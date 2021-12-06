@@ -271,20 +271,12 @@ class KedroSession:
         extra_params = self.store.get("extra_params")
 
         config_loader_class = settings.CONFIG_LOADER_CLASS
-        try:
-            return config_loader_class(
-                conf_source=str(self._project_path / settings.CONF_SOURCE),
-                env=env,
-                runtime_params=extra_params,
-                **settings.CONFIG_LOADER_ARGS,
-            )
-        except TypeError as exc:
-            raise TypeError(
-                f"Expected an instance of `ConfigLoader`, "
-                f"got `{settings.CONFIG_LOADER_CLASS}` of class "
-                f"`{type(settings.CONFIG_LOADER_CLASS)}` instead.\n"
-                f"The provided `CONFIG_LOADER_ARGS were: {settings.CONFIG_LOADER_ARGS}"
-            ) from exc
+        return config_loader_class(
+            conf_source=str(self._project_path / settings.CONF_SOURCE),
+            env=env,
+            runtime_params=extra_params,
+            **settings.CONFIG_LOADER_ARGS,
+        )
 
     def close(self):
         """Close the current session and save its store to disk

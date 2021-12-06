@@ -8,6 +8,7 @@ from warnings import warn
 
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
+from kedro.framework.project import settings
 from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import _transcode_split
 
@@ -267,18 +268,12 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        hook_manager = get_hook_manager()
-        catalog = hook_manager.hook.register_catalog(  # pylint: disable=no-member
+        catalog = settings.DATA_CATALOG_CLASS.from_config(
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,
             save_version=save_version,
         )
-        if not isinstance(catalog, DataCatalog):
-            raise KedroContextError(
-                f"Expected an instance of `DataCatalog`, "
-                f"got `{type(catalog).__name__}` instead."
-            )
 
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)

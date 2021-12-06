@@ -1,15 +1,12 @@
 import logging
 import re
-from typing import Any, Dict, Optional
 
 import pytest
 from dynaconf.validator import Validator
 
-from kedro.framework.context import KedroContextError
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
-from kedro.io import DataCatalog
 from tests.framework.session.conftest import (
     _assert_hook_call_record_has_expected_parameters,
     _mock_imported_settings_paths,
@@ -53,32 +50,6 @@ def mock_settings_duplicate_hooks(mocker, project_hooks, pipeline_registration_h
     )
 
 
-class RequiredRegistrationHooks:
-    """Mandatory registration hooks"""
-
-    @hook_impl
-    def register_catalog(
-        self,
-        catalog: Optional[Dict[str, Dict[str, Any]]],
-        credentials: Dict[str, Dict[str, Any]],
-        load_versions: Dict[str, str],
-        save_version: str,
-    ) -> DataCatalog:
-        return DataCatalog.from_config(  # pragma: no cover
-            catalog, credentials, load_versions, save_version
-        )
-
-
-@pytest.fixture
-def mock_settings_broken_catalog_hooks(mocker):
-    class BrokenCatalogHooks(RequiredRegistrationHooks):
-        @hook_impl
-        def register_catalog(self):  # pylint: disable=arguments-differ
-            return None
-
-    return _mock_settings_with_hooks(mocker, hooks=(BrokenCatalogHooks(),))
-
-
 @pytest.fixture
 def mock_session(
     mock_settings_with_pipeline_hooks, mock_package_name, tmp_path
@@ -114,23 +85,6 @@ class TestRegistrationHooks:
         }
         assert pipelines == expected_pipelines
 
-    def test_register_catalog_is_called(self, mock_session, caplog):
-        context = mock_session.load_context()
-        catalog = context.catalog
-        assert isinstance(catalog, DataCatalog)
-
-        relevant_records = [
-            r for r in caplog.records if r.getMessage() == "Registering catalog"
-        ]
-        assert len(relevant_records) == 1
-
-        record = relevant_records[0]
-        assert record.catalog.keys() == {"cars", "boats"}
-        assert record.credentials == {"dev_s3": "foo"}
-        # save_version is only passed during a run, not on the property getter
-        assert record.save_version is None
-        assert record.load_versions is None
-
 
 class TestDuplicatePipelineRegistration:
     """Test to make sure that if pipelines are defined in both registration hooks
@@ -150,13 +104,3 @@ class TestDuplicatePipelineRegistration:
         )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             assert pipelines == expected_pipelines
-
-
-class TestBrokenRegistrationHooks:
-    @pytest.mark.usefixtures("mock_settings_broken_catalog_hooks")
-    def test_broken_register_catalog_hook(self, tmp_path, mock_package_name):
-        pattern = "Expected an instance of `DataCatalog`, got `NoneType` instead."
-        with KedroSession.create(mock_package_name, tmp_path) as session:
-            context = session.load_context()
-            with pytest.raises(KedroContextError, match=re.escape(pattern)):
-                _ = context.catalog

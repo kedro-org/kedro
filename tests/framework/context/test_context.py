@@ -20,7 +20,6 @@ from kedro.framework.context.context import (
     _update_nested_dict,
     _validate_layers_for_transcoding,
 )
-from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import (
     ValidationError,
     _ProjectSettings,

@@ -5,7 +5,6 @@ import importlib
 import operator
 from collections.abc import MutableMapping
 from typing import Dict, Optional
-from warnings import warn
 
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator

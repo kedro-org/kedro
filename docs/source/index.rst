@@ -11,9 +11,9 @@
 Welcome to Kedro's documentation!
 =============================================
 
-.. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/master?label=master
-    :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/master
-    :alt: CircleCI - Master Branch
+.. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/main?label=main
+    :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/main
+    :alt: CircleCI - Main Branch
 
 .. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop
     :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/develop

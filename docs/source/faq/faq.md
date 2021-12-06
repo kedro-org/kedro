@@ -47,7 +47,7 @@ Former core team members with significant contributions include:
 [Richard Westenra](https://github.com/richardwestenra) and
 [Zain Patel](https://github.com/mzjp2).
 
-And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md).
+And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/main/RELEASE.md).
 
 ## What are the primary advantages of Kedro?
 
@@ -142,7 +142,7 @@ Refer to the following table below for a high level guide to each layer's purpos
 
 ## How do I upgrade Kedro?
 
-We use [Semantic Versioning](https://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
+We use [Semantic Versioning](https://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/main/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
 
 Once Kedro is installed, you can check your version as follows:
 

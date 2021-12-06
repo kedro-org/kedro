@@ -195,10 +195,10 @@ linkcheck_ignore = [
     "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books-langs.md#python",
     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
-    "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
+    "https://github.com/quantumblacklabs/private-kedro/blob/main/kedro/templates/project/*",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
-    "https://github.com/quantumblacklabs/kedro-starters/tree/master/standalone-datacatalog",  # temporary until 0.18
+    "https://github.com/quantumblacklabs/kedro-starters/tree/main/standalone-datacatalog",  # temporary until 0.18
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
@@ -219,7 +219,7 @@ linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/quantumblacklabs/kedro/tree/master/docs/source",
+    "github_url": "https://github.com/quantumblacklabs/kedro/tree/main/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

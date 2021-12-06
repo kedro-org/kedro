@@ -12,7 +12,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import DataSetError, PartitionedDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
-from kedro.io.partitioned_data_set import KEY_PROPAGATION_WARNING
+from kedro.io.partitioned_dataset import KEY_PROPAGATION_WARNING
 
 
 @pytest.fixture

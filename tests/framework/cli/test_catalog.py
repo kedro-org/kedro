@@ -174,7 +174,7 @@ class TestCatalogCreateCommand:
     def test_pipeline_argument_is_required(self, fake_project_cli):
         result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
         assert result.exit_code
-        expected_output = "Error: Missing option '--pipeline'."
+        expected_output = "Error: Missing option '--pipeline' / '-p'."
         assert expected_output in result.output
 
     @pytest.mark.usefixtures("fake_load_context")

@@ -2,7 +2,7 @@
 
 A Kedro project's `settings.py` file contains the runtime configuration for the project, including registration of hooks and library components. This page explains how settings work and which settings are available.
 
-A project does not _need_ to have a settings file – in fact, by default, all code in `settings.py` is commented out. In the case that settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.
+By default, all code in `settings.py` is commented out. In the case that settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.
 
 ## Available settings
 
@@ -16,7 +16,7 @@ A project does not _need_ to have a settings file – in fact, by default, all c
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
 | :code:`SESSION_STORE_CLASS`       | :code:`kedro.framework.session.session.BaseSessionStore`| Define where to store data from a KedroSession.                                                                                             |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
-| :code:`SESSION_STORE_ARGS`        | :code:`{ }`                                             | Define keyword arguments to be passed to `SESSION_STORE_CLASS` constructor.                                                                 |
+| :code:`SESSION_STORE_ARGS`        | :code:`dict()`                                             | Define keyword arguments to be passed to `SESSION_STORE_CLASS` constructor.                                                                 |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
 | :code:`CONTEXT_CLASS`             | :code:`kedro.framework.context.KedroContext`            | Define custom context class.                                                                                                                |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
@@ -24,7 +24,7 @@ A project does not _need_ to have a settings file – in fact, by default, all c
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
 | :code:`CONFIG_LOADER_CLASS`       | :code:`kedro.config.ConfigLoader`                       | Define the project ConfigLoader class.                                                                                                      |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
-| :code:`CONFIG_LOADER_ARGS`        | :code:`{ }`                                             | Define keyword arguments to be passed to `CONFIG_LOADER_CLASS` constructor. These kwargs depend on the `ConfigLoader` class implementation. |
+| :code:`CONFIG_LOADER_ARGS`        | :code:`dict()`                                             | Define keyword arguments to be passed to `CONFIG_LOADER_CLASS` constructor. These kwargs depend on the `ConfigLoader` class implementation. |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+
 | :code:`DATA_CATALOG_CLASS`        | :code:`kedro.io.DataCatalog`                            | Define the project `DataCatalog` class.                                                                                                     |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------+

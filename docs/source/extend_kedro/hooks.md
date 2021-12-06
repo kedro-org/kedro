@@ -12,7 +12,7 @@ Hooks are a mechanism to add extra behaviour to Kedro's main execution in an eas
 
 A Hook is comprised of a Hook specification and Hook implementation. To add Hooks to your project you will need to:
 
-* Provide a Hook implementation for an existing Kedro-defined Hook specification
+* Create or modify the file `<your_project>/src/<package_name>/hooks.py` to define a Hook implementation for an existing Kedro-defined Hook specification
 * Register your Hook implementation in the [`src/<your_project>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key
 
 ### Hook specification

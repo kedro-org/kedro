@@ -68,9 +68,6 @@ commands:
       - run:
           name: Install pre-commit hooks
           command: pre-commit install --install-hooks
-      - run:
-          name: Run pre-commit hooks
-          command: pre-commit install --hook-type pre-push
 
   unit_tests:
     description: Run unit tests
@@ -324,13 +321,7 @@ jobs:
 
   unit_tests_38:
     executor: py38
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Run unit tests
-          command: make test
+    steps: [unit_tests]
 
   linters_38:
     executor: py38

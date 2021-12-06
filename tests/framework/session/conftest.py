@@ -2,7 +2,7 @@ import logging
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import pandas as pd
 import pytest
@@ -343,27 +343,6 @@ class LoggingHooks:
     def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
         logger.info(
             "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
-        )
-
-    @hook_impl
-    def register_catalog(
-        self,
-        catalog: Optional[Dict[str, Dict[str, Any]]],
-        credentials: Dict[str, Dict[str, Any]],
-        load_versions: Dict[str, str],
-        save_version: str,
-    ) -> DataCatalog:
-        logger.info(
-            "Registering catalog",
-            extra={
-                "catalog": catalog,
-                "credentials": credentials,
-                "load_versions": load_versions,
-                "save_version": save_version,
-            },
-        )
-        return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version
         )
 
 

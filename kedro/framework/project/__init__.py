@@ -49,7 +49,7 @@ class _ProjectSettings(LazySettings):
 
     _CONF_SOURCE = Validator("CONF_SOURCE", default="conf")
     _HOOKS = Validator("HOOKS", default=tuple())
-    _CONTEXT_CLASS = Validator(
+    _CONTEXT_CLASS = _IsSubclassValidator(
         "CONTEXT_CLASS",
         default=_get_default_class("kedro.framework.context.KedroContext"),
     )
@@ -59,10 +59,13 @@ class _ProjectSettings(LazySettings):
     )
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())
-    _CONFIG_LOADER_CLASS = Validator(
+    _CONFIG_LOADER_CLASS = _IsSubclassValidator(
         "CONFIG_LOADER_CLASS", default=_get_default_class("kedro.config.ConfigLoader")
     )
     _CONFIG_LOADER_ARGS = Validator("CONFIG_LOADER_ARGS", default={})
+    _DATA_CATALOG_CLASS = _IsSubclassValidator(
+        "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
+    )
 
     def __init__(self, *args, **kwargs):
 
@@ -76,6 +79,7 @@ class _ProjectSettings(LazySettings):
                 self._DISABLE_HOOKS_FOR_PLUGINS,
                 self._CONFIG_LOADER_CLASS,
                 self._CONFIG_LOADER_ARGS,
+                self._DATA_CATALOG_CLASS,
             ]
         )
         super().__init__(*args, **kwargs)

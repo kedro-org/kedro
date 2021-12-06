@@ -462,7 +462,7 @@ from kedro.io.core import (
 
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
--        save_path = get_filepath_str(self.filepath, self._protocol)
+-        save_path = get_filepath_str(self._filepath, self._protocol)
 +        save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, mode="wb") as f:
             image = Image.fromarray(data)

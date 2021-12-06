@@ -85,22 +85,6 @@ def mock_settings_custom_context_class(mocker):
 
 
 @pytest.fixture
-def mock_config_loader_class(mocker):
-    return mocker.patch("kedro.config.ConfigLoader", autospec=True)
-
-
-@pytest.fixture
-def mock_settings_config_loader_class(mocker, mock_config_loader_class):
-    class MockSettings(_ProjectSettings):
-        mocker.patch("kedro.framework.project.issubclass")
-        _CONFIG_LOADER_CLASS = _IsSubclassValidator(
-            "CONFIG_LOADER_CLASS", default=lambda *_: mock_config_loader_class
-        )
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
-
-
-@pytest.fixture
 def mock_settings_custom_config_loader_class(mocker):
     class MyConfigLoader(ConfigLoader):
         pass

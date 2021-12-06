@@ -81,7 +81,9 @@ class DryRunner(AbstractRunner):
         """
         return MemoryDataSet()
 
-    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+    def _run(
+        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+    ) -> None:
         """The method implementing dry pipeline running.
         Example logs output using this implementation:
 
@@ -93,6 +95,7 @@ class DryRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            run_id: The id of the run.
 
         """
         nodes = pipeline.nodes

@@ -132,7 +132,6 @@ class NodeSpecs:
 class PipelineSpecs:
     """Namespace that defines all specifications for a pipeline's lifecycle hooks."""
 
-    # pylint: disable=missing-param-doc
     @hook_spec
     def before_pipeline_run(
         self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
@@ -296,20 +295,5 @@ class RegistrationSpecs:
         Returns:
             A mapping from a pipeline name to a ``Pipeline`` object.
 
-        """
-        pass
-
-    @hook_spec(firstresult=True)
-    def register_catalog(  # pylint: disable=too-many-arguments
-        self,
-        catalog: Optional[Dict[str, Dict[str, Any]]],
-        credentials: Dict[str, Dict[str, Any]],
-        load_versions: Dict[str, str],
-        save_version: str,
-    ) -> DataCatalog:
-        """Hook to be invoked to register a project's data catalog.
-
-        Returns:
-            An instance of a ``DataCatalog``.
         """
         pass

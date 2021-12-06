@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 from warnings import warn
 
 
-class Node:  # pylint: disable=too-many-instance-attributes
+class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
     run user-provided functions as part of Kedro pipelines.
     """

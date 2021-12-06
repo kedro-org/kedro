@@ -189,13 +189,11 @@ html_show_copyright = False
 # too many requests, or forbidden URL
 linkcheck_ignore = [
     "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
-    "https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins",
     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
     "https://console.aws.amazon.com/batch/home#/jobs",
     "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books-langs.md#python",
     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
-    "https://github.com/quantumblacklabs/private-kedro/blob/main/kedro/templates/project/*",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
     "https://github.com/quantumblacklabs/kedro-starters/tree/main/standalone-datacatalog",  # temporary until 0.18
@@ -203,6 +201,8 @@ linkcheck_ignore = [
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
+    # "anchor not found" but it's a valid selector for code examples
+    "https://docs.delta.io/latest/delta-update.html#language-python",
 
     # Number section removal, temporarily ignore until 0.18.0 release
     "https://kedro.readthedocs.io/en/stable/data/data_catalog.html#using-the-data-catalog-with-the-yaml-api",

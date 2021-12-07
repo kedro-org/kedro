@@ -20,7 +20,7 @@ class APIDataSet(AbstractDataSet):
         >>>
         >>>
         >>> data_set = APIDataSet(
-        >>>     url="https://quickstats.nass.usda.gov"
+        >>>     url="https://quickstats.nass.usda.gov",
         >>>     params={
         >>>         "key": "SOME_TOKEN",
         >>>         "format": "JSON",

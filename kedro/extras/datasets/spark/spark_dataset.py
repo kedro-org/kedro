@@ -309,7 +309,6 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
 
@@ -321,13 +320,6 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         self._file_format = file_format
         self._fs_prefix = fs_prefix
-
-        ### would they be relevant on load_args / on read as well?
-        self._dfwriter_options = self._save_args.pop("dfwriter_options", {}) or {}
-        self._file_format = file_format
-        self._fs_prefix = fs_prefix
-
-        self._handle_delta_format()
 
     @staticmethod
     def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
@@ -373,9 +365,7 @@ class SparkDataSet(AbstractVersionedDataSet):
 
     def _save(self, data: DataFrame) -> None:
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
-        data.write.options(**self._dfwriter_options).save(
-            save_path, self._file_format, **self._save_args
-        )
+        data.write.save(save_path, self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
@@ -392,9 +382,13 @@ class SparkDataSet(AbstractVersionedDataSet):
         return True
 
     def _handle_delta_format(self) -> None:
-        unsupported_modes = {"merge", "delete", "update"}
-        write_mode = self._save_args.get("mode") or ""
-        if self._file_format == "delta" and write_mode.lower() in unsupported_modes:
+        supported_modes = {"append", "overwrite", "error", "errorifexists", "ignore"}
+        write_mode = self._save_args.get("mode")
+        if (
+            write_mode
+            and self._file_format == "delta"
+            and write_mode not in supported_modes
+        ):
             raise DataSetError(
                 f"It is not possible to perform `save()` for file format `delta` "
                 f"with mode `{write_mode}` on `SparkDataSet`. "

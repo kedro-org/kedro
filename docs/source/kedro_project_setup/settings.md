@@ -1,6 +1,6 @@
 # Project settings
 
-A Kedro project's `settings.py` file contains the runtime configuration for the project, including registration of hooks and library components. This page explains how settings work and which settings are available.
+A Kedro project's `settings.py` file contains the application configuration for the project, including registration of hooks and library components. This page explains how settings work and which settings are available.
 
 By default, all code in `settings.py` is commented out. In the case that settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.
 
@@ -12,7 +12,7 @@ By default, all code in `settings.py` is commented out. In the case that setting
 +===================================+=========================================================+=========================================================================================================================================================+
 | :code:`HOOKS`                     | :code:`tuple()`                                         | Instantiate and list your `project hooks <../extend_kedro/hooks.md>`_.                                                                                  |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-| :code:`DISABLE_HOOKS_FOR_PLUGINS` | :code:`tuple()`                                         | List the installed plugins for which to disable auto-registry.                                                                                          |
+| :code:`DISABLE_HOOKS_FOR_PLUGINS` | :code:`tuple()`                                         | List the installed plugins for which to disable auto-registry of hooks.                                                                                          |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
 | :code:`SESSION_STORE_CLASS`       | :code:`kedro.framework.session.session.BaseSessionStore`| Define where to store data from a :code:`KedroSession`.                                                                                                 |
 +-----------------------------------+---------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+

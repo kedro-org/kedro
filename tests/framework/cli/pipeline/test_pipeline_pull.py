@@ -199,6 +199,7 @@ class TestPipelinePullCommand:
         self,
         fake_project_cli,
         fake_repo_path,
+        fake_package_path,
         fake_metadata,
     ):
         call_pipeline_create(fake_project_cli, fake_metadata)
@@ -208,6 +209,9 @@ class TestPipelinePullCommand:
             fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
 
+        pipeline_name = PIPELINE_NAME
+        destination = "tools"
+
         result = CliRunner().invoke(
             fake_project_cli,
             [
@@ -215,19 +219,37 @@ class TestPipelinePullCommand:
                 "pull",
                 str(sdist_file),
                 "--destination",
-                "tools",
+                destination,
                 "--alias",
-                PIPELINE_NAME,
+                pipeline_name,
             ],
             obj=fake_metadata,
         )
         assert result.exit_code == 0, result.stderr
         assert "pulled and unpacked" in result.output
+
+        source_dest = fake_package_path / destination / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        config_env = "base"
+        params_config = (
+            fake_repo_path
+            / settings.CONF_SOURCE
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
+
+        self.assert_package_files_exist(source_dest)
+        assert params_config.is_file()
+        actual_test_files = {f.name for f in test_dest.iterdir()}
+        expected_test_files = {"__init__.py", "test_pipeline.py"}
+        assert actual_test_files == expected_test_files
 
     def test_pipeline_pull_nested_destination(
         self,
         fake_project_cli,
         fake_repo_path,
+        fake_package_path,
         fake_metadata,
     ):
         call_pipeline_create(fake_project_cli, fake_metadata)
@@ -237,6 +259,9 @@ class TestPipelinePullCommand:
             fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
 
+        pipeline_name = PIPELINE_NAME
+        destination = "pipelines/nested"
+
         result = CliRunner().invoke(
             fake_project_cli,
             [
@@ -244,14 +269,31 @@ class TestPipelinePullCommand:
                 "pull",
                 str(sdist_file),
                 "--destination",
-                "pipelines/nested",
+                destination,
                 "--alias",
-                PIPELINE_NAME,
+                pipeline_name,
             ],
             obj=fake_metadata,
         )
         assert result.exit_code == 0, result.stderr
         assert "pulled and unpacked" in result.output
+
+        source_dest = fake_package_path / destination / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        config_env = "base"
+        params_config = (
+            fake_repo_path
+            / settings.CONF_SOURCE
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
+
+        self.assert_package_files_exist(source_dest)
+        assert params_config.is_file()
+        actual_test_files = {f.name for f in test_dest.iterdir()}
+        expected_test_files = {"__init__.py", "test_pipeline.py"}
+        assert actual_test_files == expected_test_files
 
     def test_pipeline_alias_refactors_imports(  # pylint: disable=too-many-locals
         self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata

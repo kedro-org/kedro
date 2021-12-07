@@ -148,8 +148,7 @@ weather@spark:
   file_format: "delta"
   save_args:
     mode: "overwrite"
-    df_writer:
-      versionAsOf: 0
+    versionAsOf: 0
 
 weather@delta:
   type: spark.DeltaTableDataSet

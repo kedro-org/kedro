@@ -5,7 +5,6 @@ import importlib
 import operator
 from collections.abc import MutableMapping
 from typing import Dict, Optional
-from warnings import warn
 
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -136,19 +135,6 @@ class _ProjectPipelines(MutableMapping):
                 raise
         else:
             project_pipelines = register_pipelines()
-
-        hook_manager = get_hook_manager()
-        pipelines_dicts = (
-            hook_manager.hook.register_pipelines()  # pylint: disable=no-member
-        )
-        for pipeline_collection in pipelines_dicts:
-            duplicate_keys = pipeline_collection.keys() & project_pipelines.keys()
-            if duplicate_keys:
-                warn(
-                    f"Found duplicate pipeline entries. "
-                    f"The following will be overwritten: {', '.join(duplicate_keys)}"
-                )
-            project_pipelines.update(pipeline_collection)
 
         self._content = project_pipelines
         self._is_data_loaded = True

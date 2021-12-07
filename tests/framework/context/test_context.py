@@ -20,7 +20,6 @@ from kedro.framework.context.context import (
     _update_nested_dict,
     _validate_layers_for_transcoding,
 )
-from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import (
     ValidationError,
     _ProjectSettings,
@@ -230,15 +229,6 @@ def dummy_context(
 
     yield context
     pipelines._clear(MOCK_PACKAGE_NAME)
-
-
-@pytest.fixture(autouse=True)
-def clear_hook_manager():
-    yield
-    hook_manager = get_hook_manager()
-    plugins = hook_manager.get_plugins()
-    for plugin in plugins:
-        hook_manager.unregister(plugin)
 
 
 class TestKedroContext:

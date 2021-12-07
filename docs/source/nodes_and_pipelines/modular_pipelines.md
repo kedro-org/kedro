@@ -253,7 +253,6 @@ new-kedro-project
 │   │   │   │   └── README.md
 │   │   │   └── __init__.py
 │   │   ├── __init__.py
-│   │   ├── hooks.py
 │   │   ├── pipeline_registry.py
 │   │   ├── __main__.py
 |   |   └── settings.py

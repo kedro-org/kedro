@@ -40,7 +40,7 @@ from typing import Any, Dict
 
 import numpy as np
 
-from kedro.io.core import AbstractDataSet
+from kedro.io import AbstractDataSet
 
 
 class ImageDataSet(AbstractDataSet):
@@ -105,11 +105,8 @@ import fsspec
 import numpy as np
 from PIL import Image
 
-from kedro.io.core import (
-    AbstractDataSet,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io import AbstractDataSet
+from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
 class ImageDataSet(AbstractDataSet):
@@ -136,14 +133,6 @@ class ImageDataSet(AbstractDataSet):
         with self._fs.open(load_path) as f:
             image = Image.open(f).convert("RGBA")
             return np.asarray(image)
-
-    def _save(self, data: np.ndarray) -> None:
-        """Saves image data to the specified filepath"""
-        ...
-
-    def _describe(self) -> Dict[str, Any]:
-        """Returns a dict that describes the attributes of the dataset"""
-        ...
 ```
 </details>
 
@@ -223,11 +212,8 @@ import fsspec
 import numpy as np
 from PIL import Image
 
-from kedro.io.core import (
-    AbstractDataSet,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io import AbstractDataSet
+from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
 class ImageDataSet(AbstractDataSet):
@@ -332,12 +318,8 @@ import fsspec
 import numpy as np
 from PIL import Image
 
-from kedro.io.core import (
-    AbstractVersionedDataSet,
-    get_filepath_str,
-    get_protocol_and_path,
-    Version,
-)
+from kedro.io import AbstractVersionedDataSet
+from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
 class ImageDataSet(AbstractVersionedDataSet):
@@ -407,13 +389,10 @@ The difference between the original `ImageDataSet` and the versioned `ImageDataS
  import numpy as np
  from PIL import Image
 
- from kedro.io.core import (
--    AbstractDataSet,
-+    AbstractVersionedDataSet,
-     get_filepath_str,
-     get_protocol_and_path,
-+    Version,
- )
+-from kedro.io import AbstractDataSet
+-from kedro.io.core import get_filepath_str, get_protocol_and_path
++from kedro.io import AbstractVersionedDataSet
++from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
 -class ImageDataSet(AbstractDataSet):

@@ -5,7 +5,7 @@ from pathlib import Path, PurePosixPath
 
 import pandas as pd
 import pytest
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
@@ -210,35 +210,6 @@ class TestSparkDataSet:
 
         spark_data_set.save(sample_spark_df)
         spark_data_set.save(sample_spark_df)
-
-    @pytest.mark.parametrize(
-        "save_args,expected_options",
-        [
-            ({"mode": "overwrite"}, {}),
-            ({"mode": "overwrite", "dfwriter_options": {}}, {}),
-            ({"mode": "overwrite", "dfwriter_options": None}, {}),
-            (
-                {"mode": "overwrite", "dfwriter_options": {"versionAsOf": 0}},
-                {"versionAsOf": 0},
-            ),
-        ],
-    )
-    def test_save_dfwriter_options(
-        self, tmp_path, save_args, expected_options, sample_spark_df, mocker
-    ):
-        filepath = (tmp_path / "test_data").as_posix()
-        spark_data_set = SparkDataSet(
-            filepath=filepath, file_format="delta", save_args=save_args
-        )
-
-        assert spark_data_set._dfwriter_options == expected_options
-
-        mock_writer = mocker.patch.object(DataFrame, "write")
-        spark_data_set.save(sample_spark_df)
-        if expected_options:
-            mock_writer.options.assert_called_once_with(versionAsOf=0)
-        else:
-            mock_writer.options.assert_called_once_with()
 
     @pytest.mark.parametrize("mode", ["merge", "delete", "update"])
     def test_file_format_delta_and_unsupported_mode(self, tmp_path, mode):
@@ -616,7 +587,7 @@ class TestSparkDataSetVersionedS3:
         )
 
         versioned_dataset_s3.save(mocked_spark_df)
-        mocked_spark_df.write.options().save.assert_called_once_with(
+        mocked_spark_df.write.save.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(b=BUCKET_NAME, f=FILENAME, v=version.save),
             "parquet",
         )
@@ -636,7 +607,7 @@ class TestSparkDataSetVersionedS3:
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
-        mocked_spark_df.write.options().save.assert_called_once_with(
+        mocked_spark_df.write.save.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(
                 b=BUCKET_NAME, f=FILENAME, v=exact_version.save
             ),
@@ -748,7 +719,7 @@ class TestSparkDataSetVersionedHdfs:
             "{fn}/{f}/{v}/{f}".format(fn=FOLDER_NAME, v=version.save, f=FILENAME),
             strict=False,
         )
-        mocked_spark_df.write.options().save.assert_called_once_with(
+        mocked_spark_df.write.save.assert_called_once_with(
             "hdfs://{fn}/{f}/{v}/{f}".format(
                 fn=FOLDER_NAME, v=version.save, f=FILENAME
             ),
@@ -770,7 +741,7 @@ class TestSparkDataSetVersionedHdfs:
 
         with pytest.warns(UserWarning, match=pattern):
             versioned_hdfs.save(mocked_spark_df)
-        mocked_spark_df.write.options().save.assert_called_once_with(
+        mocked_spark_df.write.save.assert_called_once_with(
             "hdfs://{fn}/{f}/{sv}/{f}".format(
                 fn=FOLDER_NAME, f=FILENAME, sv=exact_version.save
             ),

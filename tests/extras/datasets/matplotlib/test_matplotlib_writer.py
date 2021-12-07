@@ -292,7 +292,9 @@ class TestMatplotlibWriterVersioned:
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_plot_writer = MatplotlibWriter(
-                filepath="/tmp/file.txt", version=Version(load_version, save_version)
+                filepath="/tmp/file.txt",
+                version=Version(load_version, save_version),
+                overwrite=True,
             )
         assert not versioned_plot_writer._overwrite
 

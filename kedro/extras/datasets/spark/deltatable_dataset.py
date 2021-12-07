@@ -1,9 +1,8 @@
 """``AbstractVersionedDataSet`` implementation to access DeltaTables using
 ``delta-spark``
 """
-from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any
 
 from delta.tables import DeltaTable
 from pyspark.sql import SparkSession
@@ -64,7 +63,7 @@ class DeltaTableDataSet(AbstractDataSet):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(self, filepath: str, credentials: Dict[str, Any] = None) -> None:
+    def __init__(self, filepath: str) -> None:
         """Creates a new instance of ``DeltaTableDataSet``.
 
         Args:
@@ -72,12 +71,7 @@ class DeltaTableDataSet(AbstractDataSet):
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataSet``s
                 starting with ``/dbfs/mnt``.
-            credentials: Credentials to access the S3 bucket, such as
-                ``key``, ``secret``, if ``filepath`` prefix is ``s3a://`` or ``s3n://``.
-                Optional keyword arguments passed to ``hdfs.client.InsecureClient``
-                if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
         """
-        credentials = deepcopy(credentials) or {}  # do we need these anywhere??
         fs_prefix, filepath = _split_filepath(filepath)
 
         self._fs_prefix = fs_prefix

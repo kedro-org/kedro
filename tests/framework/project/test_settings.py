@@ -43,10 +43,8 @@ def test_settings_without_configure_project_show_default_values():
 
 
 def test_settings_after_configuring_project_shows_updated_values(
-    mocker,
     mock_package_name_with_settings_file,
 ):
-    mocker.patch("kedro.framework.project.issubclass")
     configure_project(mock_package_name_with_settings_file)
     assert settings.CONF_SOURCE == "test_conf"
     assert settings.CONTEXT_CLASS is MyContext

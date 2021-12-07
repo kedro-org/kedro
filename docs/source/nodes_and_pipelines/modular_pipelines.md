@@ -199,7 +199,7 @@ To pull multiple modular pipelines in bulk, run `kedro pipeline pull --all`. Thi
 ```toml
 [tool.kedro.pipeline.pull]
 "dist/first-pipeline-0.1.tar.gz" = {}
-"https://www.url.to/second-pipeline-0.1.tar.gz" = {alias = "pipelines.aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
+"https://www.url.to/second-pipeline-0.1.tar.gz" = {alias = "aliased_pipeline", destination = "somewhere/else", fs-args = "pipeline_pull_args.yml"}
 ```
 
 Here the keys are the package paths, and the values are the options that `kedro pipeline pull <package_path>` accepts. Package paths can be any of the locations allowed by `kedro pipeline pull`, including local storage, PyPI and the cloud.

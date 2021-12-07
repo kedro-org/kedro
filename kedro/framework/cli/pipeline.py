@@ -211,8 +211,13 @@ def delete_pipeline(
 @env_option(
     help="Environment to install the pipeline configuration to. Defaults to `base`."
 )
+@click.option("--alias", type=str, default="", help="Rename the package.")
 @click.option(
-    "--alias", type=str, default="", help="Module location to unpackage under."
+    "-d",
+    "--destination",
+    type=click.Path(file_okay=False, dir_okay=False),
+    default=None,
+    help="Module location where to unpack under.",
 )
 @click.option(
     "--fs-args",
@@ -224,7 +229,14 @@ def delete_pipeline(
 )
 @click.pass_obj  # this will pass the metadata as first argument
 def pull_package(  # pylint:disable=unused-argument, too-many-arguments
-    metadata: ProjectMetadata, package_path, env, alias, fs_args, all_flag, **kwargs
+    metadata: ProjectMetadata,
+    package_path,
+    env,
+    alias,
+    destination,
+    fs_args,
+    all_flag,
+    **kwargs,
 ) -> None:
     """Pull and unpack a modular pipeline in your project."""
     if not package_path and not all_flag:
@@ -238,18 +250,26 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
         _pull_packages_from_manifest(metadata)
         return
 
-    _pull_package(package_path, metadata, env=env, alias=alias, fs_args=fs_args)
+    _pull_package(
+        package_path,
+        metadata,
+        env=env,
+        alias=alias,
+        destination=destination,
+        fs_args=fs_args,
+    )
     as_alias = f" as `{alias}`" if alias else ""
     message = f"Pipeline {package_path} pulled and unpacked{as_alias}!"
     click.secho(message, fg="green")
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments, too-many-locals
 def _pull_package(
     package_path: str,
     metadata: ProjectMetadata,
     env: str = None,
     alias: str = None,
+    destination: str = None,
     fs_args: str = None,
 ):
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -283,7 +303,12 @@ def _pull_package(
 
         _clean_pycache(temp_dir_path)
         _install_files(
-            metadata, package_name, temp_dir_path / sdist_file_name, env, alias
+            metadata,
+            package_name,
+            temp_dir_path / sdist_file_name,
+            env,
+            alias,
+            destination,
         )
 
 
@@ -460,6 +485,7 @@ def _refactor_code_for_unpacking(
     package_path: Path,
     tests_path: Path,
     alias: Optional[str],
+    destination: Optional[str],
     project_metadata: ProjectMetadata,
 ) -> Tuple[Path, Path]:
     """This is the reverse operation of `_refactor_code_for_package`, i.e
@@ -501,14 +527,14 @@ def _refactor_code_for_unpacking(
     package_target = Path(project_metadata.package_name)
     tests_target = Path("tests")
 
-    if alias:
-        alias_path = Path(*alias.split("."))
-        alias_name = alias_path.stem
-        _rename_package(project, pipeline_name, alias_name)
+    if destination:
+        destination_path = Path(destination)
+        package_target = package_target / destination_path
+        tests_target = tests_target / destination_path
 
-        pipeline_name = alias_name
-        package_target = package_target / alias_path.parent
-        tests_target = tests_target / alias_path.parent
+    if alias and alias != pipeline_name:
+        _rename_package(project, pipeline_name, alias)
+        pipeline_name = alias
 
     if pipeline_name == project_metadata.package_name:
         full_path = _move_package_with_conflicting_name(package_target, pipeline_name)
@@ -535,12 +561,13 @@ def _refactor_code_for_unpacking(
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(  # pylint: disable=too-many-locals
+def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
     env: str = None,
     alias: str = None,
+    destination: str = None,
 ):
     env = env or "base"
 
@@ -549,10 +576,12 @@ def _install_files(  # pylint: disable=too-many-locals
     )
 
     if conf_source.is_dir() and alias:
-        alias_name = alias.split(".")[-1]
-        _rename_files(conf_source, package_name, alias_name)
+        _rename_files(conf_source, package_name, alias)
 
     module_path = alias or package_name
+    if destination:
+        module_path = f"{destination}.{module_path}"
+
     package_dest, test_dest, conf_dest = _get_artifacts_to_package(
         project_metadata, module_path=module_path, env=env
     )
@@ -566,7 +595,7 @@ def _install_files(  # pylint: disable=too-many-locals
 
     project = Project(source_path)
     refactored_package_source, refactored_test_source = _refactor_code_for_unpacking(
-        project, package_source, test_source, alias, project_metadata
+        project, package_source, test_source, alias, destination, project_metadata
     )
     project.close()
 

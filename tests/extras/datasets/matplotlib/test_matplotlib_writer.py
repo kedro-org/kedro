@@ -284,6 +284,18 @@ class TestMatplotlibWriterVersioned:
         with pytest.raises(DataSetError, match=pattern):
             versioned_plot_writer.save(mock_single_plot)
 
+    def test_ineffective_overwrite(self, load_version, save_version):
+        pattern = (
+            "Setting `overwrite=True` is ineffective if versioning "
+            "is enabled, since the versioned path must not already "
+            "exist; overriding flag with `overwrite=False` instead."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            versioned_plot_writer = MatplotlibWriter(
+                filepath="/tmp/file.txt", version=Version(load_version, save_version)
+            )
+        assert not versioned_plot_writer._overwrite
+
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
     )

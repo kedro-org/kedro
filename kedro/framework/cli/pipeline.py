@@ -578,10 +578,9 @@ def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
     if conf_source.is_dir() and alias:
         _rename_files(conf_source, package_name, alias)
 
+    module_path = alias or package_name
     if destination:
-        module_path = f"{destination}.{alias or package_name}"
-    else:
-        module_path = f"{alias or package_name}"
+        module_path = f"{destination}.{module_path}"
 
     package_dest, test_dest, conf_dest = _get_artifacts_to_package(
         project_metadata, module_path=module_path, env=env

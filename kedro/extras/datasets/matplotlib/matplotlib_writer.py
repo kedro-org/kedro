@@ -152,7 +152,7 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         if (
             isinstance(data, (list, dict))
             and self._overwrite
-            and self._fs.exists(save_path)
+            and self._exists()
         ):
             self._fs.rm(get_filepath_str(save_path, self._protocol), recursive=True)
 

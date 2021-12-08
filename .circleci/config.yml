@@ -3,6 +3,8 @@ version: 2.1
 orbs:
   win: circleci/windows@2.2.0
 
+# All windows builds use the executor win/default and modify the Python version through
+# the conda environment.
 executors:
   py36:
     docker:
@@ -60,6 +62,7 @@ commands:
           name: Pip freeze
           command: pip freeze
 
+  # Windows specific commands
   win_setup_conda:
     parameters:
       python_version:
@@ -312,7 +315,6 @@ jobs:
   all_circleci_checks_succeeded:
     docker:
       - image: circleci/python # any light-weight image
-
     steps:
       - run:
           name: Success!
@@ -355,28 +357,21 @@ workflows:
       - viz_build:
           filters:
             branches:
-              only:
-                - main
+              only: main
+
       - all_circleci_checks_succeeded:
           requires:
+            # Should just have e2e_tests and win_e2e_tests but we need to skip
+            # win_e2e_tests-3.6 due to `pywin32 is in an unsupported or invalid wheel`
             - e2e_tests
-            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
-            # - win_e2e_tests-3.6
             - win_e2e_tests-3.7
             - win_e2e_tests-3.8
-
-            - unit_tests
+            # Should just have unit_tests and win_unit_tests but we need to skip
+            # win_unit_tests-3.8 due to `Windows fatal exception: stack overflow`
             - win_unit_tests-3.6
             - win_unit_tests-3.7
-            # Skipped due to Windows fatal exception: stack overflow
-            # win_unit_tests-3.8
-
             - lint
-
             - pip_compile
             - win_pip_compile
-
             - build_docs
             - docs_linkcheck
-
-

@@ -13,8 +13,8 @@ executors:
     resource_class: medium+
 
 commands:
-  description: Setup and conda environment
   setup_conda:
+    description: Setup and conda environment
     parameters:
       platform:
         type: string

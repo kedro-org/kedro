@@ -133,6 +133,8 @@ class ImageDataSet(AbstractDataSet):
         with self._fs.open(load_path) as f:
             image = Image.open(f).convert("RGBA")
             return np.asarray(image)
+    
+    ...
 ```
 </details>
 
@@ -188,9 +190,6 @@ You can open the file to verify that the data was written back correctly.
 The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset.
 
 ```python
-from kedro.io import AbstractDataSet
-
-
 class ImageDataSet(AbstractDataSet):
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes the attributes of the dataset."""

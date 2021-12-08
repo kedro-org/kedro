@@ -24,23 +24,23 @@ commands:
       - when:
           condition:
             equal: [win/default, <<parameters.platform>>]
-            steps:
-            - run:
-                name: Initialize conda
-                command: conda init powershell
-            - run:
-                name: Create 'kedro_builder' conda environment
-                command: conda create --name kedro_builder python=<<parameters.python_version>> -y
-          unless:
-            condition:
-              equal: [win/default, <<parameters.platform>>]
-            steps:
-            - run:
-                name: Run conda.sh
-                command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
-            - run:
-                name: Activate conda environment
-                command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+          steps:
+          - run:
+              name: Initialize conda
+              command: conda init powershell
+          - run:
+              name: Create 'kedro_builder' conda environment
+              command: conda create --name kedro_builder python=<<parameters.python_version>> -y
+        unless:
+          condition:
+            equal: [win/default, <<parameters.platform>>]
+          steps:
+          - run:
+              name: Run conda.sh
+              command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
+          - run:
+              name: Activate conda environment
+              command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
 
   win_e2e_tests:
     description: Run all end to end tests

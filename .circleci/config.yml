@@ -4,17 +4,12 @@ orbs:
   win: circleci/windows@2.2.0
 
 executors:
-  py36:
+  linux:
+    parameters:
+      python_version:
+        type: string
     docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
-    resource_class: medium+
-  py37:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
-    resource_class: medium+
-  py38:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:<<parameters.python_version>>
     resource_class: medium+
 
 commands:
@@ -155,7 +150,7 @@ commands:
       - run:
           name: Create 'kedro_builder' conda environment
           command: |
-            conda create --name kedro_builder python=<< parameters.python_version >> -y
+            conda create --name kedro_builder python=<<parameters.python_version>> -y
 
   win_setup_env:
     description: Setup environment
@@ -270,7 +265,7 @@ commands:
       - win_setup_requirements
       - when:
           # Cache when `parameters.cache_save` is True
-          condition: << parameters.cache_save >>
+          condition: <<parameters.cache_save>>
           steps:
             - save_cache:
                 key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
@@ -283,6 +278,53 @@ commands:
           command: conda activate kedro_builder; make pip-compile
 
 jobs:
+  e2e_tests:
+    parameters:
+      platform:
+        type: string
+      python_version:
+        type: string
+    executor:
+      name: <<parameters.platform>>
+      python_version: <<parameters.python_version>>
+    steps: e2e_tests
+
+#  e2e_tests_36:
+#    executor: py36
+#    steps: [e2e_tests]
+#
+#  e2e_tests_37:
+#    executor: py37
+#    steps: [e2e_tests]
+#
+#  e2e_tests_38:
+#    executor: py38
+#    steps: [e2e_tests]
+
+  win_e2e_tests_36:
+    executor:
+      name: win/default
+    steps:
+      - win_setup_conda:
+          python_version: "3.6"
+      - win_e2e_tests
+
+  win_e2e_tests_37:
+    executor:
+      name: win/default
+    steps:
+      - win_setup_conda:
+          python_version: "3.7"
+      - win_e2e_tests
+
+  win_e2e_tests_38:
+    executor:
+      name: win/default
+    steps:
+      - win_setup_conda:
+          python_version: "3.8"
+      - win_e2e_tests
+
   unit_tests_36:
     executor: py36
     steps: [unit_tests]
@@ -290,10 +332,6 @@ jobs:
   linters_36:
     executor: py36
     steps: [lint]
-
-  e2e_tests_36:
-    executor: py36
-    steps: [e2e_tests]
 
   docs_36:
     executor: py36
@@ -306,10 +344,6 @@ jobs:
   linters_37:
     executor: py37
     steps: [lint]
-
-  e2e_tests_37:
-    executor: py37
-    steps: [e2e_tests]
 
   docs_37:
     executor: py37
@@ -326,10 +360,6 @@ jobs:
   linters_38:
     executor: py38
     steps: [lint]
-
-  e2e_tests_38:
-    executor: py38
-    steps: [e2e_tests]
 
   pip_compile_36:
     executor: py36
@@ -396,29 +426,6 @@ jobs:
             pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
             if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
 
-  win_e2e_tests_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_e2e_tests
-
-  win_e2e_tests_37:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.7"
-      - win_e2e_tests
-
-  win_e2e_tests_38:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.8"
-      - win_e2e_tests
 
   win_pip_compile_36:
     executor:
@@ -447,21 +454,23 @@ jobs:
       - win_pip_compile
 
 workflows:
-  version: 2
+  version: 2.1
   regular:
     jobs:
+      - e2e_tests:
+          matrix:
+            parameters:
+              python_version: [3.6, 3.7, 3.8]
+              platform: [linux]
       - unit_tests_36
       - linters_36
-      - e2e_tests_36
       - docs_36
       - docs_linkcheck_37
       - unit_tests_37
       - linters_37
-      - e2e_tests_37
       - docs_37
       - unit_tests_38
       - linters_38
-      - e2e_tests_38
       - pip_compile_36
       - pip_compile_37
       - pip_compile_38
@@ -471,9 +480,6 @@ workflows:
       - win_pip_compile_36
       - win_pip_compile_37
       - win_pip_compile_38
-      - win_e2e_tests_36
-      - win_e2e_tests_37
-      - win_e2e_tests_38
       - run_kedro_viz:
           filters:
             branches:
@@ -483,16 +489,13 @@ workflows:
           requires:
             - unit_tests_36
             - linters_36
-            - e2e_tests_36
             - docs_36
             - unit_tests_37
             - linters_37
-            - e2e_tests_37
             - docs_37
             - docs_linkcheck_37
             - unit_tests_38
             - linters_38
-            - e2e_tests_38
             - pip_compile_36
             - pip_compile_37
             - pip_compile_38
@@ -501,9 +504,16 @@ workflows:
             - win_pip_compile_38
             - win_unit_tests_36
             - win_unit_tests_37
-            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
-            # - win_e2e_tests_36
             # Skipped due to Windows fatal exception: stack overflow
             # - win_unit_tests_38
-            - win_e2e_tests_37
-            - win_e2e_tests_38
+
+#            # e2e_tests would require the whole 2 x 3 matrix of e2e_tests-*. Currently
+#            # we do not require e2e_tests-windows-3.6
+#            # - e2e_tests
+#            - e2e_tests-linux-3.6
+#            - e2e_tests-linux-3.7
+#            - e2e_tests-linux-3.8
+#            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
+#            # - e2e_tests-windows-3.6
+#            - e2e_tests-windows-3.7
+#            - e2e_tests-windows-3.8

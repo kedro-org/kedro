@@ -4,15 +4,15 @@ orbs:
   win: circleci/windows@2.2.0
 
 executors:
-  3.6:
+  py36:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
     resource_class: medium+
-  3.7:
+  py37:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
     resource_class: medium+
-  3.8:
+  py38:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
     resource_class: medium+
@@ -411,7 +411,7 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              executor: ["3.6", "3.7", "3.8"]
+              executor: [py36, py37, py38]
       - win_e2e_tests:
           matrix:
             parameters:
@@ -419,7 +419,7 @@ workflows:
       - lint:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              executor: [py36, py37, py38]
 #      - unit_tests_36
 #      - linters_36
 #      - docs_36

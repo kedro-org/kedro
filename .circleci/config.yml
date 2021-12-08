@@ -18,10 +18,10 @@ commands:
     steps:
       - run:
           name: Run conda.sh
-          command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
+          command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh">> $BASH_ENV
       - run:
           name: Activate conda environment
-          command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+          command: echo "conda deactivate; conda activate kedro_builder">> $BASH_ENV
 
   setup_requirements:
     description: Install PIP dependencies

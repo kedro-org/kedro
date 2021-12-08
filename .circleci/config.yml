@@ -75,31 +75,7 @@ commands:
           name: Install 'make' command
           command: choco install make
 
-
-  unit_tests:
-    description: Run unit tests
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Run unit tests
-          command: make test
-
-
-  run_viz_build:
-    description: Deploy kedro-viz to ensure tests in that project pass
-    steps:
-      - run:
-          name: Trigger a kedro-viz build
-          command: |
-            curl --location --request POST \
-              --url https://circleci.com/api/v2/project/github/quantumblacklabs/kedro-viz/pipeline \
-              --header "Circle-Token: $CIRCLE_TOKEN" \
-              --header 'content-type: application/json' \
-              --data '{"branch":"main"}'
-
-  win_setup_requirements:
+  win_setup_env:
     steps:
       - run:
           # Required for Tensorflow tests
@@ -151,34 +127,18 @@ commands:
           name: Pip freeze
           command: conda activate kedro_builder; pip freeze
 
-  win_unit_tests:
-    description: Run unit tests
-    steps:
-      - checkout
-      - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
-      - run:
-          # geopandas and tensorflow conflicts when imported simultaneously.
-          # The HDF5 header files used to compile this application do not match
-          # the version used by the HDF5 library to which this application is linked.
-          # Data corruption or segmentation faults may occur if the application continues.
-          # This can happen when an application was compiled by one version of HDF5 but
-          # linked with a different version of static or shared HDF5 library.
-          # You should recompile the application or check your shared library related
-          # settings such as 'LD_LIBRARY_PATH'.
-          # You can, at your own risk, disable this warning by setting the environment
-          # variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.
-          # Setting it to 2 or higher will suppress the warning messages totally.
-          name: Set HDF5_DISABLE_VERSION_CHECK environment variable
-          command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - run:
-          name: Run unit tests
-          command: |
-            conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
 
+  run_viz_build:
+    description: Deploy kedro-viz to ensure tests in that project pass
+    steps:
+      - run:
+          name: Trigger a kedro-viz build
+          command: |
+            curl --location --request POST \
+              --url https://circleci.com/api/v2/project/github/quantumblacklabs/kedro-viz/pipeline \
+              --header "Circle-Token: $CIRCLE_TOKEN" \
+              --header 'content-type: application/json' \
+              --data '{"branch":"main"}'
 
 jobs:
   e2e_tests:
@@ -209,6 +169,67 @@ jobs:
       - run:
           name: Run e2e tests
           command: conda activate kedro_builder; make e2e-tests
+
+  unit_tests:
+    parameters:
+      executor:
+        type: executor
+    executor: <<parameters.executor>>
+    steps:
+      - checkout
+      - setup_conda
+      - setup_requirements
+      - run:
+          name: Run unit tests
+          command: make test
+
+  win_unit_tests:
+    parameters:
+      python_version:
+        type: string
+    executor: win/default
+    steps:
+      - checkout
+      - win_setup_conda:
+          python_version: <<parameters.python_version>>
+      - win_setup_env
+      - restore_cache:
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+      - win_setup_requirements
+      - run:
+          # geopandas and tensorflow conflicts when imported simultaneously.
+          # The HDF5 header files used to compile this application do not match
+          # the version used by the HDF5 library to which this application is linked.
+          # Data corruption or segmentation faults may occur if the application continues.
+          # This can happen when an application was compiled by one version of HDF5 but
+          # linked with a different version of static or shared HDF5 library.
+          # You should recompile the application or check your shared library related
+          # settings such as 'LD_LIBRARY_PATH'.
+          # You can, at your own risk, disable this warning by setting the environment
+          # variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.
+          # Setting it to 2 or higher will suppress the warning messages totally.
+          name: Set HDF5_DISABLE_VERSION_CHECK environment variable
+          command: setx /m HDF5_DISABLE_VERSION_CHECK 1
+      - when:
+          # Run `test_parallel_runner.py` separately because of `Windows fatal exception: stack overflow`
+          condition:
+            equal: ["3.8", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests without Spark and TensorFlow
+                command: |
+                  conda activate kedro_builder
+                  pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
+                  if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
+      - unless:
+          condition:
+            equal: ["3.8", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests
+                command: |
+                  conda activate kedro_builder
+                  pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
 
   lint:
     parameters:
@@ -247,7 +268,7 @@ jobs:
     steps:
       - checkout
       - win_setup_conda:
-            python_version: <<parameters.python_version>>
+          python_version: <<parameters.python_version>>
       - win_setup_env
       - restore_cache:
           key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
@@ -287,21 +308,6 @@ jobs:
           name: Check for broken links
           command: make linkcheck
 
-  unit_tests_36:
-    executor: py36
-    steps: [unit_tests]
-
-
-  unit_tests_37:
-    executor: py37
-    steps: [unit_tests]
-
-  unit_tests_38:
-    executor: py38
-    steps: [unit_tests]
-
-
-
 
   run_kedro_viz:
     docker:
@@ -317,44 +323,7 @@ jobs:
           name: Success!
           command: echo "All checks passed"
 
-  # Windows-related jobs
-  win_unit_tests_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_unit_tests
 
-  win_unit_tests_37:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.7"
-      - win_unit_tests
-
-  win_unit_tests_38:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.8"
-      - checkout
-      - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
-      - run:
-          name: Set HDF5_DISABLE_VERSION_CHECK environment variable
-          command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - run:
-          name: Run unit tests without Spark and TensorFlow
-          # Run `test_parallel_runner.py` separately because of `Windows fatal exception: stack overflow`
-          command: |
-            conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
-            if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
 
 
 workflows:
@@ -366,6 +335,14 @@ workflows:
             parameters:
               executor: [py36, py37, py38]
       - win_e2e_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - unit_tests:
+          matrix:
+            parameters:
+              executor: [py36, py37, py38]
+      - win_unit_tests:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
@@ -384,23 +361,14 @@ workflows:
       - build_docs
       - docs_linkcheck
 #      - unit_tests_36
-#      - linters_36
-#      - docs_36
-#      - docs_linkcheck_37
+
 #      - unit_tests_37
-#      - linters_37
-#      - docs_37
 #      - unit_tests_38
-#      - linters_38
-#      - pip_compile_36
-#      - pip_compile_37
-#      - pip_compile_38
+
 #      - win_unit_tests_36
 #      - win_unit_tests_37
 #      - win_unit_tests_38
-#      - win_pip_compile_36
-#      - win_pip_compile_37
-#      - win_pip_compile_38
+
 #      - run_kedro_viz:
 #          filters:
 #            branches:
@@ -408,29 +376,24 @@ workflows:
 #                - main
       - all_circleci_checks_succeeded:
           requires:
-#            - unit_tests_36
-#            - docs_36
-#            - unit_tests_37
-#            - docs_37
-#            - docs_linkcheck_37
-#            - unit_tests_38
-#            - pip_compile_36
-#            - pip_compile_37
-#            - pip_compile_38
-#            - win_pip_compile_36
-#            - win_pip_compile_37
-#            - win_pip_compile_38
-#            - win_unit_tests_36
-#            - win_unit_tests_37
-            # Skipped due to Windows fatal exception: stack overflow
-            # - win_unit_tests_38
-
             - e2e_tests
-            - lint
-            - pip_compile
-            - build_docs
-            - docs_linkcheck
-#            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
-#            # - win_e2e_tests-3.6
+            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
+            # - win_e2e_tests-3.6
             - win_e2e_tests-3.7
             - win_e2e_tests-3.8
+
+            - unit_tests
+            - win_unit_tests-3.6
+            - win_unit_tests-3.7
+            # Skipped due to Windows fatal exception: stack overflow
+            # win_unit_tests-3.8
+
+            - lint
+
+            - pip_compile
+            - win_pip_compile
+
+            - build_docs
+            - docs_linkcheck
+
+

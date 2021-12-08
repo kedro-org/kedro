@@ -285,7 +285,7 @@ jobs:
   build_docs:
     executor:
       name: docker
-      python_version: 3.7
+      python_version: "3.7"
     steps:
       - setup
       - run:
@@ -295,7 +295,7 @@ jobs:
   docs_linkcheck:
     executor:
       name: docker
-      python_version: 3.7
+      python_version: "3.7"
     steps:
       - setup
       - run:

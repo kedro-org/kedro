@@ -69,6 +69,7 @@ commands:
           command: pip freeze
 
   win_setup_e2e_requirements:
+    steps:
       - run:
           name: Install dependencies
           command: |

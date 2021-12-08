@@ -17,10 +17,10 @@ commands:
     steps:
       - run:
           name: Run conda.sh
-          command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh">> $BASH_ENV
+          command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
       - run:
           name: Activate conda environment
-          command: echo "conda deactivate; conda activate kedro_builder">> $BASH_ENV
+          command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
 
   setup_requirements:
     steps:
@@ -65,24 +65,9 @@ commands:
           command: conda init powershell
       - run:
           name: Create 'kedro_builder' conda environment
-          command: |
-            conda create --name kedro_builder python=<<parameters.python_version>> -y
+          command: conda create -n kedro_builder python=<<parameters.python_version>> -y
 
-  win_setup_e2e_requirements:
-    steps:
-      - run:
-          name: Install dependencies
-          command: |
-            conda activate kedro_builder
-            pip install -r features/windows_reqs.txt
-            choco install make
 
-  setup_pre_commit:
-    description: Install pre-commit hooks
-    steps:
-      - run:
-          name: Install pre-commit hooks
-          command: pre-commit install --install-hooks
 
   unit_tests:
     description: Run unit tests
@@ -93,17 +78,6 @@ commands:
       - run:
           name: Run unit tests
           command: make test
-
-  lint:
-    description: Run linters
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - setup_pre_commit
-      - run:
-          name: Run linters
-          command: make lint
 
   build_docs:
     description: Build docs
@@ -271,7 +245,9 @@ jobs:
       - checkout
       - setup_conda
       - setup_requirements
-      - run: make e2e-tests
+      - run:
+          name: Run e2e tests
+          command: make e2e-tests
 
   win_e2e_tests:
     parameters:
@@ -282,16 +258,37 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
-      - win_setup_e2e_requirements
-      - run: conda activate kedro_builder; make e2e-tests
+      - run:
+          name: Install dependencies
+          command: |
+            conda activate kedro_builder
+            pip install -r features/windows_reqs.txt
+            choco install make
+      - run:
+          name: Run e2e tests
+          command: conda activate kedro_builder; make e2e-tests
+
+  lint:
+    parameters:
+      python_version:
+        type: string
+    executor:
+      name: linux
+      python_version: <<parameters.python_version>>
+    steps:
+      - checkout
+      - setup_conda
+      - setup_requirements
+      - run:
+          name: Install pre-commit hooks
+          command: pre-commit install --install-hooks
+      - run:
+          name: Run linters
+          command: make lint
 
   unit_tests_36:
     executor: py36
     steps: [unit_tests]
-
-  linters_36:
-    executor: py36
-    steps: [lint]
 
   docs_36:
     executor: py36
@@ -300,10 +297,6 @@ jobs:
   unit_tests_37:
     executor: py37
     steps: [unit_tests]
-
-  linters_37:
-    executor: py37
-    steps: [lint]
 
   docs_37:
     executor: py37
@@ -317,9 +310,6 @@ jobs:
     executor: py38
     steps: [unit_tests]
 
-  linters_38:
-    executor: py38
-    steps: [lint]
 
   pip_compile_36:
     executor: py36
@@ -425,6 +415,10 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
+      - lint:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
 #      - unit_tests_36
 #      - linters_36
 #      - docs_36
@@ -471,7 +465,7 @@ workflows:
             # - win_unit_tests_38
 
             - e2e_tests
-
+            - lint
 #            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
 #            # - win_e2e_tests-3.6
             - win_e2e_tests-3.7

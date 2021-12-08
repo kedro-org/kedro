@@ -140,13 +140,14 @@ commands:
       parameters:
         python_version:
           type: string
-      - checkout
-      - win_setup_conda:
-          python_version: <<parameters.python_version>>
-      - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
+      steps:
+        - checkout
+        - win_setup_conda:
+            python_version: <<parameters.python_version>>
+        - win_setup_env
+        - restore_cache:
+            key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+        - win_setup_requirements
 
 jobs:
   e2e_tests:
@@ -194,6 +195,7 @@ jobs:
     executor: win/default
     steps:
       - win_setup
+          python_version: <<parameters.python_version>>
       - run:
           # geopandas and tensorflow conflicts when imported simultaneously.
           # The HDF5 header files used to compile this application do not match
@@ -261,6 +263,7 @@ jobs:
     executor: win/default
     steps:
       - win_setup
+          python_version: <<parameters.python_version>>
       - when:
           # Save cache only for Python 3.7. There is no need to save it for each Python.
           condition:

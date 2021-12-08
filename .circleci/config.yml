@@ -372,6 +372,7 @@ workflows:
             - win_e2e_tests-3.8
             # Should just have unit_tests and win_unit_tests but we need to skip
             # win_unit_tests-3.8 due to `Windows fatal exception: stack overflow`
+            - unit_tests
             - win_unit_tests-3.6
             - win_unit_tests-3.7
             - lint

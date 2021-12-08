@@ -31,7 +31,7 @@ commands:
             - run:
                 name: Create 'kedro_builder' conda environment
                 command: conda create --name kedro_builder python=<<parameters.python_version>> -y
-        unless:
+      - unless:
           condition:
             equal: [win/default, <<parameters.platform>>]
           steps:

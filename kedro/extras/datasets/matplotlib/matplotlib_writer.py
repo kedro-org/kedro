@@ -5,6 +5,7 @@ import io
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict, List, Union
+from warnings import warn
 
 import fsspec
 import matplotlib.pyplot as plt
@@ -123,6 +124,13 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        if overwrite and version is not None:
+            warn(
+                "Setting `overwrite=True` is ineffective if versioning "
+                "is enabled, since the versioned path must not already "
+                "exist; overriding flag with `overwrite=False` instead."
+            )
+            overwrite = False
         self._overwrite = overwrite
 
     def _describe(self) -> Dict[str, Any]:
@@ -141,12 +149,8 @@ class MatplotlibWriter(AbstractVersionedDataSet):
     ) -> None:
         save_path = self._get_save_path()
 
-        if (
-            isinstance(data, (list, dict))
-            and self._overwrite
-            and self._fs.exists(self._filepath)
-        ):
-            self._fs.rm(self._filepath, recursive=True)
+        if isinstance(data, (list, dict)) and self._overwrite and self._exists():
+            self._fs.rm(get_filepath_str(save_path, self._protocol), recursive=True)
 
         if isinstance(data, list):
             for index, plot in enumerate(data):

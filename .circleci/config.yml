@@ -286,7 +286,9 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - checkout
-      - setup_conda
+      - setup_conda:
+          platform: <<parameters.platform>>
+          python_version: <<parameters.python_version>>
 #      - run:
 #          name: Run e2e tests
 #          command: make e2e-tests

@@ -4,12 +4,17 @@ orbs:
   win: circleci/windows@2.2.0
 
 executors:
-  linux:
-    parameters:
-      python_version:
-        type: string
+  3.6:
     docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:<<parameters.python_version>>
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
+    resource_class: medium+
+  3.7:
+    docker:
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
+    resource_class: medium+
+  3.8:
+    docker:
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
     resource_class: medium+
 
 commands:
@@ -236,11 +241,9 @@ commands:
 jobs:
   e2e_tests:
     parameters:
-      python_version:
-        type: string
-    executor:
-      name: linux
-      python_version: <<parameters.python_version>>
+      executor:
+        type: executor
+    executor: <<parameters.executor>>
     steps:
       - checkout
       - setup_conda
@@ -270,11 +273,9 @@ jobs:
 
   lint:
     parameters:
-      python_version:
-        type: string
-    executor:
-      name: linux
-      python_version: <<parameters.python_version>>
+      executor:
+        type: executor
+    executor: <<parameters.executor>>
     steps:
       - checkout
       - setup_conda
@@ -410,11 +411,11 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              executor: ["3.6", "3.7", "3.8"]
       - win_e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              executor: ["3.6", "3.7", "3.8"]
       - lint:
           matrix:
             parameters:
@@ -445,14 +446,11 @@ workflows:
       - all_circleci_checks_succeeded:
           requires:
 #            - unit_tests_36
-#            - linters_36
 #            - docs_36
 #            - unit_tests_37
-#            - linters_37
 #            - docs_37
 #            - docs_linkcheck_37
 #            - unit_tests_38
-#            - linters_38
 #            - pip_compile_36
 #            - pip_compile_37
 #            - pip_compile_38

@@ -258,8 +258,8 @@ class PartitionedDataSet(AbstractDataSet):
         return partitions
 
     def _save(self, data: Dict[str, Any]) -> None:
-        if self._overwrite and self._filesystem.exists(self._path):
-            self._filesystem.rm(self._path, recursive=True)
+        if self._overwrite and self._filesystem.exists(self._normalized_path):
+            self._filesystem.rm(self._normalized_path, recursive=True)
 
         for partition_id, partition_data in sorted(data.items()):
             kwargs = deepcopy(self._dataset_config)
@@ -439,8 +439,9 @@ class IncrementalDataSet(PartitionedDataSet):
         if self._credentials:
             default_config[CREDENTIALS_KEY] = deepcopy(self._credentials)
 
-        # pylint: disable=consider-iterating-dictionary
-        if CREDENTIALS_KEY in default_config.keys() & checkpoint_config.keys():
+        if (  # pylint: disable=consider-iterating-dictionary
+            CREDENTIALS_KEY in default_config.keys() & checkpoint_config.keys()
+        ):
             self._logger.warning(
                 KEY_PROPAGATION_WARNING,
                 {"keys": CREDENTIALS_KEY, "target": "checkpoint"},

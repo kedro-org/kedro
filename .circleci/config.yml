@@ -22,20 +22,7 @@ commands:
           name: Activate conda environment
           command: echo "conda deactivate; conda activate kedro_builder">> $BASH_ENV
 
-  win_setup_conda:
-    parameters:
-      python_version:
-        type: string
-    steps:
-      - run:
-          name: Initialize conda
-          command: conda init powershell
-      - run:
-          name: Create 'kedro_builder' conda environment
-          command: |
-            conda create --name kedro_builder python=<<parameters.python_version>> -y
-
-  setup_requirements:
+ setup_requirements:
     steps:
       - run:
           name: Install pip setuptools
@@ -67,6 +54,19 @@ commands:
       - run:
           name: Pip freeze
           command: pip freeze
+
+  win_setup_conda:
+    parameters:
+      python_version:
+        type: string
+    steps:
+      - run:
+          name: Initialize conda
+          command: conda init powershell
+      - run:
+          name: Create 'kedro_builder' conda environment
+          command: |
+            conda create --name kedro_builder python=<<parameters.python_version>> -y
 
   win_setup_e2e_requirements:
     steps:
@@ -104,10 +104,6 @@ commands:
       - run:
           name: Run linters
           command: make lint
-
-
-
-
 
   build_docs:
     description: Build docs
@@ -275,9 +271,7 @@ jobs:
       - checkout
       - setup_conda
       - setup_requirements
-      - run:
-          name: Run e2e tests
-          command: make e2e-tests
+      - run: make e2e-tests
 
   win_e2e_tests:
     parameters:
@@ -289,20 +283,7 @@ jobs:
       - win_setup_conda:
           python_version: <<parameters.python_version>>
       - win_setup_e2e_requirements
-      - run:
-          name: Run e2e tests
-          command: make e2e-tests
-
-
-  win_e2e_tests_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_e2e_tests
-
-
+      - run: conda activate kedro_builder; make e2e-tests
 
   unit_tests_36:
     executor: py36

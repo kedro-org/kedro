@@ -13,15 +13,46 @@ executors:
     resource_class: medium+
 
 commands:
-  setup_conda:
+  linux_setup_conda:
     description: Activate conda environment
     steps:
       - run:
           name: Run conda.sh
-          command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh">> $BASH_ENV
+          command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
       - run:
           name: Activate conda environment
-          command: echo "conda deactivate; conda activate kedro_builder">> $BASH_ENV
+          command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+
+
+  # Windows-related commands
+  win/default_setup_conda:
+    description: Setup conda
+    parameters:
+      python_version:
+        type: string
+    steps:
+      - run:
+          name: Initialize conda
+          command: conda init powershell
+      - run:
+          name: Create 'kedro_builder' conda environment
+          command: |
+            conda create --name kedro_builder python=<<parameters.python_version>> -y
+
+
+  win_e2e_tests:
+    description: Run all end to end tests
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            conda activate kedro_builder
+            pip install -r features/windows_reqs.txt
+            choco install make
+      - run:
+          name: Run e2e tests
+          command: conda activate kedro_builder; make e2e-tests
 
   setup_requirements:
     description: Install PIP dependencies
@@ -86,20 +117,6 @@ commands:
           command: make lint
 
 
-  win_e2e_tests:
-    description: Run all end to end tests
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            conda activate kedro_builder
-            pip install -r features/windows_reqs.txt
-            choco install make
-      - run:
-          name: Run e2e tests
-          command: conda activate kedro_builder; make e2e-tests
-
 
   build_docs:
     description: Build docs
@@ -142,21 +159,6 @@ commands:
               --header "Circle-Token: $CIRCLE_TOKEN" \
               --header 'content-type: application/json' \
               --data '{"branch":"main"}'
-
-  # Windows-related commands
-  win_setup_conda:
-    description: Setup conda
-    parameters:
-      python_version:
-        type: string
-    steps:
-      - run:
-          name: Initialize conda
-          command: conda init powershell
-      - run:
-          name: Create 'kedro_builder' conda environment
-          command: |
-            conda create --name kedro_builder python=<<parameters.python_version>> -y
 
   win_setup_env:
     description: Setup environment
@@ -282,24 +284,12 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Run e2e tests
-          command: make e2e-tests
-
-
-  #  e2e_tests_36:
-#    executor: py36
-#    steps: [e2e_tests]
-#
-#  e2e_tests_37:
-#    executor: py37
-#    steps: [e2e_tests]
-#
-#  e2e_tests_38:
-#    executor: py38
-#    steps: [e2e_tests]
+      - <<parameters.platform>>_setup_conda:
+          python_version: <<parameters.python_version>>
+#      - setup_requirements
+#      - run:
+#          name: Run e2e tests
+#          command: make e2e-tests
 
   win_e2e_tests_36:
     executor:
@@ -461,7 +451,7 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
-              platform: [linux]
+              platform: [linux, win/default]
 #      - unit_tests_36
 #      - linters_36
 #      - docs_36

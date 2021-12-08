@@ -4,12 +4,15 @@ configure a Kedro project and access its settings."""
 import importlib
 import operator
 from collections.abc import MutableMapping
-from typing import Dict, Optional
+from pathlib import Path
+from typing import Dict, Optional, Iterable
 from warnings import warn
 
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
+from kedro.config.common import _get_config_from_patterns
+from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 from kedro.pipeline import Pipeline
@@ -183,7 +186,7 @@ settings = _ProjectSettings()
 pipelines = _ProjectPipelines()
 
 
-def configure_project(package_name: str):
+def configure_project(package_name: str, project_path: Path):
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py and pipeline_registry.py.
     """
@@ -207,16 +210,21 @@ def configure_project(package_name: str):
 
     global LOGGING
 
-    config_loader_class = settings.CONFIG_LOADER_CLASS
-    LOGGING = config_loader_class.get(
-        "logging*", "logging*/**", "**/logging*"
+    conf_logging = _get_config_from_patterns(
+        conf_paths=_build_conf_paths(project_path), patterns=["logging*", "logging*/**", "**/logging*"]
     )
     # turn relative paths in logging config into absolute path
     # before initialising loggers
     LOGGING = _convert_paths_to_absolute_posix(
-        project_path=self._project_path, conf_dictionary=LOGGING
+        project_path=project_path, conf_dictionary=conf_logging
     )
 
+
+def _build_conf_paths(project_path) -> Iterable[str]:
+    return [
+        str(Path(project_path) / settings.CONF_SOURCE / "base"),
+        str(Path(str(project_path / settings.CONF_SOURCE)) / "local"),
+    ]
 
 def validate_settings():
     """Eagerly validate that the settings module is importable. This is desirable to

@@ -1,5 +1,6 @@
 import sys
 import textwrap
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -34,9 +35,14 @@ def mock_package_name_with_settings_file(tmpdir):
             """
         )
     )
+
+    logging = tmpdir.mkdir("test_conf").mkdir("base").join("logging.yaml")
+    (tmpdir / "test_conf").mkdir("local")
+    logging.write("")
+
     project_path, package_name, _ = str(settings_file_path).rpartition("test_package")
     sys.path.insert(0, project_path)
-    yield package_name
+    yield project_path, package_name
     sys.path.pop(0)
     # reset side-effect of configure_project
     for key, value in old_settings.items():
@@ -46,6 +52,7 @@ def mock_package_name_with_settings_file(tmpdir):
 def test_settings_after_configuring_project_shows_updated_values(
     mock_package_name_with_settings_file,
 ):
-    configure_project(mock_package_name_with_settings_file)
+    project_path, package_name = mock_package_name_with_settings_file
+    configure_project(package_name, Path(project_path))
     assert settings.CONF_SOURCE == "test_conf"
     assert settings.CONTEXT_CLASS is MOCK_CONTEXT_CLASS

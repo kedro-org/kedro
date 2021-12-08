@@ -152,5 +152,5 @@ def bootstrap_project(project_path: Path) -> ProjectMetadata:
     """
     metadata = _get_project_metadata(project_path)
     _add_src_to_path(metadata.source_dir, project_path)
-    configure_project(metadata.package_name)
+    configure_project(metadata.package_name, project_path)
     return metadata

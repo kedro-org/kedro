@@ -136,18 +136,18 @@ commands:
           name: Pip freeze
           command: conda activate kedro_builder; pip freeze
 
-    win_setup:
-      parameters:
-        python_version:
-          type: string
-      steps:
-        - checkout
-        - win_setup_conda:
-            python_version: <<parameters.python_version>>
-        - win_setup_env
-        - restore_cache:
-            key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-        - win_setup_requirements
+  win_setup:
+    parameters:
+      python_version:
+        type: string
+    steps:
+      - checkout
+      - win_setup_conda:
+          python_version: <<parameters.python_version>>
+      - win_setup_env
+      - restore_cache:
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+      - win_setup_requirements
 
 jobs:
   e2e_tests:

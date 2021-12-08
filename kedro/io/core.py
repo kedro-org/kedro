@@ -704,7 +704,7 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, 
     protocol = options_dict["protocol"]
 
     if protocol in HTTP_PROTOCOLS:
-        if version:
+        if version is not None:
             raise DataSetError(
                 "HTTP(s) DataSet doesn't support versioning. "
                 "Please remove version flag from the dataset configuration."

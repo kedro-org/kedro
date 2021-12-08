@@ -6,17 +6,12 @@ orbs:
 # All windows builds use the executor win/default and modify the Python version through
 # the conda environment.
 executors:
-  py36:
+  docker:
+    parameters:
+      python_version:
+        type: string
     docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
-    resource_class: medium+
-  py37:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
-    resource_class: medium+
-  py38:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:<<parameters.python_version>>
     resource_class: medium+
 
 commands:
@@ -152,9 +147,11 @@ commands:
 jobs:
   e2e_tests:
     parameters:
-      executor:
-        type: executor
-    executor: <<parameters.executor>>
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
     steps:
       - setup
       - run:
@@ -179,9 +176,11 @@ jobs:
 
   unit_tests:
     parameters:
-      executor:
-        type: executor
-    executor: <<parameters.executor>>
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
     steps:
       - setup
       - run:
@@ -233,9 +232,11 @@ jobs:
 
   lint:
     parameters:
-      executor:
-        type: executor
-    executor: <<parameters.executor>>
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
     steps:
       - setup
       - run:
@@ -247,9 +248,11 @@ jobs:
 
   pip_compile:
     parameters:
-      executor:
-        type: executor
-    executor: <<parameters.executor>>
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
     steps:
       - setup
       - run:
@@ -280,7 +283,9 @@ jobs:
           command: conda activate kedro_builder; make pip-compile
 
   build_docs:
-    executor: py37
+    executor:
+      name: docker
+      python_version: 3.7
     steps:
       - setup
       - run:
@@ -288,7 +293,9 @@ jobs:
           command: make build-docs
 
   docs_linkcheck:
-    executor: py37
+    executor:
+      name: docker
+      python_version: 3.7
     steps:
       - setup
       - run:
@@ -324,7 +331,7 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              executor: [py36, py37, py38]
+              python_version: ["3.6", "3.7", "3.8"]
       - win_e2e_tests:
           matrix:
             parameters:
@@ -332,7 +339,7 @@ workflows:
       - unit_tests:
           matrix:
             parameters:
-              executor: [py36, py37, py38]
+              python_version: ["3.6", "3.7", "3.8"]
       - win_unit_tests:
           matrix:
             parameters:
@@ -340,11 +347,11 @@ workflows:
       - lint:
           matrix:
             parameters:
-              executor: [py36, py37, py38]
+              python_version: ["3.6", "3.7", "3.8"]
       - pip_compile:
           matrix:
             parameters:
-              executor: [py36, py37, py38]
+              python_version: ["3.6", "3.7", "3.8"]
       - win_pip_compile:
           matrix:
             parameters:

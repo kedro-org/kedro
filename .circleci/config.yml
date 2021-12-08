@@ -24,17 +24,17 @@ commands:
       - when:
           condition:
             equal: [win/default, <<parameters.platform>>]
-            steps:
+          steps:
             - run:
                 name: Initialize conda
                 command: conda init powershell
             - run:
                 name: Create 'kedro_builder' conda environment
                 command: conda create --name kedro_builder python=<<parameters.python_version>> -y
-          unless:
-            condition:
-              equal: [win/default, <<parameters.platform>>]
-            steps:
+        unless:
+          condition:
+            equal: [win/default, <<parameters.platform>>]
+          steps:
             - run:
                 name: Run conda.sh
                 command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV

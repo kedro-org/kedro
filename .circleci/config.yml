@@ -460,7 +460,7 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              python_version: [3.6, 3.7, 3.8]
+              python_version: ["3.6", "3.7", "3.8"]
               platform: [linux]
       - unit_tests_36
       - linters_36

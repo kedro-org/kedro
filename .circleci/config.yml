@@ -85,15 +85,21 @@ commands:
           name: Run linters
           command: make lint
 
-  e2e_tests:
+
+  win_e2e_tests:
     description: Run all end to end tests
     steps:
       - checkout
-      - setup_conda
-      - setup_requirements
+      - run:
+          name: Install dependencies
+          command: |
+            conda activate kedro_builder
+            pip install -r features/windows_reqs.txt
+            choco install make
       - run:
           name: Run e2e tests
-          command: make e2e-tests
+          command: conda activate kedro_builder; make e2e-tests
+
 
   build_docs:
     description: Build docs
@@ -237,19 +243,6 @@ commands:
             conda activate kedro_builder
             pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
 
-  win_e2e_tests:
-    description: Run all end to end tests
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            conda activate kedro_builder
-            pip install -r features/windows_reqs.txt
-            choco install make
-      - run:
-          name: Run e2e tests
-          command: conda activate kedro_builder; make e2e-tests
 
   win_pip_compile:
     description: Pip-compile requirements file
@@ -287,9 +280,16 @@ jobs:
     executor:
       name: <<parameters.platform>>
       python_version: <<parameters.python_version>>
-    steps: e2e_tests
+    steps:
+      - checkout
+      - setup_conda
+      - setup_requirements
+      - run:
+          name: Run e2e tests
+          command: make e2e-tests
 
-#  e2e_tests_36:
+
+  #  e2e_tests_36:
 #    executor: py36
 #    steps: [e2e_tests]
 #

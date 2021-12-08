@@ -14,7 +14,6 @@ executors:
 
 commands:
   setup_conda:
-    description: Activate conda environment
     steps:
       - run:
           name: Run conda.sh
@@ -23,8 +22,20 @@ commands:
           name: Activate conda environment
           command: echo "conda deactivate; conda activate kedro_builder">> $BASH_ENV
 
+  win_setup_conda:
+    parameters:
+      python_version:
+        type: string
+    steps:
+      - run:
+          name: Initialize conda
+          command: conda init powershell
+      - run:
+          name: Create 'kedro_builder' conda environment
+          command: |
+            conda create --name kedro_builder python=<<parameters.python_version>> -y
+
   setup_requirements:
-    description: Install PIP dependencies
     steps:
       - run:
           name: Install pip setuptools
@@ -57,6 +68,14 @@ commands:
           name: Pip freeze
           command: pip freeze
 
+  win_setup_requirements:
+      - run:
+          name: Install dependencies
+          command: |
+            conda activate kedro_builder
+            pip install -r features/windows_reqs.txt
+            choco install make
+
   setup_pre_commit:
     description: Install pre-commit hooks
     steps:
@@ -86,19 +105,7 @@ commands:
           command: make lint
 
 
-  win_e2e_tests:
-    description: Run all end to end tests
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            conda activate kedro_builder
-            pip install -r features/windows_reqs.txt
-            choco install make
-      - run:
-          name: Run e2e tests
-          command: conda activate kedro_builder; make e2e-tests
+
 
 
   build_docs:
@@ -142,21 +149,6 @@ commands:
               --header "Circle-Token: $CIRCLE_TOKEN" \
               --header 'content-type: application/json' \
               --data '{"branch":"main"}'
-
-  # Windows-related commands
-  win_setup_conda:
-    description: Setup conda
-    parameters:
-      python_version:
-        type: string
-    steps:
-      - run:
-          name: Initialize conda
-          command: conda init powershell
-      - run:
-          name: Create 'kedro_builder' conda environment
-          command: |
-            conda create --name kedro_builder python=<<parameters.python_version>> -y
 
   win_setup_env:
     description: Setup environment
@@ -273,12 +265,10 @@ commands:
 jobs:
   e2e_tests:
     parameters:
-      platform:
-        type: string
       python_version:
         type: string
     executor:
-      name: <<parameters.platform>>
+      name: linux
       python_version: <<parameters.python_version>>
     steps:
       - checkout
@@ -288,18 +278,20 @@ jobs:
           name: Run e2e tests
           command: make e2e-tests
 
+  win_e2e_tests:
+    parameters:
+      python_version:
+        type: string
+    executor: win/default
+    steps:
+      - checkout
+      - win_setup_conda:
+          python_version: <<parameters.python_version>>
+      - win_setup_requirements
+      - run:
+          name: Run e2e tests
+          command: make e2e-tests
 
-  #  e2e_tests_36:
-#    executor: py36
-#    steps: [e2e_tests]
-#
-#  e2e_tests_37:
-#    executor: py37
-#    steps: [e2e_tests]
-#
-#  e2e_tests_38:
-#    executor: py38
-#    steps: [e2e_tests]
 
   win_e2e_tests_36:
     executor:
@@ -309,21 +301,7 @@ jobs:
           python_version: "3.6"
       - win_e2e_tests
 
-  win_e2e_tests_37:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.7"
-      - win_e2e_tests
 
-  win_e2e_tests_38:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.8"
-      - win_e2e_tests
 
   unit_tests_36:
     executor: py36
@@ -461,7 +439,10 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
-              platform: [linux]
+      - win_e2e_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
 #      - unit_tests_36
 #      - linters_36
 #      - docs_36
@@ -507,13 +488,9 @@ workflows:
             # Skipped due to Windows fatal exception: stack overflow
             # - win_unit_tests_38
 
-#            # e2e_tests would require the whole 2 x 3 matrix of e2e_tests-*. Currently
-#            # we do not require e2e_tests-windows-3.6
-#            # - e2e_tests
-            - e2e_tests-linux-3.6
-            - e2e_tests-linux-3.7
-            - e2e_tests-linux-3.8
+            - e2e_tests
+
 #            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
-#            # - e2e_tests-windows-3.6
-#            - e2e_tests-windows-3.7
-#            - e2e_tests-windows-3.8
+#            # - win_e2e_tests-3.6
+            - win_e2e_tests-3.7
+            - win_e2e_tests-3.8

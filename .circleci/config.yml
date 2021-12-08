@@ -22,7 +22,7 @@ commands:
           name: Activate conda environment
           command: echo "conda deactivate; conda activate kedro_builder">> $BASH_ENV
 
- setup_requirements:
+  setup_requirements:
     steps:
       - run:
           name: Install pip setuptools

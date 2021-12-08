@@ -62,6 +62,12 @@ commands:
           name: Pip freeze
           command: pip freeze
 
+  setup:
+    steps:
+      - checkout
+      - setup_conda
+      - setup_requirements
+
   # Windows specific commands
   win_setup_conda:
     parameters:
@@ -130,6 +136,18 @@ commands:
           name: Pip freeze
           command: conda activate kedro_builder; pip freeze
 
+    win_setup:
+      parameters:
+        python_version:
+          type: string
+      - checkout
+      - win_setup_conda:
+          python_version: <<parameters.python_version>>
+      - win_setup_env
+      - restore_cache:
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+      - win_setup_requirements
+
 jobs:
   e2e_tests:
     parameters:
@@ -137,9 +155,7 @@ jobs:
         type: executor
     executor: <<parameters.executor>>
     steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
+      - setup
       - run:
           name: Run e2e tests
           command: make e2e-tests
@@ -166,9 +182,7 @@ jobs:
         type: executor
     executor: <<parameters.executor>>
     steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
+      - setup
       - run:
           name: Run unit tests
           command: make test
@@ -179,13 +193,7 @@ jobs:
         type: string
     executor: win/default
     steps:
-      - checkout
-      - win_setup_conda:
-          python_version: <<parameters.python_version>>
-      - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
+      - win_setup
       - run:
           # geopandas and tensorflow conflicts when imported simultaneously.
           # The HDF5 header files used to compile this application do not match
@@ -227,9 +235,7 @@ jobs:
         type: executor
     executor: <<parameters.executor>>
     steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
+      - setup
       - run:
           name: Install pre-commit hooks
           command: pre-commit install --install-hooks
@@ -243,9 +249,7 @@ jobs:
         type: executor
     executor: <<parameters.executor>>
     steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
+      - setup
       - run:
           name: Pip-compile requirements file
           command: make pip-compile
@@ -256,13 +260,7 @@ jobs:
         type: string
     executor: win/default
     steps:
-      - checkout
-      - win_setup_conda:
-          python_version: <<parameters.python_version>>
-      - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
+      - win_setup
       - when:
           # Save cache only for Python 3.7. There is no need to save it for each Python.
           condition:
@@ -281,9 +279,7 @@ jobs:
   build_docs:
     executor: py37
     steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
+      - setup
       - run:
           name: Build docs
           command: make build-docs
@@ -291,9 +287,7 @@ jobs:
   docs_linkcheck:
     executor: py37
     steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
+      - setup
       - run:
           name: Check for broken links
           command: make linkcheck

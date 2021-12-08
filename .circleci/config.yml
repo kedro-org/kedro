@@ -194,7 +194,7 @@ jobs:
         type: string
     executor: win/default
     steps:
-      - win_setup
+      - win_setup:
           python_version: <<parameters.python_version>>
       - run:
           # geopandas and tensorflow conflicts when imported simultaneously.
@@ -262,7 +262,7 @@ jobs:
         type: string
     executor: win/default
     steps:
-      - win_setup
+      - win_setup:
           python_version: <<parameters.python_version>>
       - when:
           # Save cache only for Python 3.7. There is no need to save it for each Python.

@@ -176,6 +176,7 @@ class _ProjectPipelines(MutableMapping):
 
 
 PACKAGE_NAME = None
+LOGGING = None
 
 settings = _ProjectSettings()
 
@@ -203,6 +204,18 @@ def configure_project(package_name: str):
     # time a new subprocess is spawned.
     global PACKAGE_NAME
     PACKAGE_NAME = package_name
+
+    global LOGGING
+
+    config_loader_class = settings.CONFIG_LOADER_CLASS
+    LOGGING = config_loader_class.get(
+        "logging*", "logging*/**", "**/logging*"
+    )
+    # turn relative paths in logging config into absolute path
+    # before initialising loggers
+    LOGGING = _convert_paths_to_absolute_posix(
+        project_path=self._project_path, conf_dictionary=LOGGING
+    )
 
 
 def validate_settings():

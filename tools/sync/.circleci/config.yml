@@ -176,17 +176,6 @@ jobs:
           command: docker logout "${ECR_IMAGE_URL}"
           when: always  # logout even if the previous step has failed
 
-  check_package_updates:
-    executor: py36
-    steps:
-      - checkout
-      - configure_ssh_keys
-      - remove_ssh_config
-      - activate_conda
-      - clone_repo
-      - run:
-          name: Check package updates
-          command: ~/project/check_package_updates.py
 
   publish_kedro:
     executor: py36
@@ -260,29 +249,6 @@ workflows:
       - build_38:
           requires:
             - build_docker_image
-
-  weekly_updates_checks:
-    triggers:
-      - schedule:
-          cron: "00 00 * * 0"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - check_package_updates
-
-  regular:
-    unless: << pipeline.parameters.release_kedro >>  # don't run if 'release_kedro' flag is set
-    jobs:
-      - sync:
-          filters:
-            branches:
-              only:
-                - master
-      - build_36
-      - build_37
-      - build_38
 
   do_kedro_release:
     when: << pipeline.parameters.release_kedro >>  # only run if 'release_kedro' flag is set

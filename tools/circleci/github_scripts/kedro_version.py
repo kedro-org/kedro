@@ -8,7 +8,6 @@ import re
 import sys
 from pathlib import Path
 
-
 VERSION_MATCHSTR = r'\s*__version__\s*=\s*"(\d+\.\d+\.\d+)"'
 
 

@@ -255,9 +255,6 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - setup
-#      - run:
-#          name: Install pre-commit hooks
-#          command: pre-commit install --install-hooks
       - run:
           name: Run linters
           command: make lint
@@ -386,9 +383,6 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - setup
-      #        - run:
-      #            name: Install pre-commit hooks
-      #            command: pre-commit install --install-hooks
       - run:
           name: Run linters
           command: make lint

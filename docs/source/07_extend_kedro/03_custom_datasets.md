@@ -36,7 +36,7 @@ Here is an example skeleton for `ImageDataSet`:
 <summary><b>Click to expand</b></summary>
 
 ```python
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import numpy as np
 
@@ -99,18 +99,14 @@ Here is the implementation of the `_load` method using `fsspec` and `Pillow` to 
 
 ```python
 from pathlib import PurePosixPath
-
-from kedro.io.core import (
-    AbstractDataSet,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from typing import Any, Dict
 
 import fsspec
 import numpy as np
-
-# PIL is the package from Pillow
 from PIL import Image
+
+from kedro.io import AbstractDataSet
+from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
 class ImageDataSet(AbstractDataSet):
@@ -133,10 +129,12 @@ class ImageDataSet(AbstractDataSet):
             Data from the image file as a numpy array
         """
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        load_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(load_path) as f:
             image = Image.open(f).convert("RGBA")
             return np.asarray(image)
+
+    ...
 ```
 </details>
 
@@ -168,16 +166,11 @@ Similarly, we can implement the `_save` method as follows:
 
 
 ```python
-import numpy as np
-from PIL import Image
-from kedro.io.core import AbstractDataSet, get_filepath_str
-
-
 class ImageDataSet(AbstractDataSet):
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(save_path, "wb") as f:
             image = Image.fromarray(data)
             image.save(f)
@@ -197,9 +190,6 @@ You can open the file to verify that the data was written back correctly.
 The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset.
 
 ```python
-from kedro.io import AbstractDataSet
-
-
 class ImageDataSet(AbstractDataSet):
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes the attributes of the dataset."""
@@ -217,15 +207,12 @@ Here is the full implementation of our basic `ImageDataSet`:
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io.core import (
-    AbstractDataSet,
-    get_filepath_str,
-    get_protocol_and_path,
-)
-
 import fsspec
 import numpy as np
 from PIL import Image
+
+from kedro.io import AbstractDataSet
+from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
 class ImageDataSet(AbstractDataSet):
@@ -243,7 +230,6 @@ class ImageDataSet(AbstractDataSet):
         Args:
             filepath: The location of the image file to load / save data.
         """
-        # parse the path and protocol (e.g. file, http, s3, etc.)
         protocol, path = get_protocol_and_path(filepath)
         self._protocol = protocol
         self._filepath = PurePosixPath(path)
@@ -255,16 +241,14 @@ class ImageDataSet(AbstractDataSet):
         Returns:
             Data from the image file as a numpy array
         """
-        # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        load_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(load_path, mode="r") as f:
             image = Image.open(f).convert("RGBA")
             return np.asarray(image)
 
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
-        # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(save_path, mode="wb") as f:
             image = Image.fromarray(data)
             image.save(f)
@@ -329,12 +313,12 @@ The following amends the full implementation of our basic `ImageDataSet`. It now
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io import AbstractVersionedDataSet, Version
-from kedro.io.core import get_protocol_and_path
-
 import fsspec
 import numpy as np
 from PIL import Image
+
+from kedro.io import AbstractVersionedDataSet
+from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
 class ImageDataSet(AbstractVersionedDataSet):
@@ -370,14 +354,14 @@ class ImageDataSet(AbstractVersionedDataSet):
         Returns:
             Data from the image file as a numpy array
         """
-        load_path = self._get_load_path()
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, mode="r") as f:
             image = Image.open(f).convert("RGBA")
             return np.asarray(image)
 
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
-        save_path = self._get_save_path()
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, mode="wb") as f:
             image = Image.fromarray(data)
             image.save(f)
@@ -390,9 +374,84 @@ class ImageDataSet(AbstractVersionedDataSet):
 ```
 </details>
 
-The graphic shows the differences between the original `ImageDataSet` and the versioned `ImageDataSet`:
+The difference between the original `ImageDataSet` and the versioned `ImageDataSet` is as follows:
 
-![](../meta/images/diffs-graphic.png)
+<!-- Generated by saving the original and versioned examples to a file and running `diff original.py versioned.py -U -1` -->
+<details>
+<summary><b>Click to expand</b></summary>
+
+```diff
+ from pathlib import PurePosixPath
+ from typing import Any, Dict
+
+ import fsspec
+ import numpy as np
+ from PIL import Image
+
+-from kedro.io import AbstractDataSet
+-from kedro.io.core import get_filepath_str, get_protocol_and_path
++from kedro.io import AbstractVersionedDataSet
++from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
+
+
+-class ImageDataSet(AbstractDataSet):
++class ImageDataSet(AbstractVersionedDataSet):
+     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
+
+     Example:
+     ::
+
+         >>> ImageDataSet(filepath='/img/file/path.png')
+     """
+
+-    def __init__(self, filepath: str):
++    def __init__(self, filepath: str, version: Version = None):
+         """Creates a new instance of ImageDataSet to load / save image data for given filepath.
+
+         Args:
+             filepath: The location of the image file to load / save data.
++            version: The version of the dataset being saved and loaded.
+         """
+         protocol, path = get_protocol_and_path(filepath)
+         self._protocol = protocol
+-        self._filepath = PurePosixPath(path)
+         self._fs = fsspec.filesystem(self._protocol)
+
++        super().__init__(
++            filepath=PurePosixPath(path),
++            version=version,
++            exists_function=self._fs.exists,
++            glob_function=self._fs.glob,
++        )
++
+     def _load(self) -> np.ndarray:
+         """Loads data from the image file.
+
+         Returns:
+             Data from the image file as a numpy array
+         """
+-        load_path = get_filepath_str(self._filepath, self._protocol)
++        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+         with self._fs.open(load_path, mode="r") as f:
+             image = Image.open(f).convert("RGBA")
+             return np.asarray(image)
+
+     def _save(self, data: np.ndarray) -> None:
+         """Saves image data to the specified filepath."""
+-        save_path = get_filepath_str(self._filepath, self._protocol)
++        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+         with self._fs.open(save_path, mode="wb") as f:
+             image = Image.fromarray(data)
+             image.save(f)
+
+     def _describe(self) -> Dict[str, Any]:
+         """Returns a dict that describes the attributes of the dataset."""
+-        return dict(filepath=self._filepath, protocol=self._protocol)
++        return dict(
++            filepath=self._filepath, version=self._version, protocol=self._protocol
++        )
+```
+</details>
 
 To test the code, you need to enable versioning support in the data catalog:
 

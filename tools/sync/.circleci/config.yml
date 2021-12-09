@@ -13,15 +13,13 @@ executors:
   build_executor:
     docker:
       - image: cimg/python:3.8
-  py36:
+  docker:
+    parameters:
+      python_version:
+        type: string
     docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
-  py37:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
-  py38:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:<<parameters.python_version>>
+    resource_class: medium+
 
 commands:
   configure_ssh_keys:
@@ -36,43 +34,6 @@ commands:
       - run:
           name: Remove SSH config
           command: rm ~/.ssh/config
-  activate_conda:
-    steps:
-      - run:
-          name: Activate conda environment
-          command: |
-            echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
-            echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
-  setup_pip:
-    steps:
-      - run:
-          name: Install PIP dependencies
-          command: |
-            # Install pip setuptools
-            make install-pip-setuptools
-
-            # Install requirements
-            pip install -r requirements.txt -U
-
-            # Install test requirements
-            pip install -r test_requirements.txt -U
-  build_kedro:
-    description: Build Kedro
-    steps:
-      - checkout
-      - configure_ssh_keys
-      - remove_ssh_config
-      - activate_conda
-      - setup_pip
-      - run:
-          name: Run pylint and flake8
-          command: make lint
-      - run:
-          name: Run unit tests
-          command: make test
-      - run:
-          name: Run all end to end tests
-          command: make e2e-tests
 
 jobs:
   sync:
@@ -111,21 +72,6 @@ jobs:
           name: Maybe merge an automatic PR into develop
           command: ./tools/sync/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
 
-  build_36:
-    executor: py36
-    steps: [build_kedro]
-    resource_class: medium+
-
-  build_37:
-    executor: py37
-    steps: [build_kedro]
-    resource_class: medium+
-
-  build_38:
-    executor: py38
-    steps: [build_kedro]
-    resource_class: medium+
-
   build_docker_image:
     executor: build_executor
     environment:
@@ -155,6 +101,27 @@ jobs:
           command: docker logout "${ECR_IMAGE_URL}"
           when: always  # logout even if the previous step has failed
 
+  build_kedro:
+    parameters:
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
+    steps:
+      - setup
+      #        - run:
+      #            name: Install pre-commit hooks
+      #            command: pre-commit install --install-hooks
+      - run:
+          name: Run linters
+          command: make lint
+      - run:
+          name: Run unit tests
+          command: make test
+      - run:
+          name: Run e2e tests
+          command: make e2e-tests
 
   publish_kedro:
     executor: py36

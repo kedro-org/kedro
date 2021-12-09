@@ -23,14 +23,11 @@ executors:
 
 commands:
   configure_ssh_keys:
-    description: Configure SSH keys
     steps:
       - add_ssh_keys:
           fingerprints:
             - "a0:3f:6a:d9:c3:c7:c2:56:e7:38:bc:ce:d2:dc:9e:be"
             - "47:e5:59:20:85:dc:c6:13:de:c4:68:0f:a6:46:36:7e"
-  remove_ssh_config:
-    steps:
       - run:
           name: Remove SSH config
           command: rm ~/.ssh/config
@@ -44,30 +41,22 @@ jobs:
       - remove_ssh_config
       - run:
           name: Trigger Read The Docs build
-          command: |
-            if [ -n "$MAIN_BRANCH_CHANGED" ]
-            then
-                ./tools/sync/rtd-build.sh ${RTD_TOKEN} latest
-            fi
+          command: ./tools/sync/rtd-build.sh ${RTD_TOKEN} latest
       - run:
           name: Maybe trigger the release workflow
           command: |
-            if [ -n "$MAIN_BRANCH_CHANGED" ]
-            then
-                KEDRO_VERSION=$(./tools/sync/github_scripts/kedro_version.py "$MAIN_BRANCH_CHANGED/kedro") ## ???
+              KEDRO_VERSION=$(./tools/sync/github_scripts/kedro_version.py ./kedro)
 
-                if ./tools/sync/check-no-version-pypi.sh "${KEDRO_VERSION}"
-                then
-                    echo "Starting the release of Kedro ${KEDRO_VERSION}!"
-                    ./tools/sync/circle-release.sh github/quantumblacklabs/kedro
-                else
-                    echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
+              if ./tools/sync/check-no-version-pypi.sh "${KEDRO_VERSION}"
+              then
+                  echo "Starting the release of Kedro ${KEDRO_VERSION}!"
+                  ./tools/sync/circle-release.sh github/quantumblacklabs/kedro
+              else
+                  echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
                 fi
-            fi
       - run:
           name: Maybe merge main into develop or raise a PR
-          command: |
-            ./tools/sync/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+          command: ./tools/sync/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
       - run:
           name: Maybe merge an automatic PR into develop
           command: ./tools/sync/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
@@ -81,9 +70,6 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - checkout
-      - configure_ssh_keys
-      - remove_ssh_config
-      - clone_repo
       - run:
           name: Setup AWS CLI
           command: pip install -U awscli
@@ -101,6 +87,8 @@ jobs:
           command: docker logout "${ECR_IMAGE_URL}"
           when: always  # logout even if the previous step has failed
 
+  # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
+  # It's used to check that the nightly docker image is working ok and before publishing a release.
   build_kedro:
     parameters:
       python_version:
@@ -124,13 +112,13 @@ jobs:
           command: make e2e-tests
 
   publish_kedro:
-    executor: py36
+    executor:
+      name: docker
+      python_version: "3.7"
     steps:
-      - checkout
+      - setup
       - configure_ssh_keys
       - remove_ssh_config
-      - activate_conda
-      - clone_repo
       - run:
           name: Check Kedro version
           command: |
@@ -145,9 +133,7 @@ jobs:
             fi
       - run:
           name: Tag and publish release on Github
-          command: |
-            ~/project/github_scripts/release.sh quantumblacklabs kedro \
-            ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
+          command: ~/project/github_scripts/release.sh quantumblacklabs kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
       - run:
           name: Publish to PyPI
           command: |
@@ -176,7 +162,7 @@ workflows:
       - sync
       # PUT kedro_viz_build in here
 
-  nightly_build_run:
+  nightly_build:
     triggers:
       - schedule:
           cron: "30 2 * * *"
@@ -191,7 +177,6 @@ workflows:
               python_version: ["3.6", "3.7", "3.8"]
           requires:
             - build_docker_image
-        # do we still need build_kedro?
 
   do_kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

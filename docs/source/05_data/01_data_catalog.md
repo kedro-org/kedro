@@ -304,6 +304,45 @@ dev_abs:
   account_name: accountname
   account_key: key
 ```
+Example 16: Loading a csv file stored in a remote location through ssh
+
+This example requires paramiko to be installed. This can be done running:
+
+```bash
+pip install paramiko
+```
+In the conf/local/catalog.yml the dataset can be defined as follows:
+
+```yaml
+# in conf/local/catalog.yml
+cool_dataset:
+  type: pandas.CSVDataSet
+  filepath: "sftp:///path/to/remote_cluster/cool_data.csv"
+  credentials: cluster_credentials
+  load_args:
+    sep: ","
+    index_col: 0
+  save_args:
+    index: True
+    encoding: "utf-8`
+```
+sftp is the protocol used and all necessary parameters to establish the connection can be defined either trhough the fs_args or in the conf/local/credentials.yml as shown in this example.
+In conf/local/credentials.yml the hostname, the port, username and password can be defined as follows:
+
+```yaml
+# in conf/local/credentials.yml
+cluster_credentials:
+  username: my_username
+  host: host_address
+  port: 22
+  password: password
+```
+further parameters can be passed to establish te connection. The list of all available parameters can be found ['here'](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect)
+To check that the csv file can be correctly loaded in a pandas DataFrame, the dataset can be loaded from the catalog from within a kedro jupyter notebook as follows:
+
+```python
+catalog.load("cool_dataset")
+```
 
 ## Creating a Data Catalog YAML configuration file via CLI
 

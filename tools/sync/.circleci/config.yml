@@ -165,19 +165,16 @@ jobs:
 
 workflows:
   version: 2
-  scheduled:
+
+  main_updated:
     triggers:
       - schedule:
-          cron: "0 * * * *"
           filters:
             branches:
               only: main
     jobs:
       - sync
-  # should run on merge to main??
-
-  # on regular:
-  #    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
+      # PUT kedro_viz_build in here
 
   nightly_build_run:
     triggers:
@@ -194,6 +191,7 @@ workflows:
               python_version: ["3.6", "3.7", "3.8"]
           requires:
             - build_docker_image
+        # do we still need build_kedro?
 
   do_kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

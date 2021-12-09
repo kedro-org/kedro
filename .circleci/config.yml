@@ -462,7 +462,7 @@ jobs:
 workflows:
   version: 2.1
   regular:
-    unless: << pipeline.parameters.release_kedro >>  # don't run if 'release_kedro' flag is set
+    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
     jobs:
       - e2e_tests:
           matrix:
@@ -513,15 +513,16 @@ workflows:
             - docs_linkcheck
 
   main_updated:
-    unless: << pipeline.parameters.release_kedro >>  # don't run if 'release_kedro' flag is set
-    triggers:
-      - schedule:
+    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
+    jobs:
+      - sync:
           filters:
             branches:
               only: main
-    jobs:
-      - sync
-      - viz_build
+      - viz_build:
+          filters:
+            branches:
+              only: main
 
   nightly_build:
     triggers:

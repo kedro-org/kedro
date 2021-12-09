@@ -365,7 +365,7 @@ jobs:
             docker login --username AWS --password-stdin "${ECR_IMAGE_URL}"
       - run:
           name: Build docker images
-          command: ./tools/circleci/docker_build_img/build.sh "${HOME}/kedro" "${ECR_IMAGE_URL}"
+          command: ./tools/circleci/docker_build_img/build.sh "." "${ECR_IMAGE_URL}"
           no_output_timeout: 20m
       - run:
           name: Logout from AWS ECR

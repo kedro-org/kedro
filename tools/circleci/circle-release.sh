@@ -24,4 +24,3 @@ curl -X POST \
   --header "Circle-Token: ${CIRCLE_TOKEN}" \
   --data "${PAYLOAD}" \
   "${CIRCLE_ENDPOINT}"
-

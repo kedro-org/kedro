@@ -4,8 +4,7 @@ configure a Kedro project and access its settings."""
 import importlib
 import operator
 from collections.abc import MutableMapping
-from pathlib import Path
-from typing import Dict, Iterable, Optional
+from typing import Dict, Optional
 from warnings import warn
 
 from dynaconf import LazySettings

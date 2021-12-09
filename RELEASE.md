@@ -5,7 +5,7 @@
 * Enabled overriding nested parameters with `params` in CLI, i.e. `kedro run --params="model.model_tuning.booster:gbtree"` updates parameters to `{"model": {"model_tuning": {"booster": "gbtree"}}}`.
 * Added option to `pandas.SQLQueryDataSet` to specify a `filepath` with a SQL query, in addition to the current method of supplying the query itself in the `sql` argument.
 * Extended `ExcelDataSet` to support saving Excel files with multiple sheets.
-* Added the following new datasets (see ([Issue #839](https://github.com/quantumblacklabs/kedro/issues/839)):
+* Added the following new datasets:
 
 | Type                        | Description                                          | Location                          |
 | --------------------------- | ---------------------------------------------------- | --------------------------------- |

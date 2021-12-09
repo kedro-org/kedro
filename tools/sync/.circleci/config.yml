@@ -43,16 +43,6 @@ commands:
           command: |
             echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
             echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
-  clone_repo:
-    steps:
-      - run:
-          name: Clone Kedro repo
-          command: |
-            mkdir -v ~/kedro/
-            ssh-add -D
-            ssh-add ~/.ssh/id_rsa_47e5592085dcc613dec4680fa646367e
-            git clone --single-branch --branch main git@github.com:quantumblacklabs/kedro.git ~/kedro/
-            echo "cd ~/kedro" >> $BASH_ENV
   setup_pip:
     steps:
       - run:
@@ -73,15 +63,13 @@ commands:
       - configure_ssh_keys
       - remove_ssh_config
       - activate_conda
-      - clone_repo
       - setup_pip
       - run:
           name: Run pylint and flake8
           command: make lint
       - run:
-          name: Run tests
-          command: |
-            make test
+          name: Run unit tests
+          command: make test
       - run:
           name: Run all end to end tests
           command: make e2e-tests
@@ -94,32 +82,23 @@ jobs:
       - configure_ssh_keys
       - remove_ssh_config
       - run:
-          name: Clone the public kedro repository
-          command: |
-            git config --global user.email "kedro@quantumblack.com"
-            git config --global user.name "QuantumBlack Labs"
-            mkdir -v ~/kedro/
-            ssh-add -D
-            ssh-add ~/.ssh/id_rsa_a03f6ad9c3c7c256e738bcced2dc9ebe
-            git clone --single-branch --branch main git@github.com:quantumblacklabs/kedro.git ~/kedro/
-      - run:
           name: Trigger Read The Docs build
           command: |
             if [ -n "$MAIN_BRANCH_CHANGED" ]
             then
-                ./rtd-build.sh ${RTD_TOKEN} latest
+                ./tools/sync/rtd-build.sh ${RTD_TOKEN} latest
             fi
       - run:
           name: Maybe trigger the release workflow
           command: |
             if [ -n "$MAIN_BRANCH_CHANGED" ]
             then
-                KEDRO_VERSION=$(github_scripts/kedro_version.py "$MAIN_BRANCH_CHANGED/kedro")
+                KEDRO_VERSION=$(./tools/sync/github_scripts/kedro_version.py "$MAIN_BRANCH_CHANGED/kedro") ## ???
 
-                if ./check-no-version-pypi.sh "${KEDRO_VERSION}"
+                if ./tools/sync/check-no-version-pypi.sh "${KEDRO_VERSION}"
                 then
                     echo "Starting the release of Kedro ${KEDRO_VERSION}!"
-                    ./circle-release.sh github/quantumblacklabs/private-kedro-sync
+                    ./tools/sync/circle-release.sh github/quantumblacklabs/kedro
                 else
                     echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
                 fi
@@ -127,10 +106,10 @@ jobs:
       - run:
           name: Maybe merge main into develop or raise a PR
           command: |
-            ./github_scripts/merge.sh ~/kedro/ "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+            ./tools/sync/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
       - run:
           name: Maybe merge an automatic PR into develop
-          command: ./github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
+          command: ./tools/sync/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
 
   build_36:
     executor: py36
@@ -225,10 +204,13 @@ workflows:
           cron: "0 * * * *"
           filters:
             branches:
-              only:
-                - master
+              only: main
     jobs:
       - sync
+  # should run on merge to main??
+
+  # on regular:
+  #    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
 
   nightly_build_run:
     triggers:
@@ -236,8 +218,7 @@ workflows:
           cron: "30 2 * * *"
           filters:
             branches:
-              only:
-                - master
+              only: main
     jobs:
       - build_docker_image
       - build_36:
@@ -251,7 +232,7 @@ workflows:
             - build_docker_image
 
   do_kedro_release:
-    when: << pipeline.parameters.release_kedro >>  # only run if 'release_kedro' flag is set
+    when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set
     jobs:
       - build_36
       - build_37

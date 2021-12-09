@@ -188,24 +188,20 @@ workflows:
               only: main
     jobs:
       - build_docker_image
-      - build_36:
-          requires:
-            - build_docker_image
-      - build_37:
-          requires:
-            - build_docker_image
-      - build_38:
+      - build_kedro:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
           requires:
             - build_docker_image
 
   do_kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set
     jobs:
-      - build_36
-      - build_37
-      - build_38
+      - build_kedro:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
       - publish_kedro:
           requires:
-            - build_36
-            - build_37
-            - build_38
+            - build_kedro

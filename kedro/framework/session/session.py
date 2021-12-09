@@ -17,6 +17,7 @@ from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import (
+    configure_logging,
     configure_project,
     pipelines,
     settings,
@@ -208,7 +209,7 @@ class KedroSession:
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
         conf_logging = self._get_logging_config()
-        logging.config.dictConfig(conf_logging)
+        configure_logging(conf_logging)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS

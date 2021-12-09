@@ -270,7 +270,6 @@ class ParallelRunner(AbstractRunner):
 
         """
         # pylint: disable=import-outside-toplevel,cyclic-import
-        from kedro.framework.session.session import get_current_session
 
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
@@ -284,12 +283,7 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
-        from kedro.framework.project import PACKAGE_NAME
-        from kedro.framework.project import LOGGING
-
-        # session = get_current_session(silent=True)
-        # pylint: disable=protected-access
-        # conf_logging = session._get_logging_config() if session else None
+        from kedro.framework.project import LOGGING, PACKAGE_NAME
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:

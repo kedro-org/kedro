@@ -1,4 +1,4 @@
-"""``AbstractVersionedDataSet`` implementation to access DeltaTables using
+"""``AbstractDataSet`` implementation to access DeltaTables using
 ``delta-spark``
 """
 from pathlib import PurePosixPath

@@ -212,13 +212,6 @@ def configure_logging(conf_logging):
     LOGGING = conf_logging
 
 
-def _build_conf_paths(project_path) -> Iterable[str]:
-    return [
-        str(Path(project_path) / settings.CONF_SOURCE / "base"),
-        str(Path(str(project_path / settings.CONF_SOURCE)) / "local"),
-    ]
-
-
 def validate_settings():
     """Eagerly validate that the settings module is importable. This is desirable to
     surface any syntax or import errors early. In particular, without eagerly importing

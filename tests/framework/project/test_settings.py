@@ -1,6 +1,5 @@
 import sys
 import textwrap
-from unittest import mock
 
 import pytest
 
@@ -8,17 +7,9 @@ from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings
 from kedro.framework.session.store import BaseSessionStore
 
-MOCK_CONTEXT_CLASS = mock.patch(
-    "kedro.framework.context.context.KedroContext", autospec=True
-)
 
-
-def test_settings_without_configure_project_show_default_values():
-    assert settings.CONF_SOURCE == "conf"
-    assert settings.CONTEXT_CLASS is KedroContext
-    assert settings.SESSION_STORE_CLASS is BaseSessionStore
-    assert settings.SESSION_STORE_ARGS == {}
-    assert len(settings.DISABLE_HOOKS_FOR_PLUGINS) == 0
+class MyContext(KedroContext):
+    pass
 
 
 @pytest.fixture
@@ -28,9 +19,9 @@ def mock_package_name_with_settings_file(tmpdir):
     settings_file_path.write(
         textwrap.dedent(
             f"""
-                from {__name__} import MOCK_CONTEXT_CLASS
+                from {__name__} import MyContext
                 CONF_SOURCE = "test_conf"
-                CONTEXT_CLASS = MOCK_CONTEXT_CLASS
+                CONTEXT_CLASS = MyContext
             """
         )
     )
@@ -43,9 +34,17 @@ def mock_package_name_with_settings_file(tmpdir):
         settings.set(key, value)
 
 
+def test_settings_without_configure_project_show_default_values():
+    assert settings.CONF_SOURCE == "conf"
+    assert settings.CONTEXT_CLASS is KedroContext
+    assert settings.SESSION_STORE_CLASS is BaseSessionStore
+    assert settings.SESSION_STORE_ARGS == {}
+    assert len(settings.DISABLE_HOOKS_FOR_PLUGINS) == 0
+
+
 def test_settings_after_configuring_project_shows_updated_values(
     mock_package_name_with_settings_file,
 ):
     configure_project(mock_package_name_with_settings_file)
     assert settings.CONF_SOURCE == "test_conf"
-    assert settings.CONTEXT_CLASS is MOCK_CONTEXT_CLASS
+    assert settings.CONTEXT_CLASS is MyContext

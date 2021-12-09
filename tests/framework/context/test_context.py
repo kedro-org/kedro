@@ -1,6 +1,7 @@
 import configparser
 import json
 import re
+import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any, Dict
 
@@ -19,16 +20,20 @@ from kedro.framework.context.context import (
     _update_nested_dict,
     _validate_layers_for_transcoding,
 )
-from kedro.framework.hooks import get_hook_manager, hook_impl
 from kedro.framework.project import (
-    Validator,
+    ValidationError,
     _ProjectSettings,
     configure_project,
     pipelines,
 )
-from kedro.io import DataCatalog
 
 MOCK_PACKAGE_NAME = "mock_package_name"
+
+
+class BadCatalog:  # pylint: disable=too-few-public-methods
+    """
+    Catalog class that doesn't subclass `DataCatalog`, for testing only.
+    """
 
 
 def _write_yaml(filepath: Path, config: Dict):
@@ -145,23 +150,23 @@ def prepare_project_dir(tmp_path, base_config, local_config, local_logging_confi
     _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
 
 
-class RegistrationHooks:
-    @hook_impl
-    def register_catalog(
-        self, catalog, credentials, load_versions, save_version
-    ) -> DataCatalog:
-        return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version
+@pytest.fixture
+def mock_settings_file_bad_data_catalog_class(tmpdir):
+    mock_settings_file = tmpdir.join("mock_settings_file.py")
+    mock_settings_file.write(
+        textwrap.dedent(
+            f"""
+            from {__name__} import BadCatalog
+            DATA_CATALOG_CLASS = BadCatalog
+            """
         )
-
-
-class MockSettings(_ProjectSettings):
-    _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
+    )
+    return mock_settings_file
 
 
 @pytest.fixture(autouse=True)
 def mock_settings(mocker):
-    mocked_settings = MockSettings()
+    mocked_settings = _ProjectSettings()
     mocker.patch("kedro.framework.session.session.settings", mocked_settings)
     return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
@@ -226,15 +231,6 @@ def dummy_context(
     pipelines._clear(MOCK_PACKAGE_NAME)
 
 
-@pytest.fixture(autouse=True)
-def clear_hook_manager():
-    yield
-    hook_manager = get_hook_manager()
-    plugins = hook_manager.get_plugins()
-    for plugin in plugins:
-        hook_manager.unregister(plugin)
-
-
 class TestKedroContext:
     def test_attributes(self, tmp_path, dummy_context):
         assert isinstance(dummy_context.project_path, Path)
@@ -270,6 +266,18 @@ class TestKedroContext:
         dummy_context.catalog.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.catalog.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
+
+    def test_wrong_catalog_type(self, mock_settings_file_bad_data_catalog_class):
+        pattern = (
+            "Invalid value `tests.framework.context.test_context.BadCatalog` received "
+            "for setting `DATA_CATALOG_CLASS`. "
+            "It must be a subclass of `kedro.io.data_catalog.DataCatalog`."
+        )
+        mock_settings = _ProjectSettings(
+            settings_file=str(mock_settings_file_bad_data_catalog_class)
+        )
+        with pytest.raises(ValidationError, match=re.escape(pattern)):
+            assert mock_settings.DATA_CATALOG_CLASS
 
     @pytest.mark.parametrize(
         "extra_params",

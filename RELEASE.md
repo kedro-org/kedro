@@ -53,7 +53,7 @@
 * The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
 * Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
 * Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
-* `kedro pipeline package` and `kedro pipeline pull --alias` now accept a module path to the pipeline or utility module to package, relative to the `src/<package_name>/`.
+* `kedro pipeline package` now accepts a module name and path to the pipeline or utility module to package, relative to `src/<package_name>/`. In addition to the `--alias` flag used to rename the package, `kedro pipeline pull` now also supports `--destination` to provide a location for pulling the package.
 * Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
 * Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
@@ -64,15 +64,18 @@
 * Removed the `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.
 * Removed deprecated `CONF_SOURCE`, `package_name`, `pipeline`, `pipelines`, and `io` attributes from `KedroContext` as well as the deprecated `KedroContext.run` method.
 * Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
+* Removed `ProjectHooks.register_catalog` `hook_spec` in favour of loading `DATA_CATALOG_CLASS` directly from `settings.py`. The default option for `DATA_CATALOG_CLASS` is now set to `kedro.io.DataCatalog`.
+* Removed `RegistrationSpecs` and all registration hooks that belonged to it. Going forward users can register custom library components through `settings.py`.
 
 ## Thanks for supporting contributions
 
 [Deepyaman Datta](https://github.com/deepyaman), [Lucas Jamar](https://github.com/lucasjamar), [Simon Brugman](https://github.com/sbrugman)
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
-* Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
+* Please remove any existing `hook_impl` of the `register_config_loader` and `register_catalog` methods from `ProjectHooks` (or custom alternatives).
 * Populate `settings.py` with `CONFIG_LOADER_CLASS` set to your expected config loader class (for example `kedro.config.TemplatedConfigLoader` or custom implementation). If `CONFIG_LOADER_CLASS` value is not set, it will default to `kedro.config.ConfigLoader` at runtime.
 * Populate `settings.py` with `CONFIG_LOADER_ARGS` set to a dictionary with expected keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.
+* Populate `settings.py` with `DATA_CATALOG_CLASS` set to your expected data catalog class. If `DATA_CATALOG_CLASS` value is not set, it will default to `kedro.io.DataCatalog` at runtime.
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 * If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
@@ -120,13 +123,14 @@
 * Enabled overriding nested parameters with `params` in CLI, i.e. `kedro run --params="model.model_tuning.booster:gbtree"` updates parameters to `{"model": {"model_tuning": {"booster": "gbtree"}}}`.
 * Added option to `pandas.SQLQueryDataSet` to specify a `filepath` with a SQL query, in addition to the current method of supplying the query itself in the `sql` argument.
 * Extended `ExcelDataSet` to support saving Excel files with multiple sheets.
-* Added the following new dataset (see ([Issue #839](https://github.com/quantumblacklabs/kedro/issues/839)):
+* Added the following new datasets:
 
 | Type                        | Description                                          | Location                          |
 | --------------------------- | ---------------------------------------------------- | --------------------------------- |
 | `plotly.JSONDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 | `pandas.GenericDataSet` | Provides a 'best effort' facility to read / write any format provided by the `pandas` library | `kedro.extras.datasets.pandas` |
 | `pandas.GBQQueryDataSet` | Loads data from a Google Bigquery table using provided SQL query | `kedro.extras.datasets.pandas` |
+| `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark` |
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
@@ -146,6 +150,7 @@
 * Deprecated the "Thanks for supporting contributions" section of release notes to simplify the contribution process; Kedro 0.17.6 is the last release that includes this. This process has been replaced with the [automatic GitHub feature](https://github.com/quantumblacklabs/kedro/graphs/contributors).
 * Fixed a bug where the version on the tracking datasets didn't match the session id and the versions of regular versioned datasets.
 * Fixed an issue where datasets in `load_versions` that are not found in the data catalog would silently pass.
+* Altered the string representation of nodes so that node inputs/outputs order is preserved rather than being alphabetically sorted.
 
 ## Minor breaking changes to the API
 

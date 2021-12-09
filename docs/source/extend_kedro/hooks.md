@@ -12,14 +12,10 @@ Hooks are a mechanism to add extra behaviour to Kedro's main execution in an eas
 
 A Hook is comprised of a Hook specification and Hook implementation. To add Hooks to your project you will need to:
 
-* Provide a Hook implementation for an existing Kedro-defined Hook specification
-* Register your Hook implementation in the `src/<your_project>/settings.py` file under the `HOOKS` key
+* Create or modify the file `<your_project>/src/<package_name>/hooks.py` to define a Hook implementation for an existing Kedro-defined Hook specification
+* Register your Hook implementation in the [`src/<your_project>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key
 
 ### Hook specification
-
-Kedro distinguishes between 2 main types of Hooks: execution timeline and component registration.
-
-#### Execution timeline Hooks
 
 Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. Currently, the following Hook specifications are provided in [kedro.framework.hooks](/kedro.framework.hooks):
 
@@ -46,15 +42,6 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 
 [kedro.framework.hooks](/kedro.framework.hooks) lists the full specifications for which you can inject additional behaviours by providing an implementation.
 
-
-#### Registration Hooks
-
-In addition, Kedro defines Hook specifications to register certain library components to be used with the project. This is where users can define their custom class implementations. Currently, the following Hook specifications are provided:
-
-* `register_pipelines`
-* `register_catalog`
-
-The naming convention for registration hooks is `register_<library_component>`.
 
 ### Hook implementation
 
@@ -102,11 +89,11 @@ class DataCatalogHooks:
 .. note::  The name of a module that contains Hooks implementation is arbitrary and is not restricted to ``hooks.py``.
 ```
 
-We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file in your project.
+We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file that you create in your project.
 
 #### Registering your Hook implementations with Kedro
 
-Hook implementations should be registered with Kedro using the `<your_project>/src/<package_name>/settings.py` file under the `HOOKS` key.
+Hook implementations should be registered with Kedro using the [`<your_project>/src/<package_name>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key.
 
 You can register more than one implementation for the same specification. They will be called in LIFO (last-in, first-out) order.
 

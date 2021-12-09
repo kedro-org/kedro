@@ -79,6 +79,7 @@ CONTEXT_CLASS = CustomContext
 
 We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
+* [spark.DeltaTableDataSet](/kedro.extras.datasets.spark.DeltaTableDataSet)
 * [spark.SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)
 * [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)
 * [spark.SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
@@ -116,6 +117,85 @@ catalog = DataCatalog({"weather": spark_ds})
 df = catalog.load("weather")
 assert isinstance(df, pyspark.sql.DataFrame)
 ```
+
+## Spark and Delta Lake interaction
+
+[Delta Lake](https://delta.io/) is an open-source project that enables building a Lakehouse architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
+To setup PySpark with Delta Lake, have a look at [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python).
+
+We recommend the following workflow, which makes use of the [Transcoding](../data/data_catalog.md) feature in Kedro:
+
+* To create a Delta table, use a `SparkDataSet` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table and/or overwrite it.
+* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataSet` and perform the write operations within the node function.
+
+As a result, we end up with a catalog that looks like this:
+
+```yaml
+temperature:
+  type: spark.SparkDataSet
+  filepath: data/01_raw/data.csv
+  file_format: "csv"
+  load_args:
+    header: True
+    inferSchema: True
+  save_args:
+    sep: '|'
+    header: True
+
+weather@spark:
+  type: spark.SparkDataSet
+  filepath: s3a://my_bucket/03_primary/weather
+  file_format: "delta"
+  save_args:
+    mode: "overwrite"
+    versionAsOf: 0
+
+weather@delta:
+  type: spark.DeltaTableDataSet
+  filepath: s3a://my_bucket/03_primary/weather
+```
+
+The `DeltaTableDataSet` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
+
+
+> Note: If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, via the DeltaTable API.
+
+```python
+Pipeline(
+    [
+        node(
+            func=process_barometer_data, inputs="temperature", outputs="weather@spark"
+        ),
+        node(
+            func=update_meterological_state,
+            inputs="weather@delta",
+            outputs="first_operation_complete",
+        ),
+        node(
+            func=estimate_weather_trend,
+            inputs=["first_operation_complete", "weather@delta"],
+            outputs="second_operation_complete",
+        ),
+    ]
+)
+```
+
+`first_operation_complete` is a `MemoryDataSet` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node can simply not return anything:
+
+```python
+Pipeline(
+    [
+        node(func=..., inputs="temperature", outputs="weather@spark"),
+        node(func=..., inputs="weather@delta", outputs=None),
+    ]
+)
+```
+
+The following diagram is the visual representation of the workflow explained above:
+
+![Spark and Delta Lake workflow](../meta/images/spark_delta_workflow.png)
+
+> Note: This pattern of creating "dummy" datasets to preserve the data flow also applies to other "out of DAG" execution operations such as SQL operations within a node.
 
 ## Use `MemoryDataSet` for intermediary `DataFrame`
 

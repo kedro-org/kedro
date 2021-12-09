@@ -177,7 +177,6 @@ class DataCatalog:
     def _logger(self):
         return logging.getLogger(__name__)
 
-    # pylint: disable=too-many-arguments
     @classmethod
     def from_config(
         cls: Type,

@@ -53,7 +53,15 @@ class TestPipelinePullCommand:
         }
 
     @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias", [None, "aliased", "pipelines.aliased"])
+    @pytest.mark.parametrize(
+        "alias, destination",
+        [
+            (None, None),
+            ("aliased", None),
+            ("aliased", "pipelines"),
+            (None, "pipelines"),
+        ],
+    )
     def test_pull_local_sdist(
         self,
         fake_project_cli,
@@ -61,6 +69,7 @@ class TestPipelinePullCommand:
         fake_package_path,
         env,
         alias,
+        destination,
         fake_metadata,
     ):
         """Test for pulling a valid sdist file locally."""
@@ -86,6 +95,7 @@ class TestPipelinePullCommand:
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
+        options += ["--destination", destination] if destination else []
         result = CliRunner().invoke(
             fake_project_cli,
             ["pipeline", "pull", str(sdist_file), *options],
@@ -94,10 +104,10 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.output
         assert "pulled and unpacked" in result.output
 
-        alias_path = Path(*(alias.split("."))) if alias else Path(PIPELINE_NAME)
-        pipeline_name = alias_path.stem
-        source_dest = fake_package_path / alias_path
-        test_dest = fake_repo_path / "src" / "tests" / alias_path
+        pipeline_name = alias or PIPELINE_NAME
+        destination = destination or Path()
+        source_dest = fake_package_path / destination / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
         config_env = env or "base"
         params_config = (
             fake_repo_path
@@ -114,7 +124,15 @@ class TestPipelinePullCommand:
         assert actual_test_files == expected_test_files
 
     @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias", [None, "alias", "pipelines.aliased"])
+    @pytest.mark.parametrize(
+        "alias, destination",
+        [
+            (None, None),
+            ("aliased", None),
+            ("aliased", "pipelines"),
+            (None, "pipelines"),
+        ],
+    )
     def test_pull_local_sdist_compare(
         self,
         fake_project_cli,
@@ -122,6 +140,7 @@ class TestPipelinePullCommand:
         fake_package_path,
         env,
         alias,
+        destination,
         fake_metadata,
     ):
         """Test for pulling a valid sdist file locally, unpack it
@@ -150,6 +169,7 @@ class TestPipelinePullCommand:
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
+        options += ["--destination", destination] if destination else []
         result = CliRunner().invoke(
             fake_project_cli,
             ["pipeline", "pull", str(sdist_file), *options],
@@ -158,10 +178,10 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.output
         assert "pulled and unpacked" in result.output
 
-        alias_path = Path(*(alias.split("."))) if alias else Path(pipeline_name)
-        pipeline_name = alias_path.stem
-        source_dest = fake_package_path / alias_path
-        test_dest = fake_repo_path / "src" / "tests" / alias_path
+        pipeline_name = alias or pipeline_name
+        destination = destination or Path()
+        source_dest = fake_package_path / destination / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -175,6 +195,106 @@ class TestPipelinePullCommand:
         assert not filecmp.dircmp(test_path, test_dest).diff_files
         assert source_params_config.read_bytes() == dest_params_config.read_bytes()
 
+    def test_pipeline_pull_same_alias_package_name(
+        self,
+        fake_project_cli,
+        fake_repo_path,
+        fake_package_path,
+        fake_metadata,
+    ):
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        )
+
+        pipeline_name = PIPELINE_NAME
+        destination = "tools"
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            [
+                "pipeline",
+                "pull",
+                str(sdist_file),
+                "--destination",
+                destination,
+                "--alias",
+                pipeline_name,
+            ],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0, result.stderr
+        assert "pulled and unpacked" in result.output
+
+        source_dest = fake_package_path / destination / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        config_env = "base"
+        params_config = (
+            fake_repo_path
+            / settings.CONF_SOURCE
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
+
+        self.assert_package_files_exist(source_dest)
+        assert params_config.is_file()
+        actual_test_files = {f.name for f in test_dest.iterdir()}
+        expected_test_files = {"__init__.py", "test_pipeline.py"}
+        assert actual_test_files == expected_test_files
+
+    def test_pipeline_pull_nested_destination(
+        self,
+        fake_project_cli,
+        fake_repo_path,
+        fake_package_path,
+        fake_metadata,
+    ):
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        )
+
+        pipeline_name = PIPELINE_NAME
+        destination = "pipelines/nested"
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            [
+                "pipeline",
+                "pull",
+                str(sdist_file),
+                "--destination",
+                destination,
+                "--alias",
+                pipeline_name,
+            ],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0, result.stderr
+        assert "pulled and unpacked" in result.output
+
+        source_dest = fake_package_path / destination / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
+        config_env = "base"
+        params_config = (
+            fake_repo_path
+            / settings.CONF_SOURCE
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
+
+        self.assert_package_files_exist(source_dest)
+        assert params_config.is_file()
+        actual_test_files = {f.name for f in test_dest.iterdir()}
+        expected_test_files = {"__init__.py", "test_pipeline.py"}
+        assert actual_test_files == expected_test_files
+
     def test_pipeline_alias_refactors_imports(  # pylint: disable=too-many-locals
         self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
     ):
@@ -187,7 +307,8 @@ class TestPipelinePullCommand:
             f.write(import_stmt)
 
         package_alias = "alpha"
-        pull_alias = "pipelines.lib.beta"
+        pull_alias = "beta"
+        pull_destination = "pipelines/lib"
 
         call_pipeline_package(
             cli=fake_project_cli, metadata=fake_metadata, alias=package_alias
@@ -201,11 +322,19 @@ class TestPipelinePullCommand:
         )
         CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "pull", str(sdist_file), "--alias", pull_alias],
+            [
+                "pipeline",
+                "pull",
+                str(sdist_file),
+                "--alias",
+                pull_alias,
+                "--destination",
+                pull_destination,
+            ],
             obj=fake_metadata,
         )
-
-        for alias in (package_alias, pull_alias):
+        pull = f"pipelines.lib.{pull_alias}"
+        for alias in (package_alias, pull):
             alias_path = Path(*alias.split("."))
             path = fake_package_path / alias_path / "pipeline.py"
             file_content = path.read_text()
@@ -630,7 +759,7 @@ class TestPipelinePullFromManifest:
     def test_pipeline_pull_all(  # pylint: disable=too-many-locals
         self, fake_repo_path, fake_project_cli, fake_metadata, mocker
     ):
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, line-too-long
         from kedro.framework.cli import pipeline
 
         spy = mocker.spy(pipeline, "_pull_package")
@@ -639,8 +768,8 @@ class TestPipelinePullFromManifest:
         project_toml_str = textwrap.dedent(
             f"""
             [tool.kedro.pipeline.pull]
-            "{sdist_file.format("first")}" = {{alias = "pipelines.dp"}}
-            "{sdist_file.format("second")}" = {{alias = "pipelines.ds", env = "local"}}
+            "{sdist_file.format("first")}" = {{alias = "dp", destination = "pipelines"}}
+            "{sdist_file.format("second")}" = {{alias = "ds", destination = "pipelines", env = "local"}}
             "{sdist_file.format("third")}" = {{}}
             """
         )

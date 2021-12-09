@@ -1,4 +1,4 @@
-# Upcoming Release 0.17.6
+# Release 0.17.6
 
 ## Major features and improvements
 * Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
@@ -33,8 +33,6 @@
 * Fixed a bug where the version on the tracking datasets didn't match the session id and the versions of regular versioned datasets.
 * Fixed an issue where datasets in `load_versions` that are not found in the data catalog would silently pass.
 * Altered the string representation of nodes so that node inputs/outputs order is preserved rather than being alphabetically sorted.
-
-## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro.extras.decorators` and `kedro.pipeline.decorators` are being deprecated in favour of Hooks.

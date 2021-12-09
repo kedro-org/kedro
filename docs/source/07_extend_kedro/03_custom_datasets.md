@@ -133,7 +133,7 @@ class ImageDataSet(AbstractDataSet):
         with self._fs.open(load_path) as f:
             image = Image.open(f).convert("RGBA")
             return np.asarray(image)
-    
+
     ...
 ```
 </details>

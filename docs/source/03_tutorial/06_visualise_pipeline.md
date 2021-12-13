@@ -96,3 +96,48 @@ kedro viz --load-file my_shareable_pipeline.json
 ```
 
 And this will visualise the pipeline visualisation saved as `my_shareable_pipeline.json`.
+
+
+## Visualise your plotly-express charts on Kedro-viz
+
+You can view your plotly-express charts straight from Kedro-Viz. To use this feature on Kedro-viz you need to use Kedro's plotly data connector. 
+
+There are two plotly data connectors in Kedro 
+- PlotlyDataSet (https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - This is where you specify the configurations of your plot in the catalog
+
+bar_plot:
+    type: plotly.PlotlyDataSet
+    filepath: data/08_reporting/bar_plot.json
+    plotly_args:
+        type: bar
+        fig:
+            x: features
+            y: importance
+            orientation: h
+        layout:
+            xaxis_title: x
+            yaxis_title: y
+            title: Test
+
+
+- JSONDataSet (https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - This is where you specify the configurations of your plot using plotly-express package  
+
+from kedro.extras.datasets.plotly import JSONDataSet
+import plotly.express as px
+
+fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
+data_set = JSONDataSet(filepath="test.json")
+data_set.save(fig)
+reloaded = data_set.load()
+assert fig == reloaded
+
+In the catalog, you will also need to specify the output type 
+
+test.json:
+  type: plotly.JSONDataSet
+  filepath: data/08_reporting/bar_plot.json
+
+Once this set-up is completed, you can do a kedro run followed by kedro-viz and your kedro-viz pipeline will show a new dataset type with icon 
+If you click on the node, you can see a small preview of your plotly chart which can be expanded using the 'Expand Plotly Visualisation' button 
+
+

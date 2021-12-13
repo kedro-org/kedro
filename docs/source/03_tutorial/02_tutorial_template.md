@@ -55,26 +55,27 @@ wheel>=0.35, <0.37 # The reference implementation of the Python wheel packaging 
 
 ### Add and remove project-specific dependencies
 
-The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add a requirement for the `pandas` project because you are working with CSV and Excel files. You can add the necessary dependencies for these files types as follows:
-
-```bash
-pip install "kedro[pandas.CSVDataSet,pandas.ExcelDataSet]"
-```
-
-Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.6` with the following (your version of Kedro may be different):
+The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add a requirement for the `pandas` project because you are working with CSV and Excel files. 
 
 ```text
-kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.17.6
+kedro[pandas.CSVDataSet]==0.17.6 
+kedro[pandas.ExcelDataSet]==0.17.6
 ```
 
-Then run the following:
+You can add the necessary dependencies for these files types as follows to your `src/requirements.in` 'lock file'. You can read more about the benefits of [compiling your dependencies here](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/01_dependencies.html).
+
+The next two dependencies allow you to work with your pipelines visually and to use a more modern Excel parsing library:
+
+```text
+kedro-viz==4.1.1
+openpyxl==3.0.9 
+```
+
+Then run the following command to re-compile your updated dependencies and install them into your environment:
 
 ```bash
-kedro build-reqs
+kedro install --build-reqs
 ```
-
-You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies.md) in the Kedro project documentation. In a [later step of this tutorial](./04_create_pipelines.md#update-dependencies), we will modify project's dependencies to illustrate how, once you have installed project-specific dependencies, you can update them.
-
 
 ## Configure the project
 

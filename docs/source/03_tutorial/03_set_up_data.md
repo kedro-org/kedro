@@ -123,7 +123,10 @@ Now register the `xlsx` dataset by adding this snippet to the end of the `conf/b
 shuttles:
   type: pandas.ExcelDataSet
   filepath: data/01_raw/shuttles.xlsx
+  load_args:
+    engine: openpyxl
 ```
+> The `load_args` are passed to the `pd.read_excel` method as [keyword arguments](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html), conversely providing `save_args` would be passed to the `pd.DataFrame.to_excel` method.
 
 To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session and display its first five rows:
 

@@ -156,3 +156,4 @@ docs/source/04_user_guide/source/.ipynb
 tests/template/fake_project/
 
 default.profraw
+package-lock.json

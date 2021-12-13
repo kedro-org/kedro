@@ -207,7 +207,7 @@ The table below describes what the purpose of the keyword arguments in detail:
 
     ```python
         ...
-        pipeline(
+        return pipeline(
             pipe=ds_pipeline_1 + ds_pipeline_2,
             inputs="model_input_table",
             namespace="data_science",

@@ -120,7 +120,7 @@ In December 2020, AWS [announced](https://aws.amazon.com/blogs/aws/new-for-aws-l
 $ kedro package
 ```
 
-For more information, please visit the guide on [packaging Kedro as a Python package](../03_tutorial/05_package_a_project).
+For more information, please visit the guide on [packaging Kedro as a Python package](../03_tutorial/06_package_a_project).
 
 * **Step 2.2**: Create a `lambda_handler.py` file:
 

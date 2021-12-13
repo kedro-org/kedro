@@ -265,7 +265,7 @@ The above command will take the bundled `.whl` file and do the following:
 kedro build-docs
 ```
 
-The `build-docs` command builds [project documentation](../03_tutorial/05_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
+The `build-docs` command builds [project documentation](../03_tutorial/06_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 #### Lint your project

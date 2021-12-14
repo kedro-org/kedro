@@ -2,9 +2,10 @@
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
 import importlib
+import logging.config
 import operator
 from collections.abc import MutableMapping
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -166,6 +167,7 @@ class _ProjectPipelines(MutableMapping):
 
 
 PACKAGE_NAME = None
+LOGGING = None
 
 settings = _ProjectSettings()
 
@@ -193,6 +195,13 @@ def configure_project(package_name: str):
     # time a new subprocess is spawned.
     global PACKAGE_NAME
     PACKAGE_NAME = package_name
+
+
+def configure_logging(logging_config: Dict[str, Any]) -> None:
+    """Configure logging to make it available as a global variable."""
+    logging.config.dictConfig(logging_config)
+    global LOGGING
+    LOGGING = logging_config
 
 
 def validate_settings():

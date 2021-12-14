@@ -2,6 +2,8 @@
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
 import importlib
+import logging
+import logging.config
 import operator
 from collections.abc import MutableMapping
 from typing import Dict, Optional
@@ -198,6 +200,7 @@ def configure_project(package_name: str):
 
 def configure_logging(conf_logging):
     """Configure config logging to make it available as a global variable."""
+    logging.config.dictConfig(conf_logging)
     global LOGGING
     LOGGING = conf_logging
 

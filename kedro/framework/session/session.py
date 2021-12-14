@@ -209,7 +209,6 @@ class KedroSession:
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
         conf_logging = self._get_logging_config()
-        logging.config.dictConfig(conf_logging)
         configure_logging(conf_logging)
 
     def _init_store(self) -> BaseSessionStore:

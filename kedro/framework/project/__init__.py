@@ -199,7 +199,7 @@ def configure_project(package_name: str):
 
 
 def configure_logging(conf_logging):
-    """Configure config logging to make it available as a global variable."""
+    """Configure logging to make it available as a global variable."""
     logging.config.dictConfig(conf_logging)
     global LOGGING
     LOGGING = conf_logging

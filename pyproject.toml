@@ -72,7 +72,8 @@ layers = [
     "config"
 ]
 ignore_imports = [
-    "kedro.runner.parallel_runner -> kedro.framework.project"
+    "kedro.runner.parallel_runner -> kedro.framework.project",
+    "kedro.runner.parallel_runner -> kedro.framework.session.session"
 ]
 
 [[tool.importlinter.contracts]]

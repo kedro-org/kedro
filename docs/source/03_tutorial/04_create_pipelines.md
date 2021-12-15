@@ -110,7 +110,7 @@ Add the following to `src/kedro_tutorial/pipelines/data_processing/pipeline.py`,
 <summary><b>Click to expand</b></summary>
 
 ```python
-def create_pipeline(**kwargs):
+def create_pipeline(**kwargs) -> Pipeline:
     return Pipeline(
         [
             node(
@@ -227,23 +227,23 @@ Running Kedro-Viz at this point renders a very simple, but valid pipeline:
 
 The nodes above each output a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). When Kedro ran the pipeline, it determined that neither datasets had been registered in the data catalog (`conf/base/catalog.yml`). If a dataset is not registered, Kedro stores it in memory as a Python object using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes depending on it have been executed, the `MemoryDataSet` is cleared and its memory released by the Python garbage collector.
 
-You can persist the preprocessed data by adding the following to `conf/base/catalog.yml`:
+You can persist the preprocessed data by adding the following to `conf/base/catalog.yml`.:
 
 ```yaml
 preprocessed_companies:
-  type: pandas.CSVDataSet
+  type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_companies.csv
 
 preprocessed_shuttles:
-  type: pandas.CSVDataSet
+  type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_shuttles.csv
 ```
 
-The code above declares explicitly that [pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet).
+The code above declares explicitly that [pandas.ParquetDataSet](/kedro.extras.datasets.pandas.ParquetDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet).
 
-The [Data Catalog](../13_resources/02_glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as CSV data) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
+The [Data Catalog](../13_resources/02_glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as Parquet) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
-In this tutorial, we chose `pandas.CSVDataSet` for its simplicity, but you can use any other available dataset implementation class, for example, a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) or others. If you cannot find the dataset implementation you need, you can implement your own [custom dataset](../07_extend_kedro/03_custom_datasets.md).
+[Apache Parquet](https://github.com/apache/parquet-format) is our recommended format for working with processed, typed data. In general we recommend you get your data out of CSV as soon as possible, Parquet supports things like compression, partitioning and types out of the box... as well simple things like blocking you from using the same column name twice. Whilst you do lose the ability to view the file as text - the benefits really outweigh the drawbacks.
 
 ### Extend the data processing pipeline
 
@@ -315,7 +315,7 @@ If you want the model input table data to be saved to file rather than used in-m
 
 ```yaml
 model_input_table:
-  type: pandas.CSVDataSet
+  type: pandas.ParquetDataSet
   filepath: data/03_primary/model_input_table.csv
 ```
 
@@ -333,17 +333,17 @@ You should see output similar to the following:
 2019-08-19 10:55:47,534 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:55:47,541 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
 2019-08-19 10:55:55,670 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
-2019-08-19 10:55:55,736 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVDataSet)...
+2019-08-19 10:55:55,736 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (ParquetDataSet)...
 2019-08-19 10:55:56,284 - kedro.runner.sequential_runner - INFO - Completed 1 out of 3 tasks
 2019-08-19 10:55:56,284 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
 2019-08-19 10:55:56,318 - kedro.pipeline.node - INFO - Running node: preprocess_companies_node: preprocess_companies([companies]) -> [preprocessed_companies]
-2019-08-19 10:55:56,361 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVDataSet)...
+2019-08-19 10:55:56,361 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (ParquetDataSet)...
 2019-08-19 10:55:56,610 - kedro.runner.sequential_runner - INFO - Completed 2 out of 3 tasks
-2019-08-19 10:55:56,610 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVDataSet)...
-2019-08-19 10:55:56,715 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (CSVDataSet)...
+2019-08-19 10:55:56,610 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (ParquetDataSet)...
+2019-08-19 10:55:56,715 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (ParquetDataSet)...
 2019-08-19 10:55:56,750 - kedro.io.data_catalog - INFO - Loading data from `reviews` (CSVDataSet)...
 2019-08-19 10:55:56,812 - kedro.pipeline.node - INFO - Running node: create_model_input_table_node: create_model_input_table([preprocessed_companies,preprocessed_shuttles,reviews]) -> [model_input_table]
-2019-08-19 10:55:58,679 - kedro.io.data_catalog - INFO - Saving data to `model_input_table` (CSVDataSet)...
+2019-08-19 10:55:58,679 - kedro.io.data_catalog - INFO - Saving data to `model_input_table` (ParquetDataSet)...
 2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
 2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```

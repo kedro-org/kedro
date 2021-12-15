@@ -2,11 +2,9 @@
 
 In this section, we discuss the project set-up phase, which is the first part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow). The set-up steps are as follows:
 
-
 * Create a new project
 * Install dependencies
 * Configure the project
-
 
 ## Create a new project
 
@@ -52,23 +50,34 @@ wheel>=0.35, <0.37 # The reference implementation of the Python wheel packaging 
 .. note::  If your project has ``conda`` dependencies, you can create a ``src/environment.yml`` file and list them there.
 ```
 
-
 ### Add and remove project-specific dependencies
 
-The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add a requirement for the `pandas` project because you are working with CSV and Excel files. 
+The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add some extra requirements.
+
+* In this tutorial we need to do things like process Excel files and this have to provide extra dependencies.
+* By running `kedro install` on a blank template we generate a new file at `src/requirements.in`.you can read more about the benefits of compiling dependencies [here](../04_kedro_project_setup/01_dependencies.md)
+* The most important point to learn here is that you should edit the `requirements.in` file going forward.
+
+Add the following requirements to your `src/requirements.in` lock file:
 
 ```text
-kedro[pandas.CSVDataSet]==0.17.6 
-kedro[pandas.ExcelDataSet]==0.17.6
+kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6 
+kedro-viz==4.1.1 
+openpyxl==3.0.9  
 ```
 
-You can add the necessary dependencies for these files types as follows to your `src/requirements.in` 'lock file'. You can read more about the benefits of [compiling your dependencies here](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/01_dependencies.html).
+The purpose of these additions has been detailed below:
 
-The next two dependencies allow you to work with your pipelines visually and to use a more modern Excel parsing library:
-
-```text
-kedro-viz==4.1.1
-openpyxl==3.0.9 
+```eval_rst
++-----------------------------+--------------------------------------------------------------------------------------+
+| Dependency                  | Description                                                                          |
++=============================+======================================================================================+
+| :code:`kedro[{optional}]`   | This syntax is used for installing specific optional dependencies                    |
++-----------------------------+--------------------------------------------------------------------------------------+
+| :code:`kedro-viz`           | Kerdo-Viz helps us visualise pipelines                                               |
++-----------------------------+--------------------------------------------------------------------------------------+
+| :code:`openpyxl`            | This is the modern way of reading Excel files (will be default in `0.18.0`)          |
++-----------------------------+--------------------------------------------------------------------------------------+
 ```
 
 Then run the following command to re-compile your updated dependencies and install them into your environment:

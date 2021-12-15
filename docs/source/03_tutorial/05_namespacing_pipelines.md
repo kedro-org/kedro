@@ -32,7 +32,7 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
         create_model_input_table,
     )
 
-    def create_pipeline(**kwargs):
+    def create_pipeline(**kwargs) -> Pipeline:
         pipeline_instance = Pipeline(
             [
                 node(
@@ -70,13 +70,15 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
 
     </details>
 
-### Why do we need to provide inputs and outputs?
+### Why do we need to provide explicit inputs and outputs?
 
 * When introducing a namespace you must tell Kedro which inputs/outputs live at the 'edges' of the namespace
 * Failing to do so in this situation causes Kedro to think that `companies` and `data_processing.companies` are two different datasets.
 * Highlighting 'focus mode' Kedro-Viz highlights how the **explicitly declared** inputs/outputs live outside of the collapsed part of the namespace. `model_input_table` in particular is shared across both pipelines and thus needs to be outside of the `Data Processing` namespace.
 
     ![focus](../meta/images/focus_mode.png)
+
+> As an experiment, remove the explicit inputs and outputs from your `namespaced_pipeline` and see how this creates a disjointed pipeline visualisation
 
 ## Adding namespaces to the  `data_science` pipeline
 
@@ -125,7 +127,7 @@ In this section we want to add some namespaces in the modelling component of the
     from .nodes import evaluate_model, split_data, train_model
 
 
-    def create_pipeline(**kwargs):
+    def create_pipeline(**kwargs) -> Pipeline:
         pipeline_instance = Pipeline(
             [
                 node(
@@ -191,12 +193,21 @@ ds_pipeline_2 = pipeline(
 > The `pipeline_instance` variable is our 'template' pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parametrised instantiations.
 
 The table below describes what the purpose of the keyword arguments in detail:
-|Keyword argument|Pipeline 1|Pipeline 2|
-|-|-|-|
-|`inputs`|`model_input_table` lives on the boundary of the namespace and needs to be declared |Ditto|
-|`outputs`|No outputs live at the boundary of this pipeline|Ditto|
-|`parameters`|Inherits defaults from template|Overrides provided|
-|`namespace`|Unique namespace|Unique namespace|
+
+```eval_rst
+
++--------------------+---------------------------------------------------------------------------------------+------------------------------+
+| Keyword argument   | :code:`ds_pipeline_1`                                                                 | :code:`ds_pipeline_2`        |
++====================+=======================================================================================+==============================+
+| :code:`inputs`     | ``model_input_table`` lives on the boundary of the namespace and needs to be declared | Identical                    |
++--------------------+---------------------------------------------------------------------------------------+------------------------------+
+| :code:`outputs`    | No outputs live at the boundary of this pipeline                                      | Identical                    |
++--------------------+---------------------------------------------------------------------------------------+------------------------------+
+| :code:`parameters` | Inherits defaults from template                                                       | Overrides provided           |
++--------------------+---------------------------------------------------------------------------------------+------------------------------+
+| :code:`namespace`  | A unique namespace                                                                    | A different unique namespace |
++--------------------+---------------------------------------------------------------------------------------+------------------------------+
+```
 
 ## Nesting modular pipelines
 
@@ -212,8 +223,6 @@ The table below describes what the purpose of the keyword arguments in detail:
             inputs="model_input_table",
             namespace="data_science",
         )
-
-
     ```
 
     This renders as follows:

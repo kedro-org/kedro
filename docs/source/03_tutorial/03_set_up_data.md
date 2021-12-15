@@ -3,7 +3,7 @@
 In this section, we discuss the data set-up phase, which is the second part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow). The steps are as follows:
 
 * Add datasets to your `data/` folder, according to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention)
-* Register the datasets with the Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
+* Register the datasets with the Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your [code] is reproducible when it references datasets in different locations and/or environments.
 
 You can find further information about [the Data Catalog](../05_data/01_data_catalog.md) in specific documentation covering advanced usage.
 
@@ -126,7 +126,7 @@ shuttles:
   load_args:
     engine: openpyxl
 ```
-> The `load_args` are passed to the `pd.read_excel` method as [keyword arguments](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html), conversely providing `save_args` would be passed to the `pd.DataFrame.to_excel` method.
+> The `load_args` are passed to the `pd.read_excel` method as [keyword arguments](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html), conversely providing `save_args` would be passed to the `pd.DataFrame.to_excel` [method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html).
 
 To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session and display its first five rows:
 

@@ -16,7 +16,7 @@ In the text, we assume that you create an empty project and follow the flow of t
 
 When building a Kedro project, you will typically follow a standard development workflow:
 
-![](../meta/images/typical_workflow.png)
+![typical_workflow](../meta/images/typical_workflow.png)
 
 ### 1. Set up the project template
 

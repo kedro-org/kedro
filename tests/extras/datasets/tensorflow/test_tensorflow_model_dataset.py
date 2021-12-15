@@ -13,6 +13,11 @@ from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
+pytestmark = pytest.mark.skipif(
+    sys.platform.startswith("win") and sys.version_info == (3, 6),
+    reason="Due to error `h5py.h5.H5PYConfig has no attribute '__reduce_cython__'`",
+)
+
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
 # fixtures to avoid them being evaluated immediately when a new test process is spawned.
 # Specifically:
@@ -118,10 +123,6 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     return model
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win") and sys.version_info == (3, 6),
-    reason="Due to error `h5py.h5.H5PYConfig has no attribute '__reduce_cython__'`",
-)
 class TestTensorFlowModelDataset:
     """No versioning passed to creator"""
 
@@ -252,10 +253,6 @@ class TestTensorFlowModelDataset:
         assert not tf_model_dataset.exists()
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win") and sys.version_info == (3, 6),
-    reason="Due to error `h5py.h5.H5PYConfig has no attribute '__reduce_cython__'`",
-)
 class TestTensorFlowModelDatasetVersioned:
     """Test suite with versioning argument passed into TensorFlowModelDataset creator"""
 

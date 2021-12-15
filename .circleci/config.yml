@@ -217,6 +217,20 @@ jobs:
           command: |
             conda activate kedro_builder
             pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
+      - run:
+          name: Run unit tests 2
+          command: conda activate kedro_builder; pytest .\tests --cov-config pyproject_no_spark.toml --ignore .\tests\extras\dataset\spark --numprocesses 4 --dist loadfile
+          when: always
+      - run:
+          name: Run unit tests 3
+          command: conda activate kedro_builder; make test-no-spark
+          when: always
+      - run:
+          name: Run unit tests 4
+          command: conda activate kedro_builder; make test
+          when: always
+
+
 
   lint:
     parameters:

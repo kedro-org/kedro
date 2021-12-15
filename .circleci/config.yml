@@ -212,9 +212,20 @@ jobs:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - run:
-          name: Run unit tests
-          command: conda activate kedro_builder; make test-no-spark
+      - unless:
+          condition:
+            equal: ["3.6", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests without spark
+                command: conda activate kedro_builder; make test-no-spark
+      - when:
+          condition:
+            equal: ["3.6", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests without spark or tensorflow
+                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark --ignore tests/extras/datasets/tensorflow --numprocesses 4 --dist loadfile
 
   lint:
     parameters:

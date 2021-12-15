@@ -365,16 +365,10 @@ workflows:
 
       - all_circleci_checks_succeeded:
           requires:
-            # Should just have e2e_tests and win_e2e_tests but we need to skip
-            # win_e2e_tests-3.6 due to `pywin32 is in an unsupported or invalid wheel`
             - e2e_tests
-            - win_e2e_tests-3.7
-            - win_e2e_tests-3.8
-            # Should just have unit_tests and win_unit_tests but we need to skip
-            # win_unit_tests-3.8 due to `Windows fatal exception: stack overflow`
+            - win_e2e_tests
             - unit_tests
-            - win_unit_tests-3.6
-            - win_unit_tests-3.7
+            - win_unit_tests
             - lint
             - pip_compile
             - win_pip_compile

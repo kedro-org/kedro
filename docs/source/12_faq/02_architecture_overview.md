@@ -45,4 +45,4 @@ Kedro framework serves as the interface between a Kedro project and Kedro librar
 
 ### Kedro extension
 
-You can also extend Kedro behaviour in your project using a Kedro extension, which can be a custom starter, a Python library with extra hooks implemenations, extra CLI commands such as [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) or a custom library component implementation.
+You can also extend Kedro behaviour in your project using a Kedro extension, which can be a custom starter, a Python library with extra hooks implementations, extra CLI commands such as [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) or a custom library component implementation.

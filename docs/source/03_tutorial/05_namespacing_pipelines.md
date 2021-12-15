@@ -32,6 +32,7 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
         create_model_input_table,
     )
 
+
     def create_pipeline(**kwargs) -> Pipeline:
         pipeline_instance = Pipeline(
             [
@@ -172,10 +173,7 @@ In this section we want to add some namespaces in the modelling component of the
 Modular pipelines allow you instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters.
 
 ```python
-
-pipeline_instance = Pipeline(
-    ...
-)
+pipeline_instance = Pipeline(...)
 
 ds_pipeline_1 = pipeline(
     pipe=pipeline_instance,
@@ -217,12 +215,12 @@ The table below describes what the purpose of the keyword arguments in detail:
 * You can quickly wrap your two modelling pipeline instances under one 'Data science' namespace by adding the following to your `pipelines/data_science/pipeline.py` return statement:
 
     ```python
-        ...
-        return pipeline(
-            pipe=ds_pipeline_1 + ds_pipeline_2,
-            inputs="model_input_table",
-            namespace="data_science",
-        )
+    ...
+    return pipeline(
+        pipe=ds_pipeline_1 + ds_pipeline_2,
+        inputs="model_input_table",
+        namespace="data_science",
+    )
     ```
 
     This renders as follows:

@@ -61,9 +61,9 @@ The dependencies above may be sufficient for some projects, but for the spacefli
 Add the following requirements to your `src/requirements.in` lock file:
 
 ```text
-kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6 
-kedro-viz==4.1.1 
-openpyxl==3.0.9  
+kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6
+kedro-viz==4.1.1
+openpyxl==3.0.9
 ```
 
 The purpose of these additions has been detailed below:

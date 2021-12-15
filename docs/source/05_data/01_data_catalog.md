@@ -265,7 +265,7 @@ us_corn_yield_data:
     year: 2000
 ```
 
-Note that `usda_credientials` will be passed as the `auth` argument in the `requests` library. Specify the username and password as a list in your `credentials.yml` like the following:
+Note that `usda_credientials` will be passed as the `auth` argument in the `requests` library. Specify the username and password as a list in your `credentials.yml` as follows:
 
 ```yaml
 usda_credentials:

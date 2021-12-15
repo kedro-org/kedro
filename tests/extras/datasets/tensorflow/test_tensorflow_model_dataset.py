@@ -1,5 +1,5 @@
 # pylint: disable=import-outside-toplevel
-
+import sys
 from pathlib import PurePosixPath
 
 import numpy as np
@@ -118,6 +118,10 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     return model
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win") and sys.version_info == (3, 6),
+    reason="Due to error `h5py.h5.H5PYConfig has no attribute '__reduce_cython__'`",
+)
 class TestTensorFlowModelDataset:
     """No versioning passed to creator"""
 
@@ -248,6 +252,10 @@ class TestTensorFlowModelDataset:
         assert not tf_model_dataset.exists()
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win") and sys.version_info == (3, 6),
+    reason="Due to error `h5py.h5.H5PYConfig has no attribute '__reduce_cython__'`",
+)
 class TestTensorFlowModelDatasetVersioned:
     """Test suite with versioning argument passed into TensorFlowModelDataset creator"""
 

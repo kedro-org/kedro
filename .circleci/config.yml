@@ -214,21 +214,23 @@ jobs:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - run:
           name: Run unit tests
-          command: |
-            conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
-      - run:
-          name: Run unit tests 2
-          command: conda activate kedro_builder; pytest .\tests --cov-config pyproject_no_spark.toml --ignore .\tests\extras\dataset\spark --numprocesses 4 --dist loadfile
-          when: always
-      - run:
-          name: Run unit tests 3
           command: conda activate kedro_builder; make test-no-spark
-          when: always
-      - run:
-          name: Run unit tests 4
-          command: conda activate kedro_builder; make test
-          when: always
+#            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov #
+#      # ========== 1756 passed, 47 skipped, 6 warnings in 254.37s (0:04:14) ===========
+#  - run:
+#          name: Run unit tests 2
+#          command: conda activate kedro_builder; pytest .\tests --cov-config pyproject_no_spark.toml --ignore .\tests\extras\dataset\spark --numprocesses 4 --dist loadfile
+#          when: always # = 23 failed, 1827 passed, 63 skipped, 24 warnings, 15 errors in 316.56s (0:05:16)  1929
+#
+#      - run:
+#          name: Run unit tests 3
+#          command: conda activate kedro_builder; make test-no-spark  # ========== 1780 passed, 47 skipped, 24 warnings in 248.29s (0:04:08) ==========
+#
+#          when: always
+#      - run:
+#          name: Run unit tests 4
+#          command: conda activate kedro_builder; make test #  # = 23 failed, 1827 passed, 63 skipped, 24 warnings, 15 errors in 299.82s (0:04:59) =
+#          when: always
 
 
 

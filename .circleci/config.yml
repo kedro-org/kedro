@@ -473,14 +473,14 @@ workflows:
       - all_circleci_checks_succeeded:
           requires:
             - e2e_tests
-              - win_e2e_tests
-              - unit_tests
-              - win_unit_tests
-              - lint
-              - pip_compile
-              - win_pip_compile
-              - build_docs
-              - docs_linkcheck
+            - win_e2e_tests
+            - unit_tests
+            - win_unit_tests
+            - lint
+            - pip_compile
+            - win_pip_compile
+            - build_docs
+            - docs_linkcheck
 
   main_updated:
     unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set

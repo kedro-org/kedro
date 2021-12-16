@@ -318,7 +318,7 @@ jobs:
       - run:
           name: Maybe trigger the release workflow
           command: |
-              KEDRO_VERSION=$(tools/circleci/github_scripts/kedro_version.py ./kedro)
+              KEDRO_VERSION=999
 
               if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
               then
@@ -400,23 +400,23 @@ jobs:
                 echo "Error: Kedro version ${KEDRO_VERSION} already exists on PyPI"
                 exit 1
             fi
-      - run:
-          name: Tag and publish release on Github
-          command: ./tools/circleci/github_scripts/release.sh quantumblacklabs kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
-      - run:
-          name: Publish to PyPI
-          command: |
-            make package
-            python -m pip install twine -U
-            python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*
-      - run:
-          name: Trigger Read The Docs build
-          command: |
-            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} stable
-            # give some time for GitHub release to propagate
-            # otherwise RTD fails to build a new tag
-            sleep 120
-            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
+#      - run:
+#          name: Tag and publish release on Github
+#          command: ./tools/circleci/github_scripts/release.sh quantumblacklabs kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
+#      - run:
+#          name: Publish to PyPI
+#          command: |
+#            make package
+#            python -m pip install twine -U
+#            python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*
+#      - run:
+#          name: Trigger Read The Docs build
+#          command: |
+#            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} stable
+#            # give some time for GitHub release to propagate
+#            # otherwise RTD fails to build a new tag
+#            sleep 120
+#            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
 
   # Trigger kedro-viz build to ensure tests in that project pass
   viz_build:

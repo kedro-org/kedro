@@ -80,9 +80,6 @@ commands:
       - run:
           name: Create 'kedro_builder' conda environment
           command: conda create -n kedro_builder python=<<parameters.python_version>> -y
-      - run:
-          name: Install 'make' command
-          command: choco install make
 
   win_setup_env:
     steps:
@@ -117,6 +114,9 @@ commands:
             New-Item -ItemType directory -Path C:\hadoop\bin
             mv .\winutils.exe C:\hadoop\bin
             setx /m HADOOP_HOME "C:\hadoop\"
+      - run:
+          name: Install 'make' command
+          command: choco install make
 
   win_setup_requirements:
     steps:
@@ -184,6 +184,9 @@ jobs:
       - win_setup_conda:
           python_version: <<parameters.python_version>>
       - run:
+          name: Install 'make' command
+          command: choco install make
+      - run:
           name: Install dependencies
           command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
       - run:
@@ -225,26 +228,20 @@ jobs:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - when:
-          # Run `test_parallel_runner.py` separately because of `Windows fatal exception: stack overflow`
-          condition:
-            equal: ["3.8", <<parameters.python_version>>]
-          steps:
-            - run:
-                name: Run unit tests without Spark and TensorFlow
-                command: |
-                  conda activate kedro_builder
-                  pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
-                  if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
       - unless:
           condition:
-            equal: ["3.8", <<parameters.python_version>>]
+            equal: ["3.6", <<parameters.python_version>>]
           steps:
             - run:
-                name: Run unit tests
-                command: |
-                  conda activate kedro_builder
-                  pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
+                name: Run unit tests without spark
+                command: conda activate kedro_builder; make test-no-spark
+      - when:
+          condition:
+            equal: ["3.6", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests without spark or tensorflow
+                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark --ignore tests/extras/datasets/tensorflow --numprocesses 4 --dist loadfile
 
   lint:
     parameters:
@@ -255,6 +252,9 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - setup
+      - run:
+          name: Install pre-commit hooks
+          command: pre-commit install --install-hooks
       - run:
           name: Run linters
           command: make lint
@@ -490,21 +490,15 @@ workflows:
       - docs_linkcheck
       - all_circleci_checks_succeeded:
           requires:
-            # Should just have e2e_tests and win_e2e_tests but we need to skip
-            # win_e2e_tests-3.6 due to `pywin32 is in an unsupported or invalid wheel`
             - e2e_tests
-            - win_e2e_tests-3.7
-            - win_e2e_tests-3.8
-            # Should just have unit_tests and win_unit_tests but we need to skip
-            # win_unit_tests-3.8 due to `Windows fatal exception: stack overflow`
-            - unit_tests
-            - win_unit_tests-3.6
-            - win_unit_tests-3.7
-            - lint
-            - pip_compile
-            - win_pip_compile
-            - build_docs
-            - docs_linkcheck
+              - win_e2e_tests
+              - unit_tests
+              - win_unit_tests
+              - lint
+              - pip_compile
+              - win_pip_compile
+              - build_docs
+              - docs_linkcheck
 
   main_updated:
     unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set

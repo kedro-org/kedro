@@ -23,6 +23,11 @@ commands:
       - run:
           name: Activate conda environment
           command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+      - run:
+          # pytables does not work properly with python 3.9 to handle our HDFDataSet
+          # if pip-installed, so we install this dependency via conda
+          name: Install conda packages
+          command: echo "conda install -c conda-forge pytables -y" >> $BASH_ENV
 
   setup_requirements:
     steps:
@@ -115,6 +120,11 @@ commands:
 
   win_setup_requirements:
     steps:
+      # pytables and Fiona have a series of binary dependencies under Windows that
+      # are best handled by conda-installing instead of pip-installing them.
+      - run:
+          name: Install pytables
+          command: conda activate kedro_builder; conda install -c conda-forge pytables -y
       - run:
           name: Install GDAL
           command: conda activate kedro_builder; conda install -c conda-forge gdal -y
@@ -212,20 +222,9 @@ jobs:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - unless:
-          condition:
-            equal: ["3.6", <<parameters.python_version>>]
-          steps:
-            - run:
-                name: Run unit tests without spark
-                command: conda activate kedro_builder; make test-no-spark
-      - when:
-          condition:
-            equal: ["3.6", <<parameters.python_version>>]
-          steps:
-            - run:
-                name: Run unit tests without spark or tensorflow
-                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark --ignore tests/extras/datasets/tensorflow --numprocesses 4 --dist loadfile
+      - run:
+          name: Run unit tests without spark
+          command: conda activate kedro_builder; make test-no-spark
 
   lint:
     parameters:
@@ -328,31 +327,31 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9"]
       - win_e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9"]
       - unit_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9"]
       - win_unit_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9"]
       - lint:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9"]
       - pip_compile:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9"]
       - win_pip_compile:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9"]
       - build_docs
       - docs_linkcheck
       - viz_build:

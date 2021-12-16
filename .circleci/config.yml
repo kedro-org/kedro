@@ -149,17 +149,6 @@ commands:
           key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - win_setup_requirements
 
-  configure_ssh_keys:
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "a0:3f:6a:d9:c3:c7:c2:56:e7:38:bc:ce:d2:dc:9e:be"
-  remove_ssh_config:
-    steps:
-      - run:
-          name: Remove SSH config
-          command: rm ~/.ssh/config
-
 jobs:
   e2e_tests:
     parameters:
@@ -253,9 +242,6 @@ jobs:
     steps:
       - setup
       - run:
-          name: Install pre-commit hooks
-          command: pre-commit install --install-hooks
-      - run:
           name: Run linters
           command: make lint
 
@@ -321,8 +307,6 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
-      - configure_ssh_keys
-      - remove_ssh_config
       - run:
           name: Trigger Read The Docs build
           command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
@@ -399,8 +383,6 @@ jobs:
       python_version: "3.7"
     steps:
       - setup
-      - configure_ssh_keys
-      - remove_ssh_config
       - run:
           name: Check Kedro version
           command: |

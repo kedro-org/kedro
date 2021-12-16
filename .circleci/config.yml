@@ -308,6 +308,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Set git email and name
+          command: |
+            git config --global user.email "kedro@quantumblack.com"
+            git config --global user.name "QuantumBlack Labs"
+      - run:
           name: Trigger Read The Docs build
           command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
       - run:

@@ -324,10 +324,10 @@ jobs:
               fi
       - run:
           name: Maybe merge main into develop or raise a PR
-          command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+          command: ./tools/circleci/github_scripts/merge.sh . "test-main" "test-develop" "${GITHUB_TAGGING_TOKEN}"
       - run:
           name: Maybe merge an automatic PR into develop
-          command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
+          command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-test-main-to-test-develop" "test-develop" "${GITHUB_TAGGING_TOKEN}"
 
   build_docker_image:
     docker:
@@ -488,11 +488,11 @@ workflows:
       - sync:
           filters:
             branches:
-              only: main
+              only: test-main
       - viz_build:
           filters:
             branches:
-              only: main
+              only: test-main
 
   nightly_build:
     triggers:

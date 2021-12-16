@@ -21,6 +21,6 @@ curl -X POST \
   --silent --show-error --fail --retry 3 \
   --output /dev/null \
   --header "Content-Type: application/json" \
-  --header "Circle-Token: ${CIRCLE_TOKEN}" \
+  --header "Circle-Token: ${CIRCLE_RELEASE_TOKEN}" \
   --data "${PAYLOAD}" \
   "${CIRCLE_ENDPOINT}"

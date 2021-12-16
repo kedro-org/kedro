@@ -1,5 +1,4 @@
 # pylint: disable=import-outside-toplevel
-
 from pathlib import PurePosixPath
 
 import numpy as np

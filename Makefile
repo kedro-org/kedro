@@ -19,7 +19,7 @@ test:
 	pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
 
 test-no-spark:
-	pytest tests --cov-config pyproject_no_spark.toml --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
+	pytest tests --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
 
 e2e-tests:
 	behave
@@ -52,7 +52,6 @@ install-pre-commit: install-test-requirements
 
 uninstall-pre-commit:
 	pre-commit uninstall
-	pre-commit uninstall --hook-type pre-push
 
 print-python-env:
 	@./tools/print_env.sh

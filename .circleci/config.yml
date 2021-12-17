@@ -458,6 +458,16 @@ jobs:
           name: Success!
           command: echo "All checks passed"
 
+  merge_pr_to_develop:
+    docker:
+      # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - run:
+          name: Maybe merge an automatic PR into develop
+          command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
+
 workflows:
   version: 2.1
 #  regular:
@@ -508,11 +518,15 @@ workflows:
   main_updated:
     unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
     jobs:
-      - viz_build:
-          filters:
-            branches:
-              only: test-main
-      - sync:
+#      - viz_build:
+#          filters:
+#            branches:
+#              only: test-main
+#      - sync:
+#          filters:
+#            branches:
+#              only: test-main
+      - merge_pr_to_develop:
           filters:
             branches:
               only: test-main

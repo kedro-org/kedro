@@ -6,11 +6,13 @@ In many typical Kedro projects, a single (“main”) pipeline increases in comp
 
 Modular pipelines allow you to instantiate pipelines multiple times, but support overriding inputs/outputs/parameters. They are reusable within the same codebase and shareable across projects via [micro-packaging](04_micro_packaging.md). This is the modern way to use Kedro and will change the way you think about your pipelines.
 
-> The Kedro project visualised below is representative of one that one might see in the real world. It takes full advantage of modular pipelines for `Data Ingestion`, `Feature Engineering`, `Reporting` and `Train Evaluation` (which even includes nested instances).
+```eval_rst
+.. note:: The Kedro project visualised below is representative of one that one might see in the real world. It takes full advantage of modular pipelines for ``Data Ingestion``, ``Feature Engineering``, ``Reporting`` and ``Train Evaluation`` (which even includes nested instances).
+```
 
 <!-- change to demo.kedro.org once working -->
 <iframe
-    src="https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/" 
+    src="https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/"
     width="800",
     height="600"
 ></iframe>
@@ -23,7 +25,9 @@ You can use a [project-specific CLI command](../09_development/03_commands_refer
 kedro pipeline create <pipeline_name>
 ```
 
-> For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
+```eval_rst
+::note For the full list of available CLI options, you can always run ``kedro pipeline create --help`` for more information.
+```
 
 ### What does the ``kedro pipeline create`` do?
 
@@ -148,7 +152,7 @@ This combination will visualise since it's valid pre-runtime, but it will not ru
 ![disjoined](../meta/images/cook_disjointed.png)
 
 * Combining `cook_pipeline + lunch_pipeline` will not work since because the `food` doesn't exist as an output of the `cook_pipeline`.
-* In this case, we will need to map `grilled_veg` to the expected input of `food`. 
+* In this case, we will need to map `grilled_veg` to the expected input of `food`.
 
 The wrapper allows us to provide a mapping and fix this disconnect.
 
@@ -167,7 +171,9 @@ Providing  this input/output override will join up the pipeline nicely:
 
 ![joineted](../meta/images/cook_joined.png)
 
-> In this example we have used the `+` operator to join two pipelines. Remember you can also use `sum()` or pass a list of pipelines to the `Pipeline()` constructor as well.
+```eval_rst
+.. note:: In this example we have used the ``+`` operator to join two pipelines. Remember you can also use ``sum()`` or pass a list of pipelines to the ``Pipeline()`` constructor as well.
+```
 
 </details>
 
@@ -258,14 +264,16 @@ final_pipeline = (
 * The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and `lunch.defrost_node`.
 * Also two separate datasets `breakfast.veg` and `lunch.veg` connect the nodes inside the pipelines, causing no confusion between them.
 
-> Note: Parameter references (`params:` and `parameters`) will not be namespaced
-
 ![namespaced](../meta/images/cook_namespaced.gif)
 
 * Visualising the `final_pipeline` highlights how namespaces become 'super nodes' which encapsulate the wrapped pipeline.
 * This example demonstrates how we can reuse the same `cook_pipeline` with slightly different arguments.
 * In the real world, one could imagine pipelines with responsibilities like profiling or feature engineering being reused within the same project or even across projects via [micro-packaging](04_micro_packaging.md).
 * Namespaces can also be arbitrarily nested with the `.` character.
+
+```eval_rst
+.. note:: Parameter references (``params:`` and ``parameters``) will not be namespaced
+```
 
 </details>
 

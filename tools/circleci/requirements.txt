@@ -1,0 +1,3 @@
+pip>=20.0
+setuptools>=38.0
+twine~=3.0

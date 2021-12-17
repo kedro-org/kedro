@@ -321,7 +321,7 @@ jobs:
       - run:
           name: Maybe trigger the release workflow
           command: |
-              KEDRO_VERSION=$(tools/circleci/github_scripts/kedro_version.py ./kedro)
+              KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
 
               if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
               then

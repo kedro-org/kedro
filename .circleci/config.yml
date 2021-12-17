@@ -319,8 +319,8 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
-      - configure_ssh_keys
-      - remove_ssh_config
+     # - configure_ssh_keys
+     # - remove_ssh_config
 #      - run:
 #          name: SSH add
 #          command: ssh-add -D; ssh-add ~/.ssh/id_rsa_e60f4070c0bb933327a5e3fad81f56c6

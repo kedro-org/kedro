@@ -154,6 +154,8 @@ commands:
       - add_ssh_keys:
           fingerprints:
             - e6:0f:40:70:c0:bb:93:33:27:a5:e3:fa:d8:1f:56:c6
+            - a0:3f:6a:d9:c3:c7:c2:56:e7:38:bc:ce:d2:dc:9e:be
+            - 47:e5:59:20:85:dc:c6:13:de:c4:68:0f:a6:46:36:7e
 
   remove_ssh_config:
     steps:

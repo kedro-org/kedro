@@ -329,24 +329,21 @@ jobs:
       - run:
           name: Trigger Read The Docs build
           command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
-#      - run:
-#          name: Maybe merge main into develop or raise a PR
-#          command: ./tools/circleci/github_scripts/merge.sh . "test-main" "test-develop" "${GITHUB_TAGGING_TOKEN}"
-#      - run:
-#          name: Maybe merge an automatic PR into develop
-#          command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-test-main-to-test-develop" "test-develop" "${GITHUB_TAGGING_TOKEN}"
+      - run:
+          name: Maybe merge main into develop or raise a PR
+          command: ./tools/circleci/github_scripts/merge.sh . "test-main" "test-develop" "${GITHUB_TAGGING_TOKEN}"
       - run:
           name: Maybe trigger the release workflow
           command: |
-              KEDRO_VERSION=$(tools/circleci/github_scripts/kedro_version.py ./kedro)
+            KEDRO_VERSION=$(tools/circleci/github_scripts/kedro_version.py ./kedro)
 
-              if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
-              then
-                  echo "Starting the release of Kedro ${KEDRO_VERSION}!"
-                  ./tools/circleci/circle-release.sh github/quantumblacklabs/kedro
-              else
-                  echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
-              fi
+            if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
+            then
+                echo "Starting the release of Kedro ${KEDRO_VERSION}!"
+                ./tools/circleci/circle-release.sh github/quantumblacklabs/kedro
+            else
+                echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
+            fi
 
   build_docker_image:
     docker:

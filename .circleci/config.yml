@@ -149,6 +149,18 @@ commands:
           key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - win_setup_requirements
 
+  configure_ssh_keys:
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - e6:0f:40:70:c0:bb:93:33:27:a5:e3:fa:d8:1f:56:c6
+
+  remove_ssh_config:
+    steps:
+      - run:
+          name: Remove SSH config
+          command: rm ~/.ssh/config
+
 jobs:
   e2e_tests:
     parameters:
@@ -307,6 +319,8 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
+      - configure_ssh_keys
+      - remove_ssh_config
       - run:
           name: Set git email and name
           command: |
@@ -388,6 +402,8 @@ jobs:
       python_version: "3.7"
     steps:
       - setup
+      - configure_ssh_keys
+      - remove_ssh_config
       - run:
           name: Check Kedro version
           command: |

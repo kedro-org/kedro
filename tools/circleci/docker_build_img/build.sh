@@ -31,6 +31,10 @@ docker_push() {
 main() {
     local pip_reqs="$(get_pip_reqs $KEDRO_REPO)"
 
+    # Image for python 3.6
+    docker_build "$pip_reqs" 3.6
+    docker_push 3.6
+
     # Image for python 3.7
     docker_build "$pip_reqs" 3.7
     docker_push 3.7

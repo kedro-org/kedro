@@ -14,7 +14,7 @@ Feature: Run Project
   Scenario: Run parallel runner with default python entry point with example code
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter
-    When I execute the kedro command "run --parallel"
+    When I execute the kedro command "run --runner=ParallelRunner"
     Then I should get a successful exit code
     And the console log should show that "split_data" was run
     And the console log should show that "train_model" was run

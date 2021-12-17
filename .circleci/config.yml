@@ -330,6 +330,13 @@ jobs:
       - run:
           name: Maybe merge main into develop or raise a PR
           command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+
+  merge_pr_to_develop:
+    docker:
+      # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
       - run:
           name: Maybe merge an automatic PR into develop
           command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
@@ -499,10 +506,20 @@ workflows:
             branches:
               only: main
 
+  hourly_pr_merge:
+    triggers:
+      - schedule:
+          cron: 0 * * * *
+          filters:
+            branches:
+              only: main
+    jobs:
+      - merge_pr_to_develop
+
   nightly_build:
     triggers:
       - schedule:
-          cron: "30 2 * * *"
+          cron: 30 2 * * *
           filters:
             branches:
               only: main

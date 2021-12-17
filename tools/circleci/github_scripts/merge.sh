@@ -74,3 +74,5 @@ else
         echo "Failed to merge ${SOURCE_BRANCH} into ${TARGET_BRANCH} and it seems like another manual merge between ${SOURCE_BRANCH} and ${TARGET_BRANCH} is in progress. Doing nothing here."
     fi
 fi
+
+git checkout ${SOURCE_BRANCH}

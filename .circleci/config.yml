@@ -334,10 +334,12 @@ jobs:
           command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
       - run:
           name: Maybe merge main into develop or raise a PR
-          command: ./tools/circleci/github_scripts/merge.sh . "test-main" "test-develop" "${GITHUB_TAGGING_TOKEN}"
+          command: pwd; ./tools/circleci/github_scripts/merge.sh . "test-main" "test-develop" "${GITHUB_TAGGING_TOKEN}"
+      - run: pwd
       - run:
           name: Maybe trigger the release workflow
           command: |
+            pwd
             KEDRO_VERSION=$(tools/circleci/github_scripts/kedro_version.py ./kedro)
 
             if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"

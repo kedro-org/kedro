@@ -116,7 +116,7 @@ You should also create a file `src/kedro_tutorial/pipelines/data_processing/__in
 ```python
 from .pipeline import create_pipeline  # NOQA
 ```
-This file ensures that the `data_processing` folder is a Python package, in accordance with the [standard format for a modular pipeline](../06_nodes_and_pipelines/03_modular_pipelines.md#how-do-i-create-a-modular-pipeline).
+This file ensures that the `data_processing` folder is a Python package, in accordance with the [standard format for a modular pipeline](../06_nodes_and_pipelines/03_modular_pipelines.md).
 
 ### Update the project pipeline
 
@@ -579,7 +579,7 @@ kedro run --runner=module.path.to.my.runner
 .. note::  ``ParallelRunner`` performs task parallelisation, which is different from data parallelisation as seen in PySpark.
 ```
 
-You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../06_nodes_and_pipelines/04_run_a_pipeline.md).
+You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../06_nodes_and_pipelines/05_run_a_pipeline.md).
 
 ## Slice a pipeline
 
@@ -589,7 +589,7 @@ In some cases you may want to run just part of a pipeline. For example, you may 
 kedro run --pipeline=ds
 ```
 
-See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) for other ways to run sections of your pipeline.
+See the [pipeline slicing documentation](../06_nodes_and_pipelines/06_slice_a_pipeline.md) for other ways to run sections of your pipeline.
 
 ```eval_rst
 .. note::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:

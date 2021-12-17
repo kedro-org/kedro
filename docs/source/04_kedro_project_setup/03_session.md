@@ -14,7 +14,7 @@ The main methods and properties of `KedroSession` are:
 - `create()`: Create a new instance of ``KedroSession`` with  session data
 - `load_context()`: Instantiate `KedroContext` object
 - `close()`: Close the current session — although we recommend that you [use the session object as a context manager](#create-a-session), which will call `close()` automatically, as opposed to calling the method explicitly
-- `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../06_nodes_and_pipelines/04_run_a_pipeline) for details
+- `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../06_nodes_and_pipelines/05_run_a_pipeline) for details
 
 ### Create a session
 

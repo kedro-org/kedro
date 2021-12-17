@@ -307,6 +307,7 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
+      - add_ssh_keys
       - run:
           name: Set git email and name
           command: |
@@ -337,6 +338,7 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
+      - add_ssh_keys
       - run:
           name: Maybe merge an automatic PR into develop
           command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
@@ -395,6 +397,7 @@ jobs:
       python_version: "3.7"
     steps:
       - setup
+      - add_ssh_keys
       - run:
           name: Check Kedro version
           command: |
@@ -449,6 +452,7 @@ jobs:
 
 workflows:
   version: 2.1
+
   regular:
     unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
     jobs:

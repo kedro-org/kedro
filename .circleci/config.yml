@@ -319,7 +319,7 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
-     # - configure_ssh_keys
+      - configure_ssh_keys
       - remove_ssh_config
 #      - run:
 #          name: SSH add

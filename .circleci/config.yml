@@ -466,7 +466,7 @@ jobs:
       - checkout
       - run:
           name: Maybe merge an automatic PR into develop
-          command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
+          command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-test-main-to-test-develop" "test-develop" "${GITHUB_TAGGING_TOKEN}"
 
 workflows:
   version: 2.1

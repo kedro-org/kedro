@@ -322,7 +322,7 @@ jobs:
     steps:
       - checkout
       - configure_ssh_keys
-      - remove_ssh_config
+      #- remove_ssh_config
       - run:
           name: SSH add
           command: ssh-add -D; ssh-add ~/.ssh/id_rsa_a03f6ad9c3c7c256e738bcced2dc9ebe

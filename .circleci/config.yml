@@ -321,9 +321,9 @@ jobs:
       - checkout
       - configure_ssh_keys
       - remove_ssh_config
-      - run:
-          name: SSH add
-          command: ssh-add -D; ssh-add ~/.ssh/id_rsa_e60f4070c0bb933327a5e3fad81f56c6
+#      - run:
+#          name: SSH add
+#          command: ssh-add -D; ssh-add ~/.ssh/id_rsa_e60f4070c0bb933327a5e3fad81f56c6
       - run:
           name: Set git email and name
           command: |
@@ -338,7 +338,7 @@ jobs:
       - run:
           name: Maybe trigger the release workflow
           command: |
-            KEDRO_VERSION=$(tools/circleci/github_scripts/kedro_version.py ./kedro)
+            KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
 
             if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
             then

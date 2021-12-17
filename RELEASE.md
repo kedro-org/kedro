@@ -33,6 +33,7 @@
 * Fixed a bug where the version on the tracking datasets didn't match the session id and the versions of regular versioned datasets.
 * Fixed an issue where datasets in `load_versions` that are not found in the data catalog would silently pass.
 * Altered the string representation of nodes so that node inputs/outputs order is preserved rather than being alphabetically sorted.
+* Update `APIDataSet` to accept `auth` through `credentials` and allow any iterable for `auth`.
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro.extras.decorators` and `kedro.pipeline.decorators` are being deprecated in favour of Hooks.

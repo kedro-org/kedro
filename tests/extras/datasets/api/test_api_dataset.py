@@ -127,3 +127,44 @@ class TestAPIDataSet:
         )
 
         assert api_data_set.exists()
+
+    def test_credentials_auth_error(self, method):
+        """
+        If ``auth`` and ``credentials`` are both provided,
+        the constructor should raise a ValueError.
+        """
+        with pytest.raises(ValueError, match="both auth and credentials"):
+            APIDataSet(url=TEST_URL, method=method, auth=[], credentials=[])
+
+    @pytest.mark.parametrize("auth_kwarg", ["auth", "credentials"])
+    @pytest.mark.parametrize(
+        "auth_seq",
+        [
+            ("username", "password"),
+            ["username", "password"],
+            (e for e in ["username", "password"]),  # Generator.
+        ],
+    )
+    def test_auth_sequence(self, requests_mocker, method, auth_seq, auth_kwarg):
+        """
+        ``auth`` and ``credentials`` should be able to be any Iterable.
+        """
+        kwargs = {
+            "url": TEST_URL,
+            "method": method,
+            "params": TEST_PARAMS,
+            "headers": TEST_HEADERS,
+            auth_kwarg: auth_seq,
+        }
+
+        api_data_set = APIDataSet(**kwargs)
+        requests_mocker.register_uri(
+            method,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            text=TEST_TEXT_RESPONSE_DATA,
+        )
+
+        response = api_data_set.load()
+        assert isinstance(response, requests.Response)
+        assert response.text == TEST_TEXT_RESPONSE_DATA

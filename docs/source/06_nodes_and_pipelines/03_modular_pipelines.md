@@ -10,10 +10,10 @@ Modular pipelines allow you to instantiate pipelines multiple times, but support
 .. note:: The Kedro project visualised below is representative of one that one might see in the real world. It takes full advantage of modular pipelines for ``Data Ingestion``, ``Feature Engineering``, ``Reporting`` and ``Train Evaluation`` (which even includes nested instances).
 ```
 
-<!-- change to demo.kedro.org once working -->
+
 <iframe
-    src="https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/"
-    width="800",
+    src="http://demo.kedro.org"
+    width="850",
     height="600"
 ></iframe>
 

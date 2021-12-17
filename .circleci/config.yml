@@ -316,6 +316,9 @@ jobs:
           name: Trigger Read The Docs build
           command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
       - run:
+          name: Maybe merge main into develop or raise a PR
+          command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+      - run:
           name: Maybe trigger the release workflow
           command: |
               KEDRO_VERSION=$(tools/circleci/github_scripts/kedro_version.py ./kedro)
@@ -327,9 +330,6 @@ jobs:
               else
                   echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
               fi
-      - run:
-          name: Maybe merge main into develop or raise a PR
-          command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
 
   merge_pr_to_develop:
     docker:

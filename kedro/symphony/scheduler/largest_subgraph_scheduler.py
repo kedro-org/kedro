@@ -48,19 +48,36 @@ class LargestSubgraphScheduler(AbstractScheduler):
 
         pipelines = []
 
-        # Subset the full pipeline to only nodes with an executor tag. Then,
-        # subset again to the connected pipeline that can be executed entirely
-        # with one executor type.
+        # The largest connected subgraph for an executor consists of the
+        # nodes that don't depend, directly or transitively, on any node
+        # yet to be executed (i.e. excluding completed nodes) on another
+        # executor.
         for executor_tag, ready_nodes in executor_nodes_map.items():
-            executor_sub_pipeline = self.pipeline.only_nodes_with_tags(
-                executor_tag
-            ).from_nodes(*[n.name for n in ready_nodes])
+            only_nodes_without_executor_tag = (
+                self.pipeline - self.pipeline.only_nodes_with_tags(executor_tag)
+            )
+            nodes_requiring_other_executors = self.pipeline.from_nodes(
+                *[
+                    n.name
+                    for n in only_nodes_without_executor_tag.nodes
+                    if n not in self.done_nodes
+                ]
+            )
+            executable_subpipeline = (
+                self.pipeline - nodes_requiring_other_executors
+            ).from_nodes(
+                *[
+                    n.name
+                    for n in ready_nodes
+                    if n in (self.pipeline - nodes_requiring_other_executors).nodes
+                ]
+            )
 
-            pipelines.append(executor_sub_pipeline)
+            pipelines.append(executable_subpipeline)
 
-        largest_sub_pipeline = max(pipelines, key=lambda x: len(x.nodes))
+        largest_subpipeline = max(pipelines, key=lambda x: len(x.nodes))
 
-        self.todo_nodes = self.todo_nodes.difference(set(largest_sub_pipeline.nodes))
-        self.done_nodes = self.done_nodes.union(set(largest_sub_pipeline.nodes))
+        self.todo_nodes = self.todo_nodes.difference(set(largest_subpipeline.nodes))
+        self.done_nodes = self.done_nodes.union(set(largest_subpipeline.nodes))
 
-        return largest_sub_pipeline.nodes  # Nodes property is sorted already.
+        return largest_subpipeline.nodes  # Nodes property is sorted already.

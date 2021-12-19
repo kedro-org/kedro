@@ -55,8 +55,8 @@ class ThreadRunner(AbstractRunner):
             ds_name: Name of the missing data set.
 
         Returns:
-            An instance of an implementation of ``AbstractDataSet`` to be used
-            for all unregistered data sets.
+            An instance of ``MemoryDataSet`` to be used for all
+            unregistered data sets.
 
         """
         return MemoryDataSet()

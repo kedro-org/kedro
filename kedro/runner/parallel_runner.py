@@ -165,8 +165,8 @@ class ParallelRunner(AbstractRunner):
             ds_name: Name of the missing data set.
 
         Returns:
-            An instance of an implementation of ``AbstractDataSet`` to be used
-            for all unregistered data sets.
+            An instance of ``_SharedMemoryDataSet`` to be used for all
+            unregistered data sets.
 
         """
         return _SharedMemoryDataSet(self._manager)

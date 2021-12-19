@@ -137,10 +137,10 @@ class AbstractRunner(ABC):
         """Factory method for creating the default data set for the runner.
 
         Args:
-            ds_name: Name of the missing data set
+            ds_name: Name of the missing data set.
 
         Returns:
-            An instance of an implementation of AbstractDataSet to be
+            An instance of an implementation of ``AbstractDataSet`` to be
             used for all unregistered data sets.
 
         """

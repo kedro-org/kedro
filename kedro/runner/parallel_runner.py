@@ -24,7 +24,7 @@ _MAX_WINDOWS_WORKERS = 61
 
 
 class _SharedMemoryDataSet:
-    """``_SharedMemoryDataSet`` a wrapper class for a shared MemoryDataSet in SyncManager.
+    """``_SharedMemoryDataSet`` is a wrapper class for a shared MemoryDataSet in SyncManager.
     It is not inherited from AbstractDataSet class.
     """
 
@@ -162,10 +162,10 @@ class ParallelRunner(AbstractRunner):
         """Factory method for creating the default data set for the runner.
 
         Args:
-            ds_name: Name of the missing data set
+            ds_name: Name of the missing data set.
 
         Returns:
-            An instance of an implementation of _SharedMemoryDataSet to be used
+            An instance of an implementation of ``AbstractDataSet`` to be used
             for all unregistered data sets.
 
         """

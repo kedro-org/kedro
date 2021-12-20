@@ -232,11 +232,11 @@ You can persist the preprocessed data by adding the following to `conf/base/cata
 ```yaml
 preprocessed_companies:
   type: pandas.ParquetDataSet
-  filepath: data/02_intermediate/preprocessed_companies.csv
+  filepath: data/02_intermediate/preprocessed_companies.pq
 
 preprocessed_shuttles:
   type: pandas.ParquetDataSet
-  filepath: data/02_intermediate/preprocessed_shuttles.csv
+  filepath: data/02_intermediate/preprocessed_shuttles.pq
 ```
 
 The code above declares explicitly that [pandas.ParquetDataSet](/kedro.extras.datasets.pandas.ParquetDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet).

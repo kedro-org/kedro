@@ -1,5 +1,5 @@
 
-# Micro-packaging modular pipelines
+# Micro-packaging
 
 Micro-packaging allows users to share Kedro pipelines across codebases, organisations and beyond.
 

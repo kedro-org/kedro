@@ -316,7 +316,7 @@ If you want the model input table data to be saved to file rather than used in-m
 ```yaml
 model_input_table:
   type: pandas.ParquetDataSet
-  filepath: data/03_primary/model_input_table.csv
+  filepath: data/03_primary/model_input_table.pq
 ```
 
 ### Test the example

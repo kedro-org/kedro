@@ -10,6 +10,24 @@ Modular pipelines allow you to instantiate pipelines multiple times, but support
 .. note:: The Kedro project visualised below is representative of one that one might see in the real world. It takes full advantage of modular pipelines for ``Data Ingestion``, ``Feature Engineering``, ``Reporting`` and ``Train Evaluation`` (which even includes nested instances).
 ```
 
+### Key concepts
+
+In this section you will learn about how to take advantage of modular pipelines, the key points have been listed below:
+
+1. **A modular pipeline is defined by its folder structure**
+
+   * You can generate this file structure with the CLI command ``kedro pipeline create <pipeline_name>``.
+   * The folder structure keeps things isolated and encourages portability.
+
+2. **Modular pipelines are designed to be portable and reusable**
+
+   * It's possible to re-use the same pipeline multiple times within the same project (with different inputs/outputs or parameters).
+   * You can also share pipelines across codebases via [micro-packaging](04_micro_packaging.md).
+
+3. **The `kedro.pipeline.modular_pipeline.pipeline` wrapper method unlocks the real power of modular pipelines**
+
+   * Applying namespaces allows you to simplify your mental model and isolate 'within pipeline' processing steps.
+   * ``Kedro-Viz`` is able to accelerated development by [rendering namespaced](../03_tutorial/06_visualise_pipeline.md) pipelines as collapsible 'super nodes'.
 
 <iframe
     src="http://demo.kedro.org"

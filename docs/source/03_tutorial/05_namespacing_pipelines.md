@@ -88,15 +88,15 @@ In this section we want to add some namespaces in the modelling component of the
 1. Add some more parameters to the bottom of `conf/base/parameters/data_science.yml` using this snippet:
 
     ```yaml
-
+    
     model_options_experimental:
-        test_size: 0.3
-        random_state: 8
-        features:
-          - engines
-          - passenger_capacity
-          - crew
-          - review_scores_rating
+      test_size: 0.3
+      random_state: 8
+      features:
+        - engines
+        - passenger_capacity
+        - crew
+        - review_scores_rating
 
     ```
 
@@ -105,16 +105,18 @@ In this section we want to add some namespaces in the modelling component of the
     ```yaml
 
     active_modelling_pipeline.regressor:
-        type: pickle.PickleDataSet
-        filepath: data/06_models/regressor_active.pickle
-        versioned: true
-        layer: models
+      type: pickle.PickleDataSet
+      filepath: data/06_models/regressor_active.pickle
+      versioned: true
+      layer: models
 
     candidate_modelling_pipeline.regressor:
-        type: pickle.PickleDataSet
-        filepath: data/06_models/regressor_candidate.pickle
-        versioned: true
-        layer: models
+      type: pickle.PickleDataSet
+      filepath: data/06_models/regressor_candidate.pickle
+      versioned: true
+      layer: models
+    
+    ```
 
 3. Update the code in `pipelines/data_science/pipeline.py` using the snippet below.
 

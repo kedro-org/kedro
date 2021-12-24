@@ -159,14 +159,14 @@ class ParallelRunner(AbstractRunner):
     def create_default_data_set(  # type: ignore
         self, ds_name: str
     ) -> _SharedMemoryDataSet:
-        """Factory method for creating the default data set for the runner.
+        """Factory method for creating the default dataset for the runner.
 
         Args:
-            ds_name: Name of the missing data set.
+            ds_name: Name of the missing dataset.
 
         Returns:
             An instance of ``_SharedMemoryDataSet`` to be used for all
-            unregistered data sets.
+            unregistered datasets.
 
         """
         return _SharedMemoryDataSet(self._manager)
@@ -331,8 +331,9 @@ class ParallelRunner(AbstractRunner):
                         raise
                     done_nodes.add(node)
 
-                    # decrement load counts and release any data sets we've finished with
-                    # this is particularly important for the shared datasets we create above
+                    # Decrement load counts, and release any datasets we
+                    # have finished with. This is particularly important
+                    # for the shared, default datasets we created above.
                     for data_set in node.inputs:
                         load_counts[data_set] -= 1
                         if (

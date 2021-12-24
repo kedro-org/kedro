@@ -49,14 +49,14 @@ class ThreadRunner(AbstractRunner):
         self._max_workers = max_workers
 
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
-        """Factory method for creating the default data set for the runner.
+        """Factory method for creating the default dataset for the runner.
 
         Args:
-            ds_name: Name of the missing data set.
+            ds_name: Name of the missing dataset.
 
         Returns:
             An instance of ``MemoryDataSet`` to be used for all
-            unregistered data sets.
+            unregistered datasets.
 
         """
         return MemoryDataSet()
@@ -125,9 +125,8 @@ class ThreadRunner(AbstractRunner):
                         "Completed %d out of %d tasks", len(done_nodes), len(nodes)
                     )
 
-                    # decrement load counts and release any data sets we've finished
-                    # with this is particularly important for the shared datasets we
-                    # create above
+                    # Decrement load counts, and release any datasets we
+                    # have finished with.
                     for data_set in node.inputs:
                         load_counts[data_set] -= 1
                         if (

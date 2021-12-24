@@ -134,14 +134,14 @@ class AbstractRunner(ABC):
 
     @abstractmethod  # pragma: no cover
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
-        """Factory method for creating the default data set for the runner.
+        """Factory method for creating the default dataset for the runner.
 
         Args:
-            ds_name: Name of the missing data set.
+            ds_name: Name of the missing dataset.
 
         Returns:
             An instance of an implementation of ``AbstractDataSet`` to be
-            used for all unregistered data sets.
+            used for all unregistered datasets.
 
         """
         pass

@@ -41,7 +41,7 @@ class AbstractRunner(ABC):
     def run(
         self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
     ) -> Dict[str, Any]:
-        """Run the ``Pipeline`` using the ``DataSet``s provided by ``catalog``
+        """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
 
         Args:
@@ -86,7 +86,7 @@ class AbstractRunner(ABC):
         self, pipeline: Pipeline, catalog: DataCatalog
     ) -> Dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
-        ``DataSet``s provided by ``catalog`` and save results back to the same
+        datasets provided by ``catalog`` and save results back to the same
         objects.
 
         Args:

@@ -292,9 +292,9 @@ You'll need to set the Batch-related configuration that the runner will use. Add
 
 ```yaml
 aws_batch:
-    job_queue: "spaceflights_queue"
-    job_definition: "kedro_run"
-    max_workers: 2
+  job_queue: "spaceflights_queue"
+  job_definition: "kedro_run"
+  max_workers: 2
 ```
 
 #### Update CLI implementation

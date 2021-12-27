@@ -118,12 +118,14 @@ Now that all the resources are in place, it's time to submit jobs to Batch progr
 
 #### Create a custom runner
 
-Create a new Python package `runner` in your `src` folder, i.e. `kedro_tutorial/src/kedro_tutorial/runner/`. Make sure there is an `__init__.py` file at this location and add another file named `batch_runner.py`, which will contain the implementation of your custom runner, `AWSBatchRunner`. The `AWSBatchRunner` will submit and monitor jobs asynchronously, surfacing any errors that occur on Batch.
+Create a new Python package `runner` in your `src` folder, i.e. `kedro_tutorial/src/kedro_tutorial/runner/`. Make sure there is an `__init__.py` file at this location, and add another file named `batch_runner.py`, which will contain the implementation of your custom runner, `AWSBatchRunner`. The `AWSBatchRunner` will submit and monitor jobs asynchronously, surfacing any errors that occur on Batch.
 
-Make sure the `__init__.py` file in the `runner` folder includes the following import:
+Make sure the `__init__.py` file in the `runner` folder includes the following import and declaration:
 
 ```python
-from .batch_runner import AWSBatchRunner  # NOQA
+from .batch_runner import AWSBatchRunner
+
+__all__ = ["AWSBatchRunner"]
 ```
 
 Copy the contents of the script below into `batch_runner.py`:

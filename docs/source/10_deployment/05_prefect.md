@@ -1,8 +1,8 @@
 # Deployment with Prefect
 
-This page explains how to run your Kedro pipeline using [Prefect Core](https://www.prefect.io/products/core/), an open source workflow management system.
+This page explains how to run your Kedro pipeline using [Prefect Core](https://www.prefect.io/products/core/), an open-source workflow management system.
 
-In scope of this deployment we are interested in [Prefect Server](https://docs.prefect.io/orchestration/server/overview.html#what-is-prefect-server) which is an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends the Prefect Core.
+In scope of this deployment, we are interested in [Prefect Server](https://docs.prefect.io/orchestration/server/overview.html#what-is-prefect-server), an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends the Prefect Core.
 
 ```eval_rst
 .. note::  Prefect Server ships out-of-the-box with a fully featured user interface.

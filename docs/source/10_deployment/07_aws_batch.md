@@ -288,7 +288,7 @@ def _track_batch_job(job_id: str, client: Any) -> None:
 
 #### Set up Batch-related configuration
 
-You'll need to set the Batch-related configuration that the runner will use. Add a `parameters.yml` file inside the `conf/aws_batch/` directory created as part of the prerequistes steps, which will include the following keys:
+You'll need to set the Batch-related configuration that the runner will use. Add a `parameters.yml` file inside the `conf/aws_batch/` directory created as part of the prerequistes with the following keys:
 
 ```yaml
 aws_batch:

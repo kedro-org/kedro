@@ -308,4 +308,4 @@ kedro run --env dask --runner kedro_tutorial.runner.DaskRunner
 
 You should start seeing tasks appearing on [Dask's diagnostics dashboard](http://127.0.0.1:8787/status):
 
-![Dask's diagnostics dashboard](https://user-images.githubusercontent.com/14007150/147515642-2700aa75-2cce-41bc-a6a1-3947728beb61.png)
+![Dask's diagnostics dashboard](../meta/images/dask_diagnostics_dashboard.png)

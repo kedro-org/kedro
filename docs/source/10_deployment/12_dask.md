@@ -90,7 +90,7 @@ class DaskRunner(AbstractRunner):
                 asynchronously with threads. Defaults to False.
         """
         super().__init__(is_async=is_async)
-        Client(**client_args or dict(address="127.0.0.1:8786"))
+        Client(**client_args)
 
     def __del__(self):
         Client.current().close()

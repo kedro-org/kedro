@@ -98,7 +98,7 @@ kedro viz --load-file my_shareable_pipeline.json
 And this will visualise the pipeline visualisation saved as `my_shareable_pipeline.json`.
 
 
-## Visualise plotly-express charts on Kedro-viz
+## Visualise plotly-express charts in Kedro-viz
 
 You can view plotly-express charts in Kedro-Viz when you use Kedro's plotly data connector. 
 

@@ -98,9 +98,9 @@ kedro viz --load-file my_shareable_pipeline.json
 And this will visualise the pipeline visualisation saved as `my_shareable_pipeline.json`.
 
 
-## Visualise your plotly-express charts on Kedro-viz
+## Visualise plotly-express charts on Kedro-viz
 
-You can view your plotly-express charts straight from Kedro-Viz. To use this feature on Kedro-viz you need to use Kedro's plotly data connector. 
+You can view plotly-express charts in Kedro-Viz when you use Kedro's plotly data connector. 
 
 There are two plotly data connectors in Kedro :
 - [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - This is where you specify the configurations of your plot in the `catalog.yml`.
@@ -134,7 +134,7 @@ reloaded = data_set.load()
 assert fig == reloaded
 ```
 
-For JSONDataSet, you will need to specify the output type in `catalog.yml`.
+For plotly.JSONDataSet, you will also need to specify the output type in `catalog.yml`.
 
 ```yaml
 test.json:
@@ -142,13 +142,13 @@ test.json:
   filepath: data/08_reporting/bar_plot.json
 ```
 
-Once this set-up is completed, you can do a `kedro run` followed by `kedro viz` and your kedro viz pipeline will show a new dataset type with icon ![](../meta/images/icon-image-dataset.svg) . Once you click on the node, you can see a small preview of your plotly chart in the metadata panel
+Once the above set-up is completed, you can do a `kedro run` followed by `kedro viz` and your kedro-viz pipeline will show a new dataset type with icon ![](../meta/images/icon-image-dataset.svg) . Once you click on the node, you can see a small preview of your plotly chart in the metadata panel
 
 ![](../meta/images/pipeline_visualisation_plotly.png)
 
 
 
-You can be expand the visualisation using the 'Expand Plotly Visualisation' button
+The visualisation can be expanded using the 'Expand Plotly Visualisation' button
 
 
 ![](../meta/images/pipeline_visualisation_plotly_expand.png)

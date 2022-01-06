@@ -37,13 +37,3 @@ You need to tell `KedroSession` the package name of your Kedro project so it can
 - `env`: Environment for the `KedroContext`
 - `extra_params`: Optional dictionary containing extra project parameters
 for the underlying `KedroContext`; if specified, this will update (and therefore take precedence over) parameters retrieved from the project configuration
-
-When you want to access to the most recent session object, use the helper function `get_current_session()` as follows:
-
-```python
-from kedro.framework.session import get_current_session
-
-session = get_current_session()
-context = session.load_context()
-context.catalog.load("my_data").head()
-```

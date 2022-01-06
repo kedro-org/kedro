@@ -7,7 +7,7 @@ import subprocess
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, Union
 
 import click
 
@@ -28,25 +28,6 @@ from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 
 _active_session = None
-
-
-def get_current_session(silent: bool = False) -> Optional["KedroSession"]:
-    """Fetch the active ``KedroSession`` instance.
-
-    Args:
-        silent: Indicates to suppress the error if no active session was found.
-
-    Raises:
-        RuntimeError: If no active session was found and `silent` is False.
-
-    Returns:
-        KedroSession instance.
-
-    """
-    if not _active_session and not silent:
-        raise RuntimeError("There is no active Kedro session.")
-
-    return _active_session
 
 
 def _activate_session(session: "KedroSession", force: bool = False) -> None:
@@ -286,11 +267,11 @@ class KedroSession:
         if self.save_on_close:
             self._store.save()
 
-        if get_current_session(silent=True) is self:
+        if _active_session is self:
             _deactivate_session()
 
     def __enter__(self):
-        if get_current_session(silent=True) is not self:
+        if _active_session is not self:
             _activate_session(self)
         return self
 

@@ -4,7 +4,6 @@ This section covers the following:
 
 * A brief introduction to namespaces and modular pipelines
 * How to convert the existing spaceflights project into a namespaced one
-* This pattern is viewed as the modern way to use Kedro after being first introduced in version 0.17.0
 
 Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/06_nodes_and_pipelines/03_modular_pipelines.html#modular-pipelines) unlocks some sophisticated functionality in Kedro
 

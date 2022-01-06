@@ -98,31 +98,39 @@ kedro viz --load-file my_shareable_pipeline.json
 And this will visualise the pipeline visualisation saved as `my_shareable_pipeline.json`.
 
 
-## Visualise plotly-express charts in Kedro-viz
+## Visualise Plotly charts in Kedro-viz
 
-You can view plotly-express charts in Kedro-Viz when you use Kedro's plotly data connector.
+[Plotly](https://plotly.com/python/) is a free and open source python library that allows you to make interactive, publication quality graphs. With Plotly integration on Kedro-viz, you can output your interactive charts as part of your pipline visualisation. 
 
-There are two plotly data connectors in Kedro :
-- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - This is where you specify the configurations of your plot in the `catalog.yml`.
+Kedro-viz aims to help users communicate different aspects of thier workflow and with Plotly intergration, we take one step further in this direction to allow our users share thier data insights as well. 
+
+We have also used Plotly intergration to allow users to [visualise metrics from experiments](https://kedro.readthedocs.io/en/stable/08_logging/02_experiment_tracking.html?highlight=experiment%20tracking). 
+
+NOTE : Kedro's Plotly integration is currently only supported for [Plotly Express](https://plotly.com/python/plotly-express/) charts. 
+
+You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
+
+There are two plotly datasets in Kedro :
+- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - To use this dataset you need to specify the configurations of your plot in the `catalog.yml`.
 
 ```yaml
 bar_plot:
-    type: plotly.PlotlyDataSet
-    filepath: data/08_reporting/bar_plot.json
-    plotly_args:
-        type: bar
-        fig:
-            x: features
-            y: importance
-            orientation: h
-        layout:
-            xaxis_title: x
-            yaxis_title: y
-            title: Test
+  type: plotly.PlotlyDataSet
+  filepath: data/08_reporting/bar_plot.json
+  plotly_args:
+    type: bar
+    fig:
+      x: features
+      y: importance
+      orientation: h
+    layout:
+      xaxis_title: x
+      yaxis_title: y
+      title: Test
 ```
 
 
-- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - This is where you specify the configurations of your plot using plotly-express python library.
+- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to specify the configurations of your plot using plotly-express python library in your kedro node.
 
 ```python
 import plotly.express as px
@@ -135,6 +143,7 @@ def plot():
     data_set.save(fig)
     reloaded = data_set.load()
     assert fig == reloaded
+    return fig
 ```
 
 For plotly.JSONDataSet, you will also need to specify the output type in `catalog.yml`.
@@ -145,7 +154,7 @@ test.json:
   filepath: data/08_reporting/bar_plot.json
 ```
 
-Once the above set-up is completed, you can do a `kedro run` followed by `kedro viz` and your kedro-viz pipeline will show a new dataset type with icon ![](../meta/images/icon-image-dataset.svg) . Once you click on the node, you can see a small preview of your plotly chart in the metadata panel.
+Once the above set-up is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-viz pipeline will show a new dataset type with icon ![](../meta/images/icon-image-dataset.svg) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_plotly.png)
 
@@ -156,8 +165,3 @@ The visualisation can be expanded using the 'Expand Plotly Visualisation' button
 
 ![](../meta/images/pipeline_visualisation_plotly_expand.png)
 
-## Visualise metrics from your experiments
-
-For [Experiment Tracking](https://kedro.readthedocs.io/en/stable/08_logging/02_experiment_tracking.html?highlight=experiment%20tracking) datasets which use `tracking.MetricsDataSet`, the metric trend can be viewed from the metadata panel in a similar fashion to the plotly express charts. To enable this functionality in Kedro-viz, you need to follow the steps highlighted in the [Experiment Tracking](https://kedro.readthedocs.io/en/stable/08_logging/02_experiment_tracking.html?highlight=experiment%20tracking) docs.
-
-![](../meta/images/pipeline_visualisation_metrics.png)

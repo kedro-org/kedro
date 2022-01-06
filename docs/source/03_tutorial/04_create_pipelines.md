@@ -24,7 +24,7 @@ This will generate all the files you need to start writing a Kedro pipeline. You
 │       └── parameters
 │           └── data_processing.yml
 └── src
-    ├── {{project_name}}
+    ├── kedro_tutorial
     │   ├── __init__.py
     │   └── pipelines
     │       ├── __init__.py
@@ -307,7 +307,7 @@ The gif below shows how commenting out the `create_model_input_table_node` in `p
 
 ![autoreload](../meta/images/autoreload.gif)
 
-> This is also a great time to highlight how Kedro's [topological sorting](https://en.wikipedia.org/wiki/Topological_sorting) works. The actual order of the `node()` calls in the `Pipeline` object is irrelevant, Kedro works out the execution graph via the inputs/outputs declared not the order provided by the user. This means you as a developer simply asks Kedro what data you want and it will derive the execution graph automatically.
+> This is also a great time to highlight how Kedro's [topological sorting](https://en.wikipedia.org/wiki/Topological_sorting) works. The actual order of the `node()` calls in the `Pipeline` object is irrelevant, Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means you as a developer simply ask Kedro what data you want and it will derive the execution graph automatically.
 
 ### Persisting the model input table
 

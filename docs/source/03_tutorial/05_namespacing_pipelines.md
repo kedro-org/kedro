@@ -16,7 +16,7 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
 
 ## Adding a namespace to the  `data_processing` pipeline
 
-* Update the code in `src/spaceflights_tutorial/pipelines/data_processing/pipeline.py` using the snippet below.
+* Update the code in `src/kedro_tutorial/pipelines/data_processing/pipeline.py` using the snippet below.
 * This introduces the lowercase `pipeline()` method imported from `kedro.pipeline.modular_pipeline`
 
     <details>

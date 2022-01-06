@@ -70,6 +70,11 @@ class ConfirmNotUniqueError(Exception):
     pass
 
 
+# factory function.
+# user should just do pipeline, not Pipeline
+# Make Pipeline and pipeline directly interchangeable. If make them similar then no benefit in not going all the way.
+
+
 class Pipeline:  # pylint: disable=too-many-public-methods
     """A ``Pipeline`` defined as a collection of ``Node`` objects. This class
     treats nodes as part of a graph representation and provides inputs,
@@ -81,6 +86,8 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes: Iterable[Union[Node, "Pipeline"]],
         *,
         tags: Union[str, Iterable[str]] = None,
+        # TODO? could also put inputs/outputs/parameters in here
+        # TODO: namespace should be here
     ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
@@ -157,7 +164,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
                 self._nodes_by_input[_strip_transcoding(input_)].add(node)
 
         # output -> node with output
-        self._nodes_by_output = {}  # type: Dict[str, Node]
+        self._nodes_by_output = {}  # type: Dict[str, # Node]
         for node in nodes:
             for output in node.outputs:
                 self._nodes_by_output[_strip_transcoding(output)] = node

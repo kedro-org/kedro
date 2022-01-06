@@ -105,7 +105,7 @@ This wrapper really unlocks the power of modular pipelines.
 
 * It allows you to start instantiating the same pipeline multiple times.
 * These will be static in terms of structure, but dynamic in terms of `inputs`/`outputs`/`parameters`.
-* It also allows you to simplify both your mental models and Kedro-Viz visualisations via `namespace`s.
+* It also allows you to simplify both your mental models and Kedro-Viz visualisations via `namespaces`.
 
 ```python
 from kedro.pipeline.modular_pipeline import pipeline

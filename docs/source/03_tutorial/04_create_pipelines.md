@@ -517,12 +517,6 @@ def create_pipeline(**kwargs):
     )
 ```
 
-As with the data processing modular pipeline, you should ensure that the data science modular pipeline is a Python package. To do so, create the file `src/kedro_tutorial/pipelines/data_science/__init__.py` containing the following:
-
-```python
-from .pipeline import create_pipeline  # NOQA
-```
-
 ### Update the project pipeline
 
 Add the data science pipeline to the project by replacing the code in `register_pipelines` in `src/kedro_tutorial/pipeline_registry.py` with the following:

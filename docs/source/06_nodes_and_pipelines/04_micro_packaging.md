@@ -5,7 +5,7 @@ Micro-packaging allows users to share Kedro pipelines across codebases, organisa
 
 ## Package a modular pipeline
 
-Since Kedro 0.16.4 you can package a modular pipeline by executing:
+You can package a modular pipeline by executing:
 
 `kedro pipeline package <pipeline_name>`
 
@@ -52,7 +52,7 @@ second_pipeline = {}
 ```
 
 * The keys (`first_pipeline`, `second_pipeline`) are the names of the modular pipeline folders within the codebase.
-* The values are the options accepted by the  `kedro pipeline package <pipeline_name>` CLI command.
+* The values are the options accepted by the `kedro pipeline package <pipeline_name>` CLI command.
 
 ```eval_rst
 .. note::  Make sure `destination` is specified as a POSIX path even when working on a Windows machine.
@@ -69,7 +69,7 @@ You can pull a modular pipeline from a wheel file by executing `kedro pipeline p
   * To place parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
   * Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 * Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`.
-* It is advised to do `kedro install --build-reqs` to compile and install the updated list of requirements after pulling a modular pipeline.
+* It is advised to do `kedro build-reqs` to compile the updated list of requirements after pulling a modular pipeline.
 
 ```eval_rst
 .. note::  If a modular pipeline has embedded requirements and a project ``requirements.in`` file does not already exist, it will be generated based on the project ``requirements.txt`` before appending the modular pipeline requirements.

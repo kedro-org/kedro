@@ -62,21 +62,22 @@ Running the `pipeline create` command adds the following folder structure to you
 └── src
     ├── my_project
     │   ├── __init__.py
-    │   └── pipelines
-    │       ├── __init__.py
-    │       └── {{pipeline_name}}      <-- This folder defines the modular pipeline
-    │           ├── README.md          <-- To store pipeline specific documentation 
-    │           ├── __init__.py        <-- So that Python treats this pipeline as a module
-    │           ├── nodes.py           <-- To declare your nodes
-    │           └── pipeline.py        <-- To structure the pipeline itself
-    ├── tests
-    │   ├── __init__.py
-    │   └── pipelines
-    │       ├── __init__.py
-    │       └── {{pipeline_name}}      <-- Pipeline specific tests
-    │           ├── __init__.py
-    │           └── test_pipeline.py
-    └──  pipeline_registry.py          <-- Does NOT automatically update the registry 
+    │   ├── pipelines
+    │   |   ├── __init__.py
+    │   |   └── {{pipeline_name}}      <-- This folder defines the modular pipeline
+    │   |       ├── README.md          <-- To store pipeline specific documentation 
+    │   |       ├── __init__.py        <-- So that Python treats this pipeline as a module
+    │   |       ├── nodes.py           <-- To declare your nodes
+    │   |       └── pipeline.py        <-- To structure the pipeline itself
+    |   └──  pipeline_registry.py      <-- Does NOT automatically update the registry 
+    └── tests
+        ├── __init__.py
+        └── pipelines
+            ├── __init__.py
+            └── {{pipeline_name}}      <-- Pipeline specific tests
+                ├── __init__.py
+                └── test_pipeline.py
+
 ```
 
 </details>

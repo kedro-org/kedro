@@ -221,6 +221,10 @@ kedro run
 
 Running Kedro-Viz at this point renders a very simple, but valid pipeline:
 
+```bash
+kedro viz
+```
+
 ![simple_pipeline](../meta/images/simple_pipeline.png)
 
 ### Persist pre-processed data
@@ -243,7 +247,7 @@ The code above declares explicitly that [pandas.ParquetDataSet](/kedro.extras.da
 
 The [Data Catalog](../13_resources/02_glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as Parquet) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
-[Apache Parquet](https://github.com/apache/parquet-format) is our recommended format for working with processed, typed data. In general we recommend you get your data out of CSV as soon as possible, Parquet supports things like compression, partitioning and types out of the box... as well simple things like blocking you from using the same column name twice. Whilst you do lose the ability to view the file as text - the benefits really outweigh the drawbacks.
+[Apache Parquet](https://github.com/apache/parquet-format) is our recommended format for working with processed, typed data. In general we recommend you get your data out of CSV as soon as possible, Parquet supports things like compression, partitioning and types out of the box. Whilst you do lose the ability to view the file as text it is our view that the benefits greatly outweigh the drawbacks.
 
 ### Extend the data processing pipeline
 
@@ -295,19 +299,6 @@ Add an import statement for `create_model_input_table` at the top of the file:
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
 ```
 
-### Using `kedro viz --autoreload` to see how Kedro brings the pipeline together
-
-Run the following command:
-
-```bash
-kedro viz --autoreload
-```
-
-The gif below shows how commenting out the `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
-
-![autoreload](../meta/images/autoreload.gif)
-
-> This is also a great time to highlight how Kedro's [topological sorting](https://en.wikipedia.org/wiki/Topological_sorting) works. The actual order of the `node()` calls in the `Pipeline` object is irrelevant, Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means you as a developer simply ask Kedro what data you want and it will derive the execution graph automatically.
 
 ### Persisting the model input table
 
@@ -347,6 +338,21 @@ You should see output similar to the following:
 2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
 2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
+
+### Using `kedro viz --autoreload` to see how Kedro brings the pipeline together
+
+Run the following command:
+
+```bash
+kedro viz --autoreload
+```
+
+The gif below shows how commenting out the `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
+
+![autoreload](../meta/images/autoreload.gif)
+
+> This is also a great time to highlight how Kedro's [topological sorting](https://en.wikipedia.org/wiki/Topological_sorting) works. The actual order of the `node()` calls in the `Pipeline` object is irrelevant, Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means you as a developer simply ask Kedro what data you want and it will derive the execution graph automatically.
+
 
 ## Data science pipeline
 
@@ -484,11 +490,8 @@ To create a modular pipeline for the price prediction model, add the following t
 from kedro.pipeline import Pipeline, node
 
 from .nodes import evaluate_model, split_data, train_model
-```
 
-And add the following pipeline definition to the same file:
 
-```python
 def create_pipeline(**kwargs):
     return Pipeline(
         [

@@ -106,8 +106,7 @@ Kedro-Viz aims to help users communicate different aspects of their workflow thr
 
 We have also used the Plotly integration to allow users to [visualise metrics from experiments](https://kedro.readthedocs.io/en/stable/08_logging/02_experiment_tracking.html?highlight=experiment%20tracking).
 
-```eval_rst note:: Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/python/plotly-express/) charts.
-```
+Note: Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/python/plotly-express/) charts.
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
 

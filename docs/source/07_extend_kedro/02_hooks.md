@@ -57,6 +57,16 @@ In addition, Kedro defines Hook specifications to register certain library compo
 
 The naming convention for registration hooks is `register_<library_component>`.
 
+
+#### CLI hooks
+
+Lastly, Kedro defines a small set of CLI hooks, that inject additional behaviour around execution of a Kedro CLI command:
+
+* `before_command_run`
+
+This is what the [`kedro-telemetry`](https://github.com/quantumblacklabs/kedro-telemetry) plugin relies on under the hood in order to be able to collect CLI usage statistics.
+
+
 ### Hook implementation
 
 You should provide an implementation for the specification that describes the point at which you want to inject additional behaviour. The Hook implementation should have the same name as the specification. The Hook must provide a concrete implementation with a subset of the corresponding specification's parameters (you do not need to use them all).

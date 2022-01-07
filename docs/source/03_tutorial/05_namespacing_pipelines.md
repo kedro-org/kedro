@@ -61,7 +61,7 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
         )
         namespaced_pipeline = pipeline(
             pipe=pipeline_instance,
-            namespace="Data Processing",
+            namespace="data_processing",
             inputs=["companies", "shuttles", "reviews"],
             outputs="model_input_table",
         )

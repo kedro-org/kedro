@@ -504,7 +504,7 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings")
-    def test_active_session(self, fake_project, mock_package_name):
+    def test_nested_sessions(self, fake_project, mock_package_name):
         configure_project(mock_package_name)
         session1 = KedroSession.create(mock_package_name, fake_project)
         session2 = KedroSession.create(mock_package_name, fake_project)

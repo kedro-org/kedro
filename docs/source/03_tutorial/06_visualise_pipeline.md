@@ -106,16 +106,36 @@ Kedro-Viz aims to help users communicate different aspects of their workflow thr
 
 We have also used the Plotly integration to allow users to [visualise metrics from experiments](https://kedro.readthedocs.io/en/stable/08_logging/02_experiment_tracking.html?highlight=experiment%20tracking).
 
-```eval_rst note:: Kedro's Plotly integration is currently only supported for [Plotly Express](https://plotly.com/python/plotly-express/) charts.
+```eval_rst note:: Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/python/plotly-express/) charts.
 ```
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
 
 There are two types of plotly datasets in Kedro :
-- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - To use this dataset you need to specify the configurations of your plot in the `catalog.yml`.
+- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - To use this dataset you need to configure your plot in the `catalog.yml`.
+
+Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyDataSet`
+
+```python
+def plot_data():
+    return pd.DataFrame([])
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """This is a simple pipeline which generates a plot"""
+    return Pipeline(
+        [
+            node(
+                func=plot,
+                inputs="plot_data",
+                outputs="test_plot",
+            ),
+        ]
+    )
+```
 
 ```yaml
-bar_plot:
+test_plot:
   type: plotly.PlotlyDataSet
   filepath: data/08_reporting/bar_plot.json
   plotly_args:
@@ -131,7 +151,10 @@ bar_plot:
 ```
 
 
-- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to specify the configurations of your plot using plotly-express python library in your kedro node.
+- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to configure your plot using plotly-express python library in your kedro node.
+
+
+Below is an example of how to visualise plots on Kedro-Viz using `plotly.JSONDataSet`
 
 ```python
 import plotly.express as px
@@ -140,17 +163,27 @@ from kedro.extras.datasets.plotly import JSONDataSet
 
 def plot():
     fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
-    data_set = JSONDataSet(filepath="test.json")
-    data_set.save(fig)
-    reloaded = data_set.load()
-    assert fig == reloaded
     return fig
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """This is a simple pipeline which generates a plot"""
+    return Pipeline(
+        [
+            node(
+                func=plot,
+                inputs="plot_data",
+                outputs="test_plot",
+            ),
+        ]
+    )
 ```
+
 
 For `plotly.JSONDataSet`, you will also need to specify the output type in `catalog.yml`.
 
 ```yaml
-test.json:
+test_plot:
   type: plotly.JSONDataSet
   filepath: data/08_reporting/bar_plot.json
 ```
@@ -161,7 +194,7 @@ Once the above setup is completed, you can do a `kedro run` followed by `kedro v
 
 
 
-The visualisation can be expanded using the 'Expand Plotly Visualisation' button.
+You can also view the larger visualisation of the chart by clicking the 'Expand Plotly Visualisation' button on the bottom of the metadata panel
 
 
 ![](../meta/images/pipeline_visualisation_plotly_expand.png)

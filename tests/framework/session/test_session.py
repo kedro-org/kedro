@@ -18,7 +18,7 @@ from kedro.framework.project import (
     _ProjectSettings,
     configure_project,
 )
-from kedro.framework.session import KedroSession, get_current_session
+from kedro.framework.session import KedroSession
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
 _FAKE_PROJECT_NAME = "fake_project"
@@ -504,31 +504,17 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings")
-    def test_get_current_session(self, fake_project, mock_package_name):
-        assert get_current_session(silent=True) is None  # no sessions yet
-
-        pattern = "There is no active Kedro session"
-        with pytest.raises(RuntimeError, match=pattern):
-            get_current_session()
-
+    def test_nested_sessions(self, fake_project, mock_package_name):
         configure_project(mock_package_name)
         session1 = KedroSession.create(mock_package_name, fake_project)
         session2 = KedroSession.create(mock_package_name, fake_project)
 
         with session1:
-            assert get_current_session() is session1
-
             pattern = (
                 "Cannot activate the session as another active session already exists"
             )
             with pytest.raises(RuntimeError, match=pattern), session2:
                 pass  # pragma: no cover
-
-        # session has been closed, so no current sessions should be available
-        assert get_current_session(silent=True) is None
-
-        with session2:
-            assert get_current_session() is session2
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])

@@ -1,6 +1,7 @@
 """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 """
+import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -10,6 +11,7 @@ import fsspec
 import pandas as pd
 
 from kedro.io.core import (
+    PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
     DataSetError,
     Version,
@@ -17,14 +19,16 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class ExcelDataSet(AbstractVersionedDataSet):
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 
     Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -60,14 +64,14 @@ class ExcelDataSet(AbstractVersionedDataSet):
 
     """
 
-    DEFAULT_LOAD_ARGS = {"engine": "xlrd"}
+    DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        engine: str = "xlsxwriter",
+        engine: str = "openpyxl",
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
@@ -83,11 +87,11 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
             engine: The engine used to write to excel files. The default
-                engine is 'xlsxwriter'.
+                engine is 'openpyxl'.
             load_args: Pandas options for loading Excel files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_excel.html
-                All defaults are preserved, but "engine", which is set to "xlrd".
+                All defaults are preserved, but "engine", which is set to "openpyxl".
                 Supports multi-sheet Excel files (include `sheet_name = None` in `load_args`).
             save_args: Pandas options for saving Excel files.
                 Here you can find all available arguments:
@@ -104,16 +108,12 @@ class ExcelDataSet(AbstractVersionedDataSet):
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
-                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
-                to pass to the filesystem's `open` method through nested keys
-                `open_args_load` and `open_args_save`.
-                Here you can find all available arguments for `open`:
-                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `wb` when saving.
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+
+        Raises:
+            DataSetError: If versioning is enabled while in append mode.
         """
         _fs_args = deepcopy(fs_args) or {}
-        _fs_open_args_load = _fs_args.pop("open_args_load", {})
-        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -121,7 +121,8 @@ class ExcelDataSet(AbstractVersionedDataSet):
             _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+        self._storage_options = {**_credentials, **_fs_args}
+        self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
         super().__init__(
             filepath=PurePosixPath(path),
@@ -139,11 +140,22 @@ class ExcelDataSet(AbstractVersionedDataSet):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
-        self._writer_args = self._save_args.pop("writer", {"engine": engine})
+        self._writer_args = self._save_args.pop("writer", {})  # type: ignore
+        self._writer_args.setdefault("engine", engine or "openpyxl")  # type: ignore
 
-        _fs_open_args_save.setdefault("mode", "wb")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
+        if version and self._writer_args.get("mode") == "a":  # type: ignore
+            raise DataSetError(
+                "`ExcelDataSet` doesn't support versioning in append mode."
+            )
+
+        if "storage_options" in self._save_args or "storage_options" in self._load_args:
+            logger.warning(
+                "Dropping `storage_options` for %s, "
+                "please specify them under `fs_args` or `credentials`.",
+                self._filepath,
+            )
+            self._save_args.pop("storage_options", None)
+            self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -156,10 +168,18 @@ class ExcelDataSet(AbstractVersionedDataSet):
         )
 
     def _load(self) -> Union[pd.DataFrame, Dict[str, pd.DataFrame]]:
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        load_path = str(self._get_load_path())
+        if self._protocol == "file":
+            # file:// protocol seems to misbehave on Windows
+            # (<urlopen error file not on local host>),
+            # so we don't join that back to the filepath;
+            # storage_options also don't work with local paths
+            return pd.read_excel(load_path, **self._load_args)
 
-        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return pd.read_excel(fs_file, **self._load_args)
+        load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+        return pd.read_excel(
+            load_path, storage_options=self._storage_options, **self._load_args
+        )
 
     def _save(self, data: Union[pd.DataFrame, Dict[str, pd.DataFrame]]) -> None:
         output = BytesIO()
@@ -175,7 +195,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
             else:
                 data.to_excel(writer, **self._save_args)
 
-        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+        with self._fs.open(save_path, mode="wb") as fs_file:
             fs_file.write(output.getvalue())
 
         self._invalidate_cache()

@@ -135,8 +135,10 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         self._set_pipeline(nodes, tags)
         if inputs or outputs or parameters or namespace:
             new_nodes = self._transform_pipeline(inputs, outputs, parameters, namespace)
-            self._set_pipeline(new_nodes, tags)
-            # TODO: don't really need to carry around tags here?
+            self._set_pipeline(
+                new_nodes, tags
+            )  # TODO: don't really need to carry around tags here?
+            # Or neater to do self.__init__(nodes, tags)?
 
     def _set_pipeline(self, nodes, tags):
         if nodes is None:

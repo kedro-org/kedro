@@ -1,3 +1,8 @@
+# Release 0.17.7
+
+## Bug fixes and other changes
+* Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).
+
 # Release 0.17.6
 
 ## Major features and improvements

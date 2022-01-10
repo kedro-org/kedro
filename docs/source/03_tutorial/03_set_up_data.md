@@ -14,9 +14,9 @@ The spaceflights tutorial makes use of fictional datasets of companies shuttling
 
 The spaceflight tutorial has three files and uses two data formats: `.csv` and `.xlsx`. Download and save the files to the `data/01_raw/` folder of your project directory:
 
-* [reviews.csv](https://quantumblacklabs.github.io/kedro/reviews.csv)
-* [companies.csv](https://quantumblacklabs.github.io/kedro/companies.csv)
-* [shuttles.xlsx](https://quantumblacklabs.github.io/kedro/shuttles.xlsx)
+* [reviews.csv](https://kedro-org.github.io/kedro/reviews.csv)
+* [companies.csv](https://kedro-org.github.io/kedro/companies.csv)
+* [shuttles.xlsx](https://kedro-org.github.io/kedro/shuttles.xlsx)
 
 Here are some examples of how you can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) to the `data/01_raw` directory inside your project:
 
@@ -27,11 +27,11 @@ Using [cURL in a Unix terminal](https://curl.se/download.html):
 
 ```bash
 # reviews
-curl -o data/01_raw/reviews.csv https://quantumblacklabs.github.io/kedro/reviews.csv
+curl -o data/01_raw/reviews.csv https://kedro-org.github.io/kedro/reviews.csv
 # companies
-curl -o data/01_raw/companies.csv https://quantumblacklabs.github.io/kedro/companies.csv
+curl -o data/01_raw/companies.csv https://kedro-org.github.io/kedro/companies.csv
 # shuttles
-curl -o data/01_raw/shuttles.xlsx https://quantumblacklabs.github.io/kedro/shuttles.xlsx
+curl -o data/01_raw/shuttles.xlsx https://kedro-org.github.io/kedro/shuttles.xlsx
 ```
 </details>
 
@@ -41,9 +41,9 @@ Using [cURL for Windows](https://curl.se/windows/):
 <summary><b>Click to expand</b></summary>
 
 ```bat
-curl -o data\01_raw\reviews.csv https://quantumblacklabs.github.io/kedro/reviews.csv
-curl -o data\01_raw\companies.csv https://quantumblacklabs.github.io/kedro/companies.csv
-curl -o data\01_raw\shuttles.xlsx https://quantumblacklabs.github.io/kedro/shuttles.xlsx
+curl -o data\01_raw\reviews.csv https://kedro-org.github.io/kedro/reviews.csv
+curl -o data\01_raw\companies.csv https://kedro-org.github.io/kedro/companies.csv
+curl -o data\01_raw\shuttles.xlsx https://kedro-org.github.io/kedro/shuttles.xlsx
 ```
 </details>
 
@@ -54,11 +54,11 @@ Using [Wget in a Unix terminal](https://www.gnu.org/software/wget/):
 
 ```bash
 # reviews
-wget -O data/01_raw/reviews.csv https://quantumblacklabs.github.io/kedro/reviews.csv
+wget -O data/01_raw/reviews.csv https://kedro-org.github.io/kedro/reviews.csv
 # companies
-wget -O data/01_raw/companies.csv https://quantumblacklabs.github.io/kedro/companies.csv
+wget -O data/01_raw/companies.csv https://kedro-org.github.io/kedro/companies.csv
 # shuttles
-wget -O data/01_raw/shuttles.xlsx https://quantumblacklabs.github.io/kedro/shuttles.xlsx
+wget -O data/01_raw/shuttles.xlsx https://kedro-org.github.io/kedro/shuttles.xlsx
 ```
 </details>
 
@@ -68,9 +68,9 @@ Using [Wget for Windows](https://eternallybored.org/misc/wget/):
 <summary><b>Click to expand</b></summary>
 
 ```bat
-wget -O data\01_raw\reviews.csv https://quantumblacklabs.github.io/kedro/reviews.csv
-wget -O data\01_raw\companies.csv https://quantumblacklabs.github.io/kedro/companies.csv
-wget -O data\01_raw\shuttles.xlsx https://quantumblacklabs.github.io/kedro/shuttles.xlsx
+wget -O data\01_raw\reviews.csv https://kedro-org.github.io/kedro/reviews.csv
+wget -O data\01_raw\companies.csv https://kedro-org.github.io/kedro/companies.csv
+wget -O data\01_raw\shuttles.xlsx https://kedro-org.github.io/kedro/shuttles.xlsx
 ```
 </details>
 

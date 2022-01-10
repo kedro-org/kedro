@@ -60,7 +60,7 @@ The naming convention for registration hooks is `register_<library_component>`.
 
 #### CLI hooks
 
-Lastly, Kedro defines a small set of CLI hooks, that inject additional behaviour around execution of a Kedro CLI command:
+Lastly, Kedro defines a small set of CLI hooks that inject additional behaviour around execution of a Kedro CLI command:
 
 * `before_command_run`
 

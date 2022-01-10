@@ -1,7 +1,7 @@
 # Single-machine deployment
 This topic explains how to deploy Kedro on a production server. You can use three alternative methods to deploy your Kedro pipelines:
 
-- Container based using [Kedro-Docker](https://github.com/kedro-org/kedro-docker)
+- Container based using [Kedro-Docker](https://github.com/kedro-org/kedro-plugins)
 - Package based using [`kedro package`](../09_development/03_commands_reference.md#deploy-the-project)
 - CLI based using the [Kedro CLI](../09_development/03_commands_reference.md)
 
@@ -9,7 +9,7 @@ This topic explains how to deploy Kedro on a production server. You can use thre
 ## Container based
 This approach uses containers, such as [`Docker`](https://www.docker.com/) or any other container solution, to build an image and run the entire Kedro project in your preferred environment.
 
-For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-docker) plugin to streamline the process, and [usage instructions are in the plugin's README.md](https://github.com/kedro-org/kedro-docker/blob/main/README.md). After you’ve built the Docker image for your project locally, transfer the image to the production server. You can do this as follows:
+For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins) plugin to streamline the process, and [usage instructions are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md). After you’ve built the Docker image for your project locally, transfer the image to the production server. You can do this as follows:
 
 ### How to use container registry
 A container registry allows you to store and share container images. [Docker Hub](https://www.docker.com/products/docker-hub) is one example of a container registry you can use for deploying your Kedro project. If you have a [Docker ID](https://docs.docker.com/docker-id) you can use it to push and pull your images from the Docker server using the following steps.

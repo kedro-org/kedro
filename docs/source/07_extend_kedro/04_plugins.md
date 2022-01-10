@@ -154,8 +154,8 @@ When you are ready to submit your code:
 
 ## Supported Kedro plugins
 
-- [Kedro-Docker](https://github.com/kedro-org/kedro-docker), a tool for packaging and shipping Kedro projects within containers
-- [Kedro-Airflow](https://github.com/kedro-org/kedro-airflow), a tool for converting your Kedro project into an Airflow project
+- [Kedro-Docker](https://github.com/kedro-org/kedro-plugins), a tool for packaging and shipping Kedro projects within containers
+- [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins), a tool for converting your Kedro project into an Airflow project
 - [Kedro-Viz](https://github.com/kedro-org/kedro-viz), a tool for visualising your Kedro pipelines
 
 ## Community-developed plugins

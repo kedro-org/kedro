@@ -17,7 +17,7 @@ Firstly make sure your project requirements are up to date by running:
 kedro build-reqs
 ```
 
-We then recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-docker) plugin to streamline the process of building the image. [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-docker/blob/main/README.md).
+We then recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins) plugin to streamline the process of building the image. [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
 
 
 After you’ve built the Docker image for your project locally, you would typically have to transfer the image to a container registry, such as DockerHub or AWS Elastic Container Registry, to be able to pull it on your remote servers. You can find instructions on how to do so [in our guide for single-machine deployment](./02_single_machine.md#how-to-use-container-registry).

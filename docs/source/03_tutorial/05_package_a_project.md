@@ -40,6 +40,6 @@ An executable, `kedro-spaceflights`, is also placed in the `bin/` subfolder of t
 
 ### Docker and Airflow
 
-We support the [Kedro-Docker](https://github.com/kedro-org/kedro-docker) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
+We support the [Kedro-Docker](https://github.com/kedro-org/kedro-plugins) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
 
-We also support [Kedro-Airflow](https://github.com/kedro-org/kedro-airflow) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.
+We also support [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.

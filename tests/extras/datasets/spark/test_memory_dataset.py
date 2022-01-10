@@ -31,37 +31,37 @@ def spark_data_frame(spark_session):
 
 
 @pytest.fixture
-def memory_data_set(spark_data_frame):
+def memory_dataset(spark_data_frame):
     return MemoryDataSet(data=spark_data_frame)
 
 
-def test_load_modify_original_data(memory_data_set, spark_data_frame):
+def test_load_modify_original_data(memory_dataset, spark_data_frame):
     """Check that the data set object is not updated when the original
     SparkDataFrame is changed."""
     spark_data_frame = _update_spark_df(spark_data_frame, 1, 1, -5)
-    assert not _check_equals(memory_data_set.load(), spark_data_frame)
+    assert not _check_equals(memory_dataset.load(), spark_data_frame)
 
 
 def test_save_modify_original_data(spark_data_frame):
     """Check that the data set object is not updated when the original
     SparkDataFrame is changed."""
-    memory_data_set = MemoryDataSet()
-    memory_data_set.save(spark_data_frame)
+    memory_dataset = MemoryDataSet()
+    memory_dataset.save(spark_data_frame)
     spark_data_frame = _update_spark_df(spark_data_frame, 1, 1, "new value")
 
-    assert not _check_equals(memory_data_set.load(), spark_data_frame)
+    assert not _check_equals(memory_dataset.load(), spark_data_frame)
 
 
-def test_load_returns_same_spark_object(memory_data_set, spark_data_frame):
+def test_load_returns_same_spark_object(memory_dataset, spark_data_frame):
     """Test that consecutive loads point to the same object in case of
     a SparkDataFrame"""
-    loaded_data = memory_data_set.load()
-    reloaded_data = memory_data_set.load()
+    loaded_data = memory_dataset.load()
+    reloaded_data = memory_dataset.load()
     assert _check_equals(loaded_data, spark_data_frame)
     assert _check_equals(reloaded_data, spark_data_frame)
     assert loaded_data is reloaded_data
 
 
-def test_str_representation(memory_data_set):
+def test_str_representation(memory_dataset):
     """Test string representation of the data set"""
-    assert "MemoryDataSet(data=<DataFrame>)" in str(memory_data_set)
+    assert "MemoryDataSet(data=<DataFrame>)" in str(memory_dataset)

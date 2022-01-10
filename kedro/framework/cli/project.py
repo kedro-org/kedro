@@ -6,7 +6,6 @@ import subprocess
 import sys
 import webbrowser
 from pathlib import Path
-from typing import Sequence
 
 import click
 from click import secho
@@ -15,7 +14,6 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
     _config_file_callback,
-    _get_requirements_in,
     _get_values_as_tuple,
     _reformat_load_versions,
     _split_params,
@@ -32,7 +30,7 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.utils import load_obj
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
-{src}/requirements.txt and run `kedro install`."""
+{src}/requirements.txt and run `pip install -r src/requirements.txt`."""
 LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
 unformatted imports, and unblackened Python code without modifying the files."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
@@ -44,13 +42,7 @@ FROM_NODES_HELP = """A list of node names which should be used as a starting poi
 TO_NODES_HELP = """A list of node names which should be used as an end point."""
 NODE_ARG_HELP = """Run only nodes with specified names."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
-Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`.
-This option cannot be used together with --parallel."""
-PARALLEL_ARG_HELP = """(DEPRECATED) Run the pipeline using the `ParallelRunner`.
-If not specified, use the `SequentialRunner`. This flag cannot be used together
-with --runner. In Kedro 0.18.0, `-p` will be an alias for `--pipeline` and the
-`--parallel` flag will no longer exist. Instead, the parallel runner should be used by
-specifying `--runner=ParallelRunner` (or `-r ParallelRunner`)."""
+Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`."""
 ASYNC_ARG_HELP = """Load and save node inputs and outputs asynchronously
 with threads. If not specified, load and save datasets synchronously."""
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
@@ -68,18 +60,8 @@ example: param1:value1,param2:value2. Each parameter is split by the first comma
 so parameter values are allowed to contain colons, parameter keys are not.
 To pass a nested dictionary as parameter, separate keys by '.', example:
 param_group.param1:value1."""
-
-
-def _build_reqs(source_path: Path, args: Sequence[str] = ()):
-    """Run `pip-compile requirements.in` command.
-
-    Args:
-        source_path: Path to the project `src` folder.
-        args: Optional arguments for `pip-compile` call, e.g. `--generate-hashes`.
-
-    """
-    requirements_in = _get_requirements_in(source_path)
-    python_call("piptools", ["compile", "-q", *args, str(requirements_in)])
+INPUT_FILE_HELP = """Name of the requirements file to compile."""
+OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
 
 
 # pylint: disable=missing-function-docstring
@@ -135,60 +117,6 @@ def lint(
     python_call("isort", (*check_flag, "-rc") + files)  # type: ignore
 
 
-@project_group.command()
-@click.option(
-    "--build-reqs/--no-build-reqs",
-    "compile_flag",
-    default=None,
-    help="Run `pip-compile` on project requirements before install. "
-    "By default runs only if `src/requirements.in` file doesn't exist.",
-)
-@click.pass_obj  # this will pass the metadata as first argument
-def install(metadata: ProjectMetadata, compile_flag):
-    """Install project dependencies from both requirements.txt
-    and environment.yml (DEPRECATED)."""
-
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro install` will be deprecated in Kedro 0.18.0. "
-        "In the future use `pip install -r src/requirements.txt` instead. "
-        "If you were running `kedro install` with the `--build-reqs` flag, "
-        "we recommend running `kedro build-reqs` followed by `pip install -r src/requirements.txt`"
-    )
-    click.secho(deprecation_message, fg="red")
-
-    # we cannot use `context.project_path` as in other commands since
-    # context instantiation might break due to missing dependencies
-    # we attempt to install here
-    # pylint: disable=consider-using-with
-    source_path = metadata.source_dir
-    environment_yml = source_path / "environment.yml"
-    requirements_in = source_path / "requirements.in"
-    requirements_txt = source_path / "requirements.txt"
-
-    if environment_yml.is_file():
-        call(["conda", "env", "update", "--file", str(environment_yml), "--prune"])
-
-    default_compile = bool(compile_flag is None and not requirements_in.is_file())
-    do_compile = compile_flag or default_compile
-    if do_compile:
-        _build_reqs(source_path)
-
-    pip_command = ["install", "-U", "-r", str(requirements_txt)]
-
-    if os.name == "posix":
-        python_call("pip", pip_command)
-    else:
-        command = [sys.executable, "-m", "pip"] + pip_command
-        proc = subprocess.Popen(
-            command, creationflags=subprocess.CREATE_NEW_CONSOLE, stderr=subprocess.PIPE
-        )
-        _, errs = proc.communicate()
-        if errs:
-            secho(errs.decode(), fg="red")
-            raise click.exceptions.Exit(code=1)
-    secho("Requirements installed!", fg="green")
-
-
 @forward_command(project_group, forward_help=True)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
@@ -212,11 +140,27 @@ def package(metadata: ProjectMetadata):
     """Package the project as a Python egg and wheel."""
     source_path = metadata.source_dir
     call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
+        [
+            sys.executable,
+            "setup.py",
+            "clean",
+            "--all",
+            "bdist_egg",
+            "--dist-dir",
+            "../dist",
+        ],
         cwd=str(source_path),
     )
     call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
+        [
+            sys.executable,
+            "setup.py",
+            "clean",
+            "--all",
+            "bdist_wheel",
+            "--dist-dir",
+            "../dist",
+        ],
         cwd=str(source_path),
     )
 
@@ -258,17 +202,53 @@ def build_docs(metadata: ProjectMetadata, open_docs):
 
 
 @forward_command(project_group, name="build-reqs")
+@click.option(
+    "--input-file",
+    "input_file",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+    multiple=False,
+    help=INPUT_FILE_HELP,
+)
+@click.option(
+    "--output-file",
+    "output_file",
+    multiple=False,
+    help=OUTPUT_FILE_HELP,
+)
 @click.pass_obj  # this will pass the metadata as first argument
 def build_reqs(
-    metadata: ProjectMetadata, args, **kwargs
+    metadata: ProjectMetadata, input_file, output_file, args, **kwargs
 ):  # pylint: disable=unused-argument
-    """Build the project dependency requirements."""
+    """Run `pip-compile` on src/requirements.txt or the user defined input file and save
+    the compiled requirements to src/requirements.lock or the user defined output file.
+    """
+
     source_path = metadata.source_dir
-    _build_reqs(source_path, args)
+    input_file = Path(input_file or source_path / "requirements.txt")
+    output_file = Path(output_file or source_path / "requirements.lock")
+
+    if input_file.is_file():
+        python_call(
+            "piptools",
+            [
+                "compile",
+                *args,
+                str(input_file),
+                "--output-file",
+                str(output_file),
+            ],
+        )
+
+    else:
+        raise FileNotFoundError(
+            f"File `{input_file}` not found in the project. "
+            "Please specify another input or create the file and try again."
+        )
+
     secho(
-        "Requirements built! Please update requirements.in "
+        f"Requirements built! Please update {input_file.name} "
         "if you'd like to make a change in your project's dependencies, "
-        "and re-run build-reqs to generate the new requirements.txt.",
+        f"and re-run build-reqs to generate the new {output_file.name}.",
         fg="green",
     )
 
@@ -326,7 +306,6 @@ def activate_nbstripout(
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
-@click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
 @env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
@@ -338,7 +317,7 @@ def activate_nbstripout(
     help=LOAD_VERSION_HELP,
     callback=_reformat_load_versions,
 )
-@click.option("--pipeline", type=str, default=None, help=PIPELINE_ARG_HELP)
+@click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
 @click.option(
     "--config",
     "-c",
@@ -349,11 +328,10 @@ def activate_nbstripout(
 @click.option(
     "--params", type=str, default="", help=PARAMS_ARG_HELP, callback=_split_params
 )
-# pylint: disable=too-many-arguments,unused-argument,too-many-locals
+# pylint: disable=too-many-arguments,unused-argument
 def run(
     tag,
     env,
-    parallel,
     runner,
     is_async,
     node_names,
@@ -367,23 +345,7 @@ def run(
     params,
 ):
     """Run the pipeline."""
-    if parallel and runner:
-        raise KedroCliError(
-            "Both --parallel and --runner options cannot be used together. "
-            "Please use either --parallel or --runner."
-        )
-    runner = runner or "SequentialRunner"
-    if parallel:
-        deprecation_message = (
-            "DeprecationWarning: The behaviour of --parallel and -p flags will change. "
-            "In Kedro 0.18.0, `-p` will be an alias for `--pipeline` and the "
-            "`--parallel` flag will no longer exist. Instead, the parallel runner "
-            "should be used by specifying `--runner=ParallelRunner` (or "
-            "`-r ParallelRunner`)."
-        )
-        click.secho(deprecation_message, fg="red")
-        runner = "ParallelRunner"
-    runner_class = load_obj(runner, "kedro.runner")
+    runner = load_obj(runner or "SequentialRunner", "kedro.runner")
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
@@ -391,7 +353,7 @@ def run(
     with KedroSession.create(env=env, extra_params=params) as session:
         session.run(
             tags=tag,
-            runner=runner_class(is_async=is_async),
+            runner=runner(is_async=is_async),
             node_names=node_names,
             from_nodes=from_nodes,
             to_nodes=to_nodes,

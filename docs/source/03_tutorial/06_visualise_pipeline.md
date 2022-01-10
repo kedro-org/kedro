@@ -13,7 +13,7 @@ pip install kedro-viz
 
 You should be in your project root directory, and once Kedro-Viz is installed you can visualise your pipeline by running:
 ```bash
-kedro viz
+kedro vizc
 ```
 
 This command will run a server on http://127.0.0.1:4141 that will open up your visualisation on a browser. You should

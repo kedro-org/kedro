@@ -108,7 +108,7 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
 
 
 ```eval_rst
-.. note:: Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/python/plotly-express/) charts.
+  note:: Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/python/plotly-express/) charts.
 ```
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.

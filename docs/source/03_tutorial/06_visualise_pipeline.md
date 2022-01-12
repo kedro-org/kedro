@@ -108,12 +108,12 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
 
 
 ```eval_rst
-  .. note:: Kedro's Plotly integration only supports `Plotly Express <https://plotly.com/python/plotly-express/>` charts. 
+  .. note:: Kedro's Plotly integration only supports `Plotly Express <https://plotly.com/python/plotly-express/>` charts.
 ```
 
-You need to update requirements.txt in your kedro project and add the following datasets to enable plotly for your project. 
+You need to update requirements.txt in your Kedro project and add the following datasets to enable plotly for your project.
 
- `kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.xx.x`
+ `kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.17.6`
 
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
@@ -143,7 +143,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-You need to then configure the plot in `catalog.yml` 
+You need to then configure the plot in `catalog.yml`
 
 ```yaml
 shuttle_speed_comparison_plot:
@@ -192,7 +192,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-For `plotly.JSONDataSet`, you will also need to specify the output type in `catalog.yml` like below. 
+For `plotly.JSONDataSet`, you will also need to specify the output type in `catalog.yml` like below.
 
 ```yaml
 shuttle_speed_comparison_plot:

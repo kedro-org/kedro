@@ -2,6 +2,8 @@
 
 Experiment tracking is the process of saving all machine-learning related experiment information so that it is easy to find and compare past runs.[Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) supports native experiment tracking from [version 4.1.1](https://github.com/quantumblacklabs/kedro-viz/releases/tag/v4.1.1) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and compare your experiments directly from the Kedro-Viz web app. 
 
+![](../meta/images/experiment-tracking_demo_small.gif)
+
 Enabling experiment tracking features on Kedro-Viz relies on [setting up a session store to capture experiment metadata](#set-up-session-store), [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets) and [modifying your nodes and pipelines to output those metrics](#setting-up-your-nodes-and-pipelines-to-log-metrics). 
 
 This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project that is outlined in [this tutorial](../03_tutorial/01_spaceflights_tutorial.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../03_tutorial/02_experiment_tracking.md) for your Kedro project. 

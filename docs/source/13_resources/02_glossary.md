@@ -33,7 +33,7 @@ You can use Kedro-Viz to visualise your Kedro data pipelines:
 * Get a clear picture when you have lots of datasets and nodes by using tags to visualise sub-pipelines
 * Search for nodes and datasets
 
-[Further information from the Kedro-Viz repository](https://github.com/quantumblacklabs/kedro-viz) and [Kedro tutorial documentation](../03_tutorial/06_visualise_pipeline)
+[Further information from the Kedro-Viz repository](https://github.com/kedro-org/kedro-viz) and [Kedro tutorial documentation](../03_tutorial/06_visualise_pipeline)
 
 ## Layers (data engineering convention)
 According to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention), a pipeline can be broken up into different layers according to how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or processing has happened.

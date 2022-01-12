@@ -27,7 +27,7 @@ def _version_mismatch_error(project_version) -> str:
     return (
         f"Your Kedro project version {project_version} does not match Kedro package "
         f"version {kedro_version} you are running. Make sure to update your project "
-        f"template. See https://github.com/quantumblacklabs/kedro/blob/main/RELEASE.md "
+        f"template. See https://github.com/kedro-org/kedro/blob/main/RELEASE.md "
         f"for how to migrate your Kedro project."
     )
 
@@ -67,7 +67,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             f"Could not find the project configuration file '{_PYPROJECT}' in {project_path}. "
             f"If you have created your project with Kedro "
             f"version <0.17.0, make sure to update your project template. "
-            f"See https://github.com/quantumblacklabs/kedro/blob/main/RELEASE.md"
+            f"See https://github.com/kedro-org/kedro/blob/main/RELEASE.md"
             f"#migration-guide-from-kedro-016-to-kedro-0170 "
             f"for how to migrate your Kedro project."
         )

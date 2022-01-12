@@ -1,8 +1,10 @@
 # Set up experiment tracking
 
-[Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) supports native experiment tracking from [version 4.1.0](https://github.com/quantumblacklabs/kedro-viz/releases/tag/v4.1.0) onwards. On having enabled Experiment tracking on your Kedro project, you will be able to access, edit and compare your runs directly from the Kedro-Viz web app.
+Experiment tracking is the process of saving all machine-learning related experiment information so that it is easy to find and compare past runs.[Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) supports native experiment tracking from [version 4.1.0](https://github.com/quantumblacklabs/kedro-viz/releases/tag/v4.1.0) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and compare your experiments directly from the Kedro-Viz web app. 
 
-This tutorial will provide a step by step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz , using the starter project Kedro-spaceflights as outlined in [this tutorial](../03_tutorial/01_spaceflights_tutorial.md). You can also jump directly to [this section](../03_tutorial/02_experiment_tracking.md) for direct reference in setting up experiment tracking for your Kedro project.
+Enabling experiment tracking features on Kedro-Viz relies on [setting up a session store to capture experiment metadata](#set-up-session-store), [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets) and [modifying your nodes and pipelines to output those metrics](#setting-up-your-nodes-and-pipelines-to-log-metrics). 
+
+This tutorial will provide a step by step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz, using the starter project Kedro-spaceflights as outlined in [this tutorial](../03_tutorial/01_spaceflights_tutorial.md). You can also jump directly to [this section](../03_tutorial/02_experiment_tracking.md) for direct reference in setting up experiment tracking for your Kedro project.
 
 ## Project setup
 
@@ -16,7 +18,7 @@ When prompted for a project name, enter `Kedro Experiment Tracking Tutorial`. Su
 
 ## Set up session store
 
-Within the domain of experiemnt tracking in Kedro, each Kedro run is considered a session. All logged metrics and details of that Kedro run (such as the timestamp, git username and branch) are stored within the session store database, which is a SQLite database that is automatically generated on your first Kedro run after setting up the session store in your Kedro project.
+In the domain of experiment tracking, each pipeline run is considered a session. A session store records all related metadata for each pipeline run, from logged metrics to other run-related data such as timestamp, git username and branch. The session store is a SQLite database that gets generated during your first Kedro run after it has been set up in your project.
 
 To set up the session store, go to the `settings.py` file under `/src` and add the following:
 
@@ -29,7 +31,7 @@ SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data")}
 
 ## Set up tracking datasets
 
-There are 2 types of tracking datatsets: [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data.
+There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data like boolean or text-based data.
 
 Let's set up the following 2 datasets to log our r2 scores and parameters for each run by adding the following in `catalog.yml` under `/conf/base`:
 
@@ -124,21 +126,21 @@ Kedro run
 
 After the run completes, under `data/09_tracking`, you will now see 2 folders, `companies_column.json` and `metrics.json`. On performing a Kedro run after setting up the tracking datasets, Kedro will generate a folder under the dataset name for each tracked dataset, with each folder containing another folder named under the timestamp of the run. Each subsequent Kedro run will generate a new folder named after the timestamp of the run, in the same directory of the tracked dataset.
 
-You will also now see the `session_store.db` generated from your first Kedro run after enabling experiment tracking, which is used to store all the generated run metadata, alongside the tracking dataset, to be exposed via the GraphQL endpoint for Kedro-Viz.
+You will also see the `session_store.db` generated from your first Kedro run after enabling experiment tracking, which is used to store all the generated run metadata, alongside the tracking dataset, to be used for exposing experiment tracking to Kedro-Viz.
 
 ![](../meta/images/experiment-tracking_folder.png)
 
-Try to perform Kedro run a few times to generate a larger set of experiment data. You can also play around with setting up different tracking datasets, and check the logged data via the genereated JSON data files.
+Try to execute `Kedro run` a few times to generate a larger set of experiment data. You can also play around with setting up different tracking datasets, and check the logged data via the generated JSON data files.
 
 ## Accessing Run data and comparing runs on Kedro-Viz
 
-Here comes the fun part of accessing your run data on Kedro-Viz. Having ensured that you are on >=Kedro-Viz4.1.1 (you can confirm your Kedro-Viz version by running `Kedro info`), run
+Here comes the fun part of accessing your run data on Kedro-Viz. Having ensured that you are using Kedro-Viz `>=4.1.1` (you can confirm your Kedro-Viz version by running `Kedro info`), run
 
 ```bash
 kedro viz
 ```
 
-On spinning up Kedro-Viz, you will now see an `experiment tracking` icon on your left. Clicking the icon will bring you the the experiment tracking page (you can also access the page via `http://127.0.0.1:4141/runsList`), where you will now see the set of experiment data generated from your previous Kedro runs, as shown below:
+On spinning up Kedro-Viz, you will now see an `experiment tracking` icon on your left. Clicking the icon will bring you to the experiment tracking page (you can also access the page via `http://127.0.0.1:4141/runsList`), where you will now see the set of experiment data generated from your previous Kedro runs, as shown below:
 
 ![](../meta/images/experiment-tracking_runsList.png)
 
@@ -148,7 +150,7 @@ You will now be able to access, compare and pin your runs by toggling the `Compa
 
 You can also access a more detailed demo [here](https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
 
-The Kedro-Viz team will be adding new features in the coming weeks, such as allowing the editing your run title, adding notes, bookmarking and searching your runs, etc. Definitely keep an eye out on the [Kedro-Viz release page](https://github.com/quantumblacklabs/kedro-viz/releases) for the upcoming releases. 
+s
 
 ## Feedback
 

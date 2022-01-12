@@ -213,7 +213,7 @@ linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/quantumblacklabs/kedro/tree/main/docs/source",
+    "github_url": "https://github.com/kedro-org/kedro/tree/main/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -301,7 +301,7 @@ nbsphinx_epilog = """
 .. note::
 
      Found a bug, or didn't find what you were looking for? 🙏 `Please file a
-     ticket <https://github.com/quantumblacklabs/kedro/issues/new/choose>`_
+     ticket <https://github.com/kedro-org/kedro/issues/new/choose>`_
 """
 
 # -- NBconvert kedro config -------------------------------------------------
@@ -388,8 +388,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # singular
         replacements += [
-            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj)
-            for obj in objects
+            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj) for obj in objects
         ]
 
         # Look for recognised class names/function names which are NOT
@@ -404,8 +403,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # then singular
         suggestions += [
-            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj)
-            for obj in objects
+            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj) for obj in objects
         ]
 
     return replacements, suggestions

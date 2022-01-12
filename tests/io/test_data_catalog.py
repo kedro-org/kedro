@@ -294,7 +294,7 @@ class TestDataCatalog:
     def test_add_feed_dict_should_grow_linearly(self, mocker, data_catalog_from_config):
         """Check number of calls to `_sub_nonword_chars` when adding feed dict
         should grow linearly with the number of keys in the dict.
-        Simulate this issue: https://github.com/quantumblacklabs/kedro/issues/951
+        Simulate this issue: https://github.com/kedro-org/kedro/issues/951
         """
         mock_sub_nonword_chars = mocker.patch(
             "kedro.io.data_catalog._sub_nonword_chars"

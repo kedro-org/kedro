@@ -60,7 +60,7 @@ class DataCatalogWithDefault(DataCatalog):
         warnings.warn(
             "`DataCatalogWithDefault` is now deprecated and will be removed in Kedro 0.18.0."
             "For more information, please visit "
-            "https://github.com/quantumblacklabs/kedro/blob/main/RELEASE.md",
+            "https://github.com/kedro-org/kedro/blob/main/RELEASE.md",
             DeprecationWarning,
         )
 

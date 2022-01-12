@@ -49,7 +49,7 @@ kedro pipeline create <pipeline_name>
 
 ### What does the ``kedro pipeline create`` do?
 
-Running the `pipeline create` command adds the following folder structure to your project. For your convenience Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters and appropriate `tests` structure. You also don't have to add those pesky `__init__.py` files yourself, which is handy 😅.
+Running the `kedro pipeline create` command adds boilerplate pipeline folders and files for the created pipeline to your project. For your convenience Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters and appropriate `tests` structure. You also don't have to add those pesky `__init__.py` files yourself, which is handy 😅. You can see the generated folder structure below: 
 
 <details>
 <summary><b>Click to see the generated folder structure</b></summary>
@@ -82,15 +82,15 @@ Running the `pipeline create` command adds the following folder structure to you
 
 </details>
 
-If you want to do the reverse and remove a modular pipeline, you can use ``kedro pipeline delete`` to do so.
+If you want to do the reverse and remove a modular pipeline, you can use ``kedro pipeline delete <pipeline_name>`` to do so.
 
 ### Ensuring portability
 
-Kedro modular pipelines are shareable between Kedro codebases via [micro-packaging](04_micro_packaging.md), but you need to follow a couple of rules to ensure portability:
+Modular pipelines are shareable between Kedro codebases via [micro-packaging](04_micro_packaging.md), but you need to follow a couple of rules to ensure portability:
 
 * Modular pipelines should **not** depend on the main Python package as this would break portability to another project.
 * Catalog references are not packaged when sharing/consuming modular pipelines.
-* Kedro will only look for top level configuration `/conf/`, therefore providing a configuration folder within the pipeline folder will have no effect.
+* Kedro will only look for top-level configuration in `conf/`; placing a configuration folder within the pipeline folder will have no effect.
 * It is recommended that you document the configuration required (parameters and catalog) in the local `README.md` file for any downstream consumers.
 
 ### Providing modular pipeline specific dependencies
@@ -200,7 +200,7 @@ Providing this input/output override will join up the pipeline nicely:
 Reusing pipelines for slightly different purposes can be a real accelerator for teams and organisations when they reach a certain scale.
 
 * Namespaces allow you to '[instantiate](https://en.wikipedia.org/wiki/Instance_(computer_science))' the same pipeline multiple times and keep operations isolated.
-* Like one provides arguments to a class' constructor, you can provide overriding inputs/outputs/parameters to the `pipeline()` wrapper
+* Like one provides arguments to a class' constructor, you can provide overriding inputs/outputs/parameters to the `pipeline()` wrapper.
 
 <details>
 <summary>Click here to see a worked example</summary>

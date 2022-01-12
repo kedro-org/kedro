@@ -314,7 +314,7 @@ To install this script simply download it into your default IPython config direc
 
 ```bash
 mkdir -p ~/.ipython/profile_default/startup
-wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/quantumblacklabs/kedro/main/tools/ipython/ipython_loader.py
+wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/kedro-org/kedro/main/tools/ipython/ipython_loader.py
 ```
 
 ### Prerequisites
@@ -393,6 +393,6 @@ If the `KEDRO_ENV` environment variable is specified, the startup script loads t
 
 ### Kedro-Viz and Jupyter
 
-If you have [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) installed then you can display an interactive visualisation of your pipeline directly in your notebook using the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%run_viz`. You should see a visualisation like the following:
+If you have [Kedro-Viz](https://github.com/kedro-org/kedro-viz) installed then you can display an interactive visualisation of your pipeline directly in your notebook using the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%run_viz`. You should see a visualisation like the following:
 
 ![](../meta/images/jupyter_notebook_kedro_viz.png)

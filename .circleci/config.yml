@@ -326,7 +326,7 @@ jobs:
               if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
               then
                   echo "Starting the release of Kedro ${KEDRO_VERSION}!"
-                  ./tools/circleci/circle-release.sh github/quantumblacklabs/kedro
+                  ./tools/circleci/circle-release.sh github/kedro-org/kedro
               else
                   echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
               fi
@@ -411,7 +411,7 @@ jobs:
             fi
       - run:
           name: Tag and publish release on Github
-          command: ./tools/circleci/github_scripts/release.sh quantumblacklabs kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
+          command: ./tools/circleci/github_scripts/release.sh kedro-org kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
       - run:
           name: Publish to PyPI
           command: |
@@ -436,7 +436,7 @@ jobs:
           name: Trigger kedro-viz build
           command: |
             curl --location --request POST \
-              --url https://circleci.com/api/v2/project/github/quantumblacklabs/kedro-viz/pipeline \
+              --url https://circleci.com/api/v2/project/github/kedro-org/kedro-viz/pipeline \
               --header "Circle-Token: $CIRCLE_VIZ_BUILD_TOKEN" \
               --header 'content-type: application/json' \
               --data '{"branch":"main"}'

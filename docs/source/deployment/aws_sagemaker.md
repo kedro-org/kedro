@@ -15,7 +15,7 @@ Amazon SageMaker is a fully-managed service and its features are covered by the 
 To use Amazon SageMaker, make sure you have the following prerequisites in place:
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 - [Configured AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) on your local machine
-- Generated Kedro project called **Kedro Tutorial** using [Kedro Spaceflights starter](https://github.com/quantumblacklabs/kedro-starters/tree/main/spaceflights/)
+- Generated Kedro project called **Kedro Tutorial** using [Kedro Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights/)
 - Completed the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md)
 
 ## Prepare the environment

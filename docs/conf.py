@@ -196,7 +196,7 @@ linkcheck_ignore = [
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
-    "https://github.com/quantumblacklabs/kedro-starters/tree/main/standalone-datacatalog",  # temporary until 0.18
+    "https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog",  # temporary until 0.18
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
@@ -219,7 +219,7 @@ linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/quantumblacklabs/kedro/tree/main/docs/source",
+    "github_url": "https://github.com/kedro-org/kedro/tree/main/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -307,7 +307,7 @@ nbsphinx_epilog = """
 .. note::
 
      Found a bug, or didn't find what you were looking for? 🙏 `Please file a
-     ticket <https://github.com/quantumblacklabs/kedro/issues/new/choose>`_
+     ticket <https://github.com/kedro-org/kedro/issues/new/choose>`_
 """
 
 # -- NBconvert kedro config -------------------------------------------------
@@ -392,8 +392,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # singular
         replacements += [
-            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj)
-            for obj in objects
+            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj) for obj in objects
         ]
 
         # Look for recognised class names/function names which are NOT
@@ -408,8 +407,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # then singular
         suggestions += [
-            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj)
-            for obj in objects
+            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj) for obj in objects
         ]
 
     return replacements, suggestions

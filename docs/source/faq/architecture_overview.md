@@ -21,7 +21,7 @@ As a data pipeline developer, you will interact with a Kedro project, which cons
 
 ### Kedro starter
 
-You can use a [Kedro starter](../get_started/starters) to generate a Kedro project that contains boilerplate  code. We maintain a set of [official starters](https://github.com/quantumblacklabs/kedro-starters/) but you can also use a custom starter of your choice.
+You can use a [Kedro starter](../get_started/starters) to generate a Kedro project that contains boilerplate  code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
 
 ### Kedro library
 
@@ -43,4 +43,4 @@ Kedro framework serves as the interface between a Kedro project and Kedro librar
 
 ### Kedro extension
 
-You can also extend Kedro behaviour in your project using a Kedro extension, which can be a custom starter, a Python library with extra hooks implemenations, extra CLI commands such as [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) or a custom library component implementation.
+You can also extend Kedro behaviour in your project using a Kedro extension, which can be a custom starter, a Python library with extra hooks implemenations, extra CLI commands such as [Kedro-Viz](https://github.com/kedro-org/kedro-viz) or a custom library component implementation.

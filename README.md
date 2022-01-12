@@ -1,11 +1,11 @@
-![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/kedro_banner.png)
+![Kedro Logo Banner](https://raw.githubusercontent.com/kedro-org/kedro/develop/static/img/kedro_banner.png)
 [![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/quantumblacklabs/kedro/blob/main/LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)
 [![Discord Server](https://img.shields.io/discord/778216384475693066.svg?color=7289da&label=Kedro%20Discord&logo=discord&style=flat-square)](https://discord.gg/akJDeVaxnB)
-![CircleCI - Main Branch](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/main?label=main)
-![Develop Branch Build](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop)
+![CircleCI - Main Branch](https://img.shields.io/circleci/build/github/kedro-org/kedro/main?label=main)
+![Develop Branch Build](https://img.shields.io/circleci/build/github/kedro-org/kedro/develop?label=develop)
 [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://kedro.readthedocs.io/)
 
 
@@ -33,15 +33,15 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/get_started/prere
 
 ## What are the main features of Kedro?
 
-![Kedro-Viz Pipeline Visualisation](https://github.com/quantumblacklabs/kedro-viz/blob/main/.github/img/banner.png)
-*A pipeline visualisation generated using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)*
+![Kedro-Viz Pipeline Visualisation](https://github.com/kedro-org/kedro-viz/blob/main/.github/img/banner.png)
+*A pipeline visualisation generated using [Kedro-Viz](https://github.com/kedro-org/kedro-viz)*
 
 
 | Feature | What is this? |
 |----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Project Template | A standard, modifiable and easy-to-use project template based on [Cookiecutter Data Science](https://github.com/drivendata/cookiecutter-data-science/). |
 | Data Catalog | A series of lightweight data connectors used to save and load data across many different file formats and file systems, including local and network file systems, cloud object stores, and HDFS. The Data Catalog also includes data and model versioning for file-based systems. |
-| Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz). |
+| Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/kedro-org/kedro-viz). |
 | Coding Standards | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`flake8`](https://github.com/PyCQA/flake8), [`isort`](https://github.com/PyCQA/isort) and [`black`](https://github.com/psf/black) and make use of the standard Python logging library. |
 | Flexible Deployment | Deployment strategies that include single or distributed-machine deployment as well as additional support for deploying on Argo, Prefect, Kubeflow, AWS Batch and Databricks. |
 
@@ -66,12 +66,12 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 
 ## The humans behind Kedro
 
-Kedro is maintained by [a product team](https://kedro.readthedocs.io/en/stable/faq/faq.html) and a number of [contributors from across the world](https://github.com/quantumblacklabs/kedro/releases).
+Kedro is maintained by [a product team](https://kedro.readthedocs.io/en/stable/faq/faq.html) and a number of [contributors from across the world](https://github.com/kedro-org/kedro/releases).
 
 
 ## Can I contribute?
 
-Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](https://github.com/quantumblacklabs/kedro/blob/main/CONTRIBUTING.md).
+Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
 
 
 ## Where can I learn more?
@@ -125,4 +125,4 @@ Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/t
 
 ## How can I cite Kedro?
 
-If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/quantumblacklabs/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files).
+If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/kedro-org/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files).

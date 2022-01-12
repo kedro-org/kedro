@@ -28,7 +28,7 @@ pip install -r src/requirements.txt
 
 ## Workflow dependencies
 
-To install all of the dependencies recorded in Kedro's [`setup.py`](https://github.com/quantumblacklabs/kedro/blob/develop/setup.py) run:
+To install all of the dependencies recorded in Kedro's [`setup.py`](https://github.com/kedro-org/kedro/blob/develop/setup.py) run:
 
 ```bash
 pip install "kedro[all]"
@@ -46,7 +46,7 @@ Data types are broken into groups e.g. `pandas`, `spark` and `pickle`. Each grou
 pip install "kedro[<group>]"
 ```
 
-This installs Kedro and dependencies related to the data type group. An example of this could be a workflow that depends on the data types in `pandas`. Run `pip install "kedro[pandas]"` to install Kedro and the dependencies for the data types in the [`pandas` group](https://github.com/quantumblacklabs/kedro/tree/develop/kedro/extras/datasets/pandas).
+This installs Kedro and dependencies related to the data type group. An example of this could be a workflow that depends on the data types in `pandas`. Run `pip install "kedro[pandas]"` to install Kedro and the dependencies for the data types in the [`pandas` group](https://github.com/kedro-org/kedro/tree/develop/kedro/extras/datasets/pandas).
 
 #### Install dependencies at a type-level
 

@@ -152,7 +152,7 @@ setup(
     license="Apache Software License (Apache 2.0)",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/quantumblacklabs/kedro",
+    url="https://github.com/kedro-org/kedro",
     python_requires=">=3.7, <3.10",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,

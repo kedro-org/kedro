@@ -36,7 +36,7 @@ _STARTER_ALIASES = {
     "pyspark-iris",
     "spaceflights",
 }
-_STARTERS_REPO = "git+https://github.com/quantumblacklabs/kedro-starters.git"
+_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,

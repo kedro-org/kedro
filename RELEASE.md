@@ -23,13 +23,13 @@
 | `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
 
 ## Breaking changes to the API
-* Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)
+* Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
 * `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
 * `pandas.ParquetDataSet` now calls `pd.to_parquet()` upon saving. Note that the argument `partition_cols` is not supported.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
 * Removed deprecated functions `load_context` and `get_project_context`.
-* `spark.SparkHiveDataSet` API has been updated to reflect `spark.SparkDataSet`. The `write_mode=insert` option has also been replaced with `write_mode=append` as per Spark styleguide. This change addresses [Issue 725](https://github.com/quantumblacklabs/kedro/issues/725) and [Issue 745](https://github.com/quantumblacklabs/kedro/issues/745). Additionally, `upsert` mode now leverages `checkpoint` functionality and requires a valid `checkpointDir` be set for current `SparkContext`.
+* `spark.SparkHiveDataSet` API has been updated to reflect `spark.SparkDataSet`. The `write_mode=insert` option has also been replaced with `write_mode=append` as per Spark styleguide. This change addresses [Issue 725](https://github.com/kedro-org/kedro/issues/725) and [Issue 745](https://github.com/kedro-org/kedro/issues/745). Additionally, `upsert` mode now leverages `checkpoint` functionality and requires a valid `checkpointDir` be set for current `SparkContext`.
 * Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
 * Added `CONFIG_LOADER_ARGS` to `settings.py` to facilitate the provision of additional keyword arguments to the constructor of the project `config_loader`. The default option for `CONFIG_LOADER_ARGS` is an empty dictionary.
 * `yaml.YAMLDataSet` can no longer save a `pandas.DataFrame` directly, but it can save a dictionary. Use `pandas.DataFrame.to_dict()` to convert your `pandas.DataFrame` to a dictionary before you attempt to save it to YAML.

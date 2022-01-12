@@ -136,6 +136,8 @@ Sometimes two pipelines need to be connected, but do not share any catalog depen
 <details>
 <summary>Click here to see a worked example</summary>
 
+In this example the pipeline make us a Lunch. The 'verbs' (defrost, eat) are Python functions and the inputs/outputs are food at different points of the process (frozen, thawed, food).
+
 ```python
 cook_pipeline = Pipeline(
     [
@@ -197,8 +199,9 @@ Providing this input/output override will join up the pipeline nicely:
 
 ## Using a modular pipeline multiple times
 
-Reusing pipelines for slightly different purposes can be a real accelerator for teams and organisations when they reach a certain scale.
+Reusing pipelines for slightly different purposes can be a real accelerator for teams and organisations when they reach a certain scale. In the real world, one could imagine pipelines with responsibilities like profiling or feature engineering being reused within the same project or even across projects via [micro-packaging](04_micro_packaging.md).
 
+* In an ideal world, we would like to use the `cook_pipeline` twice as you would `defrost` and `grill` multiple meals beyond the `veg` currently hard-coded.
 * Namespaces allow you to '[instantiate](https://en.wikipedia.org/wiki/Instance_(computer_science))' the same pipeline multiple times and keep operations isolated.
 * Like one provides arguments to a class' constructor, you can provide overriding inputs/outputs/parameters to the `pipeline()` wrapper.
 
@@ -286,7 +289,6 @@ final_pipeline = (
 
 * Visualising the `final_pipeline` highlights how namespaces become 'super nodes' which encapsulate the wrapped pipeline.
 * This example demonstrates how we can reuse the same `cook_pipeline` with slightly different arguments.
-* In the real world, one could imagine pipelines with responsibilities like profiling or feature engineering being reused within the same project or even across projects via [micro-packaging](04_micro_packaging.md).
 * Namespaces can also be arbitrarily nested with the `.` character.
 
 ```eval_rst

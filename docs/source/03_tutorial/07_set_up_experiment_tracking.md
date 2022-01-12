@@ -12,7 +12,7 @@ You can also access a more detailed demo [here](https://kedro-viz-live-demo.hfa4
 
 ## Project setup
 
-We assume that you have already [installed Kedro](../02_get_started/02_install.md) and [Kedro-Viz](../03_tutorial/06_visualise_pipeline.md). Set up a new Kedro project using paceflights starter by running:
+We assume that you have already [installed Kedro](../02_get_started/02_install.md) and [Kedro-Viz](../03_tutorial/06_visualise_pipeline.md). Set up a new Kedro project using spaceflights starter by running:
 
 ```bash
 kedro new --starter=spaceflights
@@ -22,7 +22,7 @@ Feel free to name your project as you like, but this guide will assume the proje
 
 ## Set up session store
 
-In the domain of experiment tracking, each pipeline run is considered a session. A session store records all related metadata for each pipeline run, from logged metrics to other run-related data such as timestamp, git username and branch. The session store is a SQLite database that gets generated during your first Kedro run after it has been set up in your project.
+In the domain of experiment tracking, each pipeline run is considered a session. A session store records all related metadata for each pipeline run, from logged metrics to other run-related data such as timestamp, git username and branch. The session store is a SQLite database that gets generated during your first pipeline run after it has been set up in your project.
 
 To set up the session store, go to the `src/settings.py` file and add the following:
 

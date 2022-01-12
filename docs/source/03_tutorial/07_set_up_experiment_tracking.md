@@ -51,7 +51,7 @@ Now that we have set up the tracked datasets to log our experiment tracking data
 
 Let's set up the data to be logged for the metrics dataset - under `nodes.py` of your `data_processing` pipeline (`/src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`), modify your `evaluate_model` function by adding in three different metrics: `score` to log your r2 score, `mae` to log your mean absolute error, and `me` to log your max error, and returning those 3 metrics as a key value pair.
 
-The new `evaluate_model` function would look this:
+The new `evaluate_model` function would look like this:
 
 ```python
 def evaluate_model(
@@ -73,7 +73,7 @@ def evaluate_model(
     return {"r2_score": score, "mae": mae, "max_error": me}
 ```
 
-The next step is to ensure that the dataset is also specified as an output of your `evaluate_model` node. Under `pipeline.py` of your `data_processing` pipeline, specify the `output` of your `evaluate_model` to be the metrics dataset. Note that it is crucial that the output dataset exactly matches the name of the tracking dataset as specified in the config file.
+The next step is to ensure that the dataset is also specified as an output of your `evaluate_model` node. Under `pipeline.py` of your `data_processing` pipeline, specify the `output` of your `evaluate_model` to be the `metrics` dataset. Note that it is crucial that the output dataset exactly matches the name of the tracking dataset specified in the catalog file.
 
 The node of the `evaluate_model` on the pipeline should look like this:
 
@@ -86,7 +86,7 @@ node(
 )
 ```
 
-Let's repeat the same steps for setting up the `companies_column` dataset. For this dataset we are trying to log the column that contains the list of companies as outlined in `companies.csv` under `/data/01_raw`. Let's set up the tracked dataset from the `preprocess_companies` function under the `data_processing` pipeline by returning the data under a key value pair, as shown below:
+You have to repeat the same steps for setting up the `companies_column` dataset. For this dataset you should log the column that contains the list of companies as outlined in `companies.csv` under `/data/01_raw`. Modify the `preprocess_companies` function under the `data_processing` pipeline to return the data under a key value pair, as shown below:
 
 ```python
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
@@ -103,7 +103,7 @@ def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
     return companies, {"columns": companies.columns.tolist(), "data_type": "companies"}
 ```
 
-Again, we will need to ensure that the dataset is also specified as an output on `pipeline.py` under the `data_processing` pipeline, as follows:
+Again, you will need to ensure that the dataset is also specified as an output on `pipeline.py` under the `data_processing` pipeline, as follows:
 
 ```python
 node(
@@ -114,7 +114,7 @@ node(
 )
 ```
 
-Having set up both datasets, we are now ready to generate our first set of experiment tracking data!
+Having set up both datasets, you are now ready to generate your first set of experiment tracking data!
 
 ## Generating Run data
 

@@ -46,12 +46,12 @@ kedro starter list
 
 The Kedro team maintains the following starters to bootstrap new Kedro projects:
 
-* [Alias `astro-airflow-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/main/astro-airflow-iris): The [Kedro Iris dataset example project](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
-* [Alias `mini-kedro`](https://github.com/quantumblacklabs/kedro-starters/tree/main/mini-kedro): A minimum setup to use the traditional [Iris dataset](https://www.kaggle.com/uciml/iris) with Kedro's [`DataCatalog`](../05_data/01_data_catalog.md), which is a core component of Kedro. This starter is of use in the exploratory phase of a project. For more information, please read the [Mini-Kedro](../04_kedro_project_setup/04_mini_kedro.md) guide.
-* [Alias `pandas-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/main/pandas-iris): The [Kedro Iris dataset example project](./05_example_project.md)
-* [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/main/pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../11_tools_integration/01_pyspark.md)
-* [Alias `pyspark`](https://github.com/quantumblacklabs/kedro-starters/tree/main/pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../11_tools_integration/01_pyspark.md)
-* [Alias `spaceflights`](https://github.com/quantumblacklabs/kedro-starters/tree/main/spaceflights): The [spaceflights tutorial](../03_tutorial/01_spaceflights_tutorial.md) example code
+* [Alias `astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): The [Kedro Iris dataset example project](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
+* [Alias `mini-kedro`](https://github.com/kedro-org/kedro-starters/tree/main/mini-kedro): A minimum setup to use the traditional [Iris dataset](https://www.kaggle.com/uciml/iris) with Kedro's [`DataCatalog`](../05_data/01_data_catalog.md), which is a core component of Kedro. This starter is of use in the exploratory phase of a project. For more information, please read the [Mini-Kedro](../04_kedro_project_setup/04_mini_kedro.md) guide.
+* [Alias `pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris): The [Kedro Iris dataset example project](./05_example_project.md)
+* [Alias `pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../11_tools_integration/01_pyspark.md)
+* [Alias `pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../11_tools_integration/01_pyspark.md)
+* [Alias `spaceflights`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights): The [spaceflights tutorial](../03_tutorial/01_spaceflights_tutorial.md) example code
 
 
 ## Starter versioning

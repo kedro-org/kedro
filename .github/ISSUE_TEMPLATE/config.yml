@@ -7,5 +7,5 @@ contact_links:
     url: https://kedro.readthedocs.io/en/stable/
     about: To learn more about how Kedro works
   - name: Case studies, articles and video tutorials
-    url: https://github.com/quantumblacklabs/kedro-community
+    url: https://github.com/kedro-org/kedro-community
     about: Community-generated content, project examples and video tutorials

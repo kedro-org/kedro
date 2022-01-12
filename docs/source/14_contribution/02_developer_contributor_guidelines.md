@@ -2,12 +2,12 @@
 
 This page explains the principles and development process that we ask contributing developers to follow.
 
-**Any contributions you make will be under the [Apache 2.0 Software License](https://github.com/quantumblacklabs/kedro/blob/main/LICENSE.md)**
+**Any contributions you make will be under the [Apache 2.0 Software License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)**
 
-In short, when you submit code changes, your submissions are understood to be under the same the [Apache 2.0 License](https://github.com/quantumblacklabs/kedro/blob/main/LICENSE.md) that covers the Kedro project. You should have permission to share the submitted code.
+In short, when you submit code changes, your submissions are understood to be under the same the [Apache 2.0 License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md) that covers the Kedro project. You should have permission to share the submitted code.
 
 ```eval_rst
-.. note::  You don't need to contribute code to help the Kedro project. See our list of other ways `you can contribute to Kedro <https://github.com/quantumblacklabs/kedro/blob/main/CONTRIBUTING.md>`_.
+.. note::  You don't need to contribute code to help the Kedro project. See our list of other ways `you can contribute to Kedro <https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md>`_.
 ```
 
 ## Introduction
@@ -23,14 +23,14 @@ This guide is a practical description of:
 To work on the Kedro codebase, you will need to be set up with Git, and Make.
 
 ```eval_rst
-.. note::  If your development environment is Windows, you can use the ``win_setup_conda`` and ``win_setup_env`` commands from `Circle CI configuration <https://github.com/quantumblacklabs/kedro/blob/main/.circleci/config.yml>`_ to guide you in the correct way to do this.
+.. note::  If your development environment is Windows, you can use the ``win_setup_conda`` and ``win_setup_env`` commands from `Circle CI configuration <https://github.com/kedro-org/kedro/blob/main/.circleci/config.yml>`_ to guide you in the correct way to do this.
 ```
 
 You will also need to create and activate virtual environment. If this is unfamiliar to you, read through our [pre-requisites documentation](../02_get_started/01_prerequisites.md).
 
-Next, you'll need to fork the [Kedro source code from the Github repository](https://github.com/quantumblacklabs/kedro):
+Next, you'll need to fork the [Kedro source code from the Github repository](https://github.com/kedro-org/kedro):
 
-* Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro)
+* Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/kedro-org/kedro)
 * Choose your target account
 
 If you need further guidance, consult the [Github documentation about forking a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository).
@@ -56,7 +56,7 @@ make test
 
 ## Get started: areas of contribution
 
-Once you are ready to contribute, a good place to start is to take a look at the `good first issues` and `help wanted issues` on [GitHub](https://github.com/quantumblacklabs/kedro/issues).
+Once you are ready to contribute, a good place to start is to take a look at the `good first issues` and `help wanted issues` on [GitHub](https://github.com/kedro-org/kedro/issues).
 
 We focus on three areas for contribution: `core`, `extras` and `plugin`:
 
@@ -67,7 +67,7 @@ We focus on three areas for contribution: `core`, `extras` and `plugin`:
 
 ### `core` contribution process
 
-Typically, we only accept small contributions to the `core` Kedro library but we accept new features as plugins or additions to the [`extras`](https://github.com/quantumblacklabs/kedro/tree/main/kedro/extras) module.
+Typically, we only accept small contributions to the `core` Kedro library but we accept new features as plugins or additions to the [`extras`](https://github.com/kedro-org/kedro/tree/main/kedro/extras) module.
 
 To contribute:
 
@@ -80,8 +80,8 @@ To contribute:
 3. Before you submit a pull request (PR), please ensure that unit, end-to-end (E2E) tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](#ci--cd-and-running-checks-locally) below.
 4. Open a PR:
    <ol type="a">
-     <li>For backwards compatible changes, open a PR against the <code>quantumblacklabs:main</code> branch from your feature branch.</li>
-     <li>For changes that are NOT backwards compatible, open a PR against the <code>quantumblacklabs:develop</code> branch from your feature branch.</li>
+     <li>For backwards compatible changes, open a PR against the <code>kedro-org:main</code> branch from your feature branch.</li>
+     <li>For changes that are NOT backwards compatible, open a PR against the <code>kedro-org:develop</code> branch from your feature branch.</li>
    </ol>
 
 5. Await reviewer comments.
@@ -96,14 +96,14 @@ To contribute:
 
 You can add new work to `extras` if you do not need to create a new Kedro CLI command:
 
-1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution.
-2. Work in [`extras`](https://github.com/quantumblacklabs/kedro/tree/main/kedro/extras) and create a feature branch on your forked repository and push all your local changes to that feature branch.
+1. Create an [issue](https://github.com/kedro-org/kedro/issues) describing your contribution.
+2. Work in [`extras`](https://github.com/kedro-org/kedro/tree/main/kedro/extras) and create a feature branch on your forked repository and push all your local changes to that feature branch.
 3. Before you submit a pull request, please ensure that unit, E2E tests and linting are passing for your changes by running `make test`,`make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](#ci--cd-and-running-checks-locally) below.
 4. Include a `README.md` with instructions on how to use your contribution.
 5. Is your change [non-breaking and backwards-compatible](./03_backwards_compatibility.md)?
    <ol type="a">
-     <li>For backwards compatible changes, open a PR against the <code>quantumblacklabs:main</code> branch from your feature branch.</li>
-     <li>For changes that are NOT backwards compatible, open a PR against the <code>quantumblacklabs:develop</code> branch from your feature branch.</li>
+     <li>For backwards compatible changes, open a PR against the <code>kedro-org:main</code> branch from your feature branch.</li>
+     <li>For changes that are NOT backwards compatible, open a PR against the <code>kedro-org:develop</code> branch from your feature branch.</li>
    </ol>
 
 6. Reference your issue in the PR description (e.g., `Resolves #<issue-number>`).
@@ -215,4 +215,4 @@ Working on your first pull request? You can learn how from these resources:
 * [First timers only](https://www.firsttimersonly.com/)
 * [How to contribute to an open source project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
 
-Please check the Q&A on [GitHub discussions](https://github.com/quantumblacklabs/kedro/discussions) and ask any new questions about the development process there too!
+Please check the Q&A on [GitHub discussions](https://github.com/kedro-org/kedro/discussions) and ask any new questions about the development process there too!

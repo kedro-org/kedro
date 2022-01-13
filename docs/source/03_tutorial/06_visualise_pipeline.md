@@ -1,6 +1,6 @@
 # Visualise pipelines
 
-[Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) displays data and machine-learning pipelines in an informative way, emphasising the connections between datasets and nodes. It shows the structure of your Kedro pipeline. This exercise assumes that you have been following the [Spaceflights tutorial](01_spaceflights_tutorial.md).
+[Kedro-Viz](https://github.com/kedro-org/kedro-viz) displays data and machine-learning pipelines in an informative way, emphasising the connections between datasets and nodes. It shows the structure of your Kedro pipeline. This exercise assumes that you have been following the [Spaceflights tutorial](01_spaceflights_tutorial.md).
 
 ## Install Kedro-Viz
 
@@ -25,7 +25,7 @@ You may also use the `--autoreload` flag to autoreload Kedro Viz when a `Python`
 
 ![](../meta/images/pipeline_viz_autoreload.gif)
 
-If a visualisation panel opens up and a pipeline is not visible then please check that your [pipeline definition](04_create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/quantumblacklabs/kedro-viz).
+If a visualisation panel opens up and a pipeline is not visible then please check that your [pipeline definition](04_create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/kedro-org/kedro-viz).
 
 ## Exit an open visualisation
 
@@ -96,3 +96,117 @@ kedro viz --load-file my_shareable_pipeline.json
 ```
 
 And this will visualise the pipeline visualisation saved as `my_shareable_pipeline.json`.
+
+
+## Visualise Plotly charts in Kedro-Viz
+
+[Plotly](https://plotly.com/python/) is a free and open source Python library that allows you to make interactive, publication-quality graphs. With the Plotly integration on Kedro-Viz, you can output your interactive charts as part of your pipeline visualisation.
+
+Kedro-Viz aims to help users communicate different aspects of their workflow through an interactive flowchart. With the Plotly integration, we take one step further in this direction to allow our users to effectively share their data insights while exploring the pipeline.
+
+We have also used the Plotly integration to allow users to [visualise metrics from experiments](https://kedro.readthedocs.io/en/stable/08_logging/02_experiment_tracking.html?highlight=experiment%20tracking).
+
+
+```eval_rst
+  .. note:: Kedro's Plotly integration only supports `Plotly Express <https://plotly.com/python/plotly-express/>` charts.
+```
+
+You need to update requirements.txt in your Kedro project and add the following datasets to enable plotly for your project.
+
+ `kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.17.6`
+
+
+You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
+
+There are two types of plotly datasets in Kedro :
+- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - To use this dataset you need to configure your plot in the `catalog.yml`.
+
+Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyDataSet`
+
+The below functions can be added to the nodes.py and pipeline.py files respectively.
+
+```python
+def compare_shuttle_speed():
+    return pd.DataFrame([])
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """This is a simple pipeline which generates a plot"""
+    return Pipeline(
+        [
+            node(
+                func=compare_shuttle_speed,
+                inputs="shuttle_speed_data",
+                outputs="shuttle_speed_comparison_plot",
+            ),
+        ]
+    )
+```
+
+You need to then configure the plot in `catalog.yml`
+
+```yaml
+shuttle_speed_comparison_plot:
+  type: plotly.PlotlyDataSet
+  filepath: data/08_reporting/shuttle_speed_comparison_plot.json
+  plotly_args:
+    type: bar
+    fig:
+      x: shuttle_name
+      y: shuttle_speed
+      orientation: h
+    layout:
+      xaxis_title: Shuttles
+      yaxis_title: Shuttle Speed (km/hr)
+      title: Shuttle Speed Comaprison
+```
+
+
+- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to configure your plot using plotly-express python library in your kedro node.
+
+
+Below is an example of how to visualise plots on Kedro-Viz using `plotly.JSONDataSet`
+
+The below functions can be added to the nodes.py and pipeline.py files respectively.
+
+```python
+import plotly.express as px
+from kedro.extras.datasets.plotly import JSONDataSet
+
+
+def compare_shuttle_speed(shuttle_data):
+    fig = px.bar(x=shuttle_data.name, y=shuttle_data.speed)
+    return fig
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """This is a simple pipeline which generates a plot"""
+    return Pipeline(
+        [
+            node(
+                func=compare_shuttle_speed,
+                inputs="shuttle_speed_data",
+                outputs="shuttle_speed_comparison_plot",
+            ),
+        ]
+    )
+```
+
+For `plotly.JSONDataSet`, you will also need to specify the output type in `catalog.yml` like below.
+
+```yaml
+shuttle_speed_comparison_plot:
+  type: plotly.JSONDataSet
+  filepath: data/08_reporting/shuttle_speed_comparison_plot.json
+```
+
+Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/icon-image-dataset.svg) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.
+
+![](../meta/images/pipeline_visualisation_plotly.png)
+
+
+
+You can view the larger visualisation of the chart by clicking the 'Expand Plotly Visualisation' button on the bottom of the metadata panel.
+
+
+![](../meta/images/pipeline_visualisation_plotly_expand.png)

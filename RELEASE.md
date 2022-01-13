@@ -13,6 +13,7 @@
 | `pandas.GenericDataSet` | Provides a 'best effort' facility to read / write any format provided by the `pandas` library | `kedro.extras.datasets.pandas` |
 | `pandas.GBQQueryDataSet` | Loads data from a Google Bigquery table using provided SQL query | `kedro.extras.datasets.pandas` |
 | `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark` |
+* Added the Plotly documentation on Kedro docs.
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
@@ -23,13 +24,13 @@
 * Relaxed the bounds on the `plotly` requirement for `plotly.PlotlyDataSet` and the `pyarrow` requirement for `pandas.ParquetDataSet`.
 * `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
 * Added new `overwrite` argument to `PartitionedDataSet` and `MatplotlibWriter` to enable deletion of existing partitions and plots on dataset `save`.
-* `kedro pipeline pull` now works when the project requirements contains entries such as `-r`, `--extra-index-url` and local wheel files ([Issue #913](https://github.com/quantumblacklabs/kedro/issues/913)).
+* `kedro pipeline pull` now works when the project requirements contains entries such as `-r`, `--extra-index-url` and local wheel files ([Issue #913](https://github.com/kedro-org/kedro/issues/913)).
 * Fixed slow startup because of catalog processing by reducing the exponential growth of extra processing during `_FrozenDatasets` creations.
 * Removed `.coveragerc` from the Kedro project template. `coverage` settings are now given in `pyproject.toml`.
 * Fixed a bug where packaging or pulling a modular pipeline with the same name as the project's package name would throw an error (or silently pass without including the pipeline source code in the wheel file).
 * Removed unintentional dependency on `git`.
 * Fixed an issue where nested pipeline configuration was not included in the packaged pipeline.
-* Deprecated the "Thanks for supporting contributions" section of release notes to simplify the contribution process; Kedro 0.17.6 is the last release that includes this. This process has been replaced with the [automatic GitHub feature](https://github.com/quantumblacklabs/kedro/graphs/contributors).
+* Deprecated the "Thanks for supporting contributions" section of release notes to simplify the contribution process; Kedro 0.17.6 is the last release that includes this. This process has been replaced with the [automatic GitHub feature](https://github.com/kedro-org/kedro/graphs/contributors).
 * Fixed a bug where the version on the tracking datasets didn't match the session id and the versions of regular versioned datasets.
 * Fixed an issue where datasets in `load_versions` that are not found in the data catalog would silently pass.
 * Altered the string representation of nodes so that node inputs/outputs order is preserved rather than being alphabetically sorted.
@@ -72,7 +73,7 @@
 
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.
-* Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
+* Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/kedro-org/kedro/issues/829)).
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
 
 ## Minor breaking changes to the API
@@ -106,13 +107,13 @@
 * `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
 * Fixed an issue where spark.SparkDataSet with enabled versioning would throw a VersionNotFoundError when using databricks-connect from a remote machine and saving to dbfs filesystem.
 * `EmailMessageDataSet` added to doctree.
-* When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/quantumblacklabs/kedro/issues/761)).
+* When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/kedro-org/kedro/issues/761)).
 * `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
-* Extended support to newer versions of third-party dependencies ([Issue #735](https://github.com/quantumblacklabs/kedro/issues/735)).
+* Extended support to newer versions of third-party dependencies ([Issue #735](https://github.com/kedro-org/kedro/issues/735)).
 * Ensured consistent references to `model input` tables in accordance with our Data Engineering convention.
 * Changed behaviour where `kedro pipeline package` takes the pipeline package version, rather than the kedro package version. If the pipeline package version is not present, then the package version is used.
-* Launched [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions/) and [Kedro Discord Server](https://discord.gg/akJDeVaxnB)
-* Improved error message when versioning is enabled for a dataset previously saved as non-versioned ([Issue #625](https://github.com/quantumblacklabs/kedro/issues/625)).
+* Launched [GitHub Discussions](https://github.com/kedro-org/kedro/discussions/) and [Kedro Discord Server](https://discord.gg/akJDeVaxnB)
+* Improved error message when versioning is enabled for a dataset previously saved as non-versioned ([Issue #625](https://github.com/kedro-org/kedro/issues/625)).
 
 ## Minor breaking changes to the API
 
@@ -143,11 +144,11 @@
 * CLI commands from sources with the same name will show under one list in the help screen.
 * The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
 * `configure_project` is invoked if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support a workflow that creates `Session` manually. It will be removed in `0.18.0`.
-* Stopped swallowing up all `ModuleNotFoundError` if `register_pipelines` not found, so that a more helpful error message will appear when a dependency is missing, e.g. [Issue #722](https://github.com/quantumblacklabs/kedro/issues/722).
+* Stopped swallowing up all `ModuleNotFoundError` if `register_pipelines` not found, so that a more helpful error message will appear when a dependency is missing, e.g. [Issue #722](https://github.com/kedro-org/kedro/issues/722).
 * When `kedro new` is invoked using a configuration yaml file, `output_dir` is no longer a required key; by default the current working directory will be used.
 * When `kedro new` is invoked using a configuration yaml file, the appropriate `prompts.yml` file is now used for validating the provided configuration. Previously, validation was always performed against the kedro project template `prompts.yml` file.
 * When a relative path to a starter template is provided, `kedro new` now generates user prompts to obtain configuration rather than supplying empty configuration.
-* Fixed error when using starters on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722)).
+* Fixed error when using starters on Windows with Python 3.7 (Issue [#722](https://github.com/kedro-org/kedro/issues/722)).
 * Fixed decoding error of config files that contain accented characters by opening them for reading in UTF-8.
 * Fixed an issue where `after_dataset_loaded` run would finish before a dataset is actually loaded when using `--async` flag.
 
@@ -258,7 +259,7 @@ from kedro.framework.session import KedroSession
 ## Major features and improvements
 
 * In a significant change, [we have introduced `KedroSession`](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/03_session.html) which is responsible for managing the lifecycle of a Kedro run.
-* Created a new Kedro Starter: `kedro new --starter=mini-kedro`. It is possible to [use the DataCatalog as a standalone component](https://github.com/quantumblacklabs/kedro-starters/tree/master/mini-kedro) in a Jupyter notebook and transition into the rest of the Kedro framework.
+* Created a new Kedro Starter: `kedro new --starter=mini-kedro`. It is possible to [use the DataCatalog as a standalone component](https://github.com/kedro-org/kedro-starters/tree/master/mini-kedro) in a Jupyter notebook and transition into the rest of the Kedro framework.
 * Added `DatasetSpecs` with Hooks to run before and after datasets are loaded from/saved to the catalog.
 * Added a command: `kedro catalog create`. For a registered pipeline, it creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset that is missing from `DataCatalog`.
 * Added `settings.py` and `pyproject.toml` (to replace `.kedro.yml`) for project configuration, in line with Python best practice.
@@ -379,14 +380,14 @@ Check your source directory. If you defined a different source directory (`sourc
 
 * **Copy changes made to `DataCatalog`**. Likewise, if you have `DataCatalog` defined with `ProjectContext._create_catalog`, you should copy-paste the contents into `register_catalog`.
 
-* **Optional**: If you have plugins such as [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) installed, it's likely that Kedro 0.17.0 won't work with their older versions, so please either upgrade to the plugin's newest version or follow their migration guides.
+* **Optional**: If you have plugins such as [Kedro-Viz](https://github.com/kedro-org/kedro-viz) installed, it's likely that Kedro 0.17.0 won't work with their older versions, so please either upgrade to the plugin's newest version or follow their migration guides.
 
 # Release 0.16.6
 
 ## Major features and improvements
 
 * Added documentation with a focus on single machine and distributed environment deployment; the series includes Docker, Argo, Prefect, Kubeflow, AWS Batch, AWS Sagemaker and extends our section on Databricks
-* Added [kedro-starter-spaceflights](https://github.com/quantumblacklabs/kedro-starter-spaceflights/) alias for generating a project: `kedro new --starter spaceflights`.
+* Added [kedro-starter-spaceflights](https://github.com/kedro-org/kedro-starter-spaceflights/) alias for generating a project: `kedro new --starter spaceflights`.
 
 ## Bug fixes and other changes
 * Fixed `TypeError` when converting dict inputs to a node made from a wrapped `partial` function.
@@ -401,7 +402,7 @@ Check your source directory. If you defined a different source directory (`sourc
 * Improved error messages for incorrect parameters passed into a node.
 * Fixed issue with saving a `TensorFlowModelDataset` in the HDF5 format with versioning enabled.
 * Added missing `run_result` argument in `after_pipeline_run` Hooks spec.
-* Fixed a bug in IPython script that was causing context hooks to be registered twice. To apply this fix to a project generated with an older Kedro version, apply the same changes made in [this PR](https://github.com/quantumblacklabs/kedro-starter-pandas-iris/pull/16) to your `00-kedro-init.py` file.
+* Fixed a bug in IPython script that was causing context hooks to be registered twice. To apply this fix to a project generated with an older Kedro version, apply the same changes made in [this PR](https://github.com/kedro-org/kedro-starter-pandas-iris/pull/16) to your `00-kedro-init.py` file.
 * Improved documentation.
 
 ## Breaking changes to the API
@@ -526,7 +527,7 @@ package_name: "<your_package_name>"
 * `kedro jupyter` CLI command improvements:
   - Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
   - Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
-  - Fixed the bug in IPython startup script ([issue 298](https://github.com/quantumblacklabs/kedro/issues/298)).
+  - Fixed the bug in IPython startup script ([issue 298](https://github.com/kedro-org/kedro/issues/298)).
 * Documentation improvements:
   - Updated community-generated content in FAQ.
   - Added [find-kedro](https://github.com/WaylonWalker/find-kedro) and [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz) to the list of community plugins.
@@ -538,7 +539,7 @@ package_name: "<your_package_name>"
 
 #### Guide to apply the fix for `%run_viz` line magic in existing project
 
-Even though this release ships a fix for project generated with `kedro==0.16.2`, after upgrading, you will still need to make a change in your existing project if it was generated with `kedro>=0.16.0,<=0.16.1` for the fix to take effect. Specifically, please change the content of your project's IPython init script located at `.ipython/profile_default/startup/00-kedro-init.py` with the content of [this file](https://github.com/quantumblacklabs/kedro/blob/0.16.2/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.ipython/profile_default/startup/00-kedro-init.py). You will also need `kedro-viz>=3.3.1`.
+Even though this release ships a fix for project generated with `kedro==0.16.2`, after upgrading, you will still need to make a change in your existing project if it was generated with `kedro>=0.16.0,<=0.16.1` for the fix to take effect. Specifically, please change the content of your project's IPython init script located at `.ipython/profile_default/startup/00-kedro-init.py` with the content of [this file](https://github.com/kedro-org/kedro/blob/0.16.2/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.ipython/profile_default/startup/00-kedro-init.py). You will also need `kedro-viz>=3.3.1`.
 
 ## Thanks for supporting contributions
 [Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely), [w0rdsm1th](https://github.com/w0rdsm1th), [Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Marcus Gawronsky](https://github.com/marcusinthesky)
@@ -681,7 +682,7 @@ result = pipeline(
 
 #### Migration for decorators, color logger, transformers etc.
 Since some modules were moved to other locations you need to update import paths appropriately.
-You can find the list of moved files in the [`0.15.6` release notes](https://github.com/quantumblacklabs/kedro/releases/tag/0.15.6) under the section titled `Files with a new location`.
+You can find the list of moved files in the [`0.15.6` release notes](https://github.com/kedro-org/kedro/releases/tag/0.15.6) under the section titled `Files with a new location`.
 
 #### Migration for CLI and KEDRO_ENV environment variable
 > Note: If you haven't made significant changes to your `kedro_cli.py`, it may be easier to simply copy the updated `kedro_cli.py` `.ipython/profile_default/startup/00-kedro-init.py` and from GitHub or a newly generated project into your old project.
@@ -742,7 +743,7 @@ You can find the list of moved files in the [`0.15.6` release notes](https://git
 # 0.15.6
 
 ## Major features and improvements
-> _TL;DR_ We're launching [`kedro.extras`](https://github.com/quantumblacklabs/kedro/tree/master/extras), the new home for our revamped series of datasets, decorators and dataset transformers. The datasets in [`kedro.extras.datasets`](https://github.com/quantumblacklabs/kedro/tree/master/extras/datasets) use [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to access a variety of data stores including local file systems, network file systems, cloud object stores (including S3 and GCP), and Hadoop, read more about this [**here**](https://kedro.readthedocs.io/en/latest/04_user_guide/04_data_catalog.html#specifying-the-location-of-the-dataset). The change will allow [#178](https://github.com/quantumblacklabs/kedro/issues/178) to happen in the next major release of Kedro.
+> _TL;DR_ We're launching [`kedro.extras`](https://github.com/kedro-org/kedro/tree/master/extras), the new home for our revamped series of datasets, decorators and dataset transformers. The datasets in [`kedro.extras.datasets`](https://github.com/kedro-org/kedro/tree/master/extras/datasets) use [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to access a variety of data stores including local file systems, network file systems, cloud object stores (including S3 and GCP), and Hadoop, read more about this [**here**](https://kedro.readthedocs.io/en/latest/04_user_guide/04_data_catalog.html#specifying-the-location-of-the-dataset). The change will allow [#178](https://github.com/kedro-org/kedro/issues/178) to happen in the next major release of Kedro.
 
 An example of this new system can be seen below, loading the CSV `SparkDataSet` from S3:
 
@@ -758,7 +759,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 
 ### New features
 
-* Added `layer` attribute for datasets in `kedro.extras.datasets` to specify the name of a layer according to [data engineering convention](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention), this feature will be passed to [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) in future releases.
+* Added `layer` attribute for datasets in `kedro.extras.datasets` to specify the name of a layer according to [data engineering convention](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention), this feature will be passed to [`kedro-viz`](https://github.com/kedro-org/kedro-viz) in future releases.
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and iPython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added property `run_id` on `ProjectContext`, used for versioning using the [`Journal`](https://kedro.readthedocs.io/en/stable/04_user_guide/13_journal.html). To customise your journal `run_id` you can override the private method `_get_run_id()`.
 * Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
@@ -914,7 +915,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 * `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 * Reuse pipelines within a Kedro project using `Pipeline.transform`, it simplifies dataset and node renaming.
-* Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version 3.0.0 or later).
+* Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/kedro-org/kedro-viz) version 3.0.0 or later).
 * Added the following datasets:
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
   - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables.

@@ -12,7 +12,7 @@ Your change is **not** considered a breaking change, and so is backwards compati
 
 We aim to minimise the number of breaking changes to keep Kedro software stable and reduce the overhead for users as they migrate their projects. However, there are cases where a breaking change brings considerable value or increases the maintainability of the codebase. In these cases, breaking backwards compatibility can make sense.
 
-Before you contribute a breaking change, you should create a [Github Issue](https://github.com/quantumblacklabs/kedro/issues) that describes the change and justifies the value gained by breaking backwards compatibility.
+Before you contribute a breaking change, you should create a [Github Issue](https://github.com/kedro-org/kedro/issues) that describes the change and justifies the value gained by breaking backwards compatibility.
 
 ## The Kedro release model
 
@@ -22,4 +22,4 @@ All breaking changes go into `develop`, from which a major release can be deploy
 
 ![Kedro Gitflow Diagram](../meta/images/kedro_gitflow.svg)
 
-Please check the Q&A on [GitHub discussions](https://github.com/quantumblacklabs/kedro/discussions) and ask any new questions about the development process there too!
+Please check the Q&A on [GitHub discussions](https://github.com/kedro-org/kedro/discussions) and ask any new questions about the development process there too!

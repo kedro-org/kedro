@@ -77,8 +77,6 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
 
 
 def _clear_hook_manager():
-    from kedro.framework.hooks import get_hook_manager
-
     hook_manager = get_hook_manager()
     name_plugin_pairs = hook_manager.list_name_plugin()
     for name, plugin in name_plugin_pairs:

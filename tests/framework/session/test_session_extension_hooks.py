@@ -470,7 +470,9 @@ def mock_session_with_broken_before_node_run_hooks(
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    return KedroSession.create(mock_package_name, tmp_path)
+    session = KedroSession.create(mock_package_name, tmp_path)
+    yield session
+    session.close()
 
 
 class TestBeforeNodeRunHookWithInputUpdates:

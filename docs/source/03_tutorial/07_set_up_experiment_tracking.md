@@ -153,4 +153,4 @@ You will now be able to access, compare and pin your runs by toggling the `Compa
 
 ![](../meta/images/experiment-tracking_demo.gif)
 
-The Kedro-Viz team will be adding new features in the coming weeks, such as allowing the editing your run title, adding notes, bookmarking and searching your runs. Keep an eye out on the [Kedro-Viz release page](https://github.com/quantumblacklabs/kedro-viz/releases) for the upcoming releases.
+The Kedro-Viz team will be adding new features in the coming weeks, such as allowing the editing of your run title, adding notes, bookmarking and searching your runs. Keep an eye out on the [Kedro-Viz release page](https://github.com/quantumblacklabs/kedro-viz/releases) for the upcoming releases.

@@ -16,6 +16,7 @@ from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 from kedro.framework.project import (
     configure_logging,
     configure_project,
@@ -75,6 +76,15 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
     }
 
 
+def _clear_hook_manager():
+    from kedro.framework.hooks import get_hook_manager
+
+    hook_manager = get_hook_manager()
+    name_plugin_pairs = hook_manager.list_name_plugin()
+    for name, plugin in name_plugin_pairs:
+        hook_manager.unregister(name=name, plugin=plugin)  # pragma: no cover
+
+
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run.
@@ -106,6 +116,11 @@ class KedroSession:
         self.save_on_close = save_on_close
         self._package_name = package_name
         self._store = self._init_store()
+
+        hook_manager = get_hook_manager()
+        _register_hooks(hook_manager, settings.HOOKS)
+        _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+        self._hook_manager = hook_manager
 
     @classmethod
     def create(  # pylint: disable=too-many-arguments
@@ -270,6 +285,8 @@ class KedroSession:
         if _active_session is self:
             _deactivate_session()
 
+        _clear_hook_manager()
+
     def __enter__(self):
         if _active_session is not self:
             _activate_session(self)
@@ -374,7 +391,7 @@ class KedroSession:
 
         # Run the runner
         runner = runner or SequentialRunner()
-        hook_manager = get_hook_manager()
+        hook_manager = self._hook_manager
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )

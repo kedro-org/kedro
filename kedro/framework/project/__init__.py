@@ -10,8 +10,6 @@ from typing import Any, Dict, Optional
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
-from kedro.framework.hooks import get_hook_manager
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 from kedro.pipeline import Pipeline
 
 
@@ -180,11 +178,6 @@ def configure_project(package_name: str):
     """
     settings_module = f"{package_name}.settings"
     settings.configure(settings_module)
-
-    # set up all hooks so we can discover all pipelines
-    hook_manager = get_hook_manager()
-    _register_hooks(hook_manager, settings.HOOKS)
-    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
     pipelines_module = f"{package_name}.pipeline_registry"
     pipelines.configure(pipelines_module)

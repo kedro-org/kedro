@@ -12,7 +12,6 @@ from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
 from kedro.framework.hooks import hook_impl
-from kedro.framework.hooks.manager import get_hook_manager
 from kedro.framework.project import _ProjectPipelines, _ProjectSettings
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
@@ -90,15 +89,6 @@ def local_config(tmp_path):
             "versioned": True,
         },
     }
-
-
-@pytest.fixture(autouse=True)
-def clear_hook_manager():
-    yield
-    hook_manager = get_hook_manager()
-    plugins = hook_manager.get_plugins()
-    for plugin in plugins:
-        hook_manager.unregister(plugin)
 
 
 @pytest.fixture(autouse=True)
@@ -396,9 +386,11 @@ def mock_settings(mocker, project_hooks):
 def mock_session(
     mock_settings, mock_package_name, tmp_path
 ):  # pylint: disable=unused-argument
-    return KedroSession.create(
+    session = KedroSession.create(
         mock_package_name, tmp_path, extra_params={"params:key": "value"}
     )
+    yield session
+    session.close()
 
 
 @pytest.fixture(autouse=True)

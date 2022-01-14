@@ -151,7 +151,7 @@ Here comes the fun part of accessing your run data on Kedro-Viz. Having ensured 
 kedro viz
 ```
 
-When you open the Kedro-Viz web app, you will see an experiment tracking icon ![](../meta/images/icon-experiments.svg) on your left. Clicking the icon will bring you to the experiment tracking page (you can also access the page via `http://127.0.0.1:4141/runsList`), where you will now see the set of experiment data generated from your previous runs, as shown below:
+When you open the Kedro-Viz web app, you will see an experiment tracking icon ![](../meta/images/experiment-tracking-icon.png) on your left. Clicking the icon will bring you to the experiment tracking page (you can also access the page via `http://127.0.0.1:4141/runsList`), where you will now see the set of experiment data generated from your previous runs, as shown below:
 
 ![](../meta/images/experiment-tracking_runsList.png)
 

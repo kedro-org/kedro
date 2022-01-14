@@ -15,7 +15,7 @@ class MyPluginHook:
     @hook_impl
     def register_pipelines(self):  # pylint: disable=no-self-use
         return {
-            "from_plugin": Pipeline([node(lambda: "sth", inputs=None, outputs="x")])
+            "from_plugin": pipeline([node(lambda: "sth", inputs=None, outputs="x")])
         }
 
 

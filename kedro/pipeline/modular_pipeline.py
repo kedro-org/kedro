@@ -77,7 +77,7 @@ def pipeline(
     tags: Union[str, Iterable[str]] = None,
     namespace: str = None,
 ) -> Pipeline:
-    """Create a ``Pipeline`` from a collection of nodes and/or ``Pipelines``s.
+    """Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``s.
 
     Args:
         pipe: The nodes the ``Pipeline`` will be made of. If you

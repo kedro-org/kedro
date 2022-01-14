@@ -69,7 +69,7 @@ def _validate_datasets_exist(
 
 
 def pipeline(
-    pipe: Iterable[Union[None, Pipeline]],
+    pipe: Iterable[Union[Node, Pipeline]],
     *,
     inputs: Union[str, Set[str], Dict[str, str]] = None,
     outputs: Union[str, Set[str], Dict[str, str]] = None,
@@ -77,23 +77,24 @@ def pipeline(
     tags: Union[str, Iterable[str]] = None,
     namespace: str = None,
 ) -> Pipeline:
-    """Create a copy of the pipeline and its nodes,
-    with some dataset names and node names modified.
+    """Create a ``Pipeline`` from a collection of nodes and/or ``Pipelines``s.
 
     Args:
-        pipe: The iterable of nodes the ``Pipeline`` will be made of. If you
+        pipe: The nodes the ``Pipeline`` will be made of. If you
             provide pipelines among the list of nodes, those pipelines will
             be expanded and all their nodes will become part of this
             new pipeline.
         inputs: A name or collection of input names to be exposed as connection points
-            to other pipelines upstream.
+            to other pipelines upstream. This is optional; if not provided, the
+            pipeline inputs are automatically inferred from the pipeline structure.
             When str or Set[str] is provided, the listed input names will stay
             the same as they are named in the provided pipeline.
             When Dict[str, str] is provided, current input names will be
             mapped to new names.
             Must only refer to the pipeline's free inputs.
         outputs: A name or collection of names to be exposed as connection points
-            to other pipelines downstream.
+            to other pipelines downstream. This is optional; if not provided, the
+            pipeline inputs are automatically inferred from the pipeline structure.
             When str or Set[str] is provided, the listed output names will stay
             the same as they are named in the provided pipeline.
             When Dict[str, str] is provided, current output names will be
@@ -113,12 +114,11 @@ def pipeline(
             any of the expected types (str, dict, list, or None).
 
     Returns:
-        A new ``Pipeline`` object with the new nodes, modified as requested.
+        A new ``Pipeline`` object.
     """
-    if not isinstance(pipe, Pipeline):
-        pipe = Pipeline(pipe, tags=tags)
+    pipe = Pipeline(pipe, tags=tags)
 
-    if inputs is None and outputs is None and parameters is None and namespace is None:
+    if not any([inputs, outputs, parameters, namespace]):
         return pipe
 
     # pylint: disable=protected-access

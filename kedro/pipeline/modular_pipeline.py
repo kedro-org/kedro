@@ -69,7 +69,7 @@ def _validate_datasets_exist(
 
 
 def pipeline(
-    pipe: Iterable[Union[Node, Pipeline]],
+    pipe: Union[Iterable[Union[Node, Pipeline]], Pipeline],
     *,
     inputs: Union[str, Set[str], Dict[str, str]] = None,
     outputs: Union[str, Set[str], Dict[str, str]] = None,
@@ -116,7 +116,11 @@ def pipeline(
     Returns:
         A new ``Pipeline`` object.
     """
-    pipe = Pipeline(pipe, tags=tags)
+    if isinstance(pipe, Pipeline):
+        # To ensure that we are always dealing with a *copy* of pipe.
+        pipe = Pipeline([pipe], tags=tags)
+    else:
+        pipe = Pipeline(pipe, tags=tags)
 
     if not any([inputs, outputs, parameters, namespace]):
         return pipe

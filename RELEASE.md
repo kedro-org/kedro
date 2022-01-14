@@ -1,7 +1,8 @@
 # Release 0.17.7
 
 ## Bug fixes and other changes
-* Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).
+* Added tutorial documentation for experiment tracking in Kedro docs. (`03_tutorial/07_set_up_experiment_tracking.md`).
+* Added Plotly documentation in Kedro docs. (`03_tutorial/06_visualise_pipeline.md`).
 
 # Release 0.17.6
 
@@ -18,7 +19,6 @@
 | `pandas.GenericDataSet` | Provides a 'best effort' facility to read / write any format provided by the `pandas` library | `kedro.extras.datasets.pandas` |
 | `pandas.GBQQueryDataSet` | Loads data from a Google Bigquery table using provided SQL query | `kedro.extras.datasets.pandas` |
 | `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark` |
-* Added the Plotly documentation on Kedro docs.
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.

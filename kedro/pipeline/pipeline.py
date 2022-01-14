@@ -697,7 +697,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         Args:
             tags: The tags to be added to the nodes.
 
-        returns:
+        Returns:
             New ``Pipeline`` object with nodes tagged.
         """
         nodes = [n.tag(tags) for n in self.nodes]

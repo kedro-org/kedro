@@ -1,3 +1,14 @@
+# Release 0.17.7
+
+## Major features and improvements
+* `pipeline` now accepts `tags` and a collection of `Node`s and/or `Pipeline`s rather than just a single `Pipeline`. `pipeline` should be used in preference to `Pipeline`.
+
+## Bug fixes and other changes
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+
 # Release 0.17.6
 
 ## Major features and improvements

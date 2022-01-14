@@ -1,6 +1,6 @@
 """Helper to integrate modular pipelines into a master pipeline."""
 import copy
-from typing import AbstractSet, Dict, List, Set, Union, Iterable
+from typing import AbstractSet, Dict, Iterable, List, Set, Union
 
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import (

@@ -2,7 +2,7 @@
 import logging
 
 from kedro.framework.hooks import hook_impl
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 
 
 class MyPluginHook:

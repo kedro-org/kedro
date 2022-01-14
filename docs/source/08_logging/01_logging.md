@@ -18,6 +18,8 @@ log.warning("Issue warning")
 log.info("Send information")
 ```
 
+Note: Log names like the example above, `__name__`, can be handler names defined within the `handlers` section keys.  The default handler names are `console, info_file_handler, error_file_handler` found within `conf/base/logging.yml`.
+
 ## Logging for `anyconfig`
 
 By default, [anyconfig](https://github.com/ssato/python-anyconfig) library that is used by `kedro` to read configuration files emits a log message with `INFO` level on every read. To reduce the amount of logs being sent for CLI calls, default project logging configuration in `conf/base/logging.yml` sets the level for `anyconfig` logger to `WARNING`.

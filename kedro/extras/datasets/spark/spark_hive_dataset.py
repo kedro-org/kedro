@@ -17,7 +17,6 @@ class StagedHiveDataSet:
     Provides a context manager for temporarily writing data to a staging hive table, for example
     where you want to replace the contents of a hive table with data which relies on the data
     currently present in that table.
-
     Once initialised, the ``staged_data`` ``DataFrame`` can be queried and underlying tables used to
     define the initial dataframe can be modified without affecting ``staged_data``.
 
@@ -103,7 +102,14 @@ class SparkHiveDataSet(AbstractDataSet):
     """
 
     def __init__(
-        self, database: str, table: str, write_mode: str, table_format: str = "Parquet", table_type: str = "INTERNAL", table_path: str = None, table_pk: List[str] = None ,
+        self,
+        database: str,
+        table: str,
+        write_mode: str,
+        table_pk: List[str] = None,
+        table_format: str = "Parquet",
+        table_type: str = "INTERNAL",
+        table_path: str = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
         Args:
@@ -112,6 +118,9 @@ class SparkHiveDataSet(AbstractDataSet):
             write_mode: ``insert``, ``upsert`` or ``overwrite`` are supported.
             table_pk: If performing an upsert, this identifies the primary key columns used to
                 resolve preexisting data. Is required for ``write_mode="upsert"``.
+            table_format: A valid table format accepted by hive for eg Parquet
+            table_type: ``internal``,``external``
+            table_path: In case selected table is external,need an external path for the table
         Raises:
             DataSetError: Invalid configuration supplied
         """
@@ -125,7 +134,7 @@ class SparkHiveDataSet(AbstractDataSet):
         if write_mode == "upsert" and not table_pk:
             raise DataSetError("`table_pk` must be set to utilise `upsert` read mode")
 
-        valid_table_type = ["internal","external",None,"INTERNAL","EXTERNAL"]
+        valid_table_type = ["internal", "external", None, "INTERNAL", "EXTERNAL"]
         if table_type not in valid_table_type:
             valid_table_modes = ", ".join(valid_table_type)
             raise DataSetError(
@@ -133,22 +142,17 @@ class SparkHiveDataSet(AbstractDataSet):
                 f"`table_type` must be one of: {valid_table_modes}"
             )
 
-        #nested if for external ONLY
-        elif table_type in ["internal","INTERNAL",None]:
+        if table_type in ["internal", "INTERNAL", None]:
             print("Hive table created will be of Internal type")
 
-        elif table_type in ["external","EXTERNAL"] and table_path == None:
-            raise DataSetError(
-                f"No path specified for External table type, please specify a path to save the external table on"
-            )
-        else:
-            print( f"Hive table created will be of external type on path `{table_path}`")
+        if table_type in ["external", "EXTERNAL"] and table_path is None:
+            raise DataSetError(print("No path specified for External table type"))
 
-        valid_table_formats = ["TextFile","SequenceFile","ORC","Parquet"]
+        valid_table_formats = ["TextFile", "SequenceFile", "ORC", "Parquet"]
+
         if table_format not in valid_table_formats:
             valid_table_format_modes = ", ".join(valid_table_formats)
             raise DataSetError(
-                f"`table_format` : {table_format} is not supported as of now, contact Kedro support for enhancements"
                 f"`table_format` must be one of: {valid_table_format_modes} types"
             )
 
@@ -161,7 +165,6 @@ class SparkHiveDataSet(AbstractDataSet):
         self._table_path = table_path
         self._table_format = table_format
 
-
         # self._table_columns is set up in _save() to speed up initialization
         self._table_columns = []  # type: List[str]
 
@@ -173,7 +176,7 @@ class SparkHiveDataSet(AbstractDataSet):
             table_pk=self._table_pk,
             table_type=self._table_type,
             table_path=self._table_path,
-            table_format=self._table_format
+            table_format=self._table_format,
         )
 
     @staticmethod
@@ -182,18 +185,19 @@ class SparkHiveDataSet(AbstractDataSet):
 
     def _create_empty_hive_table(self, data):
         # if self._table_type and self._table_type.lower() == 'internal'
-            #do external
-            #fx createinternaltable
-        if self._table_type in ["INTERNAL","internal",None]:
+        # do external
+        # fx createinternaltable
+        if self._table_type in ["INTERNAL", "internal", None]:
             data.createOrReplaceTempView("tmp")
             self._get_spark().sql(
-                f"create table {self._database}.{self._table} STORED AS {self._table_format} as select * from tmp limit 1;"  # nosec
+                f"create table {self._database}.{self._table} STORED AS {self._table_format} as select * from tmp limit 1;"
+                # nosec
             )
 
-
-        elif self._table_type in ["EXTERNAL","external"]:
-            #other table options {}
-            data.write.format(self._table_format).options(map("path", self._table_path)).saveAsTable(f"`{self._database}.{self._table}`")
+        elif self._table_type in ["EXTERNAL", "external"]:
+            data.write.format(self._table_format).options(
+                map("path", self._table_path)
+            ).saveAsTable(f"`{self._database}.{self._table}`")
 
         self._get_spark().sql(f"truncate table {self._database}.{self._table}")  # nosec
 

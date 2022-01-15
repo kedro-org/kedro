@@ -120,7 +120,7 @@ class SparkHiveDataSet(AbstractDataSet):
                 resolve preexisting data. Is required for ``write_mode="upsert"``.
             table_format: A valid table format accepted by hive for eg Parquet
             table_type: ``internal``,``external``
-            table_path: In case selected table is external,need an external path for the table
+            table_path: In case selected table is external,we need an external path for the table
         Raises:
             DataSetError: Invalid configuration supplied
         """

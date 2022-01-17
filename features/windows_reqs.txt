@@ -2,8 +2,8 @@
 # e2e tests on Windows are slow but we don't need to install
 # everything, so just this subset will be enough for CI
 behave==1.2.6
-pandas>=0.24.0, <1.0.4
-psutil==5.6.7
+pandas~=1.2
+psutil==5.8.0
 requests~=2.20
 toml~=0.10.1
 PyYAML>=4.2, <6.0

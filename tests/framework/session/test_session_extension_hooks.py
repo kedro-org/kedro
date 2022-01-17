@@ -10,7 +10,7 @@ from dynaconf.validator import Validator
 
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectPipelines, _ProjectSettings
+from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline, node
@@ -19,6 +19,7 @@ from kedro.runner import ParallelRunner
 from kedro.runner.runner import _run_node_async
 from tests.framework.session.conftest import (
     _assert_hook_call_record_has_expected_parameters,
+    _assert_pipeline_equal,
     _mock_imported_settings_paths,
     assert_exceptions_equal,
 )
@@ -82,7 +83,7 @@ class TestCatalogHooks:
 
         project_path = context.project_path
         catalog = context.catalog
-        config_loader = context.config_loader
+        config_loader = mock_session._get_config_loader()
 
         relevant_records = [
             r for r in caplog.records if r.getMessage() == "Catalog created"
@@ -104,17 +105,23 @@ class TestCatalogHooks:
     ):
         context = mock_session.load_context()
         fake_save_version = mocker.sentinel.fake_save_version
-        mocker.patch.object(
-            context, "_get_save_version", return_value=fake_save_version
+
+        mocker.patch(
+            "kedro.framework.session.KedroSession.store",
+            new_callable=mocker.PropertyMock,
+            return_value={
+                "session_id": fake_save_version,
+                "save_version": fake_save_version,
+            },
         )
 
         catalog = context.catalog
-        config_loader = context.config_loader
+        config_loader = mock_session._get_config_loader()
         project_path = context.project_path
 
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
-        context.run()
+        mock_session.run()
 
         relevant_records = [
             r for r in caplog.records if r.getMessage() == "Catalog created"
@@ -138,7 +145,7 @@ class TestPipelineHooks:
     ):
         context = mock_session.load_context()
         catalog = context.catalog
-        default_pipeline = context.pipeline
+        default_pipeline = pipelines["__default__"]
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
         mock_session.run()
@@ -151,7 +158,7 @@ class TestPipelineHooks:
         ]
         assert len(before_pipeline_run_calls) == 1
         call_record = before_pipeline_run_calls[0]
-        assert call_record.pipeline is default_pipeline
+        _assert_pipeline_equal(call_record.pipeline, default_pipeline)
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
@@ -167,7 +174,7 @@ class TestPipelineHooks:
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
-        assert call_record.pipeline is default_pipeline
+        _assert_pipeline_equal(call_record.pipeline, default_pipeline)
 
     @pytest.mark.usefixtures("mock_broken_pipelines")
     def test_on_pipeline_error_hook(self, caplog, mock_session):

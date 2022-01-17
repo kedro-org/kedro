@@ -132,6 +132,7 @@ def lint(
     python_call("flake8", files)
     python_call("isort", ("--check",) + files if check_only else files)
 
+
 @project_group.command()
 @click.option(
     "--build-reqs/--no-build-reqs",

@@ -359,6 +359,7 @@ class TestPipelineHelper:
     def test_pipeline_always_copies(self):
         original_pipeline = pipeline([node(constant_output, None, "A")])
         new_pipeline = pipeline(original_pipeline)
+        assert new_pipeline.nodes == original_pipeline.nodes
         assert new_pipeline is not original_pipeline
 
     def test_pipeline_tags(self):

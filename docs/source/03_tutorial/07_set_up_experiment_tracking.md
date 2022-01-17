@@ -1,15 +1,15 @@
 # Set up experiment tracking
 
-Experiment tracking is the process of saving all machine-learning related experiment information so that it is easy to find and compare past runs. [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) supports native experiment tracking from [version 4.1.1](https://github.com/quantumblacklabs/kedro-viz/releases/tag/v4.1.1) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and compare your experiments directly from the Kedro-Viz web app. 
+Experiment tracking is the process of saving all machine-learning related experiment information so that it is easy to find and compare past runs. [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) supports native experiment tracking from [version 4.1.1](https://github.com/quantumblacklabs/kedro-viz/releases/tag/v4.1.1) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and compare your experiments directly from the Kedro-Viz web app.
 
 ![](../meta/images/experiment-tracking_demo_small.gif)
 
 Enabling experiment tracking features on Kedro-Viz relies on:
 * [setting up a session store to capture experiment metadata](#set-up-session-store),
 * [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets)
-* [modifying your nodes and pipelines to output those metrics](#setting-up-your-nodes-and-pipelines-to-log-metrics). 
+* [modifying your nodes and pipelines to output those metrics](#setting-up-your-nodes-and-pipelines-to-log-metrics).
 
-This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project that is outlined in [this tutorial](../03_tutorial/01_spaceflights_tutorial.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../08_logging/02_experiment_tracking.md) for your Kedro project. 
+This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project that is outlined in [this tutorial](../03_tutorial/01_spaceflights_tutorial.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../08_logging/02_experiment_tracking.md) for your Kedro project.
 
 You can also access a more detailed demo [here](https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
 
@@ -32,13 +32,14 @@ To set up the session store, go to the `src/settings.py` file and add the follow
 ```python
 from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore
 from pathlib import Path
+
 SESSION_STORE_CLASS = SQLiteStore
 SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data")}
 ```
 
-This will specify the creation of the `SQLiteStore` under the `/data` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin. 
+This will specify the creation of the `SQLiteStore` under the `/data` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin.
 
-Please ensure that your installed version of Kedro-Viz is at least version 4.1.1 onwards. This step is crucial for enabling experiment tracking features on Kedro-Viz as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete you can either proceed to [set up the tracking datasets](#set-up-tracking-datasets) or [set up your nodes and pipelines to log metrics](#set-up-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable. 
+Please ensure that your installed version of Kedro-Viz is at least version 4.1.1 onwards. This step is crucial for enabling experiment tracking features on Kedro-Viz as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete you can either proceed to [set up the tracking datasets](#set-up-tracking-datasets) or [set up your nodes and pipelines to log metrics](#set-up-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable.
 
 ## Set up tracking datasets
 
@@ -93,7 +94,7 @@ node(
     func=evaluate_model,
     inputs=["regressor", "X_test", "y_test"],
     name="evaluate_model_node",
-    outputs="metrics"
+    outputs="metrics",
 )
 ```
 

@@ -130,7 +130,7 @@ Having set up both datasets, you are now ready to generate your first set of exp
 
 ## Generate the Run data
 
-One of the beauty of native experiment tracking in Kedro is that all tracked data are generated and stored each time you do a Kedro run. Hence, to generat the data, simply do:
+The beauty of native experiment tracking in Kedro is that all tracked data is generated and stored each time you do a Kedro run. Hence, to generate the data, you only need to execute:
 
 ```bash
 kedro run

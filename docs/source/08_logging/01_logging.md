@@ -18,7 +18,9 @@ log.warning("Issue warning")
 log.info("Send information")
 ```
 
-Note: Log names like the example above, `__name__`, can be handler names defined within the `handlers` section keys.  The default handler names are `console, info_file_handler, error_file_handler` found within `conf/base/logging.yml`.
+```eval_rst
+.. note:: The name of a logger corresponds to a key in the ``loggers``  section in ``logging.yml`` (e.g. ``kedro.io``). See `Python's logging documentation <https://docs.python.org/3/library/logging.html#logger-objects>`_ for more information.
+```
 
 ## Logging for `anyconfig`
 

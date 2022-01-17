@@ -45,7 +45,7 @@ Please ensure that your installed version of Kedro-Viz is at least version 4.1.1
 
 There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data like boolean or text-based data.
 
-Let's set up the following 2 datasets to log our r2 scores and parameters for each run by adding the following in `catalog.yml` under `/conf/base`:
+Set up two datasets to log `r2 scores` and `parameters` for each run by adding the following in the `conf/base/catalog.yml` file:
 
 ```yaml
 metrics:
@@ -59,9 +59,9 @@ companies_columns:
 
 ## Set up your nodes and pipelines to log metrics
 
-Now that we have set up the tracked datasets to log our experiment tracking data, the next step is to ensure that the data is returned from your nodes.
+Now that you have set up the tracking datasets to log experiment tracking data, the next step is to ensure that the data is returned from your nodes.
 
-Let's set up the data to be logged for the metrics dataset - under `nodes.py` of your `data_processing` pipeline (`/src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`), modify your `evaluate_model` function by adding in three different metrics: `score` to log your r2 score, `mae` to log your mean absolute error, and `me` to log your max error, and returning those 3 metrics as a key value pair.
+Set up the data to be logged for the metrics dataset - under `nodes.py` of your `data_processing` pipeline (`/src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`), modify your `evaluate_model` function by adding in three different metrics: `score` to log your r2 score, `mae` to log your mean absolute error, and `me` to log your max error, and returning those 3 metrics as a key value pair.
 
 The new `evaluate_model` function would look like this:
 
@@ -133,7 +133,7 @@ Having set up both datasets, you are now ready to generate your first set of exp
 One of the beauty of native experiment tracking in Kedro is that all tracked data are generated and stored each time you do a Kedro run. Hence, to generat the data, simply do:
 
 ```bash
-Kedro run
+kedro run
 ```
 
 After the run completes, under `data/09_tracking`, you will now see two folders, `companies_column.json` and `metrics.json`. On performing a pipeline run after setting up the tracking datasets, Kedro will generate a folder with the dataset name for each tracked dataset. Each folder of the tracked dataset will contain folders named by the timestamp of each pipeline run to store the saved metrics of the dataset, with each future pipeline run generating a new timestamp folder with the JSON file of the saved metrics under the folder of its subsequent tracked dataset.

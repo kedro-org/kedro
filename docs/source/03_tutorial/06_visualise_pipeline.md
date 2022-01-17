@@ -200,7 +200,7 @@ shuttle_speed_comparison_plot:
   filepath: data/08_reporting/shuttle_speed_comparison_plot.json
 ```
 
-Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/icon-image-dataset.svg) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.
+Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_plotly.png)
 

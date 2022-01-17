@@ -52,11 +52,11 @@ class _SharedMemoryDataSet:
             # Checks if the error is due to serialisation or not
             try:
                 pickle.dumps(data)
-            except Exception as exc:  # SKIP_IF_NO_SPARK
+            except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
                 raise DataSetError(
                     f"{str(data.__class__)} cannot be serialized. ParallelRunner "
                     "implicit memory datasets can only be used with serializable data"
-                ) from exc
+                ) from serialisation_exc
             else:
                 raise exc
 
@@ -220,19 +220,19 @@ class ParallelRunner(AbstractRunner):
                 f"using functools.wraps()."
             )
 
-        memory_data_sets = []
+        memory_datasets = []
         for name, data_set in data_sets.items():
             if (
                 name in pipeline.all_outputs()
                 and isinstance(data_set, MemoryDataSet)
                 and not isinstance(data_set, BaseProxy)
             ):
-                memory_data_sets.append(name)
+                memory_datasets.append(name)
 
-        if memory_data_sets:
+        if memory_datasets:
             raise AttributeError(
                 f"The following data sets are memory data sets: "
-                f"{sorted(memory_data_sets)}\n"
+                f"{sorted(memory_datasets)}\n"
                 f"ParallelRunner does not support output to externally created "
                 f"MemoryDataSets"
             )
@@ -270,7 +270,6 @@ class ParallelRunner(AbstractRunner):
 
         """
         # pylint: disable=import-outside-toplevel,cyclic-import
-        from kedro.framework.session.session import get_current_session
 
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
@@ -284,11 +283,7 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
-        from kedro.framework.project import PACKAGE_NAME
-
-        session = get_current_session(silent=True)
-        # pylint: disable=protected-access
-        conf_logging = session._get_logging_config() if session else None
+        from kedro.framework.project import LOGGING, PACKAGE_NAME
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:
@@ -303,7 +298,7 @@ class ParallelRunner(AbstractRunner):
                             self._is_async,
                             run_id,
                             package_name=PACKAGE_NAME,
-                            conf_logging=conf_logging,
+                            conf_logging=LOGGING,
                         )
                     )
                 if not futures:

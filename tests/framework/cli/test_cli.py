@@ -10,7 +10,7 @@ from click.testing import CliRunner
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
-from kedro.framework.cli import get_project_context, load_entry_points
+from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.cli import KedroCLI, _init_plugins, cli
 from kedro.framework.cli.jupyter import jupyter_cli
@@ -69,24 +69,6 @@ def fake_session(mocker):
     mock_session_create = mocker.patch.object(KedroSession, "create")
     mocked_session = mock_session_create.return_value.__enter__.return_value
     return mocked_session
-
-
-# pylint:disable=too-few-public-methods
-class DummyContext:
-    def __init__(self):
-        self.config_loader = "config_loader"
-
-    catalog = "catalog"
-    pipeline = "pipeline"
-    project_name = "dummy_name"
-    project_path = "dummy_path"
-
-
-@fixture
-def mocked_load_context(mocker):
-    return mocker.patch(
-        "kedro.framework.cli.cli.load_context", return_value=DummyContext()
-    )
 
 
 class TestCliCommands:
@@ -322,23 +304,6 @@ class TestCliUtils:
         assert actual == expected
 
 
-@mark.usefixtures("mocked_load_context")
-class TestGetProjectContext:
-    def test_get_context_without_project_path(self, mocked_load_context):
-        dummy_context = get_project_context("context")
-        mocked_load_context.assert_called_once_with(Path.cwd())
-        assert isinstance(dummy_context, DummyContext)
-
-    def test_get_context_with_project_path(self, tmpdir, mocked_load_context):
-        dummy_project_path = tmpdir.mkdir("dummy_project")
-        dummy_context = get_project_context("context", project_path=dummy_project_path)
-        mocked_load_context.assert_called_once_with(dummy_project_path)
-        assert isinstance(dummy_context, DummyContext)
-
-    def test_verbose(self):
-        assert not get_project_context("verbose")
-
-
 class TestEntryPoints:
     def test_project_groups(self, entry_points, entry_point):
         entry_point.load.return_value = "groups"
@@ -552,22 +517,11 @@ class TestRunCommand:
         assert isinstance(runner, SequentialRunner)
         assert not runner._is_async
 
-    def test_with_sequential_runner_and_parallel_flag(
-        self, fake_project_cli, fake_session
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel", "--runner=SequentialRunner"]
-        )
-        assert result.exit_code
-        assert "Please use either --parallel or --runner" in result.stdout
-
-        fake_session.return_value.run.assert_not_called()
-
-    def test_run_successfully_parallel_via_flag(
+    def test_run_successfully_parallel(
         self, fake_project_cli, fake_metadata, fake_session, mocker
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel"], obj=fake_metadata
+            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
         )
         assert not result.exit_code
         fake_session.run.assert_called_once_with(
@@ -582,17 +536,6 @@ class TestRunCommand:
             pipeline_name=None,
         )
 
-        runner = fake_session.run.call_args_list[0][1]["runner"]
-        assert isinstance(runner, ParallelRunner)
-        assert not runner._is_async
-
-    def test_run_successfully_parallel_via_name(
-        self, fake_project_cli, fake_metadata, fake_session
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
-        )
-        assert not result.exit_code
         runner = fake_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, ParallelRunner)
         assert not runner._is_async

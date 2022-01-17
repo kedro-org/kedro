@@ -69,12 +69,10 @@ layers = [
     "extras.datasets",
     "io",
     "pipeline",
-    "config",
-    "versioning"
+    "config"
 ]
 ignore_imports = [
-    "kedro.runner.parallel_runner -> kedro.framework.project",
-    "kedro.runner.parallel_runner -> kedro.framework.session.session"
+    "kedro.runner.parallel_runner -> kedro.framework.project"
 ]
 
 [[tool.importlinter.contracts]]
@@ -112,5 +110,5 @@ forbidden_modules = [
 ]
 ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
-    "kedro.framework.hooks.specs -> kedro.config"
+    "kedro.framework.session.session -> kedro.config"
 ]

@@ -6,8 +6,8 @@ import abc
 import copy
 import logging
 import re
-import warnings
 import traceback
+import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
 from functools import partial
@@ -187,7 +187,7 @@ class AbstractDataSet(abc.ABC):
             # This exception handling is by design as the composed data sets
             # can throw any type of exception.
             details = _get_dataset_exception_stack(exc)
-            
+
             message = (
                 f"Failed while loading data from data set "
                 f"{str(self)}.\n{str(exc)}\n\nUnderlying exception:\n{details}'"
@@ -218,7 +218,7 @@ class AbstractDataSet(abc.ABC):
             raise
         except Exception as exc:
             details = _get_dataset_exception_stack(exc)
-            
+
             message = (
                 f"Failed while saving data to data set "
                 f"{str(self)}.\n{str(exc)}\n\nUnderlying exception:\n{details}'"
@@ -753,7 +753,7 @@ def _get_dataset_exception_stack(exc: Exception) -> str:
     of DataSets which implement AbstractDataSet (or similar) the actual
     error message is obscured from the underlying Exception when the catch-all
     DataSet error is raised.
-    
+
     This method returns the call stack for the few lines before the exception
     hits the generic implementation in core.py
 
@@ -764,5 +764,5 @@ def _get_dataset_exception_stack(exc: Exception) -> str:
         str: A string which better explains the exception at hand
     """
     traceback_obj = exc.__traceback__
-    underlying_exception = ''.join(traceback.format_tb(traceback_obj, limit=4)[1:])
+    underlying_exception = "".join(traceback.format_tb(traceback_obj, limit=4)[1:])
     return underlying_exception

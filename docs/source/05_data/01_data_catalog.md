@@ -304,12 +304,10 @@ dev_abs:
   account_name: accountname
   account_key: key
 ```
-Example 16: Loading a csv file stored in a remote location through ssh
+Example 16: Loading a CSV file stored in a remote location through SSH
 
-This example requires paramiko to be installed. This can be done running:
-
-```bash
-pip install paramiko
+```eval_rst
+.. note::  This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
 ```
 In the conf/local/catalog.yml the dataset can be defined as follows:
 

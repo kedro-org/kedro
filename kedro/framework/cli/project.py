@@ -112,9 +112,7 @@ def lint(
 
     python_call("black", ("--check",) + files if check_only else files)
     python_call("flake8", files)
-
-    check_flag = ("-c",) if check_only else ()
-    python_call("isort", (*check_flag, "-rc") + files)  # type: ignore
+    python_call("isort", ("--check",) + files if check_only else files)
 
 
 @forward_command(project_group, forward_help=True)

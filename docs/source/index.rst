@@ -4,19 +4,19 @@
    contain the root `toctree` directive.
 
 
-.. image:: https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/kedro_banner.png
+.. image:: https://raw.githubusercontent.com/kedro-org/kedro/develop/static/img/kedro_banner.png
     :alt: Kedro logo
     :class: kedro-logo
 
 Welcome to Kedro's documentation!
 =============================================
 
-.. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/main?label=main
-    :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/main
+.. image:: https://img.shields.io/circleci/build/github/kedro-org/kedro/main?label=main
+    :target: https://circleci.com/gh/kedro-org/kedro/tree/main
     :alt: CircleCI - Main Branch
 
-.. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop
-    :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/develop
+.. image:: https://img.shields.io/circleci/build/github/kedro-org/kedro/develop?label=develop
+    :target: https://circleci.com/gh/kedro-org/kedro/tree/develop
     :alt: CircleCI - Develop Branch
 
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
@@ -75,6 +75,7 @@ Welcome to Kedro's documentation!
    03_tutorial/04_create_pipelines
    03_tutorial/05_package_a_project
    03_tutorial/06_visualise_pipeline
+   03_tutorial/07_set_up_experiment_tracking
 
 .. toctree::
    :maxdepth: 2

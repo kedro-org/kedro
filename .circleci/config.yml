@@ -1,25 +1,26 @@
 version: 2.1
 
+parameters:
+  release_kedro:
+    type: boolean
+    default: false
+
 orbs:
   win: circleci/windows@2.2.0
 
+# No windows executor is listed here since windows builds use win/default and modify
+# the Python version through the conda environment.
 executors:
-  py36:
+  docker:
+    parameters:
+      python_version:
+        type: string
     docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
-    resource_class: medium+
-  py37:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
-    resource_class: medium+
-  py38:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:<<parameters.python_version>>
     resource_class: medium+
 
 commands:
   setup_conda:
-    description: Activate conda environment
     steps:
       - run:
           name: Run conda.sh
@@ -29,7 +30,6 @@ commands:
           command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
 
   setup_requirements:
-    description: Install PIP dependencies
     steps:
       - run:
           name: Install pip setuptools
@@ -62,92 +62,14 @@ commands:
           name: Pip freeze
           command: pip freeze
 
-  setup_pre_commit:
-    description: Install pre-commit hooks
-    steps:
-      - run:
-          name: Install pre-commit hooks
-          command: pre-commit install --install-hooks
-      - run:
-          name: Run pre-commit hooks
-          command: pre-commit install --hook-type pre-push
-
-  unit_tests:
-    description: Run unit tests
+  setup:
     steps:
       - checkout
       - setup_conda
       - setup_requirements
-      - run:
-          name: Run unit tests
-          command: make test
 
-  lint:
-    description: Run linters
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - setup_pre_commit
-      - run:
-          name: Run linters
-          command: make lint
-
-  e2e_tests:
-    description: Run all end to end tests
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Run e2e tests
-          command: make e2e-tests
-
-  build_docs:
-    description: Build docs
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Build docs
-          command: make build-docs
-
-  docs_linkcheck:
-    description: Build docs and check for broken links
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Check for broken links
-          command: make linkcheck
-
-  pip_compile:
-    description: Pip-compile requirements file
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Pip-compile requirements file
-          command: make pip-compile
-
-  run_viz_build:
-    description: Deploy kedro-viz to ensure tests in that project pass
-    steps:
-      - run:
-          name: Trigger a kedro-viz build
-          command: |
-            curl --location --request POST \
-              --url https://circleci.com/api/v2/project/github/quantumblacklabs/kedro-viz/pipeline \
-              --header "Circle-Token: $CIRCLE_TOKEN" \
-              --header 'content-type: application/json' \
-              --data '{"branch":"main"}'
-
-  # Windows-related commands
+  # Windows specific commands
   win_setup_conda:
-    description: Setup conda
     parameters:
       python_version:
         type: string
@@ -157,11 +79,9 @@ commands:
           command: conda init powershell
       - run:
           name: Create 'kedro_builder' conda environment
-          command: |
-            conda create --name kedro_builder python=<< parameters.python_version >> -y
+          command: conda create -n kedro_builder python=<<parameters.python_version>> -y
 
   win_setup_env:
-    description: Setup environment
     steps:
       - run:
           # Required for Tensorflow tests
@@ -199,7 +119,6 @@ commands:
           command: choco install make
 
   win_setup_requirements:
-    description: Install Kedro dependencies
     steps:
       - run:
           name: Install GDAL
@@ -217,14 +136,73 @@ commands:
           name: Pip freeze
           command: conda activate kedro_builder; pip freeze
 
-  win_unit_tests:
-    description: Run unit tests
+  win_setup:
+    parameters:
+      python_version:
+        type: string
     steps:
       - checkout
+      - win_setup_conda:
+          python_version: <<parameters.python_version>>
       - win_setup_env
       - restore_cache:
           key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - win_setup_requirements
+
+jobs:
+  e2e_tests:
+    parameters:
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
+    steps:
+      - setup
+      - run:
+          name: Run e2e tests
+          command: make e2e-tests
+
+  win_e2e_tests:
+    parameters:
+      python_version:
+        type: string
+    executor: win/default
+    steps:
+      - checkout
+      - win_setup_conda:
+          python_version: <<parameters.python_version>>
+      - run:
+          name: Install 'make' command
+          command: choco install make
+      - run:
+          name: Install dependencies
+          command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
+      - run:
+          name: Run e2e tests
+          command: conda activate kedro_builder; make e2e-tests
+
+  unit_tests:
+    parameters:
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
+    steps:
+      - setup
+      - run:
+          name: Run unit tests
+          command: make test
+
+  win_unit_tests:
+    parameters:
+      python_version:
+        type: string
+    executor: win/default
+    steps:
+      - win_setup:
+          python_version: <<parameters.python_version>>
       - run:
           # geopandas and tensorflow conflicts when imported simultaneously.
           # The HDF5 header files used to compile this application do not match
@@ -239,41 +217,59 @@ commands:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - run:
-          name: Run unit tests
-          command: |
-            conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
+      - unless:
+          condition:
+            equal: ["3.6", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests without spark
+                command: conda activate kedro_builder; make test-no-spark
+      - when:
+          condition:
+            equal: ["3.6", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests without spark or tensorflow
+                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark --ignore tests/extras/datasets/tensorflow --numprocesses 4 --dist loadfile
 
-  win_e2e_tests:
-    description: Run all end to end tests
+  lint:
+    parameters:
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
     steps:
-      - checkout
+      - setup
       - run:
-          name: Install dependencies
-          command: |
-            conda activate kedro_builder
-            pip install -r features/windows_reqs.txt
-            choco install make
+          name: Run linters
+          command: make lint
+
+  pip_compile:
+    parameters:
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
+    steps:
+      - setup
       - run:
-          name: Run e2e tests
-          command: conda activate kedro_builder; make e2e-tests
+          name: Pip-compile requirements file
+          command: make pip-compile
 
   win_pip_compile:
-    description: Pip-compile requirements file
     parameters:
-      cache_save:
-        type: boolean
-        default: false
+      python_version:
+        type: string
+    executor: win/default
     steps:
-      - checkout
-      - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
+      - win_setup:
+          python_version: <<parameters.python_version>>
       - when:
-          # Cache when `parameters.cache_save` is True
-          condition: << parameters.cache_save >>
+          # Save cache only for Python 3.7. There is no need to save it for each Python.
+          condition:
+            equal: ["3.7", <<parameters.python_version>>]
           steps:
             - save_cache:
                 key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
@@ -285,234 +281,268 @@ commands:
           name: Pip-compile requirements file
           command: conda activate kedro_builder; make pip-compile
 
-jobs:
-  unit_tests_36:
-    executor: py36
-    steps: [unit_tests]
+  build_docs:
+    executor:
+      name: docker
+      python_version: "3.7"
+    steps:
+      - setup
+      - run:
+          name: Build docs
+          command: make build-docs
 
-  linters_36:
-    executor: py36
-    steps: [lint]
+  docs_linkcheck:
+    executor:
+      name: docker
+      python_version: "3.7"
+    steps:
+      - setup
+      - run:
+          name: Check for broken links
+          command: make linkcheck
 
-  e2e_tests_36:
-    executor: py36
-    steps: [e2e_tests]
-
-  docs_36:
-    executor: py36
-    steps: [build_docs]
-
-  unit_tests_37:
-    executor: py37
-    steps: [unit_tests]
-
-  linters_37:
-    executor: py37
-    steps: [lint]
-
-  e2e_tests_37:
-    executor: py37
-    steps: [e2e_tests]
-
-  docs_37:
-    executor: py37
-    steps: [build_docs]
-
-  docs_linkcheck_37:
-    executor: py37
-    steps: [docs_linkcheck]
-
-  unit_tests_38:
-    executor: py38
+  sync:
+    docker:
+      # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
+      - image: cimg/base:2020.01
     steps:
       - checkout
-      - setup_conda
-      - setup_requirements
+      - add_ssh_keys
+      - run:
+          name: Set git email and name
+          command: |
+            git config --global user.email "kedro@quantumblack.com"
+            git config --global user.name "QuantumBlack Labs"
+      - run:
+          name: Trigger Read The Docs build
+          command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
+      - run:
+          name: Maybe merge main into develop or raise a PR
+          command: ./tools/circleci/github_scripts/merge.sh . "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+      - run:
+          name: Maybe trigger the release workflow
+          command: |
+              KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
+
+              if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
+              then
+                  echo "Starting the release of Kedro ${KEDRO_VERSION}!"
+                  ./tools/circleci/circle-release.sh github/kedro-org/kedro
+              else
+                  echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
+              fi
+
+  merge_pr_to_develop:
+    docker:
+      # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - add_ssh_keys
+      - run:
+          name: Maybe merge an automatic PR into develop
+          command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
+
+  build_docker_image:
+    docker:
+      - image: cimg/python:3.8
+    environment:
+      ECR_IMAGE_URL: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder
+      AWS_REGION: eu-west-2
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - checkout
+      - run:
+          name: Setup AWS CLI
+          command: pip install -U awscli
+      - run:
+          name: Login to AWS ECR
+          command: |
+            aws ecr get-login-password --region ${AWS_REGION} | \
+            docker login --username AWS --password-stdin "${ECR_IMAGE_URL}"
+      - run:
+          name: Build docker images
+          command: ./tools/circleci/docker_build_img/build.sh "." "${ECR_IMAGE_URL}"
+          no_output_timeout: 20m
+      - run:
+          name: Logout from AWS ECR
+          command: docker logout "${ECR_IMAGE_URL}"
+          when: always  # logout even if the previous step has failed
+
+  # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
+  # It's used to check that the nightly docker image is working ok and before publishing a release.
+  build_kedro:
+    parameters:
+      python_version:
+        type: string
+    executor:
+      name: docker
+      python_version: <<parameters.python_version>>
+    steps:
+      - setup
+      - run:
+          name: Run linters
+          command: make lint
       - run:
           name: Run unit tests
           command: make test
+      - run:
+          name: Run e2e tests
+          command: make e2e-tests
 
-  linters_38:
-    executor: py38
-    steps: [lint]
+  publish_kedro:
+    executor:
+      name: docker
+      python_version: "3.7"
+    steps:
+      - setup
+      - add_ssh_keys
+      - run:
+          name: Check Kedro version
+          command: |
+            KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
 
-  e2e_tests_38:
-    executor: py38
-    steps: [e2e_tests]
+            if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
+            then
+                echo "export KEDRO_VERSION=\"${KEDRO_VERSION}\"" >> $BASH_ENV
+            else
+                echo "Error: Kedro version ${KEDRO_VERSION} already exists on PyPI"
+                exit 1
+            fi
+      - run:
+          name: Tag and publish release on Github
+          command: ./tools/circleci/github_scripts/release.sh kedro-org kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
+      - run:
+          name: Publish to PyPI
+          command: |
+            make package
+            python -m pip install twine -U
+            python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*
+      - run:
+          name: Trigger Read The Docs build
+          command: |
+            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} stable
+            # give some time for GitHub release to propagate
+            # otherwise RTD fails to build a new tag
+            sleep 120
+            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
 
-  pip_compile_36:
-    executor: py36
-    steps: [pip_compile]
-
-  pip_compile_37:
-    executor: py37
-    steps: [pip_compile]
-
-  pip_compile_38:
-    executor: py38
-    steps: [pip_compile]
-
-  run_kedro_viz:
+  # Trigger kedro-viz build to ensure tests in that project pass
+  viz_build:
     docker:
       - image: spotify/alpine # for bash and curl
-    steps: [run_viz_build]
+    steps:
+      - run:
+          name: Trigger kedro-viz build
+          command: |
+            curl --location --request POST \
+              --url https://circleci.com/api/v2/project/github/kedro-org/kedro-viz/pipeline \
+              --header "Circle-Token: $CIRCLE_VIZ_BUILD_TOKEN" \
+              --header 'content-type: application/json' \
+              --data '{"branch":"main"}'
 
   all_circleci_checks_succeeded:
     docker:
       - image: circleci/python # any light-weight image
-
     steps:
       - run:
           name: Success!
           command: echo "All checks passed"
 
-  # Windows-related jobs
-  win_unit_tests_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_unit_tests
-
-  win_unit_tests_37:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.7"
-      - win_unit_tests
-
-  win_unit_tests_38:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.8"
-      - checkout
-      - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
-      - run:
-          name: Set HDF5_DISABLE_VERSION_CHECK environment variable
-          command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - run:
-          name: Run unit tests without Spark and TensorFlow
-          # Run `test_parallel_runner.py` separately because of `Windows fatal exception: stack overflow`
-          command: |
-            conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
-            if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
-
-  win_e2e_tests_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_e2e_tests
-
-  win_e2e_tests_37:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.7"
-      - win_e2e_tests
-
-  win_e2e_tests_38:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.8"
-      - win_e2e_tests
-
-  win_pip_compile_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_pip_compile
-
-  win_pip_compile_37:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.7"
-      - win_pip_compile:
-          # Save cache only for Python 3.7. There is no need to save it for each Python.
-          cache_save: true
-
-  win_pip_compile_38:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.8"
-      - win_pip_compile
-
 workflows:
-  version: 2
+  version: 2.1
+
   regular:
+    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
     jobs:
-      - unit_tests_36
-      - linters_36
-      - e2e_tests_36
-      - docs_36
-      - docs_linkcheck_37
-      - unit_tests_37
-      - linters_37
-      - e2e_tests_37
-      - docs_37
-      - unit_tests_38
-      - linters_38
-      - e2e_tests_38
-      - pip_compile_36
-      - pip_compile_37
-      - pip_compile_38
-      - win_unit_tests_36
-      - win_unit_tests_37
-      - win_unit_tests_38
-      - win_pip_compile_36
-      - win_pip_compile_37
-      - win_pip_compile_38
-      - win_e2e_tests_36
-      - win_e2e_tests_37
-      - win_e2e_tests_38
-      - run_kedro_viz:
-          filters:
-            branches:
-              only:
-                - master
+      - e2e_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - win_e2e_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - unit_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - win_unit_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - lint:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - pip_compile:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - win_pip_compile:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - build_docs
+      - docs_linkcheck
       - all_circleci_checks_succeeded:
           requires:
-            - unit_tests_36
-            - linters_36
-            - e2e_tests_36
-            - docs_36
-            - unit_tests_37
-            - linters_37
-            - e2e_tests_37
-            - docs_37
-            - docs_linkcheck_37
-            - unit_tests_38
-            - linters_38
-            - e2e_tests_38
-            - pip_compile_36
-            - pip_compile_37
-            - pip_compile_38
-            - win_pip_compile_36
-            - win_pip_compile_37
-            - win_pip_compile_38
-            - win_unit_tests_36
-            - win_unit_tests_37
-            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
-            # - win_e2e_tests_36
-            # Skipped due to Windows fatal exception: stack overflow
-            # - win_unit_tests_38
-            - win_e2e_tests_37
-            - win_e2e_tests_38
+            - e2e_tests
+            - win_e2e_tests
+            - unit_tests
+            - win_unit_tests
+            - lint
+            - pip_compile
+            - win_pip_compile
+            - build_docs
+            - docs_linkcheck
+
+  main_updated:
+    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
+    jobs:
+      - sync:
+          filters:
+            branches:
+              only: main
+      - viz_build:
+          filters:
+            branches:
+              only: main
+
+  hourly_pr_merge:
+    triggers:
+      - schedule:
+          cron: 0 * * * *
+          filters:
+            branches:
+              only: main
+    jobs:
+      - merge_pr_to_develop
+
+  nightly_build:
+    triggers:
+      - schedule:
+          cron: 30 2 * * *
+          filters:
+            branches:
+              only: main
+    jobs:
+      - build_docker_image
+      - build_kedro:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+          requires:
+            - build_docker_image
+
+  kedro_release:
+    when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set
+    jobs:
+      - build_kedro:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - publish_kedro:
+          requires:
+            - build_kedro

@@ -1,8 +1,15 @@
 # Release 0.17.7
 
+## Major features and improvements
+* `pipeline` now accepts `tags` and a collection of `Node`s and/or `Pipeline`s rather than just a single `Pipeline` object. `pipeline` should be used in preference to `Pipeline` when creating a Kedro pipeline.
+
 ## Bug fixes and other changes
-* Added tutorial documentation for experiment tracking in Kedro docs. (`03_tutorial/07_set_up_experiment_tracking.md`).
-* Added Plotly documentation in Kedro docs. (`03_tutorial/06_visualise_pipeline.md`).
+* Added tutorial documentation for experiment tracking in Kedro docs (`03_tutorial/07_set_up_experiment_tracking.md`).
+* Added Plotly documentation in Kedro docs (`03_tutorial/06_visualise_pipeline.md`).
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
 
 # Release 0.17.6
 

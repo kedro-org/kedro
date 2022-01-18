@@ -191,16 +191,16 @@ ds_pipeline_2 = pipeline(
 
 > The `pipeline_instance` variable is our 'template' pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parametrised instantiations.
 
-The table below describes what the purpose of the keyword arguments in detail:
+The table below describes what the purpose is of the keyword arguments in detail:
 
 ```eval_rst
 
 +--------------------+---------------------------------------------------------------------------------------+------------------------------+
 | Keyword argument   | :code:`ds_pipeline_1`                                                                 | :code:`ds_pipeline_2`        |
 +====================+=======================================================================================+==============================+
-| :code:`inputs`     | ``model_input_table`` lives on the boundary of the namespace and needs to be declared | Identical                    |
+| :code:`inputs`     | Declaring ``model_input_table`` as a boundary input will not prefix it with the namespace | Same as `ds_pipeline_1`                    |
 +--------------------+---------------------------------------------------------------------------------------+------------------------------+
-| :code:`outputs`    | No outputs live at the boundary of this pipeline                                      | Identical                    |
+| :code:`outputs`    | No outputs are at the boundary of this pipeline so nothing to list here                                      | Same as `ds_pipeline_1`                    |
 +--------------------+---------------------------------------------------------------------------------------+------------------------------+
 | :code:`parameters` | Inherits defaults from template                                                       | Overrides provided           |
 +--------------------+---------------------------------------------------------------------------------------+------------------------------+

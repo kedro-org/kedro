@@ -191,7 +191,7 @@ ds_pipeline_2 = pipeline(
 
 > The `pipeline_instance` variable is our 'template' pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parametrised instantiations.
 
-The table below describes what the purpose is of the keyword arguments in detail:
+The table below describes the purpose of each keyword arguments in detail:
 
 ```eval_rst
 

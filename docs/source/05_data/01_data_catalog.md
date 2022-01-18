@@ -326,10 +326,6 @@ cluster_credentials:
 ```
 The list of all available parameters is given in the [Paramiko documentation](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect).
 
-```python
-catalog.load("cool_dataset")
-```
-
 ## Creating a Data Catalog YAML configuration file via CLI
 
 You can use [`kedro catalog create` command](../09_development/03_commands_reference.md#create-a-data-catalog-yaml-configuration-file) to create a Data Catalog YAML configuration.

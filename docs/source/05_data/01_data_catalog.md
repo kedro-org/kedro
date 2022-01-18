@@ -315,8 +315,7 @@ cool_dataset:
   filepath: "sftp:///path/to/remote_cluster/cool_data.csv"
   credentials: cluster_credentials
 ```
-sftp is the protocol used and all necessary parameters to establish the connection can be defined either trhough the fs_args or in the conf/local/credentials.yml as shown in this example.
-In conf/local/credentials.yml the hostname, the port, username and password can be defined as follows:
+All parameters required to establish the SFTP connection can be defined through `fs_args` or in `credentials.yml` as follows:
 
 ```yaml
 # in conf/local/credentials.yml

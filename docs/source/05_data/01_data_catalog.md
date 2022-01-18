@@ -318,7 +318,6 @@ cool_dataset:
 All parameters required to establish the SFTP connection can be defined through `fs_args` or in `credentials.yml` as follows:
 
 ```yaml
-# in conf/local/credentials.yml
 cluster_credentials:
   username: my_username
   host: host_address

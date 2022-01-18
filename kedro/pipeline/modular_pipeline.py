@@ -1,6 +1,6 @@
 """Helper to integrate modular pipelines into a master pipeline."""
 import copy
-from typing import AbstractSet, Dict, List, Set, Union
+from typing import AbstractSet, Dict, Iterable, List, Set, Union
 
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import (
@@ -69,27 +69,32 @@ def _validate_datasets_exist(
 
 
 def pipeline(
-    pipe: Pipeline,
+    pipe: Union[Iterable[Union[Node, Pipeline]], Pipeline],
     *,
     inputs: Union[str, Set[str], Dict[str, str]] = None,
     outputs: Union[str, Set[str], Dict[str, str]] = None,
     parameters: Dict[str, str] = None,
+    tags: Union[str, Iterable[str]] = None,
     namespace: str = None,
 ) -> Pipeline:
-    """Create a copy of the pipeline and its nodes,
-    with some dataset names and node names modified.
+    """Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``s.
 
     Args:
-        pipe: Original modular pipeline to integrate
+        pipe: The nodes the ``Pipeline`` will be made of. If you
+            provide pipelines among the list of nodes, those pipelines will
+            be expanded and all their nodes will become part of this
+            new pipeline.
         inputs: A name or collection of input names to be exposed as connection points
-            to other pipelines upstream.
+            to other pipelines upstream. This is optional; if not provided, the
+            pipeline inputs are automatically inferred from the pipeline structure.
             When str or Set[str] is provided, the listed input names will stay
             the same as they are named in the provided pipeline.
             When Dict[str, str] is provided, current input names will be
             mapped to new names.
             Must only refer to the pipeline's free inputs.
         outputs: A name or collection of names to be exposed as connection points
-            to other pipelines downstream.
+            to other pipelines downstream. This is optional; if not provided, the
+            pipeline inputs are automatically inferred from the pipeline structure.
             When str or Set[str] is provided, the listed output names will stay
             the same as they are named in the provided pipeline.
             When Dict[str, str] is provided, current output names will be
@@ -97,6 +102,7 @@ def pipeline(
             Can refer to both the pipeline's free outputs, as well as
             intermediate results that need to be exposed.
         parameters: A map of existing parameter to the new one.
+        tags: Optional set of tags to be applied to all the pipeline nodes.
         namespace: A prefix to give to all dataset names,
             except those explicitly named with the `inputs`/`outputs`
             arguments, and parameter references (`params:` and `parameters`).
@@ -108,8 +114,17 @@ def pipeline(
             any of the expected types (str, dict, list, or None).
 
     Returns:
-        A new ``Pipeline`` object with the new nodes, modified as requested.
+        A new ``Pipeline`` object.
     """
+    if isinstance(pipe, Pipeline):
+        # To ensure that we are always dealing with a *copy* of pipe.
+        pipe = Pipeline([pipe], tags=tags)
+    else:
+        pipe = Pipeline(pipe, tags=tags)
+
+    if not any([inputs, outputs, parameters, namespace]):
+        return pipe
+
     # pylint: disable=protected-access
     inputs = _to_dict(inputs)
     outputs = _to_dict(outputs)
@@ -181,7 +196,7 @@ def pipeline(
 
     new_nodes = [_copy_node(n) for n in pipe.nodes]
 
-    return Pipeline(new_nodes)
+    return Pipeline(new_nodes, tags=tags)
 
 
 def _to_dict(element: Union[None, str, Set[str], Dict[str, str]]) -> Dict[str, str]:

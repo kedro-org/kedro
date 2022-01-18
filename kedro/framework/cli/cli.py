@@ -63,7 +63,7 @@ def info():
     click.echo(
         "kedro allows teams to create analytics\n"
         "projects. It is developed as part of\n"
-        "the Kedro initiative at QuantumBlack."
+        "the Kedro initiative."
     )
 
     plugin_versions = {}

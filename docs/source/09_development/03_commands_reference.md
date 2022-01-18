@@ -119,7 +119,7 @@ v0.17.6
 
 kedro allows teams to create analytics
 projects. It is developed as part of
-the Kedro initiative at QuantumBlack.
+the Kedro initiative.
 
 Installed plugins:
 kedro_viz: 3.4.0 (hooks:global,line_magic)

@@ -324,8 +324,7 @@ cluster_credentials:
   port: 22
   password: password
 ```
-further parameters can be passed to establish te connection. The list of all available parameters can be found ['here'](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect)
-To check that the csv file can be correctly loaded in a pandas DataFrame, the dataset can be loaded from the catalog from within a kedro jupyter notebook as follows:
+The list of all available parameters is given in the [Paramiko documentation](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect).
 
 ```python
 catalog.load("cool_dataset")

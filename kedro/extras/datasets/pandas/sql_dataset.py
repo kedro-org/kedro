@@ -208,6 +208,15 @@ class SQLTableDataSet(AbstractDataSet):
         self._save_args["name"] = table_name
 
         self._load_args["con"] = self._save_args["con"] = credentials["con"]
+        self.create_connection(self._load_args["con"])
+
+    @classmethod
+    def create_connection(cls, con):
+        if hasattr(cls, "engine"):
+            return
+
+        engine = create_engine(con)
+        cls.engine = engine
 
     def _describe(self) -> Dict[str, Any]:
         load_args = self._load_args.copy()
@@ -223,6 +232,10 @@ class SQLTableDataSet(AbstractDataSet):
         )
 
     def _load(self) -> pd.DataFrame:
+        # TODO: update load_args to use cls.engine
+        # FIXME: testing should be done with multiple sql datasets
+        # loading data from them in a loop and check that performance
+        # has improved indeed
         try:
             return pd.read_sql_table(**self._load_args)
         except ImportError as import_error:
@@ -375,6 +388,15 @@ class SQLQueryDataSet(AbstractDataSet):
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
         self._load_args["con"] = credentials["con"]
+        self.create_connection(self._load_args["con"])
+
+    @classmethod
+    def create_connection(cls, con):
+        if hasattr(cls, "engine"):
+            return
+
+        engine = create_engine(con)
+        cls.engine = engine
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
@@ -393,6 +415,8 @@ class SQLQueryDataSet(AbstractDataSet):
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
             with self._fs.open(load_path, mode="r") as fs_file:
                 load_args["sql"] = fs_file.read()
+
+        load_args["con"] = self.engine
 
         try:
             return pd.read_sql_query(**load_args)

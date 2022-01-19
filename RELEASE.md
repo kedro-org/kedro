@@ -1,3 +1,16 @@
+# Release 0.17.7
+
+## Major features and improvements
+* `pipeline` now accepts `tags` and a collection of `Node`s and/or `Pipeline`s rather than just a single `Pipeline` object. `pipeline` should be used in preference to `Pipeline` when creating a Kedro pipeline.
+
+## Bug fixes and other changes
+* Added tutorial documentation for experiment tracking in Kedro docs (`03_tutorial/07_set_up_experiment_tracking.md`).
+* Added Plotly documentation in Kedro docs (`03_tutorial/06_visualise_pipeline.md`).
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+
 # Release 0.17.6
 
 ## Major features and improvements
@@ -13,7 +26,6 @@
 | `pandas.GenericDataSet` | Provides a 'best effort' facility to read / write any format provided by the `pandas` library | `kedro.extras.datasets.pandas` |
 | `pandas.GBQQueryDataSet` | Loads data from a Google Bigquery table using provided SQL query | `kedro.extras.datasets.pandas` |
 | `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark` |
-* Added the Plotly documentation on Kedro docs.
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.

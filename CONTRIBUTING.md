@@ -2,6 +2,7 @@
 
 We welcome any and all contributions to Kedro, at whatever level you can manage. For example, you could:
 
+
 - [Join the community](#join-the-community-and-help-it-grow)
 - [Troubleshoot other users' questions or get answers to your own queries](#community-qa)
 - [Report a bug](#report-a-bug)

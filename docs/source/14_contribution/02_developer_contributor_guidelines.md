@@ -142,7 +142,6 @@ Ensure that your PR builds cleanly before you submit it, by running the CI/CD ch
 * `make lint`: PEP-8 Standards (`pylint`, `flake8`)
 * `make test`: unit tests, 100% coverage (`pytest`, `pytest-cov`)
 * `make e2e-tests`: end-to-end tests (`behave`)
-* 
 
 ```eval_rst
 .. note::  If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using ``export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)`` which `works under macOS or other workarounds <https://stackoverflow.com/questions/53583199/pyspark-error-unsupported-class-file-major-version-55)>`_.

@@ -139,53 +139,21 @@ def count_truthy(elements: List[Any]) -> int:
 ```
 
 Ensure that your PR builds cleanly before you submit it, by running the CI/CD checks locally, as follows:
-
-To run E2E tests you need to install the test requirements which includes `behave`.
-We also use [pre-commit](https://pre-commit.com) hooks for the repository to run the checks automatically.
+* `make lint`: PEP-8 Standards (`pylint`, `flake8`)
+* `make test`: unit tests, 100% coverage (`pytest`, `pytest-cov`)
+* `make e2e-tests`: end-to-end tests (`behave`)
+* 
 
 ```eval_rst
 .. note::  If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using ``export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)`` which `works under macOS or other workarounds <https://stackoverflow.com/questions/53583199/pyspark-error-unsupported-class-file-major-version-55)>`_.
-```
-
-#### PEP-8 Standards (`pylint` and `flake8`)
-
-```bash
-make lint
-```
-
-#### Unit tests, 100% coverage (`pytest`, `pytest-cov`)
-
-You need the dependencies from `test_requirements.txt` installed.
-
-```bash
-make test
 ```
 
 ```eval_rst
 .. note::  We place `conftest.py <https://docs.pytest.org/en/latest/reference/fixtures.html>`_ files in some test directories to make fixtures reusable by any tests in that directory. If you need to see which test fixtures are available and where they come from, you can issue the following command ``pytest --fixtures path/to/the/test/location.py``.
 ```
 
-#### E2E tests (`behave`)
-
-```bash
-behave
-```
-
-#### Others
-
-Our CI / CD also checks that `kedro` installs cleanly on a fresh Python virtual environment, a task which depends on successfully building the documentation:
-
-```bash
-make build-docs
-```
-
-```eval_rst
-.. note::  This command will only work on Unix-like systems and requires ``pandoc`` to be installed.
-```
-
 ### Hints on pre-commit usage
-
-The checks will automatically run on all the changed files on each commit but can be omitted by with the `--no-verify` or `-n` flag:
+[pre-commit](https://pre-commit.com) hooks run checks automatically on all the changed files on each commit but can be skipped with the `--no-verify` or `-n` flag:
 
 ```bash
 git commit --no-verify <...>
@@ -197,7 +165,6 @@ All checks will run during CI build, so skipping checks on commit will not allow
 make uninstall-pre-commit
 ```
 `pre-commit` will still be used by `make lint`, but will not install the git hooks.
-
 
 ## Need help?
 

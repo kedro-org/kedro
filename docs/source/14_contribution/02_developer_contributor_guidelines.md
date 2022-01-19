@@ -166,6 +166,23 @@ make uninstall-pre-commit
 ```
 `pre-commit` will still be used by `make lint`, but will not install the git hooks.
 
+### Developer Certificate of Origin
+We require that all contributions comply with the [Developer Certificate of Origin (DCO)](https://developercertificate.org/). This certifies that the contributor wrote or otherwise has the right to submit their contribution.
+
+All commits must be signed off by including a `Signed-off-by` line in the commit message:
+```
+This is my commit message
+
+Signed-off-by: Random J Developer <random@developer.example.org>
+```
+
+The sign-off can be added automatically to your commit message using the `-s` option:
+```bash
+git commit -s -m "This is my commit message"
+```
+
+If your PR is blocked due to unsigned commits then you will need to follow the instructions under "Rebase the branch" on the GitHub Checks page for your PR. This will retroactively add the sign-off to all unsigned commits and allow the DCO check to pass.
+
 ## Need help?
 
 Working on your first pull request? You can learn how from these resources:

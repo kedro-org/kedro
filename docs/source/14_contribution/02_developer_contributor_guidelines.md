@@ -2,7 +2,7 @@
 
 This page explains the principles and development process that we ask contributing developers to follow.
 
-**Any contributions you make will be under the [Apache 2.0 Software License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)**
+**Any contributions you make will be under the [Apache 2.0 Software License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md).**
 
 In short, when you submit code changes, your submissions are understood to be under the same the [Apache 2.0 License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md) that covers the Kedro project. You should have permission to share the submitted code.
 
@@ -185,22 +185,13 @@ make build-docs
 
 ### Hints on pre-commit usage
 
-The checks will automatically run on all the changed files on each commit.
-Even more extensive set of checks (including the heavy set of `pylint` checks)
-will run before the push.
-
-The pre-commit/pre-push checks can be omitted by running with `--no-verify` flag, as per below:
+The checks will automatically run on all the changed files on each commit but can be omitted by with the `--no-verify` or `-n` flag:
 
 ```bash
 git commit --no-verify <...>
-git push --no-verify <...>
 ```
-(`-n` alias works for `git commit`, but not for `git push`)
 
-All checks will run during CI build, so skipping checks on push will
-not allow you to merge your code with failing checks.
-
-You can uninstall the pre-commit hooks by running:
+All checks will run during CI build, so skipping checks on commit will not allow you to merge your code with failing checks. You can uninstall the pre-commit hooks by running:
 
 ```bash
 make uninstall-pre-commit

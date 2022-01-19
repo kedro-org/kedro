@@ -10,6 +10,8 @@ However, Kedro was missing a way to log metrics and capture all this logged data
 
 Experiment tracking in Kedro adds in the missing pieces and will be developed incrementally.
 
+The following section outlines the setup within your Kedro project to enable experiment tracking. You can also refer to [this tutorial](../tutorial/set_up_experiment_tracking.md) for a step-by-step process to access your tracking datasets on Kedro-Viz.
+
 ## Enable experiment tracking
 Use either one of the [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) or [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet) in your data catalog. These datasets are versioned by default to ensure a historical record is kept of the logged data.
 The `tracking.MetricsDataSet` should be used for tracking numerical metrics and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data. In Kedro-Viz these datasets will be visualised in the metadata side panel.

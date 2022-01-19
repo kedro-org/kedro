@@ -501,7 +501,7 @@ def node(
     outputs: Union[None, str, List[str], Dict[str, str]],
     *,
     name: str = None,
-    tags: Iterable[str] = None,
+    tags: Union[str, Iterable[str]] = None,
     confirms: Union[str, List[str]] = None,
     namespace: str = None,
 ) -> Node:

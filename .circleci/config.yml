@@ -16,7 +16,7 @@ executors:
       python_version:
         type: string
     docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:<<parameters.python_version>>
+      - image: public.ecr.aws/g0x0s3o2/kedro-builder:<<parameters.python_version>>
     resource_class: medium+
 
 commands:
@@ -346,9 +346,6 @@ jobs:
   build_docker_image:
     docker:
       - image: cimg/python:3.8
-    environment:
-      ECR_IMAGE_URL: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder
-      AWS_REGION: eu-west-2
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -359,15 +356,14 @@ jobs:
       - run:
           name: Login to AWS ECR
           command: |
-            aws ecr get-login-password --region ${AWS_REGION} | \
-            docker login --username AWS --password-stdin "${ECR_IMAGE_URL}"
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - run:
           name: Build docker images
-          command: ./tools/circleci/docker_build_img/build.sh "." "${ECR_IMAGE_URL}"
+          command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder"
           no_output_timeout: 20m
       - run:
           name: Logout from AWS ECR
-          command: docker logout "${ECR_IMAGE_URL}"
+          command: docker logout public.ecr.aws
           when: always  # logout even if the previous step has failed
 
   # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.

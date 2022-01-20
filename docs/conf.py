@@ -280,7 +280,7 @@ texinfo_documents = [
         "Kedro Documentation",
         author,
         "Kedro",
-        "Kedro is an open source Data Science framework.",
+        "Kedro is a Python framework for creating reproducible, maintainable and modular data science code.",
         "Data-Science",
     )
 ]

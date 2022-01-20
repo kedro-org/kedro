@@ -61,9 +61,9 @@ def info():
     """Get more information about kedro."""
     click.secho(LOGO, fg="green")
     click.echo(
-        "kedro allows teams to create analytics\n"
-        "projects. It is developed as part of\n"
-        "the Kedro initiative."
+        "Kedro is a Python framework for\n"
+        "creating reproducible, maintainable\n"
+        "and modular data science code."
     )
 
     plugin_versions = {}

@@ -117,9 +117,9 @@ Returns output similar to the following, depending on the version of Kedro used 
 |_|\_\___|\__,_|_|  \___/
 v0.17.6
 
-kedro allows teams to create analytics
-projects. It is developed as part of
-the Kedro initiative.
+Kedro is a Python framework for
+creating reproducible, maintainable
+and modular data science code.
 
 Installed plugins:
 kedro_viz: 3.4.0 (hooks:global,line_magic)

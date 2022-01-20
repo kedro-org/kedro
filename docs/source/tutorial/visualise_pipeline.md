@@ -23,7 +23,7 @@ This command will run a server on http://127.0.0.1:4141 that will open up your v
 
 You may also use the `--autoreload` flag to autoreload Kedro Viz when a `Python` or `YAML` file has changed in the corresponding Kedro project.
 
-![](../meta/images/pipeline_viz_autoreload.gif)
+![](../meta/images/kedro_viz_autoreload.gif)
 
 If a visualisation panel opens up and a pipeline is not visible then please check that your [pipeline definition](create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/kedro-org/kedro-viz).
 

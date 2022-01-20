@@ -180,6 +180,8 @@ The sign-off can be added automatically to your commit message using the `-s` op
 git commit -s -m "This is my commit message"
 ```
 
+To avoid needing to remember the `-s` flag on every commit, you might like to set up an [alias](https://git-scm.com/book/en/v2/Git-Basics-Git-Aliases) for `git commit -s`.
+
 If your PR is blocked due to unsigned commits then you will need to follow the instructions under "Rebase the branch" on the GitHub Checks page for your PR. This will retroactively add the sign-off to all unsigned commits and allow the DCO check to pass.
 
 ## Need help?

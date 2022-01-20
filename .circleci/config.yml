@@ -344,6 +344,9 @@ jobs:
           command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
 
   build_docker_image:
+    parameters:
+      python_version:
+        type: string
     docker:
       - image: cimg/python:3.8
     steps:
@@ -359,7 +362,7 @@ jobs:
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - run:
           name: Build docker images
-          command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder"
+          command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder" "<<parameters.python_version>>"
           no_output_timeout: 20m
       - run:
           name: Logout from AWS ECR
@@ -516,6 +519,7 @@ workflows:
     jobs:
       - merge_pr_to_develop
 
+  # We build all Python versions that exist on `main` or `develop`.
   nightly_build:
     triggers:
       - schedule:
@@ -524,13 +528,16 @@ workflows:
             branches:
               only: main
     jobs:
-      - build_docker_image
+      - build_docker_image:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8", "3.9"]
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.6", "3.7", "3.8", "3.9"]
           requires:
-            - build_docker_image
+            - build_docker_image-<<matrix.python_version>>
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

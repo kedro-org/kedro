@@ -34,7 +34,7 @@ pre-commit~=1.17
 psutil==5.6.7
 pyarrow>=1.0, <7.0
 pylint>=2.5.2, <3.0
-pyproj>=2.2.0, <3.0  # pyproj 3.0 requires proj>=7.2 but that conflicts with fiona which requires proj<7.2.
+pyproj~=3.0  # pyproj 3.0 requires proj>=7.2 but that conflicts with fiona which requires proj<7.2.
 pyspark>=2.2, <4.0
 pytest-cov~=3.0
 pytest-mock>=1.7.1, <2.0

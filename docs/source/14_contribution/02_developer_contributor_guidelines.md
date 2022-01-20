@@ -151,14 +151,14 @@ Ensure that your PR builds cleanly before you submit it, by running the CI/CD ch
 .. note::  We place `conftest.py <https://docs.pytest.org/en/latest/reference/fixtures.html>`_ files in some test directories to make fixtures reusable by any tests in that directory. If you need to see which test fixtures are available and where they come from, you can issue the following command ``pytest --fixtures path/to/the/test/location.py``.
 ```
 
-### Hints on pre-commit usage
-[pre-commit](https://pre-commit.com) hooks run checks automatically on all the changed files on each commit but can be skipped with the `--no-verify` or `-n` flag:
+### Hints on `pre-commit` usage
+[`pre-commit`](https://pre-commit.com) hooks run checks automatically on all the changed files on each commit but can be skipped with the `--no-verify` or `-n` flag:
 
 ```bash
 git commit --no-verify <...>
 ```
 
-All checks will run during CI build, so skipping checks on commit will not allow you to merge your code with failing checks. You can uninstall the pre-commit hooks by running:
+All checks will run during CI build, so skipping checks on commit will not allow you to merge your code with failing checks. You can uninstall the `pre-commit` hooks by running:
 
 ```bash
 make uninstall-pre-commit

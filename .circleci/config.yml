@@ -358,8 +358,7 @@ jobs:
           command: pip install -U awscli
       - run:
           name: Login to AWS ECR
-          command: |
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+          command: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - run:
           name: Build docker images
           command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder" "<<parameters.python_version>>"

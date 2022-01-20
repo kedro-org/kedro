@@ -40,4 +40,4 @@ and the `kedro-team` group on the Kedro Discord organisation.
 
 
 # Removing a Maintainer
-The TSC will also have a mechanism for removing a maintainer is no longer interested or cannot perform the maintainer duties listed above. In that case, they should volunteer for non-voting Contributor or Friends status. In extreme cases, this can also occur by a vote by the active TSC.
+The TSC will also have a mechanism for removing a maintainer who is no longer interested or cannot perform the maintainer duties listed above. In that case, they should volunteer for non-voting Contributor or Friends status. In extreme cases, this can also occur by a vote by the active TSC.

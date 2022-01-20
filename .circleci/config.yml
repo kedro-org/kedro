@@ -521,12 +521,12 @@ workflows:
 
   # We build all Python versions that exist on `main` or `develop`.
   nightly_build:
-    triggers:
-      - schedule:
-          cron: 30 2 * * *
-          filters:
-            branches:
-              only: main
+#    triggers:
+#      - schedule:
+#          cron: 30 2 * * *
+#          filters:
+#            branches:
+#              only: main
     jobs:
       - build_docker_image:
           matrix:

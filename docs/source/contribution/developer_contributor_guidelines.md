@@ -2,7 +2,7 @@
 
 This page explains the principles and development process that we ask contributing developers to follow.
 
-**Any contributions you make will be under the [Apache 2.0 Software License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)**
+**Any contributions you make will be under the [Apache 2.0 Software License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md).**
 
 In short, when you submit code changes, your submissions are understood to be under the same the [Apache 2.0 License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md) that covers the Kedro project. You should have permission to share the submitted code.
 
@@ -139,74 +139,50 @@ def count_truthy(elements: List[Any]) -> int:
 ```
 
 Ensure that your PR builds cleanly before you submit it, by running the CI/CD checks locally, as follows:
-
-To run E2E tests you need to install the test requirements which includes `behave`.
-We also use [pre-commit](https://pre-commit.com) hooks for the repository to run the checks automatically.
+* `make lint`: PEP-8 Standards (`pylint`, `flake8`)
+* `make test`: unit tests, 100% coverage (`pytest`, `pytest-cov`)
+* `make e2e-tests`: end-to-end tests (`behave`)
 
 ```eval_rst
 .. note::  If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using ``export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)`` which `works under macOS or other workarounds <https://stackoverflow.com/questions/53583199/pyspark-error-unsupported-class-file-major-version-55)>`_.
-```
-
-#### PEP-8 Standards (`pylint` and `flake8`)
-
-```bash
-make lint
-```
-
-#### Unit tests, 100% coverage (`pytest`, `pytest-cov`)
-
-You need the dependencies from `test_requirements.txt` installed.
-
-```bash
-make test
 ```
 
 ```eval_rst
 .. note::  We place `conftest.py <https://docs.pytest.org/en/latest/reference/fixtures.html>`_ files in some test directories to make fixtures reusable by any tests in that directory. If you need to see which test fixtures are available and where they come from, you can issue the following command ``pytest --fixtures path/to/the/test/location.py``.
 ```
 
-#### E2E tests (`behave`)
-
-```bash
-behave
-```
-
-#### Others
-
-Our CI / CD also checks that `kedro` installs cleanly on a fresh Python virtual environment, a task which depends on successfully building the documentation:
-
-```bash
-make build-docs
-```
-
-```eval_rst
-.. note::  This command will only work on Unix-like systems and requires ``pandoc`` to be installed.
-```
-
-### Hints on pre-commit usage
-
-The checks will automatically run on all the changed files on each commit.
-Even more extensive set of checks (including the heavy set of `pylint` checks)
-will run before the push.
-
-The pre-commit/pre-push checks can be omitted by running with `--no-verify` flag, as per below:
+### Hints on `pre-commit` usage
+[`pre-commit`](https://pre-commit.com) hooks run checks automatically on all the changed files on each commit but can be skipped with the `--no-verify` or `-n` flag:
 
 ```bash
 git commit --no-verify <...>
-git push --no-verify <...>
 ```
-(`-n` alias works for `git commit`, but not for `git push`)
 
-All checks will run during CI build, so skipping checks on push will
-not allow you to merge your code with failing checks.
-
-You can uninstall the pre-commit hooks by running:
+All checks will run during CI build, so skipping checks on commit will not allow you to merge your code with failing checks. You can uninstall the `pre-commit` hooks by running:
 
 ```bash
 make uninstall-pre-commit
 ```
 `pre-commit` will still be used by `make lint`, but will not install the git hooks.
 
+### Developer Certificate of Origin
+We require that all contributions comply with the [Developer Certificate of Origin (DCO)](https://developercertificate.org/). This certifies that the contributor wrote or otherwise has the right to submit their contribution.
+
+All commits must be signed off by including a `Signed-off-by` line in the commit message:
+```
+This is my commit message
+
+Signed-off-by: Random J Developer <random@developer.example.org>
+```
+
+The sign-off can be added automatically to your commit message using the `-s` option:
+```bash
+git commit -s -m "This is my commit message"
+```
+
+To avoid needing to remember the `-s` flag on every commit, you might like to set up an [alias](https://git-scm.com/book/en/v2/Git-Basics-Git-Aliases) for `git commit -s`.
+
+If your PR is blocked due to unsigned commits then you will need to follow the instructions under "Rebase the branch" on the GitHub Checks page for your PR. This will retroactively add the sign-off to all unsigned commits and allow the DCO check to pass.
 
 ## Need help?
 

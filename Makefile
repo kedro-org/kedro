@@ -62,6 +62,7 @@ auto-sign-off:
 	echo '--in-place "$$1"' >> .git/hooks/commit-msg
 	chmod +x .git/hooks/commit-msg
 
+test
 #git interpret-trailers --if-exists doNothing --trailer \
 #    "Signed-off-by: $NAME <$EMAIL>" \
 #    --in-place "$1"

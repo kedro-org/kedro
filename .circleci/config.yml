@@ -425,8 +425,9 @@ jobs:
       name: docker
       python_version: <<parameters.python_version>>
     steps:
-      - setup
       - run: git checkout develop
+      - setup
+      - run: git branch
       - run:
           name: Run linters
           command: make lint

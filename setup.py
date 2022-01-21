@@ -90,7 +90,7 @@ plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
-redis_require = {"redis.RedisDataSet": ["redis~=4.1.0"]}
+redis_require = {"redis.PickleDataSet": ["redis~=4.1.0"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],

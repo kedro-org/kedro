@@ -1,4 +1,4 @@
-"""``RedisDataset`` loads/saves data from/to a Redis database. The underlying
+"""``PickleDataSet`` loads/saves data from/to a Redis database. The underlying
 functionality is supported by the redis library, so it supports all allowed
 options for instantiating the redis app ``from_url`` and setting a value."""
 
@@ -13,8 +13,8 @@ import redis
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class RedisDataSet(AbstractDataSet):
-    """``RedisDataset`` loads/saves data from/to a Redis database. The
+class PickleDataSet(AbstractDataSet):
+    """``PickleDataSet`` loads/saves data from/to a Redis database. The
     underlying functionality is supported by the redis library, so it supports
     all allowed options for instantiating the redis app ``from_url`` and setting
     a value.
@@ -26,13 +26,13 @@ class RedisDataSet(AbstractDataSet):
     .. code-block:: yaml
 
         >>> my_python_object: # simple example
-        >>>   type: redis.RedisDataSet
+        >>>   type: redis.PickleDataSet
         >>>   key: my_object
         >>>   from_url_args:
         >>>     url: redis://127.0.0.1:6379
         >>>
         >>> final_python_object: # example with save args
-        >>>   type: redis.RedisDataSet
+        >>>   type: redis.PickleDataSet
         >>>   key: my_final_object
         >>>   from_url_args:
         >>>     url: redis://127.0.0.1:6379
@@ -43,12 +43,12 @@ class RedisDataSet(AbstractDataSet):
     Example using Python API:
     ::
 
-        >>> from kedro.extras.datasets.redis import RedisDataSet
+        >>> from kedro.extras.datasets.redis import PickleDataSet
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                       'col3': [5, 6]})
         >>>
-        >>> my_data = RedisDataSet(key="my_data")
+        >>> my_data = PickleDataSet(key="my_data")
         >>> my_data.save(data)
         >>> reloaded = my_data.load()
         >>> assert data.equals(reloaded)
@@ -67,7 +67,7 @@ class RedisDataSet(AbstractDataSet):
         credentials: Dict[str, Any] = None,
         redis_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of `RedisDataSet`. This loads/saves data from/to
+        """Creates a new instance of `PickleDataSet`. This loads/saves data from/to
         a Redis database while deserializing/serializing. supports custom backends to
         serialize/deserialize objects.
 

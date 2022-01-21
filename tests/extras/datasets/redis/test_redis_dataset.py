@@ -4,7 +4,7 @@
 #
 # This software framework contains the confidential and proprietary information
 # of QuantumBlack, its affiliates, and its licensors. Your use of these
-"""Tests ``RedisDataSet``."""
+"""Tests ``PickleDataSet``."""
 
 import pickle
 
@@ -13,7 +13,7 @@ import pandas as pd
 import pytest
 import redis
 
-from kedro.extras.datasets.redis import RedisDataSet
+from kedro.extras.datasets.redis import PickleDataSet
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def test_save_load_redis(
     get_mocker = mocker.patch(
         "redis.StrictRedis.get", return_value=serialized_dummy_object
     )
-    io = RedisDataSet(redis_key, from_url_args, save_args)
+    io = PickleDataSet(redis_key, from_url_args, save_args)
     io.save(dummy_object)
     loaded_dummy_object = io.load()
     from_url_mocker.assert_called_once_with(**from_url_args)

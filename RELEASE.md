@@ -22,7 +22,7 @@
 | `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas` |
 | `networkx.GraphMLDataSet`       |  Work with NetworkX using GraphML files            | `kedro.extras.datasets.networkx` |
 | `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
-| `redis.RedisDataSet`      | loads/saves data from/to a Redis database | `kedro.extras.datasets.redis` |
+| `redis.PickleDataSet`      | loads/saves data from/to a Redis database | `kedro.extras.datasets.redis` |
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)

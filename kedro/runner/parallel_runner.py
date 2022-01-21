@@ -217,7 +217,7 @@ class ParallelRunner(AbstractRunner):
                 f"need to make sure all data sets are serializable, i.e. data sets "
                 f"should not make use of lambda functions, nested functions, closures "
                 f"etc.\nIf you are using custom decorators ensure they are correctly "
-                f"using functools.wraps()."
+                f"decorated using functools.wraps()."
             )
 
         memory_data_sets = []

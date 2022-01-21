@@ -518,25 +518,41 @@ workflows:
     jobs:
       - merge_pr_to_develop
 
-  # We build all Python versions that exist on `main` or `develop`.
-  nightly_build:
-#    triggers:
-#      - schedule:
-#          cron: 30 2 * * *
-#          filters:
-#            branches:
-#              only: main
+  # Python versions that are supported on `main`.
+  nightly_build_main:
+    triggers:
+      - schedule:
+          cron: 30 2 * * *
+          filters:
+            branches:
+              only: main
     jobs:
       - build_docker_image:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8", "3.9"]
+              python_version: ["3.6", "3.7", "3.8"]
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8", "3.9"]
+              python_version: ["3.6", "3.7", "3.8"]
           requires:
             - build_docker_image-<<matrix.python_version>>
+
+  # Python version that are *only* supported on `develop`.
+  nightly_build_develop:
+    triggers:
+      - schedule:
+          cron: 30 2 * * *
+          filters:
+            branches:
+              only: develop
+    jobs:
+      - build_docker_image:
+          python_version: "3.9"
+      - build_kedro:
+          python_version: "3.9"
+          requires:
+            - build_docker_image-3.9
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

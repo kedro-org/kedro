@@ -533,7 +533,7 @@ workflows:
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.6", "3.7", "3.8"]
           requires:
             - build_docker_image-<<matrix.python_version>>
 

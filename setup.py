@@ -10,7 +10,9 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas~=1.3"  # to be able to use XMLDataSet and pandas integration with fsspec
+PANDAS = (
+    "pandas~=1.3"  # to be able to use XMLDataSet and pandas integration with fsspec
+)
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -88,6 +90,7 @@ plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
+redis_require = {"redis.RedisDataSet": ["redis~=4.1.0"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
@@ -128,6 +131,7 @@ extras_require = {
     "pillow": _collect_requirements(pillow_require),
     "plotly": _collect_requirements(plotly_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
+    "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
     "tensorflow": _collect_requirements(tensorflow_required),
     "yaml": _collect_requirements(yaml_require),

@@ -36,7 +36,7 @@
             "pillow.ImageDataSet",
             "pickle.PickleDataSet",
             "plotly.PlotlyDataSet",
-            "redis.RedisDataSet",
+            "redis.PickleDataSet",
             "spark.SparkDataSet",
             "spark.SparkHiveDataSet",
             "spark.SparkJDBCDataSet",
@@ -1089,7 +1089,7 @@
           "if": {
             "properties": {
               "type": {
-                "const": "redis.RedisDataSet"
+                "const": "redis.PickleDataSet"
               }
             }
           },

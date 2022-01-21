@@ -603,7 +603,7 @@ workflows:
       - build_kedro_dev:
           python_version: "3.9"
           requires:
-            - build_docker_image_dev-3.9
+            - build_docker_image_dev
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

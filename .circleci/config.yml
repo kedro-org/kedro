@@ -548,11 +548,15 @@ workflows:
               only: develop
     jobs:
       - build_docker_image:
-          python_version: "3.9"
+          matrix:
+            parameters:
+              python_version: ["3.9"]
       - build_kedro:
-          python_version: "3.9"
+          matrix:
+            parameters:
+              python_version: ["3.9"]
           requires:
-            - build_docker_image
+            - build_docker_image-<<matrix.python_version>>
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

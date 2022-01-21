@@ -311,8 +311,8 @@ jobs:
       - run:
           name: Set git email and name
           command: |
-            git config --global user.email "kedro@quantumblack.com"
-            git config --global user.name "QuantumBlack Labs"
+            git config --global user.email "kedro@kedro.com"
+            git config --global user.name "Kedro"
       - run:
           name: Trigger Read The Docs build
           command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest

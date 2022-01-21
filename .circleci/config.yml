@@ -368,34 +368,6 @@ jobs:
           command: docker logout public.ecr.aws
           when: always  # logout even if the previous step has failed
 
-  build_docker_image_dev:
-    parameters:
-      python_version:
-        type: string
-    docker:
-      - image: cimg/python:3.8
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - checkout
-      - run: git checkout develop
-      - run:
-          name: Setup AWS CLI
-          command: pip install -U awscli
-      - run:
-          name: Login to AWS ECR
-          command: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - run:
-          name: Build docker images
-          command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder" "<<parameters.python_version>>"
-          no_output_timeout: 20m
-      - run: git branch
-      - run:
-          name: Logout from AWS ECR
-          command: docker logout public.ecr.aws
-          when: always  # logout even if the previous step has failed
-
-
   # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
   # It's used to check that the nightly docker image is working ok and before publishing a release.
   build_kedro:
@@ -416,29 +388,6 @@ jobs:
       - run:
           name: Run e2e tests
           command: make e2e-tests
-
-  build_kedro_dev:
-    parameters:
-      python_version:
-        type: string
-    executor:
-      name: docker
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup
-      - run: git checkout develop
-      - run:
-          name: Run linters
-          command: make lint
-      - run: git branch
-      - run:
-          name: Run unit tests
-          command: make test
-      - run: git branch
-      - run:
-          name: Run e2e tests
-          command: make e2e-tests
-      - run: git branch
 
   publish_kedro:
     executor:
@@ -571,12 +520,12 @@ workflows:
 
   # Python versions that are supported on `main`.
   nightly_build_main:
-#    triggers:
-#      - schedule:
-#          cron: 30 2 * * *
-#          filters:
-#            branches:
-#              only: main
+    triggers:
+      - schedule:
+          cron: 30 2 * * *
+          filters:
+            branches:
+              only: main
     jobs:
       - build_docker_image:
           matrix:
@@ -591,19 +540,19 @@ workflows:
 
   # Python version that are *only* supported on `develop`.
   nightly_build_develop:
-#    triggers:
-#      - schedule:
-#          cron: 30 2 * * *
-#          filters:
-#            branches:
-#              only: develop
+    triggers:
+      - schedule:
+          cron: 30 2 * * *
+          filters:
+            branches:
+              only: develop
     jobs:
-      - build_docker_image_dev:
+      - build_docker_image:
           python_version: "3.9"
-      - build_kedro_dev:
+      - build_kedro:
           python_version: "3.9"
           requires:
-            - build_docker_image_dev
+            - build_docker_image
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

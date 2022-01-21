@@ -30,7 +30,7 @@ from kedro import __version__ as release
 # -- Project information -----------------------------------------------------
 
 project = "Kedro"
-author = "QuantumBlack"
+author = "Kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -259,7 +259,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "Kedro.tex", "Kedro Documentation", "QuantumBlack", "manual")
+    (master_doc, "Kedro.tex", "Kedro Documentation", "Kedro", "manual")
 ]
 
 # -- Options for manual page output ------------------------------------------
@@ -280,7 +280,7 @@ texinfo_documents = [
         "Kedro Documentation",
         author,
         "Kedro",
-        "Kedro is a Data Science framework for QuantumBlack-led projects.",
+        "Kedro is a Python framework for creating reproducible, maintainable and modular data science code.",
         "Data-Science",
     )
 ]

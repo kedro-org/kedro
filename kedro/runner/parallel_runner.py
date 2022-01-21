@@ -187,7 +187,7 @@ class ParallelRunner(AbstractRunner):
                 f"In order to utilize multiprocessing you need to make sure all nodes "
                 f"are serializable, i.e. nodes should not include lambda "
                 f"functions, nested functions, closures, etc.\nIf you "
-                f"are using custom decorators ensure they are correctly using "
+                f"are using custom decorators ensure they are correctly decorated using "
                 f"functools.wraps()."
             )
 

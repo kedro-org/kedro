@@ -26,7 +26,7 @@ from kedro.framework.cli.utils import find_stylesheets
 # -- Project information -----------------------------------------------------
 
 project = "{{ cookiecutter.python_package }}"
-author = "QuantumBlack"
+author = "Kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -149,7 +149,7 @@ latex_documents = [
         master_doc,
         "{{ cookiecutter.python_package }}.tex",
         "{{ cookiecutter.python_package }} Documentation",
-        "QuantumBlack",
+        "Kedro",
         "manual",
     )
 ]

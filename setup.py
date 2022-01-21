@@ -163,7 +163,7 @@ setup(
     include_package_data=True,
     tests_require=test_requires,
     install_requires=requires,
-    author="QuantumBlack Labs",
+    author="Kedro",
     entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},
     package_data={
         name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files

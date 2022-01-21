@@ -64,7 +64,7 @@ commands:
 
   setup:
     steps:
-      - checkout
+      #- checkout
       - setup_conda
       - setup_requirements
 
@@ -425,8 +425,10 @@ jobs:
       name: docker
       python_version: <<parameters.python_version>>
     steps:
-      - setup
+      - checkout
       - run: git checkout develop
+      - setup
+      - run: git branch
       - run:
           name: Run linters
           command: make lint

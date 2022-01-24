@@ -204,7 +204,6 @@ class SparkDataSet(AbstractVersionedDataSet):
     _SINGLE_PROCESS = True
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
-    connection = None  # to be initialized in the constructor
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -248,7 +247,6 @@ class SparkDataSet(AbstractVersionedDataSet):
                 Optional keyword arguments passed to ``hdfs.client.InsecureClient``
                 if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
         """
-        self.create_connection()
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
         exists_function = None
@@ -286,9 +284,7 @@ class SparkDataSet(AbstractVersionedDataSet):
             path = PurePosixPath(filepath)
 
             if filepath.startswith("/dbfs"):
-                # this is fine because I call `create_connection`
-                # at the top of the function
-                dbutils = _get_dbutils(self.connection)
+                dbutils = _get_dbutils(self._get_spark())
                 if dbutils:
                     glob_function = partial(_dbfs_glob, dbutils=dbutils)
                     exists_function = partial(_dbfs_exists, dbutils=dbutils)
@@ -322,20 +318,14 @@ class SparkDataSet(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    # @staticmethod
-    # def _get_spark():
-    #     return SparkSession.builder.getOrCreate()
-
-    @classmethod
-    def create_connection(cls):
-        """Create a single connection to be used by all datasets."""
-        conn = SparkSession.builder.getOrCreate()
-        cls.connection = conn
+    @staticmethod
+    def _get_spark():
+        return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
-        return self.connection.read.load(
+        return self._get_spark().read.load(
             load_path, self._file_format, **self._load_args
         )
 
@@ -347,7 +337,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
         try:
-            self.connection.read.load(load_path, self._file_format)
+            self._get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
             if (
                 exception.desc.startswith("Path does not exist:")

@@ -35,19 +35,14 @@ def mock_settings_with_disabled_hooks(mocker, project_hooks, naughty_plugin):
 class TestSessionHookManager:
     """Test the process of registering hooks with the hook manager in a session."""
 
-    def test_assert_register_hooks(self, request, project_hooks):
-        hook_manager = get_hook_manager()
-        assert not hook_manager.is_registered(project_hooks)
-
-        # call the fixture to construct the session
-        request.getfixturevalue("mock_session")
-
+    def test_assert_register_hooks(self, request, project_hooks, mock_session):
+        hook_manager = mock_session._hook_manager
         assert hook_manager.is_registered(project_hooks)
 
     @pytest.mark.usefixtures("mock_session")
-    def test_calling_register_hooks_twice(self, project_hooks):
+    def test_calling_register_hooks_twice(self, project_hooks, mock_session):
         """Calling hook registration multiple times should not raise"""
-        hook_manager = get_hook_manager()
+        hook_manager = mock_session._hook_manager
 
         assert hook_manager.is_registered(project_hooks)
         _register_hooks(hook_manager, (project_hooks,))

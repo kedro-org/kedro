@@ -18,6 +18,7 @@ from kedro.extras.datasets.spark.spark_dataset import (
     _dbfs_glob,
     _get_dbutils,
 )
+from kedro.framework.hooks import get_hook_manager
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -275,7 +276,7 @@ class TestSparkDataSet:
             r"multiprocessing: \['spark_in'\]"
         )
         with pytest.raises(AttributeError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog, get_hook_manager())
 
     def test_s3_glob_refresh(self):
         spark_dataset = SparkDataSet(filepath="s3a://bucket/data")
@@ -808,7 +809,7 @@ class TestDataFlowSequentialRunner:
     def test_spark_load_save(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> Spark (save)."""
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
-        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+        SequentialRunner(is_async=is_async).run(pipeline, data_catalog, get_hook_manager())
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
@@ -819,7 +820,7 @@ class TestDataFlowSequentialRunner:
         pipeline = Pipeline([node(identity, "spark_in", "pickle_ds")])
         pattern = ".* was not serialized due to.*"
         with pytest.raises(DataSetError, match=pattern):
-            SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+            SequentialRunner(is_async=is_async).run(pipeline, data_catalog, get_hook_manager())
 
     def test_spark_memory_spark(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> MemoryDataSet (save and then load) ->
@@ -830,7 +831,7 @@ class TestDataFlowSequentialRunner:
                 node(identity, "memory_ds", "spark_out"),
             ]
         )
-        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+        SequentialRunner(is_async=is_async).run(pipeline, data_catalog, get_hook_manager())
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))

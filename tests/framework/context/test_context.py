@@ -20,6 +20,7 @@ from kedro.framework.context.context import (
     _update_nested_dict,
     _validate_layers_for_transcoding,
 )
+from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import (
     ValidationError,
     _ProjectSettings,
@@ -223,6 +224,7 @@ def dummy_context(
         MOCK_PACKAGE_NAME,
         str(tmp_path),
         config_loader=config_loader,
+        hook_manager=get_hook_manager(),
         env=env,
         extra_params=extra_params,
     )

@@ -6,49 +6,7 @@ import pytest
 from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ThreadRunner
-
-
-def source():
-    return "stuff"
-
-
-def identity(arg):
-    return arg
-
-
-def sink(arg):  # pylint: disable=unused-argument
-    pass
-
-
-def fan_in(*args):
-    return args
-
-
-def exception_fn(arg):
-    raise Exception("test exception")
-
-
-def return_none(arg):
-    arg = None
-    return arg
-
-
-@pytest.fixture
-def catalog():
-    return DataCatalog()
-
-
-@pytest.fixture
-def fan_out_fan_in():
-    return Pipeline(
-        [
-            node(identity, "A", "B"),
-            node(identity, "B", "C"),
-            node(identity, "B", "D"),
-            node(identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
+from tests.runner.conftest import exception_fn, return_none, identity, source, sink
 
 
 class TestValidThreadRunner:
@@ -56,15 +14,15 @@ class TestValidThreadRunner:
         data_set = ThreadRunner().create_default_data_set("")
         assert isinstance(data_set, MemoryDataSet)
 
-    def test_thread_run(self, fan_out_fan_in, catalog):
+    def test_thread_run(self, fan_out_fan_in, catalog, hook_manager):
         catalog.add_feed_dict(dict(A=42))
-        result = ThreadRunner().run(fan_out_fan_in, catalog)
+        result = ThreadRunner().run(fan_out_fan_in, catalog, hook_manager)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
-    def test_memory_dataset_input(self, fan_out_fan_in):
+    def test_memory_dataset_input(self, fan_out_fan_in, hook_manager):
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        result = ThreadRunner().run(fan_out_fan_in, catalog)
+        result = ThreadRunner().run(fan_out_fan_in, catalog, hook_manager)
         assert "Z" in result
         assert result["Z"] == ("42", "42", "42")
 
@@ -85,6 +43,7 @@ class TestMaxWorkers:
         catalog,
         user_specified_number,
         expected_number,
+        hook_manager
     ):  # pylint: disable=too-many-arguments
         """
         We initialize the runner with max_workers=4.
@@ -98,7 +57,7 @@ class TestMaxWorkers:
 
         catalog.add_feed_dict(dict(A=42))
         result = ThreadRunner(max_workers=user_specified_number).run(
-            fan_out_fan_in, catalog
+            fan_out_fan_in, catalog, hook_manager
         )
         assert result == {"Z": (42, 42, 42)}
 
@@ -111,7 +70,7 @@ class TestMaxWorkers:
 
 
 class TestIsAsync:
-    def test_thread_run(self, fan_out_fan_in, catalog):
+    def test_thread_run(self, fan_out_fan_in, catalog, hook_manager):
         catalog.add_feed_dict(dict(A=42))
         pattern = (
             "`ThreadRunner` doesn't support loading and saving the "
@@ -119,24 +78,24 @@ class TestIsAsync:
             "Setting `is_async` to False."
         )
         with pytest.warns(UserWarning, match=pattern):
-            result = ThreadRunner(is_async=True).run(fan_out_fan_in, catalog)
+            result = ThreadRunner(is_async=True).run(fan_out_fan_in, catalog, hook_manager)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
 
 class TestInvalidThreadRunner:
-    def test_task_exception(self, fan_out_fan_in, catalog):
+    def test_task_exception(self, fan_out_fan_in, catalog, hook_manager):
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pipeline = Pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
-            ThreadRunner().run(pipeline, catalog)
+            ThreadRunner().run(pipeline, catalog, hook_manager)
 
-    def test_node_returning_none(self):
+    def test_node_returning_none(self, hook_manager):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         pattern = "Saving `None` to a `DataSet` is not allowed"
         with pytest.raises(DataSetError, match=pattern):
-            ThreadRunner().run(pipeline, catalog)
+            ThreadRunner().run(pipeline, catalog, hook_manager)
 
 
 class LoggingDataSet(AbstractDataSet):
@@ -161,7 +120,7 @@ class LoggingDataSet(AbstractDataSet):
 
 
 class TestThreadRunnerRelease:
-    def test_dont_release_inputs_and_outputs(self):
+    def test_dont_release_inputs_and_outputs(self, hook_manager):
         log = []
 
         pipeline = Pipeline(
@@ -174,12 +133,12 @@ class TestThreadRunnerRelease:
                 "out": LoggingDataSet(log, "out"),
             }
         )
-        ThreadRunner().run(pipeline, catalog)
+        ThreadRunner().run(pipeline, catalog, hook_manager)
 
         # we don't want to see release in or out in here
         assert list(log) == [("load", "in"), ("load", "middle"), ("release", "middle")]
 
-    def test_release_at_earliest_opportunity(self):
+    def test_release_at_earliest_opportunity(self, hook_manager):
         runner = ThreadRunner()
         log = []
 
@@ -196,7 +155,7 @@ class TestThreadRunnerRelease:
                 "second": LoggingDataSet(log, "second"),
             }
         )
-        runner.run(pipeline, catalog)
+        runner.run(pipeline, catalog, hook_manager)
 
         # we want to see "release first" before "load second"
         assert list(log) == [
@@ -206,7 +165,7 @@ class TestThreadRunnerRelease:
             ("release", "second"),
         ]
 
-    def test_count_multiple_loads(self):
+    def test_count_multiple_loads(self, hook_manager):
         runner = ThreadRunner()
         log = []
 
@@ -218,7 +177,7 @@ class TestThreadRunnerRelease:
             ]
         )
         catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
-        runner.run(pipeline, catalog)
+        runner.run(pipeline, catalog, hook_manager)
 
         # we want to the release after both the loads
         assert list(log) == [
@@ -227,7 +186,7 @@ class TestThreadRunnerRelease:
             ("release", "dataset"),
         ]
 
-    def test_release_transcoded(self):
+    def test_release_transcoded(self, hook_manager):
         log = []
 
         pipeline = Pipeline(
@@ -240,7 +199,7 @@ class TestThreadRunnerRelease:
             }
         )
 
-        ThreadRunner().run(pipeline, catalog)
+        ThreadRunner().run(pipeline, catalog, hook_manager)
 
         # we want to see both datasets being released
         assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]

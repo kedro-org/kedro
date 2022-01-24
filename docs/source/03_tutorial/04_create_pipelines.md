@@ -15,7 +15,7 @@ In the terminal run the following command:
 
 `kedro pipeline create data_processing`
 
-This will generate all the files you need to start writing a Kedro pipeline. You can see below that there is a new `nodes.py` and `pipeline.py` under the `pipelines/data_processing` folder ready to use. This `kedro pipeline create` command is a convenience method designed to save you time, but of course you're welcome to create all the files manually!
+This will generate all the files you need to start writing a `data_processing` pipeline. This command generates a new `nodes.py` and `pipeline.py` under the `src/kedro_tutorial/pipelines/data_processing` folder. The `kedro pipeline create <pipeline_name>` command is a convenience method, but of course you are welcome to create all the files manually.
 
 ```text
 ├── README.md
@@ -44,7 +44,7 @@ This will generate all the files you need to start writing a Kedro pipeline. You
 
 ### Adding the functions to `nodes.py`
 
-Add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each input a raw dataframe and output a dataframe containing pre-processed data:
+Open `src/kedro_tutorial/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each input a raw dataframe and output a dataframe containing pre-processed data:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -247,7 +247,7 @@ The code above declares explicitly that [pandas.ParquetDataSet](/kedro.extras.da
 
 The [Data Catalog](../13_resources/02_glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as Parquet) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
-[Apache Parquet](https://github.com/apache/parquet-format) is our recommended format for working with processed, typed data. In general we recommend you get your data out of CSV as soon as possible, Parquet supports things like compression, partitioning and types out of the box. Whilst you do lose the ability to view the file as text in our opinion the benefits greatly outweigh the drawbacks.
+[Apache Parquet](https://github.com/apache/parquet-format) is our recommended format for working with processed, typed data. We recommend getting your data out of CSV as soon as possible. Parquet supports things like compression, partitioning and types out of the box. Whilst you do lose the ability to view the file as text, the benefits greatly outweigh the drawbacks.
 
 ### Extend the data processing pipeline
 

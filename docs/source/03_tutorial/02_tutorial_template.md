@@ -54,8 +54,8 @@ wheel>=0.35, <0.37 # The reference implementation of the Python wheel packaging 
 
 The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add some extra requirements.
 
-* In this tutorial we need to do things like process Excel files and in order to do this we have to provide extra dependencies.
-* By running `kedro install` on a blank template we generate a new file at `src/requirements.in`.you can read more about the benefits of compiling dependencies [here](../04_kedro_project_setup/01_dependencies.md)
+* In this tutorial, we work with different data formats including CSV, Excel and Parquet and want to visualise our pipeline so we will need to provide extra dependencies.
+* By running `kedro install` on a blank template we generate a new file at `src/requirements.in`. You can read more about the benefits of compiling dependencies [here](../04_kedro_project_setup/01_dependencies.md)
 * The most important point to learn here is that you should edit the `requirements.in` file going forward.
 
 Add the following requirements to your `src/requirements.in` lock file:
@@ -74,7 +74,7 @@ The purpose of these additions has been detailed below:
 +=============================+======================================================================================+
 | :code:`kedro[{optional}]`   | This syntax is used for installing specific optional dependencies                    |
 +-----------------------------+--------------------------------------------------------------------------------------+
-| :code:`kedro-viz`           | Kerdo-Viz helps us visualise pipelines                                               |
+| :code:`kedro-viz`           | Kedro-Viz helps us visualise pipelines                                               |
 +-----------------------------+--------------------------------------------------------------------------------------+
 | :code:`openpyxl`            | This is the modern way of reading Excel files (will be default in `0.18.0`)          |
 +-----------------------------+--------------------------------------------------------------------------------------+

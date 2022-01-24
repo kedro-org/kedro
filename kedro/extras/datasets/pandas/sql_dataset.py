@@ -212,6 +212,9 @@ class SQLTableDataSet(AbstractDataSet):
 
     @classmethod
     def create_connection(cls, con):
+        """Create singleton connection to be used
+        across all instances of `SQLTableDataSet`.
+        """
         if hasattr(cls, "engine"):
             return
 
@@ -232,12 +235,11 @@ class SQLTableDataSet(AbstractDataSet):
         )
 
     def _load(self) -> pd.DataFrame:
-        # TODO: update load_args to use cls.engine
-        # FIXME: testing should be done with multiple sql datasets
-        # loading data from them in a loop and check that performance
-        # has improved indeed
+        load_args = copy.deepcopy(self._load_args)
+        load_args["con"] = self.engine  # type: ignore
+
         try:
-            return pd.read_sql_table(**self._load_args)
+            return pd.read_sql_table(**load_args)
         except ImportError as import_error:
             raise _get_missing_module_error(import_error) from import_error
         except NoSuchModuleError as exc:
@@ -392,6 +394,9 @@ class SQLQueryDataSet(AbstractDataSet):
 
     @classmethod
     def create_connection(cls, con):
+        """Create singleton connection to be used
+        across all instances of `SQLQueryDataSet`.
+        """
         if hasattr(cls, "engine"):
             return
 
@@ -410,13 +415,12 @@ class SQLQueryDataSet(AbstractDataSet):
 
     def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
+        load_args["con"] = self.engine  # type: ignore
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
             with self._fs.open(load_path, mode="r") as fs_file:
                 load_args["sql"] = fs_file.read()
-
-        load_args["con"] = self.engine
 
         try:
             return pd.read_sql_query(**load_args)

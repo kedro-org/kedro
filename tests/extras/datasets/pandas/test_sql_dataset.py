@@ -1,5 +1,5 @@
 # pylint: disable=no-member
-
+import time
 from pathlib import PosixPath
 from typing import Any
 
@@ -222,6 +222,25 @@ class TestSQLTableDataSet:
         mocker.patch("sqlalchemy.engine.Engine.table_names", return_value=[TABLE_NAME])
         assert table_data_set.exists()
         self._assert_sqlalchemy_called_once()
+
+
+class TestSQLTableDataSetSingleConnection:
+    def test_single_connection(self, dummy_dataframe, mocker):
+        # TODO: create table_a
+        kwargs = dict(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
+        datasets = [SQLTableDataSet(**kwargs) for _ in range(10)]
+        mocker.patch.object(dummy_dataframe, "to_sql")
+
+        for d in datasets:
+            d.save(dummy_dataframe)
+
+        start = time.time()
+        for d in datasets:
+            d.load()
+        end = time.time()
+
+        delta = end - start
+        print(delta)
 
 
 class TestSQLQueryDataSet:

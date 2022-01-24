@@ -501,7 +501,7 @@ def check_empty_pipeline_exists(context):
         / context.project_name.replace("-", "_")
         / "pipeline_registry.py"
     )
-    assert '"__default__": Pipeline([])' in pipeline_file.read_text("utf-8")
+    assert '"__default__": pipeline([])' in pipeline_file.read_text("utf-8")
 
 
 @then("the pipeline should contain nodes")
@@ -515,7 +515,7 @@ def check_pipeline_not_empty(context):
         / context.project_name.replace("-", "_")
         / "pipeline_registry.py"
     )
-    assert "pipeline = Pipeline([])" not in pipeline_file.read_text("utf-8")
+    assert "pipeline = pipeline([])" not in pipeline_file.read_text("utf-8")
 
 
 @then("the console log should show that {number} nodes were run")

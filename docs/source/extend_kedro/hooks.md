@@ -43,6 +43,14 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 [kedro.framework.hooks](/kedro.framework.hooks) lists the full specifications for which you can inject additional behaviours by providing an implementation.
 
 
+#### CLI hooks
+
+Lastly, Kedro defines a small set of CLI hooks that inject additional behaviour around execution of a Kedro CLI command:
+
+* `before_command_run`
+
+This is what the [`kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) plugin relies on under the hood in order to be able to collect CLI usage statistics.
+
 ### Hook implementation
 
 You should provide an implementation for the specification that describes the point at which you want to inject additional behaviour. The Hook implementation should have the same name as the specification. The Hook must provide a concrete implementation with a subset of the corresponding specification's parameters (you do not need to use them all).

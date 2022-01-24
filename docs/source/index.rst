@@ -81,6 +81,7 @@ Welcome to Kedro's documentation!
    tutorial/create_pipelines
    tutorial/package_a_project
    tutorial/visualise_pipeline
+   tutorial/set_up_experiment_tracking
 
 .. toctree::
    :maxdepth: 2

@@ -166,7 +166,7 @@ class TestLintCommand:
         expected_calls = [
             mocker.call("black", expected_files),
             mocker.call("flake8", expected_files),
-            mocker.call("isort", ("-rc",) + expected_files),
+            mocker.call("isort", expected_files),
         ]
 
         assert python_call_mock.call_args_list == expected_calls
@@ -203,7 +203,7 @@ class TestLintCommand:
         expected_calls = [
             mocker.call("black", ("--check",) + expected_files),
             mocker.call("flake8", expected_files),
-            mocker.call("isort", ("-c", "-rc") + expected_files),
+            mocker.call("isort", ("--check",) + expected_files),
         ]
 
         assert python_call_mock.call_args_list == expected_calls

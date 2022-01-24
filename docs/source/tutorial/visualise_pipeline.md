@@ -23,7 +23,7 @@ This command will run a server on http://127.0.0.1:4141 that will open up your v
 
 You may also use the `--autoreload` flag to autoreload Kedro Viz when a `Python` or `YAML` file has changed in the corresponding Kedro project.
 
-![](../meta/images/pipeline_viz_autoreload.gif)
+![](../meta/images/kedro_viz_autoreload.gif)
 
 If a visualisation panel opens up and a pipeline is not visible then please check that your [pipeline definition](create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/kedro-org/kedro-viz).
 
@@ -200,7 +200,7 @@ shuttle_speed_comparison_plot:
   filepath: data/08_reporting/shuttle_speed_comparison_plot.json
 ```
 
-Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/icon-image-dataset.svg) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.
+Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_plotly.png)
 

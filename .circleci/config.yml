@@ -16,7 +16,7 @@ executors:
       python_version:
         type: string
     docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:<<parameters.python_version>>
+      - image: public.ecr.aws/g0x0s3o2/kedro-builder:<<parameters.python_version>>
     resource_class: medium+
 
 commands:
@@ -343,11 +343,11 @@ jobs:
           command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
 
   build_docker_image:
+    parameters:
+      python_version:
+        type: string
     docker:
       - image: cimg/python:3.8
-    environment:
-      ECR_IMAGE_URL: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder
-      AWS_REGION: eu-west-2
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -357,16 +357,14 @@ jobs:
           command: pip install -U awscli
       - run:
           name: Login to AWS ECR
-          command: |
-            aws ecr get-login-password --region ${AWS_REGION} | \
-            docker login --username AWS --password-stdin "${ECR_IMAGE_URL}"
+          command: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - run:
           name: Build docker images
-          command: ./tools/circleci/docker_build_img/build.sh "." "${ECR_IMAGE_URL}"
+          command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder" "<<parameters.python_version>>"
           no_output_timeout: 20m
       - run:
           name: Logout from AWS ECR
-          command: docker logout "${ECR_IMAGE_URL}"
+          command: docker logout public.ecr.aws
           when: always  # logout even if the previous step has failed
 
   # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
@@ -519,7 +517,8 @@ workflows:
     jobs:
       - merge_pr_to_develop
 
-  nightly_build:
+  # Python versions that are supported on `main`.
+  nightly_build_main:
     triggers:
       - schedule:
           cron: 30 2 * * *
@@ -527,13 +526,36 @@ workflows:
             branches:
               only: main
     jobs:
-      - build_docker_image
+      - build_docker_image:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.6", "3.7", "3.8"]
           requires:
-            - build_docker_image
+            - build_docker_image-<<matrix.python_version>>
+
+  # Python version that are *only* supported on `develop`.
+  nightly_build_develop:
+    triggers:
+      - schedule:
+          cron: 30 2 * * *
+          filters:
+            branches:
+              only: develop
+    jobs:
+      - build_docker_image:
+          matrix:
+            parameters:
+              python_version: ["3.9"]
+      - build_kedro:
+          matrix:
+            parameters:
+              python_version: ["3.9"]
+          requires:
+            - build_docker_image-<<matrix.python_version>>
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

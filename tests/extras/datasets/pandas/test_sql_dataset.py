@@ -1,7 +1,6 @@
 # pylint: disable=no-member
 import time
 from pathlib import PosixPath
-from typing import Any
 
 import pandas as pd
 import pytest
@@ -53,10 +52,6 @@ def query_file_data_set(request, sql_file):
 
 
 class TestSQLTableDataSetLoad:
-    @staticmethod
-    def _assert_pd_called_once():
-        pd.read_sql_table.assert_called_once_with(table_name=TABLE_NAME, con=CONNECTION)
-
     def test_empty_table_name(self):
         """Check the error when instantiating with an empty table"""
         pattern = r"`table\_name` argument cannot be empty\."
@@ -77,7 +72,9 @@ class TestSQLTableDataSetLoad:
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_table")
         table_data_set.load()
-        self._assert_pd_called_once()
+        pd.read_sql_table.assert_called_once_with(
+            table_name=TABLE_NAME, con=table_data_set.engine
+        )
 
     def test_load_driver_missing(self, mocker, table_data_set):
         """Check the error when the sql driver is missing"""
@@ -87,7 +84,9 @@ class TestSQLTableDataSetLoad:
         )
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
             table_data_set.load()
-        self._assert_pd_called_once()
+        pd.read_sql_table.assert_called_once_with(
+            table_name=TABLE_NAME, con=table_data_set.engine
+        )
 
     def test_invalid_module(self, mocker, table_data_set):
         """Test that if an invalid module/driver is encountered by SQLAlchemy
@@ -97,7 +96,9 @@ class TestSQLTableDataSetLoad:
         pattern = ERROR_PREFIX + r"Invalid module some\_module"
         with pytest.raises(DataSetError, match=pattern):
             table_data_set.load()
-        self._assert_pd_called_once()
+        pd.read_sql_table.assert_called_once_with(
+            table_name=TABLE_NAME, con=table_data_set.engine
+        )
 
     def test_load_unknown_module(self, mocker, table_data_set):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -123,15 +124,13 @@ class TestSQLTableDataSetLoad:
 class TestSQLTableDataSetSave:
     _unknown_conn = "mysql+unknown_module://scott:tiger@localhost/foo"
 
-    @staticmethod
-    def _assert_to_sql_called_once(df: Any, index: bool = False):
-        df.to_sql.assert_called_once_with(name=TABLE_NAME, con=CONNECTION, index=index)
-
     def test_save_default_index(self, mocker, table_data_set, dummy_dataframe):
         """Test `save` method invocation"""
         mocker.patch.object(dummy_dataframe, "to_sql")
         table_data_set.save(dummy_dataframe)
-        self._assert_to_sql_called_once(dummy_dataframe)
+        dummy_dataframe.to_sql.assert_called_once_with(
+            name=TABLE_NAME, con=table_data_set.engine, index=False
+        )
 
     @pytest.mark.parametrize(
         "table_data_set", [{"save_args": dict(index=True)}], indirect=True
@@ -140,7 +139,9 @@ class TestSQLTableDataSetSave:
         """Test writing DataFrame index as a column"""
         mocker.patch.object(dummy_dataframe, "to_sql")
         table_data_set.save(dummy_dataframe)
-        self._assert_to_sql_called_once(dummy_dataframe, True)
+        dummy_dataframe.to_sql.assert_called_once_with(
+            name=TABLE_NAME, con=table_data_set.engine, index=True
+        )
 
     def test_save_driver_missing(self, mocker, table_data_set, dummy_dataframe):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -181,7 +182,9 @@ class TestSQLTableDataSetSave:
         effect"""
         mocker.patch.object(dummy_dataframe, "to_sql")
         table_data_set.save(dummy_dataframe)
-        self._assert_to_sql_called_once(dummy_dataframe)
+        dummy_dataframe.to_sql.assert_called_once_with(
+            name=TABLE_NAME, con=table_data_set.engine, index=False
+        )
 
 
 class TestSQLTableDataSet:
@@ -243,6 +246,7 @@ class TestSQLTableDataSetSingleConnection:
 
         delta = end - start
         print(delta)
+        datasets[0].engine.dispose()
 
     def test_single_connection(self, dummy_dataframe, mocker):
         """Test to make sure multiple instances use the same connection object."""
@@ -265,11 +269,6 @@ class TestSQLTableDataSetSingleConnection:
 
 
 class TestSQLQueryDataSet:
-    @staticmethod
-    def _assert_pd_called_once():
-        _callable = pd.read_sql_query
-        _callable.assert_called_once_with(sql=SQL_QUERY, con=CONNECTION)
-
     def test_empty_query_error(self):
         """Check the error when instantiating with empty query or file"""
         pattern = (
@@ -292,13 +291,17 @@ class TestSQLQueryDataSet:
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_query")
         query_data_set.load()
-        self._assert_pd_called_once()
+        pd.read_sql_query.assert_called_once_with(
+            sql=SQL_QUERY, con=query_data_set.engine
+        )
 
     def test_load_query_file(self, mocker, query_file_data_set):
         """Test `load` method with a query file"""
         mocker.patch("pandas.read_sql_query")
         query_file_data_set.load()
-        self._assert_pd_called_once()
+        pd.read_sql_query.assert_called_once_with(
+            sql=SQL_QUERY, con=query_file_data_set.engine
+        )
 
     def test_load_driver_missing(self, mocker, query_data_set):
         """Test that if an unknown module/driver is encountered by SQLAlchemy

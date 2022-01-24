@@ -20,7 +20,7 @@ To use AWS Step Functions, make sure you have the following:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 - [Configured AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) on your local machine
-- Generated Kedro project called **Spaceflights Step Functions** using [Kedro Spaceflights starter](https://github.com/quantumblacklabs/kedro-starters/tree/main/spaceflights/).
+- Generated Kedro project called **Spaceflights Step Functions** using [Kedro Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights/).
   - The final project directory's name should be `spaceflights-step-functions`.
   - You should complete the [spaceflights tutorial](../03_tutorial/01_spaceflights_tutorial.md) to understand the project's structure.
 
@@ -120,7 +120,7 @@ In December 2020, AWS [announced](https://aws.amazon.com/blogs/aws/new-for-aws-l
 $ kedro package
 ```
 
-For more information, please visit the guide on [packaging Kedro as a Python package](../03_tutorial/06_package_a_project).
+For more information, please visit the guide on [packaging Kedro as a Python package](../03_tutorial/08_package_a_project).
 
 * **Step 2.2**: Create a `lambda_handler.py` file:
 

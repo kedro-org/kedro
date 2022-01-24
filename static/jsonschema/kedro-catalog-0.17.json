@@ -376,6 +376,10 @@
               "timeout": {
                 "type": "integer",
                 "description": "The wait time in seconds for a response, defaults to 1 minute.\nhttps://requests.readthedocs.io/en/master/user/quickstart/#timeouts"
+              },
+              "credentials": {
+                "pattern": ".*",
+                "description": "Same as ``auth``. Allows specifying ``auth`` secrets in \ncredentials.yml."
               }
             }
           }

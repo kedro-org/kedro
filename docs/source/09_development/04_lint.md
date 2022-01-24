@@ -16,7 +16,7 @@ Alternatively, you can opt to use it as a plugin to your Kedro project. To do th
 @cli.command()
 def lint():
     """Check the Python code quality."""
-    python_call("isort", ["-rc", "src/<your_project>", "src/tests"])
+    python_call("isort", ["src/<your_project>", "src/tests"])
     python_call("pylint", ["-j", "0", "src/<your_project>"])
     python_call(
         "pylint",

@@ -6,8 +6,9 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
+from pluggy import PluginManager
+
 from kedro.config import ConfigLoader, MissingConfigException
-from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import _transcode_split
@@ -168,6 +169,7 @@ class KedroContext:
         package_name: str,
         project_path: Union[Path, str],
         config_loader: ConfigLoader,
+        hook_manager: PluginManager,
         env: str = None,
         extra_params: Dict[str, Any] = None,
     ):  # pylint: disable=too-many-arguments
@@ -194,6 +196,7 @@ class KedroContext:
         self._config_loader = config_loader
         self._env = env
         self._extra_params = deepcopy(extra_params)
+        self._hook_manager = hook_manager
 
     @property  # type: ignore
     def env(self) -> Optional[str]:
@@ -279,8 +282,7 @@ class KedroContext:
         catalog.add_feed_dict(feed_dict)
         if catalog.layers:
             _validate_layers_for_transcoding(catalog)
-        hook_manager = get_hook_manager()
-        hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
+        self._hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
             catalog=catalog,
             conf_catalog=conf_catalog,
             conf_creds=conf_creds,

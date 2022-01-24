@@ -10,8 +10,6 @@ from pluggy import PluginManager
 from .markers import HOOK_NAMESPACE
 from .specs import DataCatalogSpecs, DatasetSpecs, NodeSpecs, PipelineSpecs
 
-_hook_manager = None
-
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
 
 logger = logging.getLogger(__name__)
@@ -28,11 +26,8 @@ def _create_hook_manager() -> PluginManager:
 
 
 def get_hook_manager():
-    """Create or return the global _hook_manager singleton instance."""
-    global _hook_manager
-    if _hook_manager is None:
-        _hook_manager = _create_hook_manager()
-    return _hook_manager
+    """Create a _hook_manager singleton instance."""
+    return _create_hook_manager()
 
 
 def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:

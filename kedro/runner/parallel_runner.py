@@ -14,6 +14,8 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
 
+from pluggy import PluginManager
+
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -83,6 +85,7 @@ def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
 def _run_node_synchronization(  # pylint: disable=too-many-arguments
     node: Node,
     catalog: DataCatalog,
+    hook_manager: PluginManager,
     is_async: bool = False,
     run_id: str = None,
     package_name: str = None,
@@ -112,7 +115,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
         conf_logging = conf_logging or {}
         _bootstrap_subprocess(package_name, conf_logging)
 
-    return run_node(node, catalog, is_async, run_id)
+    return run_node(node, catalog, hook_manager, is_async, run_id)
 
 
 class ParallelRunner(AbstractRunner):
@@ -252,7 +255,11 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        run_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
@@ -295,6 +302,7 @@ class ParallelRunner(AbstractRunner):
                             _run_node_synchronization,
                             node,
                             catalog,
+                            hook_manager,
                             self._is_async,
                             run_id,
                             package_name=PACKAGE_NAME,

@@ -55,6 +55,7 @@
 * `kedro.io.DataCatalogWithDefault` is being deprecated, to be removed entirely in 0.18.0.
 
 ## Thanks for supporting contributions
+[Punit Vara](https://github.com/punitvara),
 [Deepyaman Datta](https://github.com/deepyaman),
 [Brites](https://github.com/brites101),
 [Manish Swami](https://github.com/ManishS6),

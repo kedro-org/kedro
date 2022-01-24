@@ -13,11 +13,15 @@ You previously registered the raw datasets for your Kedro project, so you can no
 
 In the terminal run the following command:
 
-`kedro pipeline create data_processing`
+```bash
+kedro pipeline create data_processing
+```
 
-This will generate all the files you need to start writing a `data_processing` pipeline. This command generates a new `nodes.py` and `pipeline.py` under the `src/kedro_tutorial/pipelines/data_processing` folder. The `kedro pipeline create <pipeline_name>` command is a convenience method, but of course you are welcome to create all the files manually.
+* This will generate all the files you need to start writing a `data_processing` pipeline. This command generates a new `nodes.py` and `pipeline.py` under the `src/kedro_tutorial/pipelines/data_processing` folder. 
+* The `kedro pipeline create <pipeline_name>` command is a convenience method so you don't have to worry about getting your ``__init__.py`` files in the right place, but of course you are welcome to create all the files manually.
 
-```text
+```bash
+
 ├── README.md
 ├── conf
 │   └── base
@@ -351,8 +355,9 @@ The gif below shows how commenting out the `create_model_input_table_node` in `p
 
 ![autoreload](../meta/images/autoreload.gif)
 
-> This is also a great time to highlight how Kedro's [topological sorting](https://en.wikipedia.org/wiki/Topological_sorting) works. The actual order of the `node()` calls in the `Pipeline` object is irrelevant, Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means you as a developer simply ask Kedro what data you want and it will derive the execution graph automatically.
-
+```eval_rst
+.. note::  This is also a great time to highlight how Kedro's `topological sorting <https://en.wikipedia.org/wiki/Topological_sorting>`_ works. The actual order of the ``node()`` calls in the ``Pipeline`` object is irrelevant, Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means you as a developer simply ask Kedro what data you want and it will derive the execution graph automatically.
+```
 
 ## Data science pipeline
 
@@ -454,9 +459,9 @@ Add the following to `conf/base/parameters/data_science.yml`:
 
 ```yaml
 model_options:
-    test_size: 0.2
-    random_state: 3
-    features:
+  test_size: 0.2
+  random_state: 3
+  features:
     - engines
     - passenger_capacity
     - crew
@@ -492,7 +497,7 @@ from kedro.pipeline import Pipeline, node
 from .nodes import evaluate_model, split_data, train_model
 
 
-def create_pipeline(**kwargs):
+def create_pipeline(**kwargs) -> Pipeline:
     return Pipeline(
         [
             node(
@@ -545,11 +550,11 @@ Include the import at the top of the file:
 from kedro_tutorial.pipelines import data_science as ds
 ```
 
-The two modular pipelines are merged together into a project default pipeline by the `__default__` key used in `"__default__": data_processing_pipeline + data_science_pipeline`.
-The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
+* The two modular pipelines are merged together into a project `__default__` pipeline using the `+` operator.
+* The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
 
 ```eval_rst
-.. note::  The order in which you add the pipelines together is not significant and ``data_science_pipeline + data_processing_pipeline`` will result in the same pipeline, since Kedro automatically detects the correct execution order for all the nodes in the resulting pipeline.
+.. note::  The order in which you add the pipelines together is not significant (``data_science_pipeline + data_processing_pipeline`` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
 ```
 
 ### Test the pipelines
@@ -565,7 +570,7 @@ You should see output similar to the following:
 <details>
 <summary><b>Click to expand</b></summary>
 
-```bash
+```text
 2019-08-19 10:51:46,501 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:51:46,510 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
 2019-08-19 10:51:46,547 - kedro.pipeline.node - INFO - Running node: preprocess_companies_node: preprocess_companies([companies]) -> [preprocessed_companies]
@@ -627,10 +632,8 @@ kedro run --runner=module.path.to.my.runner
 ```
 
 ```eval_rst
-.. note::  ``ParallelRunner`` performs task parallelisation, which is different from data parallelisation as seen in PySpark.
+.. note::  ``ParallelRunner`` performs task parallelisation via multiprocessing. ``ThreadRunner`` is intended for use with remote execution engines such as `Spark <../11_tools_integration/01_pyspark.md>`_ and `Dask <https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py>`_. You can find out more about the runners Kedro provides, and how to create your own, in the `pipeline documentation about runners ` <../06_nodes_and_pipelines/04_run_a_pipeline.md>`_.
 ```
-
-You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../06_nodes_and_pipelines/04_run_a_pipeline.md).
 
 ## Slice a pipeline
 
@@ -640,10 +643,10 @@ In some cases you may want to run just part of a pipeline. For example, you may 
 kedro run --pipeline=ds
 ```
 
-See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) for other ways to run sections of your pipeline.
+See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../09_development/03_commands_reference.html#modifying-a-kedro-run) for other ways to run sections of your pipeline.
 
 ```eval_rst
-.. note::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
+.. warning::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
 ```
 
 ```bash

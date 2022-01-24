@@ -61,23 +61,9 @@ The dependencies above may be sufficient for some projects, but for the spacefli
 Add the following requirements to your `src/requirements.in` lock file:
 
 ```text
-kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6
-kedro-viz==4.1.1
-openpyxl==3.0.9
-```
-
-The purpose of these additions has been detailed below:
-
-```eval_rst
-+-----------------------------+--------------------------------------------------------------------------------------+
-| Dependency                  | Description                                                                          |
-+=============================+======================================================================================+
-| :code:`kedro[{optional}]`   | This syntax is used for installing specific optional dependencies                    |
-+-----------------------------+--------------------------------------------------------------------------------------+
-| :code:`kedro-viz`           | Kedro-Viz helps us visualise pipelines                                               |
-+-----------------------------+--------------------------------------------------------------------------------------+
-| :code:`openpyxl`            | This is the modern way of reading Excel files (will be default in `0.18.0`)          |
-+-----------------------------+--------------------------------------------------------------------------------------+
+kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6   # Specify optional Kedro dependencies
+kedro-viz==4.1.1                                                               # Visualise your pipelines
+openpyxl==3.0.9                                                                # Use modern Excel engine (will not be required in 0.18.0)
 ```
 
 Then run the following command to re-compile your updated dependencies and install them into your environment:

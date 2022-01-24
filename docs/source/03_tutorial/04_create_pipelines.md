@@ -643,7 +643,7 @@ In some cases you may want to run just part of a pipeline. For example, you may 
 kedro run --pipeline=ds
 ```
 
-See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../09_development/03_commands_reference.html#modifying-a-kedro-run) for other ways to run sections of your pipeline.
+See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../09_development/03_commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
 
 ```eval_rst
 .. warning::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:

@@ -17,7 +17,7 @@ In the terminal run the following command:
 kedro pipeline create data_processing
 ```
 
-* This will generate all the files you need to start writing a `data_processing` pipeline. This command generates a new `nodes.py` and `pipeline.py` under the `src/kedro_tutorial/pipelines/data_processing` folder. 
+* This will generate all the files you need to start writing a `data_processing` pipeline. This command generates a new `nodes.py` and `pipeline.py` under the `src/kedro_tutorial/pipelines/data_processing` folder.
 * The `kedro pipeline create <pipeline_name>` command is a convenience method so you don't have to worry about getting your ``__init__.py`` files in the right place, but of course you are welcome to create all the files manually.
 
 ```bash

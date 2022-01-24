@@ -128,7 +128,7 @@ shuttles:
 ```
 
 ```eval_rst
-.. note::  
+.. note::
  The ``load_args`` are passed to the ``pd.read_excel`` method as `keyword arguments <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html>`_, conversely providing ``save_args`` would be passed to the ``pd.DataFrame.to_excel`` `method <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html>`_.
 ```
 

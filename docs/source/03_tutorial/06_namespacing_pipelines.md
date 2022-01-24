@@ -4,7 +4,6 @@ This section covers the following:
 
 * A brief introduction to namespaces and modular pipelines
 * How to convert the existing spaceflights project into a namespaced one
-* This pattern is viewed as the modern way to use Kedro after being first introduced in version 0.17.0
 
 Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/06_nodes_and_pipelines/03_modular_pipelines.html#modular-pipelines) unlocks some sophisticated functionality in Kedro
 
@@ -16,7 +15,7 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
 
 ## Adding a namespace to the  `data_processing` pipeline
 
-* Update the code in `src/spaceflights_tutorial/pipelines/data_processing/pipeline.py` using the snippet below.
+* Update the code in `src/kedro_tutorial/pipelines/data_processing/pipeline.py` using the snippet below.
 * This introduces the lowercase `pipeline()` method imported from `kedro.pipeline.modular_pipeline`
 
     <details>
@@ -62,7 +61,7 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
         )
         namespaced_pipeline = pipeline(
             pipe=pipeline_instance,
-            namespace="Data Processing",
+            namespace="data_processing",
             inputs=["companies", "shuttles", "reviews"],
             outputs="model_input_table",
         )
@@ -192,16 +191,16 @@ ds_pipeline_2 = pipeline(
 
 > The `pipeline_instance` variable is our 'template' pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parametrised instantiations.
 
-The table below describes what the purpose of the keyword arguments in detail:
+The table below describes the purpose of each keyword arguments in detail:
 
 ```eval_rst
 
 +--------------------+---------------------------------------------------------------------------------------+------------------------------+
 | Keyword argument   | :code:`ds_pipeline_1`                                                                 | :code:`ds_pipeline_2`        |
 +====================+=======================================================================================+==============================+
-| :code:`inputs`     | ``model_input_table`` lives on the boundary of the namespace and needs to be declared | Identical                    |
+| :code:`inputs`     | Declaring ``model_input_table`` as a boundary input will not prefix it with the namespace | Same as `ds_pipeline_1`                    |
 +--------------------+---------------------------------------------------------------------------------------+------------------------------+
-| :code:`outputs`    | No outputs live at the boundary of this pipeline                                      | Identical                    |
+| :code:`outputs`    | No outputs are at the boundary of this pipeline so nothing to list here                                      | Same as `ds_pipeline_1`                    |
 +--------------------+---------------------------------------------------------------------------------------+------------------------------+
 | :code:`parameters` | Inherits defaults from template                                                       | Overrides provided           |
 +--------------------+---------------------------------------------------------------------------------------+------------------------------+

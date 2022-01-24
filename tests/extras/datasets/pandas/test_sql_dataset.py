@@ -211,7 +211,7 @@ class TestSQLTableDataSet:
     @pytest.mark.parametrize(
         "table_data_set", [{"load_args": dict(schema="ingested")}], indirect=True
     )
-    def test_able_exists_schema(self, mocker, table_data_set):
+    def test_table_exists_schema(self, mocker, table_data_set):
         """Test `exists` method invocation with DB schema provided"""
         mocker.patch("sqlalchemy.engine.Engine.table_names")
         assert not table_data_set.exists()
@@ -225,11 +225,13 @@ class TestSQLTableDataSet:
 
 
 class TestSQLTableDataSetSingleConnection:
-    def test_single_connection(self, dummy_dataframe, mocker):
-        # TODO: create table_a
-        kwargs = dict(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
+    def test_single_connection_performance(self, dummy_dataframe):
+        kwargs = dict(
+            save_args=dict(if_exists="append"),
+            table_name=TABLE_NAME,
+            credentials=dict(con=CONNECTION),
+        )
         datasets = [SQLTableDataSet(**kwargs) for _ in range(10)]
-        mocker.patch.object(dummy_dataframe, "to_sql")
 
         for d in datasets:
             d.save(dummy_dataframe)
@@ -241,6 +243,25 @@ class TestSQLTableDataSetSingleConnection:
 
         delta = end - start
         print(delta)
+
+    def test_single_connection(self, dummy_dataframe, mocker):
+        """Test to make sure multiple instances use the same connection object."""
+        dummy_to_sql = mocker.patch.object(dummy_dataframe, "to_sql")
+        kwargs = dict(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
+
+        first = SQLTableDataSet(**kwargs)
+        unique_connection = first.engine
+        datasets = [SQLTableDataSet(**kwargs) for _ in range(10)]
+
+        for ds in datasets:
+            ds.save(dummy_dataframe)
+            assert ds.engine is unique_connection
+
+        expected_call = mocker.call(name=TABLE_NAME, con=unique_connection, index=False)
+        dummy_to_sql.assert_has_calls([expected_call] * 10)
+
+        # for d in datasets:
+        #     d.load()
 
 
 class TestSQLQueryDataSet:

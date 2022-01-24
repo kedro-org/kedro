@@ -246,18 +246,21 @@ class SQLTableDataSet(AbstractDataSet):
             raise _get_sql_alchemy_missing_error() from exc
 
     def _save(self, data: pd.DataFrame) -> None:
+        save_args = copy.deepcopy(self._save_args)
+        save_args["con"] = self.engine  # type: ignore
+
         try:
-            data.to_sql(**self._save_args)
+            data.to_sql(**save_args)
         except ImportError as import_error:
             raise _get_missing_module_error(import_error) from import_error
         except NoSuchModuleError as exc:
             raise _get_sql_alchemy_missing_error() from exc
 
     def _exists(self) -> bool:
-        eng = create_engine(self._load_args["con"])
+        eng = self.engine  # type: ignore
         schema = self._load_args.get("schema", None)
         exists = self._load_args["table_name"] in eng.table_names(schema)
-        eng.dispose()
+        # eng.dispose()
         return exists
 
 

@@ -15,7 +15,7 @@ You can also access a more detailed demo [here](https://kedro-viz-live-demo.hfa4
 
 ## Set up a project
 
-We assume that you have already [installed Kedro](../02_get_started/02_install.md) and [Kedro-Viz](../03_tutorial/06_visualise_pipeline.md). Set up a new project using the spaceflights starter by running:
+We assume that you have already [installed Kedro](../02_get_started/02_install.md) and [Kedro-Viz](../03_tutorial/05_visualise_pipeline.md). Set up a new project using the spaceflights starter by running:
 
 ```bash
 kedro new --starter=spaceflights

@@ -2,7 +2,7 @@
 
 ## Bug fixes and other changes
 * Added tutorial documentation for experiment tracking in Kedro docs. (`03_tutorial/07_set_up_experiment_tracking.md`).
-* Added Plotly documentation in Kedro docs. (`03_tutorial/06_visualise_pipeline.md`).
+* Added Plotly documentation in Kedro docs. (`03_tutorial/05_visualise_pipeline.md`).
 
 # Release 0.17.6
 

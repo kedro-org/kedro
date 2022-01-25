@@ -809,7 +809,9 @@ class TestDataFlowSequentialRunner:
     def test_spark_load_save(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> Spark (save)."""
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
-        SequentialRunner(is_async=is_async).run(pipeline, data_catalog, get_hook_manager())
+        SequentialRunner(is_async=is_async).run(
+            pipeline, data_catalog, get_hook_manager()
+        )
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
@@ -820,7 +822,9 @@ class TestDataFlowSequentialRunner:
         pipeline = Pipeline([node(identity, "spark_in", "pickle_ds")])
         pattern = ".* was not serialized due to.*"
         with pytest.raises(DataSetError, match=pattern):
-            SequentialRunner(is_async=is_async).run(pipeline, data_catalog, get_hook_manager())
+            SequentialRunner(is_async=is_async).run(
+                pipeline, data_catalog, get_hook_manager()
+            )
 
     def test_spark_memory_spark(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> MemoryDataSet (save and then load) ->
@@ -831,7 +835,9 @@ class TestDataFlowSequentialRunner:
                 node(identity, "memory_ds", "spark_out"),
             ]
         )
-        SequentialRunner(is_async=is_async).run(pipeline, data_catalog, get_hook_manager())
+        SequentialRunner(is_async=is_async).run(
+            pipeline, data_catalog, get_hook_manager()
+        )
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))

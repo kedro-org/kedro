@@ -14,7 +14,7 @@ from kedro.io import (
 )
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
-from tests.runner.conftest import identity, source, sink
+from tests.runner.conftest import identity, sink, source
 
 
 @pytest.fixture
@@ -43,7 +43,9 @@ def multi_input_list_output(arg1, arg2):
 
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSeqentialRunnerBranchlessPipeline:
-    def test_no_input_seq(self, is_async, branchless_no_input_pipeline, catalog, hook_manager):
+    def test_no_input_seq(
+        self, is_async, branchless_no_input_pipeline, catalog, hook_manager
+    ):
         outputs = SequentialRunner(is_async=is_async).run(
             branchless_no_input_pipeline, catalog, hook_manager
         )
@@ -52,7 +54,9 @@ class TestSeqentialRunnerBranchlessPipeline:
 
     def test_no_data_sets(self, is_async, branchless_pipeline, hook_manager):
         catalog = DataCatalog({}, {"ds1": 42})
-        outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog, hook_manager)
+        outputs = SequentialRunner(is_async=is_async).run(
+            branchless_pipeline, catalog, hook_manager
+        )
         assert "ds3" in outputs
         assert outputs["ds3"] == 42
 
@@ -63,12 +67,18 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert "ds3" in outputs
         assert outputs["ds3"]["data"] == 42
 
-    def test_node_returning_none(self, is_async, saving_none_pipeline, catalog, hook_manager):
+    def test_node_returning_none(
+        self, is_async, saving_none_pipeline, catalog, hook_manager
+    ):
         pattern = "Saving `None` to a `DataSet` is not allowed"
         with pytest.raises(DataSetError, match=pattern):
-            SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog, hook_manager)
+            SequentialRunner(is_async=is_async).run(
+                saving_none_pipeline, catalog, hook_manager
+            )
 
-    def test_result_saved_not_returned(self, is_async, saving_result_pipeline, hook_manager):
+    def test_result_saved_not_returned(
+        self, is_async, saving_result_pipeline, hook_manager
+    ):
         """The pipeline runs ds->dsX but save does not save the output."""
 
         def _load():
@@ -106,7 +116,12 @@ def unfinished_outputs_pipeline():
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSeqentialRunnerBranchedPipeline:
     def test_input_seq(
-        self, is_async, memory_catalog, unfinished_outputs_pipeline, pandas_df_feed_dict, hook_manager
+        self,
+        is_async,
+        memory_catalog,
+        unfinished_outputs_pipeline,
+        pandas_df_feed_dict,
+        hook_manager,
     ):
         memory_catalog.add_feed_dict(pandas_df_feed_dict, replace=True)
         outputs = SequentialRunner(is_async=is_async).run(
@@ -138,7 +153,9 @@ class TestSeqentialRunnerBranchedPipeline:
         assert outputs["ds8"]["data"] == 0
         assert isinstance(outputs["ds6"], pd.DataFrame)
 
-    def test_unsatisfied_inputs(self, is_async, unfinished_outputs_pipeline, catalog, hook_manager):
+    def test_unsatisfied_inputs(
+        self, is_async, unfinished_outputs_pipeline, catalog, hook_manager
+    ):
         """ds1, ds2 and ds3 were not specified."""
         with pytest.raises(ValueError, match=r"not found in the DataCatalog"):
             SequentialRunner(is_async=is_async).run(

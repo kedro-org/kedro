@@ -4,8 +4,6 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.runner.conftest import exception_fn, return_none, identity, source, sink, \
-    return_not_serializable
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
@@ -21,6 +19,14 @@ from kedro.runner.parallel_runner import (
     _run_node_synchronization,
     _SharedMemoryDataSet,
 )
+from tests.runner.conftest import (
+    exception_fn,
+    identity,
+    return_none,
+    return_not_serializable,
+    sink,
+    source,
+)
 
 
 @pytest.mark.skipif(
@@ -35,7 +41,9 @@ class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog, hook_manager):
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog, hook_manager)
+        result = ParallelRunner(is_async=is_async).run(
+            fan_out_fan_in, catalog, hook_manager
+        )
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
@@ -76,7 +84,7 @@ class TestMaxWorkers:
         cpu_cores,
         user_specified_number,
         expected_number,
-        hook_manager
+        hook_manager,
     ):  # pylint: disable=too-many-arguments
         """
         The system has 2 cores, but we initialize the runner with max_workers=4.
@@ -352,7 +360,7 @@ class TestRunNodeSynchronisationHelper:
         is_async,
         conf_logging,
         mocker,
-        hook_manager
+        hook_manager,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
@@ -369,7 +377,9 @@ class TestRunNodeSynchronisationHelper:
             package_name=package_name,
             conf_logging=conf_logging,
         )
-        mock_run_node.assert_called_once_with(node_, catalog, hook_manager, is_async, run_id)
+        mock_run_node.assert_called_once_with(
+            node_, catalog, hook_manager, is_async, run_id
+        )
         mock_logging.assert_called_once_with(conf_logging)
         mock_configure_project.assert_called_once_with(package_name)
 
@@ -380,7 +390,7 @@ class TestRunNodeSynchronisationHelper:
         mock_configure_project,
         is_async,
         mocker,
-        hook_manager
+        hook_manager,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
@@ -391,7 +401,9 @@ class TestRunNodeSynchronisationHelper:
         _run_node_synchronization(
             node_, catalog, hook_manager, is_async, run_id, package_name=package_name
         )
-        mock_run_node.assert_called_once_with(node_, catalog, hook_manager, is_async, run_id)
+        mock_run_node.assert_called_once_with(
+            node_, catalog, hook_manager, is_async, run_id
+        )
         mock_logging.assert_called_once_with({})
         mock_configure_project.assert_called_once_with(package_name)
 
@@ -407,5 +419,7 @@ class TestRunNodeSynchronisationHelper:
         _run_node_synchronization(
             node_, catalog, hook_manager, is_async, run_id, package_name=package_name
         )
-        mock_run_node.assert_called_once_with(node_, catalog, hook_manager, is_async, run_id)
+        mock_run_node.assert_called_once_with(
+            node_, catalog, hook_manager, is_async, run_id
+        )
         mock_logging.assert_not_called()

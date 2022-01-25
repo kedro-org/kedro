@@ -567,7 +567,7 @@ class TestKedroSession:
             run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
         )
         mock_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, fake_session_id
+            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,

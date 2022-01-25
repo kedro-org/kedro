@@ -571,7 +571,11 @@ class TestAsyncNodeDatasetHooks:
         mock_session.load_context()
 
         # run the node asynchronously with an instance of `LogCatalog`
-        _run_node_async(node=sample_node, catalog=memory_catalog)
+        _run_node_async(
+            node=sample_node,
+            catalog=memory_catalog,
+            hook_manager=mock_session._hook_manager,
+        )
 
         hooks_log_messages = [r.message for r in logs_listener.logs]
 

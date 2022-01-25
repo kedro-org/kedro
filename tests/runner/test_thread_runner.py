@@ -6,7 +6,7 @@ import pytest
 from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ThreadRunner
-from tests.runner.conftest import exception_fn, return_none, identity, source, sink
+from tests.runner.conftest import exception_fn, identity, return_none, sink, source
 
 
 class TestValidThreadRunner:
@@ -43,7 +43,7 @@ class TestMaxWorkers:
         catalog,
         user_specified_number,
         expected_number,
-        hook_manager
+        hook_manager,
     ):  # pylint: disable=too-many-arguments
         """
         We initialize the runner with max_workers=4.
@@ -78,7 +78,9 @@ class TestIsAsync:
             "Setting `is_async` to False."
         )
         with pytest.warns(UserWarning, match=pattern):
-            result = ThreadRunner(is_async=True).run(fan_out_fan_in, catalog, hook_manager)
+            result = ThreadRunner(is_async=True).run(
+                fan_out_fan_in, catalog, hook_manager
+            )
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 

@@ -1,10 +1,10 @@
+from random import random
+
 import pytest
 
 from kedro.framework.hooks import get_hook_manager
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
-
-from random import random
 
 
 def source():
@@ -32,6 +32,10 @@ def return_none(arg):
     return arg
 
 
+def return_not_serializable(arg):  # pylint: disable=unused-argument
+    return lambda x: x
+
+
 @pytest.fixture
 def catalog():
     return DataCatalog()
@@ -53,11 +57,6 @@ def fan_out_fan_in():
             node(fan_in, ["C", "D", "E"], "Z"),
         ]
     )
-
-
-@pytest.fixture
-def return_not_serializable(arg):  # pylint: disable=unused-argument
-    return lambda x: x
 
 
 @pytest.fixture

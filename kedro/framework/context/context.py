@@ -185,6 +185,7 @@ class KedroContext:
             package_name: Package name for the Kedro project the context is
                 created for.
             project_path: Project path to define the context for.
+            hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
             env: Optional argument for configuration default environment to be used
                 for running the pipeline. If not specified, it defaults to "local".
             extra_params: Optional dictionary containing extra project parameters.
@@ -282,7 +283,7 @@ class KedroContext:
         catalog.add_feed_dict(feed_dict)
         if catalog.layers:
             _validate_layers_for_transcoding(catalog)
-        self._hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
+        self._hook_manager.hook.after_catalog_created(
             catalog=catalog,
             conf_catalog=conf_catalog,
             conf_creds=conf_creds,

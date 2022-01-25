@@ -52,6 +52,7 @@ class AbstractRunner(ABC):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             run_id: The id of the run.
 
         Raises:
@@ -97,6 +98,7 @@ class AbstractRunner(ABC):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
 
@@ -136,6 +138,7 @@ class AbstractRunner(ABC):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             run_id: The id of the run.
 
         """
@@ -190,6 +193,7 @@ def run_node(
     Args:
         node: The ``Node`` to run.
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
+        hook_manager: The ``PluginManager`` to activate hooks.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
         run_id: The id of the pipeline run
@@ -216,8 +220,9 @@ def _collect_inputs_from_hook(
     hook_manager: PluginManager,
     run_id: str = None,
 ) -> Dict[str, Any]:
+    # pylint: disable=too-many-arguments
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
-    hook_response = hook_manager.hook.before_node_run(  # pylint: disable=no-member
+    hook_response = hook_manager.hook.before_node_run(
         node=node,
         catalog=catalog,
         inputs=inputs,
@@ -247,10 +252,11 @@ def _call_node_run(
     hook_manager: PluginManager,
     run_id: str = None,
 ) -> Dict[str, Any]:
+    # pylint: disable=too-many-arguments
     try:
         outputs = node.run(inputs)
     except Exception as exc:
-        hook_manager.hook.on_node_error(  # pylint: disable=no-member
+        hook_manager.hook.on_node_error(
             error=exc,
             node=node,
             catalog=catalog,
@@ -259,7 +265,7 @@ def _call_node_run(
             run_id=run_id,
         )
         raise exc
-    hook_manager.hook.after_node_run(  # pylint: disable=no-member
+    hook_manager.hook.after_node_run(
         node=node,
         catalog=catalog,
         inputs=inputs,
@@ -276,13 +282,9 @@ def _run_node_sequential(
     inputs = {}
 
     for name in node.inputs:
-        hook_manager.hook.before_dataset_loaded(  # pylint: disable=no-member
-            dataset_name=name
-        )
+        hook_manager.hook.before_dataset_loaded(dataset_name=name)
         inputs[name] = catalog.load(name)
-        hook_manager.hook.after_dataset_loaded(  # pylint: disable=no-member
-            dataset_name=name, data=inputs[name]
-        )
+        hook_manager.hook.after_dataset_loaded(dataset_name=name, data=inputs[name])
 
     is_async = False
 
@@ -296,13 +298,9 @@ def _run_node_sequential(
     )
 
     for name, data in outputs.items():
-        hook_manager.hook.before_dataset_saved(  # pylint: disable=no-member
-            dataset_name=name, data=data
-        )
+        hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
         catalog.save(name, data)
-        hook_manager.hook.after_dataset_saved(  # pylint: disable=no-member
-            dataset_name=name, data=data
-        )
+        hook_manager.hook.after_dataset_saved(dataset_name=name, data=data)
     return node
 
 
@@ -312,11 +310,9 @@ def _run_node_async(
     def _synchronous_dataset_load(dataset_name: str):
         """Minimal wrapper to ensure Hooks are run synchronously
         within an asynchronous dataset load."""
-        hook_manager.hook.before_dataset_loaded(  # pylint: disable=no-member
-            dataset_name=dataset_name
-        )
+        hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name)
         return_ds = catalog.load(dataset_name)
-        hook_manager.hook.after_dataset_loaded(  # pylint: disable=no-member
+        hook_manager.hook.after_dataset_loaded(
             dataset_name=dataset_name, data=return_ds
         )
         return return_ds
@@ -342,16 +338,14 @@ def _run_node_async(
         save_futures = set()
 
         for name, data in outputs.items():
-            hook_manager.hook.before_dataset_saved(  # pylint: disable=no-member
-                dataset_name=name, data=data
-            )
+            hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
             save_futures.add(pool.submit(catalog.save, name, data))
 
         for future in as_completed(save_futures):
             exception = future.exception()
             if exception:
                 raise exception
-            hook_manager.hook.after_dataset_saved(  # pylint: disable=no-member
+            hook_manager.hook.after_dataset_saved(
                 dataset_name=name, data=data  # pylint: disable=undefined-loop-variable
             )
     return node

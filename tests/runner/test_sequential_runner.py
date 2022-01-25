@@ -1,10 +1,8 @@
-# pylint: disable=unused-argument
 from typing import Any, Dict
 
 import pandas as pd
 import pytest
 
-from kedro.framework.hooks import get_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,

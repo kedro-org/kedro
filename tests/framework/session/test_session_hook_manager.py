@@ -35,7 +35,7 @@ def mock_settings_with_disabled_hooks(mocker, project_hooks, naughty_plugin):
 class TestSessionHookManager:
     """Test the process of registering hooks with the hook manager in a session."""
 
-    def test_assert_register_hooks(self, request, project_hooks, mock_session):
+    def test_assert_register_hooks(self, project_hooks, mock_session):
         hook_manager = mock_session._hook_manager
         assert hook_manager.is_registered(project_hooks)
 

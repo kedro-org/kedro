@@ -437,37 +437,41 @@ class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
     pass
 
 
+class BeforeNodeRunHook:
+    """Should overwrite the `cars` dataset"""
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        return {"cars": MockDatasetReplacement()} if node.name == "node1" else None
+
+
 @pytest.fixture
 def mock_session_with_before_node_run_hooks(
     mocker, project_hooks, mock_package_name, tmp_path
 ):
-    class BeforeNodeRunHook:
-        """Should overwrite the `cars` dataset"""
-
-        @hook_impl
-        def before_node_run(self, node: Node):
-            return {"cars": MockDatasetReplacement()} if node.name == "node1" else None
-
     class MockSettings(_ProjectSettings):
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    return KedroSession.create(mock_package_name, tmp_path)
+    session = KedroSession.create(mock_package_name, tmp_path)
+    yield session
+    session.close()
+
+
+class BeforeNodeRunHookEmpty:
+    """Should overwrite the `cars` dataset"""
+
+    @hook_impl
+    def before_node_run(self):
+        return MockDatasetReplacement()
 
 
 @pytest.fixture
 def mock_session_with_broken_before_node_run_hooks(
     mocker, project_hooks, mock_package_name, tmp_path
 ):
-    class BeforeNodeRunHook:
-        """Should overwrite the `cars` dataset"""
-
-        @hook_impl
-        def before_node_run(self):
-            return MockDatasetReplacement()
-
     class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
+        _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHookEmpty()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
     session = KedroSession.create(mock_package_name, tmp_path)

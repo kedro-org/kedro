@@ -3,7 +3,7 @@ from collections import namedtuple
 import pytest
 from dynaconf.validator import Validator
 
-from kedro.framework.hooks.manager import _register_hooks, get_hook_manager
+from kedro.framework.hooks.manager import _register_hooks
 from kedro.framework.project import _ProjectSettings
 from kedro.framework.session import KedroSession
 from tests.framework.session.conftest import _mock_imported_settings_paths
@@ -53,19 +53,19 @@ class TestSessionHookManager:
     def test_hooks_registered_when_session_created(
         self, mocker, request, caplog, project_hooks, num_plugins
     ):
-        hook_manager = get_hook_manager()
-        assert not hook_manager.get_plugins()
 
-        load_setuptools_entrypoints = mocker.patch.object(
-            hook_manager, "load_setuptools_entrypoints", return_value=num_plugins
+        load_setuptools_entrypoints = mocker.patch(
+            "pluggy._manager.PluginManager.load_setuptools_entrypoints",
+            return_value=num_plugins,
         )
         distinfo = [("plugin_obj_1", MockDistInfo("test-project-a", "0.1"))]
-        list_distinfo_mock = mocker.patch.object(
-            hook_manager, "list_plugin_distinfo", return_value=distinfo
+        list_distinfo_mock = mocker.patch(
+            "pluggy._manager.PluginManager.list_plugin_distinfo", return_value=distinfo
         )
 
         # call a fixture which creates a session
-        request.getfixturevalue("mock_session")
+        session = request.getfixturevalue("mock_session")
+        hook_manager = session._hook_manager
         assert hook_manager.is_registered(project_hooks)
 
         load_setuptools_entrypoints.assert_called_once_with("kedro.hooks")
@@ -89,22 +89,23 @@ class TestSessionHookManager:
         naughty_plugin,
         good_plugin,
     ):
-        hook_manager = get_hook_manager()
-        assert not hook_manager.get_plugins()
 
         distinfo = [("plugin_obj_1", naughty_plugin), ("plugin_obj_2", good_plugin)]
-        list_distinfo_mock = mocker.patch.object(
-            hook_manager, "list_plugin_distinfo", return_value=distinfo
+        mocked_distinfo = mocker.patch(
+            "pluggy._manager.PluginManager.list_plugin_distinfo", return_value=distinfo
         )
-        mocker.patch.object(
-            hook_manager, "load_setuptools_entrypoints", return_value=len(distinfo)
+
+        mocker.patch(
+            "pluggy._manager.PluginManager.load_setuptools_entrypoints",
+            return_value=len(distinfo),
         )
-        unregister_mock = mocker.patch.object(hook_manager, "unregister")
+        unregister_mock = mocker.patch("pluggy._manager.PluginManager.unregister")
 
         KedroSession.create(
             mock_package_name, tmp_path, extra_params={"params:key": "value"}
         )
-        list_distinfo_mock.assert_called_once_with()
+
+        mocked_distinfo.assert_called_once_with()
         unregister_mock.assert_called_once_with(plugin=distinfo[0][0])
 
         # check the logs

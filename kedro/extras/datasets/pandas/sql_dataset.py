@@ -395,7 +395,7 @@ class SQLQueryDataSet(AbstractDataSet):
         need to connect to the same source.
         """
         if connection_str in getattr(cls, "engines", {}):
-            return
+            return  # pragma: no cover
 
         engines = cls.engines if hasattr(cls, "engines") else {}  # type:ignore
 

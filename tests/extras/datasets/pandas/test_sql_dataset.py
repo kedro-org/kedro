@@ -18,6 +18,14 @@ ERROR_PREFIX = (
 )
 
 
+@pytest.fixture(autouse=True)
+def cleanup_engines():
+    if hasattr(SQLTableDataSet, "engines"):
+        delattr(SQLTableDataSet, "engines")
+    if hasattr(SQLQueryDataSet, "engines"):
+        delattr(SQLQueryDataSet, "engines")
+
+
 @pytest.fixture
 def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
@@ -73,63 +81,65 @@ class TestSQLTableDataSetLoad:
         mocker.patch("pandas.read_sql_table")
         table_data_set.load()
         pd.read_sql_table.assert_called_once_with(
-            table_name=TABLE_NAME, con=table_data_set.engine
+            table_name=TABLE_NAME, con=table_data_set.engines[CONNECTION]
         )
 
-    def test_load_driver_missing(self, mocker, table_data_set):
+    def test_load_driver_missing(self, mocker):
         """Check the error when the sql driver is missing"""
         mocker.patch(
-            "pandas.read_sql_table",
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine",
             side_effect=ImportError("No module named 'mysqldb'"),
         )
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
-            table_data_set.load()
-        pd.read_sql_table.assert_called_once_with(
-            table_name=TABLE_NAME, con=table_data_set.engine
-        )
+            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
 
-    def test_invalid_module(self, mocker, table_data_set):
+    def test_invalid_module(self, mocker):
         """Test that if an invalid module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         _err = ImportError("Invalid module some_module")
-        mocker.patch("pandas.read_sql_table", side_effect=_err)
+        mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+        )
         pattern = ERROR_PREFIX + r"Invalid module some\_module"
         with pytest.raises(DataSetError, match=pattern):
-            table_data_set.load()
-        pd.read_sql_table.assert_called_once_with(
-            table_name=TABLE_NAME, con=table_data_set.engine
-        )
+            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
 
-    def test_load_unknown_module(self, mocker, table_data_set):
+    def test_load_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         mocker.patch(
-            "pandas.read_sql_table",
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine",
             side_effect=ImportError("No module named 'unknown_module'"),
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
         with pytest.raises(DataSetError, match=pattern):
-            table_data_set.load()
+            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
 
-    @pytest.mark.parametrize(
-        "table_data_set", [{"credentials": dict(con=FAKE_CONN_STR)}], indirect=True
-    )
-    def test_load_unknown_sql(self, table_data_set):
-        """Check the error when unknown sql dialect is provided"""
+    def test_load_unknown_sql(self):
+        """Check the error when unknown sql dialect is provided;
+        this means the error is raised on catalog creation, rather
+        than on load or save operation.
+        """
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DataSetError, match=pattern):
-            table_data_set.load()
+            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=FAKE_CONN_STR))
 
 
 class TestSQLTableDataSetSave:
     _unknown_conn = "mysql+unknown_module://scott:tiger@localhost/foo"
+
+    def test_save_unknown_sql(self):
+        """Check the error when unknown sql dialect is provided"""
+        pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
+        with pytest.raises(DataSetError, match=pattern):
+            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=FAKE_CONN_STR))
 
     def test_save_default_index(self, mocker, table_data_set, dummy_dataframe):
         """Test `save` method invocation"""
         mocker.patch.object(dummy_dataframe, "to_sql")
         table_data_set.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engine, index=False
+            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
         )
 
     @pytest.mark.parametrize(
@@ -140,37 +150,33 @@ class TestSQLTableDataSetSave:
         mocker.patch.object(dummy_dataframe, "to_sql")
         table_data_set.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engine, index=True
+            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=True
         )
 
-    def test_save_driver_missing(self, mocker, table_data_set, dummy_dataframe):
+    def test_save_driver_missing(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         _err = ImportError("No module named 'mysqldb'")
-        mocker.patch.object(dummy_dataframe, "to_sql", side_effect=_err)
+        mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+        )
+
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
-            table_data_set.save(dummy_dataframe)
+            SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
 
-    @pytest.mark.parametrize(
-        "table_data_set", [{"credentials": dict(con=FAKE_CONN_STR)}], indirect=True
-    )
-    def test_save_unknown_sql(self, table_data_set, dummy_dataframe):
-        """Check the error when unknown sql dialect is provided"""
-        pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
-        with pytest.raises(DataSetError, match=pattern):
-            table_data_set.save(dummy_dataframe)
-
-    @pytest.mark.parametrize(
-        "table_data_set", [{"credentials": dict(con=_unknown_conn)}], indirect=True
-    )
-    def test_save_unknown_module(self, mocker, table_data_set, dummy_dataframe):
+    def test_save_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         _err = ImportError("No module named 'unknown_module'")
-        mocker.patch.object(dummy_dataframe, "to_sql", side_effect=_err)
+        mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+        )
+
         pattern = r"No module named \'unknown_module\'"
         with pytest.raises(DataSetError, match=pattern):
-            table_data_set.save(dummy_dataframe)
+            SQLTableDataSet(
+                table_name=TABLE_NAME, credentials={"con": self._unknown_conn}
+            )
 
     @pytest.mark.parametrize(
         "table_data_set", [{"save_args": dict(name="TABLE_B")}], indirect=True
@@ -183,7 +189,7 @@ class TestSQLTableDataSetSave:
         mocker.patch.object(dummy_dataframe, "to_sql")
         table_data_set.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engine, index=False
+            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
         )
 
 
@@ -246,7 +252,9 @@ class TestSQLTableDataSetSingleConnection:
 
         delta = end - start
         print(delta)
-        datasets[0].engine.dispose()
+        cons = datasets[0].engines
+        for con in cons.values():
+            con.dispose()
 
     def test_single_connection(self, dummy_dataframe, mocker):
         """Test to make sure multiple instances use the same connection object."""
@@ -254,18 +262,39 @@ class TestSQLTableDataSetSingleConnection:
         kwargs = dict(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
 
         first = SQLTableDataSet(**kwargs)
-        unique_connection = first.engine
+        unique_connection = first.engines[CONNECTION]
         datasets = [SQLTableDataSet(**kwargs) for _ in range(10)]
 
         for ds in datasets:
             ds.save(dummy_dataframe)
-            assert ds.engine is unique_connection
+            engine = ds.engines[CONNECTION]
+            assert engine is unique_connection
 
         expected_call = mocker.call(name=TABLE_NAME, con=unique_connection, index=False)
         dummy_to_sql.assert_has_calls([expected_call] * 10)
 
-        # for d in datasets:
-        #     d.load()
+        for ds in datasets:
+            ds.load()
+            engine = ds.engines[CONNECTION]
+            assert engine is unique_connection
+
+    def test_create_connection_only_once(self, mocker):
+        """Test that two datasets that need to connect to the same db
+        only create a connection once.
+        """
+        mock_engine = mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine"
+        )
+        first = SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
+        assert len(first.engines) == 1
+
+        second = SQLTableDataSet(
+            table_name="other_table", credentials=dict(con=CONNECTION)
+        )
+        assert len(second.engines) == 1
+        assert len(first.engines) == 1
+
+        mock_engine.assert_called_once_with(CONNECTION)
 
 
 class TestSQLQueryDataSet:
@@ -292,7 +321,7 @@ class TestSQLQueryDataSet:
         mocker.patch("pandas.read_sql_query")
         query_data_set.load()
         pd.read_sql_query.assert_called_once_with(
-            sql=SQL_QUERY, con=query_data_set.engine
+            sql=SQL_QUERY, con=query_data_set.engines[CONNECTION]
         )
 
     def test_load_query_file(self, mocker, query_file_data_set):
@@ -300,44 +329,47 @@ class TestSQLQueryDataSet:
         mocker.patch("pandas.read_sql_query")
         query_file_data_set.load()
         pd.read_sql_query.assert_called_once_with(
-            sql=SQL_QUERY, con=query_file_data_set.engine
+            sql=SQL_QUERY, con=query_file_data_set.engines[CONNECTION]
         )
 
-    def test_load_driver_missing(self, mocker, query_data_set):
+    def test_load_driver_missing(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         _err = ImportError("No module named 'mysqldb'")
-        mocker.patch("pandas.read_sql_query", side_effect=_err)
+        mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+        )
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
-            query_data_set.load()
+            SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
 
-    def test_invalid_module(self, mocker, query_data_set):
+    def test_invalid_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         _err = ImportError("Invalid module some_module")
-        mocker.patch("pandas.read_sql_query", side_effect=_err)
+        mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+        )
         pattern = ERROR_PREFIX + r"Invalid module some\_module"
         with pytest.raises(DataSetError, match=pattern):
-            query_data_set.load()
+            SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
 
-    def test_load_unknown_module(self, mocker, query_data_set):
+    def test_load_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         _err = ImportError("No module named 'unknown_module'")
-        mocker.patch("pandas.read_sql_query", side_effect=_err)
+        mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
+        )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
         with pytest.raises(DataSetError, match=pattern):
-            query_data_set.load()
+            SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
 
-    @pytest.mark.parametrize(
-        "query_data_set", [{"credentials": dict(con=FAKE_CONN_STR)}], indirect=True
-    )
-    def test_load_unknown_sql(self, query_data_set):
+    def test_load_unknown_sql(self):
         """Check the error when unknown SQL dialect is provided
         in the connection string"""
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DataSetError, match=pattern):
-            query_data_set.load()
+            SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=FAKE_CONN_STR))
 
     def test_save_error(self, query_data_set, dummy_dataframe):
         """Check the error when trying to save to the data set"""

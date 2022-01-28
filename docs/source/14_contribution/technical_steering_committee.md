@@ -38,6 +38,13 @@ Quarterly, existing maintainers will curate a list of contributors that have sho
 Following a successful vote, candidates are added to the `kedro-developers` team on the Kedro GitHub organisation
 and the `kedro-team` group on the Kedro Discord organisation.
 
+## How are decisions made?
+The process of adding or removing maintainers is done via composing a Pull Request (PR) against OWNERS.md which 
+includes details about contribution activities committed to the project during period of time and how that conforms with expected Maintainer responsibilities, skillset and the best interest of the project. The decision is made based on TSC members votes in a PR.
 
-# Removing a Maintainer
+The process of voting on other Issues, Proposals and Changes is performed by creating an open Github Discussion. For decisions making history reasons and to stimulate brainstorming, it's recommended to write a detailed research/description that covers possible outcomes and pros/cons behind the change to give comprehensive context.
+
+Additions and removals of maintainers require a 2/3 majority, while other decisions and changes require only a simple majority. The voting period is one week.
+
+### Removing a Maintainer
 The TSC will also have a mechanism for removing a maintainer who is no longer interested or cannot perform the maintainer duties listed above. In that case, they should volunteer for non-voting Contributor or Friends status. In extreme cases, this can also occur by a vote by the active TSC.

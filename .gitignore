@@ -147,6 +147,9 @@ kedro.db
 .*.swo
 .*.swp
 
+# Prettier
+.prettierignore
+
 .pytest_cache/
 kedro/html
 docs/tmp-build-artifacts

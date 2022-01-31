@@ -10,6 +10,11 @@ from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
+
+from kedro.framework.project import settings
+
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools, \
+    get_hook_manager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
@@ -85,7 +90,6 @@ def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
 def _run_node_synchronization(  # pylint: disable=too-many-arguments
     node: Node,
     catalog: DataCatalog,
-    hook_manager: PluginManager,
     is_async: bool = False,
     run_id: str = None,
     package_name: str = None,
@@ -114,6 +118,10 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     if multiprocessing.get_start_method() == "spawn" and package_name:  # type: ignore
         conf_logging = conf_logging or {}
         _bootstrap_subprocess(package_name, conf_logging)
+
+    hook_manager = get_hook_manager()
+    _register_hooks(hook_manager, settings.HOOKS)
+    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
     return run_node(node, catalog, hook_manager, is_async, run_id)
 
@@ -302,7 +310,6 @@ class ParallelRunner(AbstractRunner):
                             _run_node_synchronization,
                             node,
                             catalog,
-                            hook_manager,
                             self._is_async,
                             run_id,
                             package_name=PACKAGE_NAME,

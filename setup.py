@@ -10,7 +10,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas>=0.24"
+PANDAS = "pandas>=0.24, <1.4"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -77,8 +77,11 @@ pandas_require = {
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
-    "pandas.HDFDataSet": [PANDAS, "tables~=3.6.0; platform_system == 'Windows'",
-                          "tables~=3.6; platform_system != 'Windows'"],
+    "pandas.HDFDataSet": [
+        PANDAS,
+        "tables~=3.6.0; platform_system == 'Windows'",
+        "tables~=3.6; platform_system != 'Windows'",
+    ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=1.0, <7.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],

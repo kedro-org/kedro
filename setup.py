@@ -71,8 +71,11 @@ pandas_require = {
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
-    "pandas.HDFDataSet": [PANDAS, "tables~=3.6.0; platform_system == 'Windows'",
-                          "tables~=3.6; platform_system != 'Windows'"],
+    "pandas.HDFDataSet": [
+        PANDAS,
+        "tables~=3.6.0; platform_system == 'Windows'",
+        "tables~=3.6; platform_system != 'Windows'",
+    ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=1.0, <7.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
@@ -158,7 +161,7 @@ setup(
     include_package_data=True,
     tests_require=test_requires,
     install_requires=requires,
-    author="QuantumBlack Labs",
+    author="Kedro",
     entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},
     package_data={
         name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files

@@ -6,7 +6,7 @@ parameters:
     default: false
 
 orbs:
-  win: circleci/windows@2.2.0
+  win: circleci/windows@2.4.1
 
 # No windows executor is listed here since windows builds use win/default and modify
 # the Python version through the conda environment.
@@ -310,8 +310,8 @@ jobs:
       - run:
           name: Set git email and name
           command: |
-            git config --global user.email "kedro@quantumblack.com"
-            git config --global user.name "QuantumBlack Labs"
+            git config --global user.email "kedro@kedro.com"
+            git config --global user.name "Kedro"
       - run:
           name: Trigger Read The Docs build
           command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest

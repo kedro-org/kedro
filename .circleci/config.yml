@@ -168,6 +168,8 @@ jobs:
       python_version:
         type: string
     executor: win/default
+    environment:
+      PIP_DISABLE_PIP_VERSION_CHECK: 1
     steps:
       - checkout
       - win_setup_conda:
@@ -178,6 +180,7 @@ jobs:
       - run:
           name: Install dependencies
           command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
+      - run: Write-Host "BLAH $PIP_DISABLE_PIP_VERSION_CHECK"
       - run:
           name: Run e2e tests
           command: conda activate kedro_builder; make e2e-tests

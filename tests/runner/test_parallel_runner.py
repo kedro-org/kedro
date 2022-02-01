@@ -360,7 +360,6 @@ class TestRunNodeSynchronisationHelper:
         is_async,
         conf_logging,
         mocker,
-        hook_manager,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
@@ -387,7 +386,6 @@ class TestRunNodeSynchronisationHelper:
         mock_configure_project,
         is_async,
         mocker,
-        hook_manager,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
@@ -403,7 +401,7 @@ class TestRunNodeSynchronisationHelper:
         mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_not_provided(
-        self, mock_logging, mock_run_node, is_async, mocker, hook_manager
+        self, mock_logging, mock_run_node, is_async, mocker
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
         node_ = mocker.sentinel.node

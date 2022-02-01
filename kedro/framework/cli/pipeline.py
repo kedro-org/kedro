@@ -101,6 +101,11 @@ def pipeline():
     """Commands for working with pipelines."""
 
 
+@pipeline_cli.group()
+def micropkg():
+    """Commands for micropackaging."""
+
+
 @command_with_verbosity(pipeline, "create")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @click.option(
@@ -262,6 +267,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     message = f"Pipeline {package_path} pulled and unpacked{as_alias}!"
     click.secho(message, fg="green")
 
+micropkg.add_command(pull_package)
 
 # pylint: disable=too-many-arguments, too-many-locals
 def _pull_package(
@@ -412,6 +418,7 @@ def package_pipeline(
     )
     click.secho(message, fg="green")
 
+micropkg.add_command(package_pipeline)
 
 def _echo_deletion_warning(message: str, **paths: List[Path]):
     paths = {key: values for key, values in paths.items() if values}

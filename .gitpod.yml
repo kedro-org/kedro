@@ -1,4 +1,4 @@
-asks:
+tasks:
   - name: kedro
     before: |
       echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no

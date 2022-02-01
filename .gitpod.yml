@@ -1,4 +1,8 @@
 tasks:
+  # We want packages installed during the pre-build init steps to go to /workspace
+  # rather than ~ so that they are persisted. Gitpod sets PIP_USER=yes to ensure this,
+  # but pre-commit requires PIP_USER=no. Hence we set PIP_USER=no and use
+  # pip install --user to install to /workspace.
   - name: kedro
     before: |
       echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
@@ -9,6 +13,7 @@ tasks:
     command: |
       pre-commit install --install-hooks
       clear
+  # Generate a test Kedro project at /workspace/project using the local Kedro version.
   - name: test-project
     init: |
       gp sync-await kedro

@@ -35,8 +35,8 @@ class GenericDataSet(AbstractVersionedDataSet):
     appropriate type of read/write target on a best effort basis.
 
     Example using `YAML API
-    <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 

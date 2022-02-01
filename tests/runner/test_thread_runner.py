@@ -5,7 +5,6 @@ import pytest
 
 from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.decorators import log_time
 from kedro.runner import ThreadRunner
 
 
@@ -63,7 +62,7 @@ class TestValidThreadRunner:
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
-    def test_memory_data_set_input(self, fan_out_fan_in):
+    def test_memory_dataset_input(self, fan_out_fan_in):
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
@@ -138,40 +137,6 @@ class TestInvalidThreadRunner:
         pattern = "Saving `None` to a `DataSet` is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             ThreadRunner().run(pipeline, catalog)
-
-
-@log_time
-def decorated_identity(*args, **kwargs):
-    return identity(*args, **kwargs)
-
-
-@pytest.fixture
-def decorated_fan_out_fan_in():
-    return Pipeline(
-        [
-            node(decorated_identity, "A", "B"),
-            node(decorated_identity, "B", "C"),
-            node(decorated_identity, "B", "D"),
-            node(decorated_identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
-
-
-class TestThreadRunnerDecorator:
-    def test_decorate_pipeline(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ThreadRunner().run(fan_out_fan_in.decorate(log_time), catalog)
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
-
-    def test_decorated_nodes(self, decorated_fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ThreadRunner().run(decorated_fan_out_fan_in, catalog)
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
 
 
 class LoggingDataSet(AbstractDataSet):

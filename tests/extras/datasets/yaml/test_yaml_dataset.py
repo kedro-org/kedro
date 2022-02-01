@@ -102,7 +102,7 @@ class TestYAMLDataSet:
 
     def test_dataframe_support(self, yaml_data_set):
         data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5]})
-        yaml_data_set.save(data)
+        yaml_data_set.save(data.to_dict())
         reloaded = yaml_data_set.load()
         assert isinstance(reloaded, dict)
 

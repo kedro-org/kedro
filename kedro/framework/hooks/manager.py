@@ -14,7 +14,7 @@ _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed pl
 logger = logging.getLogger(__name__)
 
 
-def _create_hook_manager() -> PluginManager:
+def create_hook_manager() -> PluginManager:
     """Create a new PluginManager instance and register Kedro's hook specs."""
     manager = PluginManager(HOOK_NAMESPACE)
     manager.add_hookspecs(NodeSpecs)
@@ -22,11 +22,6 @@ def _create_hook_manager() -> PluginManager:
     manager.add_hookspecs(DataCatalogSpecs)
     manager.add_hookspecs(DatasetSpecs)
     return manager
-
-
-def get_hook_manager():
-    """Create a _hook_manager singleton instance."""
-    return _create_hook_manager()
 
 
 def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:

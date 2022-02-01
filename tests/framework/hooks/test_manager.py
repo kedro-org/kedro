@@ -1,6 +1,6 @@
 import pytest
 
-from kedro.framework.hooks.manager import _create_hook_manager
+from kedro.framework.hooks.manager import create_hook_manager
 from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
 
 
@@ -48,7 +48,7 @@ def test_hook_manager_can_call_hooks_defined_in_specs(
     hook_specs, hook_name, hook_params
 ):
     """Tests to make sure that the hook manager can call all hooks defined by specs."""
-    hook_manager = _create_hook_manager()
+    hook_manager = create_hook_manager()
     hook = getattr(hook_manager.hook, hook_name)
     assert hook.spec.namespace == hook_specs
     kwargs = {param: None for param in hook_params}

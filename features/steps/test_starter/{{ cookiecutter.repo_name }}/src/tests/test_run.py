@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
-from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks import create_hook_manager
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def project_context(config_loader):
         package_name="{{ cookiecutter.python_package }}",
         project_path=Path.cwd(),
         config_loader=config_loader,
-        hook_manager=get_hook_manager(),
+        hook_manager=create_hook_manager(),
     )
 
 

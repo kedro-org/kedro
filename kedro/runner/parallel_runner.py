@@ -10,17 +10,18 @@ from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
-
-from kedro.framework.project import settings
-
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools, \
-    get_hook_manager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
 
 from pluggy import PluginManager
 
+from kedro.framework.hooks.manager import (
+    _register_hooks,
+    _register_hooks_setuptools,
+    create_hook_manager,
+)
+from kedro.framework.project import settings
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -119,7 +120,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
         conf_logging = conf_logging or {}
         _bootstrap_subprocess(package_name, conf_logging)
 
-    hook_manager = get_hook_manager()
+    hook_manager = create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
     _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 

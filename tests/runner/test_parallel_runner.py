@@ -1,20 +1,8 @@
-import pickle
 import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any, Dict
 
-import importlib_metadata
 import pytest
-from pluggy._manager import DistFacade
-
-from kedro.framework.project import settings
-
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
-
-from kedro.framework.hooks.specs import NodeSpecs, PipelineSpecs, DataCatalogSpecs, DatasetSpecs
-
-from kedro.framework.hooks.markers import HOOK_NAMESPACE
-from pluggy import PluginManager
 
 from kedro.io import (
     AbstractDataSet,
@@ -39,21 +27,6 @@ from tests.runner.conftest import (
     sink,
     source,
 )
-
-# class Testing:
-#     def test_pickle_hook_manager(self):
-#         manager = PluginManager(HOOK_NAMESPACE)
-#         manager.add_hookspecs(NodeSpecs)
-#         manager.add_hookspecs(PipelineSpecs)
-#         manager.add_hookspecs(DataCatalogSpecs)
-#         manager.add_hookspecs(DatasetSpecs)
-#         _register_hooks(manager, settings.HOOKS)
-#         _register_hooks_setuptools(manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
-#
-#         item = list(importlib_metadata.distributions())[0]
-#         facade = DistFacade(item)
-#         pickle.dumps(facade)
-
 
 
 @pytest.mark.skipif(

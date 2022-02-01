@@ -5,7 +5,7 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
-from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks import create_hook_manager
 from kedro.io import DataCatalog, DataSetError
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner
@@ -87,4 +87,6 @@ class TestDeltaTableDataSet:
             r"multiprocessing: \['delta_in'\]"
         )
         with pytest.raises(AttributeError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog, get_hook_manager())
+            ParallelRunner(is_async=is_async).run(
+                pipeline, catalog, create_hook_manager()
+            )

@@ -13,7 +13,7 @@ from kedro.framework.hooks import hook_impl
 from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
 from kedro.runner.runner import _run_node_async
@@ -37,7 +37,7 @@ def broken_node():
 
 @pytest.fixture
 def broken_pipeline():
-    return Pipeline(
+    return pipeline(
         [
             node(broken_node, None, "A", name="node1"),
             node(broken_node, None, "B", name="node2"),
@@ -50,22 +50,6 @@ def broken_pipeline():
 def mock_broken_pipelines(mocker, broken_pipeline):
     def mock_get_pipelines_registry_callable():
         return {"__default__": broken_pipeline}
-
-    mocker.patch.object(
-        _ProjectPipelines,
-        "_get_pipelines_registry_callable",
-        return_value=mock_get_pipelines_registry_callable,
-    )
-    return mock_get_pipelines_registry_callable()
-
-
-@pytest.fixture
-def mock_pipelines(mocker, mock_pipeline):
-    def mock_get_pipelines_registry_callable():
-        return {
-            "__default__": mock_pipeline,
-            "pipe": mock_pipeline,
-        }
 
     mocker.patch.object(
         _ProjectPipelines,
@@ -437,46 +421,40 @@ class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
     pass
 
 
-class BeforeNodeRunHook:
-    """Should overwrite the `cars` dataset"""
-
-    @hook_impl
-    def before_node_run(self, node: Node):
-        return {"cars": MockDatasetReplacement()} if node.name == "node1" else None
-
-
 @pytest.fixture
 def mock_session_with_before_node_run_hooks(
     mocker, project_hooks, mock_package_name, tmp_path
 ):
+    class BeforeNodeRunHook:
+        """Should overwrite the `cars` dataset"""
+
+        @hook_impl
+        def before_node_run(self, node: Node):
+            return {"cars": MockDatasetReplacement()} if node.name == "node1" else None
+
     class MockSettings(_ProjectSettings):
         _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    session = KedroSession.create(mock_package_name, tmp_path)
-    yield session
-    session.close()
-
-
-class BeforeNodeRunHookEmpty:
-    """Should overwrite the `cars` dataset"""
-
-    @hook_impl
-    def before_node_run(self):
-        return MockDatasetReplacement()
+    return KedroSession.create(mock_package_name, tmp_path)
 
 
 @pytest.fixture
 def mock_session_with_broken_before_node_run_hooks(
     mocker, project_hooks, mock_package_name, tmp_path
 ):
+    class BeforeNodeRunHook:
+        """Should overwrite the `cars` dataset"""
+
+        @hook_impl
+        def before_node_run(self):
+            return MockDatasetReplacement()
+
     class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHookEmpty()))
+        _HOOKS = Validator("HOOKS", default=(project_hooks, BeforeNodeRunHook()))
 
     _mock_imported_settings_paths(mocker, MockSettings())
-    session = KedroSession.create(mock_package_name, tmp_path)
-    yield session
-    session.close()
+    return KedroSession.create(mock_package_name, tmp_path)
 
 
 class TestBeforeNodeRunHookWithInputUpdates:

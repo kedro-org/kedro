@@ -316,7 +316,7 @@ dev_abs:
 Example 16: Loading a CSV file stored in a remote location through SSH
 
 ```eval_rst
-.. note::  This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
+.. note::  This example requires `Paramiko <https://www.paramiko.org>`_ to be installed (``pip install paramiko``).
 ```
 ```yaml
 cool_dataset:

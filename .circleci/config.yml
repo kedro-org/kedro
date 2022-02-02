@@ -178,6 +178,8 @@ jobs:
       python_version:
         type: string
     executor: win/default
+    environment:
+      PIP_DISABLE_PIP_VERSION_CHECK: 1
     steps:
       - checkout
       - win_setup_conda:

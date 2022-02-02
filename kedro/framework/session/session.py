@@ -79,7 +79,7 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
 def _clear_hook_manager(hook_manager):
     name_plugin_pairs = hook_manager.list_name_plugin()
     for name, plugin in name_plugin_pairs:
-        hook_manager.unregister(name=name, plugin=plugin)  # pragma: no cover
+        hook_manager.unregister(name=name, plugin=plugin)
 
 
 class KedroSession:

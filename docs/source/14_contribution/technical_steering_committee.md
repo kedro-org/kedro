@@ -6,8 +6,7 @@ In this section, we detail:
 - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
 - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
 - [Application process](#application-process)
-- [Removing a maintainer](#removing-a-maintainer)
-
+- [Voting process](#voting-process)
 
 ## Responsibilities of a maintainer
 
@@ -39,7 +38,6 @@ We look for commitment markers with the following:
 - Learning how the team works, including processes for testing, quality standards and code review
 - Evidence of already having started pull requests and code reviews under the guidance of maintainers; including asking
   for help where needed
-
 
 ## Application process
 

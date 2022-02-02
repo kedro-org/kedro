@@ -14,7 +14,7 @@ In this section, we detail:
 | Theme | Activity |
 |---|---|
 | Product development | * Be available for at least one full day per week to help with product development<br>* Attend community meetings to discuss the project plans and roadmap<br>* Project maintenance including security, updates, CI/CD, builds and infrastructure<br>* Prioritize the work following the product roadmap to move the project forward |
-| Community management | * Make sure that ongoing PRs are moving forward at the right pace or closing them<br>* Guide the community to use the right channel:<br>  * [Github](https://github.com/quantumblacklabs/kedro/) for feature requests and bug reports<br>  * [GitHub discussions](https://github.com/quantumblacklabs/kedro/discussions) or [Discord](https://discord.gg/akJDeVaxnB), but the former is often preferable since it will be picked up by search engines |
+| Community management | * Make sure that ongoing pull requests are moving forward at the right pace or closing them<br>* Guide the community to use the right channel: [Github](https://github.com/quantumblacklabs/kedro/) for feature requests and bug reports, [GitHub discussions](https://github.com/quantumblacklabs/kedro/discussions) or [Discord](https://discord.gg/akJDeVaxnB). |
 
 
 ## Requirements to become a maintainer
@@ -26,9 +26,10 @@ We look for commitment markers with the following:
 
 * Being able to write solid code and collaborate with the team and community
 * Understanding the project's code base and internals
-* Doing PRs from our backlog or roadmap; maintainers need to work towards a common goal
+* Doing pull requests from our backlog or roadmap; maintainers need to work towards a common goal
 * Learning how the team works, including processes for testing, quality standards and code review
-* Evidence of already having started PRs and code reviews under the guidance of maintainers; including asking for help where needed
+* Evidence of already having started pull requests and code reviews under the guidance of maintainers; including asking
+  for help where needed
 
 
 ## Application process
@@ -39,12 +40,8 @@ Following a successful vote, candidates are added to the `kedro-developers` team
 and the `kedro-team` group on the Kedro Discord organisation.
 
 ## How are decisions made?
-The process of adding or removing maintainers is done via composing a Pull Request (PR) against OWNERS.md which
-includes details about contribution activities committed to the project during period of time and how that conforms with expected Maintainer responsibilities, skillset and the best interest of the project. The decision is made based on TSC members votes in a PR.
+The TSC will also have a mechanism for removing a maintainer who is no longer interested or cannot perform the maintainer duties listed above. In that case, they should volunteer for non-voting Contributor or Friends status. In extreme cases, this can also occur by a vote by the active TSC. The process of adding or removing maintainers is done via composing a pull request against [our team list](.. /12_faq/01_faq.md#who-maintains-kedro). The decision is made based on TSC members votes in that pull request.
 
-The process of voting on other Issues, Proposals and Changes is performed by creating an open Github Discussion. For decisions making history reasons and to stimulate brainstorming, it's recommended to write a detailed research/description that covers possible outcomes and pros/cons behind the change to give comprehensive context.
+The process of voting on other issues, proposals and changes is performed by creating an open Github Discussion.
 
 Additions and removals of maintainers require a 2/3 majority, while other decisions and changes require only a simple majority. The voting period is one week.
-
-### Removing a Maintainer
-The TSC will also have a mechanism for removing a maintainer who is no longer interested or cannot perform the maintainer duties listed above. In that case, they should volunteer for non-voting Contributor or Friends status. In extreme cases, this can also occur by a vote by the active TSC.

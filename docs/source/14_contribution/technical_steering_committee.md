@@ -39,7 +39,7 @@ Following a successful vote, candidates are added to the `kedro-developers` team
 and the `kedro-team` group on the Kedro Discord organisation.
 
 ## How are decisions made?
-The process of adding or removing maintainers is done via composing a Pull Request (PR) against OWNERS.md which 
+The process of adding or removing maintainers is done via composing a Pull Request (PR) against OWNERS.md which
 includes details about contribution activities committed to the project during period of time and how that conforms with expected Maintainer responsibilities, skillset and the best interest of the project. The decision is made based on TSC members votes in a PR.
 
 The process of voting on other Issues, Proposals and Changes is performed by creating an open Github Discussion. For decisions making history reasons and to stimulate brainstorming, it's recommended to write a detailed research/description that covers possible outcomes and pros/cons behind the change to give comprehensive context.

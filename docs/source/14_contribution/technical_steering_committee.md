@@ -11,11 +11,20 @@ In this section, we detail:
 
 ## Responsibilities of a maintainer
 
-| Theme | Activity |
-|---|---|
-| Product development | * Be available for at least one full day per week to help with product development<br>* Attend community meetings to discuss the project plans and roadmap<br>* Project maintenance including security, updates, CI/CD, builds and infrastructure<br>* Prioritize the work following the product roadmap to move the project forward |
-| Community management | * Make sure that ongoing pull requests are moving forward at the right pace or closing them<br>* Guide the community to use the right channel: [Github](https://github.com/quantumblacklabs/kedro/) for feature requests and bug reports, [GitHub discussions](https://github.com/quantumblacklabs/kedro/discussions) or [Discord](https://discord.gg/akJDeVaxnB). |
+### Product development
 
+ - Be available for at least one full day per week to help with product development
+ - Attend community meetings to discuss the project plans and roadmap
+ - Project maintenance including security, updates, CI/CD, builds and infrastructure
+ - Prioritize the work following the product roadmap to move the project forward
+
+### Community management
+
+ -  Make sure that ongoing pull requests are moving forward at the right pace or closing them
+ - Guide the community to use the right channel:
+   - [Github](https://github.com/kedro-org/kedro/) for feature requests and bug reports
+   - [GitHub discussions](https://github.com/kedro-org/kedro/discussions)
+   - [Discord](https://discord.gg/akJDeVaxnB)
 
 ## Requirements to become a maintainer
 

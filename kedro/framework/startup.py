@@ -142,7 +142,7 @@ def _add_src_to_path(source_dir: Path, project_path: Path) -> None:
 
     python_path = os.getenv("PYTHONPATH") or ""
     if str(source_dir) not in python_path:
-        sep = os.pathsep if python_path else ""
+        sep = ";" if python_path else ""
         os.environ["PYTHONPATH"] = f"{str(source_dir)}{sep}{python_path}"
 
 

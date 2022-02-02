@@ -313,27 +313,6 @@ dev_abs:
   account_name: accountname
   account_key: key
 ```
-Example 16: Loading a CSV file stored in a remote location through SSH
-
-```eval_rst
-.. note::  This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
-```
-```yaml
-cool_dataset:
-  type: pandas.CSVDataSet
-  filepath: "sftp:///path/to/remote_cluster/cool_data.csv"
-  credentials: cluster_credentials
-```
-All parameters required to establish the SFTP connection can be defined through `fs_args` or in `credentials.yml` as follows:
-
-```yaml
-cluster_credentials:
-  username: my_username
-  host: host_address
-  port: 22
-  password: password
-```
-The list of all available parameters is given in the [Paramiko documentation](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect).
 
 ## Creating a Data Catalog YAML configuration file via CLI
 

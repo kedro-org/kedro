@@ -10,7 +10,7 @@ clean:
 	pre-commit clean || true
 
 install-pip-setuptools:
-	python -m pip install -U "pip~=21.2" "setuptools>=38.0" wheel
+	python -m pip install -U "pip>=20.0" "setuptools>=38.0" wheel
 
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
@@ -55,9 +55,3 @@ uninstall-pre-commit:
 
 print-python-env:
 	@./tools/print_env.sh
-
-sign-off:
-	echo "git interpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg
-	echo '--trailer "Signed-off-by: $$(git config user.name) <$$(git config user.email)>" \c' >> .git/hooks/commit-msg
-	echo '--in-place "$$1"' >> .git/hooks/commit-msg
-	chmod +x .git/hooks/commit-msg

@@ -7,6 +7,7 @@
 * Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).
 * Added Plotly dataset documentation (`03_tutorial/06_visualise_pipeline.md`).
 * Added the upper limit `pandas<1.4` to maintain compatibility with `xlrd~=1.0`.
+* Added detail about Kedro's Technical Steering Committee and governance model.
 
 ## Minor breaking changes to the API
 

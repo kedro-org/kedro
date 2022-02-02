@@ -243,11 +243,11 @@ class SQLTableDataSet(AbstractDataSet):
         )
 
     def _load(self) -> pd.DataFrame:
-        engine = self.engines.get(self._connection_str)  # type:ignore
+        engine = self.engines[self._connection_str]  # type:ignore
         return pd.read_sql_table(con=engine, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
-        engine = self.engines.get(self._connection_str)  # type: ignore
+        engine = self.engines[self._connection_str]  # type: ignore
         data.to_sql(con=engine, **self._save_args)
 
     def _exists(self) -> bool:

@@ -1,5 +1,4 @@
 # pylint: disable=no-member
-import time
 from pathlib import PosixPath
 
 import pandas as pd
@@ -59,7 +58,17 @@ def query_file_data_set(request, sql_file):
     return SQLQueryDataSet(**kwargs)
 
 
-class TestSQLTableDataSetLoad:
+class TestSQLTableDataSet:
+    _unknown_conn = "mysql+unknown_module://scott:tiger@localhost/foo"
+
+    @staticmethod
+    def _assert_sqlalchemy_called_once(*args):
+        _callable = sqlalchemy.engine.Engine.table_names
+        if args:
+            _callable.assert_called_once_with(*args)
+        else:
+            assert _callable.call_count == 1
+
     def test_empty_table_name(self):
         """Check the error when instantiating with an empty table"""
         pattern = r"`table\_name` argument cannot be empty\."
@@ -76,15 +85,7 @@ class TestSQLTableDataSetLoad:
         with pytest.raises(DataSetError, match=pattern):
             SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=""))
 
-    def test_load_sql_params(self, mocker, table_data_set):
-        """Test `load` method invocation"""
-        mocker.patch("pandas.read_sql_table")
-        table_data_set.load()
-        pd.read_sql_table.assert_called_once_with(
-            table_name=TABLE_NAME, con=table_data_set.engines[CONNECTION]
-        )
-
-    def test_load_driver_missing(self, mocker):
+    def test_driver_missing(self, mocker):
         """Check the error when the sql driver is missing"""
         mocker.patch(
             "kedro.extras.datasets.pandas.sql_dataset.create_engine",
@@ -93,18 +94,16 @@ class TestSQLTableDataSetLoad:
         with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
             SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
 
-    def test_invalid_module(self, mocker):
-        """Test that if an invalid module/driver is encountered by SQLAlchemy
-        then the error should contain the original error message"""
-        _err = ImportError("Invalid module some_module")
-        mocker.patch(
-            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
-        )
-        pattern = ERROR_PREFIX + r"Invalid module some\_module"
+    def test_unknown_sql(self):
+        """Check the error when unknown sql dialect is provided;
+        this means the error is raised on catalog creation, rather
+        than on load or save operation.
+        """
+        pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
+            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=FAKE_CONN_STR))
 
-    def test_load_unknown_module(self, mocker):
+    def test_unknown_module(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
         then the error should contain the original error message"""
         mocker.patch(
@@ -114,93 +113,6 @@ class TestSQLTableDataSetLoad:
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
         with pytest.raises(DataSetError, match=pattern):
             SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
-
-    def test_load_unknown_sql(self):
-        """Check the error when unknown sql dialect is provided;
-        this means the error is raised on catalog creation, rather
-        than on load or save operation.
-        """
-        pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
-        with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=FAKE_CONN_STR))
-
-
-class TestSQLTableDataSetSave:
-    _unknown_conn = "mysql+unknown_module://scott:tiger@localhost/foo"
-
-    def test_save_unknown_sql(self):
-        """Check the error when unknown sql dialect is provided"""
-        pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
-        with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=FAKE_CONN_STR))
-
-    def test_save_default_index(self, mocker, table_data_set, dummy_dataframe):
-        """Test `save` method invocation"""
-        mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
-        dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
-        )
-
-    @pytest.mark.parametrize(
-        "table_data_set", [{"save_args": dict(index=True)}], indirect=True
-    )
-    def test_save_overwrite_index(self, mocker, table_data_set, dummy_dataframe):
-        """Test writing DataFrame index as a column"""
-        mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
-        dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=True
-        )
-
-    def test_save_driver_missing(self, mocker):
-        """Test that if an unknown module/driver is encountered by SQLAlchemy
-        then the error should contain the original error message"""
-        _err = ImportError("No module named 'mysqldb'")
-        mocker.patch(
-            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
-        )
-
-        with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
-            SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
-
-    def test_save_unknown_module(self, mocker):
-        """Test that if an unknown module/driver is encountered by SQLAlchemy
-        then the error should contain the original error message"""
-        _err = ImportError("No module named 'unknown_module'")
-        mocker.patch(
-            "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
-        )
-
-        pattern = r"No module named \'unknown_module\'"
-        with pytest.raises(DataSetError, match=pattern):
-            SQLTableDataSet(
-                table_name=TABLE_NAME, credentials={"con": self._unknown_conn}
-            )
-
-    @pytest.mark.parametrize(
-        "table_data_set", [{"save_args": dict(name="TABLE_B")}], indirect=True
-    )
-    def test_save_ignore_table_name_override(
-        self, mocker, table_data_set, dummy_dataframe
-    ):
-        """Test that putting the table name is `save_args` does not have any
-        effect"""
-        mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
-        dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
-        )
-
-
-class TestSQLTableDataSet:
-    @staticmethod
-    def _assert_sqlalchemy_called_once(*args):
-        _callable = sqlalchemy.engine.Engine.table_names
-        if args:
-            _callable.assert_called_once_with(*args)
-        else:
-            assert _callable.call_count == 1
 
     def test_str_representation_table(self, table_data_set):
         """Test the data set instance string representation"""
@@ -232,30 +144,49 @@ class TestSQLTableDataSet:
         assert table_data_set.exists()
         self._assert_sqlalchemy_called_once()
 
+    def test_load_sql_params(self, mocker, table_data_set):
+        """Test `load` method invocation"""
+        mocker.patch("pandas.read_sql_table")
+        table_data_set.load()
+        pd.read_sql_table.assert_called_once_with(
+            table_name=TABLE_NAME, con=table_data_set.engines[CONNECTION]
+        )
+
+    def test_save_default_index(self, mocker, table_data_set, dummy_dataframe):
+        """Test `save` method invocation"""
+        mocker.patch.object(dummy_dataframe, "to_sql")
+        table_data_set.save(dummy_dataframe)
+        dummy_dataframe.to_sql.assert_called_once_with(
+            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
+        )
+
+    @pytest.mark.parametrize(
+        "table_data_set", [{"save_args": dict(index=True)}], indirect=True
+    )
+    def test_save_overwrite_index(self, mocker, table_data_set, dummy_dataframe):
+        """Test writing DataFrame index as a column"""
+        mocker.patch.object(dummy_dataframe, "to_sql")
+        table_data_set.save(dummy_dataframe)
+        dummy_dataframe.to_sql.assert_called_once_with(
+            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=True
+        )
+
+    @pytest.mark.parametrize(
+        "table_data_set", [{"save_args": dict(name="TABLE_B")}], indirect=True
+    )
+    def test_save_ignore_table_name_override(
+        self, mocker, table_data_set, dummy_dataframe
+    ):
+        """Test that putting the table name is `save_args` does not have any
+        effect"""
+        mocker.patch.object(dummy_dataframe, "to_sql")
+        table_data_set.save(dummy_dataframe)
+        dummy_dataframe.to_sql.assert_called_once_with(
+            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
+        )
+
 
 class TestSQLTableDataSetSingleConnection:
-    def test_single_connection_performance(self, dummy_dataframe):
-        kwargs = dict(
-            save_args=dict(if_exists="append"),
-            table_name=TABLE_NAME,
-            credentials=dict(con=CONNECTION),
-        )
-        datasets = [SQLTableDataSet(**kwargs) for _ in range(10)]
-
-        for d in datasets:
-            d.save(dummy_dataframe)
-
-        start = time.time()
-        for d in datasets:
-            d.load()
-        end = time.time()
-
-        delta = end - start
-        print(delta)
-        cons = datasets[0].engines
-        for con in cons.values():
-            con.dispose()
-
     def test_single_connection(self, dummy_dataframe, mocker):
         """Test to make sure multiple instances use the same connection object."""
         dummy_to_sql = mocker.patch.object(dummy_dataframe, "to_sql")
@@ -280,7 +211,7 @@ class TestSQLTableDataSetSingleConnection:
 
     def test_create_connection_only_once(self, mocker):
         """Test that two datasets that need to connect to the same db
-        only create a connection once.
+        (but different tables, for example) only create a connection once.
         """
         mock_engine = mocker.patch(
             "kedro.extras.datasets.pandas.sql_dataset.create_engine"
@@ -295,6 +226,26 @@ class TestSQLTableDataSetSingleConnection:
         assert len(first.engines) == 1
 
         mock_engine.assert_called_once_with(CONNECTION)
+
+    def test_multiple_connections(self, mocker):
+        """Test that two datasets that need to connect to different dbs
+        only create one connection per db.
+        """
+        mock_engine = mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine"
+        )
+        first = SQLTableDataSet(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
+        assert len(first.engines) == 1
+
+        second_con = f"other_{CONNECTION}"
+        second = SQLTableDataSet(
+            table_name=TABLE_NAME, credentials=dict(con=second_con)
+        )
+        assert len(second.engines) == 2
+        assert len(first.engines) == 2
+
+        expected_calls = [mocker.call(CONNECTION), mocker.call(second_con)]
+        assert mock_engine.call_args_list == expected_calls
 
 
 class TestSQLQueryDataSet:

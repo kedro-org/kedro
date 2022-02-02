@@ -41,13 +41,12 @@ and the `kedro-team` group on the Kedro Discord organisation.
 
 ## Voting process
 
-The TSC can vote on the addition and removal of maintainers as well as other issues that affect the future of the 
-Kedro project. The voting period is one week and is either performed on GitHub Discussions or through a pull request.
+Voting can change project maintainers and decide on the future of Kedro. The TSC leads it as voting maintainers of Kedro. The voting period is one week and is either performed on GitHub Discussions or through a pull request.
 
 ### Other issues or proposals
 
-The process of voting on issues, proposals and changes is performed by creating an open Github Discussion. Proposals affecting the future of Kedro or other changes require a simple majority. 
+Open Github Discussions host votes on issues, proposals and changes affecting the future of Kedro. These votes require **a 1/2 majority**. 
 
 ### Adding or removing maintainers
 
-The process of adding or removing maintainers is done via composing a pull request against [our team list](.. /12_faq/01_faq.md#who-maintains-kedro). The decision is made based on TSC members votes in that pull request. If a member of the TSC is removed as voting maintainer than they can volunteer for non-voting Contributor or Friends status. Additions and removals of maintainers require a 2/3 majority.
+Adding or removing maintainers requires a pull request against [our team list](.. /12_faq/01_faq.md#who-maintains-kedro). The decision is made based on TSC members votes in that pull request. Additions and removals of maintainers require **a 2/3 majority**.

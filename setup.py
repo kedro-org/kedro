@@ -83,12 +83,7 @@ pandas_require = {
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }
-pillow_require = {
-    "pillow.ImageDataSet": [
-        "Pillow~=9.0; python_version > '3.6'",
-        "Pillow~=8.0; python_version == '3.6'",
-    ]
-}
+pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],

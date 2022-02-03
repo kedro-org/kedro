@@ -66,7 +66,7 @@ class HoloviewsWriter(AbstractVersionedDataSet):
                 E.g. for ``S3FileSystem`` it should look like:
                 `{'key': '<id>', 'secret': '<key>'}}`
             save_args: Extra save args passed to `holoviews.save()`. See
-                http://holoviews.org/reference_manual/holoviews.util.html#holoviews.util.save
+                https://holoviews.org/reference_manual/holoviews.util.html#holoviews.util.save
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

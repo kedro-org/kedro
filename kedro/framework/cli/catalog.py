@@ -37,6 +37,7 @@ def catalog():
 @env_option
 @click.option(
     "--pipeline",
+    "-p",
     type=str,
     default="",
     help="Name of the modular pipeline to run. If not set, "
@@ -102,6 +103,7 @@ def _map_type_to_datasets(datasets, datasets_meta):
 @env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
 @click.option(
     "--pipeline",
+    "-p",
     "pipeline_name",
     type=str,
     required=True,
@@ -116,7 +118,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     the `DataCatalog`.
 
     The catalog configuration will be saved to
-    `<conf_root>/<env>/catalog/<pipeline_name>.yml` file.
+    `<conf_source>/<env>/catalog/<pipeline_name>.yml` file.
     """
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)
@@ -147,7 +149,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     if missing_ds:
         catalog_path = (
             context.project_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / env
             / "catalog"
             / f"{pipeline_name}.yml"

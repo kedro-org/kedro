@@ -8,7 +8,6 @@ from typing import Any, Dict, Optional
 import fsspec
 import pandas as pd
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
 from sqlalchemy.exc import NoSuchModuleError
 
 from kedro.io.core import (
@@ -150,7 +149,9 @@ class SQLTableDataSet(AbstractDataSet):
 
     DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
     DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
-    engines: Dict[str, Engine] = {}
+    # using Any because of Sphinx but it should be
+    # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
+    engines: Dict[str, Any] = {}
 
     def __init__(
         self,
@@ -309,7 +310,9 @@ class SQLQueryDataSet(AbstractDataSet):
 
     """
 
-    engines: Dict[str, Engine] = {}
+    # using Any because of Sphinx but it should be
+    # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
+    engines: Dict[str, Any] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,

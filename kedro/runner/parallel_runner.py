@@ -17,9 +17,9 @@ from typing import Any, Dict, Iterable, Set
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import (
+    _create_hook_manager,
     _register_hooks,
     _register_hooks_setuptools,
-    create_hook_manager,
 )
 from kedro.framework.project import settings
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
@@ -117,7 +117,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
         conf_logging = conf_logging or {}
         _bootstrap_subprocess(package_name, conf_logging)
 
-    hook_manager = create_hook_manager()
+    hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
     _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 

@@ -18,7 +18,7 @@ from kedro.extras.datasets.spark.spark_dataset import (
     _dbfs_glob,
     _get_dbutils,
 )
-from kedro.framework.hooks import create_hook_manager
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -277,7 +277,7 @@ class TestSparkDataSet:
         )
         with pytest.raises(AttributeError, match=pattern):
             ParallelRunner(is_async=is_async).run(
-                pipeline, catalog, create_hook_manager()
+                pipeline, catalog, _create_hook_manager()
             )
 
     def test_s3_glob_refresh(self):
@@ -812,7 +812,7 @@ class TestDataFlowSequentialRunner:
         """SparkDataSet(load) -> node -> Spark (save)."""
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
         SequentialRunner(is_async=is_async).run(
-            pipeline, data_catalog, create_hook_manager()
+            pipeline, data_catalog, _create_hook_manager()
         )
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
@@ -825,7 +825,7 @@ class TestDataFlowSequentialRunner:
         pattern = ".* was not serialized due to.*"
         with pytest.raises(DataSetError, match=pattern):
             SequentialRunner(is_async=is_async).run(
-                pipeline, data_catalog, create_hook_manager()
+                pipeline, data_catalog, _create_hook_manager()
             )
 
     def test_spark_memory_spark(self, is_async, data_catalog):
@@ -838,7 +838,7 @@ class TestDataFlowSequentialRunner:
             ]
         )
         SequentialRunner(is_async=is_async).run(
-            pipeline, data_catalog, create_hook_manager()
+            pipeline, data_catalog, _create_hook_manager()
         )
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())

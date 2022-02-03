@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from kedro.framework.hooks import create_hook_manager
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import DataCatalog, LambdaDataSet
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
@@ -23,7 +23,7 @@ def biconcat(input1: str, input2: str):
 
 @pytest.fixture
 def hook_manager():
-    return create_hook_manager()
+    return _create_hook_manager()
 
 
 @pytest.fixture

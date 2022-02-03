@@ -1,4 +1,4 @@
-from kedro.framework.hooks import create_hook_manager
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node, pipeline
 from kedro.runner import SequentialRunner
@@ -41,7 +41,7 @@ class TestTransformPipelineIntegration:
 
         for pipe in [pipeline1, pipeline2, pipeline3]:
             catalog = DataCatalog({}, feed_dict={"frozen_meat": "frozen_meat_data"})
-            result = SequentialRunner().run(pipe, catalog, create_hook_manager())
+            result = SequentialRunner().run(pipe, catalog, _create_hook_manager())
             assert result == {"output": "frozen_meat_data_defrosted_grilled_done"}
 
     def test_reuse_same_pipeline(self):
@@ -78,7 +78,7 @@ class TestTransformPipelineIntegration:
                 "lunch.frozen_meat": "lunch_frozen_meat",
             },
         )
-        result = SequentialRunner().run(pipe, catalog, create_hook_manager())
+        result = SequentialRunner().run(pipe, catalog, _create_hook_manager())
         assert result == {
             "breakfast_output": "breakfast_frozen_meat_defrosted_grilled_done",
             "lunch_output": "lunch_frozen_meat_defrosted_grilled_done",

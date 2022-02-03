@@ -15,7 +15,7 @@ from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
-from kedro.framework.hooks import create_hook_manager
+from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 from kedro.framework.project import (
     configure_logging,
@@ -108,7 +108,7 @@ class KedroSession:
         self._package_name = package_name
         self._store = self._init_store()
 
-        hook_manager = create_hook_manager()
+        hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager

@@ -76,12 +76,6 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
     }
 
 
-def _clear_hook_manager(hook_manager):
-    name_plugin_pairs = hook_manager.list_name_plugin()
-    for name, plugin in name_plugin_pairs:
-        hook_manager.unregister(name=name, plugin=plugin)
-
-
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run.
@@ -282,8 +276,6 @@ class KedroSession:
 
         if _active_session is self:
             _deactivate_session()
-
-        _clear_hook_manager(self._hook_manager)
 
     def __enter__(self):
         if _active_session is not self:

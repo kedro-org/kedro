@@ -133,6 +133,7 @@ type_targets = {
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
+        "pluggy._manager.PluginManager",
     ),
     "py:data": (
         "typing.Any",

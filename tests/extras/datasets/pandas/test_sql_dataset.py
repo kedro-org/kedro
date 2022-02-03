@@ -356,3 +356,19 @@ class TestSQLQueryDataSet:
         )
         with pytest.raises(DataSetError, match=pattern):
             SQLQueryDataSet(sql=SQL_QUERY, filepath=sql_file)
+
+    def test_create_connection_only_once(self, mocker):
+        """Test that two datasets that need to connect to the same db
+        (but different tables, for example) only create a connection once.
+        """
+        mock_engine = mocker.patch(
+            "kedro.extras.datasets.pandas.sql_dataset.create_engine"
+        )
+        first = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
+        assert len(first.engines) == 1
+
+        second = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
+        assert len(second.engines) == 1
+        assert len(first.engines) == 1
+
+        mock_engine.assert_called_once_with(CONNECTION)

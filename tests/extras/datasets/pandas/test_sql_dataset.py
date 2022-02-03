@@ -189,6 +189,7 @@ class TestSQLTableDataSet:
 class TestSQLTableDataSetSingleConnection:
     def test_single_connection(self, dummy_dataframe, mocker):
         """Test to make sure multiple instances use the same connection object."""
+        mocker.patch("pandas.read_sql_table")
         dummy_to_sql = mocker.patch.object(dummy_dataframe, "to_sql")
         kwargs = dict(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
 

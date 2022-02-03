@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * `pipeline` now accepts `tags` and a collection of `Node`s and/or `Pipeline`s rather than just a single `Pipeline` object. `pipeline` should be used in preference to `Pipeline` when creating a Kedro pipeline.
+* `pandas.SQLTableDataSet` and `pandas.SQLQueryDataSet` now only open one connection per database, at instantiation time (therefore at catalog creation time), rather than one per load/save operation.
 
 ## Bug fixes and other changes
 * Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).

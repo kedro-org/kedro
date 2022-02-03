@@ -19,10 +19,9 @@ ERROR_PREFIX = (
 
 @pytest.fixture(autouse=True)
 def cleanup_engines():
-    if hasattr(SQLTableDataSet, "engines"):
-        delattr(SQLTableDataSet, "engines")
-    if hasattr(SQLQueryDataSet, "engines"):
-        delattr(SQLQueryDataSet, "engines")
+    yield
+    SQLTableDataSet.engines = {}
+    SQLQueryDataSet.engines = {}
 
 
 @pytest.fixture

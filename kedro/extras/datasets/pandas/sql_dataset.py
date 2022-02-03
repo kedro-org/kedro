@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 import fsspec
 import pandas as pd
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import NoSuchModuleError
 
 from kedro.io.core import (
@@ -147,8 +148,9 @@ class SQLTableDataSet(AbstractDataSet):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
+    engines: Dict[str, Engine] = {}
 
     def __init__(
         self,
@@ -216,10 +218,8 @@ class SQLTableDataSet(AbstractDataSet):
         to be used across all instances of `SQLTableDataSet` that
         need to connect to the same source.
         """
-        if connection_str in getattr(cls, "engines", {}):
+        if connection_str in cls.engines:
             return
-
-        engines = cls.engines if hasattr(cls, "engines") else {}  # type:ignore
 
         try:
             engine = create_engine(connection_str)
@@ -228,8 +228,7 @@ class SQLTableDataSet(AbstractDataSet):
         except NoSuchModuleError as exc:
             raise _get_sql_alchemy_missing_error() from exc
 
-        engines[connection_str] = engine
-        cls.engines = engines  # type: ignore
+        cls.engines[connection_str] = engine
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
@@ -309,6 +308,8 @@ class SQLQueryDataSet(AbstractDataSet):
         >>>
 
     """
+
+    engines: Dict[str, Engine] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -394,10 +395,8 @@ class SQLQueryDataSet(AbstractDataSet):
         to be used across all instances of `SQLQueryDataSet` that
         need to connect to the same source.
         """
-        if connection_str in getattr(cls, "engines", {}):
-            return  # pragma: no cover
-
-        engines = cls.engines if hasattr(cls, "engines") else {}  # type:ignore
+        if connection_str in cls.engines:
+            return
 
         try:
             engine = create_engine(connection_str)
@@ -406,8 +405,7 @@ class SQLQueryDataSet(AbstractDataSet):
         except NoSuchModuleError as exc:
             raise _get_sql_alchemy_missing_error() from exc
 
-        engines[connection_str] = engine
-        cls.engines = engines  # type: ignore
+        cls.engines[connection_str] = engine
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)

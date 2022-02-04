@@ -16,7 +16,7 @@ lint:
 	pre-commit run -a --hook-stage manual $(hook)
 
 test:
-	pytest tests/io/test_incremental_dataset.py
+	pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
 
 test-no-spark:
 	pytest tests --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile

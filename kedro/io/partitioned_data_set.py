@@ -99,6 +99,7 @@ class PartitionedDataSet(AbstractDataSet):
         path: str,
         dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
         filepath_arg: str = "filepath",
+        filename_prefix: str = "",
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
@@ -128,6 +129,8 @@ class PartitionedDataSet(AbstractDataSet):
             filepath_arg: Underlying dataset initializer argument that will
                 contain a path to each corresponding partition file.
                 If unspecified, defaults to "filepath".
+            filename_prefix: If specified, only partitions that start with this
+                string will be processed.
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
             credentials: Protocol-specific options that will be passed to
@@ -152,13 +155,15 @@ class PartitionedDataSet(AbstractDataSet):
         super().__init__()
 
         self._path = path
+        self._filename_prefix = filename_prefix
         self._filename_suffix = filename_suffix
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._partition_cache = Cache(maxsize=1)
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
-        self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
+        self._dataset_type, self._dataset_config = parse_dataset_definition(
+            dataset)
         if VERSION_KEY in self._dataset_config:
             raise DataSetError(
                 f"`{self.__class__.__name__}` does not support versioning of the "
@@ -182,7 +187,8 @@ class PartitionedDataSet(AbstractDataSet):
             if "fs_args" in self._dataset_config:
                 self._logger.warning(
                     KEY_PROPAGATION_WARNING,
-                    {"keys": "filesystem arguments", "target": "underlying dataset"},
+                    {"keys": "filesystem arguments",
+                        "target": "underlying dataset"},
                 )
             else:
                 self._dataset_config["fs_args"] = deepcopy(self._fs_args)
@@ -218,7 +224,7 @@ class PartitionedDataSet(AbstractDataSet):
         return [
             path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
-            if path.endswith(self._filename_suffix)
+            if path.endswith(self._filename_suffix) and self._path_to_partition(path).startswith(self._filename_prefix)
         ]
 
     def _join_protocol(self, path: str) -> str:
@@ -342,12 +348,12 @@ class IncrementalDataSet(PartitionedDataSet):
         dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
         checkpoint: Union[str, Dict[str, Any]] = None,
         filepath_arg: str = "filepath",
+        filename_prefix: str = "",
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ):
-
         """Creates a new instance of ``IncrementalDataSet``.
 
         Args:
@@ -374,10 +380,14 @@ class IncrementalDataSet(PartitionedDataSet):
                 described here:
                 https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#checkpoint-configuration
                 Credentials for the checkpoint can be explicitly specified
-                in this configuration.
+                in this configuration. If filename_prefix is specified, that value will
+                be prefixed to the default name of the checkpoint filename to allow for
+                multiple IncrementalDataSets to work from the same directory.
             filepath_arg: Underlying dataset initializer argument that will
                 contain a path to each corresponding partition file.
                 If unspecified, defaults to "filepath".
+            filename_prefix: If specified, only partitions that start with this
+                string will be processed.            
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
             credentials: Protocol-specific options that will be passed to
@@ -401,6 +411,7 @@ class IncrementalDataSet(PartitionedDataSet):
             path=path,
             dataset=dataset,
             filepath_arg=filepath_arg,
+            filename_prefix=filename_prefix,
             filename_suffix=filename_suffix,
             credentials=credentials,
             load_args=load_args,
@@ -408,9 +419,11 @@ class IncrementalDataSet(PartitionedDataSet):
         )
 
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)
-        self._force_checkpoint = self._checkpoint_config.pop("force_checkpoint", None)
+        self._force_checkpoint = self._checkpoint_config.pop(
+            "force_checkpoint", None)
 
-        comparison_func = self._checkpoint_config.pop("comparison_func", operator.gt)
+        comparison_func = self._checkpoint_config.pop(
+            "comparison_func", operator.gt)
         if isinstance(comparison_func, str):
             comparison_func = load_obj(comparison_func)
         self._comparison_func = comparison_func
@@ -429,8 +442,14 @@ class IncrementalDataSet(PartitionedDataSet):
                 f"checkpoint. Please remove `{key}` key from the checkpoint definition."
             )
 
+        default_checkpoint_filename = self.DEFAULT_CHECKPOINT_FILENAME
+        if self._filename_prefix.strip():
+            default_checkpoint_filename = '_'.join(
+                [self._filename_prefix, self.DEFAULT_CHECKPOINT_FILENAME])
+
         default_checkpoint_path = self._sep.join(
-            [self._normalized_path.rstrip(self._sep), self.DEFAULT_CHECKPOINT_FILENAME]
+            [self._normalized_path.rstrip(
+                self._sep), default_checkpoint_filename]
         )
         default_config = {
             "type": self.DEFAULT_CHECKPOINT_TYPE,
@@ -460,6 +479,8 @@ class IncrementalDataSet(PartitionedDataSet):
 
         def _is_valid_partition(partition) -> bool:
             if not partition.endswith(self._filename_suffix):
+                return False
+            if not self._path_to_partition(partition).startswith(self._filename_prefix):
                 return False
             if partition == checkpoint_path:
                 return False
@@ -505,6 +526,8 @@ class IncrementalDataSet(PartitionedDataSet):
     def confirm(self) -> None:
         """Confirm the dataset by updating the checkpoint value to the latest
         processed partition ID"""
-        partition_ids = [self._path_to_partition(p) for p in self._list_partitions()]
+        partition_ids = [self._path_to_partition(
+            p) for p in self._list_partitions()]
         if partition_ids:
-            self._checkpoint.save(partition_ids[-1])  # checkpoint to last partition
+            # checkpoint to last partition
+            self._checkpoint.save(partition_ids[-1])

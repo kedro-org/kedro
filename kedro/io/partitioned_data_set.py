@@ -7,7 +7,6 @@ from typing import Any, Callable, Dict, List, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
 
-import boto3
 from cachetools import Cache, cachedmethod
 
 from kedro.io.core import (

@@ -447,6 +447,7 @@ class TestPartitionedDataSetS3:
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
+        boto3.set_stream_logger('botocore')
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()

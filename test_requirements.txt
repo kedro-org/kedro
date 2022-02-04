@@ -16,7 +16,8 @@ geopandas>=0.6.0, <1.0
 hdfs>=2.5.8, <3.0
 holoviews~=1.13.0
 import-linter[toml]==1.2.6
-ipython~=7.10
+ipython>=7.31.1, <8.0; python_version > '3.6'
+ipython~=7.16.3; python_version == '3.6'
 joblib>=0.14
 lxml~=4.6
 matplotlib>=3.0.3, <3.4  # 3.4.0 breaks holoviews
@@ -28,7 +29,7 @@ networkx~=2.4
 openpyxl>=3.0.3, <4.0
 pandas-gbq>=0.12.0, <1.0
 pandas~=1.3  # 1.3 for read_xml/to_xml
-Pillow~=8.0
+Pillow~=9.0
 plotly>=4.8.0, <6.0
 pre-commit~=1.17
 psutil==5.8.0

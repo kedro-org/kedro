@@ -370,21 +370,23 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     return f"s3://{BUCKET_NAME}/{prefix}"
 
 
+@pytest.fixture(autouse=True)
+def mock_settings_env_vars():
+    with mock.patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": "BLA", "AWS_SECRET_ACCESS_KEY": "FAKE_SECRET_KEY"}):
+        yield
+
+
 class TestPartitionedDataSetS3:
     # @pytest.fixture(autouse=True)
     # def fake_aws_creds(self, monkeypatch):
     #     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
     #     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
 
-    @pytest.fixture(autouse=True)
-    def mock_settings_env_vars(self):
-        with mock.patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": "FAKE_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY": "FAKE_SECRET_KEY"}):
-            yield
 
     def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
-        assert os.environ["AWS_ACCESS_KEY_ID"] == "FAKE_ACCESS_KEY"
+        assert os.environ["AWS_ACCESS_KEY_ID"] == "BLA"
         pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
         boto3.set_stream_logger('botocore', level='DEBUG')

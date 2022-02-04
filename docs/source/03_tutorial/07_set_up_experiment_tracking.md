@@ -1,6 +1,6 @@
 # Set up experiment tracking
 
-Experiment tracking is the process of saving all machine-learning related experiment information so that it is easy to find and compare past runs. [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) supports native experiment tracking from [version 4.1.1](https://github.com/quantumblacklabs/kedro-viz/releases/tag/v4.1.1) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and compare your experiments directly from the Kedro-Viz web app.
+Experiment tracking is the process of saving all machine-learning related experiment information so that it is easy to find and compare past runs. [Kedro-Viz](https://github.com/kedro-org/kedro-viz) supports native experiment tracking from [version 4.1.1](https://github.com/kedro-org/kedro-viz/releases/tag/v4.1.1) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and compare your experiments directly from the Kedro-Viz web app.
 
 ![](../meta/images/experiment-tracking_demo_small.gif)
 
@@ -160,4 +160,4 @@ You will now be able to access, compare and pin your runs by toggling the `Compa
 
 ![](../meta/images/experiment-tracking_demo.gif)
 
-Keep an eye out on the [Kedro-Viz release page](https://github.com/quantumblacklabs/kedro-viz/releases) for the upcoming releases on this experiment tracking functionality.
+Keep an eye out on the [Kedro-Viz release page](https://github.com/kedro-org/kedro-viz/releases) for the upcoming releases on this experiment tracking functionality.

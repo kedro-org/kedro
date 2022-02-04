@@ -1,8 +1,19 @@
 # Release 0.17.7
 
+## Major features and improvements
+* `pipeline` now accepts `tags` and a collection of `Node`s and/or `Pipeline`s rather than just a single `Pipeline` object. `pipeline` should be used in preference to `Pipeline` when creating a Kedro pipeline.
+* `pandas.SQLTableDataSet` and `pandas.SQLQueryDataSet` now only open one connection per database, at instantiation time (therefore at catalog creation time), rather than one per load/save operation.
+
 ## Bug fixes and other changes
+* Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).
+* Added Plotly dataset documentation (`03_tutorial/06_visualise_pipeline.md`).
+* Added the upper limit `pandas<1.4` to maintain compatibility with `xlrd~=1.0`.
+* Bumped the `Pillow` minimum version requirement to 9.0 (Python 3.7+ only) following [CVE-2022-22817](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-22817).
 * Added tutorial documentation for experiment tracking in Kedro docs. (`03_tutorial/07_set_up_experiment_tracking.md`).
-* Added Plotly documentation in Kedro docs. (`03_tutorial/05_visualise_pipeline.md`).
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
 
 # Release 0.17.6
 

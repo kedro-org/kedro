@@ -196,7 +196,7 @@ class ParallelRunner(AbstractRunner):
                 f"In order to utilize multiprocessing you need to make sure all nodes "
                 f"are serializable, i.e. nodes should not include lambda "
                 f"functions, nested functions, closures, etc.\nIf you "
-                f"are using custom decorators ensure they are correctly using "
+                f"are using custom decorators ensure they are correctly decorated using "
                 f"functools.wraps()."
             )
 
@@ -226,7 +226,7 @@ class ParallelRunner(AbstractRunner):
                 f"need to make sure all data sets are serializable, i.e. data sets "
                 f"should not make use of lambda functions, nested functions, closures "
                 f"etc.\nIf you are using custom decorators ensure they are correctly "
-                f"using functools.wraps()."
+                f"decorated using functools.wraps()."
             )
 
         memory_datasets = []

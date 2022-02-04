@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import Path
 from typing import Any, Dict
@@ -12,6 +13,7 @@ from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.text import TextDataSet
 from kedro.io import AbstractDataSet, DataSetError, IncrementalDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
+from unittest import mock
 
 DATASET = "kedro.extras.datasets.pandas.CSVDataSet"
 
@@ -369,14 +371,20 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDataSetS3:
+    # @pytest.fixture(autouse=True)
+    # def fake_aws_creds(self, monkeypatch):
+    #     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
+    #     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+
     @pytest.fixture(autouse=True)
-    def fake_aws_creds(self, monkeypatch):
-        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
-        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+    def mock_settings_env_vars(self):
+        with mock.patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": "FAKE_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY": "FAKE_SECRET_KEY"}):
+            yield
 
     def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
+        assert os.environ["AWS_ACCESS_KEY_ID"] == "FAKE_ACCESS_KEY"
         pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
         boto3.set_stream_logger('botocore', level='DEBUG')

@@ -1,6 +1,6 @@
 # Join the Technical Steering Committee
 
-The term "Technical Steering Committee (TSC)" describes the group of people that maintain Kedro. The TSC has many responsibilities surrounding the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members on the TSC as this fuels Kedro's continued development. You can see [a list of Kedro's current and past maintainers](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#who-maintains-kedro).
+The term "Technical Steering Committee (TSC)" describes the group of people that maintain Kedro. The TSC has many responsibilities surrounding the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members on the TSC as this fuels Kedro's continued development. You can see [a list of Kedro's current and past maintainers](../12_faq/01_faq.html#who-maintains-kedro).
 
 In this section, we detail:
 - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
@@ -56,4 +56,4 @@ Open Github Discussions host votes on issues, proposals and changes affecting th
 
 ### Adding or removing maintainers
 
-Adding or removing maintainers requires a pull request against [our team list](.. /12_faq/01_faq.md#who-maintains-kedro). The decision is made based on TSC members votes in that pull request. Additions and removals of maintainers require **a 2/3 majority**.
+Adding or removing maintainers requires a pull request against [our team list](../12_faq/01_faq.md#who-maintains-kedro). The decision is made based on TSC members votes in that pull request. Additions and removals of maintainers require **a 2/3 majority**.

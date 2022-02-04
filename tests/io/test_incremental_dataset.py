@@ -370,16 +370,10 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     return f"s3://{BUCKET_NAME}/{prefix}"
 
 
-# @pytest.fixture(autouse=True)
-# def mock_settings_env_vars():
-#     with mock.patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": "BLA", "AWS_SECRET_ACCESS_KEY": "FAKE_SECRET_KEY"}):
-#         yield
-
-
 @pytest.fixture(autouse=True)
-def fake_aws_creds(monkeypatch):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+def mock_settings_env_vars():
+    with mock.patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": "BLA", "AWS_SECRET_ACCESS_KEY": "FAKE_SECRET_KEY"}):
+        yield
 
 
 class TestPartitionedDataSetS3:

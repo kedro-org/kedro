@@ -351,7 +351,7 @@ def mocked_s3_bucket():
     with mock_s3():
         conn = boto3.client(
             "s3",
-            aws_access_key_id="bla",
+            aws_access_key_id="fake_access_key",
             aws_secret_access_key="fake_secret_key",
         )
         conn.create_bucket(Bucket=BUCKET_NAME)
@@ -372,7 +372,7 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 @pytest.fixture(autouse=True)
 def mock_settings_env_vars():
-    with mock.patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": "BLA", "AWS_SECRET_ACCESS_KEY": "FAKE_SECRET_KEY"}):
+    with mock.patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": "FAKE_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY": "FAKE_SECRET_KEY"}):
         yield
 
 

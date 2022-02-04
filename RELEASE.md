@@ -9,6 +9,7 @@
 * Added Plotly dataset documentation (`03_tutorial/06_visualise_pipeline.md`).
 * Added the upper limit `pandas<1.4` to maintain compatibility with `xlrd~=1.0`.
 * Bumped the `Pillow` minimum version requirement to 9.0 (Python 3.7+ only) following [CVE-2022-22817](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-22817).
+* Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.5 (Python 3.7+ only). This `pip-tools` version is compatible with `pip>=21.2`, including the most recent releases of `pip`.
 
 ## Minor breaking changes to the API
 

@@ -175,7 +175,7 @@ class PickleDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        self._backend = imported_backend
+        self._backend = backend
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -203,14 +203,16 @@ class PickleDataSet(AbstractVersionedDataSet):
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return self._backend.load(fs_file, **self._load_args)  # type: ignore
+            imported_backend = importlib.import_module(self._backend)
+            return imported_backend.load(fs_file, **self._load_args)  # type: ignore
 
     def _save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
-                self._backend.dump(data, fs_file, **self._save_args)  # type: ignore
+                imported_backend = importlib.import_module(self._backend)
+                imported_backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
                 raise DataSetError(
                     f"{data.__class__} was not serialized due to: {exc}"

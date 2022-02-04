@@ -159,6 +159,9 @@ class TestPickleDataSet:
         with pytest.raises(ImportError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="fake.backend.does.not.exist")
 
+    def test_copy(self, pickle_data_set):
+        pickle_data_set._copy()
+
 
 class TestPickleDataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):

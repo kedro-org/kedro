@@ -119,7 +119,10 @@ extras_require = {
         "ipykernel>=5.3, <7.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
-    "ipython": ["ipython~=7.10"],
+    "ipython": [
+        "ipython~=7.16.3; python_version == '3.6'",
+        "ipython>=7.31.1, <8.0; python_version > '3.6'",
+    ],
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),

@@ -14,6 +14,14 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
 
+from pluggy import PluginManager
+
+from kedro.framework.hooks.manager import (
+    _create_hook_manager,
+    _register_hooks,
+    _register_hooks_setuptools,
+)
+from kedro.framework.project import settings
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -89,11 +97,8 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     conf_logging: Dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
-    `KedroSession` instance is activated in every subprocess because of Windows
-    (and latest OSX with Python 3.8) limitation.
-    Windows has no "fork", so every subprocess is a brand new process
-    created via "spawn", hence the need to a) setup the logging, b) register
-    the hooks, and c) activate `KedroSession` in every subprocess.
+    A `PluginManager` `hook_manager` instance is created in every subprocess because
+    the `PluginManager` can't be serialised.
 
     Args:
         node: The ``Node`` to run.
@@ -112,7 +117,11 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
         conf_logging = conf_logging or {}
         _bootstrap_subprocess(package_name, conf_logging)
 
-    return run_node(node, catalog, is_async, run_id)
+    hook_manager = _create_hook_manager()
+    _register_hooks(hook_manager, settings.HOOKS)
+    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+    return run_node(node, catalog, hook_manager, is_async, run_id)
 
 
 class ParallelRunner(AbstractRunner):
@@ -252,7 +261,11 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        run_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 

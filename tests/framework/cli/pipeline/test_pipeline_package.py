@@ -414,7 +414,6 @@ class TestPipelinePackageCommand:
         assert sdist_file.is_file()
         assert len(list(sdist_location.iterdir())) == 1
 
-        # pylint: disable=consider-using-with
         with tarfile.open(sdist_file, "r") as tar:
             sdist_contents = set(tar.getnames())
         assert (

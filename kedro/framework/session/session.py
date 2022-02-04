@@ -15,7 +15,8 @@ from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
-from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks import _create_hook_manager
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 from kedro.framework.project import (
     configure_logging,
     configure_project,
@@ -106,6 +107,11 @@ class KedroSession:
         self.save_on_close = save_on_close
         self._package_name = package_name
         self._store = self._init_store()
+
+        hook_manager = _create_hook_manager()
+        _register_hooks(hook_manager, settings.HOOKS)
+        _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+        self._hook_manager = hook_manager
 
     @classmethod
     def create(  # pylint: disable=too-many-arguments
@@ -244,6 +250,7 @@ class KedroSession:
             config_loader=config_loader,
             env=env,
             extra_params=extra_params,
+            hook_manager=self._hook_manager,
         )
         return context
 
@@ -374,13 +381,13 @@ class KedroSession:
 
         # Run the runner
         runner = runner or SequentialRunner()
-        hook_manager = get_hook_manager()
+        hook_manager = self._hook_manager
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 
         try:
-            run_result = runner.run(filtered_pipeline, catalog, run_id)
+            run_result = runner.run(filtered_pipeline, catalog, hook_manager, run_id)
         except Exception as error:
             hook_manager.hook.on_pipeline_error(
                 error=error,

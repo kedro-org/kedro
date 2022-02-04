@@ -13,7 +13,7 @@ from kedro.framework.hooks import hook_impl
 from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
 from kedro.runner.runner import _run_node_async
@@ -37,7 +37,7 @@ def broken_node():
 
 @pytest.fixture
 def broken_pipeline():
-    return Pipeline(
+    return pipeline(
         [
             node(broken_node, None, "A", name="node1"),
             node(broken_node, None, "B", name="node2"),
@@ -50,22 +50,6 @@ def broken_pipeline():
 def mock_broken_pipelines(mocker, broken_pipeline):
     def mock_get_pipelines_registry_callable():
         return {"__default__": broken_pipeline}
-
-    mocker.patch.object(
-        _ProjectPipelines,
-        "_get_pipelines_registry_callable",
-        return_value=mock_get_pipelines_registry_callable,
-    )
-    return mock_get_pipelines_registry_callable()
-
-
-@pytest.fixture
-def mock_pipelines(mocker, mock_pipeline):
-    def mock_get_pipelines_registry_callable():
-        return {
-            "__default__": mock_pipeline,
-            "pipe": mock_pipeline,
-        }
 
     mocker.patch.object(
         _ProjectPipelines,
@@ -569,7 +553,11 @@ class TestAsyncNodeDatasetHooks:
         mock_session.load_context()
 
         # run the node asynchronously with an instance of `LogCatalog`
-        _run_node_async(node=sample_node, catalog=memory_catalog)
+        _run_node_async(
+            node=sample_node,
+            catalog=memory_catalog,
+            hook_manager=mock_session._hook_manager,
+        )
 
         hooks_log_messages = [r.message for r in logs_listener.logs]
 

@@ -9,6 +9,7 @@
 * Added Plotly dataset documentation (`03_tutorial/06_visualise_pipeline.md`).
 * Added the upper limit `pandas<1.4` to maintain compatibility with `xlrd~=1.0`.
 * Bumped the `Pillow` minimum version requirement to 9.0 (Python 3.7+ only) following [CVE-2022-22817](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-22817).
+* Fixed `PickleDataSet` to be copyable and hence work with the parallel runner.
 
 ## Minor breaking changes to the API
 

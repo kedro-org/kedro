@@ -437,15 +437,17 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     return f"s3://{BUCKET_NAME}/{prefix}"
 
 
-@pytest.fixture(autouse=True)
-def mock_settings_env_vars():
-    with mock.patch.dict(os.environ, {"AWS_ACCESS_KEY_ID": "FAKE_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY": "FAKE_SECRET_KEY"}):
-        yield
-
-
 class TestPartitionedDataSetS3:
+    @pytest.fixture(autouse=True)
+    def fake_aws_creds(self, monkeypatch):
+        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
+        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):
+    def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas, fake_aws_creds):
+        print(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
+        logger = logging.getLogger(__name__)
+        logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
         boto3.set_stream_logger('botocore')
         loaded_partitions = pds.load()

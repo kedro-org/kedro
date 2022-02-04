@@ -181,6 +181,7 @@ ds_pipeline_1 = pipeline(
     inputs="model_input_table",
     namespace="active_modelling_pipeline",
 )
+
 ds_pipeline_2 = pipeline(
     pipe=pipeline_instance,
     inputs="model_input_table",

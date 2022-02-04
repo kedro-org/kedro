@@ -530,7 +530,7 @@ class TestKedroSession:
         """Test running the project via the session"""
 
         mock_hook = mocker.patch(
-            "kedro.framework.session.session.create_hook_manager"
+            "kedro.framework.session.session._create_hook_manager"
         ).return_value.hook
         mock_pipelines = mocker.patch(
             "kedro.framework.session.session.pipelines",
@@ -602,7 +602,7 @@ class TestKedroSession:
     ):
         """Test exception being raise during the run"""
         mock_hook = mocker.patch(
-            "kedro.framework.session.session.create_hook_manager"
+            "kedro.framework.session.session._create_hook_manager"
         ).return_value.hook
         mock_pipelines = mocker.patch(
             "kedro.framework.session.session.pipelines",

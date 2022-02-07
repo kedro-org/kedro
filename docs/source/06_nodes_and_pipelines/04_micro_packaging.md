@@ -5,9 +5,7 @@ Micro-packaging allows users to share Kedro pipelines across codebases, organisa
 
 ## Package a modular pipeline
 
-You can package a modular pipeline by executing:
-
-`kedro pipeline package <pipeline_name>`
+You can package a modular pipeline by executing: `kedro pipeline package <pipeline_name>`
 
 * This will generate a new [wheel file](https://pythonwheels.com/) for this pipeline.
 * By default, the wheel file will be saved into `src/dist` directory inside your project.

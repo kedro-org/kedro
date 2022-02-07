@@ -27,7 +27,7 @@ In this section you will learn about how to take advantage of modular pipelines,
 3. **The `kedro.pipeline.modular_pipeline.pipeline` wrapper method unlocks the real power of modular pipelines**
 
    * Applying [namespaces](https://en.wikipedia.org/wiki/Namespace) allows you to simplify your mental model and isolate 'within pipeline' processing steps.
-   * ``Kedro-Viz`` is able to accelerate development by [rendering namespaced](../03_tutorial/06_visualise_pipeline.md) pipelines as collapsible 'super nodes'.
+   * ``Kedro-Viz`` is able to accelerate development by [rendering namespaced](../03_tutorial/05_visualise_pipeline.md) pipelines as collapsible 'super nodes'.
 
 <iframe
     src="http://demo.kedro.org"
@@ -136,7 +136,7 @@ Sometimes two pipelines need to be connected, but do not share any catalog depen
 <details>
 <summary>Click here to see a worked example</summary>
 
-In this example, there is a `lunch_pipeline` to make us lunch. The 'verbs', `defrost` and `eat`, are Python functions and the inputs/outputs are food at different points of the process (`frozen`, `thawed` and `food`).
+In this example, there is a `lunch_pipeline` which makes us lunch. The 'verbs', `defrost` and `eat`, are Python functions and the inputs/outputs are food at different points of the process (`frozen`, `thawed` and `food`).
 
 ```python
 cook_pipeline = Pipeline(

@@ -448,6 +448,8 @@ class TestPartitionedDataSetS3:
         print(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         logger = logging.getLogger(__name__)
         logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
+        logger.debug(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
+        logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
         boto3.set_stream_logger('botocore')
         loaded_partitions = pds.load()
@@ -457,90 +459,90 @@ class TestPartitionedDataSetS3:
             df = load_func()
             assert_frame_equal(df, partitioned_data_pandas[partition_id])
 
-    def test_load_s3a(self, mocked_csvs_in_s3, partitioned_data_pandas, mocker):
-        path = mocked_csvs_in_s3.split("://", 1)[1]
-        s3a_path = f"s3a://{path}"
-        # any type is fine as long as it passes isinstance check
-        # since _dataset_type is mocked later anyways
-        pds = PartitionedDataSet(s3a_path, "pandas.CSVDataSet")
-        assert pds._protocol == "s3a"
-
-        mocked_ds = mocker.patch.object(pds, "_dataset_type")
-        mocked_ds.__name__ = "mocked"
-        loaded_partitions = pds.load()
-
-        assert loaded_partitions.keys() == partitioned_data_pandas.keys()
-        assert mocked_ds.call_count == len(loaded_partitions)
-        expected = [
-            mocker.call(filepath=f"{s3a_path}/{partition_id}")
-            for partition_id in loaded_partitions
-        ]
-        mocked_ds.assert_has_calls(expected, any_order=True)
-
-    @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_save(self, dataset, mocked_csvs_in_s3):
-        pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
-        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
-        part_id = "new/data.csv"
-        pds.save({part_id: original_data})
-
-        s3 = s3fs.S3FileSystem()
-        assert s3.exists("/".join([mocked_csvs_in_s3, part_id]))
-
-        loaded_partitions = pds.load()
-        assert part_id in loaded_partitions
-        reloaded_data = loaded_partitions[part_id]()
-        assert_frame_equal(reloaded_data, original_data)
-
-    def test_save_s3a(self, mocked_csvs_in_s3, mocker):
-        """Test that save works in case of s3a protocol"""
-        path = mocked_csvs_in_s3.split("://", 1)[1]
-        s3a_path = f"s3a://{path}"
-        # any type is fine as long as it passes isinstance check
-        # since _dataset_type is mocked later anyways
-        pds = PartitionedDataSet(s3a_path, "pandas.CSVDataSet", filename_suffix=".csv")
-        assert pds._protocol == "s3a"
-
-        mocked_ds = mocker.patch.object(pds, "_dataset_type")
-        mocked_ds.__name__ = "mocked"
-        new_partition = "new/data"
-        data = "data"
-
-        pds.save({new_partition: data})
-        mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.csv")
-        mocked_ds.return_value.save.assert_called_once_with(data)
-
-    @pytest.mark.parametrize("dataset", ["pandas.CSVDataSet", "pandas.HDFDataSet"])
-    def test_exists(self, dataset, mocked_csvs_in_s3):
-        assert PartitionedDataSet(mocked_csvs_in_s3, dataset).exists()
-
-        empty_folder = "/".join([mocked_csvs_in_s3, "empty", "folder"])
-        assert not PartitionedDataSet(empty_folder, dataset).exists()
-
-        s3fs.S3FileSystem().mkdir(empty_folder)
-        assert not PartitionedDataSet(empty_folder, dataset).exists()
-
-    @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_release(self, dataset, mocked_csvs_in_s3):
-        partition_to_remove = "p2.csv"
-        pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
-        initial_load = pds.load()
-        assert partition_to_remove in initial_load
-
-        s3 = s3fs.S3FileSystem()
-        s3.rm("/".join([mocked_csvs_in_s3, partition_to_remove]))
-        cached_load = pds.load()
-        assert initial_load.keys() == cached_load.keys()
-
-        pds.release()
-        load_after_release = pds.load()
-        assert initial_load.keys() ^ load_after_release.keys() == {partition_to_remove}
-
-    @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_describe(self, dataset):
-        path = f"s3://{BUCKET_NAME}/foo/bar"
-        pds = PartitionedDataSet(path, dataset)
-
-        assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataSet" in str(pds)
-        assert "dataset_config" in str(pds)
+    # def test_load_s3a(self, mocked_csvs_in_s3, partitioned_data_pandas, mocker):
+    #     path = mocked_csvs_in_s3.split("://", 1)[1]
+    #     s3a_path = f"s3a://{path}"
+    #     # any type is fine as long as it passes isinstance check
+    #     # since _dataset_type is mocked later anyways
+    #     pds = PartitionedDataSet(s3a_path, "pandas.CSVDataSet")
+    #     assert pds._protocol == "s3a"
+    #
+    #     mocked_ds = mocker.patch.object(pds, "_dataset_type")
+    #     mocked_ds.__name__ = "mocked"
+    #     loaded_partitions = pds.load()
+    #
+    #     assert loaded_partitions.keys() == partitioned_data_pandas.keys()
+    #     assert mocked_ds.call_count == len(loaded_partitions)
+    #     expected = [
+    #         mocker.call(filepath=f"{s3a_path}/{partition_id}")
+    #         for partition_id in loaded_partitions
+    #     ]
+    #     mocked_ds.assert_has_calls(expected, any_order=True)
+    #
+    # @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
+    # def test_save(self, dataset, mocked_csvs_in_s3):
+    #     pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
+    #     original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+    #     part_id = "new/data.csv"
+    #     pds.save({part_id: original_data})
+    #
+    #     s3 = s3fs.S3FileSystem()
+    #     assert s3.exists("/".join([mocked_csvs_in_s3, part_id]))
+    #
+    #     loaded_partitions = pds.load()
+    #     assert part_id in loaded_partitions
+    #     reloaded_data = loaded_partitions[part_id]()
+    #     assert_frame_equal(reloaded_data, original_data)
+    #
+    # def test_save_s3a(self, mocked_csvs_in_s3, mocker):
+    #     """Test that save works in case of s3a protocol"""
+    #     path = mocked_csvs_in_s3.split("://", 1)[1]
+    #     s3a_path = f"s3a://{path}"
+    #     # any type is fine as long as it passes isinstance check
+    #     # since _dataset_type is mocked later anyways
+    #     pds = PartitionedDataSet(s3a_path, "pandas.CSVDataSet", filename_suffix=".csv")
+    #     assert pds._protocol == "s3a"
+    #
+    #     mocked_ds = mocker.patch.object(pds, "_dataset_type")
+    #     mocked_ds.__name__ = "mocked"
+    #     new_partition = "new/data"
+    #     data = "data"
+    #
+    #     pds.save({new_partition: data})
+    #     mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.csv")
+    #     mocked_ds.return_value.save.assert_called_once_with(data)
+    #
+    # @pytest.mark.parametrize("dataset", ["pandas.CSVDataSet", "pandas.HDFDataSet"])
+    # def test_exists(self, dataset, mocked_csvs_in_s3):
+    #     assert PartitionedDataSet(mocked_csvs_in_s3, dataset).exists()
+    #
+    #     empty_folder = "/".join([mocked_csvs_in_s3, "empty", "folder"])
+    #     assert not PartitionedDataSet(empty_folder, dataset).exists()
+    #
+    #     s3fs.S3FileSystem().mkdir(empty_folder)
+    #     assert not PartitionedDataSet(empty_folder, dataset).exists()
+    #
+    # @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
+    # def test_release(self, dataset, mocked_csvs_in_s3):
+    #     partition_to_remove = "p2.csv"
+    #     pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
+    #     initial_load = pds.load()
+    #     assert partition_to_remove in initial_load
+    #
+    #     s3 = s3fs.S3FileSystem()
+    #     s3.rm("/".join([mocked_csvs_in_s3, partition_to_remove]))
+    #     cached_load = pds.load()
+    #     assert initial_load.keys() == cached_load.keys()
+    #
+    #     pds.release()
+    #     load_after_release = pds.load()
+    #     assert initial_load.keys() ^ load_after_release.keys() == {partition_to_remove}
+    #
+    # @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
+    # def test_describe(self, dataset):
+    #     path = f"s3://{BUCKET_NAME}/foo/bar"
+    #     pds = PartitionedDataSet(path, dataset)
+    #
+    #     assert f"path={path}" in str(pds)
+    #     assert "dataset_type=CSVDataSet" in str(pds)
+    #     assert "dataset_config" in str(pds)

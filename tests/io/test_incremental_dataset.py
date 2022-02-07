@@ -371,13 +371,12 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     return f"s3://{BUCKET_NAME}/{prefix}"
 
 
-
-
 class TestPartitionedDataSetS3:
     @pytest.fixture(autouse=True)
     def fake_aws_creds(self, monkeypatch):
         monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
         monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+
 
     def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas, fake_aws_creds):
         """Test the standard flow for loading, confirming and reloading
@@ -385,6 +384,8 @@ class TestPartitionedDataSetS3:
         print(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         logger = logging.getLogger(__name__)
         logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
+        logger.debug(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
+        logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
         boto3.set_stream_logger('botocore')
@@ -400,114 +401,114 @@ class TestPartitionedDataSetS3:
         assert pds._checkpoint.exists()
         assert pds._read_checkpoint() == max(partitioned_data_pandas)
 
-    def test_load_and_confirm_s3a(
-        self, mocked_csvs_in_s3, partitioned_data_pandas, mocker
-    ):
-        s3a_path = f"s3a://{mocked_csvs_in_s3.split('://', 1)[1]}"
-        pds = IncrementalDataSet(s3a_path, DATASET)
-        assert pds._protocol == "s3a"
-        assert pds._checkpoint._protocol == "s3"
-
-        mocked_ds = mocker.patch.object(pds, "_dataset_type")
-        mocked_ds.__name__ = "mocked"
-        loaded = pds.load()
-
-        assert loaded.keys() == partitioned_data_pandas.keys()
-        assert not pds._checkpoint.exists()
-        assert pds._read_checkpoint() is None
-        pds.confirm()
-        assert pds._checkpoint.exists()
-        assert pds._read_checkpoint() == max(partitioned_data_pandas)
-
-    @pytest.mark.parametrize(
-        "forced_checkpoint,expected_partitions",
-        [
-            (
-                "",
-                {
-                    "p00/data.csv",
-                    "p01/data.csv",
-                    "p02/data.csv",
-                    "p03/data.csv",
-                    "p04/data.csv",
-                },
-            ),
-            (
-                "p00/data.csv",
-                {"p01/data.csv", "p02/data.csv", "p03/data.csv", "p04/data.csv"},
-            ),
-            ("p03/data.csv", {"p04/data.csv"}),
-        ],
-    )
-    def test_force_checkpoint_no_checkpoint_file(
-        self, forced_checkpoint, expected_partitions, mocked_csvs_in_s3
-    ):
-        """Test how forcing checkpoint value affects the available partitions
-        in S3 if the checkpoint file does not exist"""
-        pds = IncrementalDataSet(
-            mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
-        )
-        loaded = pds.load()
-        assert loaded.keys() == expected_partitions
-
-        assert not pds._checkpoint.exists()
-        pds.confirm()
-        assert pds._checkpoint.exists()
-        assert pds._checkpoint.load() == max(expected_partitions)
-
-    @pytest.mark.parametrize(
-        "forced_checkpoint,expected_partitions",
-        [
-            (
-                "",
-                {
-                    "p00/data.csv",
-                    "p01/data.csv",
-                    "p02/data.csv",
-                    "p03/data.csv",
-                    "p04/data.csv",
-                },
-            ),
-            (
-                "p00/data.csv",
-                {"p01/data.csv", "p02/data.csv", "p03/data.csv", "p04/data.csv"},
-            ),
-            ("p03/data.csv", {"p04/data.csv"}),
-        ],
-    )
-    def test_force_checkpoint_checkpoint_file_exists(
-        self, forced_checkpoint, expected_partitions, mocked_csvs_in_s3
-    ):
-        """Test how forcing checkpoint value affects the available partitions
-        in S3 if the checkpoint file exists"""
-        # create checkpoint and assert that it exists
-        IncrementalDataSet(mocked_csvs_in_s3, DATASET).confirm()
-        checkpoint_path = (
-            f"{mocked_csvs_in_s3}/{IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME}"
-        )
-        checkpoint_value = TextDataSet(checkpoint_path).load()
-        assert checkpoint_value == "p04/data.csv"
-
-        pds = IncrementalDataSet(
-            mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
-        )
-        assert pds._checkpoint.exists()
-        loaded = pds.load()
-        assert loaded.keys() == expected_partitions
-
-    @pytest.mark.parametrize(
-        "forced_checkpoint", ["p04/data.csv", "p10/data.csv", "p100/data.csv"]
-    )
-    def test_force_checkpoint_no_partitions(self, forced_checkpoint, mocked_csvs_in_s3):
-        """Test that forcing the checkpoint to certain values results in no
-        partitions returned from S3"""
-        pds = IncrementalDataSet(
-            mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
-        )
-        loaded = pds.load()
-        assert loaded == {}
-
-        assert not pds._checkpoint.exists()
-        pds.confirm()
-        # confirming with no partitions available must have no effect
-        assert not pds._checkpoint.exists()
+    # def test_load_and_confirm_s3a(
+    #     self, mocked_csvs_in_s3, partitioned_data_pandas, mocker
+    # ):
+    #     s3a_path = f"s3a://{mocked_csvs_in_s3.split('://', 1)[1]}"
+    #     pds = IncrementalDataSet(s3a_path, DATASET)
+    #     assert pds._protocol == "s3a"
+    #     assert pds._checkpoint._protocol == "s3"
+    #
+    #     mocked_ds = mocker.patch.object(pds, "_dataset_type")
+    #     mocked_ds.__name__ = "mocked"
+    #     loaded = pds.load()
+    #
+    #     assert loaded.keys() == partitioned_data_pandas.keys()
+    #     assert not pds._checkpoint.exists()
+    #     assert pds._read_checkpoint() is None
+    #     pds.confirm()
+    #     assert pds._checkpoint.exists()
+    #     assert pds._read_checkpoint() == max(partitioned_data_pandas)
+    #
+    # @pytest.mark.parametrize(
+    #     "forced_checkpoint,expected_partitions",
+    #     [
+    #         (
+    #             "",
+    #             {
+    #                 "p00/data.csv",
+    #                 "p01/data.csv",
+    #                 "p02/data.csv",
+    #                 "p03/data.csv",
+    #                 "p04/data.csv",
+    #             },
+    #         ),
+    #         (
+    #             "p00/data.csv",
+    #             {"p01/data.csv", "p02/data.csv", "p03/data.csv", "p04/data.csv"},
+    #         ),
+    #         ("p03/data.csv", {"p04/data.csv"}),
+    #     ],
+    # )
+    # def test_force_checkpoint_no_checkpoint_file(
+    #     self, forced_checkpoint, expected_partitions, mocked_csvs_in_s3
+    # ):
+    #     """Test how forcing checkpoint value affects the available partitions
+    #     in S3 if the checkpoint file does not exist"""
+    #     pds = IncrementalDataSet(
+    #         mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
+    #     )
+    #     loaded = pds.load()
+    #     assert loaded.keys() == expected_partitions
+    #
+    #     assert not pds._checkpoint.exists()
+    #     pds.confirm()
+    #     assert pds._checkpoint.exists()
+    #     assert pds._checkpoint.load() == max(expected_partitions)
+    #
+    # @pytest.mark.parametrize(
+    #     "forced_checkpoint,expected_partitions",
+    #     [
+    #         (
+    #             "",
+    #             {
+    #                 "p00/data.csv",
+    #                 "p01/data.csv",
+    #                 "p02/data.csv",
+    #                 "p03/data.csv",
+    #                 "p04/data.csv",
+    #             },
+    #         ),
+    #         (
+    #             "p00/data.csv",
+    #             {"p01/data.csv", "p02/data.csv", "p03/data.csv", "p04/data.csv"},
+    #         ),
+    #         ("p03/data.csv", {"p04/data.csv"}),
+    #     ],
+    # )
+    # def test_force_checkpoint_checkpoint_file_exists(
+    #     self, forced_checkpoint, expected_partitions, mocked_csvs_in_s3
+    # ):
+    #     """Test how forcing checkpoint value affects the available partitions
+    #     in S3 if the checkpoint file exists"""
+    #     # create checkpoint and assert that it exists
+    #     IncrementalDataSet(mocked_csvs_in_s3, DATASET).confirm()
+    #     checkpoint_path = (
+    #         f"{mocked_csvs_in_s3}/{IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME}"
+    #     )
+    #     checkpoint_value = TextDataSet(checkpoint_path).load()
+    #     assert checkpoint_value == "p04/data.csv"
+    #
+    #     pds = IncrementalDataSet(
+    #         mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
+    #     )
+    #     assert pds._checkpoint.exists()
+    #     loaded = pds.load()
+    #     assert loaded.keys() == expected_partitions
+    #
+    # @pytest.mark.parametrize(
+    #     "forced_checkpoint", ["p04/data.csv", "p10/data.csv", "p100/data.csv"]
+    # )
+    # def test_force_checkpoint_no_partitions(self, forced_checkpoint, mocked_csvs_in_s3):
+    #     """Test that forcing the checkpoint to certain values results in no
+    #     partitions returned from S3"""
+    #     pds = IncrementalDataSet(
+    #         mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
+    #     )
+    #     loaded = pds.load()
+    #     assert loaded == {}
+    #
+    #     assert not pds._checkpoint.exists()
+    #     pds.confirm()
+    #     # confirming with no partitions available must have no effect
+    #     assert not pds._checkpoint.exists()

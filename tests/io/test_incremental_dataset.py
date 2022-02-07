@@ -381,14 +381,12 @@ class TestPartitionedDataSetS3:
     def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas, fake_aws_creds):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
-        print(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         logger = logging.getLogger(__name__)
         logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
-        logger.debug(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
-        boto3.set_stream_logger('botocore')
+        # boto3.set_stream_logger('botocore')
 
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()

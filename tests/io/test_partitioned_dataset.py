@@ -418,7 +418,7 @@ def mocked_s3_bucket():
     with mock_s3():
         conn = boto3.client(
             "s3",
-            aws_access_key_id="bla",
+            aws_access_key_id="fake_access_key",
             aws_secret_access_key="fake_secret_key",
         )
         conn.create_bucket(Bucket=BUCKET_NAME)
@@ -445,13 +445,11 @@ class TestPartitionedDataSetS3:
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas, fake_aws_creds):
-        print(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         logger = logging.getLogger(__name__)
         logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
-        logger.debug(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
-        boto3.set_stream_logger('botocore')
+        # boto3.set_stream_logger('botocore')
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()

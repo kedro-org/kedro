@@ -61,7 +61,7 @@ To follow along with this tutorial, make sure you have the following:
     └── src
     ```
 
-4. Install [`kedro-airflow~=0.4`](https://github.com/quantumblacklabs/kedro-airflow). We will use this plugin to convert the Kedro pipeline into an Airflow DAG.
+4. Install [`kedro-airflow~=0.4`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow). We will use this plugin to convert the Kedro pipeline into an Airflow DAG.
 
     ```shell
     pip install kedro-airflow~=0.4

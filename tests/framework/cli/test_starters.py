@@ -400,7 +400,7 @@ class TestNewWithStarterValid:
             input=_make_cli_prompt_input(),
         )
         kwargs = {
-            "template": "git+https://github.com/quantumblacklabs/kedro-starters.git",
+            "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": version,
             "directory": "spaceflights",
         }
@@ -416,7 +416,7 @@ class TestNewWithStarterValid:
             input=_make_cli_prompt_input(),
         )
         kwargs = {
-            "template": "git+https://github.com/quantumblacklabs/kedro-starters.git",
+            "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": "my_checkout",
             "directory": "spaceflights",
         }
@@ -497,7 +497,7 @@ class TestNewWithStarterInvalid:
     @pytest.mark.parametrize(
         "starter, repo",
         [
-            ("spaceflights", "https://github.com/quantumblacklabs/kedro-starters.git"),
+            ("spaceflights", "https://github.com/kedro-org/kedro-starters.git"),
             (
                 "git+https://github.com/fake/fake.git",
                 "https://github.com/fake/fake.git",

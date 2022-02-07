@@ -255,11 +255,11 @@ Enter the following in your `settings.json` file:
 ```json
 {
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/jsonschema/kedro-catalog-0.17.json": "conf/**/*catalog*"
+    "https://raw.githubusercontent.com/kedro-org/kedro/develop/static/jsonschema/kedro-catalog-0.17.json": "conf/**/*catalog*"
   }
 }
 ```
 
 and start editing your `catalog` files.
 
-> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/main/static/jsonschema).
+> Different schemas for different Kedro versions can be found [here](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).

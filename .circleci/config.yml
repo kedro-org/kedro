@@ -6,7 +6,7 @@ parameters:
     default: false
 
 orbs:
-  win: circleci/windows@2.2.0
+  win: circleci/windows@2.4.1
 
 # No windows executor is listed here since windows builds use win/default and modify
 # the Python version through the conda environment.
@@ -16,7 +16,7 @@ executors:
       python_version:
         type: string
     docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:<<parameters.python_version>>
+      - image: public.ecr.aws/g0x0s3o2/kedro-builder:<<parameters.python_version>>
     resource_class: medium+
 
 commands:
@@ -168,6 +168,8 @@ jobs:
       python_version:
         type: string
     executor: win/default
+    environment:
+      PIP_DISABLE_PIP_VERSION_CHECK: 1
     steps:
       - checkout
       - win_setup_conda:
@@ -311,8 +313,8 @@ jobs:
       - run:
           name: Set git email and name
           command: |
-            git config --global user.email "kedro@quantumblack.com"
-            git config --global user.name "QuantumBlack Labs"
+            git config --global user.email "kedro@kedro.com"
+            git config --global user.name "Kedro"
       - run:
           name: Trigger Read The Docs build
           command: ./tools/circleci/rtd-build.sh ${RTD_TOKEN} latest
@@ -327,7 +329,7 @@ jobs:
               if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
               then
                   echo "Starting the release of Kedro ${KEDRO_VERSION}!"
-                  ./tools/circleci/circle-release.sh github/quantumblacklabs/kedro
+                  ./tools/circleci/circle-release.sh github/kedro-org/kedro
               else
                   echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
               fi
@@ -344,11 +346,11 @@ jobs:
           command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
 
   build_docker_image:
+    parameters:
+      python_version:
+        type: string
     docker:
       - image: cimg/python:3.8
-    environment:
-      ECR_IMAGE_URL: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder
-      AWS_REGION: eu-west-2
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -358,16 +360,14 @@ jobs:
           command: pip install -U awscli
       - run:
           name: Login to AWS ECR
-          command: |
-            aws ecr get-login-password --region ${AWS_REGION} | \
-            docker login --username AWS --password-stdin "${ECR_IMAGE_URL}"
+          command: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - run:
           name: Build docker images
-          command: ./tools/circleci/docker_build_img/build.sh "." "${ECR_IMAGE_URL}"
+          command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder" "<<parameters.python_version>>"
           no_output_timeout: 20m
       - run:
           name: Logout from AWS ECR
-          command: docker logout "${ECR_IMAGE_URL}"
+          command: docker logout public.ecr.aws
           when: always  # logout even if the previous step has failed
 
   # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
@@ -412,7 +412,7 @@ jobs:
             fi
       - run:
           name: Tag and publish release on Github
-          command: ./tools/circleci/github_scripts/release.sh quantumblacklabs kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
+          command: ./tools/circleci/github_scripts/release.sh kedro-org kedro ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
       - run:
           name: Publish to PyPI
           command: |
@@ -437,7 +437,7 @@ jobs:
           name: Trigger kedro-viz build
           command: |
             curl --location --request POST \
-              --url https://circleci.com/api/v2/project/github/quantumblacklabs/kedro-viz/pipeline \
+              --url https://circleci.com/api/v2/project/github/kedro-org/kedro-viz/pipeline \
               --header "Circle-Token: $CIRCLE_VIZ_BUILD_TOKEN" \
               --header 'content-type: application/json' \
               --data '{"branch":"main"}'
@@ -489,7 +489,11 @@ workflows:
       - all_circleci_checks_succeeded:
           requires:
             - e2e_tests
-            - win_e2e_tests
+            # win_e2e_tests-3.6 is not required due to the error
+            # `Cargo, the Rust package manager, is not installed or is not on PATH`.
+            # - win_e2e_tests
+            - win_e2e_tests-3.7
+            - win_e2e_tests-3.8
             - unit_tests
             - win_unit_tests
             - lint
@@ -520,7 +524,8 @@ workflows:
     jobs:
       - merge_pr_to_develop
 
-  nightly_build:
+  # Python versions that are supported on `main`.
+  nightly_build_main:
     triggers:
       - schedule:
           cron: 30 2 * * *
@@ -528,13 +533,36 @@ workflows:
             branches:
               only: main
     jobs:
-      - build_docker_image
+      - build_docker_image:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
       - build_kedro:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
           requires:
-            - build_docker_image
+            - build_docker_image-<<matrix.python_version>>
+
+  # Python version that are *only* supported on `develop`.
+  nightly_build_develop:
+    triggers:
+      - schedule:
+          cron: 30 2 * * *
+          filters:
+            branches:
+              only: develop
+    jobs:
+      - build_docker_image:
+          matrix:
+            parameters:
+              python_version: ["3.9"]
+      - build_kedro:
+          matrix:
+            parameters:
+              python_version: ["3.9"]
+          requires:
+            - build_docker_image-<<matrix.python_version>>
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

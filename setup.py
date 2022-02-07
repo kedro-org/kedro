@@ -10,7 +10,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas>=0.24"
+PANDAS = "pandas>=0.24, <1.4"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -77,15 +77,23 @@ pandas_require = {
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
-    "pandas.HDFDataSet": [PANDAS, "tables~=3.6.0; platform_system == 'Windows'",
-                          "tables~=3.6; platform_system != 'Windows'"],
+    "pandas.HDFDataSet": [
+        PANDAS,
+        "tables~=3.6.0; platform_system == 'Windows'",
+        "tables~=3.6; platform_system != 'Windows'",
+    ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=1.0, <7.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.GenericDataSet": [PANDAS],
 }
-pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
+pillow_require = {
+    "pillow.ImageDataSet": [
+        "Pillow~=9.0; python_version > '3.6'",
+        "Pillow~=8.0; python_version == '3.6'",
+    ]
+}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
@@ -121,7 +129,10 @@ extras_require = {
         "ipykernel>=5.3, <7.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
-    "ipython": ["ipython~=7.10"],
+    "ipython": [
+        "ipython~=7.16.3; python_version == '3.6'",
+        "ipython>=7.31.1, <8.0; python_version > '3.6'",
+    ],
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
@@ -157,13 +168,13 @@ setup(
     license="Apache Software License (Apache 2.0)",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/quantumblacklabs/kedro",
+    url="https://github.com/kedro-org/kedro",
     python_requires=">=3.6, <3.9",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,
     tests_require=test_requires,
     install_requires=requires,
-    author="QuantumBlack Labs",
+    author="Kedro",
     entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},
     package_data={
         name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files

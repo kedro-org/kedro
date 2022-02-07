@@ -1,6 +1,6 @@
 # Deployment to a Databricks cluster
 
-This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starters/tree/main/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
+This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
 
 * [Databricks Connect workflow](#run-the-kedro-project-with-databricks-connect) (recommended)
 * [Databricks Notebook workflow](#run-kedro-project-from-a-databricks-notebook) (the setup of this is more involved)

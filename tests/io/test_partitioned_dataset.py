@@ -445,6 +445,13 @@ class TestPartitionedDataSetS3:
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas, fake_aws_creds):
+        session = boto3.Session(
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key"
+        )
+
+        session.resource("s3")
+        
         logger = logging.getLogger(__name__)
         logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")

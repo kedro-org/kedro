@@ -692,10 +692,13 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return Pipeline(nodes)
 
     def tag(self, tags: Union[str, Iterable[str]]) -> "Pipeline":
-        """
-        Return a copy of the pipeline, with each node tagged accordingly.
-        :param tags: The tags to be added to the nodes.
-        :return: New `Pipeline` object.
+        """Tags all the nodes in the pipeline.
+
+        Args:
+            tags: The tags to be added to the nodes.
+
+        Returns:
+            New ``Pipeline`` object with nodes tagged.
         """
         nodes = [n.tag(tags) for n in self.nodes]
         return Pipeline(nodes)

@@ -30,7 +30,7 @@ from kedro import __version__ as release
 # -- Project information -----------------------------------------------------
 
 project = "Kedro"
-author = "QuantumBlack"
+author = "Kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -213,7 +213,7 @@ linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/quantumblacklabs/kedro/tree/main/docs/source",
+    "github_url": "https://github.com/kedro-org/kedro/tree/main/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -259,7 +259,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "Kedro.tex", "Kedro Documentation", "QuantumBlack", "manual")
+    (master_doc, "Kedro.tex", "Kedro Documentation", "Kedro", "manual")
 ]
 
 # -- Options for manual page output ------------------------------------------
@@ -280,7 +280,7 @@ texinfo_documents = [
         "Kedro Documentation",
         author,
         "Kedro",
-        "Kedro is a Data Science framework for QuantumBlack-led projects.",
+        "Kedro is a Python framework for creating reproducible, maintainable and modular data science code.",
         "Data-Science",
     )
 ]
@@ -301,7 +301,7 @@ nbsphinx_epilog = """
 .. note::
 
      Found a bug, or didn't find what you were looking for? 🙏 `Please file a
-     ticket <https://github.com/quantumblacklabs/kedro/issues/new/choose>`_
+     ticket <https://github.com/kedro-org/kedro/issues/new/choose>`_
 """
 
 # -- NBconvert kedro config -------------------------------------------------
@@ -388,8 +388,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # singular
         replacements += [
-            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj)
-            for obj in objects
+            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj) for obj in objects
         ]
 
         # Look for recognised class names/function names which are NOT
@@ -404,8 +403,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # then singular
         suggestions += [
-            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj)
-            for obj in objects
+            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj) for obj in objects
         ]
 
     return replacements, suggestions

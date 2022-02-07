@@ -117,9 +117,9 @@ Returns output similar to the following, depending on the version of Kedro used 
 |_|\_\___|\__,_|_|  \___/
 v0.17.6
 
-kedro allows teams to create analytics
-projects. It is developed as part of
-the Kedro initiative at QuantumBlack.
+Kedro is a Python framework for
+creating reproducible, maintainable
+and modular data science code.
 
 Installed plugins:
 kedro_viz: 3.4.0 (hooks:global,line_magic)
@@ -265,7 +265,7 @@ The above command will take the bundled `.whl` file and do the following:
 kedro build-docs
 ```
 
-The `build-docs` command builds [project documentation](../03_tutorial/05_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
+The `build-docs` command builds [project documentation](../03_tutorial/08_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 #### Lint your project

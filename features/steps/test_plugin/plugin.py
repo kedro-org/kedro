@@ -2,7 +2,7 @@
 import logging
 
 from kedro.framework.hooks import hook_impl
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 
 
 class MyPluginHook:
@@ -15,7 +15,7 @@ class MyPluginHook:
     @hook_impl
     def register_pipelines(self):  # pylint: disable=no-self-use
         return {
-            "from_plugin": Pipeline([node(lambda: "sth", inputs=None, outputs="x")])
+            "from_plugin": pipeline([node(lambda: "sth", inputs=None, outputs="x")])
         }
 
 

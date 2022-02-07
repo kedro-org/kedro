@@ -247,12 +247,15 @@ scooters_query:
     index_col: [name]
 ```
 
+When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+
 Example 13: Load data from an API endpoint, example US corn yield data from USDA
 
 ```yaml
 us_corn_yield_data:
   type: api.APIDataSet
   url: https://quickstats.nass.usda.gov
+  credentials: usda_credentials
   params:
     key: SOME_TOKEN
     format: JSON
@@ -262,7 +265,13 @@ us_corn_yield_data:
     year: 2000
 ```
 
-When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+Note that `usda_credientials` will be passed as the `auth` argument in the `requests` library. Specify the username and password as a list in your `credentials.yml` as follows:
+
+```yaml
+usda_credentials:
+  - username
+  - password
+```
 
 Example 14: Loading data from Minio (S3 API Compatible Storage)
 
@@ -304,6 +313,27 @@ dev_abs:
   account_name: accountname
   account_key: key
 ```
+Example 16: Loading a CSV file stored in a remote location through SSH
+
+```eval_rst
+.. note::  This example requires `Paramiko <https://www.paramiko.org>`_ to be installed (``pip install paramiko``).
+```
+```yaml
+cool_dataset:
+  type: pandas.CSVDataSet
+  filepath: "sftp:///path/to/remote_cluster/cool_data.csv"
+  credentials: cluster_credentials
+```
+All parameters required to establish the SFTP connection can be defined through `fs_args` or in `credentials.yml` as follows:
+
+```yaml
+cluster_credentials:
+  username: my_username
+  host: host_address
+  port: 22
+  password: password
+```
+The list of all available parameters is given in the [Paramiko documentation](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect).
 
 ## Creating a Data Catalog YAML configuration file via CLI
 

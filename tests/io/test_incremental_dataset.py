@@ -354,13 +354,6 @@ def aws_credentials():
     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
 
-# @pytest.fixture
-# def s3_client(aws_credentials):
-#     with mock_s3():
-#         conn = boto3.client("s3", region_name="us-east-1")
-#         yield conn
-
-
 @pytest.fixture
 def mocked_s3_bucket(aws_credentials):
     """Create a bucket for testing using moto."""
@@ -373,7 +366,7 @@ def mocked_s3_bucket(aws_credentials):
 
 
 @pytest.fixture
-def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
+def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas, aws_credentials):
     prefix = "csvs"
     for key, data in partitioned_data_pandas.items():
         mocked_s3_bucket.put_object(

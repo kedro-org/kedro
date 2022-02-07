@@ -140,6 +140,11 @@ class PickleDataSet(AbstractVersionedDataSet):
             ValueError: If ``backend`` does not satisfy the `pickle` interface.
             ImportError: If the ``backend`` module could not be imported.
         """
+        # We do not store `imported_backend` as an attribute to be used in `load`/`save`
+        # as this would mean the dataset cannot be deepcopied (module objects cannot be
+        # pickled). The import here is purely to raise any errors as early as possible.
+        # Repeated imports in the `load` and `save` methods should not be a significant
+        # performance hit as Python caches imports.
         try:
             imported_backend = importlib.import_module(backend)
         except ImportError as exc:

@@ -136,7 +136,7 @@ Sometimes two pipelines need to be connected, but do not share any catalog depen
 <details>
 <summary>Click here to see a worked example</summary>
 
-In this example the pipeline make us a Lunch. The 'verbs' (defrost, eat) are Python functions and the inputs/outputs are food at different points of the process (frozen, thawed, food).
+In this example, there is a `lunch_pipeline` to make us lunch. The 'verbs', `defrost` and `eat`, are Python functions and the inputs/outputs are food at different points of the process (`frozen`, `thawed` and `food`).
 
 ```python
 cook_pipeline = Pipeline(

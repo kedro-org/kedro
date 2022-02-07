@@ -413,13 +413,27 @@ S3_DATASET_DEFINITION = [
 
 
 @pytest.fixture
-def mocked_s3_bucket():
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+
+
+# @pytest.fixture
+# def s3_client(aws_credentials):
+#     with mock_s3():
+#         conn = boto3.client("s3", region_name="us-east-1")
+#         yield conn
+
+
+@pytest.fixture
+def mocked_s3_bucket(aws_credentials):
     """Create a bucket for testing using moto."""
     with mock_s3():
         conn = boto3.client(
             "s3",
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
         )
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
@@ -438,20 +452,13 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDataSetS3:
-    @pytest.fixture(autouse=True)
-    def fake_aws_creds(self, monkeypatch):
-        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
-        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+    # @pytest.fixture(autouse=True)
+    # def fake_aws_creds(self, monkeypatch):
+    #     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
+    #     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas, fake_aws_creds):
-        session = boto3.Session(
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key"
-        )
-
-        session.resource("s3")
-        
+    def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):
         logger = logging.getLogger(__name__)
         logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")

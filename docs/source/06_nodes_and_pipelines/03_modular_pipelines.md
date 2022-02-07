@@ -89,7 +89,7 @@ If you want to do the reverse and remove a modular pipeline, you can use ``kedro
 Modular pipelines are shareable between Kedro codebases via [micro-packaging](04_micro_packaging.md), but you need to follow a couple of rules to ensure portability:
 
 * Modular pipelines should **not** depend on the main Python package as this would break portability to another project.
-* Catalog references are not packaged when sharing/consuming modular pipelines.
+* Catalog references are not packaged when sharing/consuming modular pipelines i.e. the `catalog.yml` file is not packaged.
 * Kedro will only look for top-level configuration in `conf/`; placing a configuration folder within the pipeline folder will have no effect.
 * It is recommended that you document the configuration required (parameters and catalog) in the local `README.md` file for any downstream consumers.
 

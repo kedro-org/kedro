@@ -167,7 +167,7 @@ lunch_pipeline = Pipeline(
 cook_pipeline + lunch_pipeline 
 ```
 
-This combination will visualise since it's valid pre-runtime, but it will not run since `food` is not an output of the cook pipeline:
+This combination will visualise since it's valid pre-runtime, but it will not run since `food` is not an output of the `cook_pipeline` because the output of the `cook_pipeline` is `grilled_veg`:
 
 ![disjoined](../meta/images/cook_disjointed.png)
 

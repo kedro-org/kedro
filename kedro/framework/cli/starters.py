@@ -91,6 +91,9 @@ def new(
             "Cannot use the --directory flag without a --starter value."
         )
 
+    starter_name = (
+        "astro-airflow-iris" if starter_name == "astro-iris" else starter_name
+    )
     if starter_name in _STARTER_ALIASES:
         if directory:
             raise KedroCliError(

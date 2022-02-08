@@ -1,11 +1,11 @@
 -r requirements.txt
 adlfs~=0.7
-aiohttp==3.7.4
 bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython~=1.73
 black==21.5b1
 blacken-docs==1.9.2
+botocore==1.23.30
 compress-pickle[lz4]~=1.2.0
 dask>=2021.10.0, <2022.01; python_version > '3.6' # not directly required, pinned by Snyk to avoid a vulnerability
 dask[complete]~=2.6; python_version == '3.6'

@@ -463,7 +463,7 @@ class TestPartitionedDataSetS3:
             while True:
                 try:
                     loaded_partitions = pds.load()
-                except NoCredentialsError:
+                except DataSetError:
                     continue
                 break
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()

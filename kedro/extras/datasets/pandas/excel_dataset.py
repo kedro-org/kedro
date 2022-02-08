@@ -26,10 +26,8 @@ class ExcelDataSet(AbstractVersionedDataSet):
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 
-    Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
-
+    Example adding a catalog entry with the``YAML API``:
+    
     .. code-block:: yaml
 
         >>> rockets:

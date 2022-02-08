@@ -1,6 +1,6 @@
 # pylint: disable=too-many-lines
 
-"""A collection of CLI commands for working with Kedro pipelines."""
+"""A collection of CLI commands for working with Kedro micro-packages."""
 import json
 import re
 import shutil
@@ -97,158 +97,16 @@ def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
 
 # pylint: disable=missing-function-docstring
 @click.group(name="Kedro")
-def pipeline_cli():  # pragma: no cover
+def micropkg_cli():  # pragma: no cover
     pass
 
 
 @pipeline_cli.group()
-def pipeline():
+def micropkg():
     """Commands for working with pipelines."""
 
 
-@command_with_verbosity(pipeline, "create")
-@click.argument("name", nargs=1, callback=_check_pipeline_name)
-@click.option(
-    "--skip-config",
-    is_flag=True,
-    help="Skip creation of config files for the new pipeline(s).",
-)
-@env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
-@click.pass_obj  # this will pass the metadata as first argument
-def create_pipeline(
-    metadata: ProjectMetadata, name, skip_config, env, **kwargs
-):  # pylint: disable=unused-argument
-    """Create a new modular pipeline by providing a name."""
-    package_dir = metadata.source_dir / metadata.package_name
-    conf_root = settings.CONF_ROOT
-    project_conf_path = metadata.project_path / conf_root
-
-    env = env or "base"
-    if not skip_config and not (project_conf_path / env).exists():
-        raise KedroCliError(
-            f"Unable to locate environment `{env}`. "
-            f"Make sure it exists in the project configuration."
-        )
-
-    result_path = _create_pipeline(name, package_dir / "pipelines")
-    _copy_pipeline_tests(name, result_path, package_dir)
-    _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
-    click.secho(f"\nPipeline `{name}` was successfully created.\n", fg="green")
-
-    click.secho(
-        f"To be able to run the pipeline `{name}`, you will need to add it "
-        f"to `register_pipelines()` in `{package_dir / 'pipeline_registry.py'}`.",
-        fg="yellow",
-    )
-
-
-@command_with_verbosity(pipeline, "delete")
-@click.argument("name", nargs=1, callback=_check_pipeline_name)
-@env_option(
-    help="Environment to delete pipeline configuration from. Defaults to `base`."
-)
-@click.option(
-    "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
-)
-@click.pass_obj  # this will pass the metadata as first argument
-def delete_pipeline(
-    metadata: ProjectMetadata, name, env, yes, **kwargs
-):  # pylint: disable=unused-argument
-    """Delete a modular pipeline by providing a name."""
-    package_dir = metadata.source_dir / metadata.package_name
-    conf_root = settings.CONF_ROOT
-    project_conf_path = metadata.project_path / conf_root
-
-    env = env or "base"
-    if not (project_conf_path / env).exists():
-        raise KedroCliError(
-            f"Unable to locate environment `{env}`. "
-            f"Make sure it exists in the project configuration."
-        )
-
-    pipeline_artifacts = _get_pipeline_artifacts(metadata, pipeline_name=name, env=env)
-
-    files_to_delete = [
-        pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml"
-        for confdir in ("parameters", "catalog")
-        if (pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml").is_file()
-    ]
-    dirs_to_delete = [
-        path
-        for path in (pipeline_artifacts.pipeline_dir, pipeline_artifacts.pipeline_tests)
-        if path.is_dir()
-    ]
-
-    if not files_to_delete and not dirs_to_delete:
-        raise KedroCliError(f"Pipeline `{name}` not found.")
-
-    if not yes:
-        _echo_deletion_warning(
-            "The following paths will be removed:",
-            directories=dirs_to_delete,
-            files=files_to_delete,
-        )
-        click.echo()
-        yes = click.confirm(f"Are you sure you want to delete pipeline `{name}`?")
-        click.echo()
-
-    if not yes:
-        raise KedroCliError("Deletion aborted!")
-
-    _delete_artifacts(*files_to_delete, *dirs_to_delete)
-    click.secho(f"\nPipeline `{name}` was successfully deleted.", fg="green")
-    click.secho(
-        f"\nIf you added the pipeline `{name}` to `register_pipelines()` in "
-        f"`{package_dir / 'pipeline_registry.py'}`, you will need to remove it.",
-        fg="yellow",
-    )
-
-
-@pipeline.command("list")
-def list_pipelines():
-    """List all pipelines defined in your pipeline_registry.py file. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro pipeline list` is deprecated. "
-        "Please use `kedro registry list` instead."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    click.echo(yaml.dump(sorted(pipelines)))
-
-
-@command_with_verbosity(pipeline, "describe")
-@click.argument("name", nargs=1, default="__default__")
-@click.pass_obj
-def describe_pipeline(
-    metadata: ProjectMetadata, name, **kwargs
-):  # pylint: disable=unused-argument, protected-access
-    """Describe a pipeline by providing a pipeline name.
-    Defaults to the __default__ pipeline. (DEPRECATED)
-    """
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro pipeline describe` is deprecated. "
-        "Please use `kedro registry describe` instead."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    pipeline_obj = pipelines.get(name)
-    if not pipeline_obj:
-        all_pipeline_names = pipelines.keys()
-        existing_pipelines = ", ".join(sorted(all_pipeline_names))
-        raise KedroCliError(
-            f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
-        )
-
-    nodes = []
-    for node in pipeline_obj.nodes:
-        namespace = f"{node.namespace}." if node.namespace else ""
-        nodes.append(f"{namespace}{node._name or node._func_name} ({node._func_name})")
-    result = {"Nodes": nodes}
-
-    click.echo(yaml.dump(result))
-
-
-@command_with_verbosity(pipeline, "pull")
+@command_with_verbosity(micropkg, "pull")
 @click.argument("package_path", nargs=1, required=False)
 @click.option(
     "--all",
@@ -280,11 +138,6 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     metadata: ProjectMetadata, package_path, env, alias, fs_args, all_flag, **kwargs
 ) -> None:
     """Pull and unpack a modular pipeline in your project."""
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro pipeline pull` will be deprecated in Kedro 0.18.0. "
-        "In future please use `kedro micropkg pull` instead."
-    )
-    click.secho(deprecation_message, fg="red")
     if not package_path and not all_flag:
         click.secho(
             "Please specify a package path or add '--all' to pull all pipelines in the "
@@ -385,7 +238,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     click.secho("Pipelines packaged!", fg="green")
 
 
-@pipeline.command("package")
+@micropkg.command("package")
 @env_option(
     help="Environment where the pipeline configuration lives. Defaults to `base`."
 )
@@ -423,11 +276,6 @@ def package_pipeline(
     metadata: ProjectMetadata, name, env, alias, destination, version, all_flag
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline as a Python .whl."""
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro pipeline package` will be deprecated in Kedro 0.18.0. "
-        "In future please use `kedro micropkg package` instead."
-    )
-    click.secho(deprecation_message, fg="red")
     if not name and not all_flag:
         click.secho(
             "Please specify a pipeline name or add '--all' to package all pipelines in "
@@ -446,18 +294,6 @@ def package_pipeline(
     as_alias = f" as `{alias}`" if alias else ""
     message = f"Pipeline `{name}` packaged{as_alias}! Location: {result_path}"
     click.secho(message, fg="green")
-
-
-def _echo_deletion_warning(message: str, **paths: List[Path]):
-    paths = {key: values for key, values in paths.items() if values}
-
-    if paths:
-        click.secho(message, bold=True)
-
-    for key, values in paths.items():
-        click.echo(f"\n{key.capitalize()}:")
-        paths_str = "\n".join(str(value) for value in values)
-        click.echo(indent(paths_str, " " * 2))
 
 
 def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
@@ -956,38 +792,6 @@ def _generate_setup_file(
     return setup_file
 
 
-def _create_pipeline(name: str, output_dir: Path) -> Path:
-    with _filter_deprecation_warnings():
-        # pylint: disable=import-outside-toplevel
-        from cookiecutter.main import cookiecutter
-
-    template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
-    cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
-
-    click.echo(f"Creating the pipeline `{name}`: ", nl=False)
-
-    try:
-        result_path = cookiecutter(
-            str(template_path),
-            output_dir=str(output_dir),
-            no_input=True,
-            extra_context=cookie_context,
-        )
-    except Exception as exc:
-        click.secho("FAILED", fg="red")
-        cls = exc.__class__
-        raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
-
-    click.secho("OK", fg="green")
-    result_path = Path(result_path)
-    message = indent(f"Location: `{result_path.resolve()}`", " " * 2)
-    click.secho(message, bold=True)
-
-    _clean_pycache(result_path)
-
-    return result_path
-
-
 # pylint: disable=missing-raises-doc
 def _sync_dirs(source: Path, target: Path, prefix: str = "", overwrite: bool = False):
     """Recursively copies `source` directory (or file) into `target` directory without
@@ -1070,43 +874,6 @@ def _get_package_artifacts(
         source_path / package_name / "config",
     )
     return artifacts
-
-
-def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Path):
-    tests_source = result_path / "tests"
-    tests_target = package_dir.parent / "tests" / "pipelines" / pipeline_name
-    try:
-        _sync_dirs(tests_source, tests_target)
-    finally:
-        shutil.rmtree(tests_source)
-
-
-def _copy_pipeline_configs(
-    result_path: Path, conf_path: Path, skip_config: bool, env: str
-):
-    config_source = result_path / "config"
-    try:
-        if not skip_config:
-            config_target = conf_path / env
-            _sync_dirs(config_source, config_target)
-    finally:
-        shutil.rmtree(config_source)
-
-
-def _delete_artifacts(*artifacts: Path):
-    for artifact in artifacts:
-        click.echo(f"Deleting `{artifact}`: ", nl=False)
-        try:
-            if artifact.is_dir():
-                shutil.rmtree(artifact)
-            else:
-                artifact.unlink()
-        except Exception as exc:
-            click.secho("FAILED", fg="red")
-            cls = exc.__class__
-            raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
-        else:
-            click.secho("OK", fg="green")
 
 
 def _append_package_reqs(

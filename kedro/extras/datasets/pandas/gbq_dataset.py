@@ -177,9 +177,7 @@ class GBQQueryDataSet(AbstractDataSet):
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
 
-    Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    Example adding a catalog entry with the ``YAML API``:
 
     .. code-block:: yaml
 

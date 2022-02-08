@@ -79,9 +79,10 @@ Welcome to Kedro's documentation!
    tutorial/tutorial_template
    tutorial/set_up_data
    tutorial/create_pipelines
-   tutorial/package_a_project
    tutorial/visualise_pipeline
+   tutorial/namespacing_pipelines
    tutorial/set_up_experiment_tracking
+   tutorial/package_a_project
 
 .. toctree::
    :maxdepth: 2

@@ -5,16 +5,50 @@ This section covers the third part of the [standard development workflow](./spac
 * How to create each [node](../resources/glossary.md#node) required by the example
 * How to set up a [pipeline](../resources/glossary.md#pipeline)
 
-
 ## Data processing pipeline
 
 You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets, [companies.csv](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights/%7B%7B%20cookiecutter.repo_name%20%7D%7D/data/01_raw/companies.csv) and [shuttles.xlsx](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights/%7B%7B%20cookiecutter.repo_name%20%7D%7D/data/01_raw/shuttles.xlsx), to prepare the data for modelling.
 
-### Node functions
+### Generate a new pipeline template
 
-Create a file `src/kedro_tutorial/pipelines/data_processing/nodes.py`, adding the subfolders too if necessary.
+In the terminal run the following command:
 
-Add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each input a raw dataframe and output a dataframe containing pre-processed data:
+```bash
+kedro pipeline create data_processing
+```
+
+* This will generate all the files you need to start writing a `data_processing` pipeline. This command generates a new `nodes.py` and `pipeline.py` under the `src/kedro_tutorial/pipelines/data_processing` folder.
+* The `kedro pipeline create <pipeline_name>` command is a convenience method so you don't have to worry about getting your ``__init__.py`` files in the right place, but of course you are welcome to create all the files manually.
+
+```bash
+
+├── README.md
+├── conf
+│   └── base
+│       └── parameters
+│           └── data_processing.yml
+└── src
+    ├── kedro_tutorial
+    │   ├── __init__.py
+    │   └── pipelines
+    │       ├── __init__.py
+    │       └── data_processing
+    │           ├── README.md
+    │           ├── __init__.py
+    │           ├── nodes.py
+    │           └── pipeline.py
+    └── tests
+        ├── __init__.py
+        └── pipelines
+            ├── __init__.py
+            └── data_processing
+                ├── __init__.py
+                └── test_pipeline.py
+```
+
+### Adding the functions to `nodes.py`
+
+Open `src/kedro_tutorial/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each input a raw dataframe and output a dataframe containing pre-processed data:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -23,17 +57,17 @@ Add the code below, which provides two functions (`preprocess_companies` and `pr
 import pandas as pd
 
 
-def _is_true(x):
+def _is_true(x: pd.Series) -> pd.Series:
     return x == "t"
 
 
-def _parse_percentage(x):
+def _parse_percentage(x: pd.Series) -> pd.Series:
     x = x.str.replace("%", "")
     x = x.astype(float) / 100
     return x
 
 
-def _parse_money(x):
+def _parse_money(x: pd.Series) -> pd.Series:
     x = x.str.replace("$", "").str.replace(",", "")
     x = x.astype(float)
     return x
@@ -67,6 +101,7 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
     shuttles["price"] = _parse_money(shuttles["price"])
     return shuttles
 ```
+
 </details>
 
 ### Assemble nodes into the data processing pipeline
@@ -79,7 +114,7 @@ Add the following to `src/kedro_tutorial/pipelines/data_processing/pipeline.py`,
 <summary><b>Click to expand</b></summary>
 
 ```python
-def create_pipeline(**kwargs):
+def create_pipeline(**kwargs) -> Pipeline:
     return Pipeline(
         [
             node(
@@ -97,6 +132,7 @@ def create_pipeline(**kwargs):
         ]
     )
 ```
+
 </details>
 
 ```eval_rst
@@ -111,16 +147,9 @@ from kedro.pipeline import Pipeline, node
 from .nodes import preprocess_companies, preprocess_shuttles
 ```
 
-You should also create a file `src/kedro_tutorial/pipelines/data_processing/__init__.py` containing the following:
-
-```python
-from .pipeline import create_pipeline  # NOQA
-```
-This file ensures that the `data_processing` folder is a Python package, in accordance with the [standard format for a modular pipeline](../nodes_and_pipelines/modular_pipelines.md#how-do-i-create-a-modular-pipeline).
-
 ### Update the project pipeline
 
-Now update the project's pipeline in `src/kedro_tutorial/pipeline_registry.py` to add the [modular pipeline](../resources/glossary.md#modular-pipeline) for data processing:
+Now update the project's pipeline in `src/kedro_tutorial/pipeline_registry.py` to add the [pipeline](../resources/glossary.md#modular-pipeline) for data processing:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -147,6 +176,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
         "dp": data_processing_pipeline,
     }
 ```
+
 </details>
 
 ### Test the example
@@ -193,28 +223,35 @@ kedro run
 
 ```
 
+Running Kedro-Viz at this point renders a very simple, but valid pipeline:
+
+```bash
+kedro viz
+```
+
+![simple_pipeline](../meta/images/simple_pipeline.png)
 
 ### Persist pre-processed data
 
 The nodes above each output a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). When Kedro ran the pipeline, it determined that neither datasets had been registered in the data catalog (`conf/base/catalog.yml`). If a dataset is not registered, Kedro stores it in memory as a Python object using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes depending on it have been executed, the `MemoryDataSet` is cleared and its memory released by the Python garbage collector.
 
-You can persist the preprocessed data by adding the following to `conf/base/catalog.yml`:
+You can persist the preprocessed data by adding the following to `conf/base/catalog.yml`.:
 
 ```yaml
 preprocessed_companies:
-  type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_companies.csv
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_companies.pq
 
 preprocessed_shuttles:
-  type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_shuttles.csv
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_shuttles.pq
 ```
 
-The code above declares explicitly that [pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet).
+The code above declares explicitly that [pandas.ParquetDataSet](/kedro.extras.datasets.pandas.ParquetDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet).
 
-The [Data Catalog](../resources/glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as CSV data) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
+The [Data Catalog](../resources/glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as Parquet) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
-In this tutorial, we chose `pandas.CSVDataSet` for its simplicity, but you can use any other available dataset implementation class, for example, a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) or others. If you cannot find the dataset implementation you need, you can implement your own [custom dataset](../extend_kedro/custom_datasets.md).
+[Apache Parquet](https://github.com/apache/parquet-format) is our recommended format for working with processed and typed data. We recommend getting your data out of CSV as soon as possible. Parquet supports things like compression, partitioning and types out of the box. Whilst you do lose the ability to view the file as text, the benefits greatly outweigh the drawbacks.
 
 ### Extend the data processing pipeline
 
@@ -244,8 +281,8 @@ def create_model_input_table(
     model_input_table = model_input_table.dropna()
     return model_input_table
 ```
-</details>
 
+</details>
 
 Add the function to the data processing pipeline in `src/kedro_tutorial/pipelines/data_processing/pipeline.py` as a node:
 
@@ -266,12 +303,15 @@ Add an import statement for `create_model_input_table` at the top of the file:
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
 ```
 
+
+### Persisting the model input table
+
 If you want the model input table data to be saved to file rather than used in-memory, add an entry to `conf/base/catalog.yml`:
 
 ```yaml
 model_input_table:
-  type: pandas.CSVDataSet
-  filepath: data/03_primary/model_input_table.csv
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/model_input_table.pq
 ```
 
 ### Test the example
@@ -288,21 +328,36 @@ You should see output similar to the following:
 2019-08-19 10:55:47,534 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:55:47,541 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
 2019-08-19 10:55:55,670 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
-2019-08-19 10:55:55,736 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVDataSet)...
+2019-08-19 10:55:55,736 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (ParquetDataSet)...
 2019-08-19 10:55:56,284 - kedro.runner.sequential_runner - INFO - Completed 1 out of 3 tasks
 2019-08-19 10:55:56,284 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
 2019-08-19 10:55:56,318 - kedro.pipeline.node - INFO - Running node: preprocess_companies_node: preprocess_companies([companies]) -> [preprocessed_companies]
-2019-08-19 10:55:56,361 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVDataSet)...
+2019-08-19 10:55:56,361 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (ParquetDataSet)...
 2019-08-19 10:55:56,610 - kedro.runner.sequential_runner - INFO - Completed 2 out of 3 tasks
-2019-08-19 10:55:56,610 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVDataSet)...
-2019-08-19 10:55:56,715 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (CSVDataSet)...
+2019-08-19 10:55:56,610 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (ParquetDataSet)...
+2019-08-19 10:55:56,715 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (ParquetDataSet)...
 2019-08-19 10:55:56,750 - kedro.io.data_catalog - INFO - Loading data from `reviews` (CSVDataSet)...
 2019-08-19 10:55:56,812 - kedro.pipeline.node - INFO - Running node: create_model_input_table_node: create_model_input_table([preprocessed_companies,preprocessed_shuttles,reviews]) -> [model_input_table]
-2019-08-19 10:55:58,679 - kedro.io.data_catalog - INFO - Saving data to `model_input_table` (CSVDataSet)...
+2019-08-19 10:55:58,679 - kedro.io.data_catalog - INFO - Saving data to `model_input_table` (ParquetDataSet)...
 2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
 2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
+### Using `kedro viz --autoreload` to see how Kedro brings the pipeline together
+
+Run the following command:
+
+```bash
+kedro viz --autoreload
+```
+
+The gif below shows how commenting out the `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
+
+![autoreload](../meta/images/autoreload.gif)
+
+```eval_rst
+.. note::  This is also a great time to highlight how Kedro's `topological sorting <https://en.wikipedia.org/wiki/Topological_sorting>`_ works. The actual order of the ``node()`` calls in the ``Pipeline`` object is irrelevant, Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means you as a developer simply ask Kedro what data you want and it will derive the execution graph automatically.
+```
 
 ## Data science pipeline
 
@@ -310,6 +365,7 @@ We have created a modular pipeline for data processing, which merges three input
 implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Update dependencies
+
 We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
 
 To **update** the project's dependencies, you should modify `src/requirements.txt` to add the following:
@@ -322,9 +378,13 @@ Then, re-run `pip install -r src/requirements.txt` to install the updated projec
 
 You can find out more about [how to work with project dependencies](../kedro_project_setup/dependencies) in the Kedro project documentation.
 
-### Create a data science node
+### Create the data science pipeline
 
-Create a file `src/kedro_tutorial/pipelines/data_science/nodes.py`, adding the subfolders too if necessary. Add the following code to the file:
+```bash
+kedro pipeline create data_science
+```
+
+Add the following code to the `src/kedro_tutorial/pipelines/data_science/nodes.py` file:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -344,7 +404,7 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
 
     Args:
         data: Data containing features and target.
-        parameters: Parameters defined in parameters.yml.
+        parameters: Parameters defined in parameters/data_science.yml.
     Returns:
         Split data.
     """
@@ -389,28 +449,29 @@ def evaluate_model(
 
 </details>
 
-
 ### Configure the input parameters
 
-Add the following to `conf/base/parameters.yml`:
+Add the following to `conf/base/parameters/data_science.yml`:
 
 ```yaml
-test_size: 0.2
-random_state: 3
-features:
-  - engines
-  - passenger_capacity
-  - crew
-  - d_check_complete
-  - moon_clearance_complete
-  - iata_approved
-  - company_rating
-  - review_scores_rating
+model_options:
+  test_size: 0.2
+  random_state: 3
+  features:
+    - engines
+    - passenger_capacity
+    - crew
+    - d_check_complete
+    - moon_clearance_complete
+    - iata_approved
+    - company_rating
+    - review_scores_rating
 ```
 
 These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../kedro_project_setup/configuration.md#Parameters) is available in later documentation for advanced usage. Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
 
 ### Register the dataset
+
 The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
 
 ```yaml
@@ -423,23 +484,21 @@ regressor:
 Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning](../data/kedro_io.md#versioning) section.
 
 ### Assemble the data science pipeline
+
 To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
 
 ```python
 from kedro.pipeline import Pipeline, node
 
 from .nodes import evaluate_model, split_data, train_model
-```
 
-And add the following pipeline definition to the same file:
 
-```python
-def create_pipeline(**kwargs):
+def create_pipeline(**kwargs) -> Pipeline:
     return Pipeline(
         [
             node(
                 func=split_data,
-                inputs=["model_input_table", "parameters"],
+                inputs=["model_input_table", "params:model_options"],
                 outputs=["X_train", "X_test", "y_train", "y_test"],
                 name="split_data_node",
             ),
@@ -457,12 +516,6 @@ def create_pipeline(**kwargs):
             ),
         ]
     )
-```
-
-As with the data processing modular pipeline, you should ensure that the data science modular pipeline is a Python package. To do so, create the file `src/kedro_tutorial/pipelines/data_science/__init__.py` containing the following:
-
-```python
-from .pipeline import create_pipeline  # NOQA
 ```
 
 ### Update the project pipeline
@@ -493,25 +546,27 @@ Include the import at the top of the file:
 from kedro_tutorial.pipelines import data_science as ds
 ```
 
-The two modular pipelines are merged together into a project default pipeline by the `__default__` key used in `"__default__": data_processing_pipeline + data_science_pipeline`.
-The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
+* The two modular pipelines are merged together into a project `__default__` pipeline using the `+` operator.
+* The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
 
 ```eval_rst
-.. note::  The order in which you add the pipelines together is not significant and ``data_science_pipeline + data_processing_pipeline`` will result in the same pipeline, since Kedro automatically detects the correct execution order for all the nodes in the resulting pipeline.
+.. note::  The order in which you add the pipelines together is not significant (``data_science_pipeline + data_processing_pipeline`` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
 ```
 
 ### Test the pipelines
+
 Execute the default pipeline:
 
 ```bash
 kedro run
 ```
+
 You should see output similar to the following:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
-```bash
+```text
 2019-08-19 10:51:46,501 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:51:46,510 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
 2019-08-19 10:51:46,547 - kedro.pipeline.node - INFO - Running node: preprocess_companies_node: preprocess_companies([companies]) -> [preprocessed_companies]
@@ -528,8 +583,8 @@ You should see output similar to the following:
 2019-08-19 10:51:58,037 - kedro.io.data_catalog - INFO - Saving data to `model_input_table` (CSVDataSet)...
 2019-08-19 10:52:09,133 - kedro.runner.sequential_runner - INFO - Completed 3 out of 6 tasks
 2019-08-19 10:52:09,133 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataSet)...
-2019-08-19 10:52:10,941 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
-2019-08-19 10:52:10,941 - kedro.pipeline.node - INFO - Running node: split_data_node: split_data([model_input_table,parameters]) -> [X_test,X_train,y_test,y_train]
+2019-08-19 10:52:10,941 - kedro.io.data_catalog - INFO - Loading data from `params:model_options` (MemoryDataSet)...
+2019-08-19 10:52:10,941 - kedro.pipeline.node - INFO - Running node: split_data_node: split_data([model_input_table,params:model_options]) -> [X_test,X_train,y_test,y_train]
 2019-08-19 10:52:11,343 - kedro.io.data_catalog - INFO - Saving data to `X_train` (MemoryDataSet)...
 2019-08-19 10:52:11,372 - kedro.io.data_catalog - INFO - Saving data to `X_test` (MemoryDataSet)...
 2019-08-19 10:52:11,380 - kedro.io.data_catalog - INFO - Saving data to `y_train` (MemoryDataSet)...
@@ -548,6 +603,7 @@ You should see output similar to the following:
 2019-08-19 10:52:11,869 - kedro.runner.sequential_runner - INFO - Completed 6 out of 6 tasks
 2019-08-19 10:52:11,869 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
+
 </details>
 
 ## Kedro runners
@@ -567,7 +623,7 @@ kedro run --runner=module.path.to.my.runner
 ```
 
 ```eval_rst
-.. note::  ``ParallelRunner`` performs task parallelisation, which is different from data parallelisation as seen in PySpark.
+.. note::  ``ParallelRunner`` performs task parallelisation via multiprocessing. ``ThreadRunner`` is intended for use with remote execution engines such as `Spark <../tools_integration/pyspark.md>`_ and `Dask <https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py>`_. You can find out more about the runners Kedro provides, and how to create your own, in the `pipeline documentation about runners ` <../nodes_and_pipelines/run_a_pipeline.md>`_.
 ```
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
@@ -580,10 +636,10 @@ In some cases you may want to run just part of a pipeline. For example, you may 
 kedro run --pipeline=ds
 ```
 
-See the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) for other ways to run sections of your pipeline.
+See the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
 
 ```eval_rst
-.. note::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
+.. warning::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
 ```
 
 ```bash

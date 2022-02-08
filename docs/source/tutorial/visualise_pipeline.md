@@ -104,7 +104,7 @@ And this will visualise the pipeline visualisation saved as `my_shareable_pipeli
 
 Kedro-Viz aims to help users communicate different aspects of their workflow through an interactive flowchart. With the Plotly integration, we take one step further in this direction to allow our users to effectively share their data insights while exploring the pipeline.
 
-We have also used the Plotly integration to allow users to [visualise metrics from experiments](https://kedro.readthedocs.io/en/stable/08_logging/02_experiment_tracking.html?highlight=experiment%20tracking).
+We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
 
 
 ```eval_rst

@@ -18,11 +18,11 @@ workflows:
           mapping: |
             docs/.* build-docs true
             (?!docs/.*) build-code true
-      - path-filtering/filter:
-          name: check-updated-files
-          base-revision: develop
-          config-path: .circleci/continue_config.yml
-          # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
-          mapping: |
-            docs/.* build-docs true
-            (?!docs/.*) build-code true
+#      - path-filtering/filter:
+#          name: develop-check-updated-files
+#          base-revision: develop
+#          config-path: .circleci/continue_config.yml
+#          # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
+#          mapping: |
+#            docs/.* build-docs true
+#            (?!docs/.*) build-code true

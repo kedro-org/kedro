@@ -459,14 +459,7 @@ class TestPartitionedDataSetS3:
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
         # boto3.set_stream_logger('botocore')
 
-        for i in range(0, 8):
-            while True:
-                try:
-                    loaded_partitions = pds.load()
-                except DataSetError:
-                    logger.info("Trying again")
-                    continue
-                break
+        loaded_partitions = pds.load()
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
         for partition_id, load_func in loaded_partitions.items():
             df = load_func()

@@ -91,6 +91,12 @@ def new(
             "Cannot use the --directory flag without a --starter value."
         )
 
+    # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external) documentation
+    # and tutorials still refer to `astro-iris`. The below line checks if a user has entered old
+    # `astro-iris` as the starter name and changes it to `astro-airflow-iris`.
+    starter_name = (
+        "astro-airflow-iris" if starter_name == "astro-iris" else starter_name
+    )
     if starter_name in _STARTER_ALIASES:
         if directory:
             raise KedroCliError(

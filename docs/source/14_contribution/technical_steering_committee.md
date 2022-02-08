@@ -38,10 +38,11 @@ We look for commitment markers with the following:
 - Learning how the team works, including processes for testing, quality standards and code review
 - Evidence of already having started pull requests and code reviews under the guidance of maintainers; including asking
   for help where needed
+- Showing excitement about the future of Kedro
 
 ## Application process
 
-Quarterly, existing maintainers will curate a list of contributors that have shown regular activity on the project over the prior months. From this list, maintainer candidates are selected and proposed for a vote.
+Quarterly, existing maintainers will curate a list of contributors that have shown regular activity on the project over the prior months and want to become maintainers. From this list, maintainer candidates are selected and proposed for a vote.
 
 Following a successful vote, candidates are added to the `kedro-developers` team on the Kedro GitHub organisation
 and the `kedro-team` group on the Kedro Discord organisation.

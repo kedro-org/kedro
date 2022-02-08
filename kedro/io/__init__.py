@@ -13,19 +13,15 @@ from .core import (
     Version,
 )
 from .data_catalog import DataCatalog
-from .data_catalog_with_default import DataCatalogWithDefault
-from .lambda_data_set import LambdaDataSet
-from .memory_data_set import MemoryDataSet
-from .partitioned_data_set import IncrementalDataSet, PartitionedDataSet
-from .transformers import AbstractTransformer
+from .lambda_dataset import LambdaDataSet
+from .memory_dataset import MemoryDataSet
+from .partitioned_dataset import IncrementalDataSet, PartitionedDataSet
 
 __all__ = [
     "AbstractDataSet",
-    "AbstractTransformer",
     "AbstractVersionedDataSet",
     "CachedDataSet",
     "DataCatalog",
-    "DataCatalogWithDefault",
     "DataSetAlreadyExistsError",
     "DataSetError",
     "DataSetNotFoundError",

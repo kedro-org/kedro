@@ -395,7 +395,7 @@ class TestPartitionedDataSetS3:
         assert pds._checkpoint._protocol == "s3"
         # boto3.set_stream_logger('botocore')
 
-        for i in range(0, 100):
+        for i in range(0, 10):
             while True:
                 try:
                     loaded = pds.load()

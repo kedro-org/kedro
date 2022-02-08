@@ -14,6 +14,7 @@
 * The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
 * Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
 * Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
+* The `hook_manager` is no longer a global singleton. The `hook_manager` lifecycle is now managed by the `KedroSession`, a new `hook_manager` will be created everytime a `session` is instantiated.
 * Added the following new datasets:
 
 | Type                | Description                                                    | Location                       |
@@ -66,6 +67,8 @@
 * Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
 * Removed `ProjectHooks.register_catalog` `hook_spec` in favour of loading `DATA_CATALOG_CLASS` directly from `settings.py`. The default option for `DATA_CATALOG_CLASS` is now set to `kedro.io.DataCatalog`.
 * Removed `RegistrationSpecs` and all registration hooks that belonged to it. Going forward users can register custom library components through `settings.py`.
+* Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
+* Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
 
 ## Thanks for supporting contributions
 
@@ -121,11 +124,13 @@
 
 ## Major features and improvements
 * `pipeline` now accepts `tags` and a collection of `Node`s and/or `Pipeline`s rather than just a single `Pipeline` object. `pipeline` should be used in preference to `Pipeline` when creating a Kedro pipeline.
+* `pandas.SQLTableDataSet` and `pandas.SQLQueryDataSet` now only open one connection per database, at instantiation time (therefore at catalog creation time), rather than one per load/save operation.
 
 ## Bug fixes and other changes
 * Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).
 * Added Plotly dataset documentation (`03_tutorial/06_visualise_pipeline.md`).
 * Added the upper limit `pandas<1.4` to maintain compatibility with `xlrd~=1.0`.
+* Bumped the `Pillow` minimum version requirement to 9.0 (Python 3.7+ only) following [CVE-2022-22817](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-22817).
 
 ## Minor breaking changes to the API
 

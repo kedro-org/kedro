@@ -24,6 +24,7 @@ from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
 from kedro.framework.cli.registry import registry_cli
 from kedro.framework.cli.starters import create_cli
+from kedro.framework.cli.micropkg import micropkg_cli
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     ENTRY_POINT_GROUPS,
@@ -206,7 +207,7 @@ class KedroCLI(CommandCollection):
         if not self._metadata:
             return []
 
-        built_in = [catalog_cli, jupyter_cli, pipeline_cli, project_group, registry_cli]
+        built_in = [catalog_cli, jupyter_cli, pipeline_cli, micropkg_cli, project_group, registry_cli]
 
         plugins = load_entry_points("project")
 

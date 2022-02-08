@@ -101,9 +101,9 @@ def micropkg_cli():  # pragma: no cover
     pass
 
 
-@pipeline_cli.group()
+@micropkg_cli.group()
 def micropkg():
-    """Commands for working with pipelines."""
+    """Commands for working with micro-packages."""
 
 
 @command_with_verbosity(micropkg, "pull")

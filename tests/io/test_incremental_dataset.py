@@ -7,6 +7,7 @@ from typing import Any, Dict
 import boto3
 import pandas as pd
 import pytest
+from botocore.exceptions import NoCredentialsError
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
@@ -394,7 +395,13 @@ class TestPartitionedDataSetS3:
         assert pds._checkpoint._protocol == "s3"
         # boto3.set_stream_logger('botocore')
 
-        loaded = pds.load()
+        for i in range(0, 100):
+            while True:
+                try:
+                    loaded = pds.load()
+                except NoCredentialsError:
+                    continue
+                break
         assert loaded.keys() == partitioned_data_pandas.keys()
         for partition_id, data in loaded.items():
             assert_frame_equal(data, partitioned_data_pandas[partition_id])

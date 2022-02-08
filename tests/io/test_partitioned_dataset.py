@@ -8,6 +8,7 @@ import boto3
 import pandas as pd
 import pytest
 import s3fs
+from botocore.exceptions import NoCredentialsError
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
@@ -458,7 +459,13 @@ class TestPartitionedDataSetS3:
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
         # boto3.set_stream_logger('botocore')
 
-        loaded_partitions = pds.load()
+        for i in range(0, 100):
+            while True:
+                try:
+                    loaded_partitions = pds.load()
+                except NoCredentialsError:
+                    continue
+                break
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
         for partition_id, load_func in loaded_partitions.items():
             df = load_func()

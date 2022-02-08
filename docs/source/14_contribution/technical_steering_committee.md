@@ -14,8 +14,8 @@ In this section, we detail:
 
  - Be available for at least one full day per week to help with product development
  - Attend community meetings to discuss the project plans and roadmap
- - Project maintenance including security, updates, CI/CD, builds and infrastructure
- - Prioritize the work following the product roadmap to move the project forward
+ - Be proactive about project maintenance including security, updates, CI/CD, builds and infrastructure
+ - Prioritise the work following the product roadmap to move the project forward
 
 ### Community management
 
@@ -28,7 +28,7 @@ In this section, we detail:
 ## Requirements to become a maintainer
 
 Just contributing does not make you a maintainer; you need to demonstrate commitment to Kedro's long-term success by
-working with existing maintainers for a period.
+working with existing maintainers for a period of time.
 
 We look for commitment markers with the following:
 

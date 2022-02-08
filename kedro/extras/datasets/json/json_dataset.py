@@ -21,7 +21,7 @@ class JSONDataSet(AbstractVersionedDataSet):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 
-    Example adding a catalog entry with the``YAML API``:
+    Example adding a catalog entry with the ``YAML API``:
 
     .. code-block:: yaml
 

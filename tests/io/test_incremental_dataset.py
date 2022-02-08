@@ -395,11 +395,12 @@ class TestPartitionedDataSetS3:
         assert pds._checkpoint._protocol == "s3"
         # boto3.set_stream_logger('botocore')
 
-        for i in range(0, 10):
+        for i in range(0, 8):
             while True:
                 try:
                     loaded = pds.load()
                 except DataSetError:
+                    logger.info("Trying again")
                     continue
                 break
         assert loaded.keys() == partitioned_data_pandas.keys()

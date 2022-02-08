@@ -1,5 +1,3 @@
-# pylint: disable=too-many-lines
-
 """A collection of CLI commands for working with Kedro micro-packages."""
 import json
 import re
@@ -14,25 +12,22 @@ from zipfile import ZipFile
 
 import click
 import pkg_resources
-import yaml
 from rope.base.project import Project
 from rope.contrib import generate
 from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
 from setuptools.dist import Distribution
 
-import kedro
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
-    _filter_deprecation_warnings,
     _get_requirements_in,
     call,
     command_with_verbosity,
     env_option,
     python_call,
 )
-from kedro.framework.project import pipelines, settings
+from kedro.framework.project import settings
 from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-

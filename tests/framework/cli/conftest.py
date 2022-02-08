@@ -19,11 +19,11 @@ from kedro import __version__ as kedro_version
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.cli import cli
 from kedro.framework.cli.jupyter import jupyter_cli
+from kedro.framework.cli.micropkg import micropkg_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
 from kedro.framework.cli.registry import registry_cli
 from kedro.framework.cli.starters import create_cli
-from kedro.framework.cli.micropkg import micropkg_cli
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
 

@@ -1,28 +1,20 @@
-# pylint: disable=too-many-lines
-
 """A collection of CLI commands for working with Kedro pipelines."""
 import re
 import shutil
 from pathlib import Path
 from textwrap import indent
-from typing import Iterable, List, NamedTuple, Optional, Set, Tuple, Union
+from typing import Iterable, List, NamedTuple, Set, Tuple, Union
 
 import click
 import pkg_resources
-from rope.base.project import Project
-from rope.contrib import generate
-from rope.refactor.move import MoveModule
-from rope.refactor.rename import Rename
 
 import kedro
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
-    call,
     command_with_verbosity,
     env_option,
-    python_call,
 )
 from kedro.framework.project import settings
 from kedro.framework.startup import ProjectMetadata

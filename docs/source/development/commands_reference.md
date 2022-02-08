@@ -73,6 +73,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
   * [`kedro pipeline package <pipeline_name>`](#package-a-modular-pipeline)
   * [`kedro pipeline pull <package_name>`](#pull-a-modular-pipeline)
+  * [`kedro micropkg package <package_name>`](#package-project)
+  * [`kedro micropkg pull <package_name>`](#pull-a-project)
   * [`kedro registry describe <pipeline_name>`](#describe-a-registered-pipeline)
   * [`kedro registry list`](#list-all-registered-pipelines-in-your-project)
   * [`kedro run`](#run-the-project)

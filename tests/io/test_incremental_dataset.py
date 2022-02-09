@@ -378,12 +378,8 @@ class TestPartitionedDataSetS3:
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
 
-        # logger = logging.getLogger(__name__)
-        # logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
-        # logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
-        # boto3.set_stream_logger('botocore')
 
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()

@@ -78,14 +78,11 @@ def _is_relative_path(path_string: str) -> bool:
 def _convert_paths_to_absolute_posix(
     project_path: Path, conf_dictionary: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """Turn all relative paths inside ``conf_dictionary`` into
-    absolute paths by appending them to ``project_path`` and
-    convert absolute Windows paths to POSIX format. This is a hack
-    to make sure that we don't have to change user's working directory
-    for logging and datasets to work.
-    It is important for non-standard workflows such as IPython
-    notebook where users don't go through `kedro run` or
-    `__main__.py` entrypoints.
+    """Turn all relative paths inside ``conf_dictionary`` into absolute paths by appending them
+    to ``project_path`` and convert absolute Windows paths to POSIX format. This is a hack to
+    make sure that we don't have to change user's working directory for logging and datasets to
+    work. It is important for non-standard workflows such as IPython notebook where users don't go
+    through `kedro run` or `__main__.py` entrypoints.
 
     Example:
     ::

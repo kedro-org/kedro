@@ -632,7 +632,7 @@ kedro run --runner=module.path.to.my.runner
 ```
 
 ```eval_rst
-.. note::  ``ParallelRunner`` performs task parallelisation via multiprocessing. ``ThreadRunner`` is intended for use with remote execution engines such as `Spark <../11_tools_integration/01_pyspark.md>`_ and `Dask <https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py>`_. You can find out more about the runners Kedro provides, and how to create your own, in the `pipeline documentation about runners ` <../06_nodes_and_pipelines/04_run_a_pipeline.md>`_.
+.. note::  ``ParallelRunner`` performs task parallelisation via multiprocessing. ``ThreadRunner`` is intended for use with remote execution engines such as `Spark <../11_tools_integration/01_pyspark.md>`_ and `Dask <https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py>`_. You can find out more about the runners Kedro provides, and how to create your own, in the `pipeline documentation about runners ` <../06_nodes_and_pipelines/05_run_a_pipeline.md>`_.
 ```
 
 ## Slice a pipeline
@@ -643,7 +643,7 @@ In some cases you may want to run just part of a pipeline. For example, you may 
 kedro run --pipeline=ds
 ```
 
-See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../09_development/03_commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
+See the [pipeline slicing documentation](../06_nodes_and_pipelines/06_slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../09_development/03_commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
 
 ```eval_rst
 .. warning::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:

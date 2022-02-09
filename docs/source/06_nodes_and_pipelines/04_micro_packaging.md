@@ -17,7 +17,7 @@ When you package your modular pipeline, Kedro will also automatically package fi
 ├── conf
 │   └── base
 │       └── parameters
-│           └── {{pipeline_name*}}  <-- All parameter file(s) 
+│           └── {{pipeline_name*}}  <-- All parameter file(s)
 └── src
     ├── my_project
     │   ├── __init__.py

@@ -49,7 +49,7 @@ kedro pipeline create <pipeline_name>
 
 ### What does the ``kedro pipeline create`` do?
 
-Running the `kedro pipeline create` command adds boilerplate pipeline folders and files for the created pipeline to your project. For your convenience Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters and appropriate `tests` structure. You also don't have to add those pesky `__init__.py` files yourself, which is handy 😅. You can see the generated folder structure below: 
+Running the `kedro pipeline create` command adds boilerplate pipeline folders and files for the created pipeline to your project. For your convenience Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters and appropriate `tests` structure. You also don't have to add those pesky `__init__.py` files yourself, which is handy 😅. You can see the generated folder structure below:
 
 <details>
 <summary><b>Click to see the generated folder structure</b></summary>
@@ -65,11 +65,11 @@ Running the `kedro pipeline create` command adds boilerplate pipeline folders an
     │   ├── pipelines
     │   |   ├── __init__.py
     │   |   └── {{pipeline_name}}      <-- This folder defines the modular pipeline
-    │   |       ├── README.md          <-- To store pipeline specific documentation 
+    │   |       ├── README.md          <-- To store pipeline specific documentation
     │   |       ├── __init__.py        <-- So that Python treats this pipeline as a module
     │   |       ├── nodes.py           <-- To declare your nodes
     │   |       └── pipeline.py        <-- To structure the pipeline itself
-    |   └──  pipeline_registry.py      <-- Does NOT automatically update the registry 
+    |   └──  pipeline_registry.py      <-- Does NOT automatically update the registry
     └── tests
         ├── __init__.py
         └── pipelines
@@ -141,30 +141,14 @@ In this example, there is a `lunch_pipeline` which makes us lunch. The 'verbs', 
 ```python
 cook_pipeline = Pipeline(
     [
-        node(
-            func=defrost, 
-            inputs="frozen_veg", 
-            outputs="veg"
-        ), 
-        node(
-            func=grill, 
-            inputs="veg", 
-            outputs="grilled_veg"
-        )
+        node(func=defrost, inputs="frozen_veg", outputs="veg"),
+        node(func=grill, inputs="veg", outputs="grilled_veg"),
     ]
 )
 
-lunch_pipeline = Pipeline(
-    [
-        node(
-            func=eat, 
-            inputs="food", 
-            outputs=None
-        )
-    ]
-)
+lunch_pipeline = Pipeline([node(func=eat, inputs="food", outputs=None)])
 
-cook_pipeline + lunch_pipeline 
+cook_pipeline + lunch_pipeline
 ```
 
 This combination will visualise since it's valid pre-runtime, but it will not run since `food` is not an output of the `cook_pipeline` because the output of the `cook_pipeline` is `grilled_veg`:
@@ -179,10 +163,7 @@ The wrapper allows us to provide a mapping and fix this disconnect.
 ```python
 from kedro.pipeline.modular_pipeline import pipeline
 
-prep_pipeline = pipeline(
-        pipe=cook_pipeline, 
-        inputs={"food" : "grilled_veg"} 
-)
+prep_pipeline = pipeline(pipe=cook_pipeline, inputs={"food": "grilled_veg"})
 
 meal_pipeline = prep_pipeline + lunch_pipeline
 ```
@@ -211,40 +192,17 @@ Reusing pipelines for slightly different purposes can be a real accelerator for 
 ```python
 cook_pipeline = Pipeline(
     [
-        node(
-            func=defrost, 
-            inputs="frozen_veg", 
-            outputs="veg", 
-            name="defrost_node"
-        ),
-        node(
-            func=grill, 
-            inputs="veg", 
-            outputs="grilled_veg"
-        ),
+        node(func=defrost, inputs="frozen_veg", outputs="veg", name="defrost_node"),
+        node(func=grill, inputs="veg", outputs="grilled_veg"),
     ]
 )
 
 eat_breakfast_pipeline = Pipeline(
-    [
-        node(
-            func=eat_breakfast, 
-            inputs="breakfast_food", 
-            outputs=None
-        )
-    ]
+    [node(func=eat_breakfast, inputs="breakfast_food", outputs=None)]
 )
-eat_lunch_pipeline = Pipeline(
-    [
-        node(
-            func=eat_lunch, 
-            inputs="lunch_food", 
-            outputs=None
-        )
-    ]
-)
+eat_lunch_pipeline = Pipeline([node(func=eat_lunch, inputs="lunch_food", outputs=None)])
 
-cook_pipeline + eat_breakfast_pipeline + eat_lunch_pipeline 
+cook_pipeline + eat_breakfast_pipeline + eat_lunch_pipeline
 ```
 
 If we visualise the snippet above, we see a disjointed pipeline:
@@ -313,13 +271,13 @@ final_pipeline = (
 template_pipeline = Pipeline(
     [
         node(
-            func=node_func1, 
-            inputs=["input1", "input2", "params:override_me"], 
+            func=node_func1,
+            inputs=["input1", "input2", "params:override_me"],
             outputs="intermediary_output"
         ),
         node(
-            func=node_func2, 
-            inputs="intermediary_output", 
+            func=node_func2,
+            inputs="intermediary_output",
             outputs="output"
         ),
     ]

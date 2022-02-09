@@ -127,7 +127,7 @@
 * `pandas.SQLTableDataSet` and `pandas.SQLQueryDataSet` now only open one connection per database, at instantiation time (therefore at catalog creation time), rather than one per load/save operation.
 
 ## Bug fixes and other changes
-* Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).
+* Added tutorial documentation for experiment tracking in Kedro docs. (`03_tutorial/07_set_up_experiment_tracking.md`).
 * Added Plotly dataset documentation (`03_tutorial/06_visualise_pipeline.md`).
 * Added the upper limit `pandas<1.4` to maintain compatibility with `xlrd~=1.0`.
 * Bumped the `Pillow` minimum version requirement to 9.0 (Python 3.7+ only) following [CVE-2022-22817](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-22817).

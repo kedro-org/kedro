@@ -371,11 +371,23 @@ def mocked_csvs_in_s3(mocked_s3, partitioned_data_pandas, aws_credentials):
 
 
 class TestPartitionedDataSetS3:
-    def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
+    def helper(self, mocked_s3, partitioned_data_pandas):
+        prefix = "csvs"
+        mocked_s3.create_bucket(Bucket=BUCKET_NAME)
+        for key, data in partitioned_data_pandas.items():
+            mocked_s3.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        return f"s3://{BUCKET_NAME}/{prefix}"
+
+    def test_load_and_confirm(self, mocked_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
+        mocked_csvs = self.helper(mocked_s3, partitioned_data_pandas)
 
-        pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
+        pds = IncrementalDataSet(mocked_csvs, DATASET)
         assert pds._checkpoint._protocol == "s3"
 
         loaded = pds.load()

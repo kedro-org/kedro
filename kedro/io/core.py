@@ -387,7 +387,7 @@ def parse_dataset_definition(
             class_obj = next(obj for obj in trials if obj is not None)
         except StopIteration as exc:
             raise DataSetError(
-                f"Class `{class_obj}` not found or one of its dependencies"
+                f"Class `{class_obj}` not found or one of its dependencies "
                 f"has not been installed."
             ) from exc
 

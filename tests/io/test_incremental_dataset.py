@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 from pathlib import Path
@@ -7,7 +6,6 @@ from typing import Any, Dict
 import boto3
 import pandas as pd
 import pytest
-from botocore.exceptions import NoCredentialsError
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
@@ -15,7 +13,6 @@ from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.text import TextDataSet
 from kedro.io import AbstractDataSet, DataSetError, IncrementalDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
-from unittest import mock
 
 DATASET = "kedro.extras.datasets.pandas.CSVDataSet"
 
@@ -348,20 +345,24 @@ BUCKET_NAME = "fake_bucket_name"
 
 
 @pytest.fixture
-def mocked_s3_bucket():
+def aws_credentials():
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
+
+
+@pytest.fixture
+def mocked_s3_bucket(aws_credentials):
     """Create a bucket for testing using moto."""
     with mock_s3():
         conn = boto3.client(
             "s3",
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
         )
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
 
 
 @pytest.fixture
-def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
+def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas, aws_credentials):
     prefix = "csvs"
     for key, data in partitioned_data_pandas.items():
         mocked_s3_bucket.put_object(
@@ -373,9 +374,6 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDataSetS3:
-    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
-
     def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""

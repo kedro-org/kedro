@@ -382,7 +382,7 @@ class TestPartitionedDataSetS3:
             )
         return f"s3://{BUCKET_NAME}/{prefix}"
 
-    def test_load_and_confirm(self, mocked_s3, partitioned_data_pandas):
+    def test_load_and_confirm(self, mocked_s3, partitioned_data_pandas, aws_credentials):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
         mocked_csvs = self.helper(mocked_s3, partitioned_data_pandas)

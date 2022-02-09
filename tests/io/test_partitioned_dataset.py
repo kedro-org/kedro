@@ -452,7 +452,7 @@ class TestPartitionedDataSetS3:
         return f"s3://{BUCKET_NAME}/{prefix}"
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_load(self, dataset, mocked_s3, partitioned_data_pandas):
+    def test_load(self, dataset, mocked_s3, partitioned_data_pandas, aws_credentials):
         mocked_csvs = self.helper(mocked_s3, partitioned_data_pandas)
         pds = PartitionedDataSet(mocked_csvs, dataset)
         loaded_partitions = pds.load()

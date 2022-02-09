@@ -47,8 +47,6 @@ class TestJSONDataSet:
         json_data_set.save(dummy_dataframe)
         reloaded = json_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert json_data_set._fs_open_args_load == {}
-        assert json_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, json_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -74,13 +72,26 @@ class TestJSONDataSet:
             assert json_data_set._save_args[key] == value
 
     @pytest.mark.parametrize(
-        "fs_args",
-        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
-        indirect=True,
+        "load_args,save_args",
+        [
+            ({"storage_options": {"a": "b"}}, {}),
+            ({}, {"storage_options": {"a": "b"}}),
+            ({"storage_options": {"a": "b"}}, {"storage_options": {"x": "y"}}),
+        ],
     )
-    def test_open_extra_args(self, json_data_set, fs_args):
-        assert json_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert json_data_set._fs_open_args_save == {"mode": "w"}  # default unchanged
+    def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
+        filepath = str(tmp_path / "test.csv")
+
+        ds = JSONDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+
+        records = [r for r in caplog.records if r.levelname == "WARNING"]
+        expected_log_message = (
+            f"Dropping `storage_options` for {filepath}, "
+            f"please specify them under `fs_args` or `credentials`."
+        )
+        assert records[0].getMessage() == expected_log_message
+        assert "storage_options" not in ds._save_args
+        assert "storage_options" not in ds._load_args
 
     def test_load_missing_file(self, json_data_set):
         """Check the error when trying to load missing file."""
@@ -89,21 +100,29 @@ class TestJSONDataSet:
             json_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type,credentials",
+        "filepath,instance_type,credentials,load_path",
         [
-            ("s3://bucket/file.json", S3FileSystem, {}),
-            ("file:///tmp/test.json", LocalFileSystem, {}),
-            ("/tmp/test.json", LocalFileSystem, {}),
-            ("gcs://bucket/file.json", GCSFileSystem, {}),
-            ("https://example.com/file.json", HTTPFileSystem, {}),
+            ("s3://bucket/file.json", S3FileSystem, {}, "s3://bucket/file.json"),
+            ("file:///tmp/test.json", LocalFileSystem, {}, "/tmp/test.json"),
+            ("/tmp/test.json", LocalFileSystem, {}, "/tmp/test.json"),
+            ("gcs://bucket/file.json", GCSFileSystem, {}, "gcs://bucket/file.json"),
+            (
+                "https://example.com/file.json",
+                HTTPFileSystem,
+                {},
+                "https://example.com/file.json",
+            ),
             (
                 "abfs://bucket/file.csv",
                 AzureBlobFileSystem,
                 {"account_name": "test", "account_key": "test"},
+                "abfs://bucket/file.csv",
             ),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type, credentials):
+    def test_protocol_usage(
+        self, filepath, instance_type, credentials, load_path, mocker
+    ):
         data_set = JSONDataSet(filepath=filepath, credentials=credentials)
         assert isinstance(data_set._fs, instance_type)
 
@@ -111,6 +130,11 @@ class TestJSONDataSet:
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
+
+        mock_pandas_call = mocker.patch("pandas.read_json")
+        data_set.load()
+        assert mock_pandas_call.call_count == 1
+        assert mock_pandas_call.call_args_list[0][0][0] == load_path
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value

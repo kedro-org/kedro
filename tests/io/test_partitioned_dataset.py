@@ -414,23 +414,24 @@ S3_DATASET_DEFINITION = [
 
 
 @pytest.fixture
-def mocked_s3_bucket():
-    """Create a bucket for testing using moto."""
-    with mock_s3():
-        conn = boto3.client(
-            "s3",
-            aws_access_key_id="fake_access_key",
-            aws_secret_access_key="fake_secret_key",
-        )
-        conn.create_bucket(Bucket=BUCKET_NAME)
-        yield conn
+def aws_credentials():
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
 
 @pytest.fixture
-def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
+def mocked_s3(aws_credentials):
+    """Create a bucket for testing using moto."""
+    with mock_s3():
+        yield boto3.client("s3")
+
+
+@pytest.fixture
+def mocked_csvs_in_s3(mocked_s3, partitioned_data_pandas, aws_credentials):
     prefix = "csvs"
+    mocked_s3.create_bucket(Bucket=BUCKET_NAME)
     for key, data in partitioned_data_pandas.items():
-        mocked_s3_bucket.put_object(
+        mocked_s3.put_object(
             Bucket=BUCKET_NAME,
             Key=f"{prefix}/{key}",
             Body=data.to_csv(index=False),
@@ -439,12 +440,21 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDataSetS3:
-    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
+    def helper(self, mocked_s3, partitioned_data_pandas):
+        prefix = "csvs"
+        mocked_s3.create_bucket(Bucket=BUCKET_NAME)
+        for key, data in partitioned_data_pandas.items():
+            mocked_s3.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        return f"s3://{BUCKET_NAME}/{prefix}"
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):
-        pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
+    def test_load(self, dataset, mocked_s3, partitioned_data_pandas):
+        mocked_csvs = self.helper(mocked_s3, partitioned_data_pandas)
+        pds = PartitionedDataSet(mocked_csvs, dataset)
         loaded_partitions = pds.load()
 
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()

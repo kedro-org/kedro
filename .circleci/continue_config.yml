@@ -463,8 +463,10 @@ workflows:
   version: 2.1
 
   build_docs:
-    when: <<pipeline.parameters.build-docs>>
-    unless: <<pipeline.parameters.release_kedro>>
+    when:
+      and:
+        - <<pipeline.parameters.build-docs>>
+        - not: <<pipeline.parameters.release_kedro>>
     jobs:
       - build_docs
       - docs_linkcheck
@@ -474,8 +476,10 @@ workflows:
             - docs_linkcheck
 
   build_code:
-    when: <<pipeline.parameters.build-code>>
-    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
+    when:
+      and:
+        - <<pipeline.parameters.build-code>>
+        - not: <<pipeline.parameters.release_kedro>>
     jobs:
       - e2e_tests:
           matrix:

@@ -433,8 +433,8 @@ class TestKedroCLI:
     def test_kedro_cli_no_project(self, mocker, tmp_path):
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=False)
         kedro_cli = KedroCLI(tmp_path)
-        assert len(kedro_cli.global_groups) == 3
-        assert kedro_cli.global_groups == [cli, create_cli, micropkg_cli]
+        assert len(kedro_cli.global_groups) == 2
+        assert kedro_cli.global_groups == [cli, create_cli]
 
         result = CliRunner().invoke(kedro_cli, [])
 
@@ -454,8 +454,8 @@ class TestKedroCLI:
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
 
-        assert len(kedro_cli.global_groups) == 3
-        assert kedro_cli.global_groups == [cli, create_cli, micropkg_cli]
+        assert len(kedro_cli.global_groups) == 2
+        assert kedro_cli.global_groups == [cli, create_cli]
         assert len(kedro_cli.project_groups) == 7
         assert kedro_cli.project_groups == [
             catalog_cli,

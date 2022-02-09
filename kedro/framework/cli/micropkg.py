@@ -191,7 +191,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
     config_dict = anyconfig.load(metadata.config_file)
     config_dict = config_dict["tool"]["kedro"]
-    build_specs = config_dict.get("pipeline", {}).get("pull")
+    build_specs = config_dict.get("micropkg", {}).get("pull")
 
     if not build_specs:
         click.secho(
@@ -215,7 +215,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
 
     config_dict = anyconfig.load(metadata.config_file)
     config_dict = config_dict["tool"]["kedro"]
-    build_specs = config_dict.get("pipeline", {}).get("package")
+    build_specs = config_dict.get("micropkg", {}).get("package")
 
     if not build_specs:
         click.secho(

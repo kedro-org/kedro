@@ -346,17 +346,9 @@ class TestIncrementalDataSetLocal:
 
 BUCKET_NAME = "fake_bucket_name"
 
-@pytest.fixture
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-
 
 @pytest.fixture
-def mocked_s3_bucket(aws_credentials):
+def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
         conn = boto3.client(
@@ -367,7 +359,7 @@ def mocked_s3_bucket(aws_credentials):
 
 
 @pytest.fixture
-def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas, aws_credentials):
+def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     prefix = "csvs"
     for key, data in partitioned_data_pandas.items():
         mocked_s3_bucket.put_object(
@@ -388,9 +380,9 @@ class TestPartitionedDataSetS3:
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
 
-        logger = logging.getLogger(__name__)
-        logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
-        logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
+        # logger = logging.getLogger(__name__)
+        # logger.info(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
+        # logger.error(f"👉 {os.environ['AWS_ACCESS_KEY_ID']}")
         pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
         # boto3.set_stream_logger('botocore')

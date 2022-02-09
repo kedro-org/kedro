@@ -4,10 +4,10 @@ version: 2.1
 # the default pipeline parameters, which will be updated according to
 # the results of the path-filtering orb
 parameters:
-  build-code:
+  code_change:
     type: boolean
     default: false
-  build-docs:
+  docs_change:
     type: boolean
     default: false
   release_kedro:
@@ -462,10 +462,10 @@ jobs:
 workflows:
   version: 2.1
 
-  build_docs:
+  build_docs_only:
     when:
       and:
-        - <<pipeline.parameters.build-docs>>
+        - <<pipeline.parameters.docs_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
       - build_docs
@@ -475,10 +475,10 @@ workflows:
             - build_docs
             - docs_linkcheck
 
-  build_code:
+  build_code_only:
     when:
       and:
-        - <<pipeline.parameters.build-code>>
+        - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
       - e2e_tests:

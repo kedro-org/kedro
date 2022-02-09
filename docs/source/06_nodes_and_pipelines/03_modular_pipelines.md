@@ -30,7 +30,7 @@ In this section you will learn about how to take advantage of modular pipelines,
    * ``Kedro-Viz`` is able to accelerate development by [rendering namespaced](../03_tutorial/05_visualise_pipeline.md) pipelines as collapsible 'super nodes'.
 
 <iframe
-    src="http://demo.kedro.org"
+    src="https://demo.kedro.org"
     width="850",
     height="600"
 ></iframe>

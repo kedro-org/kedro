@@ -62,10 +62,10 @@ def micropkg():
     "-a",
     "all_flag",
     is_flag=True,
-    help="Pull and unpack all pipelines in the `pyproject.toml` package manifest section.",
+    help="Pull and unpack all micro-packages in the `pyproject.toml` package manifest section.",
 )
 @env_option(
-    help="Environment to install the pipeline configuration to. Defaults to `base`."
+    help="Environment to install the micro-package configuration to. Defaults to `base`."
 )
 @click.option(
     "--alias",
@@ -189,7 +189,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
 
 @micropkg.command("package")
 @env_option(
-    help="Environment where the pipeline configuration lives. Defaults to `base`."
+    help="Environment where the micro-package configuration lives. Defaults to `base`."
 )
 @click.option(
     "--alias",
@@ -209,7 +209,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     "--version",
     type=str,
     help="Version to package under. "
-    "Defaults to pipeline package version or, "
+    "Defaults to micro-package package version or, "
     "if that is not defined, the project package version.",
 )
 @click.option(
@@ -217,7 +217,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     "-a",
     "all_flag",
     is_flag=True,
-    help="Package all pipelines in the `pyproject.toml` package manifest section.",
+    help="Package all micro-packages in the `pyproject.toml` package manifest section.",
 )
 @click.argument("name", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument

@@ -22,7 +22,8 @@ tasks:
       pip install /workspace/kedro --no-deps
       yes project | kedro new -s pandas-iris
     command: |
-      pip install /workspace/kedro --no-deps
+      # Need no-use-pep517 as a workaround for https://github.com/pypa/pip/issues/7953.
+      pip install -e /workspace/kedro --no-deps --no-use-pep517
       cd /workspace/project
       clear
       kedro info

@@ -371,6 +371,9 @@ def mocked_csvs_in_s3(mocked_s3, partitioned_data_pandas, aws_credentials):
 
 
 class TestPartitionedDataSetS3:
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
+
     def helper(self, mocked_s3, partitioned_data_pandas):
         prefix = "csvs"
         mocked_s3.create_bucket(Bucket=BUCKET_NAME)
@@ -382,7 +385,7 @@ class TestPartitionedDataSetS3:
             )
         return f"s3://{BUCKET_NAME}/{prefix}"
 
-    def test_load_and_confirm(self, mocked_s3, partitioned_data_pandas, aws_credentials):
+    def test_load_and_confirm(self, mocked_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
         mocked_csvs = self.helper(mocked_s3, partitioned_data_pandas)

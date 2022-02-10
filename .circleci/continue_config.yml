@@ -466,6 +466,7 @@ workflows:
     when:
       and:
         - <<pipeline.parameters.docs_change>>
+        - not: <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
       - build_docs
@@ -475,12 +476,14 @@ workflows:
             - build_docs
             - docs_linkcheck
 
-  build_code_only:
+  build_code_and_docs:
     when:
       and:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
+      - build_docs
+      - docs_linkcheck
       - e2e_tests:
           matrix:
             parameters:
@@ -522,6 +525,8 @@ workflows:
             - lint
             - pip_compile
             - win_pip_compile
+            - build_docs
+            - docs_linkcheck
 
   main_updated:
     unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set

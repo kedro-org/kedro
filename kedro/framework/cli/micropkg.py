@@ -18,6 +18,8 @@ from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
 from setuptools.dist import Distribution
 
+from kedro.framework.cli.pipeline import _sync_dirs
+
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
@@ -785,60 +787,6 @@ def _generate_setup_file(
 
     setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
     return setup_file
-
-
-# pylint: disable=missing-raises-doc
-def _sync_dirs(source: Path, target: Path, prefix: str = "", overwrite: bool = False):
-    """Recursively copies `source` directory (or file) into `target` directory without
-    overwriting any existing files/directories in the target using the following
-    rules:
-        1) Skip any files/directories which names match with files in target,
-        unless overwrite=True.
-        2) Copy all files from source to target.
-        3) Recursively copy all directories from source to target.
-
-    Args:
-        source: A local directory to copy from, must exist.
-        target: A local directory to copy to, will be created if doesn't exist yet.
-        prefix: Prefix for CLI message indentation.
-    """
-
-    existing = list(target.iterdir()) if target.is_dir() else []
-    existing_files = {f.name for f in existing if f.is_file()}
-    existing_folders = {f.name for f in existing if f.is_dir()}
-
-    if source.is_dir():
-        content = list(source.iterdir())
-    elif source.is_file():
-        content = [source]
-    else:
-        # nothing to copy
-        content = []  # pragma: no cover
-
-    for source_path in content:
-        source_name = source_path.name
-        target_path = target / source_name
-        click.echo(indent(f"Creating `{target_path}`: ", prefix), nl=False)
-
-        if (  # rule #1
-            not overwrite
-            and source_name in existing_files
-            or source_path.is_file()
-            and source_name in existing_folders
-        ):
-            click.secho("SKIPPED (already exists)", fg="yellow")
-        elif source_path.is_file():  # rule #2
-            try:
-                target.mkdir(exist_ok=True, parents=True)
-                shutil.copyfile(str(source_path), str(target_path))
-            except Exception:
-                click.secho("FAILED", fg="red")
-                raise
-            click.secho("OK", fg="green")
-        else:  # source_path is a directory, rule #3
-            click.echo()
-            new_prefix = (prefix or "") + " " * 2
-            _sync_dirs(source_path, target_path, prefix=new_prefix)
 
 
 def _get_pipeline_artifacts(

@@ -8,7 +8,7 @@ from click.testing import CliRunner
 from pandas import DataFrame
 
 from kedro.extras.datasets.pandas import CSVDataSet
-from kedro.framework.cli.micropkg import _sync_dirs
+from kedro.framework.cli.pipeline import _sync_dirs
 from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
 

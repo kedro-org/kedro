@@ -71,7 +71,7 @@ This is when you run a subset, or a ‘slice’ of a pipeline’s nodes. You can
 * by tagging certain nodes (`pipeline.only_nodes_with_tags`)
 * by specifying certain nodes (`pipeline.only_nodes`)
 
-[Further information about pipeline slicing](../06_nodes_and_pipelines/05_slice_a_pipeline)
+[Further information about pipeline slicing](../06_nodes_and_pipelines/06_slice_a_pipeline)
 
 ## Runner
 Runners are different execution mechanisms to run pipelines with the specified data catalog.
@@ -80,7 +80,7 @@ Runners are different execution mechanisms to run pipelines with the specified d
 * The parallel runner allows for concurrency by use of multiprocessing
 * The thread runner uses threading for concurrent execution
 
-[Further information about runners](../06_nodes_and_pipelines/04_run_a_pipeline)
+[Further information about runners](../06_nodes_and_pipelines/05_run_a_pipeline)
 
 ## Starters
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused. A Kedro starter is a [Cookiecutter template](https://cookiecutter.readthedocs.io/) that contains the boilerplate code for a Kedro project.

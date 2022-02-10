@@ -19,10 +19,10 @@ tasks:
       gp sync-await kedro
       export PIP_USER=no
       cd /workspace
-      pip install -e /workspace/kedro --no-deps
+      pip install /workspace/kedro --no-deps
       yes project | kedro new -s pandas-iris
     command: |
-      pip install -e /workspace/kedro --no-deps
+      pip install /workspace/kedro --no-deps
       cd /workspace/project
       clear
       kedro info

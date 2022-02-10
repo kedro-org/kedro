@@ -8,7 +8,7 @@ import yaml
 from click import ClickException
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_wheel_name
+from kedro.framework.cli.micropkg import _get_wheel_name
 from kedro.framework.project import settings
 
 PIPELINE_NAME = "my_pipeline"

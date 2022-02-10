@@ -101,6 +101,69 @@ There is a syntax to describe function inputs and outputs. This allows different
 
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
 
+## `**kwargs`-only node functions
+
+Sometimes, when creating reporting nodes for instance, you need to know the names of the datasets that your node receives, but you may not have this information in advance. This can be solved by defining a `**kwargs`-only function, like so:
+
+```python
+def reporting(**kwargs):
+    result = []
+    for name, data in kwargs.items():
+        res = example_report(name, data)
+        result.append(res)
+    return combined_report(result)
+```
+
+Then, when it comes to constructing the `Pipeline`, simply pass a dictionary to the node inputs:
+
+```python
+from kedro.pipeline import Pipeline, node
+
+
+pipeline = Pipeline([
+    node(
+        reporting,
+        inputs={"uk_input1": "uk_input1", "uk_input2": "uk_input2", ...},
+        outputs="uk",
+    ),
+    node(
+        reporting,
+        inputs={"ge_input1": "ge_input1", "ge_input2": "ge_input2", ...},
+        outputs="ge",
+    ),
+    ...
+])
+```
+
+Alternatively, you can also make use of a helper function that creates the mapping for you, so you can reuse it across your codebase.
+
+```python
+from kedro.pipeline import Pipeline, node
+
+
+mapping = lambda x: {k: k for k in x}
+
+pipeline = Pipeline(
+    [
+        node(
+            reporting,
+            inputs=mapping(["uk_input1", "uk_input2", ...]),
+            outputs="uk",
+        ),
+        node(
+            reporting,
+            inputs=mapping(["ge_input1", "ge_input2", ...]),
+            outputs="ge",
+        ),
+        ...,
+    ]
+)
+```
+
+```eval_rst
+.. note:: `**kwargs` might require you to replace all special characters with `_` in the dataset names, to ensure they are valid Python variable names.
+```
+
 ## How to tag a node
 
 Tags may be useful to run part of a pipeline without changing the code. For instance, `kedro run --tag=ds` will only run nodes that have a `ds` tag attached.

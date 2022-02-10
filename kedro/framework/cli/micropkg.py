@@ -871,6 +871,27 @@ def _get_package_artifacts(
     return artifacts
 
 
+def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Path):
+    tests_source = result_path / "tests"
+    tests_target = package_dir.parent / "tests" / "pipelines" / pipeline_name
+    try:
+        _sync_dirs(tests_source, tests_target)
+    finally:
+        shutil.rmtree(tests_source)
+
+
+def _copy_pipeline_configs(
+    result_path: Path, conf_path: Path, skip_config: bool, env: str
+):
+    config_source = result_path / "config"
+    try:
+        if not skip_config:
+            config_target = conf_path / env
+            _sync_dirs(config_source, config_target)
+    finally:
+        shutil.rmtree(config_source)
+
+
 def _append_package_reqs(
     requirements_in: Path, package_reqs: List[str], pipeline_name: str
 ) -> None:

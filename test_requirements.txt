@@ -33,7 +33,7 @@ Pillow~=8.0; python_version == '3.6'
 Pillow~=9.0; python_version > '3.6'
 plotly>=4.8.0, <6.0
 pre-commit~=1.17
-psutil==5.6.7
+psutil==5.9.0
 pyarrow>=1.0, <7.0
 pylint>=2.5.2, <3.0
 pyproj>=2.2.0, <3.0  # pyproj 3.0 requires proj>=7.2 but that conflicts with fiona which requires proj<7.2.

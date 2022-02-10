@@ -456,14 +456,14 @@ workflows:
   regular:
     unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
     jobs:
-      - e2e_tests:
-          matrix:
-            parameters:
-              python_version: ["3.6", "3.7", "3.8"]
-      - win_e2e_tests:
-          matrix:
-            parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+#      - e2e_tests:
+#          matrix:
+#            parameters:
+#              python_version: ["3.6", "3.7", "3.8"]
+#      - win_e2e_tests:
+#          matrix:
+#            parameters:
+#              python_version: ["3.6", "3.7", "3.8"]
       - unit_tests:
           matrix:
             parameters:
@@ -472,18 +472,18 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
-      - lint:
-          matrix:
-            parameters:
-              python_version: ["3.6", "3.7", "3.8"]
-      - pip_compile:
-          matrix:
-            parameters:
-              python_version: ["3.6", "3.7", "3.8"]
-      - win_pip_compile:
-          matrix:
-            parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+#      - lint:
+#          matrix:
+#            parameters:
+#              python_version: ["3.6", "3.7", "3.8"]
+#      - pip_compile:
+#          matrix:
+#            parameters:
+#              python_version: ["3.6", "3.7", "3.8"]
+#      - win_pip_compile:
+#          matrix:
+#            parameters:
+#              python_version: ["3.6", "3.7", "3.8"]
       - build_docs
       - docs_linkcheck
       - all_circleci_checks_succeeded:

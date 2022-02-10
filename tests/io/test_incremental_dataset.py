@@ -345,24 +345,23 @@ BUCKET_NAME = "fake_bucket_name"
 
 
 @pytest.fixture
-def aws_credentials():
-    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
-
-
-@pytest.fixture
-def mocked_s3(aws_credentials):
+def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
-        yield boto3.client("s3")
+        conn = boto3.client(
+            "s3",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        yield conn
 
 
 @pytest.fixture
-def mocked_csvs_in_s3(mocked_s3, partitioned_data_pandas, aws_credentials):
+def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     prefix = "csvs"
-    mocked_s3.create_bucket(Bucket=BUCKET_NAME)
     for key, data in partitioned_data_pandas.items():
-        mocked_s3.put_object(
+        mocked_s3_bucket.put_object(
             Bucket=BUCKET_NAME,
             Key=f"{prefix}/{key}",
             Body=data.to_csv(index=False),
@@ -371,28 +370,18 @@ def mocked_csvs_in_s3(mocked_s3, partitioned_data_pandas, aws_credentials):
 
 
 class TestPartitionedDataSetS3:
+    # @pytest.fixture(autouse=True)
+    # def fake_aws_creds(self, monkeypatch):
+    #     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
+    #     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
-    def helper(self, mocked_s3, partitioned_data_pandas):
-        prefix = "csvs"
-        mocked_s3.create_bucket(Bucket=BUCKET_NAME)
-        for key, data in partitioned_data_pandas.items():
-            mocked_s3.put_object(
-                Bucket=BUCKET_NAME,
-                Key=f"{prefix}/{key}",
-                Body=data.to_csv(index=False),
-            )
-        return f"s3://{BUCKET_NAME}/{prefix}"
-
-    def test_load_and_confirm(self, mocked_s3, partitioned_data_pandas):
+    def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
-        mocked_csvs = self.helper(mocked_s3, partitioned_data_pandas)
-
-        pds = IncrementalDataSet(mocked_csvs, DATASET)
+        pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
-
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
         for partition_id, data in loaded.items():

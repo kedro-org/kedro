@@ -7,8 +7,8 @@ This section covers the following:
 
 Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipelines.md) unlocks some sophisticated functionality in Kedro
 
-1. You are able to [instantiate the same pipeline structure multiple times](../nodes_and_pipelines/modular_pipelines.md#how-to-use-a-modular-pipeline-twice), but provide different inputs/outputs.
-2. You can unlock the full power of [micro-packaging](../nodes_and_pipelines/modular_pipelines.md#How-to-share-a-modular-pipeline).
+1. You are able to [instantiate the same pipeline structure multiple times](../nodes_and_pipelines/modular_pipelines.md), but provide different inputs/outputs.
+2. You can unlock the full power of [micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 3. You can de-clutter your mental model with Kedro-Viz rendering collapsible components.
 
     ![collapsible](../meta/images/collapsible.gif)

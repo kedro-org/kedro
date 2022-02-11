@@ -4,7 +4,7 @@
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test and maintain, and are portable so they can be copied and reused between projects.
 
-Modular pipelines allow you to instantiate pipelines multiple times whilst allowing the user to override inputs/outputs/parameters. They are reusable within the same codebase and shareable across projects via [micro-packaging](04_micro_packaging.md). This is the modern way to use Kedro and will change the way you think about your pipelines.
+Modular pipelines allow you to instantiate pipelines multiple times whilst allowing the user to override inputs/outputs/parameters. They are reusable within the same codebase and shareable across projects via [micro-packaging](micro_packaging.md). This is the modern way to use Kedro and will change the way you think about your pipelines.
 
 ```eval_rst
 .. note:: The Kedro project visualised below is representative of one that might be seen in the real world. It takes full advantage of modular pipelines for ``Data Ingestion``, ``Feature Engineering``, ``Reporting`` and ``Train Evaluation`` (which even includes nested instances).
@@ -22,12 +22,12 @@ In this section you will learn about how to take advantage of modular pipelines,
 2. **Modular pipelines are designed to be portable and reusable**
 
    * It's possible to re-use the same pipeline multiple times within the same project (with different inputs/outputs or parameters).
-   * You can also share pipelines across codebases via [micro-packaging](04_micro_packaging.md).
+   * You can also share pipelines across codebases via [micro-packaging](micro_packaging.md).
 
 3. **The `kedro.pipeline.modular_pipeline.pipeline` wrapper method unlocks the real power of modular pipelines**
 
    * Applying [namespaces](https://en.wikipedia.org/wiki/Namespace) allows you to simplify your mental model and isolate 'within pipeline' processing steps.
-   * ``Kedro-Viz`` is able to accelerate development by [rendering namespaced](../03_tutorial/05_visualise_pipeline.md) pipelines as collapsible 'super nodes'.
+   * ``Kedro-Viz`` is able to accelerate development by [rendering namespaced](../tutorial/visualise_pipeline.md) pipelines as collapsible 'super nodes'.
 
 <iframe
     src="https://demo.kedro.org"
@@ -37,7 +37,7 @@ In this section you will learn about how to take advantage of modular pipelines,
 
 ## How do I create a modular pipeline?
 
-You can use a [project-specific CLI command](../09_development/03_commands_reference.md#kedro-commands) to create a modular pipeline. The pipeline name must adhere to [Python convention](https://realpython.com/python-pep8/#naming-conventions).
+You can use a [project-specific CLI command](../development/commands_reference.md#kedro-commands) to create a modular pipeline. The pipeline name must adhere to [Python convention](https://realpython.com/python-pep8/#naming-conventions).
 
 ```bash
 kedro pipeline create <pipeline_name>
@@ -86,7 +86,7 @@ If you want to do the reverse and remove a modular pipeline, you can use ``kedro
 
 ### Ensuring portability
 
-Modular pipelines are shareable between Kedro codebases via [micro-packaging](04_micro_packaging.md), but you need to follow a couple of rules to ensure portability:
+Modular pipelines are shareable between Kedro codebases via [micro-packaging](micro_packaging.md), but you need to follow a couple of rules to ensure portability:
 
 * Modular pipelines should **not** depend on the main Python package as this would break portability to another project.
 * Catalog references are not packaged when sharing/consuming modular pipelines i.e. the `catalog.yml` file is not packaged.
@@ -96,8 +96,8 @@ Modular pipelines are shareable between Kedro codebases via [micro-packaging](04
 ### Providing modular pipeline specific dependencies
 
 * A modular pipeline **may** have external dependencies specified in a local `requirements.txt` file.
-* Pipeline specific dependencies are scooped up during the [micro-packaging](04_micro_packaging.md) process.
-* These dependencies are _not_ currently installed by the [`kedro install`](../09_development/03_commands_reference.md#install-all-package-dependencies) command and will have to be manually installed.
+* Pipeline specific dependencies are scooped up during the [micro-packaging](micro_packaging.md) process.
+* These dependencies are _not_ currently installed by the [`kedro install`](../development/commands_reference.md#install-all-package-dependencies) command and will have to be manually installed.
 
 ## Using the modular `pipeline()` wrapper to provide overrides
 
@@ -180,7 +180,7 @@ Providing this input/output override will join up the pipeline nicely:
 
 ## Using a modular pipeline multiple times
 
-Reusing pipelines for slightly different purposes can be a real accelerator for teams and organisations when they reach a certain scale. In the real world, one could imagine pipelines with responsibilities like profiling or feature engineering being reused within the same project or even across projects via [micro-packaging](04_micro_packaging.md).
+Reusing pipelines for slightly different purposes can be a real accelerator for teams and organisations when they reach a certain scale. In the real world, one could imagine pipelines with responsibilities like profiling or feature engineering being reused within the same project or even across projects via [micro-packaging](micro_packaging.md).
 
 * In an ideal world, we would like to use the `cook_pipeline` twice as you would `defrost` and `grill` multiple meals beyond the `veg` currently hard-coded.
 * Namespaces allow you to '[instantiate](https://en.wikipedia.org/wiki/Instance_(computer_science))' the same pipeline multiple times and keep operations isolated.

@@ -156,9 +156,6 @@ Alternatively, you can also make use of a helper function that creates the mappi
  )
 ```
 
-```eval_rst
-.. note:: `**kwargs` might require you to replace all special characters with `_` in the dataset names, to ensure they are valid Python variable names.
-```
 
 ## How to tag a node
 

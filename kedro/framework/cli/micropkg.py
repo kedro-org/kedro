@@ -86,10 +86,10 @@ def micropkg():
 def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     metadata: ProjectMetadata, package_path, env, alias, fs_args, all_flag, **kwargs
 ) -> None:
-    """Pull and unpack a modular pipeline in your project."""
+    """Pull and unpack a modular pipeline and other micro-packages in your project."""
     if not package_path and not all_flag:
         click.secho(
-            "Please specify a package path or add '--all' to pull all pipelines in the "
+            "Please specify a package path or add '--all' to pull all micro-packages in the "
             "`pyproject.toml` package manifest section."
         )
         sys.exit(1)
@@ -100,7 +100,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
 
     _pull_package(package_path, metadata, env=env, alias=alias, fs_args=fs_args)
     as_alias = f" as `{alias}`" if alias else ""
-    message = f"Pipeline {package_path} pulled and unpacked{as_alias}!"
+    message = f"Micro-package {package_path} pulled and unpacked{as_alias}!"
     click.secho(message, fg="green")
 
 
@@ -160,7 +160,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
         _pull_package(package_path, metadata, **specs)
         click.secho(f"Pulled and unpacked `{package_path}`!")
 
-    click.secho("Pipelines pulled and unpacked!", fg="green")
+    click.secho("Micro-packages pulled and unpacked!", fg="green")
 
 
 def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
@@ -182,9 +182,9 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
         if "alias" in specs:
             _assert_pkg_name_ok(specs["alias"])
         _package_pipeline(pipeline_name, metadata, **specs)
-        click.secho(f"Packaged `{pipeline_name}` pipeline!")
+        click.secho(f"Packaged `{pipeline_name}` micro-package!")
 
-    click.secho("Pipelines packaged!", fg="green")
+    click.secho("Micro-packages packaged!", fg="green")
 
 
 @micropkg.command("package")
@@ -224,10 +224,10 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
 def package_pipeline(
     metadata: ProjectMetadata, name, env, alias, destination, version, all_flag
 ):  # pylint: disable=too-many-arguments
-    """Package up a modular pipeline as a Python .whl."""
+    """Package up a modular pipeline or micro-package as a Python .whl."""
     if not name and not all_flag:
         click.secho(
-            "Please specify a pipeline name or add '--all' to package all pipelines in "
+            "Please specify a micro-package name or add '--all' to package all micro-packages in "
             "the `pyproject.toml` package manifest section."
         )
         sys.exit(1)
@@ -241,7 +241,7 @@ def package_pipeline(
     )
 
     as_alias = f" as `{alias}`" if alias else ""
-    message = f"Pipeline `{name}` packaged{as_alias}! Location: {result_path}"
+    message = f"Micro-package `{name}` packaged{as_alias}! Location: {result_path}"
     click.secho(message, fg="green")
 
 

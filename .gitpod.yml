@@ -21,11 +21,10 @@ tasks:
       gp sync-await kedro
       export PIP_USER=no
       cd /workspace
-      pip install /workspace/kedro --no-deps
+      pip install -e /workspace/kedro --no-deps
       yes project | kedro new -s pandas-iris
     command: |
-      # Need no-use-pep517 as a workaround for https://github.com/pypa/pip/issues/7953.
-      pip install -e /workspace/kedro --no-deps --no-use-pep517
+      pip install -e /workspace/kedro --no-deps
       cd /workspace/project
       clear
       kedro info

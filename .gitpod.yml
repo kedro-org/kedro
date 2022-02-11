@@ -1,3 +1,5 @@
+image: gitpod/workspace-full:legacy-dazzle-v1
+
 tasks:
   # We want packages installed during the pre-build init steps to go to /workspace
   # rather than ~ so that they are persisted. Gitpod sets PIP_USER=yes to ensure this,

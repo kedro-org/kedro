@@ -114,49 +114,43 @@ def reporting(**kwargs):
     return combined_report(result)
 ```
 
-Then, when it comes to constructing the `Pipeline`, simply pass a dictionary to the node inputs:
+Then, when it comes to constructing the `Node`, simply pass a dictionary to the node inputs:
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node
 
 
-pipeline = Pipeline([
-    node(
-        reporting,
-        inputs={"uk_input1": "uk_input1", "uk_input2": "uk_input2", ...},
-        outputs="uk",
-    ),
-    node(
-        reporting,
-        inputs={"ge_input1": "ge_input1", "ge_input2": "ge_input2", ...},
-        outputs="ge",
-    ),
-    ...
-])
+uk_reporting_node = node(
+    reporting,
+    inputs={"uk_input1": "uk_input1", "uk_input2": "uk_input2", ...},
+    outputs="uk",
+)
+
+ge_reporting_node = node(
+    reporting,
+    inputs={"ge_input1": "ge_input1", "ge_input2": "ge_input2", ...},
+    outputs="ge",
+)
 ```
 
 Alternatively, you can also make use of a helper function that creates the mapping for you, so you can reuse it across your codebase.
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node
 
 
 mapping = lambda x: {k: k for k in x}
 
-pipeline = Pipeline(
-    [
-        node(
-            reporting,
-            inputs=mapping(["uk_input1", "uk_input2", ...]),
-            outputs="uk",
-        ),
-        node(
-            reporting,
-            inputs=mapping(["ge_input1", "ge_input2", ...]),
-            outputs="ge",
-        ),
-        ...,
-    ]
+uk_reporting_node = node(
+    reporting,
+    inputs=mapping(["uk_input1", "uk_input2", ...]),
+    outputs="uk",
+)
+
+ge_reporting_node = node(
+    reporting,
+    inputs=mapping(["ge_input1", "ge_input2", ...]),
+    outputs="ge",
 )
 ```
 

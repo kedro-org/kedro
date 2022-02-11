@@ -676,7 +676,7 @@ class TestPipelinePullFromManifest:
         )
 
         assert result.exit_code == 0
-        assert "Pipelines pulled and unpacked!" in result.output
+        assert "Micro-packages pulled and unpacked!" in result.output
         assert spy.call_count == 3
 
         build_config = toml.loads(project_toml_str)
@@ -726,7 +726,7 @@ class TestPipelinePullFromManifest:
         )
         assert result.exit_code
         expected_message = (
-            "Please specify a package path or add '--all' to pull all pipelines in the"
+            "Please specify a package path or add '--all' to pull all micro-packages in the"
             " `pyproject.toml` package manifest section."
         )
         assert expected_message in result.output

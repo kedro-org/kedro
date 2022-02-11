@@ -41,18 +41,18 @@ class TestMicropkgPackageCommand:
     @pytest.mark.parametrize(
         "options,package_name,version,success_message",
         [
-            ([], PIPELINE_NAME, "0.1", f"Pipeline `{PIPELINE_NAME}` packaged!"),
+            ([], PIPELINE_NAME, "0.1", f"Micro-package `{PIPELINE_NAME}` packaged!"),
             (
                 ["--alias", "alternative"],
                 "alternative",
                 "0.1",
-                f"Pipeline `{PIPELINE_NAME}` packaged as `alternative`!",
+                f"Micro-package `{PIPELINE_NAME}` packaged as `alternative`!",
             ),
             (
                 ["--version", "0.3"],
                 PIPELINE_NAME,
                 "0.3",
-                f"Pipeline `{PIPELINE_NAME}` packaged!",
+                f"Micro-package `{PIPELINE_NAME}` packaged!",
             ),
         ],
     )
@@ -156,7 +156,7 @@ class TestMicropkgPackageCommand:
 
         assert result.exit_code == 0
         success_message = (
-            f"Pipeline `{PIPELINE_NAME}` packaged! Location: {destination}"
+            f"Micro-package `{PIPELINE_NAME}` packaged! Location: {destination}"
         )
         assert success_message in result.output
 
@@ -183,7 +183,7 @@ class TestMicropkgPackageCommand:
 
         warning_message = f"Package file {wheel_file} will be overwritten!"
         success_message = (
-            f"Pipeline `{PIPELINE_NAME}` packaged! Location: {destination}"
+            f"Micro-package `{PIPELINE_NAME}` packaged! Location: {destination}"
         )
         assert warning_message in result.output
         assert success_message in result.output
@@ -234,7 +234,7 @@ class TestMicropkgPackageCommand:
         )
 
         assert result.exit_code == 0
-        assert f"Pipeline `{PIPELINE_NAME}` packaged!" in result.output
+        assert f"Micro-package `{PIPELINE_NAME}` packaged!" in result.output
 
         wheel_location = fake_repo_path / "src" / "dist"
         assert f"Location: {wheel_location}" in result.output
@@ -318,7 +318,7 @@ class TestMicropkgPackageCommand:
         )
 
         assert result.exit_code == 0
-        assert "Pipeline `retail` packaged!" in result.output
+        assert "Micro-package `retail` packaged!" in result.output
 
         wheel_location = fake_repo_path / "src" / "dist"
         assert f"Location: {wheel_location}" in result.output
@@ -376,7 +376,7 @@ class TestMicropkgPackageCommand:
         )
 
         assert result.exit_code == 0
-        assert "Pipeline `retail` packaged!" in result.output
+        assert "Micro-package `retail` packaged!" in result.output
 
         wheel_location = fake_repo_path / "src" / "dist"
         assert f"Location: {wheel_location}" in result.output
@@ -454,7 +454,7 @@ class TestMicropkgPackageFromManifest:
         )
 
         assert result.exit_code == 0
-        assert "Pipelines packaged!" in result.output
+        assert "Micro-packages packaged!" in result.output
         assert spy.call_count == 3
 
         build_config = toml.loads(project_toml_str)
@@ -504,7 +504,7 @@ class TestMicropkgPackageFromManifest:
         )
         assert result.exit_code
         expected_message = (
-            "Please specify a pipeline name or add '--all' to package all pipelines in "
+            "Please specify a micro-package name or add '--all' to package all micro-packages in "
             "the `pyproject.toml` package manifest section."
         )
         assert expected_message in result.output

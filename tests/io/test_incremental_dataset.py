@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import Path
 from typing import Any, Dict
@@ -369,10 +370,8 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDataSetS3:
-    @pytest.fixture(autouse=True)
-    def fake_aws_creds(self, monkeypatch):
-        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
-        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
     def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading

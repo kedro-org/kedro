@@ -129,7 +129,7 @@ shuttles:
 
 ```eval_rst
 .. note::
- The ``load_args`` are passed to the ``pd.read_excel`` method as `keyword arguments <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html>`_, conversely providing ``save_args`` would be passed to the ``pd.DataFrame.to_excel`` `method <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html>`_.
+ The ``load_args`` are passed to the ``pd.read_excel`` method as `keyword arguments <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html>`_; although not specified here, ``save_args`` would be passed to the ``pd.DataFrame.to_excel`` `method <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html>`_.
 ```
 
 To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session and display its first five rows:

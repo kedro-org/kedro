@@ -33,7 +33,7 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
 
 
     def create_pipeline(**kwargs) -> Pipeline:
-        pipeline_instance = Pipeline(
+        return pipeline(
             [
                 node(
                     func=preprocess_companies,
@@ -49,23 +49,15 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
                 ),
                 node(
                     func=create_model_input_table,
-                    inputs={
-                        "companies": "preprocessed_companies",
-                        "shuttles": "preprocessed_shuttles",
-                        "reviews": "reviews",
-                    },
+                    inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
                     outputs="model_input_table",
                     name="create_model_input_table_node",
                 ),
-            ]
-        )
-        namespaced_pipeline = pipeline(
-            pipe=pipeline_instance,
+            ],
             namespace="data_processing",
             inputs=["companies", "shuttles", "reviews"],
             outputs="model_input_table",
         )
-        return namespaced_pipeline
     ```
 
     </details>
@@ -89,7 +81,7 @@ In this section we want to add some namespaces in the modelling component of the
     ```yaml
 
     model_options_experimental:
-      test_size: 0.3
+      test_size: 0.2
       random_state: 8
       features:
         - engines
@@ -130,7 +122,7 @@ In this section we want to add some namespaces in the modelling component of the
 
 
     def create_pipeline(**kwargs) -> Pipeline:
-        pipeline_instance = Pipeline(
+        pipeline_instance = pipeline(
             [
                 node(
                     func=split_data,
@@ -163,8 +155,11 @@ In this section we want to add some namespaces in the modelling component of the
             namespace="candidate_modelling_pipeline",
             parameters={"params:model_options": "params:model_options_experimental"},
         )
-
-        return ds_pipeline_1 + ds_pipeline_2
+        return pipeline(
+            pipe=ds_pipeline_1 + ds_pipeline_2,
+            inputs="model_input_table",
+            namespace="data_science",
+        )
     ```
 
     </details>
@@ -174,7 +169,7 @@ In this section we want to add some namespaces in the modelling component of the
 Modular pipelines allow you instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters.
 
 ```python
-pipeline_instance = Pipeline(...)
+pipeline_instance = pipeline(...)
 
 ds_pipeline_1 = pipeline(
     pipe=pipeline_instance,

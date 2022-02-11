@@ -115,7 +115,7 @@ Add the following to `src/kedro_tutorial/pipelines/data_processing/pipeline.py`,
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
-    return Pipeline(
+    return pipeline(
         [
             node(
                 func=preprocess_companies,
@@ -371,7 +371,7 @@ We now need to add `scikit-learn` to the project's dependencies. This is a sligh
 To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update ``src/requirements.txt`` as you did previously in the tutorial before you built the project's requirements with ``kedro build-reqs``:
 
 ```text
-scikit-learn==0.23.1
+scikit-learn~=1.0
 ```
 
 Then, re-run `kedro install` with a flag telling Kedro to recompile the requirements:

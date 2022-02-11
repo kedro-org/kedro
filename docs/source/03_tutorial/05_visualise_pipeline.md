@@ -132,7 +132,7 @@ def compare_shuttle_speed():
 
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
-    return Pipeline(
+    return pipeline(
         [
             node(
                 func=compare_shuttle_speed,

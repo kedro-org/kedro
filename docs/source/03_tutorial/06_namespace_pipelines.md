@@ -155,11 +155,8 @@ In this section we want to add some namespaces in the modelling component of the
             namespace="candidate_modelling_pipeline",
             parameters={"params:model_options": "params:model_options_experimental"},
         )
-        return pipeline(
-            pipe=ds_pipeline_1 + ds_pipeline_2,
-            inputs="model_input_table",
-            namespace="data_science",
-        )
+
+        return ds_pipeline_1 + ds_pipeline_2
     ```
 
     </details>

@@ -73,9 +73,10 @@ Welcome to Kedro's documentation!
    03_tutorial/02_tutorial_template
    03_tutorial/03_set_up_data
    03_tutorial/04_create_pipelines
-   03_tutorial/05_package_a_project
-   03_tutorial/06_visualise_pipeline
+   03_tutorial/05_visualise_pipeline
+   03_tutorial/06_namespacing_pipelines
    03_tutorial/07_set_up_experiment_tracking
+   03_tutorial/08_package_a_project
 
 .. toctree::
    :maxdepth: 2
@@ -100,8 +101,9 @@ Welcome to Kedro's documentation!
    06_nodes_and_pipelines/01_nodes
    06_nodes_and_pipelines/02_pipeline_introduction
    06_nodes_and_pipelines/03_modular_pipelines
-   06_nodes_and_pipelines/04_run_a_pipeline
-   06_nodes_and_pipelines/05_slice_a_pipeline
+   06_nodes_and_pipelines/04_micro_packaging
+   06_nodes_and_pipelines/05_run_a_pipeline
+   06_nodes_and_pipelines/06_slice_a_pipeline
 
 .. toctree::
    :maxdepth: 2

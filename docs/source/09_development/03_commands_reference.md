@@ -265,7 +265,7 @@ The above command will take the bundled `.whl` file and do the following:
 kedro build-docs
 ```
 
-The `build-docs` command builds [project documentation](../03_tutorial/05_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
+The `build-docs` command builds [project documentation](../03_tutorial/08_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 #### Lint your project
@@ -301,7 +301,7 @@ The following command packages all the files related to a modular pipeline into 
 kedro pipeline package <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#package-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/04_micro_packaging.md).
 
 ##### Pull a modular pipeline in your project
 The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [wheel file](https://pythonwheels.com/).
@@ -309,7 +309,7 @@ The following command pulls all the files related to a modular pipeline from eit
 kedro pipeline pull <package_name> (or path to a wheel file)
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
+Further information is available in the [micro-packaging documentation](../06_nodes_and_pipelines/04_micro_packaging.md).
 
 ##### Delete a modular pipeline
 The following command deletes all the files related to a modular pipeline in your Kedro project.
@@ -318,7 +318,7 @@ The following command deletes all the files related to a modular pipeline in you
 kedro pipeline delete <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
+Further information is available in the [micro-packaging documentation](../06_nodes_and_pipelines/04_micro_packaging.md).
 
 ##### Describe a pipeline
 

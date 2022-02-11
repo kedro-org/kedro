@@ -135,23 +135,25 @@ ge_reporting_node = node(
 
 Alternatively, you can also make use of a helper function that creates the mapping for you, so you can reuse it across your codebase.
 
-```python
-from kedro.pipeline import node
+```diff
+ from kedro.pipeline import node
 
 
-mapping = lambda x: {k: k for k in x}
++mapping = lambda x: {k: k for k in x}
++
+ uk_reporting_node = node(
+     reporting,
+-    inputs={"uk_input1": "uk_input1", "uk_input2": "uk_input2", ...},
++    inputs=mapping(["uk_input1", "uk_input2", ...]),
+     outputs="uk",
+ )
 
-uk_reporting_node = node(
-    reporting,
-    inputs=mapping(["uk_input1", "uk_input2", ...]),
-    outputs="uk",
-)
-
-ge_reporting_node = node(
-    reporting,
-    inputs=mapping(["ge_input1", "ge_input2", ...]),
-    outputs="ge",
-)
+ ge_reporting_node = node(
+     reporting,
+-    inputs={"ge_input1": "ge_input1", "ge_input2": "ge_input2", ...},
++    inputs=mapping(["ge_input1", "ge_input2", ...]),
+     outputs="ge",
+ )
 ```
 
 ```eval_rst

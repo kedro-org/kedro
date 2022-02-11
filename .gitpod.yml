@@ -1,0 +1,45 @@
+image: gitpod/workspace-full:legacy-dazzle-v1
+
+tasks:
+  # We want packages installed during the pre-build init steps to go to /workspace
+  # rather than ~ so that they are persisted. Gitpod sets PIP_USER=yes to ensure this,
+  # but pre-commit requires PIP_USER=no. Hence we set PIP_USER=no and use
+  # pip install --user to install to /workspace.
+  - name: kedro
+    before: |
+      echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
+    init: |
+      make sign-off
+      pip install -r test_requirements.txt --user
+      gp sync-done kedro
+    command: |
+      pre-commit install --install-hooks
+      clear
+  # Generate a test Kedro project at /workspace/project using the local Kedro version.
+  - name: test-project
+    init: |
+      gp sync-await kedro
+      export PIP_USER=no
+      cd /workspace
+      pip install -e /workspace/kedro --no-deps
+      yes project | kedro new -s pandas-iris
+    command: |
+      pip install -e /workspace/kedro --no-deps
+      cd /workspace/project
+      clear
+      kedro info
+
+github:
+  prebuilds:
+    # enable for the master/default branch (defaults to true)
+    master: true
+    # enable for all branches in this repo (defaults to false)
+    branches: true
+    # enable for pull requests coming from this repo (defaults to true)
+    pullRequests: true
+    # enable for pull requests coming from forks (defaults to false)
+    pullRequestsFromForks: true
+    # add a "Review in Gitpod" button as a comment to pull requests (defaults to true)
+    addComment: false
+    # add a "Review in Gitpod" button to pull requests (defaults to false)
+    addBadge: true

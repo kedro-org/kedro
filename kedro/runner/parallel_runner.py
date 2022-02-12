@@ -24,7 +24,7 @@ _MAX_WINDOWS_WORKERS = 61
 
 
 class _SharedMemoryDataSet:
-    """``_SharedMemoryDataSet`` a wrapper class for a shared MemoryDataSet in SyncManager.
+    """``_SharedMemoryDataSet`` is a wrapper class for a shared MemoryDataSet in SyncManager.
     It is not inherited from AbstractDataSet class.
     """
 
@@ -159,14 +159,14 @@ class ParallelRunner(AbstractRunner):
     def create_default_data_set(  # type: ignore
         self, ds_name: str
     ) -> _SharedMemoryDataSet:
-        """Factory method for creating the default data set for the runner.
+        """Factory method for creating the default dataset for the runner.
 
         Args:
-            ds_name: Name of the missing data set
+            ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of an implementation of _SharedMemoryDataSet to be used
-            for all unregistered data sets.
+            An instance of ``_SharedMemoryDataSet`` to be used for all
+            unregistered datasets.
 
         """
         return _SharedMemoryDataSet(self._manager)
@@ -187,7 +187,7 @@ class ParallelRunner(AbstractRunner):
                 f"In order to utilize multiprocessing you need to make sure all nodes "
                 f"are serializable, i.e. nodes should not include lambda "
                 f"functions, nested functions, closures, etc.\nIf you "
-                f"are using custom decorators ensure they are correctly using "
+                f"are using custom decorators ensure they are correctly decorated using "
                 f"functools.wraps()."
             )
 
@@ -217,7 +217,7 @@ class ParallelRunner(AbstractRunner):
                 f"need to make sure all data sets are serializable, i.e. data sets "
                 f"should not make use of lambda functions, nested functions, closures "
                 f"etc.\nIf you are using custom decorators ensure they are correctly "
-                f"using functools.wraps()."
+                f"decorated using functools.wraps()."
             )
 
         memory_data_sets = []
@@ -331,8 +331,9 @@ class ParallelRunner(AbstractRunner):
                         raise
                     done_nodes.add(node)
 
-                    # decrement load counts and release any data sets we've finished with
-                    # this is particularly important for the shared datasets we create above
+                    # Decrement load counts, and release any datasets we
+                    # have finished with. This is particularly important
+                    # for the shared, default datasets we created above.
                     for data_set in node.inputs:
                         load_counts[data_set] -= 1
                         if (

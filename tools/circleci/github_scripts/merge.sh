@@ -20,7 +20,7 @@ PR_BRANCH="merge-${SOURCE_BRANCH}-to-${TARGET_BRANCH}"
 
 # The Github details to raise a PR
 GITHUB_TAGGING_TOKEN=$4
-GITHUB_USER="quantumblacklabs"
+GITHUB_USER="kedro-org"
 GITHUB_REPO="kedro"
 GITHUB_ENDPOINT="https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/pulls"
 PAYLOAD=$(cat <<-END

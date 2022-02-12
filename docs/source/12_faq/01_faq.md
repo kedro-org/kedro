@@ -1,7 +1,7 @@
 # Frequently asked questions
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
- question which isn't answered here, check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
+ question which isn't answered here, check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
 
 ## What is Kedro?
 
@@ -9,7 +9,7 @@ Kedro is an open-source Python framework for creating reproducible, maintainable
  borrows concepts from software engineering and applies them to machine-learning code; applied concepts include
   modularity, separation of concerns and versioning.
 
-For the source code, take a look at the [Kedro repository on Github](https://github.com/quantumblacklabs/kedro).
+For the source code, take a look at the [Kedro repository on Github](https://github.com/kedro-org/kedro).
 
 ## Who maintains Kedro?
 
@@ -47,7 +47,7 @@ Former core team members with significant contributions include:
 [Richard Westenra](https://github.com/richardwestenra) and
 [Zain Patel](https://github.com/mzjp2).
 
-And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/main/RELEASE.md).
+And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/kedro-org/kedro/blob/main/RELEASE.md).
 
 ## What are the primary advantages of Kedro?
 
@@ -142,7 +142,7 @@ Refer to the following table below for a high level guide to each layer's purpos
 
 ## How do I upgrade Kedro?
 
-We use [Semantic Versioning](https://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/main/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
+We use [Semantic Versioning](https://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/kedro-org/kedro/blob/main/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
 
 Once Kedro is installed, you can check your version as follows:
 
@@ -165,7 +165,7 @@ When migrating an existing project to a newer Kedro version, make sure you also 
 If you want to try out the latest, most novel functionality of Kedro which has not been released yet, you can run the following installation command:
 
 ```console
-pip install git+https://github.com/quantumblacklabs/kedro.git@develop
+pip install git+https://github.com/kedro-org/kedro.git@develop
 ```
 
 This will install Kedro from the `develop` branch of the GitHub repository, which is always the most up to date. This command will install Kedro from source, unlike `pip install kedro` which installs from PyPI.
@@ -179,14 +179,14 @@ pip install kedro
 
 ## How can I find out more about Kedro?
 
-There are a host of articles, podcasts, talks and Kedro showcase projects in the [`kedro-community`](https://github.com/quantumblacklabs/kedro-community) repository.
+There are a host of articles, podcasts, talks and Kedro showcase projects in the [`kedro-community`](https://github.com/kedro-org/kedro-community) repository.
 
-Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/quantumblacklabs/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the Github repository](https://github.com/quantumblacklabs/kedro/blob/develop/RELEASE.md).
+Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the Github repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
 
 ## How can I cite Kedro?
 
-If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/quantumblacklabs/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files).
+If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/kedro-org/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files).
 
 ## How can I get my question answered?
 
-If your question isn't answered above, check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
+If your question isn't answered above, check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).

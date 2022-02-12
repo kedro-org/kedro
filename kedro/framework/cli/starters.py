@@ -36,7 +36,7 @@ _STARTER_ALIASES = {
     "pyspark-iris",
     "spaceflights",
 }
-_STARTERS_REPO = "git+https://github.com/quantumblacklabs/kedro-starters.git"
+_STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,
@@ -91,6 +91,12 @@ def new(
             "Cannot use the --directory flag without a --starter value."
         )
 
+    # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external) documentation
+    # and tutorials still refer to `astro-iris`. The below line checks if a user has entered old
+    # `astro-iris` as the starter name and changes it to `astro-airflow-iris`.
+    starter_name = (
+        "astro-airflow-iris" if starter_name == "astro-iris" else starter_name
+    )
     if starter_name in _STARTER_ALIASES:
         if directory:
             raise KedroCliError(
@@ -282,7 +288,12 @@ def _get_cookiecutter_dir(
                 f" Specified tag {checkout}. The following tags are available: "
                 + ", ".join(_get_available_tags(template_path))
             )
-        raise KedroCliError(error_message) from exc
+        official_starters = sorted(_STARTER_ALIASES)
+
+        raise KedroCliError(
+            f"{error_message}. The aliases for the official Kedro starters are: \n"
+            f"{yaml.safe_dump(official_starters)}"
+        ) from exc
 
     return Path(cookiecutter_dir)
 

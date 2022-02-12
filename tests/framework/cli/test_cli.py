@@ -109,14 +109,6 @@ class TestCliCommands:
         assert result_abr.exit_code == 0
         assert version in result_abr.output
 
-    def test_info_contains_qb(self):
-        """Check that `kedro info` output contains
-        reference to QuantumBlack."""
-        result = CliRunner().invoke(cli, ["info"])
-
-        assert result.exit_code == 0
-        assert "QuantumBlack" in result.output
-
     def test_info_contains_plugin_versions(self, entry_point, mocker):
         get_distribution = mocker.patch("pkg_resources.get_distribution")
         get_distribution().version = "1.0.2"

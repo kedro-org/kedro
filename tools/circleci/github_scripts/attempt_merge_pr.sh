@@ -10,7 +10,7 @@ set -o errexit
 SOURCE_BRANCH=$1
 TARGET_BRANCH=$2
 GITHUB_TAGGING_TOKEN=$3
-GITHUB_USER="quantumblacklabs"
+GITHUB_USER="kedro-org"
 GITHUB_REPO="kedro"
 
 # Array of GitHub mergeable states that are valid to proceed with automatic PR merging.

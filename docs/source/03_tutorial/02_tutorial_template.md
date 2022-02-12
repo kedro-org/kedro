@@ -2,11 +2,9 @@
 
 In this section, we discuss the project set-up phase, which is the first part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow). The set-up steps are as follows:
 
-
 * Create a new project
 * Install dependencies
 * Configure the project
-
 
 ## Create a new project
 
@@ -52,29 +50,27 @@ wheel>=0.35, <0.37 # The reference implementation of the Python wheel packaging 
 .. note::  If your project has ``conda`` dependencies, you can create a ``src/environment.yml`` file and list them there.
 ```
 
-
 ### Add and remove project-specific dependencies
 
-The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add a requirement for the `pandas` project because you are working with CSV and Excel files. You can add the necessary dependencies for these files types as follows:
+The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add some extra requirements.
 
-```bash
-pip install "kedro[pandas.CSVDataSet,pandas.ExcelDataSet]"
-```
+* In this tutorial, we work with different data formats including CSV, Excel and Parquet and want to visualise our pipeline so we will need to provide extra dependencies.
+* By running `kedro install` on a blank template we generate a new file at `src/requirements.in`. You can read more about the benefits of compiling dependencies [here](../04_kedro_project_setup/01_dependencies.md)
+* The most important point to learn here is that you should edit the `requirements.in` file going forward.
 
-Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.6` with the following (your version of Kedro may be different):
+Add the following requirements to your `src/requirements.in` lock file:
 
 ```text
-kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.17.6
+kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6   # Specify optional Kedro dependencies
+kedro-viz==4.1.1                                                               # Visualise your pipelines
+openpyxl==3.0.9                                                                # Use modern Excel engine (will not be required in 0.18.0)
 ```
 
-Then run the following:
+Then run the following command to re-compile your updated dependencies and install them into your environment:
 
 ```bash
-kedro build-reqs
+kedro install --build-reqs
 ```
-
-You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies.md) in the Kedro project documentation. In a [later step of this tutorial](./04_create_pipelines.md#update-dependencies), we will modify project's dependencies to illustrate how, once you have installed project-specific dependencies, you can update them.
-
 
 ## Configure the project
 

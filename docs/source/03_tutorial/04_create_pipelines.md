@@ -18,9 +18,9 @@ kedro pipeline create data_processing
 ```
 
 This generates all the files you need to start writing a `data_processing` pipeline:
-*`nodes.py` and `pipeline.py` under the `src/kedro_tutorial/pipelines/data_processing` folder for the main node functions that form your pipeline
-* `conf/base/parameters/data_processing.yml` for defining parameters used when running the pipeline
-* `tests/pipelines/data_processing` for writing tests for your pipeline
+* `nodes.py` and `pipeline.py` in the `src/kedro_tutorial/pipelines/data_processing` folder for the main node functions that form your pipeline
+* `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
+* `tests/pipelines/data_processing` for tests for your pipeline
 * `__init__.py` files in the required places to ensure that the pipeline can be imported by Python
 
 ```bash

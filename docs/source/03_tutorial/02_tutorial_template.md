@@ -18,7 +18,7 @@ When prompted for a project name, enter `Kedro Tutorial`. Subsequently, accept t
 
 ## Install dependencies
 
-Up to this point, we haven't discussed project dependencies, so now is a good time to examine them. We use a `requirents.txt` file to specify a project's dependencies and make it easier for others to run your project. This avoids version conflicts by ensuring that you use same Python packages and versions.
+Up to this point, we haven't discussed project dependencies, so now is a good time to examine them. We use a `requirements.txt` file to specify a project's dependencies and make it easier for others to run your project. This avoids version conflicts by ensuring that you use same Python packages and versions.
 
 The generic project template bundles some typical dependencies, in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers are slightly different depending on the version of Kedro that you are using:
 
@@ -42,7 +42,7 @@ wheel>=0.35, <0.37 # The reference implementation of the Python wheel packaging 
 .. note::  If your project has ``conda`` dependencies, you can create a ``src/environment.yml`` file and list them there.
 ```
 
-The dependencies above may be sufficient for some projects, but for this tutorial you need to add some extra requirements. These will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise our pipeline.
+The dependencies above may be sufficient for some projects, but for this tutorial you need to add some extra requirements. These will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.
 
 Edit your `src/requirements.txt` file to include the following lines:
 

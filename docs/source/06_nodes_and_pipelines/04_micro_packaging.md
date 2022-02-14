@@ -5,6 +5,10 @@ Micro-packaging allows users to share Kedro pipelines across codebases, organisa
 
 ## Package a modular pipeline
 
+```eval_rst
+.. warning::  `kedro pipeline package` will be deprecated in 0.18.0. We recommend using `kedro micropkg package` instead.
+```
+
 You can package a modular pipeline by executing: `kedro pipeline package <pipeline_name>`
 
 * This will generate a new [wheel file](https://pythonwheels.com/) for this pipeline.
@@ -41,7 +45,15 @@ In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel 
 
 ## Package multiple modular pipelines
 
+```eval_rst
+.. warning::  `kedro pipeline package --all` will be deprecated in 0.18.0. We recommend using `kedro micropkg package --all` instead.
+```
+
 To package multiple modular pipelines in bulk, run `kedro pipeline package --all`. This will package all pipelines specified in the `tool.kedro.pipeline.package` manifest section of the project's `pyproject.toml` file:
+
+```eval_rst
+.. warning::  `[tool.kedro.pipeline.package]` will be deprecated in 0.18.0. We recommend using `[tool.kedro.micropkg.package]` instead.
+```
 
 ```toml
 [tool.kedro.pipeline.package]
@@ -57,6 +69,10 @@ second_pipeline = {}
 ```
 
 ## Pull a modular pipeline
+
+```eval_rst
+.. warning::  `kedro pipeline pull <package_name>` will be deprecated in 0.18.0. We recommend using `kedro micropkg pull <package_name>` instead.
+```
 
 You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`.
 
@@ -89,6 +105,10 @@ You can pull a modular pipeline from different locations, including local storag
 
 ### Providing `fsspec` arguments
 
+```eval_rst
+.. warning::  `kedro pipeline pull <package_name>` will be deprecated in 0.18.0. We recommend using `kedro micropkg pull <package_name>` instead.
+```
+
 * If you are pulling the pipeline from a location that isn't PyPI, Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to locate and pull down your pipeline.
 * You can use the `--fs-args` option to point to a YAML that contains the required configuration.
 
@@ -105,8 +125,16 @@ client_kwargs:
 
 ## Pull multiple modular pipelines
 
+```eval_rst
+.. warning::  `kedro pipeline pull --all` will be deprecated in 0.18.0. We recommend using `kedro micropkg pull --all` instead.
+```
+
 * To pull multiple modular pipelines in bulk, run `kedro pipeline pull --all`.
 * This will pull and unpack all pipelines specified in the `tool.kedro.pipeline.pull` manifest section of the project's `pyproject.toml` file:
+
+```eval_rst
+.. warning::  `[tool.kedro.pipeline.pull]` will be deprecated in 0.18.0. We recommend using `[tool.kedro.micropkg.pull]` instead.
+```
 
 ```toml
 [tool.kedro.pipeline.pull]

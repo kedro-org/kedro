@@ -4,7 +4,7 @@
 
 ## Install Kedro-Viz
 
-You can install Kedro-Viz by running:
+If you did not already install Kedro-Viz when you [installed the tutorial project dependencies](02_tutorial_template.md#install-dependencies) then you can do so now by running:
 ```bash
 pip install kedro-viz
 ```
@@ -132,7 +132,7 @@ def compare_shuttle_speed():
 
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
-    return Pipeline(
+    return pipeline(
         [
             node(
                 func=compare_shuttle_speed,

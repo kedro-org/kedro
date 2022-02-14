@@ -126,12 +126,7 @@ class _ProjectPipelines(MutableMapping):
                 self._pipelines_module
             )
         except (ModuleNotFoundError, AttributeError) as exc:
-            # for backwards compatibility with templates < 0.17.2
-            # where no pipelines_registry is defined
-            if self._pipelines_module in str(exc):  # pragma: no cover
-                project_pipelines = {}
-            else:
-                raise
+            raise exc
         else:
             project_pipelines = register_pipelines()
 

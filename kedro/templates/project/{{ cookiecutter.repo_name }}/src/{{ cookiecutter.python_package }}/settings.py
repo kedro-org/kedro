@@ -3,10 +3,10 @@ from the Kedro defaults. For further information, including these default values
 https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 
 #############
-# LIFECYCLE #
+# Lifecycle #
 #############
 
-# Instantiated project hooks to inject additional behaviour into the execution timeline.
+# Instantiated project hooks.
 # from {{cookiecutter.python_package}}.hooks import ProjectHooks
 # HOOKS = (ProjectHooks(),)
 
@@ -25,7 +25,7 @@ https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 # CONTEXT_CLASS = KedroContext
 
 #################
-# CONFIGURATION #
+# Configuration #
 #################
 
 # Directory that holds configuration.

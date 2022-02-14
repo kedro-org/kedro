@@ -107,6 +107,10 @@ companies = catalog.load("companies")
 companies.head()
 ```
 
+```eval_rst
+.. note:: If this is the first ``kedro`` command you have executed in the project, you will be asked whether you wish to opt into `usage analytics <https://github.com/quantumblacklabs/kedro-telemetry>`_. Your decision is recorded in the ``.telemetry`` file so that subsequent calls to ``kedro`` in this project do not ask you again.
+```
+
 The command loads the dataset named `companies` (as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv` into the variable `companies`, which is of type `pandas.DataFrame`. The `head` method from `pandas` then displays the first five rows of the DataFrame.
 
 When you have finished, close `ipython` session as follows:

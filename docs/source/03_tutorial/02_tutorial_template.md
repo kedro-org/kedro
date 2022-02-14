@@ -14,19 +14,11 @@ Navigate to your chosen working directory and run the following to [create a new
 kedro new
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. Subsequently, accept the default suggestions for `repo_name` and `python_package` by pressing enter.
+When prompted for a project name, enter `Kedro Tutorial`. Subsequently, accept the default suggestions for `repo_name` and `python_package` by pressing enter. Then navigate to the root directory of the project, `kedro-tutorial`.
 
-## Install project dependencies with `kedro install`
+## Install dependencies
 
-To install the project-specific dependencies, navigate to the root directory of the project and run:
-
-```bash
-kedro install
-```
-
-### More about project dependencies
-
-Up to this point, we haven't discussed project dependencies, so now is a good time to examine them. We use Kedro to specify a project's dependencies and make it easier for others to run your project. It avoids version conflicts because Kedro ensures that you use same Python packages and versions.
+Up to this point, we haven't discussed project dependencies, so now is a good time to examine them. We use a `requirements.txt` file to specify a project's dependencies and make it easier for others to run your project. This avoids version conflicts by ensuring that you use same Python packages and versions.
 
 The generic project template bundles some typical dependencies, in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers are slightly different depending on the version of Kedro that you are using:
 
@@ -50,27 +42,24 @@ wheel>=0.35, <0.37 # The reference implementation of the Python wheel packaging 
 .. note::  If your project has ``conda`` dependencies, you can create a ``src/environment.yml`` file and list them there.
 ```
 
-### Add and remove project-specific dependencies
+The dependencies above may be sufficient for some projects, but for this tutorial you need to add some extra requirements. These will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.
 
-The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add some extra requirements.
-
-* In this tutorial, we work with different data formats including CSV, Excel and Parquet and want to visualise our pipeline so we will need to provide extra dependencies.
-* By running `kedro install` on a blank template we generate a new file at `src/requirements.in`. You can read more about the benefits of compiling dependencies [here](../04_kedro_project_setup/01_dependencies.md)
-* The most important point to learn here is that you should edit the `requirements.in` file going forward.
-
-Add the following requirements to your `src/requirements.in` lock file:
+Edit your `src/requirements.txt` file to include the following lines:
 
 ```text
 kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6   # Specify optional Kedro dependencies
-kedro-viz==4.1.1                                                               # Visualise your pipelines
-openpyxl==3.0.9                                                                # Use modern Excel engine (will not be required in 0.18.0)
+kedro-viz~=4.0                                                                 # Visualise your pipelines
+openpyxl>=3.0.6, <4.0                                                          # Use modern Excel engine (will not be required in 0.18.0)
+scikit-learn~=1.0                                                              # For modelling in the data science pipeline 
 ```
 
-Then run the following command to re-compile your updated dependencies and install them into your environment:
+To install all the project-specific dependencies, navigate to the root directory of the project and run:
 
 ```bash
-kedro install --build-reqs
+pip install -r src/requirements.txt
 ```
+
+You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies.md) in the Kedro project documentation.
 
 ## Configure the project
 

@@ -1,6 +1,10 @@
 """Project settings."""
 
-# TODO: LINK TO MORE DOCS
+# TODO: LINK TO MORE DOCS and default values
+
+#############
+# LIFECYCLE #
+#############
 
 # Instantiated project hooks to inject additional behaviour into the execution timeline.
 # from {{cookiecutter.python_package}}.hooks import ProjectHooks
@@ -18,6 +22,10 @@
 
 # Class that manages Kedro's library components.
 # CONTEXT_CLASS = KedroContext
+
+#################
+# CONFIGURATION #
+#################
 
 # Directory that holds configuration.
 # CONF_SOURCE = "conf"

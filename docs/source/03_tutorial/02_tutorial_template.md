@@ -14,7 +14,7 @@ Navigate to your chosen working directory and run the following to [create a new
 kedro new
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. Subsequently, accept the default suggestions for `repo_name` and `python_package` by pressing enter.
+When prompted for a project name, enter `Kedro Tutorial`. Subsequently, accept the default suggestions for `repo_name` and `python_package` by pressing enter. Then navigate to the root directory of the project,`kedro-tutorial`.
 
 ## Install dependencies
 

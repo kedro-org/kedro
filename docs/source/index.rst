@@ -74,7 +74,7 @@ Welcome to Kedro's documentation!
    03_tutorial/03_set_up_data
    03_tutorial/04_create_pipelines
    03_tutorial/05_visualise_pipeline
-   03_tutorial/06_namespacing_pipelines
+   03_tutorial/06_namespace_pipelines
    03_tutorial/07_set_up_experiment_tracking
    03_tutorial/08_package_a_project
 

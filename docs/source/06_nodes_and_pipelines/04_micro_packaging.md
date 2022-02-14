@@ -11,7 +11,7 @@ Micro-packaging allows users to share Kedro micro-packages across codebases, org
 You can package a micro-package by executing: `kedro micropkg package <pipeline_name>`
 
 * This will generate a new [wheel file](https://pythonwheels.com/) for this micro-package.
-* By default, the wheel file will be saved into `src/dist` directory inside your project.
+* By default, the wheel file will be saved into `dist/` directory inside your project.
 * You can customise the target with the `--destination` (`-d`) option.
 
 When you package your micro-package, Kedro will also automatically package files from 3 locations:
@@ -82,7 +82,7 @@ You can pull a micro-package from different locations, including local storage, 
 +--------------------------------+--------------------------------------------------------------------------------------+
 | Operation                      | Command                                                                              |
 +================================+======================================================================================+
-| Pulling from a local directory | ``kedro micropkg pull <project-root>/src/dist/<pipeline_name>-0.1-py3-none-any.whl`` |
+| Pulling from a local directory | ``kedro micropkg pull <project-root>/dist/<pipeline_name>-0.1-py3-none-any.whl`` |
 +--------------------------------+--------------------------------------------------------------------------------------+
 | Pull from cloud storage        | ``kedro micropkg pull s3://my_bucket/<pipeline_name>-0.1-py3-none-any.whl``          |
 +--------------------------------+--------------------------------------------------------------------------------------+
@@ -113,7 +113,7 @@ client_kwargs:
 
 ```toml
 [tool.kedro.micropkg.pull]
-"src/dist/first-pipeline-0.1-py3-none-any.whl" = {}
+"dist/first-pipeline-0.1-py3-none-any.whl" = {}
 "https://www.url.to/second-pipeline.whl" = {alias = "aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
 ```
 

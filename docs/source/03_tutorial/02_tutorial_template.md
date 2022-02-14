@@ -58,6 +58,8 @@ To install all the project-specific dependencies, navigate to the root directory
 pip install -r src/requirements.txt
 ```
 
+You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies.md) in the Kedro project documentation.
+
 ## Configure the project
 
 You may optionally add in any credentials to `conf/local/credentials.yml` that you would need to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials. Additional information can be found in the [advanced documentation on configuration](../04_kedro_project_setup/02_configuration.md).

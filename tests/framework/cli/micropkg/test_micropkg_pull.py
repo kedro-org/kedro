@@ -77,10 +77,7 @@ class TestMicropkgPullCommand:
         assert not config_path.exists()
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -143,10 +140,7 @@ class TestMicropkgPullCommand:
         )
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=pipeline_name, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=pipeline_name, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -195,10 +189,7 @@ class TestMicropkgPullCommand:
         )
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=package_alias, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=package_alias, version="0.1")
         )
         CliRunner().invoke(
             fake_project_cli, ["micropkg", "pull", str(wheel_file)], obj=fake_metadata
@@ -231,10 +222,7 @@ class TestMicropkgPullCommand:
             cli=fake_project_cli, metadata=fake_metadata, alias=package_name
         )
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=package_name, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=package_name, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -260,10 +248,7 @@ class TestMicropkgPullCommand:
 
         call_micropkg_package(cli=fake_project_cli, metadata=fake_metadata)
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -292,10 +277,7 @@ class TestMicropkgPullCommand:
         mocked_filesystem = mocker.patch("fsspec.filesystem")
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
 
         options = ["--fs-args", str(fs_args_config)]
@@ -316,10 +298,7 @@ class TestMicropkgPullCommand:
         call_pipeline_create(fake_project_cli, fake_metadata)
         call_micropkg_package(fake_project_cli, fake_metadata)
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -370,10 +349,7 @@ class TestMicropkgPullCommand:
         assert not source_params_config.exists()
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -437,10 +413,7 @@ class TestMicropkgPullCommand:
         assert not test_path.exists()
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -650,7 +623,6 @@ class TestPipelinePullFromManifest:
         pyproject_toml = fake_repo_path / "pyproject.toml"
         wheel_file = (
             lambda name: fake_repo_path
-            / "src"
             / "dist"
             / _get_wheel_name(name=name, version="0.1")
         )

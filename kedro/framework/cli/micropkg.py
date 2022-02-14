@@ -202,7 +202,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     "-d",
     "--destination",
     type=click.Path(resolve_path=True, file_okay=False),
-    help="Location where to create the wheel file. Defaults to `src/dist`.",
+    help="Location where to create the wheel file. Defaults to `dist/`.",
 )
 @click.option(
     "-v",
@@ -275,7 +275,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
 
-    destination = Path(destination) if destination else package_dir.parent / "dist"
+    destination = Path(destination) if destination else metadata.project_path / "dist"
     version = version or _get_default_version(metadata, pipeline_name)
 
     _generate_wheel_file(

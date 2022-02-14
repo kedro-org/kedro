@@ -82,7 +82,7 @@ You can pull a micro-package from different locations, including local storage, 
 +--------------------------------+--------------------------------------------------------------------------------------+
 | Operation                      | Command                                                                              |
 +================================+======================================================================================+
-| Pulling from a local directory | ``kedro micropkg pull <project-root>/dist/<pipeline_name>-0.1-py3-none-any.whl`` |
+| Pulling from a local directory | ``kedro micropkg pull <project-root>/dist/<pipeline_name>-0.1-py3-none-any.whl``     |
 +--------------------------------+--------------------------------------------------------------------------------------+
 | Pull from cloud storage        | ``kedro micropkg pull s3://my_bucket/<pipeline_name>-0.1-py3-none-any.whl``          |
 +--------------------------------+--------------------------------------------------------------------------------------+

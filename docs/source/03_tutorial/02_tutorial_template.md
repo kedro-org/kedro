@@ -50,7 +50,7 @@ Edit your `src/requirements.txt` file to include the following lines:
 kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6   # Specify optional Kedro dependencies
 kedro-viz~=4.0                                                                 # Visualise your pipelines
 openpyxl>=3.0.6, <4.0                                                          # Use modern Excel engine (will not be required in 0.18.0)
-scikit-learn~=1.0                                                              # For modelling in the data science pipeline 
+scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```
 
 To install all the project-specific dependencies, navigate to the root directory of the project and run:

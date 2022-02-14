@@ -25,7 +25,7 @@ Adding namespaces to [modular pipelines](https://kedro.readthedocs.io/en/stable/
     from kedro.pipeline import Pipeline, node
     from kedro.pipeline.modular_pipeline import pipeline
 
-    from spaceflights_tutorial.pipelines.data_processing.nodes import (
+    from kedro_tutorial.pipelines.data_processing.nodes import (
         preprocess_companies,
         preprocess_shuttles,
         create_model_input_table,

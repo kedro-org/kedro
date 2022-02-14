@@ -145,7 +145,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 Be sure to import `node`, and your functions by adding them to the beginning of `pipeline.py`:
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import preprocess_companies, preprocess_shuttles
 ```
@@ -211,8 +211,6 @@ kedro run
 You should see output similar to the following:
 
 ```bash
-kedro run
-
 2019-08-19 10:50:39,950 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:50:39,957 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
 2019-08-19 10:50:48,521 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
@@ -350,7 +348,7 @@ You should see output similar to the following:
 2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
-### Use `kedro viz --autoreload` to see how Kedro brings the pipeline together
+### Use `kedro viz --autoreload`
 
 Run the following command:
 
@@ -481,7 +479,7 @@ Versioning is enabled for `regressor`, which means that the pickled output of th
 To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import evaluate_model, split_data, train_model
 

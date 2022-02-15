@@ -300,7 +300,7 @@ The following command packages all the files related to a modular pipeline into 
 kedro pipeline package <pipeline_module_path>
 ```
 
-Further information is available in the [pipeline documentation](../nodes_and_pipelines/modular_pipelines.md).
+Further information is available in the [micro-packaging](../nodes_and_pipelines/micro_packaging.md) documentation.
 
 ##### Pull a modular pipeline in your project
 The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
@@ -309,7 +309,7 @@ The following command pulls all the files related to a modular pipeline from eit
 kedro pipeline pull <package_name> (or path to a sdist file)
 ```
 
-Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
+Further information is available in the [micro-packaging](../nodes_and_pipelines/micro_packaging.md) documentation.
 
 ##### Delete a modular pipeline
 The following command deletes all the files related to a modular pipeline in your Kedro project.
@@ -318,7 +318,7 @@ The following command deletes all the files related to a modular pipeline in you
 kedro pipeline delete <pipeline_name>
 ```
 
-Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
+Further information is available in the [modular pipeline](../nodes_and_pipelines/modular_pipelines.md) documentation.
 
 
 #### Registered pipelines

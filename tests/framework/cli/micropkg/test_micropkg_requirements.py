@@ -50,7 +50,7 @@ class TestPipelineRequirements:
         )
         assert result.exit_code == 0
 
-    def call_pipeline_package(self, cli, metadata):
+    def call_micropkg_package(self, cli, metadata):
         result = CliRunner().invoke(
             cli,
             ["micropkg", "package", PIPELINE_NAME],
@@ -64,7 +64,7 @@ class TestPipelineRequirements:
         )
         assert result.exit_code == 0
 
-    def call_pipeline_pull(self, cli, metadata, repo_path):
+    def call_micropkg_pull(self, cli, metadata, repo_path):
         wheel_file = (
             repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
@@ -95,9 +95,9 @@ class TestPipelineRequirements:
         )
         pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
@@ -126,9 +126,9 @@ class TestPipelineRequirements:
         )
         pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
@@ -151,9 +151,9 @@ class TestPipelineRequirements:
         )
         pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
         existing_requirements = _safe_parse_requirements(COMPLEX_REQUIREMENTS)
@@ -179,9 +179,9 @@ class TestPipelineRequirements:
         )
         pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
         existing_requirements = _safe_parse_requirements(initial_dependency)
@@ -213,9 +213,9 @@ class TestPipelineRequirements:
         pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
         packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
 
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
 
@@ -239,9 +239,9 @@ class TestPipelineRequirements:
         project_requirements_txt.unlink()
 
         self.call_pipeline_create(fake_project_cli, fake_metadata)
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
         project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
@@ -261,9 +261,9 @@ class TestPipelineRequirements:
         pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
         project_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         # requirements.txt expected to be copied into requirements.in without any
         # addition
@@ -277,9 +277,9 @@ class TestPipelineRequirements:
         """No pipeline requirements.txt and no project requirements.in does not
         create project requirements.in."""
         self.call_pipeline_create(fake_project_cli, fake_metadata)
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
         assert not project_requirements_in.exists()
@@ -294,9 +294,9 @@ class TestPipelineRequirements:
             fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"
         )
         pipeline_requirements_txt.touch()
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_micropkg_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
-        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+        self.call_micropkg_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
         assert not project_requirements_in.exists()

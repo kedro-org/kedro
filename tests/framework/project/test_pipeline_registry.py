@@ -47,9 +47,7 @@ def mock_package_name_with_unimportable_pipelines_file(tmpdir):
 
 
 def test_pipelines_without_configure_project_throws_exception():
-    with pytest.raises(
-        ModuleNotFoundError, match="No module named 'dummy_package'"
-    ):
+    with pytest.raises(ModuleNotFoundError, match="No module named 'dummy_package'"):
         assert pipelines == {}
 
 

@@ -11,6 +11,8 @@ from typing import Any, Dict
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 
+from kedro.framework.project import configure_project
+
 startup_path = Path.cwd()
 project_path = startup_path
 
@@ -49,6 +51,7 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
 
     _remove_cached_modules(metadata.package_name)
 
+    configure_project(metadata.package_name)
     session = KedroSession.create(
         metadata.package_name, path, env=env, extra_params=extra_params
     )

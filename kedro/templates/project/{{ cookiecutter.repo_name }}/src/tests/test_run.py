@@ -25,5 +25,5 @@ def project_context():
 # and should be replaced with the ones testing the project
 # functionality
 class TestProjectContext:
-    def test_package_name(self, project_context):
-        assert project_context.package_name == "{{ cookiecutter.python_package }}"
+    def test_project_path(self, project_context):
+        assert project_context.project_path == Path.cwd()

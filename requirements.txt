@@ -7,9 +7,8 @@ fsspec>=2021.4, <=2022.1
 gitpython~=3.0
 jmespath>=0.9.5, <1.0
 jupyter_client>=5.1, <7.0
-pip-tools~=6.4.0; python_version == '3.6'
-pip-tools~=6.5; python_version > '3.6'
-pluggy~=0.13.0
+pip-tools~=6.5
+pluggy~=1.0.0
 python-json-logger~=2.0
 PyYAML>=4.2, <6.0
 rope~=0.21.0  # subject to LGPLv3 license

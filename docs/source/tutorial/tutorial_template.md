@@ -49,7 +49,6 @@ Edit your `src/requirements.txt` file to include the following lines:
 ```text
 kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.6   # Specify optional Kedro dependencies
 kedro-viz~=4.0                                                                 # Visualise your pipelines
-openpyxl>=3.0.6, <4.0                                                          # Use modern Excel engine (will not be required in 0.18.0)
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```
 
@@ -59,7 +58,7 @@ To install all the project-specific dependencies, navigate to the root directory
 pip install -r src/requirements.txt
 ```
 
-You can find out more about [how to work with project dependencies](../kedro_project_setup/dependencies.md) in the Kedro project documentation. In a [later step of this tutorial](./create_pipelines.md#update-dependencies), we will modify project's dependencies to illustrate how, once you have installed project-specific dependencies, you can update them.
+You can find out more about [how to work with project dependencies](../kedro_project_setup/dependencies.md) in the Kedro project documentation.
 
 
 ## Configure the project

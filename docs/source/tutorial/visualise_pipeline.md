@@ -4,7 +4,7 @@
 
 ## Install Kedro-Viz
 
-If you did not already install Kedro-Viz when you [installed the tutorial project dependencies](02_tutorial_template.md#install-dependencies) then you can do so now by running:
+If you did not already install Kedro-Viz when you [installed the tutorial project dependencies](tutorial_template.md#install-dependencies) then you can do so now by running:
 ```bash
 pip install kedro-viz
 ```

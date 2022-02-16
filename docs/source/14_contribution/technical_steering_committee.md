@@ -39,6 +39,7 @@ We look for commitment markers with the following:
 - Evidence of already having started pull requests and code reviews under the guidance of maintainers; including asking
   for help where needed
 - Showing excitement about the future of Kedro
+- Building a collaborative relationship with the existing team
 
 ## Application process
 

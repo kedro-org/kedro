@@ -226,7 +226,7 @@ You should see output similar to the following:
 
 ### Visualise the pipeline
 
-Kedro-Viz at this point will render a visualisation of a very simple, but valid, pipeline. To show the visualisation, run: 
+Kedro-Viz at this point will render a visualisation of a very simple, but valid, pipeline. To show the visualisation, run:
 
 ```bash
 kedro viz

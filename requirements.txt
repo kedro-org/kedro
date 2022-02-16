@@ -3,7 +3,7 @@ cachetools~=4.1
 click<8.0
 cookiecutter~=1.7.0
 dynaconf>=3.1.2,<4.0.0
-fsspec>=2021.04, <=2022.1
+fsspec>=2021.4, <=2022.1
 gitpython~=3.0
 jmespath>=0.9.5, <1.0
 jupyter_client>=5.1, <7.0

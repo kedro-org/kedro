@@ -54,7 +54,7 @@ Voting can change project maintainers and decide on the future of Kedro. The TSC
 
 ### Other issues or proposals
 
-Open Github Discussions host votes on issues, proposals and changes affecting the future of Kedro. These votes require **a 1/2 majority**.
+Open Github Discussions host votes on issues, proposals and changes affecting the future of Kedro, including amendments to our ways of working described in this document. These votes require **a 1/2 majority**.
 
 ### Adding or removing maintainers
 

@@ -9,7 +9,7 @@ You can package a modular pipeline by executing: `kedro pipeline package pipelin
 
 
 * This will generate a new [tar](https://docs.python.org/3/distutils/sourcedist.html) file for this pipeline.
-* By default, the wheel file will be saved into `dist` directory inside your project.
+* By default, the tar file will be saved into `dist` directory inside your project.
 * You can customise the target with the `--destination` (`-d`) option.
 
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
@@ -30,7 +30,7 @@ When you package your modular pipeline, Kedro will also automatically package fi
             └── {{pipeline_name}}    <-- Pipeline tests
 ```
 
-Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the modular pipeline wheel file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.
+Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the modular pipeline tar file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.
 
 ```eval_rst
 .. note::  Kedro will not package the catalog config files even if those are present in ``conf/<env>/catalog/<pipeline_name>.yml``.
@@ -38,7 +38,7 @@ Kedro will also include any requirements found in `src/<python_package>/pipeline
 
 If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_name>`.
 
-In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel file directly, or via a cloud storage such as AWS S3.
+In addition to [PyPI](https://pypi.org/), you can also share the packaged tar file directly, or via a cloud storage such as AWS S3.
 
 ## Package multiple modular pipelines
 
@@ -58,16 +58,16 @@ second_package = {}
 ```
 
 ```eval_rst
-.. note::  The examples above apply to any generic Python package, modular pipelines fall under this category and can be easily addressed via the ``piplines.pipeline_name`` syntax.
+.. note::  The examples above apply to any generic Python package, modular pipelines fall under this category and can be easily addressed via the ``pipelines.pipeline_name`` syntax.
 ```
 
 
 ## Pull a modular pipeline
 
-You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`.
+You can pull a modular pipeline from a tar file by executing `kedro pipeline pull <package_name>`.
 
-* The `<package_name>` must either be a package name on PyPI or a path to the wheel file.
-* Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
+* The `<package_name>` must either be a package name on PyPI or a path to the tar file.
+* Kedro will unpack the tar file, and install the files in following locations in your Kedro project:
   * All the modular pipeline code in `src/<python_package>/<micropackage_name>/`
   * Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`.
   * To place parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
@@ -120,7 +120,7 @@ client_kwargs:
 "https://www.url.to/second-pipeline.tar.gz" = {alias = "aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
 ```
 
-* The keys (wheel references in this case) are the package paths
+* The keys (tar references in this case) are the package paths
 * The values are the options that `kedro pipeline pull <package_path>` CLI command accepts.
 
 ```eval_rst

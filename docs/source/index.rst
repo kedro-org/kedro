@@ -80,7 +80,7 @@ Welcome to Kedro's documentation!
    tutorial/set_up_data
    tutorial/create_pipelines
    tutorial/visualise_pipeline
-   tutorial/namespacing_pipelines
+   tutorial/namespace_pipelines
    tutorial/set_up_experiment_tracking
    tutorial/package_a_project
 

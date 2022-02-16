@@ -41,7 +41,7 @@ class AbstractRunner(ABC):
     def run(
         self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
     ) -> Dict[str, Any]:
-        """Run the ``Pipeline`` using the ``DataSet``s provided by ``catalog``
+        """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
 
         Args:
@@ -86,19 +86,20 @@ class AbstractRunner(ABC):
         self, pipeline: Pipeline, catalog: DataCatalog
     ) -> Dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
-        ``DataSet``s provided by ``catalog`` and save results back to the same
-        objects.
+        datasets provided by ``catalog``, and save results back to the
+        same objects.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
         Raises:
-            ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
+            ValueError: Raised when ``Pipeline`` inputs cannot be
+                satisfied.
 
         Returns:
-            Any node outputs that cannot be processed by the ``DataCatalog``.
-            These are returned in a dictionary, where the keys are defined
-            by the node outputs.
+            Any node outputs that cannot be processed by the
+            ``DataCatalog``. These are returned in a dictionary, where
+            the keys are defined by the node outputs.
 
         """
         free_outputs = pipeline.outputs() - set(catalog.list())
@@ -108,12 +109,12 @@ class AbstractRunner(ABC):
             *to_build
         )
 
-        # we also need any memory data sets that feed into that
-        # including chains of memory data sets
-        memory_sets = pipeline.data_sets() - set(catalog.list())
-        output_to_memory = pipeline.only_nodes_with_outputs(*memory_sets)
-        input_from_memory = to_rerun.inputs() & memory_sets
-        to_rerun += output_to_memory.to_outputs(*input_from_memory)
+        # We also need any missing datasets that are required to run the
+        # `to_rerun` pipeline, including any chains of missing datasets.
+        unregistered_ds = pipeline.data_sets() - set(catalog.list())
+        output_to_unregistered = pipeline.only_nodes_with_outputs(*unregistered_ds)
+        input_from_unregistered = to_rerun.inputs() & unregistered_ds
+        to_rerun += output_to_unregistered.to_outputs(*input_from_unregistered)
 
         return self.run(to_rerun, catalog)
 
@@ -134,14 +135,14 @@ class AbstractRunner(ABC):
 
     @abstractmethod  # pragma: no cover
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
-        """Factory method for creating the default data set for the runner.
+        """Factory method for creating the default dataset for the runner.
 
         Args:
-            ds_name: Name of the missing data set
+            ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of an implementation of AbstractDataSet to be
-            used for all unregistered data sets.
+            An instance of an implementation of ``AbstractDataSet`` to be
+            used for all unregistered datasets.
 
         """
         pass
@@ -179,7 +180,7 @@ def run_node(
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
-        run_id: The id of the pipeline run
+        run_id: The id of the pipeline run.
 
     Returns:
         The node argument.

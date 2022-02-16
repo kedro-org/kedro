@@ -95,6 +95,7 @@ exclude_patterns = [
     "kedro_docs_style_guide.md",
 ]
 
+
 type_targets = {
     "py:class": (
         "object",
@@ -117,6 +118,7 @@ type_targets = {
         "kedro.io.core.DataSetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
+        "kedro.io.memory_data_set.MemoryDataSet",
         "kedro.io.transformers.AbstractTransformer",
         "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
         "kedro.io.partitioned_data_set.PartitionedDataSet",
@@ -159,7 +161,6 @@ type_targets = {
         "ConfirmNotUniqueError",
     ),
 }
-
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
 nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
 

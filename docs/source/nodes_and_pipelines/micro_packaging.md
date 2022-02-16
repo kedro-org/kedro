@@ -47,10 +47,10 @@ To package multiple modular pipelines in bulk, run `kedro pipeline package --all
 ```toml
 [tool.kedro.pipeline.package]
 first_package = {alias = "aliased_package", destination = "somewhere/else", env = "uat"}
-second_package = {}
+"utils.cleaning" = {}
 ```
 
-* The keys (`first_package`, `second_pacakge`) are the names of the modular pipeline folders within the codebase.
+* The keys (`first_package`, `utils.cleaning`) are the Python module paths of the micro-packages, relative to your project's package name.
 * The values are the options accepted by the `kedro pipeline package <pipeline_name>` CLI command.
 
 ```eval_rst
@@ -117,7 +117,7 @@ client_kwargs:
 ```toml
 [tool.kedro.pipeline.pull]
 "src/dist/first-pipeline-0.1-py3-none-any.tar.gz" = {}
-"https://www.url.to/second-pipeline.tar.gz" = {alias = "aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
+"https://www.url.to/second-pipeline.tar.gz" = {alias = "aliased_pipeline", destination = "pipelines", fs-args = "pipeline_pull_args.yml"}
 ```
 
 * The keys (tar references in this case) are the package paths

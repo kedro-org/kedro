@@ -25,6 +25,10 @@ def mock_package_name_with_pipelines_file(tmpdir):
     sys.path.pop(0)
 
 
+def test_pipelines_without_configure_project_is_empty():
+    assert pipelines == {}
+
+
 @pytest.fixture
 def mock_package_name_with_unimportable_pipelines_file(tmpdir):
     pipelines_file_path = tmpdir.mkdir("test_broken_package") / "pipeline_registry.py"
@@ -44,11 +48,6 @@ def mock_package_name_with_unimportable_pipelines_file(tmpdir):
     sys.path.insert(0, project_path)
     yield package_name
     sys.path.pop(0)
-
-
-def test_pipelines_without_configure_project_throws_exception():
-    with pytest.raises(ModuleNotFoundError, match="No module named 'dummy_package'"):
-        assert pipelines == {}
 
 
 def test_pipelines_after_configuring_project_shows_updated_values(

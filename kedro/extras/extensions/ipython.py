@@ -11,8 +11,6 @@ from typing import Any, Dict
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 
-from kedro.framework.project import configure_project
-
 startup_path = Path.cwd()
 project_path = startup_path
 
@@ -41,7 +39,7 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
 
     import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
-    from kedro.framework.project import pipelines
+    from kedro.framework.project import configure_project, pipelines
     from kedro.framework.session import KedroSession
     from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import bootstrap_project

@@ -121,14 +121,10 @@ class _ProjectPipelines(MutableMapping):
         if self._pipelines_module is None or self._is_data_loaded:
             return
 
-        try:
-            register_pipelines = self._get_pipelines_registry_callable(
-                self._pipelines_module
-            )
-        except (ModuleNotFoundError, AttributeError) as exc:
-            raise exc
-        else:
-            project_pipelines = register_pipelines()
+        register_pipelines = self._get_pipelines_registry_callable(
+            self._pipelines_module
+        )
+        project_pipelines = register_pipelines()
 
         self._content = project_pipelines
         self._is_data_loaded = True

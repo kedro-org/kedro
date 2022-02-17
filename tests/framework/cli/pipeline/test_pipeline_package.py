@@ -15,7 +15,7 @@ FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pipelines")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_dist")
 class TestPipelinePackageCommand:
     def assert_wheel_contents_correct(
         self, wheel_location, package_name=PIPELINE_NAME, version="0.1"
@@ -420,7 +420,7 @@ class TestPipelinePackageCommand:
 
 
 @pytest.mark.usefixtures(
-    "chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pyproject_toml", "cleanup_pipelines"
+    "chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pyproject_toml"
 )
 class TestPipelinePackageFromManifest:
     def test_pipeline_package_all(  # pylint: disable=too-many-locals

@@ -17,8 +17,11 @@ In the terminal run the following command:
 kedro pipeline create data_processing
 ```
 
-* This will generate all the files you need to start writing a `data_processing` pipeline. This command generates a new `nodes.py` and `pipeline.py` under the `src/kedro_tutorial/pipelines/data_processing` folder.
-* The `kedro pipeline create <pipeline_name>` command is a convenience method so you don't have to worry about getting your ``__init__.py`` files in the right place, but of course you are welcome to create all the files manually.
+This generates all the files you need to start writing a `data_processing` pipeline:
+* `nodes.py` and `pipeline.py` in the `src/kedro_tutorial/pipelines/data_processing` folder for the main node functions that form your pipeline
+* `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
+* `src/tests/pipelines/data_processing` for tests for your pipeline
+* `__init__.py` files in the required places to ensure that the pipeline can be imported by Python
 
 ```bash
 
@@ -46,9 +49,9 @@ kedro pipeline create data_processing
                 └── test_pipeline.py
 ```
 
-### Adding the functions to `nodes.py`
+### Add node functions
 
-Open `src/kedro_tutorial/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each input a raw dataframe and output a dataframe containing pre-processed data:
+Open `src/kedro_tutorial/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each take a raw DataFrame and output a DataFrame containing pre-processed data:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -115,7 +118,7 @@ Add the following to `src/kedro_tutorial/pipelines/data_processing/pipeline.py`,
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
-    return Pipeline(
+    return pipeline(
         [
             node(
                 func=preprocess_companies,
@@ -142,7 +145,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 Be sure to import `node`, and your functions by adding them to the beginning of `pipeline.py`:
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import preprocess_companies, preprocess_shuttles
 ```
@@ -208,8 +211,6 @@ kedro run
 You should see output similar to the following:
 
 ```bash
-kedro run
-
 2019-08-19 10:50:39,950 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:50:39,957 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
 2019-08-19 10:50:48,521 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
@@ -223,11 +224,15 @@ kedro run
 
 ```
 
-Running Kedro-Viz at this point renders a very simple, but valid pipeline:
+### Visualise the pipeline
+
+Kedro-Viz at this point will render a visualisation of a very simple, but valid, pipeline. To show the visualisation, run:
 
 ```bash
 kedro viz
 ```
+
+This command should open up a visualisation in your browser that looks like the following:
 
 ![simple_pipeline](../meta/images/simple_pipeline.png)
 
@@ -251,11 +256,11 @@ The code above declares explicitly that [pandas.ParquetDataSet](/kedro.extras.da
 
 The [Data Catalog](../13_resources/02_glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as Parquet) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
-[Apache Parquet](https://github.com/apache/parquet-format) is our recommended format for working with processed and typed data. We recommend getting your data out of CSV as soon as possible. Parquet supports things like compression, partitioning and types out of the box. Whilst you do lose the ability to view the file as text, the benefits greatly outweigh the drawbacks.
+We choose the [Apache Parquet](https://github.com/apache/parquet-format) format for working with processed and typed data. We recommend getting your data out of CSV as soon as possible. Parquet supports things like compression, partitioning and types out of the box. Whilst you lose the ability to view the file as text, the benefits greatly outweigh the drawbacks.
 
 ### Extend the data processing pipeline
 
-The next step in the tutorial is to add another node for a function to join together the three dataframes into a single model input table. First, add the `create_model_input_table()` function from the snippet below to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
+The next step in the tutorial is to add another node for a function to join together the three DataFrames into a single model input table. First, add the `create_model_input_table()` function from the snippet below to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -304,7 +309,7 @@ from .nodes import create_model_input_table, preprocess_companies, preprocess_sh
 ```
 
 
-### Persisting the model input table
+### Persist the model input table
 
 If you want the model input table data to be saved to file rather than used in-memory, add an entry to `conf/base/catalog.yml`:
 
@@ -343,7 +348,7 @@ You should see output similar to the following:
 2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
-### Using `kedro viz --autoreload` to see how Kedro brings the pipeline together
+### Use `kedro viz --autoreload`
 
 Run the following command:
 
@@ -351,39 +356,21 @@ Run the following command:
 kedro viz --autoreload
 ```
 
-The gif below shows how commenting out the `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
+The `autoreload` flag will ensure that changes to your pipeline are automatically reflected in Kedro-Viz. For example, commenting out `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
 
 ![autoreload](../meta/images/autoreload.gif)
 
 ```eval_rst
-.. note::  This is also a great time to highlight how Kedro's `topological sorting <https://en.wikipedia.org/wiki/Topological_sorting>`_ works. The actual order of the ``node()`` calls in the ``Pipeline`` object is irrelevant, Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means you as a developer simply ask Kedro what data you want and it will derive the execution graph automatically.
+.. note::  This is also a great time to highlight how Kedro's `topological sorting <https://en.wikipedia.org/wiki/Topological_sorting>`_ works. The actual order of the ``node()`` calls in the ``pipeline`` is irrelevant; Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means that you, as a developer, simply ask Kedro what data you want and it will derive the execution graph automatically.
 ```
 
 ## Data science pipeline
 
-We have created a modular pipeline for data processing, which merges three input datasets to create a model input table. Now we will create the data science pipeline for price prediction, which uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)
-implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
-
-### Update dependencies
-
-We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
-
-To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update ``src/requirements.txt`` as you did previously in the tutorial before you built the project's requirements with ``kedro build-reqs``:
-
-```text
-scikit-learn==0.23.1
-```
-
-Then, re-run `kedro install` with a flag telling Kedro to recompile the requirements:
-
-```bash
-kedro install --build-reqs
-```
-
-You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies) in the Kedro project documentation.
+We have created a modular pipeline for data processing, which merges three input datasets to create a model input table. Now we will create the data science pipeline for price prediction, which uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Create the data science pipeline
 
+Run the following command to create the `data_science` pipeline:
 ```bash
 kedro pipeline create data_science
 ```
@@ -492,13 +479,13 @@ Versioning is enabled for `regressor`, which means that the pickled output of th
 To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import evaluate_model, split_data, train_model
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return Pipeline(
+    return pipeline(
         [
             node(
                 func=split_data,

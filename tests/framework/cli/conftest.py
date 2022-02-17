@@ -128,7 +128,7 @@ def fake_project_cli(
     # module caching mechanism. Any `reload` on it will not work though.
     old_path = sys.path.copy()
     sys.path = [str(fake_repo_path / "src")] + sys.path
-    o = sys.modules.copy()
+
     import_module(PACKAGE_NAME)
     configure_project(PACKAGE_NAME)
     yield fake_kedro_cli
@@ -138,11 +138,16 @@ def fake_project_cli(
     for key, value in old_settings.items():
         settings.set(key, value)
     sys.path = old_path
-    n = sys.modules
-    for key in list(n.keys()):
-        if key.startswith(PACKAGE_NAME):
-            del n[key]
-    # del sys.modules[PACKAGE_NAME]
+
+    # configure_project does imports that add PACKAGE_NAME.pipelines,
+    # PACKAGE_NAME.settings to sys.modules. These need to be removed.
+    # Ideally we would reset sys.modules to exactly what it was before
+    # running anything, but removal of distutils.build.commands from
+    # sys.modules mysteriously makes some tests for `kedro pipeline package`
+    # fail on Windows, Python 3.7 and 3.8.
+    for module in list(sys.modules.keys()):
+        if module.startswith(PACKAGE_NAME):
+            del sys.modules[module]
 
 
 @fixture

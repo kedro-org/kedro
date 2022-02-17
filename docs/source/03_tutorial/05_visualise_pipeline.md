@@ -17,7 +17,7 @@ kedro viz
 ```
 
 This command will run a server on http://127.0.0.1:4141 that will open up your visualisation on a browser. You should
- be able to see the following:
+be able to see the following:
 
 ![](../meta/images/pipeline_visualisation.png)
 

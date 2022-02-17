@@ -192,6 +192,7 @@ html_show_copyright = False
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [
+    "http://127.0.0.1:8787/status",  # Dask's diagnostics dashboard
     "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
     "https://console.aws.amazon.com/batch/home#/jobs",

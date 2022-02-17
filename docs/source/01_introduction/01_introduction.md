@@ -10,9 +10,9 @@ In the next few chapters, you will learn how to [install Kedro](../02_get_starte
 
 Once you are set up, we suggest working through our examples, including:
 
-- A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](https://kedro.readthedocs.io/en/stable/02_get_started/03_hello_kedro.html)
-- An [introduction to the project template](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) using the Iris dataset
-- A more detailed [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/03_tutorial/02_tutorial_template.html) to give you hands-on experience
+- A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](../02_get_started/03_hello_kedro.md)
+- An [introduction to the project template](../02_get_started/05_example_project.md) using the Iris dataset
+- A more detailed [spaceflights tutorial](../03_tutorial/02_tutorial_template.md) to give you hands-on experience
 
 We also recommend the [frequently asked questions](../12_faq/01_faq.md) and the [API reference documentation](/kedro.rst) for additional information.
 

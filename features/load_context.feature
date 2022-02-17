@@ -15,18 +15,19 @@ Feature: Custom Kedro project
         And I execute the kedro command "run"
         Then I should get a successful exit code
 
-    Scenario: Hooks from installed plugins are automatically registered
+    Scenario: Hooks from installed plugins are automatically registered and work with the default runner
         Given I have installed the test plugin
         When I execute the kedro command "run"
         Then I should get a successful exit code
         And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
         And I should get a message including "Reached after_catalog_created hook"
 
-    Scenario: Pipelines from installed plugins are added to the project's pipelines
+     Scenario: Hooks from installed plugins are automatically registered and work with the parallel runner
         Given I have installed the test plugin
-        When I execute the kedro command "run --pipeline from_plugin"
+        When I execute the kedro command "run --runner=ParallelRunner"
         Then I should get a successful exit code
         And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
+        And I should get a message including "Reached after_catalog_created hook"
 
     Scenario: Disable automatically registered plugin hooks
         Given I have installed the test plugin

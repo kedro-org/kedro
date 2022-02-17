@@ -17,7 +17,6 @@ DEFAULT_KEDRO_COMMANDS = [
     "build-docs",
     "build-reqs",
     "catalog",
-    "install",
     "ipython",
     "jupyter",
     "lint",
@@ -98,7 +97,7 @@ class TestCLITools:
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         raw_cli_structure = get_cli_structure(kedro_cli, get_help=False)
-        assert type(raw_cli_structure["kedro"]["new"]) == dict
+        assert isinstance(raw_cli_structure["kedro"]["new"], dict)
         assert sorted(list(raw_cli_structure["kedro"]["new"].keys())) == sorted(
             [
                 "--verbose",

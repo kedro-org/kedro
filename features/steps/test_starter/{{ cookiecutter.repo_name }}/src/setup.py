@@ -13,7 +13,7 @@ with open("requirements.txt", encoding="utf-8") as f:
     requires = []
     for line in f:
         req = line.split("#", 1)[0].strip()
-        if req and not req.startswith("--"):
+        if req and not req.startswith("-r"):
             requires.append(req)
 
 setup(

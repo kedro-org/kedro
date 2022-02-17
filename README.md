@@ -1,5 +1,5 @@
 ![Kedro Logo Banner](https://raw.githubusercontent.com/kedro-org/kedro/develop/static/img/kedro_banner.png)
-[![Python version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro/)
+[![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)
@@ -28,7 +28,7 @@ It is also possible to install Kedro using `conda`:
 conda install -c conda-forge kedro
 ```
 
-Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_get_started/01_prerequisites.html) contains full installation instructions, and includes how to set up Python virtual environments.
+Our [Get Started guide](https://kedro.readthedocs.io/en/stable/get_started/prerequisites.html) contains full installation instructions, and includes how to set up Python virtual environments.
 
 
 ## What are the main features of Kedro?
@@ -49,9 +49,9 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_get_started/01
 ## How do I use Kedro?
 
 The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) includes three examples to help get you started:
-- A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](https://kedro.readthedocs.io/en/stable/02_get_started/03_hello_kedro.html)
-- An [introduction to the project template](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) using the Iris dataset
-- A more detailed [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/03_tutorial/02_tutorial_template.html) to give you hands-on experience
+- A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](https://kedro.readthedocs.io/en/stable/get_started/hello_kedro.html)
+- An [introduction to the project template](https://kedro.readthedocs.io/en/stable/get_started/example_project.html) using the Iris dataset
+- A more detailed [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/tutorial/tutorial_template.html) to give you hands-on experience
 
 
 ## Why does Kedro exist?
@@ -66,7 +66,7 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 
 ## The humans behind Kedro
 
-Kedro is maintained by [a product team](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html) and a number of [contributors from across the world](https://github.com/kedro-org/kedro/releases).
+Kedro is maintained by [a product team](https://kedro.readthedocs.io/en/stable/faq/faq.html) and a number of [contributors from across the world](https://github.com/kedro-org/kedro/releases).
 
 
 ## Can I contribute?
@@ -76,7 +76,7 @@ Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](ht
 
 ## Where can I learn more?
 
-There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
+There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/faq/faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
 
 
 ## Who likes Kedro?

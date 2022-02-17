@@ -23,15 +23,6 @@ def _remove_cached_modules(package_name):
         del sys.modules[module]  # pragma: no cover
 
 
-def _clear_hook_manager():
-    from kedro.framework.hooks import get_hook_manager
-
-    hook_manager = get_hook_manager()
-    name_plugin_pairs = hook_manager.list_name_plugin()
-    for name, plugin in name_plugin_pairs:
-        hook_manager.unregister(name=name, plugin=plugin)  # pragma: no cover
-
-
 def _find_kedro_project(current_dir):  # pragma: no cover
     from kedro.framework.startup import _is_project
 
@@ -52,8 +43,6 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
     from kedro.framework.session import KedroSession
     from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import bootstrap_project
-
-    _clear_hook_manager()
 
     path = path or project_path
     metadata = bootstrap_project(path)

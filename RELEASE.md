@@ -3,6 +3,7 @@
 ## Major features and improvements
 * `pipeline` now accepts `tags` and a collection of `Node`s and/or `Pipeline`s rather than just a single `Pipeline` object. `pipeline` should be used in preference to `Pipeline` when creating a Kedro pipeline.
 * `pandas.SQLTableDataSet` and `pandas.SQLQueryDataSet` now only open one connection per database, at instantiation time (therefore at catalog creation time), rather than one per load/save operation.
+* Documented distribution of Kedro pipelines with Dask.
 
 ## Bug fixes and other changes
 * Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).
@@ -404,7 +405,7 @@ Check your source directory. If you defined a different source directory (`sourc
 
 ## Major features and improvements
 
-* Added documentation with a focus on single machine and distributed environment deployment; the series includes Docker, Argo, Prefect, Kubeflow, AWS Batch, AWS Sagemaker and extends our section on Databricks
+* Added documentation with a focus on single machine and distributed environment deployment; the series includes Docker, Argo, Prefect, Kubeflow, AWS Batch, AWS Sagemaker and extends our section on Databricks.
 * Added [kedro-starter-spaceflights](https://github.com/kedro-org/kedro-starter-spaceflights/) alias for generating a project: `kedro new --starter spaceflights`.
 
 ## Bug fixes and other changes

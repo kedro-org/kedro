@@ -28,6 +28,7 @@ Andrew Mackay,
 [Rashida Kanchwala](https://github.com/rashidakanchwala),
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Susanna Wong](https://github.com/studioswong),
+[Nero Okwa](https://github.com/NeroOkwa),
 [Tynan DeBold](https://github.com/tynandebold) and
 [Yetunde Dada](https://github.com/yetudada).
 

@@ -24,6 +24,7 @@ DEFAULT_KEDRO_COMMANDS = [
     "new",
     "package",
     "pipeline",
+    "micropkg",
     "registry",
     "run",
     "starter",

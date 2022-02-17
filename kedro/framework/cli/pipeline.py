@@ -280,6 +280,11 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     metadata: ProjectMetadata, package_path, env, alias, fs_args, all_flag, **kwargs
 ) -> None:
     """Pull and unpack a modular pipeline in your project."""
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro pipeline pull` will be deprecated in Kedro 0.18.0. "
+        "In future please use `kedro micropkg pull` instead."
+    )
+    click.secho(deprecation_message, fg="red")
     if not package_path and not all_flag:
         click.secho(
             "Please specify a package path or add '--all' to pull all pipelines in the "
@@ -418,6 +423,11 @@ def package_pipeline(
     metadata: ProjectMetadata, name, env, alias, destination, version, all_flag
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline as a Python .whl."""
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro pipeline package` will be deprecated in Kedro 0.18.0. "
+        "In future please use `kedro micropkg package` instead."
+    )
+    click.secho(deprecation_message, fg="red")
     if not name and not all_flag:
         click.secho(
             "Please specify a pipeline name or add '--all' to package all pipelines in "

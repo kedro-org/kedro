@@ -1,5 +1,5 @@
 ```eval_rst
-.. warning::  `kedro pipeline package/pull` will be deprecated in 0.18.0. We recommend using `kedro micropkg package` instead.
+.. warning::  `kedro pipeline package/pull` will be deprecated in 0.18.0. We recommend using `kedro micropkg package/pull` instead.
 ```
 
 # Micro-packaging

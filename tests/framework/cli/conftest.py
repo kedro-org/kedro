@@ -128,7 +128,7 @@ def fake_project_cli(
     # module caching mechanism. Any `reload` on it will not work though.
     old_path = sys.path.copy()
     sys.path = [str(fake_repo_path / "src")] + sys.path
-
+    o = sys.modules.copy()
     import_module(PACKAGE_NAME)
     configure_project(PACKAGE_NAME)
     yield fake_kedro_cli
@@ -138,7 +138,11 @@ def fake_project_cli(
     for key, value in old_settings.items():
         settings.set(key, value)
     sys.path = old_path
-    del sys.modules[PACKAGE_NAME]
+    n = sys.modules
+    for key in list(n.keys()):
+        if key.startswith(PACKAGE_NAME):
+            del n[key]
+    # del sys.modules[PACKAGE_NAME]
 
 
 @fixture

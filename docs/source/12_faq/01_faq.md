@@ -23,10 +23,10 @@ Andrew Mackay,
 [Lim Hoang](https://github.com/limdauto),
 [Lorena Bălan](https://github.com/lorenabalan),
 [Merel Theisen](https://github.com/MerelTheisenQB),
+[Nero Okwa](https://github.com/NeroOkwa),
 [Rashida Kanchwala](https://github.com/rashidakanchwala),
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Susanna Wong](https://github.com/studioswong),
-[Nero Okwa](https://github.com/NeroOkwa),
 [Tynan DeBold](https://github.com/tynandebold) and
 [Yetunde Dada](https://github.com/yetudada).
 

@@ -1,5 +1,5 @@
 -r requirements.txt
-adlfs~=0.7
+adlfs>=2021.7.1, <=2022.2
 bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython~=1.73
@@ -11,7 +11,7 @@ dask[complete]~=2021.10  # pinned by Snyk to avoid a vulnerability
 delta-spark~=1.0
 dill~=0.3.1
 filelock>=3.4.0, <4.0
-gcsfs>=2021.04, <2022.01  # Upper bound set arbitrarily, to be reassessed in early 2022
+gcsfs>=2021.4, <=2022.1
 geopandas>=0.6.0, <1.0
 hdfs>=2.5.8, <3.0
 holoviews~=1.13.0

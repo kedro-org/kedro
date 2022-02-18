@@ -1,4 +1,4 @@
-# Namespacing pipelines
+# Namespace pipelines
 
 This section covers the following:
 
@@ -7,8 +7,8 @@ This section covers the following:
 
 Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipelines.md) unlocks some sophisticated functionality in Kedro
 
-1. You are able to [instantiate the same pipeline structure multiple times](../nodes_and_pipelines/modular_pipelines.md#how-to-use-a-modular-pipeline-twice), but provide different inputs/outputs.
-2. You can unlock the full power of [micro-packaging](../nodes_and_pipelines/modular_pipelines.md#How-to-share-a-modular-pipeline).
+1. You are able to [instantiate the same pipeline structure multiple times](../nodes_and_pipelines/modular_pipelines.md), but provide different inputs/outputs.
+2. You can unlock the full power of [micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 3. You can de-clutter your mental model with Kedro-Viz rendering collapsible components.
 
     ![collapsible](../meta/images/collapsible.gif)
@@ -25,7 +25,7 @@ Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipeline
     from kedro.pipeline import Pipeline, node
     from kedro.pipeline.modular_pipeline import pipeline
 
-    from spaceflights_tutorial.pipelines.data_processing.nodes import (
+    from kedro_tutorial.pipelines.data_processing.nodes import (
         preprocess_companies,
         preprocess_shuttles,
         create_model_input_table,
@@ -33,7 +33,7 @@ Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipeline
 
 
     def create_pipeline(**kwargs) -> Pipeline:
-        pipeline_instance = Pipeline(
+        return pipeline(
             [
                 node(
                     func=preprocess_companies,
@@ -49,23 +49,15 @@ Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipeline
                 ),
                 node(
                     func=create_model_input_table,
-                    inputs={
-                        "companies": "preprocessed_companies",
-                        "shuttles": "preprocessed_shuttles",
-                        "reviews": "reviews",
-                    },
+                    inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
                     outputs="model_input_table",
                     name="create_model_input_table_node",
                 ),
-            ]
-        )
-        namespaced_pipeline = pipeline(
-            pipe=pipeline_instance,
+            ],
             namespace="data_processing",
             inputs=["companies", "shuttles", "reviews"],
             outputs="model_input_table",
         )
-        return namespaced_pipeline
     ```
 
     </details>
@@ -89,7 +81,7 @@ In this section we want to add some namespaces in the modelling component of the
     ```yaml
 
     model_options_experimental:
-      test_size: 0.3
+      test_size: 0.2
       random_state: 8
       features:
         - engines
@@ -130,7 +122,7 @@ In this section we want to add some namespaces in the modelling component of the
 
 
     def create_pipeline(**kwargs) -> Pipeline:
-        pipeline_instance = Pipeline(
+        pipeline_instance = pipeline(
             [
                 node(
                     func=split_data,
@@ -174,7 +166,7 @@ In this section we want to add some namespaces in the modelling component of the
 Modular pipelines allow you instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters.
 
 ```python
-pipeline_instance = Pipeline(...)
+pipeline_instance = pipeline(...)
 
 ds_pipeline_1 = pipeline(
     pipe=pipeline_instance,

@@ -2,10 +2,6 @@
 from the Kedro defaults. For further information, including these default values, see
 https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 
-#############
-# Lifecycle #
-#############
-
 # Instantiated project hooks.
 # from {{cookiecutter.python_package}}.hooks import ProjectHooks
 # HOOKS = (ProjectHooks(),)
@@ -22,11 +18,8 @@ https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 # }
 
 # Class that manages Kedro's library components.
+# from kedro.framework.context import KedroContext
 # CONTEXT_CLASS = KedroContext
-
-#################
-# Configuration #
-#################
 
 # Directory that holds configuration.
 # CONF_SOURCE = "conf"
@@ -40,4 +33,5 @@ https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 # }
 
 # Class that manages the Data Catalog.
+# from kedro.io import DataCatalog
 # DATA_CATALOG_CLASS = DataCatalog

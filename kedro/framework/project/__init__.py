@@ -129,16 +129,10 @@ class _ProjectPipelines(MutableMapping):
         self._content = project_pipelines
         self._is_data_loaded = True
 
-    def configure(self, pipelines_module: str) -> None:
+    def configure(self, pipelines_module: Optional[str]) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every `configure` call,
         data are reloaded.
-        """
-        self._clear(pipelines_module)
-
-    def _clear(self, pipelines_module: Optional[str]) -> None:
-        """Helper method to clear the pipelines so new content will be reloaded
-        next time data is accessed. Useful for testing purpose.
         """
         self._is_data_loaded = False
         self._pipelines_module = pipelines_module

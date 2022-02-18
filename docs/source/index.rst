@@ -181,6 +181,7 @@ Welcome to Kedro's documentation!
    14_contribution/02_developer_contributor_guidelines
    14_contribution/03_backwards_compatibility
    14_contribution/04_documentation_contributor_guidelines
+   14_contribution/technical_steering_committee
 
 API documentation
 =================

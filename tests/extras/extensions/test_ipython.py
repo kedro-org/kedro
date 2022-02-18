@@ -70,7 +70,6 @@ def pipeline_cleanup():
     from kedro.framework.project import pipelines
 
     pipelines.configure(None)
-    pipelines._content = {}
 
 
 class TestLoadKedroObjects:

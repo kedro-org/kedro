@@ -134,8 +134,9 @@ class _ProjectPipelines(MutableMapping):
         Reset the data loading state so that after every `configure` call,
         data are reloaded.
         """
-        self._is_data_loaded = False
         self._pipelines_module = pipelines_module
+        self._is_data_loaded = False
+        self._content = {}
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)

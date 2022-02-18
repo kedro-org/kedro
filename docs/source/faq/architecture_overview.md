@@ -21,7 +21,7 @@ As a data pipeline developer, you will interact with a Kedro project, which cons
 
 ### Kedro starter
 
-You can use a [Kedro starter](../get_started/starters) to generate a Kedro project that contains boilerplate  code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
+You can use a [Kedro starter](../get_started/starters.md) to generate a Kedro project that contains boilerplate  code. We maintain a set of [official starters](https://github.com/kedro-org/kedro-starters/) but you can also use a custom starter of your choice.
 
 ### Kedro library
 

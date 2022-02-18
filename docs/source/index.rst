@@ -80,7 +80,7 @@ Welcome to Kedro's documentation!
    tutorial/set_up_data
    tutorial/create_pipelines
    tutorial/visualise_pipeline
-   tutorial/namespacing_pipelines
+   tutorial/namespace_pipelines
    tutorial/set_up_experiment_tracking
    tutorial/package_a_project
 
@@ -107,6 +107,7 @@ Welcome to Kedro's documentation!
    nodes_and_pipelines/nodes
    nodes_and_pipelines/pipeline_introduction
    nodes_and_pipelines/modular_pipelines
+   nodes_and_pipelines/micro_packaging
    nodes_and_pipelines/run_a_pipeline
    nodes_and_pipelines/slice_a_pipeline
 

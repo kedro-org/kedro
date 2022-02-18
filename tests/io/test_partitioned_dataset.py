@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from pathlib import Path
 
@@ -436,10 +437,8 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDataSetS3:
-    @pytest.fixture(autouse=True)
-    def fake_aws_creds(self, monkeypatch):
-        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
-        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):

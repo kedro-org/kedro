@@ -4,11 +4,11 @@
 
 # Micro-packaging
 
-Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond.
+Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond. A micro-package can be any part of a Python code in a Kedro project including pipelines and utility functions.
 
 ## Package a micro-package
 
-You can package a micro-package by executing: `kedro micropkg package <pipeline_name>`
+You can package a micro-package by executing: `kedro micropkg package <micropkg_name>`
 
 * This will generate a new [wheel file](https://pythonwheels.com/) for this micro-package.
 * By default, the wheel file will be saved into `dist/` directory inside your project.
@@ -32,13 +32,13 @@ When you package your micro-package, Kedro will also automatically package files
             └── {{pipeline_name}}    <-- Pipeline tests
 ```
 
-Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the micro-package wheel file. These requirements will later be taken into account when pulling a micro-package via `kedro micropkg pull`.
+Kedro will also include any requirements found in `src/<python_package>/pipelines/<micropkg_name>/requirements.txt` in the micro-package wheel file. These requirements will later be taken into account when pulling a micro-package via `kedro micropkg pull`.
 
 ```eval_rst
-.. note::  Kedro will not package the catalog config files even if those are present in ``conf/<env>/catalog/<pipeline_name>.yml``.
+.. note::  Kedro will not package the catalog config files even if those are present in ``conf/<env>/catalog/<micropkg_name>.yml``.
 ```
 
-If you plan to publish your packaged micro-package to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your micro-package name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro micropkg package --alias <new_package_name> <pipeline_name>`.
+If you plan to publish your packaged micro-package to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your micro-package name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro micropkg package --alias <new_package_name> <micropkg_name>`.
 
 In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel file directly, or via a cloud storage such as AWS S3.
 
@@ -53,7 +53,7 @@ second_pipeline = {}
 ```
 
 * The keys (`first_pipeline`, `second_pipeline`) are the names of the micro-package folders within the codebase.
-* The values are the options accepted by the `kedro micropkg package <pipeline_name>` CLI command.
+* The values are the options accepted by the `kedro micropkg package <micropkg_name>` CLI command.
 
 ```eval_rst
 .. note::  Make sure `destination` is specified as a POSIX path even when working on a Windows machine.
@@ -65,10 +65,10 @@ You can pull a micro-package from a wheel file by executing `kedro micropkg pull
 
 * The `<package_name>` must either be a package name on PyPI or a path to the wheel file.
 * Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
-  * All the micro-package code in `src/<python_package>/pipelines/<pipeline_name>/`
-  * Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`.
-  * To place parameters from a different config environment, run `kedro micropkg pull <pipeline_name> --env <env_name>`
-  * Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
+  * All the micro-package code in `src/<python_package>/pipelines/<micropkg_name>/`
+  * Configuration files in `conf/<env>/parameters/<micropkg_name>.yml`, where `<env>` defaults to `base`.
+  * To place parameters from a different config environment, run `kedro micropkg pull <micropkg_name> --env <env_name>`
+  * Pipeline unit tests in `src/tests/pipelines/<micropkg_name>`
 * Kedro will also parse any requirements packaged with the micro-package and add them to project level `requirements.in`.
 * It is advised to do `kedro build-reqs` to compile the updated list of requirements after pulling a micro-package.
 
@@ -82,9 +82,9 @@ You can pull a micro-package from different locations, including local storage, 
 +--------------------------------+--------------------------------------------------------------------------------------+
 | Operation                      | Command                                                                              |
 +================================+======================================================================================+
-| Pulling from a local directory | ``kedro micropkg pull <project-root>/dist/<pipeline_name>-0.1-py3-none-any.whl``     |
+| Pulling from a local directory | ``kedro micropkg pull <project-root>/dist/<micropkg_name>-0.1-py3-none-any.whl``     |
 +--------------------------------+--------------------------------------------------------------------------------------+
-| Pull from cloud storage        | ``kedro micropkg pull s3://my_bucket/<pipeline_name>-0.1-py3-none-any.whl``          |
+| Pull from cloud storage        | ``kedro micropkg pull s3://my_bucket/<micropkg_name>-0.1-py3-none-any.whl``          |
 +--------------------------------+--------------------------------------------------------------------------------------+
 | Pull from PyPI like endpoint   | ``kedro micropkg pull <pypi-package-name>``                                          |
 +--------------------------------+--------------------------------------------------------------------------------------+

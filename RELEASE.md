@@ -13,6 +13,7 @@
 * Fixed `PickleDataSet` to be copyable and hence work with the parallel runner.
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.5 (Python 3.7+ only). This `pip-tools` version is compatible with `pip>=21.2`, including the most recent releases of `pip`. Python 3.6 users should continue to use `pip-tools` 6.4 and `pip<22`.
 * Added `astro-iris` as alias for `astro-airlow-iris`, so that old tutorials can still be followed.
+* Added details about [Kedro's Technical Steering Committee and governance model](https://kedro.readthedocs.io/en/0.17.7/14_contribution/technical_steering_committee.html).
 
 ## Minor breaking changes to the API
 

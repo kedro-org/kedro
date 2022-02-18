@@ -136,7 +136,7 @@ class _ProjectPipelines(MutableMapping):
         """
         self._clear(pipelines_module)
 
-    def _clear(self, pipelines_module: str) -> None:
+    def _clear(self, pipelines_module: Optional[str]) -> None:
         """Helper method to clear the pipelines so new content will be reloaded
         next time data is accessed. Useful for testing purpose.
         """

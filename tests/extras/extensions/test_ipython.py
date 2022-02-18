@@ -132,7 +132,7 @@ class TestLoadKedroObjects:
             project_version="0.1",
             project_path=tmp_path,
         )
-        mocker.patch("kedro.extras.extensions.ipython.configure_project")
+        mocker.patch("kedro.framework.project.configure_project")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project",
             return_value=fake_metadata,

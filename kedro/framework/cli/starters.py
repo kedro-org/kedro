@@ -194,10 +194,11 @@ def list_starters():
         if directory:
             repo_url = repo_url.replace(".git", f"/tree/main/{directory}")
         # TODO: should we make "core" starters distinguishable from plugin ones?
-        # I add a "*" next to the name to make this distinction visual
+        # I add a "(*)" next to the name to make this distinction visual
+        # and at the beginning of the list
         # BEWARE: in case we allow official plugins to be overriden, below test is not valid
         starter_name_displayed = (
-            f"{starter_name}*"
+            f"(*) {starter_name}"
             if not starter_name in _STARTER_ALIASES.keys()
             else starter_name
         )

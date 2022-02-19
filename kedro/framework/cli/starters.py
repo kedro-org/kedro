@@ -9,6 +9,7 @@ import shutil
 import stat
 import tempfile
 from collections import OrderedDict
+import pkg_resources
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -23,20 +24,29 @@ from kedro.framework.cli.utils import (
     _clean_pycache,
     _filter_deprecation_warnings,
     command_with_verbosity,
+    load_entry_points,
 )
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
-_STARTER_ALIASES = {
-    "astro-airflow-iris",
-    "mini-kedro",
-    "pandas-iris",
-    "pyspark",
-    "pyspark-iris",
-    "spaceflights",
-}
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+
+# The `astro-iris` was renamed to `astro-airflow-iris`, but old (external) documentation
+# and tutorials still refer to `astro-iris`. We create an alias to check if a user has
+# entered old `astro-iris` as the starter name and changes it to `astro-airflow-iris`.
+_STARTER_ALIASES = {
+    "astro-airflow-iris": {"repo": _STARTERS_REPO, "directory": "astro-airflow-iris"},
+    "astro-iris": {
+        "repo": _STARTERS_REPO,
+        "directory": "astro-airflow-iris",
+    },  # this is an alias name
+    "mini-kedro": {"repo": _STARTERS_REPO, "directory": "mini-kedro"},
+    "pandas-iris": {"repo": _STARTERS_REPO, "directory": "pandas-iris"},
+    "pyspark": {"repo": _STARTERS_REPO, "directory": "pyspark"},
+    "pyspark-iris": {"repo": _STARTERS_REPO, "directory": "pyspark-iris"},
+    "spaceflights": {"repo": _STARTERS_REPO, "directory": "spaceflights"},
+}
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,
@@ -60,6 +70,34 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     """
     os.chmod(path, stat.S_IWRITE)
     func(path)
+
+
+def _get_starters_aliases() -> Dict[str, Dict[str, str]]:
+    """This functions lists all the starters aliases declared in
+    the core repo and in plugins entry points.
+    """
+    official_starter_aliases = _STARTER_ALIASES.copy()
+    starters_aliases_from_plugins = load_entry_points("starter")
+
+    # TODO: it would likely be a good idea to indicate in the name
+    # from which plugin this is imported, e.g  we may store the origin
+    # which would return a dict like {pandas-iris: kedro, my_awesome-starter: awesome_plugin}
+    # this is useful for debugging and when listing discovered starters
+
+    # TODO Add the possibility for plugins users to specify {starter_name: git+url}
+    #  instead of {starter_name: {"repo": git+url, "directory": None}}
+    # which is unneedly verbose and error prone
+
+    starters_aliases_from_plugins = {
+        k: v
+        for starter_alias in starters_aliases_from_plugins
+        for k, v in starter_alias.items()
+    }
+
+    # TODO discuss if we should let the possibility to override official starters
+    # i.e. return {**official_starter_aliases, **starters_aliases_from_plugins}.
+    # I don't for now, but maybe it's a good idea?
+    return {**starters_aliases_from_plugins, **official_starter_aliases}
 
 
 # pylint: disable=missing-function-docstring
@@ -91,19 +129,16 @@ def new(
             "Cannot use the --directory flag without a --starter value."
         )
 
-    # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external) documentation
-    # and tutorials still refer to `astro-iris`. The below line checks if a user has entered old
-    # `astro-iris` as the starter name and changes it to `astro-airflow-iris`.
-    starter_name = (
-        "astro-airflow-iris" if starter_name == "astro-iris" else starter_name
-    )
-    if starter_name in _STARTER_ALIASES:
+    starter_aliases = _get_starters_aliases()
+
+    if starter_name in starter_aliases.keys():
         if directory:
             raise KedroCliError(
                 "Cannot use the --directory flag with a --starter alias."
             )
-        template_path = _STARTERS_REPO
-        directory = starter_name
+        template_path = starter_aliases[starter_name]["repo"]
+        # "directory" is an optional key for starters from plugins, so if the key is not present we will use "None".
+        directory = starter_aliases[starter_name].get("directory")
         checkout = checkout or version
     elif starter_name is not None:
         template_path = starter_name
@@ -149,10 +184,25 @@ def starter():
 @starter.command("list")
 def list_starters():
     """List all official project starters available."""
-    repo_url = _STARTERS_REPO.replace("git+", "").replace(".git", "/tree/main/{alias}")
-    output = [
-        {alias: repo_url.format(alias=alias)} for alias in sorted(_STARTER_ALIASES)
-    ]
+    starters_aliases = _get_starters_aliases()
+
+    output = {}
+    for starter_name, starter_config in starters_aliases.items():
+        directory = starter_config.get("directory")
+        repo_url = starter_config.get("repo")
+        repo_url = repo_url.replace("git+", "")
+        if directory:
+            repo_url = repo_url.replace(".git", f"/tree/main/{directory}")
+        # TODO: should we make "core" starters distinguishable from plugin ones?
+        # I add a "*" next to the name to make this distinction visual
+        # BEWARE: in case we allow official plugins to be overriden, below test is not valid
+        starter_name_displayed = (
+            f"{starter_name}*"
+            if not starter_name in _STARTER_ALIASES.keys()
+            else starter_name
+        )
+        output[starter_name_displayed] = repo_url
+
     click.echo(yaml.safe_dump(output))
 
 

@@ -484,31 +484,31 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - lint:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - pip_compile:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_pip_compile:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - build_docs
       - docs_linkcheck
       - all_circleci_checks_succeeded:
@@ -577,11 +577,11 @@ workflows:
       - build_docker_image:
           matrix:
             parameters:
-              python_version: ["3.9"]
+              python_version: ["3.9", "3.10"]
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.9"]
+              python_version: ["3.9", "3.10"]
           requires:
             - build_docker_image-<<matrix.python_version>>
 
@@ -591,7 +591,7 @@ workflows:
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - publish_kedro:
           requires:
             - build_kedro

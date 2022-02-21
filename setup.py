@@ -159,7 +159,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/kedro-org/kedro",
-    python_requires=">=3.7, <3.10",
+    python_requires=">=3.7, <3.11",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,
     tests_require=test_requires,
@@ -176,6 +176,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     extras_require=extras_require,
 )

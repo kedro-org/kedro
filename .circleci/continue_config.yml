@@ -481,10 +481,6 @@ workflows:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
-      - build_docker_image:
-          matrix:
-            parameters:
-              python_version: [ "3.10" ]
       - e2e_tests:
           matrix:
             parameters:

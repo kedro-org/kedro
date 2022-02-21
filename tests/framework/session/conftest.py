@@ -12,7 +12,11 @@ from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
 from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectPipelines, _ProjectSettings
+from kedro.framework.project import (
+    _ProjectPipelines,
+    _ProjectSettings,
+    configure_project,
+)
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
@@ -387,6 +391,7 @@ def mock_settings(mocker, project_hooks):
 def mock_session(
     mock_settings, mock_package_name, tmp_path
 ):  # pylint: disable=unused-argument
+    configure_project(mock_package_name)
     session = KedroSession.create(
         mock_package_name, tmp_path, extra_params={"params:key": "value"}
     )

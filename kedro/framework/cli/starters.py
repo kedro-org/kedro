@@ -24,7 +24,8 @@ from kedro.framework.cli.utils import (
     _clean_pycache,
     _filter_deprecation_warnings,
     command_with_verbosity,
-    load_entry_points,
+    # load_entry_points,
+    ENTRY_POINT_GROUPS,
 )
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -36,16 +37,41 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 # and tutorials still refer to `astro-iris`. We create an alias to check if a user has
 # entered old `astro-iris` as the starter name and changes it to `astro-airflow-iris`.
 _STARTER_ALIASES = {
-    "astro-airflow-iris": {"repo": _STARTERS_REPO, "directory": "astro-airflow-iris"},
-    "astro-iris": {
-        "repo": _STARTERS_REPO,
+    "astro-airflow-iris": {
+        "template_path": _STARTERS_REPO,
         "directory": "astro-airflow-iris",
-    },  # this is an alias name
-    "mini-kedro": {"repo": _STARTERS_REPO, "directory": "mini-kedro"},
-    "pandas-iris": {"repo": _STARTERS_REPO, "directory": "pandas-iris"},
-    "pyspark": {"repo": _STARTERS_REPO, "directory": "pyspark"},
-    "pyspark-iris": {"repo": _STARTERS_REPO, "directory": "pyspark-iris"},
-    "spaceflights": {"repo": _STARTERS_REPO, "directory": "spaceflights"},
+        "checkout": "main",
+    },
+    "astro-iris": {
+        "template_path": _STARTERS_REPO,
+        "directory": "astro-airflow-iris",
+        "checkout": "main",
+    },  # this is an alias name for "astro-airflow-iris"
+    "mini-kedro": {
+        "template_path": _STARTERS_REPO,
+        "directory": "mini-kedro",
+        "checkout": "main",
+    },
+    "pandas-iris": {
+        "template_path": _STARTERS_REPO,
+        "directory": "pandas-iris",
+        "checkout": "main",
+    },
+    "pyspark": {
+        "template_path": _STARTERS_REPO,
+        "directory": "pyspark",
+        "checkout": "main",
+    },
+    "pyspark-iris": {
+        "template_path": _STARTERS_REPO,
+        "directory": "pyspark-iris",
+        "checkout": "main",
+    },
+    "spaceflights": {
+        "template_path": _STARTERS_REPO,
+        "directory": "spaceflights",
+        "checkout": "main",
+    },
 }
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
@@ -75,29 +101,36 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
 def _get_starters_aliases() -> Dict[str, Dict[str, str]]:
     """This functions lists all the starters aliases declared in
     the core repo and in plugins entry points.
+
+    The output looks like:
+    {
+        {
+            "astro-airflow-iris": {"template_path": ..., directory=..., "origin": "kedro"},
+            ...,
+            "my-awesome-starter": {"template_path": ..., directory=..., "origin": "my-awesome-plugin"}
+        }
+    }
     """
-    official_starter_aliases = _STARTER_ALIASES.copy()
-    starters_aliases_from_plugins = load_entry_points("starter")
 
-    # TODO: it would likely be a good idea to indicate in the name
-    # from which plugin this is imported, e.g  we may store the origin
-    # which would return a dict like {pandas-iris: kedro, my_awesome-starter: awesome_plugin}
-    # this is useful for debugging and when listing discovered starters
-
-    # TODO Add the possibility for plugins users to specify {starter_name: git+url}
-    #  instead of {starter_name: {"repo": git+url, "directory": None}}
-    # which is unneedly verbose and error prone
-
-    starters_aliases_from_plugins = {
-        k: v
-        for starter_alias in starters_aliases_from_plugins
-        for k, v in starter_alias.items()
+    # add an extra key to indicate from where the plugin come from
+    starters_aliases = {
+        name: {**config, "origin": "kedro"} for name, config in _STARTER_ALIASES.items()
     }
 
-    # TODO discuss if we should let the possibility to override official starters
-    # i.e. return {**official_starter_aliases, **starters_aliases_from_plugins}.
-    # I don't for now, but maybe it's a good idea?
-    return {**starters_aliases_from_plugins, **official_starter_aliases}
+    for starter_entry_point in pkg_resources.iter_entry_points(
+        group=ENTRY_POINT_GROUPS["starters"]
+    ):
+        module_name = starter_entry_point.module_name.split(".")[0]
+        for starter_name, starter_config in starter_entry_point.load().items():
+            if starter_name in starters_aliases:
+                click.secho(
+                    f"The starter alias {starter_name} from {module_name} was already created by from {starters_aliases[starter_name]['origin']} and is ignored",
+                    fg="yellow",
+                )
+                continue  # break the loop
+            starters_aliases[starter_name] = {**starter_config, "origin": module_name}
+
+    return starters_aliases
 
 
 # pylint: disable=missing-function-docstring
@@ -131,18 +164,18 @@ def new(
 
     starter_aliases = _get_starters_aliases()
 
-    if starter_name in starter_aliases.keys():
+    if starter_name in starter_aliases:
         if directory:
             raise KedroCliError(
                 "Cannot use the --directory flag with a --starter alias."
             )
-        template_path = starter_aliases[starter_name]["repo"]
+        template_path = starter_aliases[starter_name]["template_path"]
         # "directory" is an optional key for starters from plugins, so if the key is not present we will use "None".
         directory = starter_aliases[starter_name].get("directory")
-        checkout = checkout or version
+        checkout = checkout or starter_aliases[starter_name].get("checkout", version)
     elif starter_name is not None:
         template_path = starter_name
-        checkout = checkout or version
+        checkout = checkout or starter_aliases[starter_name].get("checkout", version)
     else:
         template_path = str(TEMPLATE_PATH)
 
@@ -185,26 +218,31 @@ def starter():
 def list_starters():
     """List all official project starters available."""
     starters_aliases = _get_starters_aliases()
-
-    output = {}
+    # we "reverse" the dictionnary so that the origin key in starter config
+    # {name: {template_path; ..., origin: ...}} became the first key:
+    # {kedro: ["astro-iris":{...}], "my-plugin":["my-starter":{...}]}
+    starters_by_origin = {}
     for starter_name, starter_config in starters_aliases.items():
-        directory = starter_config.get("directory")
-        repo_url = starter_config.get("repo")
-        repo_url = repo_url.replace("git+", "")
-        if directory:
-            repo_url = repo_url.replace(".git", f"/tree/main/{directory}")
-        # TODO: should we make "core" starters distinguishable from plugin ones?
-        # I add a "(*)" next to the name to make this distinction visual
-        # and at the beginning of the list
-        # BEWARE: in case we allow official plugins to be overriden, below test is not valid
-        starter_name_displayed = (
-            f"(*) {starter_name}"
-            if not starter_name in _STARTER_ALIASES.keys()
-            else starter_name
-        )
-        output[starter_name_displayed] = repo_url
-
-    click.echo(yaml.safe_dump(output))
+        starter_raw_config = {
+            starter_name: {k: v for k, v in starter_config.items() if k != "origin"}
+        }
+        if starter_config["origin"] in starters_by_origin:
+            starters_by_origin[starter_config["origin"]].append(starter_raw_config)
+        else:
+            starters_by_origin[starter_config["origin"]] = [starter_raw_config]
+    for origin, starter_aliases in starters_by_origin.items():
+        click.secho(f"Starters from '{origin}'\n", fg="yellow")
+        output = []
+        for starter_alias in starter_aliases:
+            for starter_name, starter_config in starter_alias.items():
+                starter_name_displayed = (
+                    f"{starter_name} "
+                    f"(template_path={starter_config.get('template_path')}, "
+                    f"directory={starter_config.get('directory')}, "
+                    f"checkout={starter_config.get('checkout')})"
+                )
+                output.append(starter_name_displayed)
+        click.echo(yaml.safe_dump(output))
 
 
 def _fetch_config_from_file(config_path: str) -> Dict[str, str]:

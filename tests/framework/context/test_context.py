@@ -230,7 +230,7 @@ def dummy_context(
     )
 
     yield context
-    pipelines.configure(None)
+    pipelines.configure()
 
 
 class TestKedroContext:

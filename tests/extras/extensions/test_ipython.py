@@ -69,7 +69,7 @@ def pipeline_cleanup():
     yield
     from kedro.framework.project import pipelines
 
-    pipelines.configure(None)
+    pipelines.configure()
 
 
 class TestLoadKedroObjects:

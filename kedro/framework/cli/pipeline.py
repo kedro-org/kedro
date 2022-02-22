@@ -399,7 +399,7 @@ def package_pipeline(
         "Please use `kedro micropkg package` instead."
     )
     click.secho(deprecation_message, fg="red")
-    """Package up a modular pipeline as Python source distribution."""
+    # Package up a modular pipeline as Python source distribution.
     if not module_path and not all_flag:
         click.secho(
             "Please specify a pipeline name or add '--all' to package all pipelines in "

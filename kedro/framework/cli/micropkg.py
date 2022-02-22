@@ -1,14 +1,9 @@
 """A collection of CLI commands for working with Kedro micro-packages."""
 
 import re
-import shutil
 import sys
-import tarfile
 import tempfile
-from importlib import import_module
 from pathlib import Path
-from textwrap import indent
-from typing import Iterable, List, NamedTuple, Optional, Set, Tuple, Union
 
 import click
 
@@ -19,51 +14,18 @@ from kedro.framework.cli.pipeline import (
     _check_pipeline_name,
     _find_config_files,
     _generate_sdist_file,
+    _get_artifacts_to_package,
     _get_default_version,
-    _get_pipeline_artifacts,
     _install_files,
     _unpack_sdist,
     _validate_dir,
-    _echo_deletion_warning,
-    _get_fsspec_filesystem,
-    _rename_files,
-    _refactor_code_for_unpacking,
-    _get_sdist_name,
-    _sync_path_list,
-    _make_install_requires,
-    _create_nested_package,
-    _move_package,
-    _rename_package,
-    _refactor_code_for_package,
-    _generate_manifest_file,
-    _generate_setup_file,
-    _create_pipeline,
-    _sync_dirs,
-    _get_artifacts_to_package,
-    _get_package_artifacts,
-    _copy_pipeline_tests,
-    _copy_pipeline_configs,
-    _delete_artifacts,
-    _safe_parse_requirements
 )
-
-import pkg_resources
-from rope.base.project import Project
-from rope.contrib import generate
-from rope.refactor.move import MoveModule
-from rope.refactor.rename import Rename
-
-import kedro
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
-    _filter_deprecation_warnings,
-    call,
     command_with_verbosity,
     env_option,
-    python_call,
 )
-from kedro.framework.project import settings
 from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-

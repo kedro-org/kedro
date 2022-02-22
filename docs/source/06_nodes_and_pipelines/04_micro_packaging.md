@@ -4,7 +4,7 @@
 
 # Micro-packaging
 
-Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond. A micro-package can be any part of a Python code in a Kedro project including pipelines and utility functions.
+Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond. A micro-package can be any part of Python code in a Kedro project including pipelines and utility functions.
 
 ## Package a micro-package
 
@@ -14,7 +14,7 @@ You can package a micro-package by executing: `kedro micropkg package <micropkg_
 * By default, the wheel file will be saved into `dist/` directory inside your project.
 * You can customise the target with the `--destination` (`-d`) option.
 
-When you package your micro-package, Kedro will also automatically package files from 3 locations:
+When you package your micro-package, such as a modular pipeline for example, Kedro will also automatically package files from 3 locations:
 
 ```text
 ├── conf
@@ -68,7 +68,7 @@ You can pull a micro-package from a wheel file by executing `kedro micropkg pull
   * All the micro-package code in `src/<python_package>/pipelines/<micropkg_name>/`
   * Configuration files in `conf/<env>/parameters/<micropkg_name>.yml`, where `<env>` defaults to `base`.
   * To place parameters from a different config environment, run `kedro micropkg pull <micropkg_name> --env <env_name>`
-  * Pipeline unit tests in `src/tests/pipelines/<micropkg_name>`
+  * Unit tests in `src/tests/pipelines/<micropkg_name>`
 * Kedro will also parse any requirements packaged with the micro-package and add them to project level `requirements.in`.
 * It is advised to do `kedro build-reqs` to compile the updated list of requirements after pulling a micro-package.
 
@@ -96,7 +96,7 @@ You can pull a micro-package from different locations, including local storage, 
 * You can use the `--fs-args` option to point to a YAML that contains the required configuration.
 
 ```bash
-kedro micro-pkg pull https://<url-to-pipeline.whl> --fs-args micropkg_pull_args.yml
+kedro micropkg pull https://<url-to-pipeline.whl> --fs-args micropkg_pull_args.yml
 ```
 
 ```yaml

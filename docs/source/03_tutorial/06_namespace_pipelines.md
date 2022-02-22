@@ -5,10 +5,10 @@ This section covers the following:
 * A brief introduction to namespaces and modular pipelines
 * How to convert the existing spaceflights project into a namespaced one
 
-Adding namespaces to [modular pipelines](../06_nodes_and_pipelines/03_modular_pipelines.md#modular-pipelines) unlocks some sophisticated functionality in Kedro
+Adding namespaces to [modular pipelines](../06_nodes_and_pipelines/03_modular_pipelines.md) unlocks some sophisticated functionality in Kedro
 
 1. You are able to [instantiate the same pipeline structure multiple times](../06_nodes_and_pipelines/03_modular_pipelines.md#using-a-modular-pipeline-multiple-times), but provide different inputs/outputs.
-2. You can unlock the full power of [micro-packaging](../06_nodes_and_pipelines/03_modular_pipelines.md#how-to-share-a-modular-pipeline).
+2. You can unlock the full power of [micro-packaging](../06_nodes_and_pipelines/04_micro_packaging.md).
 3. You can de-clutter your mental model with Kedro-Viz rendering collapsible components.
 
     ![collapsible](../meta/images/collapsible.gif)

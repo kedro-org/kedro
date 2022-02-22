@@ -48,7 +48,7 @@ To package multiple micro-packages in bulk, run `kedro micropkg package --all`. 
 
 ```toml
 [tool.kedro.micropkg.package]
-first_pipeline = {alias = "aliased_pipeline", destination = "somewhere/else", env = "uat"}
+cleaning_utils = {alias = "aliased_util", destination = "somewhere/else", env = "uat"}
 second_pipeline = {}
 ```
 

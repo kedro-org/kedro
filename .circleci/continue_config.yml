@@ -49,9 +49,8 @@ commands:
           name: Install pip setuptools
           command: make install-pip-setuptools
       - run:
-          # Virtualenv 20.0.20 broke pre-commit, capped for now
           name: Install venv for some pre-commit hooks
-          command: conda install -y "virtualenv<20.0"
+          command: conda install -y virtualenv
       - run:
           name: Install requirements and test requirements
           command: pip install --upgrade -r test_requirements.txt

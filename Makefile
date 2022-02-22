@@ -19,7 +19,7 @@ test:
 	pytest tests --cov-config pyproject.toml
 
 test-no-spark:
-	pytest tests --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
+	pytest tests --no-cov --ignore tests/extras/datasets/spark
 
 e2e-tests:
 	behave

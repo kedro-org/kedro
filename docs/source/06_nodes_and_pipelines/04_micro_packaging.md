@@ -4,7 +4,7 @@
 
 # Micro-packaging
 
-Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond. A micro-package can be any part of a Python code in a Kedro project including pipelines and utility functions.
+Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond. A micro-package can be any part of Python code in a Kedro project including pipelines and utility functions.
 
 ## Package a micro-package
 

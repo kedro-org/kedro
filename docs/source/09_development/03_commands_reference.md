@@ -239,7 +239,7 @@ kedro package
 See the Python documentation for [further information about packaging](https://packaging.python.org/overview/).
 
 ### Pull a micro-package
-Since Kedro 0.16.4 you can pull a micro-package into your Kedro project as follows:
+Since Kedro 0.17.7 you can pull a micro-package into your Kedro project as follows:
 
 ```bash
 kedro micropkg pull <link-to-micro-package-wheel-file>

@@ -14,7 +14,7 @@ You can package a micro-package by executing: `kedro micropkg package <micropkg_
 * By default, the wheel file will be saved into `dist/` directory inside your project.
 * You can customise the target with the `--destination` (`-d`) option.
 
-When you package your micro-package, Kedro will also automatically package files from 3 locations:
+When you package your micro-package, such as a modular pipeline for example, Kedro will also automatically package files from 3 locations:
 
 ```text
 ├── conf

@@ -96,7 +96,7 @@ You can pull a micro-package from different locations, including local storage, 
 * You can use the `--fs-args` option to point to a YAML that contains the required configuration.
 
 ```bash
-kedro micro-pkg pull https://<url-to-pipeline.whl> --fs-args micropkg_pull_args.yml
+kedro micropkg pull https://<url-to-pipeline.whl> --fs-args micropkg_pull_args.yml
 ```
 
 ```yaml

@@ -7,8 +7,8 @@
 * Added new command group, `micropkg`, to replace `kedro pipeline pull` and `kedro pipeline package` with `kedro micropkg pull` and `kedro micropkg package` for Kedro 0.18.0. `kedro micropkg package` saves packages to `project/dist` while `kedro pipeline package` saves packages to `project/src/dist`.
 
 ## Bug fixes and other changes
-* Added tutorial documentation for experiment tracking (`03_tutorial/07_set_up_experiment_tracking.md`).
-* Added Plotly dataset documentation (`03_tutorial/06_visualise_pipeline.md`).
+* Added tutorial documentation for [experiment tracking](https://kedro.readthedocs.io/en/0.17.7/08_logging/02_experiment_tracking.html).
+* Added [Plotly dataset documentation](https://kedro.readthedocs.io/en/0.17.7/03_tutorial/05_visualise_pipeline.html#visualise-plotly-charts-in-kedro-viz).
 * Added the upper limit `pandas<1.4` to maintain compatibility with `xlrd~=1.0`.
 * Bumped the `Pillow` minimum version requirement to 9.0 (Python 3.7+ only) following [CVE-2022-22817](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-22817).
 * Fixed `PickleDataSet` to be copyable and hence work with the parallel runner.
@@ -16,7 +16,6 @@
 * Added `astro-iris` as alias for `astro-airlow-iris`, so that old tutorials can still be followed.
 * Added details about [Kedro's Technical Steering Committee and governance model](https://kedro.readthedocs.io/en/0.17.7/14_contribution/technical_steering_committee.html).
 
-## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro pipeline pull` and `kedro pipeline package` will be deprecated. Please use `kedro micropkg` instead.

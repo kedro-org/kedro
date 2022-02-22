@@ -15,7 +15,6 @@
 * Added `astro-iris` as alias for `astro-airlow-iris`, so that old tutorials can still be followed.
 * Added details about [Kedro's Technical Steering Committee and governance model](https://kedro.readthedocs.io/en/0.17.7/14_contribution/technical_steering_committee.html).
 
-## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro pipeline pull` and `kedro pipeline package` will be deprecated. Please use `kedro micropkg` instead.

@@ -26,6 +26,6 @@ authors:
 - family-names: Wong
   given-names: Susanna
 title: Kedro
-version: 0.17.6
-date-released: 2021-12-09
+version: 0.17.7
+date-released: 2022-22-02
 url: https://github.com/kedro-org/kedro

@@ -19,7 +19,6 @@ from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 from kedro.framework.project import (
     configure_logging,
-    configure_project,
     pipelines,
     settings,
     validate_settings,
@@ -139,13 +138,6 @@ class KedroSession:
         Returns:
             A new ``KedroSession`` instance.
         """
-
-        # This is to make sure that for workflows that manually create session
-        # without going through one of our known entrypoints, e.g. some plugins
-        # like kedro-airflow, the project is still properly configured. This
-        # is for backward compatibility and should be removed in 0.18.
-        if package_name is not None:
-            configure_project(package_name)
 
         validate_settings()
 

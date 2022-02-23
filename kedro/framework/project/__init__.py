@@ -121,36 +121,22 @@ class _ProjectPipelines(MutableMapping):
         if self._pipelines_module is None or self._is_data_loaded:
             return
 
-        try:
-            register_pipelines = self._get_pipelines_registry_callable(
-                self._pipelines_module
-            )
-        except (ModuleNotFoundError, AttributeError) as exc:
-            # for backwards compatibility with templates < 0.17.2
-            # where no pipelines_registry is defined
-            if self._pipelines_module in str(exc):  # pragma: no cover
-                project_pipelines = {}
-            else:
-                raise
-        else:
-            project_pipelines = register_pipelines()
+        register_pipelines = self._get_pipelines_registry_callable(
+            self._pipelines_module
+        )
+        project_pipelines = register_pipelines()
 
         self._content = project_pipelines
         self._is_data_loaded = True
 
-    def configure(self, pipelines_module: str) -> None:
+    def configure(self, pipelines_module: Optional[str] = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every `configure` call,
         data are reloaded.
         """
-        self._clear(pipelines_module)
-
-    def _clear(self, pipelines_module: str) -> None:
-        """Helper method to clear the pipelines so new content will be reloaded
-        next time data is accessed. Useful for testing purpose.
-        """
-        self._is_data_loaded = False
         self._pipelines_module = pipelines_module
+        self._is_data_loaded = False
+        self._content = {}
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)

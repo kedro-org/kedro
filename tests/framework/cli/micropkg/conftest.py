@@ -60,11 +60,6 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
             if each.is_file():
                 each.unlink()
 
-        for pattern in ("parameter", "catalog"):
-            for dirpath in confs.rglob(pattern):
-                if dirpath.is_dir() and not any(dirpath.iterdir()):
-                    dirpath.rmdir()
-
         tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
         if tests.is_dir():
             shutil.rmtree(str(tests))

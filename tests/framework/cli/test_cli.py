@@ -453,7 +453,7 @@ class TestRunCommand:
         return config_path
 
     @staticmethod
-    @fixture()
+    @fixture
     def fake_run_config_with_params(fake_run_config, request):
         config = anyconfig.load(fake_run_config)
         config["run"].update(request.param)

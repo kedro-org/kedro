@@ -131,7 +131,7 @@ def _install_project_requirements(context):
     # JupyterLab from running, hence the version is forcefully set to 225.
     # More details: https://github.com/mhammond/pywin32/issues/1431
     # This isn't needed for Python 3.10.
-    if sys.platform.startswith("win") and sys.version.split(".")[1] < "10":
+    if sys.platform.startswith("win") and sys.version_info < (3, 10):
         install_reqs.append("pywin32==225")
 
     call([context.pip, "install", *install_reqs], env=context.env)

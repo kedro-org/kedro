@@ -35,7 +35,7 @@ def versioned_hv_writer(filepath_png, load_version, save_version):
 
 
 @pytest.mark.skipif(
-    sys.version.split(".")[1] == "10",
+    sys.version_info == (3, 10),
     reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
 )
 class TestHoloviewsWriter:
@@ -118,7 +118,7 @@ class TestHoloviewsWriter:
 
 
 @pytest.mark.skipif(
-    sys.version.split(".")[1] == "10",
+   sys.version_info == (3, 10),
     reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
 )
 class TestHoloviewsWriterVersioned:

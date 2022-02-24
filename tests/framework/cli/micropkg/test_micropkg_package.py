@@ -16,7 +16,7 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_dist")
-class TestPipelinePackageCommand:
+class TestMicropkgPackageCommand:
     def assert_sdist_contents_correct(
         self, sdist_location, package_name=PIPELINE_NAME, version="0.1"
     ):
@@ -50,7 +50,7 @@ class TestPipelinePackageCommand:
             ),
         ],
     )
-    def test_package_pipeline(
+    def test_package_micropkg(
         self,
         fake_repo_path,
         fake_project_cli,
@@ -65,7 +65,7 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}"] + options,
+            ["micropkg", "package", f"pipelines.{PIPELINE_NAME}"] + options,
             obj=fake_metadata,
         )
 
@@ -79,7 +79,7 @@ class TestPipelinePackageCommand:
             sdist_location=sdist_location, package_name=package_name, version="0.1"
         )
 
-    def test_pipeline_package_same_name_as_package_name(
+    def test_micropkg_package_same_name_as_package_name(
         self, fake_metadata, fake_project_cli, fake_repo_path
     ):
         """Create modular pipeline with the same name as the
@@ -94,7 +94,7 @@ class TestPipelinePackageCommand:
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", f"pipelines.{pipeline_name}"],
+            ["micropkg", "package", f"pipelines.{pipeline_name}"],
             obj=fake_metadata,
         )
         sdist_location = fake_repo_path / "dist"
@@ -105,7 +105,7 @@ class TestPipelinePackageCommand:
             sdist_location=sdist_location, package_name=pipeline_name
         )
 
-    def test_pipeline_package_same_name_as_package_name_alias(
+    def test_micropkg_package_same_name_as_package_name_alias(
         self, fake_metadata, fake_project_cli, fake_repo_path
     ):
         """Create modular pipeline, then package under alias
@@ -120,7 +120,7 @@ class TestPipelinePackageCommand:
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}", "--alias", alias],
+            ["micropkg", "package", f"pipelines.{PIPELINE_NAME}", "--alias", alias],
             obj=fake_metadata,
         )
         sdist_location = fake_repo_path / "dist"
@@ -132,7 +132,7 @@ class TestPipelinePackageCommand:
         )
 
     @pytest.mark.parametrize("existing_dir", [True, False])
-    def test_pipeline_package_to_destination(
+    def test_micropkg_package_to_destination(
         self, fake_project_cli, existing_dir, tmp_path, fake_metadata
     ):
         destination = (tmp_path / "in" / "here").resolve()
@@ -146,7 +146,7 @@ class TestPipelinePackageCommand:
         result = CliRunner().invoke(
             fake_project_cli,
             [
-                "pipeline",
+                "micropkg",
                 "package",
                 f"pipelines.{PIPELINE_NAME}",
                 "--destination",
@@ -164,7 +164,7 @@ class TestPipelinePackageCommand:
 
         self.assert_sdist_contents_correct(sdist_location=destination)
 
-    def test_pipeline_package_overwrites_sdist(
+    def test_micropkg_package_overwrites_sdist(
         self, fake_project_cli, tmp_path, fake_metadata
     ):
         destination = (tmp_path / "in" / "here").resolve()
@@ -179,7 +179,7 @@ class TestPipelinePackageCommand:
         result = CliRunner().invoke(
             fake_project_cli,
             [
-                "pipeline",
+                "micropkg",
                 "package",
                 f"pipelines.{PIPELINE_NAME}",
                 "--destination",
@@ -208,19 +208,19 @@ class TestPipelinePackageCommand:
             ("a", TOO_SHORT_ERROR),
         ],
     )
-    def test_package_pipeline_bad_alias(
+    def test_package_micropkg_bad_alias(
         self, fake_project_cli, bad_alias, error_message
     ):
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}", "--alias", bad_alias],
+            ["micropkg", "package", f"pipelines.{PIPELINE_NAME}", "--alias", bad_alias],
         )
         assert result.exit_code
         assert error_message in result.output
 
-    def test_package_pipeline_invalid_module_path(self, fake_project_cli):
+    def test_package_micropkg_invalid_module_path(self, fake_project_cli):
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", f"pipelines/{PIPELINE_NAME}"]
+            fake_project_cli, ["micropkg", "package", f"pipelines/{PIPELINE_NAME}"]
         )
         error_message = (
             "The pipeline location you provided is not a valid Python module path"
@@ -229,7 +229,7 @@ class TestPipelinePackageCommand:
         assert result.exit_code
         assert error_message in result.output
 
-    def test_package_pipeline_no_config(
+    def test_package_micropkg_no_config(
         self, fake_repo_path, fake_project_cli, fake_metadata
     ):
         version = "0.1"
@@ -241,7 +241,7 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}"],
+            ["micropkg", "package", f"pipelines.{PIPELINE_NAME}"],
             obj=fake_metadata,
         )
 
@@ -278,7 +278,7 @@ class TestPipelinePackageCommand:
     ):
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", "pipelines.non_existing"],
+            ["micropkg", "package", "pipelines.non_existing"],
             obj=fake_metadata,
         )
         assert result.exit_code == 1
@@ -294,7 +294,7 @@ class TestPipelinePackageCommand:
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", "pipelines.empty_dir"],
+            ["micropkg", "package", "pipelines.empty_dir"],
             obj=fake_metadata,
         )
         assert result.exit_code == 1
@@ -334,7 +334,7 @@ class TestPipelinePackageCommand:
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", "pipelines.retail"],
+            ["micropkg", "package", "pipelines.retail"],
             obj=fake_metadata,
         )
 
@@ -399,7 +399,7 @@ class TestPipelinePackageCommand:
         (super_deep_nested_param_path / "params3.yml").touch()
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", "pipelines.retail"],
+            ["micropkg", "package", "pipelines.retail"],
             obj=fake_metadata,
         )
 
@@ -441,7 +441,7 @@ class TestPipelinePackageCommand:
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", f"pipelines.{_pipeline_name}"],
+            ["micropkg", "package", f"pipelines.{_pipeline_name}"],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
@@ -454,7 +454,7 @@ class TestPipelinePackageCommand:
         assert sdist_file.is_file()
         assert len(list(sdist_location.iterdir())) == 1
 
-    def test_pipeline_package_nested_module(
+    def test_micropkg_package_nested_module(
         self, fake_project_cli, fake_metadata, fake_repo_path, fake_package_path
     ):
         CliRunner().invoke(
@@ -468,7 +468,7 @@ class TestPipelinePackageCommand:
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}.utils"],
+            ["micropkg", "package", f"pipelines.{PIPELINE_NAME}.utils"],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
@@ -493,20 +493,20 @@ class TestPipelinePackageCommand:
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pyproject_toml"
 )
-class TestPipelinePackageFromManifest:
-    def test_pipeline_package_all(  # pylint: disable=too-many-locals
+class TestMicropkgPackageFromManifest:
+    def test_micropkg_package_all(  # pylint: disable=too-many-locals
         self, fake_repo_path, fake_project_cli, fake_metadata, tmp_path, mocker
     ):
         # pylint: disable=import-outside-toplevel
-        from kedro.framework.cli import pipeline
+        from kedro.framework.cli import micropkg
 
-        spy = mocker.spy(pipeline, "_package_pipeline")
+        spy = mocker.spy(micropkg, "_package_pipeline")
         pyproject_toml = fake_repo_path / "pyproject.toml"
         other_dest = tmp_path / "here"
         other_dest.mkdir()
         project_toml_str = textwrap.dedent(
             f"""
-            [tool.kedro.pipeline.package]
+            [tool.kedro.micropkg.package]
             "pipelines.first" = {{destination = "{other_dest.as_posix()}"}}
             "pipelines.second" = {{alias = "ds", env = "local"}}
             "pipelines.third" = {{}}
@@ -521,32 +521,32 @@ class TestPipelinePackageFromManifest:
             )
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", "--all"], obj=fake_metadata
+            fake_project_cli, ["micropkg", "package", "--all"], obj=fake_metadata
         )
 
         assert result.exit_code == 0
-        assert "Pipelines packaged!" in result.output
+        assert "Micro-packages packaged!" in result.output
         assert spy.call_count == 3
 
         build_config = toml.loads(project_toml_str)
-        package_manifest = build_config["tool"]["kedro"]["pipeline"]["package"]
+        package_manifest = build_config["tool"]["kedro"]["micropkg"]["package"]
         for pipeline_name, packaging_specs in package_manifest.items():
             expected_call = mocker.call(pipeline_name, fake_metadata, **packaging_specs)
             assert expected_call in spy.call_args_list
 
-    def test_pipeline_package_all_empty_toml(
+    def test_micropkg_package_all_empty_toml(
         self, fake_repo_path, fake_project_cli, fake_metadata, mocker
     ):
         # pylint: disable=import-outside-toplevel
-        from kedro.framework.cli import pipeline
+        from kedro.framework.cli import micropkg
 
-        spy = mocker.spy(pipeline, "_package_pipeline")
+        spy = mocker.spy(micropkg, "_package_pipeline")
         pyproject_toml = fake_repo_path / "pyproject.toml"
         with pyproject_toml.open(mode="a") as file:
-            file.write("\n[tool.kedro.pipeline.package]\n")
+            file.write("\n[tool.kedro.micropkg.package]\n")
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", "--all"], obj=fake_metadata
+            fake_project_cli, ["micropkg", "package", "--all"], obj=fake_metadata
         )
 
         assert result.exit_code == 0
@@ -563,19 +563,19 @@ class TestPipelinePackageFromManifest:
             file.write("what/toml?")
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", "--all"], obj=fake_metadata
+            fake_project_cli, ["micropkg", "package", "--all"], obj=fake_metadata
         )
 
         assert result.exit_code
         assert isinstance(result.exception, toml.TomlDecodeError)
 
-    def test_pipeline_package_no_arg_provided(self, fake_project_cli, fake_metadata):
+    def test_micropkg_package_no_arg_provided(self, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package"], obj=fake_metadata
+            fake_project_cli, ["micropkg", "package"], obj=fake_metadata
         )
         assert result.exit_code
         expected_message = (
-            "Please specify a pipeline name or add '--all' to package all pipelines in "
+            "Please specify a micro-package name or add '--all' to package all micro-packages in "
             "the `pyproject.toml` package manifest section."
         )
         assert expected_message in result.output

@@ -40,38 +40,14 @@ _STARTER_ALIASES = {
     "astro-airflow-iris": {
         "template_path": _STARTERS_REPO,
         "directory": "astro-airflow-iris",
-        "checkout": "main",
     },
-    "astro-iris": {
-        "template_path": _STARTERS_REPO,
-        "directory": "astro-airflow-iris",
-        "checkout": "main",
-    },  # this is an alias name for "astro-airflow-iris"
-    "mini-kedro": {
-        "template_path": _STARTERS_REPO,
-        "directory": "mini-kedro",
-        "checkout": "main",
-    },
-    "pandas-iris": {
-        "template_path": _STARTERS_REPO,
-        "directory": "pandas-iris",
-        "checkout": "main",
-    },
-    "pyspark": {
-        "template_path": _STARTERS_REPO,
-        "directory": "pyspark",
-        "checkout": "main",
-    },
-    "pyspark-iris": {
-        "template_path": _STARTERS_REPO,
-        "directory": "pyspark-iris",
-        "checkout": "main",
-    },
-    "spaceflights": {
-        "template_path": _STARTERS_REPO,
-        "directory": "spaceflights",
-        "checkout": "main",
-    },
+    # this is an alias name for "astro-airflow-iris"
+    "astro-iris": {"template_path": _STARTERS_REPO, "directory": "astro-airflow-iris"},
+    "mini-kedro": {"template_path": _STARTERS_REPO, "directory": "mini-kedro"},
+    "pandas-iris": {"template_path": _STARTERS_REPO, "directory": "pandas-iris"},
+    "pyspark": {"template_path": _STARTERS_REPO, "directory": "pyspark"},
+    "pyspark-iris": {"template_path": _STARTERS_REPO, "directory": "pyspark-iris"},
+    "spaceflights": {"template_path": _STARTERS_REPO, "directory": "spaceflights"},
 }
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
@@ -124,11 +100,14 @@ def _get_starters_aliases() -> Dict[str, Dict[str, str]]:
         for starter_name, starter_config in starter_entry_point.load().items():
             if starter_name in starters_aliases:
                 click.secho(
-                    f"The starter alias {starter_name} from {module_name} was already created by from {starters_aliases[starter_name]['origin']} and is ignored",
+                    f"Starter alias `{starter_name}` from `{module_name}` has been ignored as it is already defined by `{starters_aliases[starter_name]['origin']}`",
                     fg="yellow",
                 )
-                continue  # break the loop
-            starters_aliases[starter_name] = {**starter_config, "origin": module_name}
+            else:
+                starters_aliases[starter_name] = {
+                    **starter_config,
+                    "origin": module_name,
+                }
 
     return starters_aliases
 
@@ -172,10 +151,10 @@ def new(
         template_path = starter_aliases[starter_name]["template_path"]
         # "directory" is an optional key for starters from plugins, so if the key is not present we will use "None".
         directory = starter_aliases[starter_name].get("directory")
-        checkout = checkout or starter_aliases[starter_name].get("checkout", version)
+        checkout = checkout or version
     elif starter_name is not None:
         template_path = starter_name
-        checkout = checkout or starter_aliases[starter_name].get("checkout", version)
+        checkout = checkout or version
     else:
         template_path = str(TEMPLATE_PATH)
 
@@ -221,28 +200,27 @@ def list_starters():
     # we "reverse" the dictionnary so that the origin key in starter config
     # {name: {template_path; ..., origin: ...}} became the first key:
     # {kedro: ["astro-iris":{...}], "my-plugin":["my-starter":{...}]}
-    starters_by_origin = {}
+    # starters_by_origin = {}
+    # for starter_name, starter_config in starters_aliases.items():
+    #     starter_raw_config = {
+    #         starter_name: {k: v for k, v in starter_config.items() if k != "origin"}
+    #     }
+    #     if starter_config["origin"] in starters_by_origin:
+    #         starters_by_origin[starter_config["origin"]].append(starter_raw_config)
+    #     else:
+    #         starters_by_origin[starter_config["origin"]] = [starter_raw_config]
+
+    last_origin = "kedro"
+    click.secho(f"Built-in starters\n", fg="yellow")
+
+    # click.echo(yaml.dump(starters_aliases, default_flow_style=False))
     for starter_name, starter_config in starters_aliases.items():
-        starter_raw_config = {
-            starter_name: {k: v for k, v in starter_config.items() if k != "origin"}
-        }
-        if starter_config["origin"] in starters_by_origin:
-            starters_by_origin[starter_config["origin"]].append(starter_raw_config)
-        else:
-            starters_by_origin[starter_config["origin"]] = [starter_raw_config]
-    for origin, starter_aliases in starters_by_origin.items():
-        click.secho(f"Starters from '{origin}'\n", fg="yellow")
-        output = []
-        for starter_alias in starter_aliases:
-            for starter_name, starter_config in starter_alias.items():
-                starter_name_displayed = (
-                    f"{starter_name} "
-                    f"(template_path={starter_config.get('template_path')}, "
-                    f"directory={starter_config.get('directory')}, "
-                    f"checkout={starter_config.get('checkout')})"
-                )
-                output.append(starter_name_displayed)
-        click.echo(yaml.safe_dump(output))
+        origin = starter_config.pop("origin")
+        if origin != last_origin:
+            click.secho(f"\nStarters from {origin}\n", fg="yellow")
+            last_origin = origin
+
+        click.echo(f"{starter_name}: {starter_config}")
 
 
 def _fetch_config_from_file(config_path: str) -> Dict[str, str]:

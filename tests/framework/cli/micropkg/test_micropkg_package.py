@@ -84,7 +84,7 @@ class TestMicropkgPackageCommand:
     ):
         """Create modular pipeline with the same name as the
         package name, then package as is. The command should run
-        and the resulting wheel should have all expected contents.
+        and the resulting sdist should have all expected contents.
         """
         pipeline_name = fake_metadata.package_name
         result = CliRunner().invoke(
@@ -110,7 +110,7 @@ class TestMicropkgPackageCommand:
     ):
         """Create modular pipeline, then package under alias
         the same name as the package name. The command should run
-        and the resulting wheel should have all expected contents.
+        and the resulting sdist should have all expected contents.
         """
         alias = fake_metadata.package_name
         result = CliRunner().invoke(
@@ -164,7 +164,7 @@ class TestMicropkgPackageCommand:
 
         self.assert_sdist_contents_correct(sdist_location=destination)
 
-    def test_micropkg_package_overwrites_wheel(
+    def test_micropkg_package_overwrites_sdist(
         self, fake_project_cli, tmp_path, fake_metadata
     ):
         destination = (tmp_path / "in" / "here").resolve()

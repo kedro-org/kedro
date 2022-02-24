@@ -84,7 +84,7 @@ class TestPipelinePackageCommand:
     ):
         """Create modular pipeline with the same name as the
         package name, then package as is. The command should run
-        and the resulting wheel should have all expected contents.
+        and the resulting sdist should have all expected contents.
         """
         pipeline_name = fake_metadata.package_name
         result = CliRunner().invoke(
@@ -110,7 +110,7 @@ class TestPipelinePackageCommand:
     ):
         """Create modular pipeline, then package under alias
         the same name as the package name. The command should run
-        and the resulting wheel should have all expected contents.
+        and the resulting sdist should have all expected contents.
         """
         alias = fake_metadata.package_name
         result = CliRunner().invoke(

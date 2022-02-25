@@ -15,7 +15,7 @@ We also provide information to help you deploy to the following:
 * to [Kubeflow Workflows](06_kubeflow.md)
 * to [AWS Batch](07_aws_batch.md)
 * to [Databricks](08_databricks.md)
-* to [Dask](12_dask.md)
+* to [Dask](dask.md)
 
 <!--- There has to be some non-link text in the bullets above, if it's just links, there's a Sphinx bug that fails the build process-->
 

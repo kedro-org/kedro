@@ -88,7 +88,7 @@ commands:
           command: conda init powershell
       - run:
           name: Create 'kedro_builder' conda environment
-          command: conda create -n kedro_builder python=<<parameters.python_version>> -y
+          command: conda create -n kedro_builder python=<<parameters.python_version>> rust -y
 
   win_setup_env:
     steps:

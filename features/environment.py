@@ -107,7 +107,6 @@ def _setup_minimal_env(context):
             "-U",
             "pip>=21.2",
             "setuptools>=38.0",
-            "setuptools-rust",
             "wheel",
         ],
         env=context.env,

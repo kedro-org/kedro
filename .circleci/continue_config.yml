@@ -211,9 +211,21 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - setup
-      - run:
-          name: Run unit tests
-          command: make test
+      - unless:
+          condition:
+            equal: ["3.10", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests in parallel
+                command: make test
+      - when:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Run unit tests sequentially
+                command: pytest tests --cov-config pyproject.toml
+
 
   win_unit_tests:
     parameters:
@@ -237,9 +249,20 @@ jobs:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - run:
-          name: Run unit tests without spark
-          command: conda activate kedro_builder; make test-no-spark
+      - unless:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Run unit tests without spark in parallel
+                command: conda activate kedro_builder; make test-no-spark
+      - when:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Run unit tests withou spark sequentially
+                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
 
   lint:
     parameters:

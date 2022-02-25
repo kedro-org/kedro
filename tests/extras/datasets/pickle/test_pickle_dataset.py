@@ -159,6 +159,11 @@ class TestPickleDataSet:
         with pytest.raises(ImportError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="fake.backend.does.not.exist")
 
+    def test_copy(self, pickle_data_set):
+        pickle_data_set_copy = pickle_data_set._copy()
+        assert pickle_data_set_copy is not pickle_data_set
+        assert pickle_data_set_copy._describe() == pickle_data_set._describe()
+
 
 class TestPickleDataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):
@@ -257,3 +262,8 @@ class TestPickleDataSetVersioned:
         Path(pickle_data_set._filepath.as_posix()).unlink()
         versioned_pickle_data_set.save(dummy_dataframe)
         assert versioned_pickle_data_set.exists()
+
+    def test_copy(self, versioned_pickle_data_set):
+        pickle_data_set_copy = versioned_pickle_data_set._copy()
+        assert pickle_data_set_copy is not versioned_pickle_data_set
+        assert pickle_data_set_copy._describe() == versioned_pickle_data_set._describe()

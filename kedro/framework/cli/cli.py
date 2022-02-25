@@ -20,6 +20,7 @@ from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
 from kedro.framework.cli.jupyter import jupyter_cli
+from kedro.framework.cli.micropkg import micropkg_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
 from kedro.framework.cli.registry import registry_cli
@@ -61,9 +62,9 @@ def info():
     """Get more information about kedro."""
     click.secho(LOGO, fg="green")
     click.echo(
-        "kedro allows teams to create analytics\n"
-        "projects. It is developed as part of\n"
-        "the Kedro initiative at QuantumBlack."
+        "Kedro is a Python framework for\n"
+        "creating reproducible, maintainable\n"
+        "and modular data science code."
     )
 
     plugin_versions = {}
@@ -206,7 +207,14 @@ class KedroCLI(CommandCollection):
         if not self._metadata:
             return []
 
-        built_in = [catalog_cli, jupyter_cli, pipeline_cli, project_group, registry_cli]
+        built_in = [
+            catalog_cli,
+            jupyter_cli,
+            pipeline_cli,
+            micropkg_cli,
+            project_group,
+            registry_cli,
+        ]
 
         plugins = load_entry_points("project")
 

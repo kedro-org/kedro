@@ -74,8 +74,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
   * [`kedro pipeline describe <pipeline_name>`](#describe-a-pipeline)
   * [`kedro pipeline list`](#list-all-pipelines-in-your-project)
-  * [`kedro pipeline package <pipeline_name>`](#package-a-modular-pipeline)
-  * [`kedro pipeline pull <package_name>`](#pull-a-modular-pipeline)
+  * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package)
+  * [`kedro micropkg pull <package_name>`](#pull-a-micro-package)
   * [`kedro run`](#run-the-project)
   * [`kedro test`](#test-your-project)
 
@@ -115,11 +115,11 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.17.6
+v0.17.7
 
-kedro allows teams to create analytics
-projects. It is developed as part of
-the Kedro initiative at QuantumBlack.
+Kedro is a Python framework for
+creating reproducible, maintainable
+and modular data science code.
 
 Installed plugins:
 kedro_viz: 3.4.0 (hooks:global,line_magic)
@@ -238,11 +238,11 @@ kedro package
 
 See the Python documentation for [further information about packaging](https://packaging.python.org/overview/).
 
-### Pull a modular pipeline
-Since Kedro 0.16.4 you can pull a modular pipeline into your Kedro project as follows:
+### Pull a micro-package
+Since Kedro 0.17.7 you can pull a micro-package into your Kedro project as follows:
 
 ```bash
-kedro pipeline pull <link-to-modular-pipeline-wheel-file>
+kedro micropkg pull <link-to-micro-package-wheel-file>
 ```
 
 The above command will take the bundled `.whl` file and do the following:
@@ -251,11 +251,11 @@ The above command will take the bundled `.whl` file and do the following:
 * Place parameters in `conf/base/parameters/<pipeline_name>.yml`
 * Pull out tests and place in `src/tests/pipelines/<pipeline_name>`
 
-`kedro pipeline pull` works with PyPI, local and cloud storage:
+`kedro micropkg pull` works with PyPI, local and cloud storage:
 
-* PyPI: `kedro pipeline pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro pipeline pull <path-to-your-project-root>/src/dist/<my-pipeline>-0.1-py3-none-any.whl`
-* Cloud storage: `kedro pipeline pull s3://<my-bucket>/<my-pipeline>-0.1-py3-none-any.whl`
+* PyPI: `kedro micropkg pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
+* Local storage: `kedro micropkg pull <path-to-your-project-root>/src/dist/<my-pipeline>-0.1-py3-none-any.whl`
+* Cloud storage: `kedro micropkg pull s3://<my-bucket>/<my-pipeline>-0.1-py3-none-any.whl`
 
 ### Project quality
 
@@ -265,7 +265,7 @@ The above command will take the bundled `.whl` file and do the following:
 kedro build-docs
 ```
 
-The `build-docs` command builds [project documentation](../03_tutorial/05_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
+The `build-docs` command builds [project documentation](../03_tutorial/08_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 #### Lint your project
@@ -294,22 +294,22 @@ kedro test
 kedro pipeline create <pipeline_name>
 ```
 
-##### Package a modular pipeline
+##### Package a micro-package
 The following command packages all the files related to a modular pipeline into a [wheel file](https://pythonwheels.com/):
 
 ```bash
-kedro pipeline package <pipeline_name>
+kedro micropkg package <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#package-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/04_micro_packaging.md).
 
-##### Pull a modular pipeline in your project
+##### Pull a micro-package in your project
 The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [wheel file](https://pythonwheels.com/).
 ```bash
-kedro pipeline pull <package_name> (or path to a wheel file)
+kedro micropkg pull <package_name> (or path to a wheel file)
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
+Further information is available in the [micro-packaging documentation](../06_nodes_and_pipelines/04_micro_packaging.md).
 
 ##### Delete a modular pipeline
 The following command deletes all the files related to a modular pipeline in your Kedro project.
@@ -318,7 +318,7 @@ The following command deletes all the files related to a modular pipeline in you
 kedro pipeline delete <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
+Further information is available in the [micro-packaging documentation](../06_nodes_and_pipelines/04_micro_packaging.md).
 
 ##### Describe a pipeline
 

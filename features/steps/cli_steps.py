@@ -249,7 +249,7 @@ def init_git_repo(context):
     with util.chdir(context.root_project_dir):
         check_run("git init")
         check_run("git config user.name 'Tester'")
-        check_run("git config user.email 'tester.kedro@quantumblack.com'")
+        check_run("git config user.email 'tester.kedro@kedro.com'")
 
 
 @given("I have added a test jupyter notebook")

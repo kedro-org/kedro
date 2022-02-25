@@ -30,7 +30,7 @@ from kedro import __version__ as release
 # -- Project information -----------------------------------------------------
 
 project = "Kedro"
-author = "QuantumBlack"
+author = "Kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -95,6 +95,7 @@ exclude_patterns = [
     "kedro_docs_style_guide.md",
 ]
 
+
 type_targets = {
     "py:class": (
         "object",
@@ -117,6 +118,7 @@ type_targets = {
         "kedro.io.core.DataSetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
+        "kedro.io.memory_data_set.MemoryDataSet",
         "kedro.io.transformers.AbstractTransformer",
         "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
         "kedro.io.partitioned_data_set.PartitionedDataSet",
@@ -159,7 +161,6 @@ type_targets = {
         "ConfirmNotUniqueError",
     ),
 }
-
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
 nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
 
@@ -205,6 +206,7 @@ linkcheck_ignore = [
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
+    "https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf",
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -259,7 +261,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "Kedro.tex", "Kedro Documentation", "QuantumBlack", "manual")
+    (master_doc, "Kedro.tex", "Kedro Documentation", "Kedro", "manual")
 ]
 
 # -- Options for manual page output ------------------------------------------
@@ -280,7 +282,7 @@ texinfo_documents = [
         "Kedro Documentation",
         author,
         "Kedro",
-        "Kedro is a Data Science framework for QuantumBlack-led projects.",
+        "Kedro is a Python framework for creating reproducible, maintainable and modular data science code.",
         "Data-Science",
     )
 ]

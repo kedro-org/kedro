@@ -107,8 +107,8 @@ class DaskRunner(AbstractRunner):
         """
         return _DaskDataSet(ds_name)
 
+    @staticmethod
     def _run_node(
-        self,
         node: Node,
         catalog: DataCatalog,
         is_async: bool = False,
@@ -149,7 +149,12 @@ class DaskRunner(AbstractRunner):
                 node_futures[dependency] for dependency in node_dependencies[node]
             )
             node_futures[node] = client.submit(
-                self._run_node, node, catalog, self._is_async, run_id, *dependencies
+                DaskRunner._run_node,
+                node,
+                catalog,
+                self._is_async,
+                run_id,
+                *dependencies,
             )
 
         for i, (_, node) in enumerate(

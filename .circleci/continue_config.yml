@@ -88,7 +88,18 @@ commands:
           command: conda init powershell
       - run:
           name: Create 'kedro_builder' conda environment
-          command: conda create -n kedro_builder python=<<parameters.python_version>> rust -y
+          command: conda create -n kedro_builder python=<<parameters.python_version>> -y
+
+  win_setup_rust:
+    steps:
+      - run:
+          name: Install Rust
+          command: |
+            $ProgressPreference = "SilentlyContinue"
+            Invoke-WebRequest https://win.rustup.rs/x86_64 -OutFile rustup-init.exe
+            ./rustup-init.exe --default-toolchain stable -y
+            $env:PATH+=";$env:USERPROFILE\.cargo\bin"
+            $ExportContent+="`n" + '$env:PATH+=";$env:USERPROFILE\.cargo\bin"'
 
   win_setup_env:
     steps:
@@ -183,6 +194,7 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
+      - win_setup_rust
       - run:
           name: Install 'make' command
           command: choco install make

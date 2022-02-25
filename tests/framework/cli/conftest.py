@@ -19,6 +19,7 @@ from kedro import __version__ as kedro_version
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.cli import cli
 from kedro.framework.cli.jupyter import jupyter_cli
+from kedro.framework.cli.micropkg import micropkg_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
 from kedro.framework.cli.registry import registry_cli
@@ -103,6 +104,7 @@ def fake_kedro_cli():
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
         ],
@@ -137,7 +139,16 @@ def fake_project_cli(
     for key, value in old_settings.items():
         settings.set(key, value)
     sys.path = old_path
-    del sys.modules[PACKAGE_NAME]
+
+    # configure_project does imports that add PACKAGE_NAME.pipelines,
+    # PACKAGE_NAME.settings to sys.modules. These need to be removed.
+    # Ideally we would reset sys.modules to exactly what it was before
+    # running anything, but removal of distutils.build.commands from
+    # sys.modules mysteriously makes some tests for `kedro pipeline package`
+    # fail on Windows, Python 3.7 and 3.8.
+    for module in list(sys.modules.keys()):
+        if module.startswith(PACKAGE_NAME):
+            del sys.modules[module]
 
 
 @fixture

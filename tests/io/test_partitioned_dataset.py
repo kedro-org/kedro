@@ -417,6 +417,7 @@ def mocked_s3_bucket():
     with mock_s3():
         conn = boto3.client(
             "s3",
+            region_name="us-east-1",
             aws_access_key_id="fake_access_key",
             aws_secret_access_key="fake_secret_key",
         )

@@ -14,6 +14,7 @@ from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.cli import KedroCLI, _init_plugins, cli
 from kedro.framework.cli.jupyter import jupyter_cli
+from kedro.framework.cli.micropkg import micropkg_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
 from kedro.framework.cli.registry import registry_cli
@@ -345,11 +346,12 @@ class TestKedroCLI:
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        assert len(kedro_cli.project_groups) == 5
+        assert len(kedro_cli.project_groups) == 6
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
         ]
@@ -382,11 +384,12 @@ class TestKedroCLI:
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        assert len(kedro_cli.project_groups) == 6
+        assert len(kedro_cli.project_groups) == 7
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
             cli,
@@ -418,11 +421,12 @@ class TestKedroCLI:
 
         assert len(kedro_cli.global_groups) == 2
         assert kedro_cli.global_groups == [cli, create_cli]
-        assert len(kedro_cli.project_groups) == 6
+        assert len(kedro_cli.project_groups) == 7
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
             cli,

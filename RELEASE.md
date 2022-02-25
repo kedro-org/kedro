@@ -1,9 +1,17 @@
+# Release 0.17.8
+
+## Major features and improvements
+* Documented distribution of Kedro pipelines with Dask.
+
+## Bug fixes and other changes
+
+## Upcoming deprecations for Kedro 0.18.0
+
 # Release 0.17.7
 
 ## Major features and improvements
 * `pipeline` now accepts `tags` and a collection of `Node`s and/or `Pipeline`s rather than just a single `Pipeline` object. `pipeline` should be used in preference to `Pipeline` when creating a Kedro pipeline.
 * `pandas.SQLTableDataSet` and `pandas.SQLQueryDataSet` now only open one connection per database, at instantiation time (therefore at catalog creation time), rather than one per load/save operation.
-* Documented distribution of Kedro pipelines with Dask.
 * Added new command group, `micropkg`, to replace `kedro pipeline pull` and `kedro pipeline package` with `kedro micropkg pull` and `kedro micropkg package` for Kedro 0.18.0. `kedro micropkg package` saves packages to `project/dist` while `kedro pipeline package` saves packages to `project/src/dist`.
 
 ## Bug fixes and other changes
@@ -15,7 +23,6 @@
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.5 (Python 3.7+ only). This `pip-tools` version is compatible with `pip>=21.2`, including the most recent releases of `pip`. Python 3.6 users should continue to use `pip-tools` 6.4 and `pip<22`.
 * Added `astro-iris` as alias for `astro-airlow-iris`, so that old tutorials can still be followed.
 * Added details about [Kedro's Technical Steering Committee and governance model](https://kedro.readthedocs.io/en/0.17.7/14_contribution/technical_steering_committee.html).
-
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro pipeline pull` and `kedro pipeline package` will be deprecated. Please use `kedro micropkg` instead.

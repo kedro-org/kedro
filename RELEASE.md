@@ -1,7 +1,7 @@
 # Upcoming Release 0.18.0
 
 ## Major features and improvements
-* Added support for Python 3.9, dropped support for Python 3.6.
+* Added support for Python 3.9 and 3.10, dropped support for Python 3.6.
 * Support specifying parameters mapping in `pipeline()` without the `params:` prefix.
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
 * Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.

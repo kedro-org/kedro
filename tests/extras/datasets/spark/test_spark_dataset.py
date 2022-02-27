@@ -208,26 +208,49 @@ class TestSparkDataSet:
         spark_df = spark_data_set.load()
         assert spark_df.filter(col("Name") == "Alex").count() == 1
 
-    def test_load_options_schema(
+    def test_load_options_schema_ddl_string(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema": "name STRING, age INT, height FLOAT"},
+        )
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    def test_load_options_schema_obj(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema": sample_spark_df_schema},
+        )
+
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    def test_load_options_schema_path(
         self, tmp_path, sample_pandas_df, sample_spark_df_schema
     ):
         filepath = (tmp_path / "data").as_posix()
         schemapath = (tmp_path / "schema.json").as_posix()
-
-        # Write CSV dataset
         local_csv_data_set = CSVDataSet(filepath=filepath)
         local_csv_data_set.save(sample_pandas_df)
+        Path(schemapath).write_text(sample_spark_df_schema.json(), encoding="utf-8")
 
-        # Write schema
-        # TODO: Should this be tackled in another way?
-        with open(schemapath, "w", encoding="utf-8") as f:
-            f.write(sample_spark_df_schema.json())
-
-        # Load CSV dataset
         spark_data_set = SparkDataSet(
             filepath=filepath,
             file_format="csv",
-            load_args={"header": True, "schema_json_path": schemapath},
+            load_args={"header": True, "schema": {"filepath": schemapath}},
         )
 
         spark_df = spark_data_set.load()

@@ -318,21 +318,20 @@ class SparkDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-        # Handle schema
-        self._schema = self._load_schema(self._load_args.pop("schema_json_path", None))
+        # Handle schema load argument
+        self._schema = self._load_args.pop("schema", None)
+        if self._schema is not None:
+            if isinstance(self._schema, dict):
+                self._schema = self._load_schema_from_file(self._schema)
+
         self._file_format = file_format
         self._fs_prefix = fs_prefix
 
     @staticmethod
-    def _load_schema(schema_json_path: str) -> Optional[StructType]:
-        if schema_json_path is None:
-            return None
-
-        # TODO Limit protocols to file only?
-        # TODO What about files in HDFS?
-        # TODO What about credentials, e.g., schema stored in separate GCS bucket?
-        protocol, schema_path = get_protocol_and_path(schema_json_path)
-        file_system = fsspec.filesystem(protocol)
+    def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
+        credentials = deepcopy(schema.get("credentials")) or {}
+        protocol, schema_path = get_protocol_and_path(schema["filepath"])
+        file_system = fsspec.filesystem(protocol, **credentials)
         pure_posix_path = PurePosixPath(schema_path)
         load_path = get_filepath_str(pure_posix_path, protocol)
 
@@ -340,11 +339,10 @@ class SparkDataSet(AbstractVersionedDataSet):
         with file_system.open(load_path) as fs_file:
 
             try:
-                # FUTURE: Support other schema input formats
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:
                 raise DataSetError(
-                    "Contents of `schema_json_path` are invalid. Please"
+                    "Contents of `schema.filepath` are invalid. Please"
                     "provide a valid JSON serialized `pyspark.sql.types.StructType`."
                 ) from exc
 

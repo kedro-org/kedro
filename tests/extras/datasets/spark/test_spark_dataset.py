@@ -256,6 +256,18 @@ class TestSparkDataSet:
         spark_df = spark_data_set.load()
         assert spark_df.schema == sample_spark_df_schema
 
+    def test_load_options_schema_path_err(self, tmp_path):
+        filepath = (tmp_path / "data").as_posix()
+        schemapath = (tmp_path / "schema.json").as_posix()
+        Path(schemapath).write_text("dummy", encoding="utf-8")
+
+        with pytest.raises(DataSetError):
+            SparkDataSet(
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True, "schema": {"filepath": schemapath}},
+            )
+
     def test_save_options_csv(self, tmp_path, sample_spark_df):
         # To cross check the correct Spark save operation we save to
         # a single spark partition with csv format and retrieve it with Kedro

@@ -318,7 +318,7 @@ The following command deletes all the files related to a modular pipeline in you
 kedro pipeline delete <pipeline_name>
 ```
 
-Further information is available in the [micro-packaging documentation](../06_nodes_and_pipelines/04_micro_packaging.md).
+Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
 
 #### Registered pipelines
 

@@ -118,12 +118,14 @@ Now that all the resources are in place, it's time to submit jobs to Batch progr
 
 #### Create a custom runner
 
-Create a new Python package `runner` in your `src` folder, i.e. `kedro_tutorial/src/kedro_tutorial/runner/`. Make sure there is an `__init__.py` file at this location and add another file named `batch_runner.py`, which will contain the implementation of your custom runner, `AWSBatchRunner`. The `AWSBatchRunner` will submit and monitor jobs asynchronously, surfacing any errors that occur on Batch.
+Create a new Python package `runner` in your `src` folder, i.e. `kedro_tutorial/src/kedro_tutorial/runner/`. Make sure there is an `__init__.py` file at this location, and add another file named `batch_runner.py`, which will contain the implementation of your custom runner, `AWSBatchRunner`. The `AWSBatchRunner` will submit and monitor jobs asynchronously, surfacing any errors that occur on Batch.
 
-Make sure the `__init__.py` file in the `runner` folder includes the following import:
+Make sure the `__init__.py` file in the `runner` folder includes the following import and declaration:
 
 ```python
-from .batch_runner import AWSBatchRunner  # NOQA
+from .batch_runner import AWSBatchRunner
+
+__all__ = ["AWSBatchRunner"]
 ```
 
 Copy the contents of the script below into `batch_runner.py`:
@@ -286,13 +288,13 @@ def _track_batch_job(job_id: str, client: Any) -> None:
 
 #### Set up Batch-related configuration
 
-You'll need to set the Batch-related configuration that the runner will use. Add a `parameters.yml` file inside the `conf/aws_batch/` directory created as part of the prerequistes steps, which will include the following keys:
+You'll need to set the Batch-related configuration that the runner will use. Add a `parameters.yml` file inside the `conf/aws_batch/` directory created as part of the prerequistes with the following keys:
 
 ```yaml
 aws_batch:
-    job_queue: "spaceflights_queue"
-    job_definition: "kedro_run"
-    max_workers: 2
+  job_queue: "spaceflights_queue"
+  job_definition: "kedro_run"
+  max_workers: 2
 ```
 
 #### Update CLI implementation
@@ -315,6 +317,7 @@ def run(tag, env, parallel, ...):
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
     with KedroSession.create(env=env, extra_params=params) as session:
+        context = session.load_context()
         runner_instance = _instantiate_runner(runner, is_async, context)
         session.run(
             tags=tag,
@@ -323,6 +326,7 @@ def run(tag, env, parallel, ...):
             from_nodes=from_nodes,
             to_nodes=to_nodes,
             from_inputs=from_inputs,
+            to_outputs=to_outputs,
             load_versions=load_version,
             pipeline_name=pipeline,
         )

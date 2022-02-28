@@ -174,7 +174,7 @@ class PickleDataSet(AbstractDataSet):
     def _exists(self) -> bool:
         try:
             key_exists = bool(self._redis_db.exists(self._key))
-        except DataSetError:
+        except Exception:
             return False
 
         return key_exists

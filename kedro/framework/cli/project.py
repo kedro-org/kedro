@@ -324,7 +324,11 @@ def activate_nbstripout(
     callback=_config_file_callback,
 )
 @click.option(
-    "--params", type=str, default="", help=PARAMS_ARG_HELP, callback=_split_params
+    "--params",
+    type=click.UNPROCESSED,
+    default="",
+    help=PARAMS_ARG_HELP,
+    callback=_split_params,
 )
 # pylint: disable=too-many-arguments,unused-argument
 def run(

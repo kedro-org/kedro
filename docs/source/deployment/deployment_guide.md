@@ -21,4 +21,4 @@ We also provide information to help you deploy to the following:
 
 In addition, we also provide instructions on [how to integrate a Kedro project with Amazon SageMaker](aws_sagemaker.md).
 
-![](../meta/images/deployments.png)  <!-- TODO(deepyaman): Add Dask to deployment flowchart. -->
+![](../meta/images/deployments.png)

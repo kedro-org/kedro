@@ -1,3 +1,12 @@
+# Release 0.17.8
+
+## Major features and improvements
+* Documented distribution of Kedro pipelines with Dask.
+
+## Bug fixes and other changes
+
+## Upcoming deprecations for Kedro 0.18.0
+
 # Release 0.17.7
 
 ## Major features and improvements
@@ -14,7 +23,6 @@
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.5 (Python 3.7+ only). This `pip-tools` version is compatible with `pip>=21.2`, including the most recent releases of `pip`. Python 3.6 users should continue to use `pip-tools` 6.4 and `pip<22`.
 * Added `astro-iris` as alias for `astro-airlow-iris`, so that old tutorials can still be followed.
 * Added details about [Kedro's Technical Steering Committee and governance model](https://kedro.readthedocs.io/en/0.17.7/14_contribution/technical_steering_committee.html).
-
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro pipeline pull` and `kedro pipeline package` will be deprecated. Please use `kedro micropkg` instead.
@@ -406,7 +414,7 @@ Check your source directory. If you defined a different source directory (`sourc
 
 ## Major features and improvements
 
-* Added documentation with a focus on single machine and distributed environment deployment; the series includes Docker, Argo, Prefect, Kubeflow, AWS Batch, AWS Sagemaker and extends our section on Databricks
+* Added documentation with a focus on single machine and distributed environment deployment; the series includes Docker, Argo, Prefect, Kubeflow, AWS Batch, AWS Sagemaker and extends our section on Databricks.
 * Added [kedro-starter-spaceflights](https://github.com/kedro-org/kedro-starter-spaceflights/) alias for generating a project: `kedro new --starter spaceflights`.
 
 ## Bug fixes and other changes

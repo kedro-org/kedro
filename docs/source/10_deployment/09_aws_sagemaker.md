@@ -225,7 +225,7 @@ from .nodes import (
 
 
 def create_pipeline(**kwargs):
-    return Pipeline(
+    return pipeline(
         [
             node(
                 func=split_data,

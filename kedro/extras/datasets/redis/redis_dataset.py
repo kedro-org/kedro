@@ -4,7 +4,6 @@ options for instantiating the redis app ``from_url`` and setting a value."""
 
 import importlib
 import os
-import pickle
 from copy import deepcopy
 from typing import Any, Dict
 
@@ -129,7 +128,7 @@ class PickleDataSet(AbstractDataSet):
                 "Missing one of `loads` and `dumps` on the backend."
             )
 
-        self._backend = imported_backend
+        self._backend = backend
 
         self._key = key
 
@@ -151,18 +150,20 @@ class PickleDataSet(AbstractDataSet):
         )
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(key=self._key, **self._from_url_args)
+        return dict(key=self._key, **self._redis_from_url_args)
 
     # `redis_db` mypy does not work since it is optional and optional is not
     # accepted by pickle.loads.
     def _load(self) -> Any:
-        return self._backend.loads(self._redis_db.get(self._key), **self._load_args)  # type: ignore
+        imported_backend = importlib.import_module(self._backend)
+        return imported_backend.loads(self._redis_db.get(self._key), **self._load_args)  # type: ignore
 
     def _save(self, data: Any) -> None:
         try:
+            imported_backend = importlib.import_module(self._backend)
             self._redis_db.set(
                 self._key,
-                self._backend.dumps(data, **self._save_args),
+                imported_backend.dumps(data, **self._save_args),
                 **self._redis_set_args,
             )
         except Exception as exc:

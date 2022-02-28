@@ -1,9 +1,3 @@
-# Copyright (c) 2016 - present
-# QuantumBlack Visual Analytics Ltd (a McKinsey company).
-# All rights reserved.
-#
-# This software framework contains the confidential and proprietary information
-# of QuantumBlack, its affiliates, and its licensors. Your use of these
 """Tests ``PickleDataSet``."""
 
 import pickle

@@ -38,4 +38,4 @@ There are quite a few ways to contribute to the project, find inspiration from t
 Kedro is an incubating project in [LF AI & Data](https://lfaidata.foundation/), a sub-organisation within the Linux
 Foundation that focuses on open innovation within the data and AI space. A group of maintainers, known as the Technical Steering Committee (TSC), govern the project. You can read more about the structure of our TSC in our [Technical Charter](./kedro_technical_charter.pdf).
 
-We invite community members to join the TSC and help define the future of the Kedro project. Read the [guidance on becoming a Kedro maintainer](https://kedro.readthedocs.io/en/stable/14_contribution/technical_steering_committee.html) to understand the process of joining the TSC.
+We invite community members to join the TSC and help define the future of the Kedro project. Read the [guidance on becoming a Kedro maintainer](https://kedro.readthedocs.io/en/stable/contribution/technical_steering_committee.html) to understand the process of joining the TSC.

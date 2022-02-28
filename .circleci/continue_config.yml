@@ -37,6 +37,11 @@ commands:
       - run:
           name: Activate conda environment
           command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+      - run:
+          # pytables does not work properly with python 3.9 to handle our HDFDataSet
+          # if pip-installed, so we install this dependency via conda
+          name: Install conda packages
+          command: echo "conda install -c conda-forge pytables -y" >> $BASH_ENV
 
   setup_requirements:
     steps:
@@ -44,9 +49,8 @@ commands:
           name: Install pip setuptools
           command: make install-pip-setuptools
       - run:
-          # Virtualenv 20.0.20 broke pre-commit, capped for now
           name: Install venv for some pre-commit hooks
-          command: conda install -y "virtualenv<20.0"
+          command: conda install -y virtualenv
       - run:
           name: Install requirements and test requirements
           command: pip install --upgrade -r test_requirements.txt
@@ -129,6 +133,11 @@ commands:
 
   win_setup_requirements:
     steps:
+      # pytables and Fiona have a series of binary dependencies under Windows that
+      # are best handled by conda-installing instead of pip-installing them.
+      - run:
+          name: Install pytables
+          command: conda activate kedro_builder; conda install -c conda-forge pytables -y
       - run:
           name: Install GDAL
           command: conda activate kedro_builder; conda install -c conda-forge gdal -y
@@ -202,9 +211,21 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - setup
-      - run:
-          name: Run unit tests
-          command: make test
+      - unless:
+          condition:
+            equal: ["3.10", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests in parallel
+                command: make test
+      - when:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Run unit tests sequentially
+                command: pytest tests --cov-config pyproject.toml
+
 
   win_unit_tests:
     parameters:
@@ -230,18 +251,18 @@ jobs:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - unless:
           condition:
-            equal: ["3.6", <<parameters.python_version>>]
+            equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
-                name: Run unit tests without spark
+                name: Run unit tests without spark in parallel
                 command: conda activate kedro_builder; make test-no-spark
       - when:
           condition:
-            equal: ["3.6", <<parameters.python_version>>]
+            equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
-                name: Run unit tests without spark or tensorflow
-                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark --ignore tests/extras/datasets/tensorflow --numprocesses 4 --dist loadfile
+                name: Run unit tests withou spark sequentially
+                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
 
   lint:
     parameters:
@@ -482,47 +503,48 @@ workflows:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
-      - build_docs
-      - docs_linkcheck
       - e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - unit_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_unit_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - lint:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - pip_compile:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_pip_compile:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - build_docs
+      - docs_linkcheck
       - all_circleci_checks_succeeded:
           requires:
             - e2e_tests
-            # win_e2e_tests-3.6 is not required due to the error
-            # `Cargo, the Rust package manager, is not installed or is not on PATH`.
-            # - win_e2e_tests
-            - win_e2e_tests-3.7
-            - win_e2e_tests-3.8
+            - win_e2e_tests
             - unit_tests
             - win_unit_tests
-            - lint
+            # lint-3.10 is not required due to inconsistent results for pylint.
+            # See: https://github.com/PyCQA/pylint/issues/5832
+            # - lint
+            - lint-3.7
+            - lint-3.8
+            - lint-3.9
             - pip_compile
             - win_pip_compile
             - build_docs
@@ -582,11 +604,11 @@ workflows:
       - build_docker_image:
           matrix:
             parameters:
-              python_version: ["3.9"]
+              python_version: ["3.9", "3.10"]
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.9"]
+              python_version: ["3.9", "3.10"]
           requires:
             - build_docker_image-<<matrix.python_version>>
 
@@ -596,7 +618,7 @@ workflows:
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - publish_kedro:
           requires:
             - build_kedro

@@ -16,8 +16,7 @@ You should be in your project root directory, and once Kedro-Viz is installed yo
 kedro viz
 ```
 
-This command will run a server on http://127.0.0.1:4141 that will open up your visualisation on a browser. You should
- be able to see the following:
+This command will run a server on http://127.0.0.1:4141 that will open up your visualisation on a browser. You should be able to see the following:
 
 ![](../meta/images/pipeline_visualisation.png)
 
@@ -113,7 +112,7 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
 
 You need to update requirements.txt in your Kedro project and add the following datasets to enable plotly for your project.
 
- `kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.17.6`
+`kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.17.7`
 
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.

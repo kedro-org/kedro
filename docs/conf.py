@@ -190,6 +190,7 @@ html_show_copyright = False
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [
+    "http://127.0.0.1:8787/status",  # Dask's diagnostics dashboard
     "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
     "https://console.aws.amazon.com/batch/home#/jobs",
@@ -205,6 +206,7 @@ linkcheck_ignore = [
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
+    "https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf",
 
     # Number section removal, temporarily ignore until 0.18.0 release
     "https://kedro.readthedocs.io/en/stable/data/data_catalog.html#using-the-data-catalog-with-the-yaml-api",

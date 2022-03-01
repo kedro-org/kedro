@@ -51,5 +51,4 @@ tables~=3.6.0; platform_system == "Windows" and python_version<'3.9'
 tables~=3.6; platform_system != "Windows"
 tensorflow>=2.0, <3.0
 trufflehog~=2.1
-wheel~=0.35
 xlsxwriter~=1.0

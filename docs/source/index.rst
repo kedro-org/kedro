@@ -153,6 +153,7 @@ Welcome to Kedro's documentation!
    deployment/aws_sagemaker
    deployment/aws_step_functions
    deployment/airflow_astronomer
+   deployment/dask
 
 .. toctree::
    :maxdepth: 2
@@ -184,6 +185,7 @@ Welcome to Kedro's documentation!
    contribution/developer_contributor_guidelines
    contribution/backwards_compatibility
    contribution/documentation_contributor_guidelines
+   contribution/technical_steering_committee
 
 API documentation
 =================

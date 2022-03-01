@@ -5,9 +5,7 @@ The following lists a set of questions that we have been asked about Kedro in th
 
 ## What is Kedro?
 
-Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It
- borrows concepts from software engineering and applies them to machine-learning code; applied concepts include
-  modularity, separation of concerns and versioning.
+Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It borrows concepts from software engineering and applies them to machine-learning code; applied concepts include modularity, separation of concerns and versioning. Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
 
 For the source code, take a look at the [Kedro repository on Github](https://github.com/kedro-org/kedro).
 
@@ -25,6 +23,7 @@ Andrew Mackay,
 [Lim Hoang](https://github.com/limdauto),
 [Lorena Bălan](https://github.com/lorenabalan),
 [Merel Theisen](https://github.com/MerelTheisenQB),
+[Nero Okwa](https://github.com/NeroOkwa),
 [Rashida Kanchwala](https://github.com/rashidakanchwala),
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Susanna Wong](https://github.com/studioswong),

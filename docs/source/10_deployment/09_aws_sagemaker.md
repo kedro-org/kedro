@@ -224,7 +224,7 @@ from .nodes import (
 )
 
 
-def create_pipeline(**kwargs):
+def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(

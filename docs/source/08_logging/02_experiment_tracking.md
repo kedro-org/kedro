@@ -42,7 +42,7 @@ Add the node to your pipeline and ensure that the output name matches the name o
 
 ```python
 # pipeline.py
-def create_pipeline(**kwargs):
+def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(

@@ -223,7 +223,7 @@ def predict(model: RandomForestClassifier, testing_data: DataFrame) -> DataFrame
     return predictions
 
 
-def create_pipeline(**kwargs):
+def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(train_model, inputs=["training_data"], outputs="example_classifier"),

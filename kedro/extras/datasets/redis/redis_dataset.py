@@ -57,6 +57,7 @@ class PickleDataSet(AbstractDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         key: str,
@@ -99,10 +100,10 @@ class PickleDataSet(AbstractDataSet):
                 All defaults are preserved.
             credentials: Credentials required to get access to the redis server.
                 E.g. `{"password": None}`.
-            redis_args: Extra arguments to pass into the redis client constructor ``redis.StrictRedis.from_url``.
-                (e.g. `{"socket_timeout": 10}`), as well as to pass to the ``redis.StrictRedis.set``
-                through nested keys `from_url_args` and `set_args`. Here you can find all available
-                arguments for `from_url`:
+            redis_args: Extra arguments to pass into the redis client constructor
+                ``redis.StrictRedis.from_url``. (e.g. `{"socket_timeout": 10}`), as well as to pass
+                to the ``redis.StrictRedis.set`` through nested keys `from_url_args` and `set_args`.
+                Here you can find all available arguments for `from_url`:
                 https://redis-py.readthedocs.io/en/stable/connections.html?highlight=from_url#redis.Redis.from_url
                 All defaults are preserved, except `url`, which is set to `redis://127.0.0.1:6379`.
                 You could also specify the url through the env variable ``REDIS_URL``.
@@ -155,15 +156,19 @@ class PickleDataSet(AbstractDataSet):
     # `redis_db` mypy does not work since it is optional and optional is not
     # accepted by pickle.loads.
     def _load(self) -> Any:
+        if not self.exists():
+            raise DataSetError(f"The provided key {self._key} does not exists.")
         imported_backend = importlib.import_module(self._backend)
-        return imported_backend.loads(self._redis_db.get(self._key), **self._load_args)  # type: ignore
+        return imported_backend.loads(  # type: ignore
+            self._redis_db.get(self._key), **self._load_args
+        )  # type: ignore
 
     def _save(self, data: Any) -> None:
         try:
             imported_backend = importlib.import_module(self._backend)
             self._redis_db.set(
                 self._key,
-                imported_backend.dumps(data, **self._save_args),
+                imported_backend.dumps(data, **self._save_args),  # type: ignore
                 **self._redis_set_args,
             )
         except Exception as exc:
@@ -174,7 +179,8 @@ class PickleDataSet(AbstractDataSet):
     def _exists(self) -> bool:
         try:
             key_exists = bool(self._redis_db.exists(self._key))
-        except Exception:
-            return False
-
+        except Exception as exc:
+            raise DataSetError(
+                f"The existence of key {self._key} could not be established due to: {exc}"
+            ) from exc
         return key_exists

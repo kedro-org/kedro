@@ -82,6 +82,7 @@ class TestPickleDataSet:
             "redis.StrictRedis.get", return_value=serialized_dummy_object
         )
         pickle_data_set.save(dummy_object)
+        mocker.patch("redis.StrictRedis.exists", return_value=True)
         loaded_dummy_object = pickle_data_set.load()
         set_mocker.assert_called_once_with(
             key,
@@ -96,6 +97,7 @@ class TestPickleDataSet:
         mocker.patch(
             "redis.StrictRedis.from_url", return_value=redis.Redis.from_url("redis://")
         )
+        mocker.patch("redis.StrictRedis.exists", return_value=False)
         assert not pickle_data_set.exists()
         mocker.patch("redis.StrictRedis.set")
         pickle_data_set.save(dummy_object)
@@ -121,9 +123,10 @@ class TestPickleDataSet:
         assert pickle_data_set._redis_from_url_args == redis_args["from_url_args"]
         assert pickle_data_set._redis_set_args == {}  # default unchanged
 
-    def test_load_missing_key(self, pickle_data_set):
+    def test_load_missing_key(self, mocker, pickle_data_set):
         """Check the error when trying to load missing file."""
-        pattern = r"Failed while loading data from data set PickleDataSet\(.*\)"
+        pattern = r"The provided key "
+        mocker.patch("redis.StrictRedis.exists", return_value=False)
         with pytest.raises(DataSetError, match=pattern):
             pickle_data_set.load()
 
@@ -156,4 +159,4 @@ class TestPickleDataSet:
             side_effect=ImportError,
         )
         with pytest.raises(ImportError, match=pattern):
-            PickleDataSet(filepath="test.pkl", backend="fake.backend.does.not.exist")
+            PickleDataSet("key", backend="fake.backend.does.not.exist")

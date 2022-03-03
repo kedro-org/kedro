@@ -21,7 +21,6 @@ from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
-from kedro.runner.runner import AbstractRunner
 
 logger = logging.getLogger(__name__)
 
@@ -279,7 +278,7 @@ class LoggingHooks:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner: AbstractRunner,
+        runner_name: str,
         run_id: str,
     ) -> None:
         logger.info(
@@ -288,7 +287,7 @@ class LoggingHooks:
                 "pipeline": pipeline,
                 "run_params": run_params,
                 "catalog": catalog,
-                "runner": runner,
+                "runner_name": runner_name,
                 "run_id": run_id,
             },
         )
@@ -300,6 +299,8 @@ class LoggingHooks:
         run_result: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
+        runner_name: str,
+        run_id: str,
     ) -> None:
         logger.info(
             "Ran pipeline",
@@ -308,6 +309,8 @@ class LoggingHooks:
                 "run_params": run_params,
                 "run_result": run_result,
                 "catalog": catalog,
+                "runner_name": runner_name,
+                "run_id": run_id,
             },
         )
 
@@ -318,6 +321,8 @@ class LoggingHooks:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
+        runner_name: str,
+        run_id: str,
     ) -> None:
         logger.info(
             "Pipeline error",
@@ -326,6 +331,8 @@ class LoggingHooks:
                 "run_params": run_params,
                 "pipeline": pipeline,
                 "catalog": catalog,
+                "runner_name": runner_name,
+                "run_id": run_id,
             },
         )
 

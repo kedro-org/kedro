@@ -378,7 +378,7 @@ class KedroSession:
             run_params=record_data,
             pipeline=filtered_pipeline,
             catalog=catalog,
-            runner=runner,
+            runner_name=runner,
             run_id=run_id,
         )
 
@@ -390,6 +390,8 @@ class KedroSession:
                 run_params=record_data,
                 pipeline=filtered_pipeline,
                 catalog=catalog,
+                runner_name=getattr(runner, "__name__", str(runner)),
+                run_id=run_id,
             )
             raise
 
@@ -398,7 +400,7 @@ class KedroSession:
             run_result=run_result,
             pipeline=filtered_pipeline,
             catalog=catalog,
-            runner=runner,
+            runner_name=getattr(runner, "__name__", str(runner)),
             run_id=run_id,
         )
         return run_result

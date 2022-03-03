@@ -567,7 +567,7 @@ class TestKedroSession:
             run_params=record_data,
             pipeline=mock_pipeline,
             catalog=mock_catalog,
-            runner=mock_runner,
+            runner_name=mock_runner.__name__,
             run_id=fake_session_id,
         )
         mock_runner.run.assert_called_once_with(
@@ -578,7 +578,7 @@ class TestKedroSession:
             run_result=mock_runner.run.return_value,
             pipeline=mock_pipeline,
             catalog=mock_catalog,
-            runner=mock_runner,
+            runner_name=mock_runner.__name__,
             run_id=fake_session_id,
         )
 
@@ -650,6 +650,8 @@ class TestKedroSession:
             run_params=record_data,
             pipeline=mock_pipeline,
             catalog=mock_catalog,
+            runner_name=mock_runner.__name__,
+            run_id=fake_session_id,
         )
 
         mock_hook.after_pipeline_run.assert_not_called()

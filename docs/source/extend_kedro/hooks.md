@@ -48,8 +48,9 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 Lastly, Kedro defines a small set of CLI hooks that inject additional behaviour around execution of a Kedro CLI command:
 
 * `before_command_run`
+* `after_command_run`
 
-This is what the [`kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) plugin relies on under the hood in order to be able to collect CLI usage statistics.
+This is what the [`kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) plugin relies on these under the hood in order to be able to collect CLI usage statistics.
 
 ### Hook implementation
 

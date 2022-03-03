@@ -541,8 +541,10 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner = mocker.Mock()
-        mock_runner.__name__ = 'SequentialRunner'
+        mock_runner = mocker.patch(
+            "kedro.runner.sequential_runner.SequentialRunner", autospec=True
+        )
+
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         with KedroSession.create(mock_package_name, fake_project) as session:

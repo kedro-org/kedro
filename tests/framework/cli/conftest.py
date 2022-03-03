@@ -116,7 +116,7 @@ def fake_project_cli(
     fake_repo_path: Path, dummy_config: Path, fake_kedro_cli: click.CommandCollection
 ):
     old_settings = settings.as_dict()
-    starter_path = Path(__file__).parents[3].resolve()
+    starter_path = Path(__file__).resolve().parents[3]
     starter_path = starter_path / "features" / "steps" / "test_starter"
     CliRunner().invoke(
         fake_kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)]

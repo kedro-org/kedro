@@ -10,9 +10,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = (
-    "pandas~=1.3"  # to be able to use XMLDataSet and pandas integration with fsspec
-)
+PANDAS = "pandas~=1.3"  # to be able to use XMLDataSet and pandas integration with fsspec
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -90,7 +88,7 @@ plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
-redis_require = {"redis.PickleDataSet": ["redis~=4.1.0"]}
+redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],

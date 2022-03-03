@@ -1121,10 +1121,6 @@
               "redis_args": {
                 "type": "object",
                 "description": "Extra arguments to pass into the redis client constructor ``redis.StrictRedis.from_url``, as well as to pass to the ``redis.StrictRedis.set``"
-              },
-              "layer": {
-                "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/0.15.9/06_resources/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }

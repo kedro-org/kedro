@@ -94,9 +94,6 @@ class TestPickleDataSet:
     def test_exists(self, mocker, pickle_data_set, dummy_object, key):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        mocker.patch(
-            "redis.StrictRedis.from_url", return_value=redis.Redis.from_url("redis://")
-        )
         mocker.patch("redis.StrictRedis.exists", return_value=False)
         assert not pickle_data_set.exists()
         mocker.patch("redis.StrictRedis.set")
@@ -104,6 +101,12 @@ class TestPickleDataSet:
         exists_mocker = mocker.patch("redis.StrictRedis.exists", return_value=True)
         assert pickle_data_set.exists()
         exists_mocker.assert_called_once_with(key)
+
+    def test_exists_raises_error(self, pickle_data_set):
+        """Check the error when trying to assert existence with no redis server."""
+        pattern = r"The existence of key "
+        with pytest.raises(DataSetError, match=pattern):
+            pickle_data_set.exists()
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "errors": "strict"}], indirect=True

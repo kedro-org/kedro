@@ -102,7 +102,7 @@ Decorators can also be useful for monitoring your pipeline. You can apply one or
 For example, if you want to apply the decorator above to all pipeline nodes simultaneously:
 
 ```python
-hello_pipeline = Pipeline(
+hello_pipeline = pipeline(
     [node(say_hello, "name1", None), node(say_hello, "name2", None)]
 ).decorate(apply_g, apply_h)
 

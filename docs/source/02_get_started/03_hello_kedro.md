@@ -48,10 +48,10 @@ A pipeline organises the dependencies and execution order of a collection of nod
 In this example the pipeline executes `return_greeting_node` before it executes `join_statements_node`:
 
 ```python
-from kedro.pipeline import Pipeline
+from kedro.pipeline import pipeline
 
 # Assemble nodes into a pipeline
-pipeline = Pipeline([return_greeting_node, join_statements_node])
+greeting_pipeline = pipeline([return_greeting_node, join_statements_node])
 ```
 
 ## DataCatalog
@@ -84,7 +84,7 @@ It's now time to stitch the code together. Here is the full example:
 ```python
 """Contents of hello_kedro.py"""
 from kedro.io import DataCatalog, MemoryDataSet
-from kedro.pipeline import node, Pipeline
+from kedro.pipeline import node, pipeline
 from kedro.runner import SequentialRunner
 
 # Prepare a data catalog
@@ -107,13 +107,13 @@ join_statements_node = node(
 )
 
 # Assemble nodes into a pipeline
-pipeline = Pipeline([return_greeting_node, join_statements_node])
+greeting_pipeline = pipeline([return_greeting_node, join_statements_node])
 
 # Create a runner to run the pipeline
 runner = SequentialRunner()
 
 # Run the pipeline
-print(runner.run(pipeline, data_catalog))
+print(runner.run(greeting_pipeline, data_catalog))
 ```
 Then open a terminal and run the following command:
 

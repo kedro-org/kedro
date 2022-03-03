@@ -541,9 +541,9 @@ node(
 Alternatively, confirmation can be deferred to one of the nodes downstream, allowing you to implement extra validations before the loaded partitions are considered successfully processed:
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 
-Pipeline(
+pipeline(
     [
         node(
             func=process_partitions,

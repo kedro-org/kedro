@@ -159,7 +159,7 @@ The `DeltaTableDataSet` does not support `save()` operation, as the updates happ
 > Note: If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, via the DeltaTable API.
 
 ```python
-Pipeline(
+pipeline(
     [
         node(
             func=process_barometer_data, inputs="temperature", outputs="weather@spark"
@@ -181,7 +181,7 @@ Pipeline(
 `first_operation_complete` is a `MemoryDataSet` and it signals that any Delta operations which occur "outside" the Kedro DAG are complete. This can be used as input to a downstream node, to preserve the shape of the DAG. Otherwise, if no downstream nodes need to run after this, the node can simply not return anything:
 
 ```python
-Pipeline(
+pipeline(
     [
         node(func=..., inputs="temperature", outputs="weather@spark"),
         node(func=..., inputs="weather@delta", outputs=None),
@@ -206,7 +206,7 @@ Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs
 ```python
 from typing import Any, Dict
 
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.sql import DataFrame
 
@@ -223,8 +223,8 @@ def predict(model: RandomForestClassifier, testing_data: DataFrame) -> DataFrame
     return predictions
 
 
-def create_pipeline(**kwargs):
-    return Pipeline(
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
         [
             node(train_model, inputs=["training_data"], outputs="example_classifier"),
             node(

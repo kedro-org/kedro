@@ -25,7 +25,7 @@ def variance(m, m2):
     return m2 - m * m
 
 
-pipeline = Pipeline(
+variance_pipeline = pipeline(
     [
         node(len, "xs", "n"),
         node(mean, ["xs", "n"], "m", name="mean_node"),
@@ -42,7 +42,7 @@ You can use `describe` to understand what nodes are part of the pipeline:
 <summary><b>Click to expand</b></summary>
 
 ```python
-print(pipeline.describe())
+print(variance_pipeline.describe())
 ```
 
 The output is as follows:
@@ -67,7 +67,7 @@ Outputs: v
 You can also tag your pipeline by providing the `tags` argument, which will tag all of the pipeline's nodes. In the following example, both nodes are tagged with `pipeline_tag`.
 
 ```python
-pipeline = Pipeline(
+pipeline = pipeline(
     [node(..., name="node1"), node(..., name="node2")], tags="pipeline_tag"
 )
 ```
@@ -75,7 +75,7 @@ pipeline = Pipeline(
 You can combine pipeline tagging with node tagging. In the following example, `node1` and `node2` are tagged with `pipeline_tag`, while `node2` also has a `node_tag`.
 
 ```python
-pipeline = Pipeline(
+pipeline = pipeline(
     [node(..., name="node1"), node(..., name="node2", tags="node_tag")],
     tags="pipeline_tag",
 )
@@ -91,15 +91,15 @@ You can merge multiple pipelines as shown below. Note that, in this case, `pipel
 
 
 ```python
-pipeline_de = Pipeline([node(len, "xs", "n"), node(mean, ["xs", "n"], "m")])
+pipeline_de = pipeline([node(len, "xs", "n"), node(mean, ["xs", "n"], "m")])
 
-pipeline_ds = Pipeline(
+pipeline_ds = pipeline(
     [node(mean_sos, ["xs", "n"], "m2"), node(variance, ["m", "m2"], "v")]
 )
 
 last_node = node(print, "v", None)
 
-pipeline_all = Pipeline([pipeline_de, pipeline_ds, last_node])
+pipeline_all = pipeline([pipeline_de, pipeline_ds, last_node])
 print(pipeline_all.describe())
 ```
 
@@ -130,7 +130,7 @@ Pipelines provide access to their nodes in a topological order to enable custom 
 <summary><b>Click to expand</b></summary>
 
 ```python
-nodes = pipeline.nodes
+nodes = variance_pipeline.nodes
 nodes
 ```
 
@@ -162,7 +162,7 @@ You should see the following:
 In a similar way to the above, you can use `inputs()` and `outputs()` to check the inputs and outputs of a pipeline:
 
 ```python
-pipeline.inputs()
+variance_pipeline.inputs()
 ```
 
 Gives the following:
@@ -172,7 +172,7 @@ Out[7]: {'xs'}
 ```
 
 ```python
-pipeline.outputs()
+variance_pipeline.outputs()
 ```
 
 Displays the output:
@@ -195,7 +195,7 @@ In this case we have a pipeline consisting of a single node with no input and ou
 
 ```python
 try:
-    Pipeline([node(lambda: print("!"), None, None)])
+    pipeline([node(lambda: print("!"), None, None)])
 except Exception as e:
     print(e)
 ```
@@ -220,7 +220,7 @@ The first node captures the relationship of how to calculate `y` from `x` and th
 
 ```python
 try:
-    Pipeline(
+    pipeline(
         [
             node(lambda x: x + 1, "x", "y", name="first node"),
             node(lambda y: y - 1, "y", "x", name="second node"),

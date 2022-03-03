@@ -138,13 +138,21 @@ class KedroCLI(CommandCollection):
             project_metadata=self._metadata, command_args=args
         )
 
-        super().main(
-            args=args,
-            prog_name=prog_name,
-            complete_var=complete_var,
-            standalone_mode=standalone_mode,
-            **extra,
-        )
+        try:
+            super().main(
+                args=args,
+                prog_name=prog_name,
+                complete_var=complete_var,
+                standalone_mode=standalone_mode,
+                **extra,
+            )
+        except SystemExit as exc:
+            self._cli_hook_manager.hook.after_command_run(  # pylint: disable=no-member
+                project_metadata=self._metadata, command_args=args, exit_code=exc.code
+            )
+            # click.core.main() method exits by default, we capture this and then
+            # exit as originally intended
+            sys.exit(exc.code)
 
     @property
     def global_groups(self) -> Sequence[click.MultiCommand]:

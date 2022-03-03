@@ -133,12 +133,12 @@ class PipelineSpecs:
     """Namespace that defines all specifications for a pipeline's lifecycle hooks."""
 
     @hook_spec
-    def before_pipeline_run(
+    def before_pipeline_run(  # pylint: disable=too-many-arguments
         self,
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner: "AbstractRunner",  # type: ignore[F821]
+        runner: "AbstractRunner",  # type: ignore # noqa: F821
         run_id: str,
     ) -> None:
         """Hook to be invoked before a pipeline runs.
@@ -171,13 +171,13 @@ class PipelineSpecs:
         pass
 
     @hook_spec
-    def after_pipeline_run(
+    def after_pipeline_run(  # pylint: disable=too-many-arguments
         self,
         run_params: Dict[str, Any],
         run_result: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner: "AbstractRunner",  # type: ignore[F821]
+        runner: "AbstractRunner",  # type: ignore # noqa: F821
         run_id: str,
     ) -> None:
         """Hook to be invoked after a pipeline runs.
@@ -211,13 +211,13 @@ class PipelineSpecs:
         pass
 
     @hook_spec
-    def on_pipeline_error(
+    def on_pipeline_error(  # pylint: disable=too-many-arguments
         self,
         error: Exception,
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner: "AbstractRunner",  # type: ignore[F821]
+        runner: "AbstractRunner",  # type: ignore # noqa: F821
         run_id: str,
     ):
         """Hook to be invoked if a pipeline run throws an uncaught Exception.

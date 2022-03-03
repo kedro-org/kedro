@@ -66,7 +66,7 @@ second_pipeline = {}
 
 ## Pull a micro-package
 
-You can pull a micro-package from a wheel file by executing `kedro micropkg pull <package_name>`.
+You can pull a micro-package from a tar file by executing `kedro micropkg pull <package_name>`.
 
 * The `<package_name>` must either be a package name on PyPI or a path to the tar file.
 * Kedro will unpack the tar file, and install the files in following locations in your Kedro project:

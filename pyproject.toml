@@ -39,7 +39,7 @@ min-public-methods = 1
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["kedro/templates/*", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*"]
+omit = ["kedro/templates/*", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*", "kedro/extras/datasets/holoviews/*", "tests/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
@@ -69,12 +69,10 @@ layers = [
     "extras.datasets",
     "io",
     "pipeline",
-    "config",
-    "versioning"
+    "config"
 ]
 ignore_imports = [
-    "kedro.runner.parallel_runner -> kedro.framework.project",
-    "kedro.runner.parallel_runner -> kedro.framework.session.session"
+    "kedro.runner.parallel_runner -> kedro.framework.project"
 ]
 
 [[tool.importlinter.contracts]]
@@ -112,5 +110,5 @@ forbidden_modules = [
 ]
 ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
-    "kedro.framework.hooks.specs -> kedro.config"
+    "kedro.framework.session.session -> kedro.config"
 ]

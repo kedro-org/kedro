@@ -13,7 +13,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import DataSetError, PartitionedDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
-from kedro.io.partitioned_data_set import KEY_PROPAGATION_WARNING
+from kedro.io.partitioned_dataset import KEY_PROPAGATION_WARNING
 
 
 @pytest.fixture
@@ -417,6 +417,7 @@ def mocked_s3_bucket():
     with mock_s3():
         conn = boto3.client(
             "s3",
+            region_name="us-east-1",
             aws_access_key_id="fake_access_key",
             aws_secret_access_key="fake_secret_key",
         )

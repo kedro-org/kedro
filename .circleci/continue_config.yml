@@ -539,12 +539,7 @@ workflows:
             - win_e2e_tests
             - unit_tests
             - win_unit_tests
-            # lint-3.10 is not required due to inconsistent results for pylint.
-            # See: https://github.com/PyCQA/pylint/issues/5832
-            # - lint
-            - lint-3.7
-            - lint-3.8
-            - lint-3.9
+            - lint
             - pip_compile
             - win_pip_compile
             - build_docs

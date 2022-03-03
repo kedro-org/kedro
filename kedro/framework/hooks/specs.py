@@ -141,7 +141,7 @@ class PipelineSpecs:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner: "AbstractRunner",
+        runner: "AbstractRunner", # type: ignore[F821]
         run_id: str,
     ) -> None:
         """Hook to be invoked before a pipeline runs.
@@ -180,7 +180,7 @@ class PipelineSpecs:
         run_result: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner: "AbstractRunner",
+        runner: "AbstractRunner", # type: ignore[F821]
         run_id: str,
     ) -> None:
         """Hook to be invoked after a pipeline runs.
@@ -220,7 +220,7 @@ class PipelineSpecs:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner: "AbstractRunner",
+        runner: "AbstractRunner", # type: ignore[F821]
         run_id: str,
     ):
         """Hook to be invoked if a pipeline run throws an uncaught Exception.

@@ -378,7 +378,7 @@ class KedroSession:
             run_params=record_data,
             pipeline=filtered_pipeline,
             catalog=catalog,
-            runner_name=runner,
+            runner_name=getattr(runner, "__name__", str(runner)),
             run_id=run_id,
         )
 

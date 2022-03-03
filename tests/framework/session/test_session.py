@@ -542,9 +542,10 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner = mocker.patch(
-            "kedro.runner.sequential_runner.SequentialRunner", autospec=True
+            "kedro.runner.sequential_runner.SequentialRunner",
+            autospec=True,
         )
-
+        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         with KedroSession.create(mock_package_name, fake_project) as session:
@@ -565,7 +566,6 @@ class TestKedroSession:
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
         }
-
         mock_hook.before_pipeline_run.assert_called_once_with(
             run_params=record_data,
             pipeline=mock_pipeline,
@@ -587,7 +587,11 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_run_non_existent_pipeline(self, fake_project, mock_package_name, mocker):
-        mock_runner = mocker.Mock()
+        mock_runner = mocker.patch(
+            "kedro.runner.sequential_runner.SequentialRunner",
+            autospec=True,
+        )
+        mock_runner.__name__ = "SequentialRunner"
 
         pattern = (
             "Failed to find the pipeline named 'doesnotexist'. "
@@ -623,7 +627,11 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         error = FakeException("You shall not pass!")
-        mock_runner = mocker.Mock()
+        mock_runner = mocker.patch(
+            "kedro.runner.sequential_runner.SequentialRunner",
+            autospec=True,
+        )
+        mock_runner.__name__ = "SequentialRunner"
         mock_runner.run.side_effect = error  # runner.run() raises an error
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 

@@ -535,7 +535,11 @@ class TestKedroSession:
         }
 
         mock_hook.before_pipeline_run.assert_called_once_with(
-            run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
+            run_params=record_data,
+            pipeline=mock_pipeline,
+            catalog=mock_catalog,
+            runner=mock_runner,
+            run_id=fake_session_id,
         )
         mock_runner.run.assert_called_once_with(
             mock_pipeline, mock_catalog, fake_session_id
@@ -545,6 +549,8 @@ class TestKedroSession:
             run_result=mock_runner.run.return_value,
             pipeline=mock_pipeline,
             catalog=mock_catalog,
+            runner=mock_runner,
+            run_id=fake_session_id,
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")

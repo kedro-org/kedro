@@ -153,7 +153,7 @@ class TestPipelineHooks:
         call_record = before_pipeline_run_calls[0]
         assert call_record.pipeline is default_pipeline
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["pipeline", "catalog", "run_params"]
+            call_record, ["pipeline", "catalog", "run_params", "runner", "run_id"]
         )
 
         # test after pipeline run hook
@@ -165,7 +165,7 @@ class TestPipelineHooks:
         assert len(after_pipeline_run_calls) == 1
         call_record = after_pipeline_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["pipeline", "catalog", "run_params"]
+            call_record, ["pipeline", "catalog", "run_params", "runner", "run_id"]
         )
         assert call_record.pipeline is default_pipeline
 

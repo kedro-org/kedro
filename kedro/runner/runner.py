@@ -282,7 +282,8 @@ def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -
 
     for name, data in outputs.items():
         hook_manager.hook.before_dataset_saved(  # pylint: disable=no-member
-            dataset_name=name, data=data
+            dataset_name=name,
+            data=data,
         )
         catalog.save(name, data)
         hook_manager.hook.after_dataset_saved(  # pylint: disable=no-member

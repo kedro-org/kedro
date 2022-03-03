@@ -35,12 +35,20 @@ from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpe
             "on_node_error",
             ("error", "node", "catalog", "inputs", "is_async", "run_id"),
         ),
-        (PipelineSpecs, "before_pipeline_run", ("run_params", "pipeline", "catalog")),
-        (PipelineSpecs, "after_pipeline_run", ("run_params", "pipeline", "catalog")),
+        (
+            PipelineSpecs,
+            "before_pipeline_run",
+            ("run_params", "pipeline", "catalog", "runner", "run_id"),
+        ),
+        (
+            PipelineSpecs,
+            "after_pipeline_run",
+            ("run_params", "pipeline", "catalog", "runner", "run_id"),
+        ),
         (
             PipelineSpecs,
             "on_pipeline_error",
-            ("error", "run_params", "pipeline", "catalog"),
+            ("error", "run_params", "pipeline", "catalog", "runner", "run_id"),
         ),
     ],
 )

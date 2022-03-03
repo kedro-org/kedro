@@ -137,7 +137,12 @@ class PipelineSpecs:
 
     @hook_spec
     def before_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self,
+        run_params: Dict[str, Any],
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        runner: "AbstractRunner",
+        run_id: str,
     ) -> None:
         """Hook to be invoked before a pipeline runs.
 
@@ -163,6 +168,8 @@ class PipelineSpecs:
 
             pipeline: The ``Pipeline`` that will be run.
             catalog: The ``DataCatalog`` to be used during the run.
+            runner: The runner class that will be used to execute this run.
+            run_id: The ID of the run about to be executed.
         """
         pass
 
@@ -173,6 +180,8 @@ class PipelineSpecs:
         run_result: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
+        runner: "AbstractRunner",
+        run_id: str,
     ) -> None:
         """Hook to be invoked after a pipeline runs.
 
@@ -199,6 +208,8 @@ class PipelineSpecs:
             run_result: The output of ``Pipeline`` run.
             pipeline: The ``Pipeline`` that was run.
             catalog: The ``DataCatalog`` used during the run.
+            runner: The runner class that was used to execute this run.
+            run_id: The ID of the run that completed.
         """
         pass
 
@@ -209,6 +220,8 @@ class PipelineSpecs:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
+        runner: "AbstractRunner",
+        run_id: str,
     ):
         """Hook to be invoked if a pipeline run throws an uncaught Exception.
         The signature of this error hook should match the signature of ``before_pipeline_run``
@@ -236,6 +249,8 @@ class PipelineSpecs:
                    }
             pipeline: The ``Pipeline`` that will was run.
             catalog: The ``DataCatalog`` used during the run.
+            runner: The runner class that was used during the run.
+            run_id: The ID of the run that was used.
         """
         pass
 

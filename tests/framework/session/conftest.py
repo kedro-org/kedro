@@ -19,6 +19,7 @@ from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
+from kedro.runner.runner import AbstractRunner
 from kedro.versioning import Journal
 
 logger = logging.getLogger(__name__)
@@ -278,11 +279,22 @@ class LoggingHooks:
 
     @hook_impl
     def before_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self,
+        run_params: Dict[str, Any],
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        runner: AbstractRunner,
+        run_id: str,
     ) -> None:
         logger.info(
             "About to run pipeline",
-            extra={"pipeline": pipeline, "run_params": run_params, "catalog": catalog},
+            extra={
+                "pipeline": pipeline,
+                "run_params": run_params,
+                "catalog": catalog,
+                "runner": runner,
+                "run_id": run_id,
+            },
         )
 
     @hook_impl

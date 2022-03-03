@@ -185,7 +185,7 @@ $ kubectl create -f secret.yml
 $ kubectl get secrets aws-secrets -n kubeflow
 ```
 
-You can find more information about AWS configuration in [the Kubeflow Pipelines documentation](https://www.kubeflow.org/docs/aws/pipeline/).
+You can find more information about AWS configuration in [the Kubeflow Pipelines documentation](https://www.kubeflow.org/docs/distributions/aws/component-guides/pipeline/).
 
 ### Upload workflow spec and execute runs
 

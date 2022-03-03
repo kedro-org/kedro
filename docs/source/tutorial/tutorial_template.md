@@ -35,7 +35,6 @@ nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputl
 pytest-cov~=3.0 # Produces test coverage reports
 pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with pytest
 pytest~=6.2 # Testing framework for Python code
-wheel>=0.35, <0.37 # The reference implementation of the Python wheel packaging standard
 ```
 
 ```eval_rst

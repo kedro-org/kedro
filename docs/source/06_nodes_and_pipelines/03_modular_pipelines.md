@@ -139,14 +139,14 @@ Sometimes two pipelines need to be connected, but do not share any catalog depen
 In this example, there is a `lunch_pipeline` which makes us lunch. The 'verbs', `defrost` and `eat`, are Python functions and the inputs/outputs are food at different points of the process (`frozen`, `thawed` and `food`).
 
 ```python
-cook_pipeline = Pipeline(
+cook_pipeline = pipeline(
     [
         node(func=defrost, inputs="frozen_veg", outputs="veg"),
         node(func=grill, inputs="veg", outputs="grilled_veg"),
     ]
 )
 
-lunch_pipeline = Pipeline([node(func=eat, inputs="food", outputs=None)])
+lunch_pipeline = pipeline([node(func=eat, inputs="food", outputs=None)])
 
 cook_pipeline + lunch_pipeline
 ```
@@ -173,7 +173,7 @@ Providing this input/output override will join up the pipeline nicely:
 ![joined](../meta/images/cook_joined.png)
 
 ```eval_rst
-.. note:: In this example we have used the ``+`` operator to join two pipelines. Remember you can also use ``sum()`` or pass a list of pipelines to the ``Pipeline()`` constructor as well.
+.. note:: In this example we have used the ``+`` operator to join two pipelines. Remember you can also use ``sum()`` or pass a list of pipelines to the `pipe` argument as well.
 ```
 
 </details>
@@ -190,17 +190,17 @@ Reusing pipelines for slightly different purposes can be a real accelerator for 
 <summary>Click here to see a worked example</summary>
 
 ```python
-cook_pipeline = Pipeline(
+cook_pipeline = pipeline(
     [
         node(func=defrost, inputs="frozen_veg", outputs="veg", name="defrost_node"),
         node(func=grill, inputs="veg", outputs="grilled_veg"),
     ]
 )
 
-eat_breakfast_pipeline = Pipeline(
+eat_breakfast_pipeline = pipeline(
     [node(func=eat_breakfast, inputs="breakfast_food", outputs=None)]
 )
-eat_lunch_pipeline = Pipeline([node(func=eat_lunch, inputs="lunch_food", outputs=None)])
+eat_lunch_pipeline = pipeline([node(func=eat_lunch, inputs="lunch_food", outputs=None)])
 
 cook_pipeline + eat_breakfast_pipeline + eat_lunch_pipeline
 ```
@@ -268,17 +268,17 @@ final_pipeline = (
 * Providing a namespace isolates the intermediate operation and visualises nicely.
 
 ```python
-template_pipeline = Pipeline(
+template_pipeline = pipeline(
     [
         node(
             func=node_func1,
             inputs=["input1", "input2", "params:override_me"],
-            outputs="intermediary_output"
+            outputs="intermediary_output",
         ),
         node(
             func=node_func2,
             inputs="intermediary_output",
-            outputs="output"
+            outputs="output",
         ),
     ]
 )
@@ -286,8 +286,8 @@ template_pipeline = Pipeline(
 alpha_pipeline = pipeline(
     pipe=template_pipeline,
     inputs={"input1", "input2"},
-    parameters={"params:override_me": "params:alpha"}
-    namespace="alpha"
+    parameters={"params:override_me": "params:alpha"},
+    namespace="alpha",
 )
 
 beta_pipeline = pipeline(

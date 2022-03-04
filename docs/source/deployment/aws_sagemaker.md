@@ -214,8 +214,8 @@ from .nodes import (
 )
 
 
-def create_pipeline(**kwargs):
-    return Pipeline(
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
         [
             node(
                 func=split_data,

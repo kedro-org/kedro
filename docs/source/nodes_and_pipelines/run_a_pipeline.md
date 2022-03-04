@@ -157,7 +157,7 @@ def register_pipelines():
 
     data_engineering_pipeline = de.create_pipeline()
     data_science_pipeline = ds.create_pipeline()
-    my_pipeline = Pipeline(
+    my_pipeline = pipeline(
         [
             # your definition goes here
         ]

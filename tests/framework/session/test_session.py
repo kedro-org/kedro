@@ -548,6 +548,7 @@ class TestKedroSession:
             session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
 
         record_data = {
+            "session_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,
@@ -593,6 +594,7 @@ class TestKedroSession:
     def test_run_exception(  # pylint: disable=too-many-locals
         self,
         fake_project,
+        fake_session_id,
         fake_pipeline_name,
         mock_context_class,
         mock_package_name,
@@ -622,6 +624,7 @@ class TestKedroSession:
             session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
 
         record_data = {
+            "session_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
             "kedro_version": kedro_version,

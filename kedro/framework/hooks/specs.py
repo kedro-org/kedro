@@ -135,6 +135,7 @@ class PipelineSpecs:
                 Should have the following schema::
 
                    {
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -169,6 +170,7 @@ class PipelineSpecs:
                 Should have the following schema::
 
                    {
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -207,6 +209,7 @@ class PipelineSpecs:
                 Should have the following schema::
 
                    {
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,

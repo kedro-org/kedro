@@ -352,6 +352,7 @@ class KedroSession:
         )
 
         record_data = {
+            "session_id": self.store["session_id"],
             "project_path": self._project_path.as_posix(),
             "env": context.env,
             "kedro_version": kedro_version,

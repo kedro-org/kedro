@@ -165,7 +165,7 @@ class AWSBatchRunner(ThreadRunner):
         return super()._get_required_workers_count(pipeline)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self, pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         nodes = pipeline.nodes
         node_dependencies = pipeline.node_dependencies
@@ -206,7 +206,6 @@ class AWSBatchRunner(ThreadRunner):
                         node,
                         node_to_job,
                         node_dependencies[node],
-                        run_id,
                     )
                     futures.add(future)
 
@@ -232,11 +231,10 @@ def _submit_job(
     node: Node,
     node_to_job: Dict[Node, str],
     node_dependencies: Set[Node],
-    run_id: str,
 ) -> Node:
     self._logger.info("Submitting the job for node: %s", str(node))
 
-    job_name = f"kedro_{run_id}_{node.name}".replace(".", "-")
+    job_name = f"kedro_{node.name}".replace(".", "-")
     depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
     command = ["kedro", "run", "--node", node.name]
 

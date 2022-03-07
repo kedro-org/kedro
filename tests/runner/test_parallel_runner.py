@@ -364,14 +364,12 @@ class TestRunNodeSynchronisationHelper:
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
         package_name = mocker.sentinel.package_name
 
         _run_node_synchronization(
             node_,
             catalog,
             is_async,
-            run_id,
             package_name=package_name,
             conf_logging=conf_logging,
         )
@@ -390,12 +388,9 @@ class TestRunNodeSynchronisationHelper:
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
         package_name = mocker.sentinel.package_name
 
-        _run_node_synchronization(
-            node_, catalog, is_async, run_id, package_name=package_name
-        )
+        _run_node_synchronization(node_, catalog, is_async, package_name=package_name)
         mock_run_node.assert_called_once()
         mock_logging.assert_called_once_with({})
         mock_configure_project.assert_called_once_with(package_name)
@@ -406,11 +401,8 @@ class TestRunNodeSynchronisationHelper:
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
         package_name = mocker.sentinel.package_name
 
-        _run_node_synchronization(
-            node_, catalog, is_async, run_id, package_name=package_name
-        )
+        _run_node_synchronization(node_, catalog, is_async, package_name=package_name)
         mock_run_node.assert_called_once()
         mock_logging.assert_not_called()

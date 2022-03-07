@@ -327,7 +327,7 @@ class KedroSession:
         # Report project name
         self._logger.info("** Kedro project %s", self._project_path.name)
 
-        save_version = run_id = self.store["session_id"]
+        save_version = self.store["session_id"]
         extra_params = self.store.get("extra_params") or {}
         context = self.load_context()
 
@@ -352,7 +352,6 @@ class KedroSession:
         )
 
         record_data = {
-            "run_id": run_id,
             "project_path": self._project_path.as_posix(),
             "env": context.env,
             "kedro_version": kedro_version,
@@ -379,7 +378,7 @@ class KedroSession:
         )
 
         try:
-            run_result = runner.run(filtered_pipeline, catalog, hook_manager, run_id)
+            run_result = runner.run(filtered_pipeline, catalog, hook_manager)
         except Exception as error:
             hook_manager.hook.on_pipeline_error(
                 error=error,

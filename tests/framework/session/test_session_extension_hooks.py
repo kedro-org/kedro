@@ -60,11 +60,8 @@ def mock_broken_pipelines(mocker, broken_pipeline):
 
 
 class TestCatalogHooks:
-    def test_after_catalog_created_hook(self, mocker, mock_session, caplog):
+    def test_after_catalog_created_hook(self, mock_session, caplog):
         context = mock_session.load_context()
-        fake_run_id = mocker.sentinel.fake_run_id
-        mocker.patch.object(context, "_get_run_id", return_value=fake_run_id)
-
         project_path = context.project_path
         catalog = context.catalog
         config_loader = mock_session._get_config_loader()
@@ -82,9 +79,8 @@ class TestCatalogHooks:
         # save_version is only passed during a run, not on the property getter
         assert record.save_version is None
         assert record.load_versions is None
-        assert record.run_id is fake_run_id
 
-    def test_after_catalog_created_hook_default_run_id(
+    def test_after_catalog_created_hook_default(
         self, mocker, mock_session, dummy_dataframe, caplog
     ):
         context = mock_session.load_context()
@@ -119,7 +115,6 @@ class TestCatalogHooks:
         )
         assert record.save_version is fake_save_version
         assert record.load_versions is None
-        assert record.run_id is record.save_version
 
 
 class TestPipelineHooks:
@@ -189,7 +184,7 @@ class TestPipelineHooks:
         assert len(on_node_error_calls) == 1
         call_record = on_node_error_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["error", "node", "catalog", "inputs", "is_async", "run_id"]
+            call_record, ["error", "node", "catalog", "inputs", "is_async"]
         )
         expected_error = ValueError("broken")
         assert_exceptions_equal(call_record.error, expected_error)
@@ -212,11 +207,10 @@ class TestNodeHooks:
         assert len(before_node_run_calls) == 1
         call_record = before_node_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["node", "catalog", "inputs", "is_async", "run_id"]
+            call_record, ["node", "catalog", "inputs", "is_async"]
         )
         # sanity check a couple of important parameters
         assert call_record.inputs["cars"].to_dict() == dummy_dataframe.to_dict()
-        assert call_record.run_id == mock_session.session_id
 
         # test after node run hook
         after_node_run_calls = [
@@ -225,11 +219,10 @@ class TestNodeHooks:
         assert len(after_node_run_calls) == 1
         call_record = after_node_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["node", "catalog", "inputs", "outputs", "is_async", "run_id"]
+            call_record, ["node", "catalog", "inputs", "outputs", "is_async"]
         )
         # sanity check a couple of important parameters
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
-        assert call_record.run_id == mock_session.session_id
 
     @SKIP_ON_WINDOWS
     @pytest.mark.usefixtures("mock_broken_pipelines")
@@ -248,7 +241,7 @@ class TestNodeHooks:
         for call_record in on_node_error_records:
             _assert_hook_call_record_has_expected_parameters(
                 call_record,
-                ["error", "node", "catalog", "inputs", "is_async", "run_id"],
+                ["error", "node", "catalog", "inputs", "is_async"],
             )
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)

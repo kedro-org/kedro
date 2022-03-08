@@ -6,7 +6,7 @@ import pytest
 import toml
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_sdist_name
+from kedro.framework.cli.micropkg import _get_sdist_name
 
 PIPELINE_NAME = "my_pipeline"
 

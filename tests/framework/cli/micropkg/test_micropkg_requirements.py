@@ -1,7 +1,7 @@
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_sdist_name, _safe_parse_requirements
+from kedro.framework.cli.micropkg import _get_sdist_name, _safe_parse_requirements
 
 PIPELINE_NAME = "my_pipeline"
 

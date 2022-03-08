@@ -69,8 +69,7 @@ def pipeline_cleanup():
     yield
     from kedro.framework.project import pipelines
 
-    pipelines.configure(None)
-    pipelines._content = {}
+    pipelines.configure()
 
 
 class TestLoadKedroObjects:
@@ -95,6 +94,7 @@ class TestLoadKedroObjects:
         )
         mocker.patch("kedro.framework.project.settings.configure")
         mocker.patch("kedro.framework.session.session.validate_settings")
+        mocker.patch("kedro.framework.session.KedroSession._get_config_loader")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project",
             return_value=fake_metadata,
@@ -131,7 +131,7 @@ class TestLoadKedroObjects:
             project_version="0.1",
             project_path=tmp_path,
         )
-        mocker.patch("kedro.framework.session.session.configure_project")
+        mocker.patch("kedro.framework.project.configure_project")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project",
             return_value=fake_metadata,

@@ -68,7 +68,7 @@ class PickleDataSet(AbstractDataSet):
         redis_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of `PickleDataSet`. This loads/saves data from/to
-        a Redis database while deserializing/serializing. supports custom backends to
+        a Redis database while deserializing/serializing. Supports custom backends to
         serialize/deserialize objects.
 
         Example backends that are compatible (non-exhaustive):

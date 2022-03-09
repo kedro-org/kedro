@@ -75,6 +75,14 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
     }
 
 
+class KedroSessionError(Exception):
+    """``KedroSessionError`` raised by ``KedroSession``
+    in case of run failure as part of a session.
+    """
+
+    pass
+
+
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run.
@@ -94,18 +102,20 @@ class KedroSession:
         >>>
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         session_id: str,
         package_name: str = None,
         project_path: Union[Path, str] = None,
         save_on_close: bool = False,
+        run_called: bool = False,
     ):
         self._project_path = Path(project_path or Path.cwd()).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
         self._package_name = package_name
         self._store = self._init_store()
+        self._run_called = run_called
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
@@ -318,6 +328,8 @@ class KedroSession:
                 defined by `register_pipelines`.
             Exception: Any uncaught exception during the run will be re-raised
                 after being passed to ``on_pipeline_error`` hook.
+            KedroSessionError: If more than one run is attempted to be executed during
+                a single session.
         Returns:
             Any node outputs that cannot be processed by the ``DataCatalog``.
             These are returned in a dictionary, where the keys are defined
@@ -326,6 +338,13 @@ class KedroSession:
         # pylint: disable=protected-access,no-member
         # Report project name
         self._logger.info("** Kedro project %s", self._project_path.name)
+
+        if self._run_called:
+            raise KedroSessionError(
+                "A run has already been executed as part of the"
+                " active KedroSession. KedroSession has a 1-1 mapping with"
+                " runs, and thus only one run should be executed per session."
+            )
 
         save_version = self.store["session_id"]
         extra_params = self.store.get("extra_params") or {}
@@ -380,6 +399,7 @@ class KedroSession:
 
         try:
             run_result = runner.run(filtered_pipeline, catalog, hook_manager)
+            self._run_called = True
         except Exception as error:
             hook_manager.hook.on_pipeline_error(
                 error=error,

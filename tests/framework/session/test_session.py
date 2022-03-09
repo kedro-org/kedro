@@ -577,6 +577,73 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
+    def test_run_multiple_times(  # pylint: disable=too-many-locals
+        self,
+        fake_project,
+        fake_session_id,
+        fake_pipeline_name,
+        mock_context_class,
+        mock_package_name,
+        mocker,
+    ):
+        """Test running the project more than once via the session"""
+
+        mock_hook = mocker.patch(
+            "kedro.framework.session.session._create_hook_manager"
+        ).return_value.hook
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_context = mock_context_class.return_value
+        mock_catalog = mock_context._get_catalog.return_value
+        mock_runner = mocker.Mock()
+        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
+
+        message = (
+            "A run has already been executed as part of the active KedroSession. "
+            "KedroSession has a 1-1 mapping with runs, and thus only one run should be"
+            " executed per session."
+        )
+        with pytest.raises(Exception, match=message):
+            with KedroSession.create(mock_package_name, fake_project) as session:
+                session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
+                session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
+
+        record_data = {
+            "session_id": fake_session_id,
+            "project_path": fake_project.as_posix(),
+            "env": mock_context.env,
+            "kedro_version": kedro_version,
+            "tags": None,
+            "from_nodes": None,
+            "to_nodes": None,
+            "node_names": None,
+            "from_inputs": None,
+            "to_outputs": None,
+            "load_versions": None,
+            "extra_params": {},
+            "pipeline_name": fake_pipeline_name,
+        }
+
+        mock_hook.before_pipeline_run.assert_called_once_with(
+            run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
+        )
+        mock_runner.run.assert_called_once_with(
+            mock_pipeline, mock_catalog, session._hook_manager
+        )
+        mock_hook.after_pipeline_run.assert_called_once_with(
+            run_params=record_data,
+            run_result=mock_runner.run.return_value,
+            pipeline=mock_pipeline,
+            catalog=mock_catalog,
+        )
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
     def test_run_non_existent_pipeline(self, fake_project, mock_package_name, mocker):
         mock_runner = mocker.Mock()
 

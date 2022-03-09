@@ -33,7 +33,7 @@
 | `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
 
 ## Breaking changes to the API
-* Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
+* Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
 * `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
 * `pandas.ParquetDataSet` now calls `pd.to_parquet()` upon saving. Note that the argument `partition_cols` is not supported.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
@@ -84,6 +84,38 @@
 [Deepyaman Datta](https://github.com/deepyaman), [Lucas Jamar](https://github.com/lucasjamar), [Simon Brugman](https://github.com/sbrugman)
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
+* If you are using any modular pipelines with parameters, make sure they are declared with the correct namespace. See example below:
+
+For a given pipeline:
+```python
+active_pipeline = pipeline(
+    pipe=pipeline_instance,
+    inputs="model_input_table",
+    namespace="candidate_modelling_pipeline",
+)
+```
+
+The parameters should like this:
+
+```diff
+-model_options:
+-    test_size: 0.2
+-    random_state: 8
+-    features:
+-    - engines
+-    - passenger_capacity
+-    - crew
++candidate_modelling_pipeline:
++    model_options:
++      test_size: 0.2
++      random_state: 8
++      features:
++        - engines
++        - passenger_capacity
++        - crew
+
+```
+
 * Please remove any existing `hook_impl` of the `register_config_loader` and `register_catalog` methods from `ProjectHooks` (or custom alternatives).
 * Populate `settings.py` with `CONFIG_LOADER_CLASS` set to your expected config loader class (for example `kedro.config.TemplatedConfigLoader` or custom implementation). If `CONFIG_LOADER_CLASS` value is not set, it will default to `kedro.config.ConfigLoader` at runtime.
 * Populate `settings.py` with `CONFIG_LOADER_ARGS` set to a dictionary with expected keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.

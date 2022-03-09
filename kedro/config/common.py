@@ -145,6 +145,7 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
     try:
         # Default to UTF-8, which is Python 3 default encoding, to decode the file
         with open(config_file, encoding="utf8") as yml:
+            _config_logger.debug("loading config file: '%s'", config_file)
             return {
                 k: v
                 for k, v in anyconfig.load(yml, ac_template=ac_template).items()

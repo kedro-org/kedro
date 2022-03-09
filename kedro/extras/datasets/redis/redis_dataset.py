@@ -112,7 +112,6 @@ class PickleDataSet(AbstractDataSet):
             ValueError: If ``backend`` does not satisfy the `pickle` interface.
             ImportError: If the ``backend`` module could not be imported.
         """
-        super().__init__()
         try:
             imported_backend = importlib.import_module(backend)
         except ImportError as exc:

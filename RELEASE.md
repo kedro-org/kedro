@@ -89,13 +89,20 @@
 For a given pipeline:
 ```python
 active_pipeline = pipeline(
-    pipe=pipeline_instance,
+    pipe=[
+        node(
+            func=some_func,
+            inputs=["model_input_table", "params:model_options"],
+            outputs=["**my_output"],
+        ),
+        ...,
+    ],
     inputs="model_input_table",
     namespace="candidate_modelling_pipeline",
 )
 ```
 
-The parameters should like this:
+The parameters should look like this:
 
 ```diff
 -model_options:

@@ -88,10 +88,11 @@ def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
     logging.config.dictConfig(conf_logging)
 
 
-def _run_node_synchronization(
+def _run_node_synchronization(  # pylint: disable=too-many-arguments
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,
+    session_id: str = None,
     package_name: str = None,
     conf_logging: Dict[str, Any] = None,
 ) -> Node:
@@ -104,6 +105,7 @@ def _run_node_synchronization(
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
+        session_id: The session id of the pipeline run.
         package_name: The name of the project Python package.
         conf_logging: A dictionary containing logging configuration.
 
@@ -119,7 +121,7 @@ def _run_node_synchronization(
     _register_hooks(hook_manager, settings.HOOKS)
     _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
-    return run_node(node, catalog, hook_manager, is_async)
+    return run_node(node, catalog, hook_manager, is_async, session_id)
 
 
 class ParallelRunner(AbstractRunner):
@@ -263,12 +265,14 @@ class ParallelRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            session_id: The id of the session.
 
         Raises:
             AttributeError: When the provided pipeline is not suitable for
@@ -305,6 +309,7 @@ class ParallelRunner(AbstractRunner):
                             node,
                             catalog,
                             self._is_async,
+                            session_id,
                             package_name=PACKAGE_NAME,
                             conf_logging=LOGGING,
                         )

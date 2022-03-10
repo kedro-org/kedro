@@ -254,6 +254,7 @@ class KedroContext:
         self,
         save_version: str = None,
         load_versions: Dict[str, str] = None,
+        session_id: str = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 
@@ -290,6 +291,7 @@ class KedroContext:
             feed_dict=feed_dict,
             save_version=save_version,
             load_versions=load_versions,
+            session_id=session_id,
         )
         return catalog
 

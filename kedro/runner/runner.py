@@ -44,6 +44,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
+        session_id: str = None,
     ) -> Dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
@@ -52,6 +53,7 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
@@ -80,7 +82,7 @@ class AbstractRunner(ABC):
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
-        self._run(pipeline, catalog, hook_manager)
+        self._run(pipeline, catalog, hook_manager, session_id)
 
         self._logger.info("Pipeline execution completed successfully.")
 
@@ -129,6 +131,7 @@ class AbstractRunner(ABC):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines, assuming that the
         inputs have already been checked and normalized by run().
@@ -137,6 +140,7 @@ class AbstractRunner(ABC):
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
             hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
 
         """
         pass
@@ -183,6 +187,7 @@ def run_node(
     catalog: DataCatalog,
     hook_manager: PluginManager,
     is_async: bool = False,
+    session_id: str = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -192,14 +197,16 @@ def run_node(
         hook_manager: The ``PluginManager`` to activate hooks.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
+        session_id: The session id of the pipeline run.
+
     Returns:
         The node argument.
 
     """
     if is_async:
-        node = _run_node_async(node, catalog, hook_manager)
+        node = _run_node_async(node, catalog, hook_manager, session_id)
     else:
-        node = _run_node_sequential(node, catalog, hook_manager)
+        node = _run_node_sequential(node, catalog, hook_manager, session_id)
 
     for name in node.confirms:
         catalog.confirm(name)
@@ -212,13 +219,16 @@ def _collect_inputs_from_hook(
     inputs: Dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
+    session_id: str = None,
 ) -> Dict[str, Any]:
+    # pylint: disable=too-many-arguments
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
         node=node,
         catalog=catalog,
         inputs=inputs,
         is_async=is_async,
+        session_id=session_id,
     )
 
     additional_inputs = {}
@@ -241,7 +251,9 @@ def _call_node_run(
     inputs: Dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
+    session_id: str = None,
 ) -> Dict[str, Any]:
+    # pylint: disable=too-many-arguments
     try:
         outputs = node.run(inputs)
     except Exception as exc:
@@ -251,6 +263,7 @@ def _call_node_run(
             catalog=catalog,
             inputs=inputs,
             is_async=is_async,
+            session_id=session_id,
         )
         raise exc
     hook_manager.hook.after_node_run(
@@ -259,12 +272,16 @@ def _call_node_run(
         inputs=inputs,
         outputs=outputs,
         is_async=is_async,
+        session_id=session_id,
     )
     return outputs
 
 
 def _run_node_sequential(
-    node: Node, catalog: DataCatalog, hook_manager: PluginManager
+    node: Node,
+    catalog: DataCatalog,
+    hook_manager: PluginManager,
+    session_id: str = None,
 ) -> Node:
     inputs = {}
 
@@ -276,11 +293,13 @@ def _run_node_sequential(
     is_async = False
 
     additional_inputs = _collect_inputs_from_hook(
-        node, catalog, inputs, is_async, hook_manager
+        node, catalog, inputs, is_async, hook_manager, session_id=session_id
     )
     inputs.update(additional_inputs)
 
-    outputs = _call_node_run(node, catalog, inputs, is_async, hook_manager)
+    outputs = _call_node_run(
+        node, catalog, inputs, is_async, hook_manager, session_id=session_id
+    )
 
     for name, data in outputs.items():
         hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
@@ -290,7 +309,10 @@ def _run_node_sequential(
 
 
 def _run_node_async(
-    node: Node, catalog: DataCatalog, hook_manager: PluginManager
+    node: Node,
+    catalog: DataCatalog,
+    hook_manager: PluginManager,
+    session_id: str = None,
 ) -> Node:
     def _synchronous_dataset_load(dataset_name: str):
         """Minimal wrapper to ensure Hooks are run synchronously
@@ -312,11 +334,13 @@ def _run_node_async(
         inputs = {key: value.result() for key, value in inputs.items()}
         is_async = True
         additional_inputs = _collect_inputs_from_hook(
-            node, catalog, inputs, is_async, hook_manager
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
         )
         inputs.update(additional_inputs)
 
-        outputs = _call_node_run(node, catalog, inputs, is_async, hook_manager)
+        outputs = _call_node_run(
+            node, catalog, inputs, is_async, hook_manager, session_id=session_id
+        )
 
         save_futures = set()
 

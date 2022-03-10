@@ -47,12 +47,14 @@ class SequentialRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         """The method implementing sequential pipeline running.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            session_id: The id of the session.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -64,7 +66,7 @@ class SequentialRunner(AbstractRunner):
 
         for exec_index, node in enumerate(nodes):
             try:
-                run_node(node, catalog, hook_manager, self._is_async)
+                run_node(node, catalog, hook_manager, self._is_async, session_id)
                 done_nodes.add(node)
             except Exception:
                 self._suggest_resume_scenario(pipeline, done_nodes)

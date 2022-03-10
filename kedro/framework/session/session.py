@@ -102,20 +102,19 @@ class KedroSession:
         >>>
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         session_id: str,
         package_name: str = None,
         project_path: Union[Path, str] = None,
         save_on_close: bool = False,
-        run_called: bool = False,
     ):
         self._project_path = Path(project_path or Path.cwd()).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
         self._package_name = package_name
         self._store = self._init_store()
-        self._run_called = run_called
+        self._run_called = False
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
@@ -346,7 +345,8 @@ class KedroSession:
                 " runs, and thus only one run should be executed per session."
             )
 
-        save_version = self.store["session_id"]
+        session_id = self.store["session_id"]
+        save_version = session_id
         extra_params = self.store.get("extra_params") or {}
         context = self.load_context()
 
@@ -371,7 +371,7 @@ class KedroSession:
         )
 
         record_data = {
-            "session_id": self.store["session_id"],
+            "session_id": session_id,
             "project_path": self._project_path.as_posix(),
             "env": context.env,
             "kedro_version": kedro_version,
@@ -387,7 +387,9 @@ class KedroSession:
         }
 
         catalog = context._get_catalog(
-            save_version=save_version, load_versions=load_versions
+            save_version=save_version,
+            load_versions=load_versions,
+            session_id=session_id,
         )
 
         # Run the runner
@@ -398,7 +400,9 @@ class KedroSession:
         )
 
         try:
-            run_result = runner.run(filtered_pipeline, catalog, hook_manager)
+            run_result = runner.run(
+                filtered_pipeline, catalog, hook_manager, session_id
+            )
             self._run_called = True
         except Exception as error:
             hook_manager.hook.on_pipeline_error(

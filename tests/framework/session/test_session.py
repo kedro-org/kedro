@@ -567,7 +567,7 @@ class TestKedroSession:
             run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
         )
         mock_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager
+            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,
@@ -634,7 +634,7 @@ class TestKedroSession:
             run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
         )
         mock_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager
+            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,
@@ -784,7 +784,7 @@ class TestKedroSession:
         session.run(runner=fixed_runner, pipeline_name=fake_pipeline_name)
 
         fixed_runner.run.assert_called_once_with(
-            mock_pipeline, mock_catalog, session._hook_manager
+            mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
         )
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,

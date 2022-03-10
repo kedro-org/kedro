@@ -23,6 +23,7 @@ class DataCatalogSpecs:
         feed_dict: Dict[str, Any],
         save_version: str,
         load_versions: Dict[str, str],
+        session_id: str,
     ) -> None:
         """Hooks to be invoked after a data catalog is created.
         It receives the ``catalog`` as well as
@@ -37,6 +38,7 @@ class DataCatalogSpecs:
                 for all datasets in the catalog.
             load_versions: The load_versions used in ``load`` operations
                 for each dataset in the catalog.
+            session_id: The id of the session for which the catalog is loaded.
         """
         pass
 
@@ -45,12 +47,13 @@ class NodeSpecs:
     """Namespace that defines all specifications for a node's lifecycle hooks."""
 
     @hook_spec
-    def before_node_run(
+    def before_node_run(  # pylint: disable=too-many-arguments
         self,
         node: Node,
         catalog: DataCatalog,
         inputs: Dict[str, Any],
         is_async: bool,
+        session_id: str,
     ) -> Optional[Dict[str, Any]]:
         """Hook to be invoked before a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
@@ -62,6 +65,7 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
+            session_id: The id of the session.
 
         Returns:
             Either None or a dictionary mapping dataset name(s) to new value(s).
@@ -78,6 +82,7 @@ class NodeSpecs:
         inputs: Dict[str, Any],
         outputs: Dict[str, Any],
         is_async: bool,
+        session_id: str,
     ) -> None:
         """Hook to be invoked after a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
@@ -93,6 +98,7 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual computed output data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
+            session_id: The id of the session.
         """
         pass
 
@@ -104,6 +110,7 @@ class NodeSpecs:
         catalog: DataCatalog,
         inputs: Dict[str, Any],
         is_async: bool,
+        session_id: str,
     ):
         """Hook to be invoked if a node run throws an uncaught error.
         The signature of this error hook should match the signature of ``before_node_run``
@@ -117,6 +124,7 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
+            session_id: The id of the session.
         """
         pass
 

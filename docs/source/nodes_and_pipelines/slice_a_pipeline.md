@@ -21,7 +21,7 @@ def variance(m, m2):
     return m2 - m * m
 
 
-pipeline = Pipeline(
+full_pipeline = pipeline(
     [
         node(len, "xs", "n"),
         node(mean, ["xs", "n"], "m", name="mean_node", tags="mean"),
@@ -32,7 +32,7 @@ pipeline = Pipeline(
 ```
 </details>
 
-The `pipeline.describe()` method returns the following output:
+The `Pipeline.describe()` method returns the following output:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -63,7 +63,7 @@ One way to slice a pipeline is to provide a set of pre-calculated inputs which s
 
 
 ```python
-print(pipeline.from_inputs("m2").describe())
+print(full_pipeline.from_inputs("m2").describe())
 ```
 
 `Output`:
@@ -86,7 +86,7 @@ Slicing the pipeline from inputs `m` and `xs` results in the following pipeline:
 <summary><b>Click to expand</b></summary>
 
 ```python
-print(pipeline.from_inputs("m", "xs").describe())
+print(full_pipeline.from_inputs("m", "xs").describe())
 ```
 
 `Output`:
@@ -115,7 +115,7 @@ Another way of slicing a pipeline is to specify the nodes which should be used a
 <summary><b>Click to expand</b></summary>
 
 ```python
-print(pipeline.from_nodes("mean_node").describe())
+print(full_pipeline.from_nodes("mean_node").describe())
 ```
 
 `Output`:
@@ -149,7 +149,7 @@ Similarly, you can specify the nodes which should be used to end a pipeline. For
 
 
 ```python
-print(pipeline.to_nodes("mean_node").describe())
+print(full_pipeline.to_nodes("mean_node").describe())
 ```
 
 `Output`:
@@ -192,7 +192,7 @@ You can also slice a pipeline from the nodes that have specific tags attached to
 <summary><b>Click to expand</b></summary>
 
 ```python
-print(pipeline.only_nodes_with_tags("mean", "variance").describe())
+print(full_pipeline.only_nodes_with_tags("mean", "variance").describe())
 ```
 
 `Output`:
@@ -216,9 +216,9 @@ To slice a pipeline from nodes that have tag `mean` *OR* tag `variance`:
 
 
 ```python
-sliced_pipeline = pipeline.only_nodes_with_tags("mean") + pipeline.only_nodes_with_tags(
-    "variance"
-)
+sliced_pipeline = full_pipeline.only_nodes_with_tags(
+    "mean"
+) + full_pipeline.only_nodes_with_tags("variance")
 print(sliced_pipeline.describe())
 ```
 
@@ -244,7 +244,7 @@ Sometimes you might need to run only some of the nodes in a pipeline, as follows
 <summary><b>Click to expand</b></summary>
 
 ```python
-print(pipeline.only_nodes("mean_node", "mean_sos").describe())
+print(full_pipeline.only_nodes("mean_node", "mean_sos").describe())
 ```
 
 `Output`:
@@ -276,7 +276,7 @@ Kedro can automatically generate a sliced pipeline from existing node outputs. T
 <summary><b>Click to expand</b></summary>
 
 ```python
-print(pipeline.describe())
+print(full_pipeline.describe())
 ```
 
 `Output`:
@@ -333,7 +333,7 @@ Running the pipeline calculates `n` and saves the result to disk:
 <summary><b>Click to expand</b></summary>
 
 ```python
-SequentialRunner().run(pipeline, io)
+SequentialRunner().run(full_pipeline, io)
 ```
 
 `Output`:
@@ -359,7 +359,7 @@ We can avoid re-calculating `n` (and all other results that have already been sa
 <summary><b>Click to expand</b></summary>
 
 ```python
-SequentialRunner().run_only_missing(pipeline, io)
+SequentialRunner().run_only_missing(full_pipeline, io)
 ```
 
 `Ouput`:

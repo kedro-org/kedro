@@ -466,7 +466,7 @@ my_dataframe@pandas:
 These entries are used in the pipeline like this:
 
 ```python
-Pipeline(
+pipeline(
     [
         node(func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
         node(func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),

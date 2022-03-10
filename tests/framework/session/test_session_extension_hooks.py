@@ -80,7 +80,7 @@ class TestCatalogHooks:
         assert record.save_version is None
         assert record.load_versions is None
 
-    def test_after_catalog_created_hook_default(
+    def test_after_catalog_created_hook_on_session_run(
         self, mocker, mock_session, dummy_dataframe, caplog
     ):
         context = mock_session.load_context()

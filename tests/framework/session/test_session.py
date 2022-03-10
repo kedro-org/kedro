@@ -605,7 +605,7 @@ class TestKedroSession:
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         message = (
-            "A run has already been executed as part of the active KedroSession. "
+            "A run has already been completed as part of the active KedroSession. "
             "KedroSession has a 1-1 mapping with runs, and thus only one run should be"
             " executed per session."
         )

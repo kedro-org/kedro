@@ -183,7 +183,12 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
-      - run: conda activate kedro_builder; pip install behave==1.2.6
+#      - restore_cache:
+#          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+#      - run:
+#          name: Install all requirements
+#          command: conda activate kedro_builder; pip install -r test_requirements.txt -U
+      - run: conda activate kedro_builder; pip install psutil==5.6.7 psutil==5.6.7
       - run:
           name: Install 'make' command
           command: choco install make

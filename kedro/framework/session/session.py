@@ -77,7 +77,7 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
 
 class KedroSessionError(Exception):
     """``KedroSessionError`` raised by ``KedroSession``
-    in case of run failure as part of a session.
+    in the case that multiple runs are attempted in one session.
     """
 
     pass

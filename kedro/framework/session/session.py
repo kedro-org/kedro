@@ -389,7 +389,6 @@ class KedroSession:
         catalog = context._get_catalog(
             save_version=save_version,
             load_versions=load_versions,
-            session_id=session_id,
         )
 
         # Run the runner

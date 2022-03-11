@@ -23,7 +23,6 @@ class DataCatalogSpecs:
         feed_dict: Dict[str, Any],
         save_version: str,
         load_versions: Dict[str, str],
-        session_id: str,
     ) -> None:
         """Hooks to be invoked after a data catalog is created.
         It receives the ``catalog`` as well as
@@ -38,7 +37,6 @@ class DataCatalogSpecs:
                 for all datasets in the catalog.
             load_versions: The load_versions used in ``load`` operations
                 for each dataset in the catalog.
-            session_id: The id of the session for which the catalog is loaded.
         """
         pass
 

@@ -68,7 +68,6 @@ def after_catalog_created(
     conf_creds: Dict[str, Any],
     save_version: str,
     load_versions: Dict[str, str],
-    session_id: str,
 ) -> None:
     pass
 ```

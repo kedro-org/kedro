@@ -17,7 +17,6 @@ from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpe
                 "feed_dict",
                 "save_version",
                 "load_versions",
-                "session_id",
             ),
         ),
         (

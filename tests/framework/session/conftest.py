@@ -193,7 +193,6 @@ class LoggingHooks:
         feed_dict: Dict[str, Any],
         save_version: str,
         load_versions: Dict[str, str],
-        session_id: str,
     ):
         logger.info(
             "Catalog created",
@@ -204,7 +203,6 @@ class LoggingHooks:
                 "feed_dict": feed_dict,
                 "save_version": save_version,
                 "load_versions": load_versions,
-                "session_id": session_id,
             },
         )
 

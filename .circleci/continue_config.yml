@@ -155,7 +155,7 @@ commands:
           python_version: <<parameters.python_version>>
       - win_setup_env
       - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}-invalid
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - win_setup_requirements
 
 jobs:
@@ -172,8 +172,6 @@ jobs:
           name: Run e2e tests
           command: make e2e-tests
 
-  # What if checksum changes?
-  # Need pywin pinning?
   win_e2e_tests:
     parameters:
       python_version:
@@ -186,11 +184,11 @@ jobs:
       - win_setup_conda:
           python_version: <<parameters.python_version>>
       - run:
-          name: Install dependencies
-          command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
-      - run:
           name: Install 'make' command
           command: choco install make
+      - run:
+          name: Install dependencies
+          command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
       - run:
           name: Run e2e tests
           command: conda activate kedro_builder; make e2e-tests

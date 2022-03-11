@@ -10,20 +10,15 @@
 # Upcoming Release 0.18.0
 
 ## Major features and improvements
-* Added support for Python 3.9 and 3.10, dropped support for Python 3.6.
-* Support specifying parameters mapping in `pipeline()` without the `params:` prefix.
-* Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
-* Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
-* Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.
-* Bumped the minimum version of `pandas` to 1.3. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
-* Refactored the `load` and `save` operations for `pandas` datasets in order to leverage `pandas` own API and delegate `fsspec` operations to them. This reduces the need to have our own `fsspec` wrappers.
+
+### Framework
 * Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
-* Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
-* Added `save_args` to `feather.FeatherDataSet`.
 * The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
 * Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
 * Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
 * The `hook_manager` is no longer a global singleton. The `hook_manager` lifecycle is now managed by the `KedroSession`, a new `hook_manager` will be created everytime a `session` is instantiated.
+
+### DataSets
 * Added the following new datasets:
 
 | Type                | Description                                                    | Location                       |
@@ -32,20 +27,42 @@
 | `networkx.GraphMLDataSet`       |  Work with NetworkX using GraphML files            | `kedro.extras.datasets.networkx` |
 | `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
 
+* Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
+* Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.
+* Refactored the `load` and `save` operations for `pandas` datasets in order to leverage `pandas` own API and delegate `fsspec` operations to them. This reduces the need to have our own `fsspec` wrappers.
+* Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
+* Added `save_args` to `feather.FeatherDataSet`.
+
+### Dependencies
+* Bumped the minimum version of `pandas` to 1.3. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
+
+### Other
+* Added support for Python 3.9 and 3.10, dropped support for Python 3.6.
+* Support specifying parameters mapping in `pipeline()` without the `params:` prefix.
+* Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
+
 ## Breaking changes to the API
-* Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
-* `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
-* `pandas.ParquetDataSet` now calls `pd.to_parquet()` upon saving. Note that the argument `partition_cols` is not supported.
-* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
-* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
+
+### Framework
 * Removed deprecated functions `load_context` and `get_project_context`.
-* `spark.SparkHiveDataSet` API has been updated to reflect `spark.SparkDataSet`. The `write_mode=insert` option has also been replaced with `write_mode=append` as per Spark styleguide. This change addresses [Issue 725](https://github.com/kedro-org/kedro/issues/725) and [Issue 745](https://github.com/kedro-org/kedro/issues/745). Additionally, `upsert` mode now leverages `checkpoint` functionality and requires a valid `checkpointDir` be set for current `SparkContext`.
 * Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
 * Added `CONFIG_LOADER_ARGS` to `settings.py` to facilitate the provision of additional keyword arguments to the constructor of the project `config_loader`. The default option for `CONFIG_LOADER_ARGS` is an empty dictionary.
+* The environment defaulting behaviour has been removed from `KedroContext` and is now implemented in a `ConfigLoader` class (or equivalent) with the `base_env` and `default_run_env` attributes.
+* `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
+* The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
+* Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
+* Removed the `config_loader` property from `KedroContext`.
+* Removed deprecated `CONF_SOURCE`, `package_name`, `pipeline`, `pipelines`, and `io` attributes from `KedroContext` as well as the deprecated `KedroContext.run` method.
+* Removed `ProjectHooks.register_catalog` `hook_spec` in favour of loading `DATA_CATALOG_CLASS` directly from `settings.py`. The default option for `DATA_CATALOG_CLASS` is now set to `kedro.io.DataCatalog`.
+* Removed `RegistrationSpecs` and all registration hooks that belonged to it. Going forward users can register custom library components through `settings.py`.
+* Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
+* Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
+
+### DataSets
+* `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
+* `pandas.ParquetDataSet` now calls `pd.to_parquet()` upon saving. Note that the argument `partition_cols` is not supported.
+* `spark.SparkHiveDataSet` API has been updated to reflect `spark.SparkDataSet`. The `write_mode=insert` option has also been replaced with `write_mode=append` as per Spark styleguide. This change addresses [Issue 725](https://github.com/kedro-org/kedro/issues/725) and [Issue 745](https://github.com/kedro-org/kedro/issues/745). Additionally, `upsert` mode now leverages `checkpoint` functionality and requires a valid `checkpointDir` be set for current `SparkContext`.
 * `yaml.YAMLDataSet` can no longer save a `pandas.DataFrame` directly, but it can save a dictionary. Use `pandas.DataFrame.to_dict()` to convert your `pandas.DataFrame` to a dictionary before you attempt to save it to YAML.
-* Removed `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
-* The `kedro package` and `kedro pipeline package` now save `egg` and `whl` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
-* Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
 * Removed `open_args_load` and `open_args_save` from the following datasets:
   * `pandas.CSVDataSet`
   * `pandas.ExcelDataSet`
@@ -58,26 +75,26 @@
   * `pandas.FeatherDataSet`
   * `pandas.JSONDataSet`
   * `pandas.ParquetDataSet`
-* The environment defaulting behaviour has been removed from `KedroContext` and is now implemented in a `ConfigLoader` class (or equivalent) with the `base_env` and `default_run_env` attributes.
-* `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
-* The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
-* Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
-* Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
-* `kedro pipeline package` now accepts a module name and path to the pipeline or utility module to package, relative to `src/<package_name>/`. In addition to the `--alias` flag used to rename the package, `kedro pipeline pull` now also supports `--destination` to provide a location for pulling the package.
 * Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
-* Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
-* Removed the `config_loader` property from `KedroContext`.
+
+### CLI
+* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
+* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
+* Removed the `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.
+* Removed `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
+* `kedro pipeline package` now accepts a module name and path to the pipeline or utility module to package, relative to `src/<package_name>/`. In addition to the `--alias` flag used to rename the package, `kedro pipeline pull` now also supports `--destination` to provide a location for pulling the package.
+* The `kedro package` and `kedro pipeline package` now save `egg` and `whl` or `tar` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
+* Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
+* Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
+* Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
+
+### Other
+* Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
+* Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
 * Removed transformer API from `DataCatalog`, as well as the modules `kedro.extras.transformers` and `kedro.io.transformers`.
 * Removed the `Journal` and `DataCatalogWithDefault`.
-* Removed the `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.
-* Removed deprecated `CONF_SOURCE`, `package_name`, `pipeline`, `pipelines`, and `io` attributes from `KedroContext` as well as the deprecated `KedroContext.run` method.
-* Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
-* Removed `ProjectHooks.register_catalog` `hook_spec` in favour of loading `DATA_CATALOG_CLASS` directly from `settings.py`. The default option for `DATA_CATALOG_CLASS` is now set to `kedro.io.DataCatalog`.
-* Removed `RegistrationSpecs` and all registration hooks that belonged to it. Going forward users can register custom library components through `settings.py`.
-* Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
-* Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
 
 ## Thanks for supporting contributions
 

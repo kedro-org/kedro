@@ -186,9 +186,6 @@ jobs:
       - run:
           name: Install 'make' command
           command: choco install make
-      # - restore_cache:
-      #          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
       - run:
           name: Run e2e tests
           command: conda activate kedro_builder; make e2e-tests

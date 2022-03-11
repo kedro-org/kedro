@@ -135,9 +135,9 @@ commands:
       - run:
           name: Install Fiona
           command: conda activate kedro_builder; conda install -c conda-forge fiona -y
-#      - run:
-#          name: Install all requirements
-#          command: conda activate kedro_builder; pip install -r test_requirements.txt -U
+      - run:
+          name: Install all requirements
+          command: conda activate kedro_builder; pip install -r test_requirements.txt -U
       - run:
           name: Print Python environment
           command: conda activate kedro_builder; make print-python-env
@@ -174,6 +174,7 @@ jobs:
 
   # What if checksum changes?
   # venv in conda?
+  # Need pywin pinning?
   win_e2e_tests:
     parameters:
       python_version:
@@ -187,10 +188,9 @@ jobs:
           python_version: <<parameters.python_version>>
       - restore_cache:
           key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-#      - run:
-#          name: Install all requirements
-#          command: conda activate kedro_builder; pip install -r test_requirements.txt -U
-#      - run: conda activate kedro_builder; pip install behave==1.2.6 psutil==5.6.7
+      - run:
+          name: Install dependencies
+          command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
       - run:
           name: Install 'make' command
           command: choco install make
@@ -501,10 +501,10 @@ workflows:
 #          matrix:
 #            parameters:
 #              python_version: ["3.6", "3.7", "3.8"]
-      - win_unit_tests:
-          matrix:
-            parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+#      - win_unit_tests:
+#          matrix:
+#            parameters:
+#              python_version: ["3.6", "3.7", "3.8"]
 #      - lint:
 #          matrix:
 #            parameters:

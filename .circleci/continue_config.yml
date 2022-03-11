@@ -183,12 +183,12 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
+      # - restore_cache:
+      #          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+      - win_setup_requirements
       - run:
           name: Install 'make' command
           command: choco install make
-      - run:
-          name: Install dependencies
-          command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
       - run:
           name: Run e2e tests
           command: conda activate kedro_builder; make e2e-tests

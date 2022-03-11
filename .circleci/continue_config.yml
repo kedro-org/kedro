@@ -135,9 +135,9 @@ commands:
       - run:
           name: Install Fiona
           command: conda activate kedro_builder; conda install -c conda-forge fiona -y
-      - run:
-          name: Install all requirements
-          command: conda activate kedro_builder; pip install -r test_requirements.txt -U
+#      - run:
+#          name: Install all requirements
+#          command: conda activate kedro_builder; pip install -r test_requirements.txt -U
       - run:
           name: Print Python environment
           command: conda activate kedro_builder; make print-python-env
@@ -172,6 +172,8 @@ jobs:
           name: Run e2e tests
           command: make e2e-tests
 
+  # What if checksum changes?
+  # venv in conda?
   win_e2e_tests:
     parameters:
       python_version:
@@ -499,10 +501,10 @@ workflows:
 #          matrix:
 #            parameters:
 #              python_version: ["3.6", "3.7", "3.8"]
-#      - win_unit_tests:
-#          matrix:
-#            parameters:
-#              python_version: ["3.6", "3.7", "3.8"]
+      - win_unit_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
 #      - lint:
 #          matrix:
 #            parameters:

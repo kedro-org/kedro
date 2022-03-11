@@ -183,6 +183,7 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
+      - run: conda activate kedro_builder; pip install behave==1.2.6
       - run:
           name: Install 'make' command
           command: choco install make

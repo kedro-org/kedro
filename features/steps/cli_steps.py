@@ -1,8 +1,6 @@
 """Behave step definitions for the cli_scenarios feature."""
 
-import itertools
 import json
-import shlex
 import shutil
 from pathlib import Path
 from time import time

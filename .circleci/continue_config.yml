@@ -155,7 +155,7 @@ commands:
           python_version: <<parameters.python_version>>
       - win_setup_env
       - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}-invalid
       - win_setup_requirements
 
 jobs:
@@ -173,7 +173,6 @@ jobs:
           command: make e2e-tests
 
   # What if checksum changes?
-  # venv in conda?
   # Need pywin pinning?
   win_e2e_tests:
     parameters:
@@ -186,8 +185,6 @@ jobs:
       - checkout
       - win_setup_conda:
           python_version: <<parameters.python_version>>
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - run:
           name: Install dependencies
           command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
@@ -501,10 +498,10 @@ workflows:
 #          matrix:
 #            parameters:
 #              python_version: ["3.6", "3.7", "3.8"]
-#      - win_unit_tests:
-#          matrix:
-#            parameters:
-#              python_version: ["3.6", "3.7", "3.8"]
+      - win_unit_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
 #      - lint:
 #          matrix:
 #            parameters:

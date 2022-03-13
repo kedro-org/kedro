@@ -224,7 +224,7 @@ class TestSparkDataSet:
         spark_df = spark_data_set.load()
         assert spark_df.schema == sample_spark_df_schema
 
-    def test_load_options_schema_path_err(self, tmp_path):
+    def test_load_options_invalid_schema(self, tmp_path):
         filepath = (tmp_path / "data").as_posix()
         schemapath = (tmp_path / "schema.json").as_posix()
         Path(schemapath).write_text("dummy", encoding="utf-8")

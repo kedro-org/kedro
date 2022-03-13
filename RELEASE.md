@@ -1,3 +1,12 @@
+# Release 0.17.8
+
+## Major features and improvements
+
+* Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
+
+## Thanks for supporting contributions
+[Laurens Vijnck](https://github.com/lvijnck)
+
 # Release 0.17.7
 
 ## Major features and improvements

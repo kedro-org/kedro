@@ -224,16 +224,36 @@ class TestSparkDataSet:
         spark_df = spark_data_set.load()
         assert spark_df.schema == sample_spark_df_schema
 
-    def test_load_options_invalid_schema(self, tmp_path):
+    def test_load_options_invalid_schema_file(self, tmp_path):
         filepath = (tmp_path / "data").as_posix()
         schemapath = (tmp_path / "schema.json").as_posix()
         Path(schemapath).write_text("dummy", encoding="utf-8")
 
-        with pytest.raises(DataSetError):
+        pattern = (
+            f"Contents of `schema.filepath` ({schemapath}) are invalid. Please"
+            f"provide a valid JSON serialized `pyspark.sql.types.StructType`."
+        )
+
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
             SparkDataSet(
                 filepath=filepath,
                 file_format="csv",
                 load_args={"header": True, "schema": {"filepath": schemapath}},
+            )
+
+    def test_load_options_invalid_schema(self, tmp_path):
+        filepath = (tmp_path / "data").as_posix()
+
+        pattern = (
+            "Schema load argument does not specify a `filepath` attribute. Please"
+            "include a path to a JSON serialized `pyspark.sql.types.StructType`."
+        )
+
+        with pytest.raises(DataSetError, match=pattern):
+            SparkDataSet(
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True, "schema": {}},
             )
 
     def test_save_options_csv(self, tmp_path, sample_spark_df):

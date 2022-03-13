@@ -320,6 +320,7 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         self._file_format = file_format
         self._fs_prefix = fs_prefix
+        self._handle_delta_format()
 
     @staticmethod
     def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:

@@ -50,7 +50,6 @@ commands:
       - run: which -a python
       - run: which -a pip
       - run: pip freeze
-      - run: conda info
       - run: python -m pip freeze
       - run:
           name: Install requirements and test requirements

@@ -47,10 +47,6 @@ commands:
           # Virtualenv 20.0.20 broke pre-commit, capped for now
           name: Install venv for some pre-commit hooks
           command: conda install -y "virtualenv<20.0"
-      - run: which -a python
-      - run: which -a pip
-      - run: pip freeze
-      - run: python -m pip freeze
       - run:
           name: Install requirements and test requirements
           command: pip install --upgrade -r test_requirements.txt
@@ -508,12 +504,12 @@ workflows:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
-#      - build_docs
-#      - docs_linkcheck
-#      - e2e_tests:
-#          matrix:
-#            parameters:
-#              python_version: ["3.6", "3.7", "3.8"]
+      - build_docs
+      - docs_linkcheck
+      - e2e_tests:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
       - win_e2e_tests:
           matrix:
             parameters:
@@ -521,40 +517,38 @@ workflows:
       - unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7"]
-
-      #              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.6", "3.7", "3.8"]
       - win_unit_tests:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
-#      - lint:
-#          matrix:
-#            parameters:
-#              python_version: ["3.6", "3.7", "3.8"]
-#      - pip_compile:
-#          matrix:
-#            parameters:
-#              python_version: ["3.6", "3.7", "3.8"]
+      - lint:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
+      - pip_compile:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
       - win_pip_compile:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
-#      - all_circleci_checks_succeeded:
-#          requires:
-#            - e2e_tests
-#            # win_e2e_tests-3.6 is not required due to the error
-#            # `Cargo, the Rust package manager, is not installed or is not on PATH`.
-#            # - win_e2e_tests
-#            - win_e2e_tests-3.7
-#            - win_e2e_tests-3.8
-#            - unit_tests
-#            - win_unit_tests
-#            - lint
-#            - pip_compile
-#            - win_pip_compile
-#            - build_docs
-#            - docs_linkcheck
+      - all_circleci_checks_succeeded:
+          requires:
+            - e2e_tests
+            # win_e2e_tests-3.6 is not required due to the error
+            # `Cargo, the Rust package manager, is not installed or is not on PATH`.
+            # - win_e2e_tests
+            - win_e2e_tests-3.7
+            - win_e2e_tests-3.8
+            - unit_tests
+            - win_unit_tests
+            - lint
+            - pip_compile
+            - win_pip_compile
+            - build_docs
+            - docs_linkcheck
 
   main_updated:
     unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set

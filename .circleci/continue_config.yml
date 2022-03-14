@@ -47,12 +47,11 @@ commands:
           # Virtualenv 20.0.20 broke pre-commit, capped for now
           name: Install venv for some pre-commit hooks
           command: conda install -y "virtualenv<20.0"
-      - run:
-          name: Pip freeze
-          command: pip freeze
+      - run: which -a python
+      - run: which -a pip
       - run:
           name: Install requirements and test requirements
-          command: pip install --upgrade -r test_requirements.txt
+          command: python -m pip install --upgrade -r test_requirements.txt
       - run:
           # this is needed to fix java cacerts so
           # spark can automatically download packages from mvn
@@ -207,6 +206,9 @@ jobs:
     executor:
       name: docker
       python_version: <<parameters.python_version>>
+    - run: which -a python
+    - run: which -a pip
+    - run: which -a pytest
     steps:
       - setup
       - run:

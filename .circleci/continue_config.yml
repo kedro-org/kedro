@@ -211,15 +211,9 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - setup
-      - run: which -a python
-      - run: which -a pip
-      - run: which -a pytest
       - run:
           name: Run unit tests
           command: make test
-      - run: which -a python
-      - run: which -a pip
-      - run: which -a pytest
 
   win_unit_tests:
     parameters:

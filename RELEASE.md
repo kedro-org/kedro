@@ -101,6 +101,7 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * Removed transformer API from `DataCatalog`, as well as the modules `kedro.extras.transformers` and `kedro.io.transformers`.
 * Removed the `Journal` and `DataCatalogWithDefault`.
 
+
 ## Thanks for supporting contributions
 
 [Deepyaman Datta](https://github.com/deepyaman), [Lucas Jamar](https://github.com/lucasjamar), [Simon Brugman](https://github.com/sbrugman)
@@ -205,6 +206,7 @@ The parameters should look like this:
 #### Hooks
 * If you were using `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead.
 * If you were using `run_id` in any of the `before_node_run`, `after_node_run`, `on_node_error`, `before_pipeline_run`, `after_pipeline_run` or `on_pipeline_error` hooks, replace it with `session_id` instead.
+
 
 # Release 0.17.7
 

@@ -133,6 +133,9 @@ commands:
           command: choco install make
 
   win_setup_requirements:
+    parameters:
+      python_version:
+        type: string
     steps:
       - restore_cache:
           name: Restore package cache
@@ -162,7 +165,8 @@ commands:
       - win_setup_conda:
           python_version: <<parameters.python_version>>
       - win_setup_env
-      - win_setup_requirements
+      - win_setup_requirements:
+          python_version: <<parameters.python_version>>
 
 jobs:
   e2e_tests:

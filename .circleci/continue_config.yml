@@ -88,7 +88,7 @@ commands:
           command: conda init powershell
       - run:
           name: Create 'kedro_builder' conda environment
-          command: conda create -n kedro_builder_<<parameters.python_version>> python=<<parameters.python_version>> -y
+          command: conda create -n kedro_builder python=<<parameters.python_version>> -y
       - restore_cache:
           key: kedro-deps-vtest-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - restore_cache:
@@ -133,24 +133,21 @@ commands:
 
   win_setup_requirements:
     steps:
-      parameters:
-        python_version:
-          type: string
       - run:
           name: Install GDAL
-          command: conda activate kedro_builder_<<parameters.python_version>>; conda install -c conda-forge gdal -y
+          command: conda activate kedro_builder; conda install -c conda-forge gdal -y
       - run:
           name: Install Fiona
-          command: conda activate kedro_builder_<<parameters.python_version>>; conda install -c conda-forge fiona -y
+          command: conda activate kedro_builder; conda install -c conda-forge fiona -y
       - run:
           name: Install all requirements
-          command: conda activate kedro_builder_<<parameters.python_version>>; pip install -r test_requirements.txt -U
+          command: conda activate kedro_builder; pip install -r test_requirements.txt -U
       - run:
           name: Print Python environment
-          command: conda activate kedro_builder_<<parameters.python_version>>; make print-python-env
+          command: conda activate kedro_builder; make print-python-env
       - run:
           name: Pip freeze
-          command: conda activate kedro_builder_<<parameters.python_version>>; pip freeze
+          command: conda activate kedro_builder; pip freeze
 
   win_setup:
     parameters:
@@ -163,9 +160,7 @@ commands:
       - win_setup_env
 #      - restore_cache:
 #          key: kedro-deps-vtest-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements:
-          python_version: <<parameters.python_version>>
-
+      - win_setup_requirements
 
 jobs:
   e2e_tests:
@@ -197,10 +192,10 @@ jobs:
           command: choco install make
       - run:
           name: Install dependencies
-          command: conda activate kedro_builder_<<parameters.python_version>>; pip install -r features/windows_reqs.txt
+          command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
       - run:
           name: Run e2e tests
-          command: conda activate kedro_builder_<<parameters.python_version>>; make e2e-tests
+          command: conda activate kedro_builder; make e2e-tests
 
   unit_tests:
     parameters:
@@ -243,14 +238,14 @@ jobs:
           steps:
             - run:
                 name: Run unit tests without spark
-                command: conda activate kedro_builder_<<parameters.python_version>>; make test-no-spark
+                command: conda activate kedro_builder; make test-no-spark
       - when:
           condition:
             equal: ["3.6", <<parameters.python_version>>]
           steps:
             - run:
                 name: Run unit tests without spark or tensorflow
-                command: conda activate kedro_builder_<<parameters.python_version>>; pytest tests --no-cov --ignore tests/extras/datasets/spark --ignore tests/extras/datasets/tensorflow --numprocesses 4 --dist loadfile
+                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark --ignore tests/extras/datasets/tensorflow --numprocesses 4 --dist loadfile
 
   lint:
     parameters:
@@ -289,7 +284,7 @@ jobs:
       - when:
           # Save cache only for Python 3.7. There is no need to save it for each Python.
           condition:
-            equal: [ "3.7", <<parameters.python_version>> ]
+            equal: ["3.7", <<parameters.python_version>>]
           steps:
           - save_cache:
               key: kedro-deps-vtest-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
@@ -300,10 +295,10 @@ jobs:
       - save_cache:
           key: kedro-deps-vtest-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}-<<parameters.python_version>>
           paths:
-            - c:\tools\miniconda3\envs\kedro_builder_<<parameters.python_version>>
+            - c:\tools\miniconda3\envs\kedro_builder
       - run:
           name: Pip-compile requirements file
-          command: conda activate kedro_builder_<<parameters.python_version>>; make pip-compile
+          command: conda activate kedro_builder; make pip-compile
 
   build_docs:
     executor:

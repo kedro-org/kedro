@@ -78,7 +78,7 @@
 * Removed `RegistrationSpecs` and all registration hooks that belonged to it. Going forward users can register custom library components through `settings.py`.
 * Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
 * Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
-* Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result of that. 
+* Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result of that.
 
 ## Thanks for supporting contributions
 
@@ -167,7 +167,7 @@ The parameters should look like this:
 * If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 * If you were using the `KedroContext` to access `ConfigLoader`, please use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
 * To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
-* If you were using `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead. 
+* If you were using `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead.
 * If you were using `run_id` in any of the `before_node_run`, `after_node_run`, `on_node_error`, `before_pipeline_run`, `after_pipeline_run` or `on_pipeline_error` hooks, replace it with `session_id` instead.
 
 # Release 0.17.7

@@ -85,14 +85,14 @@ class ThreadRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        run_id: str = None,
+        session_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
-            run_id: The id of the run.
+            session_id: The id of the session.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -119,7 +119,7 @@ class ThreadRunner(AbstractRunner):
                             catalog,
                             hook_manager,
                             self._is_async,
-                            run_id,
+                            session_id,
                         )
                     )
                 if not futures:

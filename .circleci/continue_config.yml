@@ -139,7 +139,7 @@ commands:
     steps:
       - run:
           name: Install GDAL and Fiona
-          command: conda activate kedro_builder; conda install gdal fiona -c local conda-forge -y
+          command: conda activate kedro_builder; conda install gdal fiona -c local -c conda-forge -y
       - run:
           name: Install all requirements
           command: conda activate kedro_builder; pip install -r test_requirements.txt -U

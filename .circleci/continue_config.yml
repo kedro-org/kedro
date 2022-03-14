@@ -51,7 +51,7 @@ commands:
       - run: which -a pip
       - run:
           name: Install requirements and test requirements
-          command: python -m pip install --upgrade -r test_requirements.txt
+          command: pip install --upgrade -r test_requirements.txt
       - run:
           # this is needed to fix java cacerts so
           # spark can automatically download packages from mvn

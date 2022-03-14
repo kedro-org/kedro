@@ -9,6 +9,10 @@
 
 # Upcoming Release 0.18.0
 
+## TL;DR ✨
+Kedro 0.18.0 strives to reduce the complexity of the project template and get us closer to a stable release of the framework. We've also introduced the full [micro-packaging workflow](/docs/source/nodes_and_pipelines/micro_packaging.md) 📦, which allows you to import packages, utility functions and existing pipelines into your Kedro project.
+Additionally, the release comes with long-awaited Python 3.9 and 3.10 support 🐍.
+
 ## Major features and improvements
 
 ### Framework

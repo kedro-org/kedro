@@ -90,8 +90,10 @@ commands:
           name: Create 'kedro_builder' conda environment
           command: conda create -n kedro_builder python=<<parameters.python_version>> -y
       - restore_cache:
+          #name:
           key: kedro-deps-vtest-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - restore_cache:
+          #name:
           key: kedro-deps-vtest-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}-<<parameters.python_version>>
 
   win_setup_env:
@@ -287,12 +289,14 @@ jobs:
             equal: ["3.7", <<parameters.python_version>>]
           steps:
           - save_cache:
+              # name:
               key: kedro-deps-vtest-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
               paths:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs
                 - c:\users\circleci\appdata\local\pip\cache
       - save_cache:
+          # name
           key: kedro-deps-vtest-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}-<<parameters.python_version>>
           paths:
             - c:\tools\miniconda3\envs\kedro_builder

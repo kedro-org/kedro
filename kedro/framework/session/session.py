@@ -75,6 +75,14 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
     }
 
 
+class KedroSessionError(Exception):
+    """``KedroSessionError`` raised by ``KedroSession``
+    in the case that multiple runs are attempted in one session.
+    """
+
+    pass
+
+
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run.
@@ -106,6 +114,7 @@ class KedroSession:
         self.save_on_close = save_on_close
         self._package_name = package_name
         self._store = self._init_store()
+        self._run_called = False
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
@@ -318,6 +327,8 @@ class KedroSession:
                 defined by `register_pipelines`.
             Exception: Any uncaught exception during the run will be re-raised
                 after being passed to ``on_pipeline_error`` hook.
+            KedroSessionError: If more than one run is attempted to be executed during
+                a single session.
         Returns:
             Any node outputs that cannot be processed by the ``DataCatalog``.
             These are returned in a dictionary, where the keys are defined
@@ -327,7 +338,15 @@ class KedroSession:
         # Report project name
         self._logger.info("** Kedro project %s", self._project_path.name)
 
-        save_version = run_id = self.store["session_id"]
+        if self._run_called:
+            raise KedroSessionError(
+                "A run has already been completed as part of the"
+                " active KedroSession. KedroSession has a 1-1 mapping with"
+                " runs, and thus only one run should be executed per session."
+            )
+
+        session_id = self.store["session_id"]
+        save_version = session_id
         extra_params = self.store.get("extra_params") or {}
         context = self.load_context()
 
@@ -352,7 +371,7 @@ class KedroSession:
         )
 
         record_data = {
-            "run_id": run_id,
+            "session_id": session_id,
             "project_path": self._project_path.as_posix(),
             "env": context.env,
             "kedro_version": kedro_version,
@@ -368,7 +387,8 @@ class KedroSession:
         }
 
         catalog = context._get_catalog(
-            save_version=save_version, load_versions=load_versions
+            save_version=save_version,
+            load_versions=load_versions,
         )
 
         # Run the runner
@@ -379,7 +399,10 @@ class KedroSession:
         )
 
         try:
-            run_result = runner.run(filtered_pipeline, catalog, hook_manager, run_id)
+            run_result = runner.run(
+                filtered_pipeline, catalog, hook_manager, session_id
+            )
+            self._run_called = True
         except Exception as error:
             hook_manager.hook.on_pipeline_error(
                 error=error,

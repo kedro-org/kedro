@@ -49,6 +49,9 @@ commands:
           command: conda install -y "virtualenv<20.0"
       - run: which -a python
       - run: which -a pip
+      - run: pip freeze
+      - run: conda info
+      - run: python -m pip freeze
       - run:
           name: Install requirements and test requirements
           command: pip install --upgrade -r test_requirements.txt

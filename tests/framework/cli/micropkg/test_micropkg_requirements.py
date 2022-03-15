@@ -36,10 +36,10 @@ http://some.website.com/package.whl
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "cleanup_dist")
-class TestPipelineRequirements:
+class TestMicropkgRequirements:
     """Many of these tests follow the pattern:
     - create a pipeline with some sort of requirements.txt
-    - package the pipeline
+    - package the pipeline/micro-package
     - delete the pipeline and pull in the packaged one
     - assert the project's modified requirements.txt is as expected
     """

@@ -79,6 +79,7 @@
 * Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
 * Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
 * Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result of that.
+* Removed the `kedro pipeline package/pull` CLI commands, in favour of `kedro micropkg package/pull`.
 
 ## Thanks for supporting contributions
 

@@ -444,7 +444,7 @@ def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
     if conf_source.is_dir():
         _sync_dirs(conf_source, conf_dest)
         # `config` dir was packaged under `package_name` directory with
-        # `kedro pipeline package`. Since `config` was already synced,
+        # `kedro micropkg package`. Since `config` was already synced,
         # we don't want to copy it again when syncing the package, so we remove it.
         shutil.rmtree(str(conf_source))
 

@@ -312,7 +312,7 @@ class TestMicropkgPackageCommand:
 
         Add a directory with a parameter file to verify that if a project has parameters structured
         like below, that the ones inside a directory with the pipeline name are packaged as well
-        when calling `kedro pipeline package` for a specific pipeline.
+        when calling `kedro micropkg package` for a specific pipeline.
 
         parameters
             └── retail

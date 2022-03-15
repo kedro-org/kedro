@@ -34,8 +34,10 @@ def _find_kedro_project(current_dir):  # pragma: no cover
     return None
 
 
-def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
-    """Line magic which reloads all Kedro default variables."""
+def reload_kedro(path="", env: str = None, extra_params: Dict[str, Any] = None):
+    """Line magic which reloads all Kedro default variables.
+    Setting the path will also make it default for subsequent calls.
+    """
 
     import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
@@ -43,6 +45,14 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
     from kedro.framework.session import KedroSession
     from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import bootstrap_project
+
+    # If a path is provided, set it as default for subsequent calls
+    global project_path
+    if path:
+        project_path = Path(path).expanduser().resolve()
+        logging.info("Updated path to Kedro project: %s", str(project_path))
+    else:
+        logging.info("No path argument was provided. Using: %s", str(project_path))
 
     path = path or project_path
     metadata = bootstrap_project(path)
@@ -77,25 +87,12 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
         logging.info("Registered line magic `%s`", line_magic.__name__)  # type: ignore
 
 
-def init_kedro(path=""):
-    """Line magic to set path to Kedro project.
-    `%reload_kedro` will default to this location.
-    """
-    global project_path
-    if path:
-        project_path = Path(path).expanduser().resolve()
-        logging.info("Updated path to Kedro project: %s", str(project_path))
-    else:
-        logging.info("No path argument was provided. Using: %s", str(project_path))
-
-
 def load_ipython_extension(ipython):
     """Main entry point when %load_ext is executed"""
 
     global project_path
     global startup_path  # pylint:disable=global-variable-not-assigned
 
-    ipython.register_magic_function(init_kedro, "line")
     ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
 
     project_path = _find_kedro_project(startup_path)
@@ -105,7 +102,4 @@ def load_ipython_extension(ipython):
     except (ImportError, ModuleNotFoundError):
         logging.error("Kedro appears not to be installed in your current environment.")
     except Exception:  # pylint: disable=broad-except
-        logging.warning(
-            "Kedro extension was registered. Make sure you pass the project path to "
-            "`%reload_kedro` or set it using `%init_kedro`."
-        )
+        logging.warning("Kedro extension was registered.")

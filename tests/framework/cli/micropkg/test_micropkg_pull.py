@@ -438,7 +438,7 @@ class TestMicropkgPullCommand:
         (tmp_path / f"{PIPELINE_NAME}-0.1" / "dummy.egg-info").mkdir(parents=True)
 
         mocker.patch(
-            "kedro.framework.cli.pipeline.tempfile.TemporaryDirectory",
+            "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
             return_value=tmp_path,
         )
         result = CliRunner().invoke(
@@ -619,9 +619,9 @@ class TestMicropkgPullCommand:
         assert not test_path.exists()
         assert not source_params_config.exists()
 
-        python_call_mock = mocker.patch("kedro.framework.cli.pipeline.python_call")
+        python_call_mock = mocker.patch("kedro.framework.cli.micropkg.python_call")
         mocker.patch(
-            "kedro.framework.cli.pipeline.tempfile.TemporaryDirectory",
+            "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
             return_value=tmp_path,
         )
 
@@ -675,11 +675,11 @@ class TestMicropkgPullCommand:
             "ERROR: Could not find a version that satisfies the requirement"
         )
         python_call_mock = mocker.patch(
-            "kedro.framework.cli.pipeline.python_call",
+            "kedro.framework.cli.micropkg.python_call",
             side_effect=ClickException(pypi_error_message),
         )
         mocker.patch(
-            "kedro.framework.cli.pipeline.tempfile.TemporaryDirectory",
+            "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
             return_value=tmp_path,
         )
 
@@ -709,9 +709,9 @@ class TestMicropkgPullCommand:
         call_micropkg_package(
             fake_project_cli, fake_metadata, alias="another", destination=tmp_path
         )
-        mocker.patch("kedro.framework.cli.pipeline.python_call")
+        mocker.patch("kedro.framework.cli.micropkg.python_call")
         mocker.patch(
-            "kedro.framework.cli.pipeline.tempfile.TemporaryDirectory",
+            "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
             return_value=tmp_path,
         )
         result = CliRunner().invoke(
@@ -729,12 +729,12 @@ class TestMicropkgPullCommand:
         error_message = "Error: More than 1 or no sdist files found:"
         package_path = f"{protocol}://{PIPELINE_NAME}"
 
-        python_call_mock = mocker.patch("kedro.framework.cli.pipeline.python_call")
+        python_call_mock = mocker.patch("kedro.framework.cli.micropkg.python_call")
         filesystem_mock = mocker.patch(
             "fsspec.filesystem", side_effect=ValueError(exception_message)
         )
         mocker.patch(
-            "kedro.framework.cli.pipeline.tempfile.TemporaryDirectory",
+            "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
             return_value=tmp_path,
         )
 

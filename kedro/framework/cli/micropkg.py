@@ -48,7 +48,9 @@ setup(
 
 def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
     if value and not re.match(r"^[\w.]+$", value):
-        message = "The pipeline location you provided is not a valid Python module path"
+        message = (
+            "The micro-package location you provided is not a valid Python module path"
+        )
         raise KedroCliError(message)
     return value
 
@@ -201,7 +203,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
     click.secho("Micro-packages pulled and unpacked!", fg="green")
 
 
-def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
+def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
     # pylint: disable=import-outside-toplevel
     import anyconfig  # for performance reasons
 
@@ -216,11 +218,11 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
         )
         return
 
-    for pipeline_name, specs in build_specs.items():
+    for package_name, specs in build_specs.items():
         if "alias" in specs:
             _assert_pkg_name_ok(specs["alias"])
-        _package_pipeline(pipeline_name, metadata, **specs)
-        click.secho(f"Packaged `{pipeline_name}` micro-package!")
+        _package_pipeline(package_name, metadata, **specs)
+        click.secho(f"Packaged `{package_name}` micro-package!")
 
     click.secho("Micro-packages packaged!", fg="green")
 
@@ -251,7 +253,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
 )
 @click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
-def package_pipeline(
+def package_micropkg(
     metadata: ProjectMetadata, module_path, env, alias, destination, all_flag
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline or micro-package as a Python source distribution."""
@@ -263,7 +265,7 @@ def package_pipeline(
         sys.exit(1)
 
     if all_flag:
-        _package_pipelines_from_manifest(metadata)
+        _package_micropkgs_from_manifest(metadata)
         return
 
     result_path = _package_pipeline(
@@ -799,9 +801,9 @@ def _get_package_artifacts(
 
 
 def _append_package_reqs(
-    requirements_txt: Path, package_reqs: List[str], pipeline_name: str
+    requirements_txt: Path, package_reqs: List[str], package_name: str
 ) -> None:
-    """Appends modular pipeline requirements to project level requirements.txt"""
+    """Appends micro-package requirements to project level requirements.txt"""
     incoming_reqs = _safe_parse_requirements(package_reqs)
     if requirements_txt.is_file():
         existing_reqs = _safe_parse_requirements(requirements_txt.read_text())
@@ -813,16 +815,16 @@ def _append_package_reqs(
         sep = "\n"
         with open(requirements_txt, "a", encoding="utf-8") as file:
             file.write(
-                f"\n\n# Additional requirements from modular pipeline `{pipeline_name}`:\n"
+                f"\n\n# Additional requirements from micro-package `{package_name}`:\n"
             )
             file.write(sep.join(sorted_reqs))
         click.secho(
-            f"Added the following requirements from modular pipeline `{pipeline_name}` to "
+            f"Added the following requirements from micro-package `{package_name}` to "
             f"requirements.txt:\n{sep.join(sorted_reqs)}"
         )
     else:
         click.secho(
-            "No project requirements.txt found. Copying contents from pipeline requirements.txt..."
+            "No project requirements.txt found. Copying contents from project requirements.txt..."
         )
         sorted_reqs = sorted(str(req) for req in incoming_reqs)
         sep = "\n"

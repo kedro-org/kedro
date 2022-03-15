@@ -1,3 +1,12 @@
+# Release 0.17.9
+
+## Major features and improvements
+* Added abfss to list of cloud protocols, enabling abfss paths.
+
+## Bug fixes and other changes
+
+## Upcoming deprecations for Kedro 0.18.0
+
 # Release 0.17.8
 
 ## Major features and improvements

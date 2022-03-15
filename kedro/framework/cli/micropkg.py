@@ -221,7 +221,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
     for package_name, specs in build_specs.items():
         if "alias" in specs:
             _assert_pkg_name_ok(specs["alias"])
-        _package_pipeline(package_name, metadata, **specs)
+        _package_micropkg(package_name, metadata, **specs)
         click.secho(f"Packaged `{package_name}` micro-package!")
 
     click.secho("Micro-packages packaged!", fg="green")
@@ -268,7 +268,7 @@ def package_micropkg(
         _package_micropkgs_from_manifest(metadata)
         return
 
-    result_path = _package_pipeline(
+    result_path = _package_micropkg(
         module_path, metadata, alias=alias, destination=destination, env=env
     )
 
@@ -492,7 +492,7 @@ def _get_default_version(metadata: ProjectMetadata, pipeline_module_path: str) -
         return project_module.__version__  # type: ignore
 
 
-def _package_pipeline(
+def _package_micropkg(
     pipeline_module_path: str,
     metadata: ProjectMetadata,
     alias: str = None,

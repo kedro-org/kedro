@@ -223,7 +223,7 @@ class TestMicropkgPackageCommand:
             fake_project_cli, ["micropkg", "package", f"pipelines/{PIPELINE_NAME}"]
         )
         error_message = (
-            "The pipeline location you provided is not a valid Python module path"
+            "The micro-package location you provided is not a valid Python module path"
         )
 
         assert result.exit_code
@@ -273,7 +273,7 @@ class TestMicropkgPackageCommand:
         assert expected_files <= sdist_contents
         assert f"{PIPELINE_NAME}/config/parameters.yml" not in sdist_contents
 
-    def test_package_non_existing_pipeline_dir(
+    def test_package_non_existing_micropkg_dir(
         self, fake_package_path, fake_project_cli, fake_metadata
     ):
         result = CliRunner().invoke(
@@ -286,7 +286,7 @@ class TestMicropkgPackageCommand:
         error_message = f"Error: Directory '{pipeline_dir}' doesn't exist."
         assert error_message in result.output
 
-    def test_package_empty_pipeline_dir(
+    def test_package_empty_micropkg_dir(
         self, fake_project_cli, fake_package_path, fake_metadata
     ):
         pipeline_dir = fake_package_path / "pipelines" / "empty_dir"
@@ -431,7 +431,7 @@ class TestMicropkgPackageCommand:
             in sdist_contents
         )
 
-    def test_pipeline_package_default(
+    def test_micropkg_package_default(
         self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata
     ):
         _pipeline_name = "data_engineering"
@@ -500,7 +500,7 @@ class TestMicropkgPackageFromManifest:
         # pylint: disable=import-outside-toplevel
         from kedro.framework.cli import micropkg
 
-        spy = mocker.spy(micropkg, "_package_pipeline")
+        spy = mocker.spy(micropkg, "_package_micropkg")
         pyproject_toml = fake_repo_path / "pyproject.toml"
         other_dest = tmp_path / "here"
         other_dest.mkdir()
@@ -540,7 +540,7 @@ class TestMicropkgPackageFromManifest:
         # pylint: disable=import-outside-toplevel
         from kedro.framework.cli import micropkg
 
-        spy = mocker.spy(micropkg, "_package_pipeline")
+        spy = mocker.spy(micropkg, "_package_micropkg")
         pyproject_toml = fake_repo_path / "pyproject.toml"
         with pyproject_toml.open(mode="a") as file:
             file.write("\n[tool.kedro.micropkg.package]\n")

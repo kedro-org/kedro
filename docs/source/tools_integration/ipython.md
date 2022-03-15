@@ -117,6 +117,10 @@ The command runs the nodes from your default project pipeline in a sequential ma
 
 To parameterise your pipeline run, refer to [a later section on this page on run parameters](#additional-parameters-for-session-run) which lists all available options.
 
+```eval_rst
+.. note::  You can only execute one _successful_ run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run `%reload_kedro` to obtain a new `KedroSession` object.
+```
+
 
 ### Parameters
 

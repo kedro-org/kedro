@@ -3,32 +3,31 @@
 This module implements commands available from the kedro CLI for creating
 projects.
 """
-from itertools import groupby
-from operator import itemgetter
 import os
 import re
 import shutil
 import stat
 import tempfile
 from collections import OrderedDict
-from pandas import value_counts
-import pkg_resources
+from itertools import groupby
+from operator import itemgetter
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from warnings import warn
 
 import click
+import pkg_resources
 import yaml
 
 import kedro
 from kedro import __version__ as version
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
+    ENTRY_POINT_GROUPS,
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
     command_with_verbosity,
-    # load_entry_points,
-    ENTRY_POINT_GROUPS,
 )
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -94,52 +93,64 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     func(path)
 
 
-def _check_starter_entrypoint_config(module_name: str, config: Dict[str, str]) -> None:
+def _check_starter_entrypoint_config(module_name: str, config: Dict[str, str]) -> bool:
+    flag_config_ok = True
     if not isinstance(config, dict):
-        raise ValueError(
-            f"The starter configuration loaded from entrypoint should be a 'dict', got '{config}' instead"
+        warn(
+            f"The starter configuration loaded from module {module_name} should be a 'dict', got '{type(config)}' instead"
         )
+        flag_config_ok = False
     mandatory_keys = {"name", "template_path"}
     optional_keys = {"directory"}
+    provided_keys = set(config.keys())
 
-    missing_keys = mandatory_keys - set(config.keys())
+    missing_keys = mandatory_keys - provided_keys
     if missing_keys:  # mandatory keys
-        raise ValueError(
-            f"Entrypoint kedro.starters from {module_name} must have the following missing keys: '{missing_keys}'"
+        warn(
+            f"Entrypoint kedro.starters from {module_name} must have the following keys, which are currently missing: '{missing_keys}'"
         )
+        flag_config_ok = False
 
-    extra_keys = set(config.keys()) - mandatory_keys - optional_keys  # optional keys
+    extra_keys = provided_keys - mandatory_keys - optional_keys  # optional keys
     if extra_keys:  # mandatory keys
-        raise ValueError(
+        warn(
             f"Entrypoint kedro.starters from {module_name} has keys '{extra_keys}' which are not allowed"
         )
+        flag_config_ok = False
+
+    return flag_config_ok
 
 
-def _get_starters_aliases() -> Dict[str, Dict[str, str]]:
+def _get_starters_aliases() -> List[Dict[str, str]]:
     """This functions lists all the starters aliases declared in
     the core repo and in plugins entry points.
 
     The output looks like:
-    {
-        {
-            "astro-airflow-iris": {"template_path": ..., directory=..., "origin": "kedro"},
-            ...,
-            "my-awesome-starter": {"template_path": ..., directory=..., "origin": "my-awesome-plugin"}
-        }
-    }
+    [
+        {"name": "astro-airflow-iris", "template_path": ..., "directory": ..., "origin": "kedro"},
+        ...,
+        {"name": "my-awesome-starter", "template_path": ..., "directory": ..., "origin": "my-awesome-plugin"}
+    ]
     """
 
     # add an extra key to indicate from where the plugin come from
     starters_aliases = [{**config, "origin": "kedro"} for config in _STARTERS_ALIASES]
 
-    existing_names = {}  # dict {name: module_name}
+    existing_names: Dict[str, str] = {}  # dict {name: module_name}
     for starter_entry_point in pkg_resources.iter_entry_points(
         group=ENTRY_POINT_GROUPS["starters"]
     ):
         module_name = starter_entry_point.module_name.split(".")[0]
         for starter_config in starter_entry_point.load():
-            _check_starter_entrypoint_config(module_name, starter_config)
-            if starter_config["name"] in existing_names:
+            config_status = _check_starter_entrypoint_config(
+                module_name, starter_config
+            )
+            if config_status is False:
+                click.secho(
+                    f"Starter alias `{starter_config['name']}` from `{module_name}` has been ignored as the config is invalid and cannot be loaded",
+                    fg="yellow",
+                )
+            elif starter_config["name"] in existing_names:
                 click.secho(
                     f"Starter alias `{starter_config['name']}` from `{module_name}` has been ignored as it is already defined by `{existing_names[starter_config['name']]}`",
                     fg="yellow",
@@ -184,8 +195,10 @@ def new(
 
     # see https://www.geeksforgeeks.org/group-list-of-dictionary-data-by-particular-key-in-python/
     # this returns a nested dictionary {name1: {template_path: xxx, directory: xxx}, name2: {template_path: xxx, directory: xxx}, ...}
+    # and we know that each starter has only one config, so we can convert take the first item of the list
     starters_aliases_by_name = {
-        k: list(v)[0] for k, v in groupby(starters_aliases, key=itemgetter("name"))
+        name: list(config)[0]
+        for name, config in groupby(starters_aliases, key=itemgetter("name"))
     }
 
     if starter_name in starters_aliases_by_name:
@@ -243,28 +256,25 @@ def list_starters():
     """List all official project starters available."""
     starters_aliases = _get_starters_aliases()
     starters_aliases_by_origin = {
-        # origin: [
-        #     {
-        #         k: v
-        #         for k, v in config.items()
-        #         if k in {"name", "template_path", "directory"} and v is not None
-        #     }
-        #     for config in config_list
-        # ]
-        origin: list(configs)
-        for origin, configs in groupby(
+        origin: list(starter_config)
+        for origin, starter_config in groupby(
             sorted(starters_aliases, key=itemgetter("origin")), key=itemgetter("origin")
         )
     }
 
     # ensure kedro starters are listed first
-    kedro_starters = starters_aliases_by_origin.pop("kedro")
-    click.secho(f"\nBuilt-in starters\n", fg="yellow")
-    click.echo(yaml.dump(kedro_starters))
+    built_in_config = starters_aliases_by_origin.pop("kedro")
+    starters_aliases_by_origin = {
+        "kedro": built_in_config,
+        **starters_aliases_by_origin,
+    }
 
-    for origin, starter_config in starters_aliases_by_origin.items():
+    for origin, module_starters_config in starters_aliases_by_origin.items():
         click.secho(f"\nStarters from {origin}\n", fg="yellow")
-        click.echo(yaml.dump(starter_config))
+        for starter_config in module_starters_config:
+            del starter_config["origin"]
+            name = starter_config.pop("name")
+            click.echo(yaml.dump({name: starter_config}))
 
 
 def _fetch_config_from_file(config_path: str) -> Dict[str, str]:

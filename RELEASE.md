@@ -33,7 +33,7 @@
 | `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
 
 ## Breaking changes to the API
-* Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
+* Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
 * `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
 * `pandas.ParquetDataSet` now calls `pd.to_parquet()` upon saving. Note that the argument `partition_cols` is not supported.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
@@ -78,12 +78,52 @@
 * Removed `RegistrationSpecs` and all registration hooks that belonged to it. Going forward users can register custom library components through `settings.py`.
 * Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
 * Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
+* Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result of that.
 
 ## Thanks for supporting contributions
 
 [Deepyaman Datta](https://github.com/deepyaman), [Lucas Jamar](https://github.com/lucasjamar), [Simon Brugman](https://github.com/sbrugman)
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
+* If you are using any modular pipelines with parameters, make sure they are declared with the correct namespace. See example below:
+
+For a given pipeline:
+```python
+active_pipeline = pipeline(
+    pipe=[
+        node(
+            func=some_func,
+            inputs=["model_input_table", "params:model_options"],
+            outputs=["**my_output"],
+        ),
+        ...,
+    ],
+    inputs="model_input_table",
+    namespace="candidate_modelling_pipeline",
+)
+```
+
+The parameters should look like this:
+
+```diff
+-model_options:
+-    test_size: 0.2
+-    random_state: 8
+-    features:
+-    - engines
+-    - passenger_capacity
+-    - crew
++candidate_modelling_pipeline:
++    model_options:
++      test_size: 0.2
++      random_state: 8
++      features:
++        - engines
++        - passenger_capacity
++        - crew
+
+```
+
 * Please remove any existing `hook_impl` of the `register_config_loader` and `register_catalog` methods from `ProjectHooks` (or custom alternatives).
 * Populate `settings.py` with `CONFIG_LOADER_CLASS` set to your expected config loader class (for example `kedro.config.TemplatedConfigLoader` or custom implementation). If `CONFIG_LOADER_CLASS` value is not set, it will default to `kedro.config.ConfigLoader` at runtime.
 * Populate `settings.py` with `CONFIG_LOADER_ARGS` set to a dictionary with expected keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.
@@ -127,7 +167,8 @@
 * If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 * If you were using the `KedroContext` to access `ConfigLoader`, please use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
 * To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
-
+* If you were using `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead.
+* If you were using `run_id` in any of the `before_node_run`, `after_node_run`, `on_node_error`, `before_pipeline_run`, `after_pipeline_run` or `on_pipeline_error` hooks, replace it with `session_id` instead.
 
 # Release 0.17.7
 

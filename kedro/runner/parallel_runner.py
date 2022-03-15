@@ -92,7 +92,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,
-    run_id: str = None,
+    session_id: str = None,
     package_name: str = None,
     conf_logging: Dict[str, Any] = None,
 ) -> Node:
@@ -105,7 +105,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
-        run_id: The id of the pipeline run.
+        session_id: The session id of the pipeline run.
         package_name: The name of the project Python package.
         conf_logging: A dictionary containing logging configuration.
 
@@ -121,7 +121,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     _register_hooks(hook_manager, settings.HOOKS)
     _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
-    return run_node(node, catalog, hook_manager, is_async, run_id)
+    return run_node(node, catalog, hook_manager, is_async, session_id)
 
 
 class ParallelRunner(AbstractRunner):
@@ -265,14 +265,14 @@ class ParallelRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager,
-        run_id: str = None,
+        session_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
-            run_id: The id of the run.
+            session_id: The id of the session.
 
         Raises:
             AttributeError: When the provided pipeline is not suitable for
@@ -309,7 +309,7 @@ class ParallelRunner(AbstractRunner):
                             node,
                             catalog,
                             self._is_async,
-                            run_id,
+                            session_id,
                             package_name=PACKAGE_NAME,
                             conf_logging=LOGGING,
                         )

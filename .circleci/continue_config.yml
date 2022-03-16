@@ -128,13 +128,19 @@ commands:
           command: choco install make
 
   win_setup_requirements:
+    parameters:
+      python_version:
+        type: string
     steps:
+      - restore_cache:
+          name: Restore package cache
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+      - restore_cache:
+          name: Restore conda environment cache
+          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - run:
-          name: Install GDAL
-          command: conda activate kedro_builder; conda install -c conda-forge gdal -y
-      - run:
-          name: Install Fiona
-          command: conda activate kedro_builder; conda install -c conda-forge fiona -y
+          name: Install GDAL and Fiona
+          command: conda activate kedro_builder; conda install gdal fiona -c conda-forge -y
       - run:
           name: Install all requirements
           command: conda activate kedro_builder; pip install -r test_requirements.txt -U
@@ -154,9 +160,8 @@ commands:
       - win_setup_conda:
           python_version: <<parameters.python_version>>
       - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
+      - win_setup_requirements:
+          python_version: <<parameters.python_version>>
 
 jobs:
   e2e_tests:
@@ -186,6 +191,10 @@ jobs:
       - run:
           name: Install 'make' command
           command: choco install make
+      # We don't use the `win_setup` command here, which would install the full set
+      # of requirements used by unit tests. Even when those packages are cached
+      # it is faster to just install the minimal set of dependencies needed for e2e
+      # tests in a new empty environment rather than restore the cache.
       - run:
           name: Install dependencies
           command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
@@ -278,16 +287,23 @@ jobs:
       - win_setup:
           python_version: <<parameters.python_version>>
       - when:
-          # Save cache only for Python 3.7. There is no need to save it for each Python.
+          # Save Python package cache only for Python 3.7. The conda environment itself
+          # is specific to a Python version and is cached separately for each.
           condition:
             equal: ["3.7", <<parameters.python_version>>]
           steps:
-            - save_cache:
-                key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-                paths:
-                  # Cache pip cache and conda packages directories
-                  - c:\tools\miniconda3\pkgs
-                  - c:\users\circleci\appdata\local\pip\cache
+          - save_cache:
+              name: Save Python package cache
+              key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+              paths:
+                # Cache pip cache and conda packages directories
+                - c:\tools\miniconda3\pkgs
+                - c:\users\circleci\appdata\local\pip\cache
+      - save_cache:
+          name: Save conda environment cache
+          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          paths:
+            - c:\tools\miniconda3\envs\kedro_builder
       - run:
           name: Pip-compile requirements file
           command: conda activate kedro_builder; make pip-compile

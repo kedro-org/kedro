@@ -346,25 +346,25 @@ def _refactor_code_for_unpacking(
     """This is the reverse operation of `_refactor_code_for_package`, i.e
     we go from:
     <temp_dir>  # also the root of the Rope project
-    |__ <pipeline_name>  # or <alias>
+    |__ <micro_package>  # or <alias>
         |__ __init__.py
-    |__ tests  # only tests for <pipeline_name>
+    |__ tests  # only tests for <micro_package>
         |__ __init__.py
         |__ test_pipeline.py
 
     to:
     <temp_dir>  # also the root of the Rope project
-    |__ <package>
+    |__ <project_package>
         |__ __init__.py
-        |__ <path_to_pipeline>
+        |__ <path_to_micro_package>
             |__ __init__.py
-            |__ <pipeline_name>
+            |__ <micro_package>
                 |__ __init__.py
     |__ tests
         |__ __init__.py
-        |__ <path_to_pipeline>
+        |__ <path_to_micro_package>
             |__ __init__.py
-            |__ <pipeline_name>
+            |__ <micro_package>
                 |__ __init__.py
     """
 
@@ -620,32 +620,32 @@ def _refactor_code_for_package(
     """In order to refactor the imports properly, we need to recreate
     the same nested structure as in the project. Therefore, we create:
     <temp_dir>  # also the root of the Rope project
-    |__ <package>
+    |__ <project_package>
         |__ __init__.py
-        |__ pipelines
+        |__ <path_to_micro_package>
             |__ __init__.py
-            |__ <pipeline_name>
+            |__ <micro_package>
                 |__ __init__.py
     |__ tests
         |__ __init__.py
-        |__ pipelines
+        |__ path_to_micro_package
             |__ __init__.py
-            |__ <pipeline_name>
+            |__ <micro_package>
                 |__ __init__.py
-    We then move <pipeline_name> outside of package src to top level ("")
+    We then move <micro_package> outside of package src to top level ("")
     in temp_dir, and rename folder & imports if alias provided.
 
-    For tests, we need to extract all the contents of <pipeline_name>
+    For tests, we need to extract all the contents of <micro_package>
     at into top-level `tests` folder. This is not possible in one go with
     the Rope API, so we have to do it in a bit of a hacky way.
-    We rename <pipeline_name> to a `tmp_name` and move it at top-level ("")
+    We rename <micro_package> to a `tmp_name` and move it at top-level ("")
     in temp_dir. We remove the old `tests` folder and rename `tmp_name` to `tests`.
 
     The final structure should be:
     <temp_dir>  # also the root of the Rope project
-    |__ <pipeline_name>  # or <alias>
+    |__ <micro_package>  # or <alias>
         |__ __init__.py
-    |__ tests  # only tests for <pipeline_name>
+    |__ tests  # only tests for <micro_package>
         |__ __init__.py
         |__ test_pipeline.py
     """

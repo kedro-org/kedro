@@ -42,7 +42,7 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 
 ### Other
 * Added support for Python 3.9 and 3.10, dropped support for Python 3.6.
-* Support specifying parameters mapping in `pipeline()` without the `params:` prefix.
+* Added support for specifying parameters mapping in `pipeline()` without the `params:` prefix.
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
 
 ## Breaking changes to the API
@@ -88,8 +88,9 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
 * Removed the `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.
 * Removed `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
-* `kedro pipeline package` now accepts a module name and path to the pipeline or utility module to package, relative to `src/<package_name>/`. In addition to the `--alias` flag used to rename the package, `kedro pipeline pull` now also supports `--destination` to provide a location for pulling the package.
-* The `kedro package` and `kedro pipeline package` now save `egg` and `whl` or `tar` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
+* `kedro pipeline package` has been replaced by `kedro micropkg package` and now accepts a module name and path to the pipeline or utility module to package, relative to `src/<package_name>/`. In addition to the `--alias` flag used to rename the package.
+* `kedro pipeline pull` has been replaced by `kedro micropkg pull` and now also supports `--destination` to provide a location for pulling the package.
+* The `kedro package` and `kedro micropkg package` now save `egg` and `whl` or `tar` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
 * Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
 * Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 * Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
@@ -165,27 +166,27 @@ The parameters should look like this:
 
 ```
 
-* If you were pulling any modular pipelines with `kedro pipeline pull my_pipeline --alias other_pipeline`, please use `kedro pipeline pull my_pipeline --alias pipelines.other_pipeline` instead.
-* If you were packaging any modular pipelines with `kedro pipeline package my_pipeline`, please use `kedro pipeline package pipelines.my_pipeline` instead.
+* If you were pulling any modular pipelines with `kedro pipeline pull my_pipeline --alias other_pipeline`, please use `kedro micropkg pull my_pipeline --alias pipelines.other_pipeline` instead.
+* If you were packaging any modular pipelines with `kedro pipeline package my_pipeline`, please use `kedro micropkg package pipelines.my_pipeline` instead.
 * Similarly, if you were packaging any modular pipelines using `pyproject.toml`, you should modify the keys to include the full module path, and wrapped in double-quotes, e.g:
 
   ```toml
-  [tool.kedro.pipeline.package]
+  [tool.kedro.micropkg.package]
   data_engineering = {destination = "path/to/here"}
   data_science = {alias = "ds", env = "local"}
 
-  [tool.kedro.pipeline.pull]
+  [tool.kedro.micropkg.pull]
   "s3://my_bucket/my_pipeline" = {alias = "aliased_pipeline"}
   ```
 
   becomes
 
   ```toml
-  [tool.kedro.pipeline.package]
+  [tool.kedro.micropkg.package]
   "pipelines.data_engineering" = {destination = "path/to/here"}
   "pipelines.data_science" = {alias = "ds", env = "local"}
 
-  [tool.kedro.pipeline.pull]
+  [tool.kedro.micropkg.pull]
   "s3://my_bucket/my_pipeline" = {alias = "pipelines.aliased_pipeline"}
 
   ```
@@ -200,7 +201,7 @@ The parameters should look like this:
 * If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 
 #### CLI
-* Edit any scripts containing `kedro pipeline package --version` to remove the `--version` option. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
+* Edit any scripts containing `kedro pipeline package --version` to use `kedro micropkg package` instead. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
 * To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
 
 #### Hooks

@@ -10,7 +10,7 @@ from kedro.pipeline import Pipeline
 @pytest.fixture(autouse=True)
 def project_path(mocker, tmp_path):
     path = tmp_path
-    mocker.patch("kedro.extras.extensions.ipython.project_path", path)
+    mocker.patch("kedro.extras.extensions.ipython.default_project_path", path)
 
 
 @pytest.fixture(autouse=True)
@@ -39,9 +39,9 @@ class TestLoadKedroObjects:
     def test_load_kedro_objects(
         self, tmp_path, mocker, caplog
     ):  # pylint: disable=too-many-locals
-        from kedro.extras.extensions.ipython import project_path
+        from kedro.extras.extensions.ipython import default_project_path
 
-        assert project_path == tmp_path
+        assert default_project_path == tmp_path
 
         kedro_path = tmp_path / "here"
 
@@ -96,10 +96,10 @@ class TestLoadKedroObjects:
 
         log_messages = [record.getMessage() for record in caplog.records]
         assert expected_message in log_messages
-        from kedro.extras.extensions.ipython import project_path
+        from kedro.extras.extensions.ipython import default_project_path
 
         # make sure global variable updated
-        assert project_path == expected_path
+        assert default_project_path == expected_path
 
     def test_load_kedro_objects_extra_args(self, tmp_path, mocker):
         fake_metadata = ProjectMetadata(
@@ -155,9 +155,9 @@ class TestLoadKedroObjects:
 
     @pytest.mark.usefixtures("pipeline_cleanup")
     def test_load_kedro_objects_no_path(self, tmp_path, caplog, mocker):
-        from kedro.extras.extensions.ipython import project_path
+        from kedro.extras.extensions.ipython import default_project_path
 
-        assert project_path == tmp_path
+        assert default_project_path == tmp_path
 
         fake_metadata = ProjectMetadata(
             source_dir=tmp_path / "src",  # default
@@ -197,10 +197,10 @@ class TestLoadKedroObjects:
         log_messages = [record.getMessage() for record in caplog.records]
         assert expected_message in log_messages
 
-        from kedro.extras.extensions.ipython import project_path
+        from kedro.extras.extensions.ipython import default_project_path
 
         # make sure global variable stayed the same
-        assert project_path == tmp_path
+        assert default_project_path == tmp_path
 
 
 class TestLoadIPythonExtension:
@@ -212,7 +212,12 @@ class TestLoadIPythonExtension:
                 "Kedro appears not to be installed in your current environment.",
                 "ERROR",
             ),
-            (RuntimeError, "Kedro extension was registered.", "WARNING"),
+            (
+                RuntimeError,
+                "Kedro extension was registered but couldn't find a Kedro project. "
+                "Make sure you run `%reload_kedro <path_to_kedro_project>`.",
+                "WARNING",
+            ),
         ],
     )
     def test_load_extension_not_in_kedro_env_or_project(

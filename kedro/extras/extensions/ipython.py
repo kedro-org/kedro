@@ -11,8 +11,7 @@ from typing import Any, Dict
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 
-startup_path = Path.cwd()
-default_project_path = startup_path
+default_project_path = Path.cwd()
 
 
 def _remove_cached_modules(package_name):
@@ -23,7 +22,7 @@ def _remove_cached_modules(package_name):
         del sys.modules[module]  # pragma: no cover
 
 
-def _find_kedro_project(current_dir):  # pragma: no cover
+def _find_kedro_project(current_dir: Path):  # pragma: no cover
     from kedro.framework.startup import _is_project
 
     while current_dir != current_dir.parent:
@@ -34,7 +33,9 @@ def _find_kedro_project(current_dir):  # pragma: no cover
     return None
 
 
-def reload_kedro(path="", env: str = None, extra_params: Dict[str, Any] = None):
+def reload_kedro(
+    path: str = None, env: str = None, extra_params: Dict[str, Any] = None
+):
     """Line magic which reloads all Kedro default variables.
     Setting the path will also make it default for subsequent calls.
     """
@@ -92,11 +93,10 @@ def load_ipython_extension(ipython):
     """Main entry point when %load_ext is executed"""
 
     global default_project_path
-    global startup_path  # pylint:disable=global-variable-not-assigned
 
     ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
 
-    default_project_path = _find_kedro_project(startup_path)
+    default_project_path = _find_kedro_project(Path.cwd())
 
     try:
         reload_kedro(default_project_path)

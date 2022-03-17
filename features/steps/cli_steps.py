@@ -159,12 +159,15 @@ def create_config_file(context):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
-@given('I have executed the kedro command "{command}"')
-def exec_kedro_target_checked(context, command):
-    """Execute Kedro command and check the status."""
-    cmd = [context.kedro] + command.split()
-
-    res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+@given("I have installed the project dependencies")
+def pip_install_dependencies(context):
+    """Install project dependencies using pip."""
+    reqs_path = "src/requirements.txt"
+    res = run(
+        [context.pip, "install", "-r", reqs_path],
+        env=context.env,
+        cwd=str(context.root_project_dir),
+    )
 
     if res.returncode != OK_EXIT_CODE:
         print(res.stdout)
@@ -637,15 +640,3 @@ def check_cell_conversion(context: behave.runner.Context):
         / "hello_world.py"
     )
     assert "Hello World!" in converted_file.read_text()
-
-
-@then("{path} must not exist")
-def check_path_doesnt_exist(context: behave.runner.Context, path: str):
-    path = context.root_project_dir / path
-    assert not path.exists()
-
-
-@then("{filepath} file must exist")
-def check_file_exists(context: behave.runner.Context, filepath: str):
-    filepath = context.root_project_dir / filepath
-    assert filepath.is_file()

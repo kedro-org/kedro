@@ -144,7 +144,7 @@ commands:
           key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
-        # Dependency resolution works best when installing these altogether  in one
+        # Dependency resolution works best when installing these altogether in one
         # `conda install` command rather than one at a time in several sequential `conda install`s.
       - run:
           name: Install GDAL, Fiona and pytables

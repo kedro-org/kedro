@@ -5,5 +5,3 @@ PLEASE DELETE THIS FILE ONCE YOU START WORKING ON YOUR OWN PROJECT!
 """
 
 from .pipeline import create_pipeline  # NOQA
-
-__version__ = "4.20.69"

@@ -1,22 +1,13 @@
 """This module provides an utility function to retrieve the global hook_manager singleton
 in a Kedro's execution process.
 """
-# pylint: disable=global-statement,invalid-name
 import logging
 from typing import Any, Iterable
 
 from pluggy import PluginManager
 
 from .markers import HOOK_NAMESPACE
-from .specs import (
-    DataCatalogSpecs,
-    DatasetSpecs,
-    NodeSpecs,
-    PipelineSpecs,
-    RegistrationSpecs,
-)
-
-_hook_manager = None
+from .specs import DataCatalogSpecs, DatasetSpecs, NodeSpecs, PipelineSpecs
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
 
@@ -29,17 +20,8 @@ def _create_hook_manager() -> PluginManager:
     manager.add_hookspecs(NodeSpecs)
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)
-    manager.add_hookspecs(RegistrationSpecs)
     manager.add_hookspecs(DatasetSpecs)
     return manager
-
-
-def get_hook_manager():
-    """Create or return the global _hook_manager singleton instance."""
-    global _hook_manager
-    if _hook_manager is None:
-        _hook_manager = _create_hook_manager()
-    return _hook_manager
 
 
 def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:

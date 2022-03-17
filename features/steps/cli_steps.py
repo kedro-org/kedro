@@ -399,7 +399,7 @@ def update_kedro_req(context: behave.runner.Context):
 
 @when("I add {dependency} to the requirements")
 def add_req(context: behave.runner.Context, dependency: str):
-    reqs_path = context.root_project_dir / "src" / "requirements.in"
+    reqs_path = context.root_project_dir / "src" / "requirements.txt"
     if reqs_path.is_file():
         reqs_path.write_text(reqs_path.read_text() + "\n" + str(dependency) + "\n")
 

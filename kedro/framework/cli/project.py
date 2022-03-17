@@ -124,12 +124,11 @@ def ipython(
     """Open IPython with project specific variables loaded."""
     _check_module_importable("IPython")
 
-    os.environ["IPYTHONDIR"] = str(metadata.project_path / ".ipython")
     if env:
         os.environ["KEDRO_ENV"] = env
     if "-h" not in args and "--help" not in args:
         ipython_message()
-    call(["ipython"] + list(args))
+    call(["ipython", "--ext", "kedro.extras.extensions.ipython"] + list(args))
 
 
 @project_group.command()

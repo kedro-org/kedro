@@ -79,6 +79,7 @@
 * Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
 * Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
 * Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result of that.
+* Removed `%init_kedro` IPython line magic, with its functionality incorporated into `%reload_kedro`. This means that if `%reload_kedro` is called with a filepath, that will be set as default for subsequent calls.
 
 ## Thanks for supporting contributions
 

@@ -51,11 +51,9 @@ def reload_kedro(
     global default_project_path
     if path:
         default_project_path = Path(path).expanduser().resolve()
-        logging.info("Updated path to Kedro project: %s", str(default_project_path))
+        logging.info("Updated path to Kedro project: %s", default_project_path)
     else:
-        logging.info(
-            "No path argument was provided. Using: %s", str(default_project_path)
-        )
+        logging.info("No path argument was provided. Using: %s", default_project_path)
 
     metadata = bootstrap_project(default_project_path)
 
@@ -66,7 +64,7 @@ def reload_kedro(
         metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )
     _activate_session(session, force=True)
-    logging.debug("Loading the context from %s", str(default_project_path))
+    logging.debug("Loading the context from %s", default_project_path)
     context = session.load_context()
     catalog = context.catalog
 

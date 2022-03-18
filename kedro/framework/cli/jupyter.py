@@ -105,7 +105,7 @@ def jupyter_lab(
 
     python_call(
         "jupyter",
-        ("lab", f"--MappingKernelManager.default_kernel_name={kernel_name}") + args,
+        ("lab", f"--MultiKernelManager.default_kernel_name={kernel_name}") + args,
     )
 
 
@@ -116,11 +116,25 @@ def _create_kernel(kernel_name: str, display_name: str):
     and customises it to make the launch command load the kedro extension.
 
     On linux this creates a directory ~/.local/share/jupyter/kernels/{kernel_name}
-    containing kernel.json, logo-32x32.png and logo-64x64.png. kernel.json will look
-    as follows:
+    containing kernel.json, logo-32x32.png and logo-64x64.png. An example kernel.json
+    looks as follows:
 
-
-
+    {
+     "argv": [
+      "/Users/antony_milne/miniconda3/envs/spaceflights/bin/python",
+      "-m",
+      "ipykernel_launcher",
+      "-f",
+      "{connection_file}",
+      "--ext",
+      "kedro.extras.extensions.ipython"
+     ],
+     "display_name": "Kedro (spaceflights)",
+     "language": "python",
+     "metadata": {
+      "debugger": false
+     }
+    }
 
     Args:
         kernel_name: Name of the kernel to create.
@@ -143,9 +157,9 @@ def _create_kernel(kernel_name: str, display_name: str):
     # indent=1 is to match the default ipykernel style (see ipykernel.write_kernel_spec).
     kernel_json.write_text(json.dumps(kernel_spec, indent=1))
 
-    kedro_extensions_dir = Path(__file__).parents[3] / "extras" / "extensions"
+    kedro_extensions_dir = Path(__file__).parents[2] / "extras" / "extensions"
     shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
-    shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
+    shutil.copy(kedro_extensions_dir / "logo-64x64.png", kernel_path)
 
 
 @command_with_verbosity(jupyter, "convert")

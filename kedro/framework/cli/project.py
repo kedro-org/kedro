@@ -21,7 +21,6 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
     env_option,
     forward_command,
-    ipython_message,
     python_call,
     split_string,
 )

@@ -140,8 +140,11 @@ def _create_kernel(kernel_name: str, display_name: str):
         kernel_name: Name of the kernel to create.
         display_name: Kernel name as it is displayed in the UI.
     """
-    # Kernel already exists.
     if kernel_name in find_kernel_specs():
+        secho(
+            f"Jupyter kernel {kernel_name} already exists and will be used.",
+            fg="green",
+        )
         return
 
     # Install with user=True rather than system-wide to minimise footprint and
@@ -151,6 +154,7 @@ def _create_kernel(kernel_name: str, display_name: str):
         kernel_name=kernel_name,
         display_name=display_name,
     )
+
     kernel_json = Path(kernel_path) / "kernel.json"
     kernel_spec = json.loads(kernel_json.read_text())
     kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])

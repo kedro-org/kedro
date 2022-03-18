@@ -10,10 +10,11 @@ from glob import iglob
 from pathlib import Path
 from typing import Any, Dict
 from warnings import warn
-from ipykernel.kernelspec import install
-from jupyter_client.kernelspec import find_kernel_specs
+
 import click
 from click import secho
+from ipykernel.kernelspec import install
+from jupyter_client.kernelspec import find_kernel_specs
 
 from kedro.framework.cli.utils import (
     KedroCliError,
@@ -26,12 +27,12 @@ from kedro.framework.cli.utils import (
 from kedro.framework.project import validate_settings
 from kedro.framework.startup import ProjectMetadata
 
-
 CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
 including sub-folders."""
 
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
+
 
 # pylint: disable=missing-function-docstring
 @click.group(name="Kedro")

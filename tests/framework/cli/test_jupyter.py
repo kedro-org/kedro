@@ -5,11 +5,8 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 from click.testing import CliRunner
-from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
 
-from kedro.framework.cli.jupyter import (
-    _export_nodes,
-)
+from kedro.framework.cli.jupyter import _export_nodes
 from kedro.framework.cli.utils import KedroCliError
 
 

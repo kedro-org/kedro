@@ -8,9 +8,7 @@ from click.testing import CliRunner
 from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
 
 from kedro.framework.cli.jupyter import (
-    SingleKernelSpecManager,
     _export_nodes,
-    collect_line_magic,
 )
 from kedro.framework.cli.utils import KedroCliError
 
@@ -20,48 +18,6 @@ def mocked_logging(mocker):
     # Disable logging.config.dictConfig in KedroSession._setup_logging as
     # it changes logging.config and affects other unit tests
     return mocker.patch("logging.config.dictConfig")
-
-
-def test_collect_line_magic(entry_points, entry_point):
-    entry_point.load.return_value = "line_magic"
-    line_magics = collect_line_magic()
-    assert line_magics == ["line_magic"]
-    entry_points.assert_called_once_with(group="kedro.line_magic")
-
-
-class TestSingleKernelSpecManager:
-    def test_overridden_values(self):
-        assert SingleKernelSpecManager.whitelist == [NATIVE_KERNEL_NAME]
-
-    def test_renaming_default_kernel(self, mocker):
-        """
-        Make sure the default kernel display_name is changed.
-        """
-        mocker.patch.object(
-            KernelSpecManager,
-            "get_kernel_spec",
-            return_value=mocker.Mock(display_name="default"),
-        )
-        manager = SingleKernelSpecManager()
-        manager.default_kernel_name = "New Kernel Name"
-        new_kernel_spec = manager.get_kernel_spec(NATIVE_KERNEL_NAME)
-        assert new_kernel_spec.display_name == "New Kernel Name"
-
-    def test_non_default_kernel_untouched(self, mocker):
-        """
-        Make sure the non-default kernel display_name is not changed.
-        In theory the function will never be called like that,
-        but let's not make extra assumptions.
-        """
-        mocker.patch.object(
-            KernelSpecManager,
-            "get_kernel_spec",
-            return_value=mocker.Mock(display_name="default"),
-        )
-        manager = SingleKernelSpecManager()
-        manager.default_kernel_name = "New Kernel Name"
-        new_kernel_spec = manager.get_kernel_spec("another_kernel")
-        assert new_kernel_spec.display_name == "default"
 
 
 def default_jupyter_options(command, address="127.0.0.1", all_kernels=False):

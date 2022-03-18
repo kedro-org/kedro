@@ -297,18 +297,6 @@ def env_option(func_=None, **kwargs):
     return opt(func_) if func_ else opt
 
 
-def ipython_message():
-    """Show a message saying how we have configured the IPython env."""
-    ipy_vars = ["startup_error", "context"]
-    click.secho("-" * 79, fg="cyan")
-    click.secho("Starting a Kedro session with the following variables in scope")
-    click.secho(", ".join(ipy_vars), fg="green")
-    line_magic = click.style("%reload_kedro", fg="green")
-    click.secho(f"Use the line magic {line_magic} to refresh them")
-    click.secho("or to see the error message if they are undefined")
-    click.secho("-" * 79, fg="cyan")
-
-
 @contextmanager
 def _filter_deprecation_warnings():
     """Temporarily suppress all DeprecationWarnings."""

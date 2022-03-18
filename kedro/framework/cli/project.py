@@ -126,8 +126,6 @@ def ipython(
 
     if env:
         os.environ["KEDRO_ENV"] = env
-    if "-h" not in args and "--help" not in args:
-        ipython_message()
     call(["ipython", "--ext", "kedro.extras.extensions.ipython"] + list(args))
 
 

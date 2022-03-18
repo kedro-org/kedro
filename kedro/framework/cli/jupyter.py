@@ -3,18 +3,16 @@ and CLI commands for working with Kedro catalog.
 """
 import json
 import os
-import re
 import sys
 from collections import Counter
 from glob import iglob
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 from warnings import warn
-
+from ipykernel.kernelspec import install
+from jupyter_client.kernelspec import find_kernel_specs
 import click
 from click import secho
-from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
-from traitlets import Unicode
 
 from kedro.framework.cli.utils import (
     KedroCliError,
@@ -28,10 +26,6 @@ from kedro.framework.cli.utils import (
 from kedro.framework.project import validate_settings
 from kedro.framework.startup import ProjectMetadata
 
-JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
-JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
-terminate its kernel after so many seconds of inactivity. This does not affect
-any open notebooks."""
 
 CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
 including sub-folders."""
@@ -60,19 +54,26 @@ def jupyter_notebook(
     env,
     args,
     **kwargs,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument
     """Open Jupyter Notebook with project specific variables loaded."""
     _check_module_importable("jupyter_core")
 
     validate_settings()
 
-    if "-h" not in args and "--help" not in args:
-        ipython_message()
+    kernel_name = f"kedro_{metadata.package_name}"
+    if kernel_name not in find_kernel_specs():
+        kernel_path = install(
+            user=True,
+            kernel_name=kernel_name,
+            display_name=f"Kedro ({metadata.package_name})",
+        )
+        kernel_json = Path(kernel_path) / "kernel.json"
+        kernel_spec = json.loads(Path(kernel_json).read_text())
+        kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
+        kernel_json.write_text(json.dumps(kernel_spec, indent=1))
 
     if env:
         os.environ["KEDRO_ENV"] = env
-
-    kernel_name = f"kedro_{metadata.package_name}"
 
     # project_name=metadata.project_name,
     python_call(
@@ -95,9 +96,6 @@ def jupyter_notebook(
     _check_module_importable("jupyter_core")
 
     validate_settings()
-
-    if "-h" not in args and "--help" not in args:
-        ipython_message()
 
     if env:
         os.environ["KEDRO_ENV"] = env

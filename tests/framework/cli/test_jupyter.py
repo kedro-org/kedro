@@ -44,50 +44,29 @@ def python_call_mock(mocker):
     return mocker.patch("kedro.framework.cli.jupyter.python_call")
 
 
-@pytest.fixture
-def fake_ipython_message(mocker):
-    return mocker.patch("kedro.framework.cli.jupyter.ipython_message")
-
-
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestJupyterNotebookCommand:
-    def test_default_kernel(
-        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
-    ):
+    def test_default_kernel(self, python_call_mock, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
             fake_project_cli,
             ["jupyter", "notebook", "--ip", "0.0.0.0"],
             obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
-        fake_ipython_message.assert_called_once_with(False)
         python_call_mock.assert_called_once_with(
             *default_jupyter_options("notebook", "0.0.0.0")
         )
 
-    def test_all_kernels(
-        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
-    ):
+    def test_all_kernels(self, python_call_mock, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
             fake_project_cli,
             ["jupyter", "notebook", "--all-kernels"],
             obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
-        fake_ipython_message.assert_called_once_with(True)
         python_call_mock.assert_called_once_with(
             *default_jupyter_options("notebook", all_kernels=True)
         )
-
-    @pytest.mark.parametrize("help_flag", ["-h", "--help"])
-    def test_help(
-        self, help_flag, fake_project_cli, fake_ipython_message, fake_metadata
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["jupyter", "notebook", help_flag], obj=fake_metadata
-        )
-        assert not result.exit_code, result.stdout
-        fake_ipython_message.assert_not_called()
 
     @pytest.mark.parametrize("env_flag", ["--env", "-e"])
     def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
@@ -118,41 +97,25 @@ class TestJupyterNotebookCommand:
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestJupyterLabCommand:
-    def test_default_kernel(
-        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
-    ):
+    def test_default_kernel(self, python_call_mock, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
             fake_project_cli,
             ["jupyter", "lab", "--ip", "0.0.0.0"],
             obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
-        fake_ipython_message.assert_called_once_with(False)
         python_call_mock.assert_called_once_with(
             *default_jupyter_options("lab", "0.0.0.0")
         )
 
-    def test_all_kernels(
-        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
-    ):
+    def test_all_kernels(self, python_call_mock, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
             fake_project_cli, ["jupyter", "lab", "--all-kernels"], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
-        fake_ipython_message.assert_called_once_with(True)
         python_call_mock.assert_called_once_with(
             *default_jupyter_options("lab", all_kernels=True)
         )
-
-    @pytest.mark.parametrize("help_flag", ["-h", "--help"])
-    def test_help(
-        self, help_flag, fake_project_cli, fake_ipython_message, fake_metadata
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["jupyter", "lab", help_flag], obj=fake_metadata
-        )
-        assert not result.exit_code, result.stdout
-        fake_ipython_message.assert_not_called()
 
     @pytest.mark.parametrize("env_flag", ["--env", "-e"])
     def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):

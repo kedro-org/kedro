@@ -3,11 +3,12 @@ and CLI commands for working with Kedro catalog.
 """
 import json
 import os
+import shutil
 import sys
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict
 from warnings import warn
 from ipykernel.kernelspec import install
 from jupyter_client.kernelspec import find_kernel_specs
@@ -20,7 +21,6 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
     env_option,
     forward_command,
-    ipython_message,
     python_call,
 )
 from kedro.framework.project import validate_settings
@@ -61,21 +61,16 @@ def jupyter_notebook(
     validate_settings()
 
     kernel_name = f"kedro_{metadata.package_name}"
-    if kernel_name not in find_kernel_specs():
-        kernel_path = install(
-            user=True,
-            kernel_name=kernel_name,
-            display_name=f"Kedro ({metadata.package_name})",
-        )
-        kernel_json = Path(kernel_path) / "kernel.json"
-        kernel_spec = json.loads(Path(kernel_json).read_text())
-        kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
-        kernel_json.write_text(json.dumps(kernel_spec, indent=1))
+    try:
+        _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
+    except Exception as exc:
+        raise KedroCliError(
+            f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
+        ) from exc
 
     if env:
         os.environ["KEDRO_ENV"] = env
 
-    # project_name=metadata.project_name,
     python_call(
         "jupyter",
         ("notebook", f"--MappingKernelManager.default_kernel_name={kernel_name}")
@@ -86,27 +81,71 @@ def jupyter_notebook(
 @forward_command(jupyter, "lab", forward_help=True)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
-def jupyter_notebook(
+def jupyter_lab(
     metadata: ProjectMetadata,
     env,
     args,
     **kwargs,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument
     """Open Jupyter Lab with project specific variables loaded."""
     _check_module_importable("jupyter_core")
 
     validate_settings()
 
+    kernel_name = f"kedro_{metadata.package_name}"
+    try:
+        _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
+    except Exception as exc:
+        raise KedroCliError(
+            f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
+        ) from exc
+
     if env:
         os.environ["KEDRO_ENV"] = env
 
-    kernel_name = f"kedro_{metadata.package_name}"
-
-    # project_name=metadata.project_name,
     python_call(
         "jupyter",
         ("lab", f"--MappingKernelManager.default_kernel_name={kernel_name}") + args,
     )
+
+
+def _create_kernel(kernel_name: str, display_name: str):
+    """Creates an ipython kernel for the kedro project, if one does not already exist.
+
+    Installs the default ipython kernel (which points towards `sys.executable`)
+    and customises it to make the launch command load the kedro extension.
+
+    On linux this creates a directory ~/.local/share/jupyter/kernels/{kernel_name}
+    containing kernel.json, logo-32x32.png and logo-64x64.png. kernel.json will look
+    as follows:
+
+
+
+
+    Args:
+        kernel_name: Name of the kernel to create.
+        display_name: Kernel name as it is displayed in the UI.
+    """
+    # Kernel already exists.
+    if kernel_name in find_kernel_specs():
+        return
+
+    # Install with user=True rather than system-wide to minimise footprint and
+    # ensure that we have permissions to write there.
+    kernel_path = install(
+        user=True,
+        kernel_name=kernel_name,
+        display_name=display_name,
+    )
+    kernel_json = Path(kernel_path) / "kernel.json"
+    kernel_spec = json.loads(kernel_json.read_text())
+    kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
+    # indent=1 is to match the default ipykernel style (see ipykernel.write_kernel_spec).
+    kernel_json.write_text(json.dumps(kernel_spec, indent=1))
+
+    kedro_extensions_dir = Path(__file__).parents[3] / "extras" / "extensions"
+    shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
+    shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
 
 
 @command_with_verbosity(jupyter, "convert")

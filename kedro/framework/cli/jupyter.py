@@ -109,11 +109,13 @@ def jupyter_lab(
     )
 
 
-def _create_kernel(kernel_name: str, display_name: str):
+def _create_kernel(kernel_name: str, display_name: str) -> None:
     """Creates an ipython kernel for the kedro project, if one does not already exist.
 
     Installs the default ipython kernel (which points towards `sys.executable`)
     and customises it to make the launch command load the kedro extension.
+    This is equivalent to the method recommended for creating a custom ipython kernel
+    on the CLI: https://ipython.readthedocs.io/en/stable/install/kernel_install.html.
 
     On linux this creates a directory ~/.local/share/jupyter/kernels/{kernel_name}
     containing kernel.json, logo-32x32.png and logo-64x64.png. An example kernel.json

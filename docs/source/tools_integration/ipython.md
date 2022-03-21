@@ -117,6 +117,10 @@ The command runs the nodes from your default project pipeline in a sequential ma
 
 To parameterise your pipeline run, refer to [a later section on this page on run parameters](#additional-parameters-for-session-run) which lists all available options.
 
+```eval_rst
+.. note::  You can only execute one _successful_ run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run `%reload_kedro` to obtain a new `KedroSession` object.
+```
+
 
 ### Parameters
 
@@ -271,7 +275,7 @@ In [1]: %load_ext kedro.extras.extensions.ipython
 ```
 
 When you start an `ipython` shell outside a project root and load the extension the variables won't be loaded.
-Run `%reload_kedro <path_to_project_root>` to get the variables, or `%init_kedro <path_to_project_root>` to set the project path for subsequent calls and then call simply `%reload_kedro` after that without having to specify the path.
+Run `%reload_kedro <path_to_project_root>` to get the variables, and to set the project path for subsequent calls. You can then call just `%reload_kedro` without having to specify the path.
 
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython
@@ -282,7 +286,7 @@ or
 
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython
-In [2]: %init_kedro <path_to_project_root>
+In [2]: %reload_kedro <path_to_project_root>
 In [3]: %reload_kedro
 ```
 

@@ -112,7 +112,7 @@ class DaskRunner(AbstractRunner):
         node: Node,
         catalog: DataCatalog,
         is_async: bool = False,
-        run_id: str = None,
+        session_id: str = None,
         *dependencies: Node,
     ) -> Node:
         """Run a single `Node` with inputs from and outputs to the `catalog`.
@@ -126,17 +126,17 @@ class DaskRunner(AbstractRunner):
             catalog: A ``DataCatalog`` containing the node's inputs and outputs.
             is_async: If True, the node inputs and outputs are loaded and saved
                 asynchronously with threads. Defaults to False.
-            run_id: The id of the pipeline run.
+            session_id: The session id of the pipeline run.
             dependencies: The upstream ``Node``s to allow Dask to handle
                 dependency tracking. Their values are not actually used.
 
         Returns:
             The node argument.
         """
-        return run_node(node, catalog, is_async, run_id)
+        return run_node(node, catalog, is_async, session_id)
 
     def _run(
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self, pipeline: Pipeline, catalog: DataCatalog, session_id: str = None
     ) -> None:
         nodes = pipeline.nodes
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
@@ -153,7 +153,7 @@ class DaskRunner(AbstractRunner):
                 node,
                 catalog,
                 self._is_async,
-                run_id,
+                session_id,
                 *dependencies,
             )
 

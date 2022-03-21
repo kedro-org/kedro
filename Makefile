@@ -10,7 +10,7 @@ clean:
 	pre-commit clean || true
 
 install-pip-setuptools:
-	python -m pip install -U "pip>=21.2" "setuptools>=38.0" wheel
+	pip install -U "pip>=21.2" "setuptools>=38.0" wheel
 
 lint:
 	pre-commit run -a --hook-stage manual $(hook)

@@ -88,6 +88,7 @@ plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
+redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
@@ -128,6 +129,7 @@ extras_require = {
     "pillow": _collect_requirements(pillow_require),
     "plotly": _collect_requirements(plotly_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
+    "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
     "tensorflow": _collect_requirements(tensorflow_required),
     "yaml": _collect_requirements(yaml_require),

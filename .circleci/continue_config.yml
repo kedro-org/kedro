@@ -13,7 +13,12 @@ parameters:
   release_kedro:
     type: boolean
     default: false
-
+  run_hourly:
+    type: boolean
+    default: false
+  run_nightly:
+    type: boolean
+    default: false
 orbs:
   win: circleci/windows@2.4.1
 
@@ -560,7 +565,7 @@ workflows:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
       - build_kedro:
-          filters:
+            filters:
             branches:
               only: test_ci_main
           matrix:

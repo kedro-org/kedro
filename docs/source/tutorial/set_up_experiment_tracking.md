@@ -101,7 +101,7 @@ node(
 You have to repeat the same steps for setting up the `companies_column` dataset. For this dataset you should log the column that contains the list of companies as outlined in `companies.csv` under `/data/01_raw`. Modify the `preprocess_companies` node under the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`) to return the data under a key value pair, as shown below:
 
 ```python
-def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
+def preprocess_companies(companies: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
     """Preprocesses the data for companies.
 
     Args:

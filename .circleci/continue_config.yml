@@ -591,8 +591,7 @@ workflows:
 
   # Python version that are *only* supported on `develop`.
   nightly_build_develop:
-    when:
-      not: << pipeline.parameters.run_hourly >>
+    when: << pipeline.parameters.run_nightly >>
     jobs:
       - build_docker_image:
           matrix:

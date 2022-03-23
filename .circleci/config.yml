@@ -16,84 +16,84 @@ setup: true
 orbs:
   path-filtering: circleci/path-filtering@0.1.1
 
-jobs:
-  merge_pr_to_develop:
-        docker:
-          # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
-          - image: cimg/base:2020.01
-        steps:
-          - checkout
-          - add_ssh_keys
-          - run:
-              name: Maybe merge an automatic PR into develop
-              command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
+# jobs:
+#   merge_pr_to_develop:
+#         docker:
+#           # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
+#           - image: cimg/base:2020.01
+#         steps:
+#           - checkout
+#           - add_ssh_keys
+#           - run:
+#               name: Maybe merge an automatic PR into develop
+#               command: ./tools/circleci/github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
 
-  build_docker_image:
-    parameters:
-      python_version:
-        type: string
-    docker:
-      - image: cimg/python:3.8
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - checkout
-      - run:
-          name: Setup AWS CLI
-          command: pip install -U awscli
-      - run:
-          name: Login to AWS ECR
-          command: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - run:
-          name: Build docker images
-          command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder" "<<parameters.python_version>>"
-          no_output_timeout: 20m
-      - run:
-          name: Logout from AWS ECR
-          command: docker logout public.ecr.aws
-          when: always  # logout even if the previous step has failed
+#   build_docker_image:
+#     parameters:
+#       python_version:
+#         type: string
+#     docker:
+#       - image: cimg/python:3.8
+#     steps:
+#       - setup_remote_docker:
+#           docker_layer_caching: true
+#       - checkout
+#       - run:
+#           name: Setup AWS CLI
+#           command: pip install -U awscli
+#       - run:
+#           name: Login to AWS ECR
+#           command: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+#       - run:
+#           name: Build docker images
+#           command: ./tools/circleci/docker_build_img/build.sh "." "public.ecr.aws/g0x0s3o2/kedro-builder" "<<parameters.python_version>>"
+#           no_output_timeout: 20m
+#       - run:
+#           name: Logout from AWS ECR
+#           command: docker logout public.ecr.aws
+#           when: always  # logout even if the previous step has failed
 
-  # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
-  # It's used to check that the nightly docker image is working ok and before publishing a release.
-  build_kedro:
-    parameters:
-      python_version:
-        type: string
-    executor:
-      name: docker
-      python_version: <<parameters.python_version>>
-    steps:
-      - setup
-      - run:
-          name: Run linters
-          command: make lint
-      - run:
-          name: Run unit tests
-          command: make test
-      - run:
-          name: Run e2e tests
-          command: make e2e-tests
+#   # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
+#   # It's used to check that the nightly docker image is working ok and before publishing a release.
+#   build_kedro:
+#     parameters:
+#       python_version:
+#         type: string
+#     executor:
+#       name: docker
+#       python_version: <<parameters.python_version>>
+#     steps:
+#       - setup
+#       - run:
+#           name: Run linters
+#           command: make lint
+#       - run:
+#           name: Run unit tests
+#           command: make test
+#       - run:
+#           name: Run e2e tests
+#           command: make e2e-tests
 
 workflows:
-  # regular:
-  #   jobs:
-  #     # the path-filtering/filter job determines which pipeline
-  #     # parameters to update, i.e. which builds to run.
-  #     - path-filtering/filter:
-  #         name: check-updated-files
-  #         base-revision: main
-  #         config-path: .circleci/continue_config.yml
-  #         # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
-  #         mapping: |
-  #           docs/.* docs_change true
-  #           ^((?!docs/).)*$ code_change true
-  hourly_pr_merge:
-    when: << pipeline.parameters.run_hourly >>
+  regular:
     jobs:
-      - merge_pr_to_develop:
-        filters:
-          branches:
-            only: test_ci_main
+      # the path-filtering/filter job determines which pipeline
+      # parameters to update, i.e. which builds to run.
+      - path-filtering/filter:
+          name: check-updated-files
+          base-revision: main
+          config-path: .circleci/continue_config.yml
+          # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
+          mapping: |
+            docs/.* docs_change true
+            ^((?!docs/).)*$ code_change true
+  # hourly_pr_merge:
+  #   when: << pipeline.parameters.run_hourly >>
+  #   jobs:
+  #     - merge_pr_to_develop:
+  #       filters:
+  #         branches:
+  #           only: test_ci_main
 
   # # Python versions that are supported on `main`.
   # nightly_build_main:

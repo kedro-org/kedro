@@ -11,7 +11,7 @@ from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
 from warnings import warn
 
 from toposort import CircularDependencyError as ToposortCircleError
-from toposort import toposort
+from toposort import toposort, toposort_flatten
 
 import kedro
 from kedro.pipeline.node import Node, _to_list
@@ -829,7 +829,14 @@ def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
         return f"Circular dependencies exist among these items: {circular}"
 
     try:
-        return list(toposort(node_dependencies))
+        n1 = list(toposort(node_dependencies))
+        n2 = list(toposort_flatten(node_dependencies))
+        print("**********************"* 5)
+        # for i, nodes in enumerate(n1):
+            # n1[i] = sorted(list(nodes))
+        # return n1
+        # return list(toposort(node_dependencies))
+        return [n2]
     except ToposortCircleError as exc:
         message = _circle_error_message(exc.data)
         raise CircularDependencyError(message) from exc

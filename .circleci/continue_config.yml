@@ -468,6 +468,8 @@ workflows:
         - <<pipeline.parameters.docs_change>>
         - not: <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_docs
       - docs_linkcheck
@@ -481,6 +483,8 @@ workflows:
       and:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_docs
       - docs_linkcheck

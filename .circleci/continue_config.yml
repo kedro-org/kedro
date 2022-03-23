@@ -565,7 +565,7 @@ workflows:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
       - build_kedro:
-            filters:
+          filters:
             branches:
               only: test_ci_main
           matrix:

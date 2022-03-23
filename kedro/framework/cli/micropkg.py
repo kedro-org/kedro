@@ -350,7 +350,7 @@ def _refactor_code_for_unpacking(
         |__ __init__.py
     |__ tests  # only tests for <micro_package>
         |__ __init__.py
-        |__ test_pipeline.py
+        |__ tests.py
 
     to:
     <temp_dir>  # also the root of the Rope project
@@ -378,7 +378,7 @@ def _refactor_code_for_unpacking(
         _rename_package(project, (target / "tmp_name").as_posix(), desired_name)
         return full_path
 
-    pipeline_name = package_path.stem
+    package_name = package_path.stem
     package_target = Path(project_metadata.package_name)
     tests_target = Path("tests")
 
@@ -387,31 +387,31 @@ def _refactor_code_for_unpacking(
         package_target = package_target / destination_path
         tests_target = tests_target / destination_path
 
-    if alias and alias != pipeline_name:
-        _rename_package(project, pipeline_name, alias)
-        pipeline_name = alias
+    if alias and alias != package_name:
+        _rename_package(project, package_name, alias)
+        package_name = alias
 
-    if pipeline_name == project_metadata.package_name:
-        full_path = _move_package_with_conflicting_name(package_target, pipeline_name)
+    if package_name == project_metadata.package_name:
+        full_path = _move_package_with_conflicting_name(package_target, package_name)
     else:
         full_path = _create_nested_package(project, package_target)
-        _move_package(project, pipeline_name, package_target.as_posix())
+        _move_package(project, package_name, package_target.as_posix())
 
-    refactored_package_path = full_path / pipeline_name
+    refactored_package_path = full_path / package_name
 
     if not tests_path.exists():
         return refactored_package_path, tests_path
 
-    # we can't rename the tests package to <pipeline_name>
+    # we can't rename the tests package to <package_name>
     # because it will conflict with existing top-level package;
     # hence we give it a temp name, create the expected
     # nested folder structure, move the contents there,
-    # then rename the temp name to <pipeline_name>.
+    # then rename the temp name to <package_name>.
     full_path = _move_package_with_conflicting_name(
-        tests_target, original_name="tests", desired_name=pipeline_name
+        tests_target, original_name="tests", desired_name=package_name
     )
 
-    refactored_tests_path = full_path / pipeline_name
+    refactored_tests_path = full_path / package_name
 
     return refactored_package_path, refactored_tests_path
 
@@ -479,50 +479,50 @@ def _find_config_files(
     return config_files
 
 
-def _get_default_version(metadata: ProjectMetadata, pipeline_module_path: str) -> str:
-    # default to pipeline package version
+def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -> str:
+    # default to micropkg package version
     try:
-        pipeline_module = import_module(
-            f"{metadata.package_name}.{pipeline_module_path}"
+        micropkg_module = import_module(
+            f"{metadata.package_name}.{micropkg_module_path}"
         )
-        return pipeline_module.__version__  # type: ignore
+        return micropkg_module.__version__  # type: ignore
     except (AttributeError, ModuleNotFoundError):
-        # if pipeline version doesn't exist, take the project one
+        # if micropkg version doesn't exist, take the project one
         project_module = import_module(f"{metadata.package_name}")
         return project_module.__version__  # type: ignore
 
 
 def _package_micropkg(
-    pipeline_module_path: str,
+    micropkg_module_path: str,
     metadata: ProjectMetadata,
     alias: str = None,
     destination: str = None,
     env: str = None,
 ) -> Path:
-    pipeline_name = pipeline_module_path.split(".")[-1]
+    micropkg_name = micropkg_module_path.split(".")[-1]
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
 
     package_source, package_tests, package_conf = _get_artifacts_to_package(
-        metadata, module_path=pipeline_module_path, env=env
+        metadata, module_path=micropkg_module_path, env=env
     )
     # as the source distribution will only contain parameters, we aren't listing other
     # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
         package_conf,
-        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/**/*"],
+        [f"parameters*/**/{micropkg_name}.yml", f"parameters*/**/{micropkg_name}/**/*"],
     )
 
     source_paths = (package_source, package_tests, configs_to_package)
 
-    # Check that pipeline directory exists and not empty
+    # Check that micropkg directory exists and not empty
     _validate_dir(package_source)
 
     destination = Path(destination) if destination else metadata.project_path / "dist"
-    version = _get_default_version(metadata, pipeline_module_path)
+    version = _get_default_version(metadata, micropkg_module_path)
 
     _generate_sdist_file(
-        pipeline_name=pipeline_name,
+        micropkg_name=micropkg_name,
         destination=destination.resolve(),
         source_paths=source_paths,
         version=version,
@@ -647,7 +647,7 @@ def _refactor_code_for_package(
         |__ __init__.py
     |__ tests  # only tests for <micro_package>
         |__ __init__.py
-        |__ test_pipeline.py
+        |__ test.py
     """
 
     def _move_package_with_conflicting_name(target: Path, conflicting_name: str):
@@ -671,21 +671,21 @@ def _refactor_code_for_package(
         # overwrite=True to update the __init__.py files generated by create_package
         _sync_dirs(tests_path, full_path, overwrite=True)
 
-    # Refactor imports in src/package_name/pipelines/pipeline_name
-    # and imports of `pipeline_name` in tests.
-    pipeline_name = package_target.stem
-    if pipeline_name == project_metadata.package_name:
-        _move_package_with_conflicting_name(package_target, pipeline_name)
+    # Refactor imports in src/package_name/.../micro_package
+    # and imports of `micro_package` in tests.
+    micro_package_name = package_target.stem
+    if micro_package_name == project_metadata.package_name:
+        _move_package_with_conflicting_name(package_target, micro_package_name)
     else:
         _move_package(project, package_target.as_posix(), "")
         shutil.rmtree(Path(project.address) / project_metadata.package_name)
 
     if alias:
-        _rename_package(project, pipeline_name, alias)
+        _rename_package(project, micro_package_name, alias)
 
     if tests_path.exists():
         # we can't move the relevant tests folder as is because
-        # it will conflict with the top-level package <pipeline_name>;
+        # it will conflict with the top-level package <micro_package>;
         # we can't rename it "tests" and move it, because it will conflict
         # with the existing "tests" folder at top level;
         # hence we give it a temp name, move it, delete tests/ and
@@ -698,14 +698,14 @@ _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 
 # pylint: disable=too-many-arguments,too-many-locals
 def _generate_sdist_file(
-    pipeline_name: str,
+    micropkg_name: str,
     destination: Path,
     source_paths: Tuple[_SourcePathType, ...],
     version: str,
     metadata: ProjectMetadata,
     alias: str = None,
 ) -> None:
-    package_name = alias or pipeline_name
+    package_name = alias or micropkg_name
     package_source, tests_source, conf_source = source_paths
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -721,7 +721,7 @@ def _generate_sdist_file(
         _, _, conf_target = _get_package_artifacts(temp_dir_path, package_name)
         _sync_path_list(conf_source, conf_target)  # type: ignore
         if conf_target.is_dir() and alias:
-            _rename_files(conf_target, pipeline_name, alias)
+            _rename_files(conf_target, micropkg_name, alias)
 
         # Build a setup.py on the fly
         try:

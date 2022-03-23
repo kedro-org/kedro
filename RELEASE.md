@@ -4,7 +4,7 @@
 * Documented distribution of Kedro pipelines with Dask.
 
 ## Bug fixes and other changes
-* Fix `kedro new` create invalid package name with user input contains hyphen.
+* Fix `kedro new` invalid package name when user input contains hyphen.
 
 ## Upcoming deprecations for Kedro 0.18.0
 

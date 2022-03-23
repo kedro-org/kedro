@@ -90,17 +90,21 @@ workflows:
   hourly_pr_merge:
     when: << pipeline.parameters.run_hourly >>
     
-    filters:
-      branches:
-        only: test_ci_main
+
     jobs:
-      - merge_pr_to_develop
+      - merge_pr_to_develop:
+        filters:
+          branches:
+            only: test_ci_main
 
   # # Python versions that are supported on `main`.
   # nightly_build_main:
   #   when: << pipeline.parameters.run_hourly >>
   #   jobs:
   #     - build_docker_image:
+          # filters:
+          #   branches:
+          #     only: test_ci_main
   #         matrix:
   #           parameters:
   #             python_version: ["3.6", "3.7", "3.8"]

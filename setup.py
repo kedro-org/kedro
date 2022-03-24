@@ -10,7 +10,9 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas~=1.3"  # to be able to use XMLDataSet and pandas integration with fsspec
+PANDAS = (
+    "pandas~=1.3"  # to be able to use XMLDataSet and pandas integration with fsspec
+)
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -119,7 +121,6 @@ extras_require = {
         "ipykernel>=5.3, <7.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
-    "ipython": ["ipython>=7.31.1, <8.0"],
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),

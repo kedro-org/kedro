@@ -56,7 +56,6 @@ def jupyter_notebook(
 ):  # pylint: disable=unused-argument
     """Open Jupyter Notebook with project specific variables loaded."""
     _check_module_importable("notebook")
-
     validate_settings()
 
     kernel_name = f"kedro_{metadata.package_name}"
@@ -83,7 +82,6 @@ def jupyter_lab(
 ):  # pylint: disable=unused-argument
     """Open Jupyter Lab with project specific variables loaded."""
     _check_module_importable("jupyterlab")
-
     validate_settings()
 
     kernel_name = f"kedro_{metadata.package_name}"

@@ -24,14 +24,15 @@
 * Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
 * Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
 * The `hook_manager` is no longer a global singleton. The `hook_manager` lifecycle is now managed by the `KedroSession`, a new `hook_manager` will be created everytime a `session` is instantiated.
+* Updated ``black`` dependency in the project template to a non pre-release version
 * Added the following new datasets:
 
-| Type                | Description                                                    | Location                       |
-| ------------------- | -------------------------------------------------------------- | ------------------------------ |
-| `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas` |
-| `networkx.GraphMLDataSet`       |  Work with NetworkX using GraphML files            | `kedro.extras.datasets.networkx` |
-| `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
-| `redis.PickleDataSet`      | loads/saves data from/to a Redis database | `kedro.extras.datasets.redis` |
+| Type                      | Description                                                    | Location                         |
+| ------------------------- | -------------------------------------------------------------- | -------------------------------- |
+| `pandas.XMLDataSet`       | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas`   |
+| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                         | `kedro.extras.datasets.networkx` |
+| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files        | `kedro.extras.datasets.networkx` |
+| `redis.PickleDataSet`     | loads/saves data from/to a Redis database                      | `kedro.extras.datasets.redis`    |
 
 ## Breaking changes to the API
 * Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
@@ -203,12 +204,12 @@ The parameters should look like this:
 * Extended `ExcelDataSet` to support saving Excel files with multiple sheets.
 * Added the following new datasets:
 
-| Type                        | Description                                          | Location                          |
-| --------------------------- | ---------------------------------------------------- | --------------------------------- |
-| `plotly.JSONDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
-| `pandas.GenericDataSet` | Provides a 'best effort' facility to read / write any format provided by the `pandas` library | `kedro.extras.datasets.pandas` |
-| `pandas.GBQQueryDataSet` | Loads data from a Google Bigquery table using provided SQL query | `kedro.extras.datasets.pandas` |
-| `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark` |
+| Type                      | Description                                                                                                            | Location                       |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `plotly.JSONDataSet`      | Works with plotly graph object Figures (saves as json file)                                                            | `kedro.extras.datasets.plotly` |
+| `pandas.GenericDataSet`   | Provides a 'best effort' facility to read / write any format provided by the `pandas` library                          | `kedro.extras.datasets.pandas` |
+| `pandas.GBQQueryDataSet`  | Loads data from a Google Bigquery table using provided SQL query                                                       | `kedro.extras.datasets.pandas` |
+| `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark`  |
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.

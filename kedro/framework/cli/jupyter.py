@@ -62,12 +62,7 @@ def jupyter_notebook(
     validate_settings()
 
     kernel_name = f"kedro_{metadata.package_name}"
-    try:
-        _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
-    except Exception as exc:
-        raise KedroCliError(
-            f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
-        ) from exc
+    _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
 
     if env:
         os.environ["KEDRO_ENV"] = env
@@ -94,12 +89,7 @@ def jupyter_lab(
     validate_settings()
 
     kernel_name = f"kedro_{metadata.package_name}"
-    try:
-        _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
-    except Exception as exc:
-        raise KedroCliError(
-            f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
-        ) from exc
+    _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
 
     if env:
         os.environ["KEDRO_ENV"] = env
@@ -142,31 +132,40 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
     Args:
         kernel_name: Name of the kernel to create.
         display_name: Kernel name as it is displayed in the UI.
+
+    Raises:
+        KedroCliError: When kernel cannot be setup.
     """
-    if kernel_name in find_kernel_specs():
-        secho(
-            f"Jupyter kernel {kernel_name} already exists and will be used.",
-            fg="green",
+    try:
+        if kernel_name in find_kernel_specs():
+            secho(
+                f"Jupyter kernel {kernel_name} already exists and will be used.",
+                fg="green",
+            )
+            return
+
+        # Install with user=True rather than system-wide to minimise footprint and
+        # ensure that we have permissions to write there.
+        kernel_path = install(
+            user=True,
+            kernel_name=kernel_name,
+            display_name=display_name,
         )
-        return
 
-    # Install with user=True rather than system-wide to minimise footprint and
-    # ensure that we have permissions to write there.
-    kernel_path = install(
-        user=True,
-        kernel_name=kernel_name,
-        display_name=display_name,
-    )
+        kernel_json = Path(kernel_path) / "kernel.json"
+        kernel_spec = json.loads(kernel_json.read_text())
+        kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
+        # indent=1 is to match the default ipykernel style (see
+        # ipykernel.write_kernel_spec).
+        kernel_json.write_text(json.dumps(kernel_spec, indent=1))
 
-    kernel_json = Path(kernel_path) / "kernel.json"
-    kernel_spec = json.loads(kernel_json.read_text())
-    kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
-    # indent=1 is to match the default ipykernel style (see ipykernel.write_kernel_spec).
-    kernel_json.write_text(json.dumps(kernel_spec, indent=1))
-
-    kedro_extensions_dir = Path(__file__).parents[2] / "extras" / "extensions"
-    shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
-    shutil.copy(kedro_extensions_dir / "logo-64x64.png", kernel_path)
+        kedro_extensions_dir = Path(__file__).parents[2] / "extras" / "extensions"
+        shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
+        shutil.copy(kedro_extensions_dir / "logo-64x64.png", kernel_path)
+    except Exception as exc:
+        raise KedroCliError(
+            f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
+        ) from exc
 
 
 @command_with_verbosity(jupyter, "convert")

@@ -1,17 +1,54 @@
-# Use Kedro with IPython and Jupyter Notebooks/Lab
+# Use Kedro with IPython and Jupyter
+<!--
+# TODO:
+# document line_magic entry point
+# more info on what kernel is and that it's user level
+# remove kernel
+# bit on juptyer console/qtconsole
+-->
 
-This section follows the [Iris dataset example](../get_started/example_project.md) and demonstrates how to use Kedro with IPython and Jupyter Notebooks / Lab. We also recommend a video that explains the transition from the use of vanilla Jupyter Notebooks to using Kedro, from [Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne).
-
+This page follows the [Iris dataset example](../get_started/example_project.md) and demonstrates how to use Kedro with IPython, Jupyter Notebook and JupyterLab. We also recommend [a video by Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne) that explains the transition from the use of vanilla Jupyter notebooks to Kedro.
 
 <iframe width="560" height="315" style="max-width: 100%" src="https://www.youtube.com/embed/dRnCovp1GRQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-## Why use a Notebook?
-There are reasons why you may want to use a Notebook, although in general, the principles behind Kedro would discourage their use because they have some [drawbacks when they are used to create production or reproducible code](https://towardsdatascience.com/5-reasons-why-you-should-switch-from-jupyter-notebook-to-scripts-cb3535ba9c95). However, there are occasions when you'd want to put some code into a Notebook, for example:
+## Why use a notebook?
+There are reasons why you may want to use a notebook, although in general, the principles behind Kedro would discourage their use because they have some [drawbacks when used to create production or reproducible code](https://towardsdatascience.com/5-reasons-why-you-should-switch-from-jupyter-notebook-to-scripts-cb3535ba9c95). However, there are occasions when you'd want to put some code into a notebook, for example:
 
 * To conduct exploratory data analysis
-* For experimentation as you create new Python functions (nodes)
+* For experimentation as you create new Python functions (that could become Kedro nodes)
 * As a tool for reporting and presentations
 
+## Kedro IPython extension
+
+The best way to interact with Kedro in IPython and Jupyter is through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`. This launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `context`, `session`, `catalog` and `pipelines`. It also provides the `%reload_kedro` line magic that is useful for reloading these variables (for example, if you change entries in your Data Catalog).
+
+The simplest way to make use of the Kedro IPython extension is through the following commands:
+* `kedro ipython`. This launches an IPython shell with the extension already loaded and is equivalent to the command `ipython --ext kedro.extras.extensions.ipython`.
+* `kedro jupyter notebook`. This creates a custom Jupyter kernel that automatically loads the extension and launches Jupyter Notebook with this kernel selected.
+* `kedro jupyter lab`. This creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected.
+
+Running any of the above from within your Kedro project will make the `context`, `session`, `catalog` and `pipelines` variables immediately accessible to you. 
+
+If the above commands are not available to you (e.g. if you are working on a managed Jupyter service such as a Databricks notebook) then equivalent behaviour can be achieved by explicitly loading the Kedro IPython extension using the `%load_ext` line magic:
+```ipython
+In [1]: %load_ext kedro.extras.extensions.ipython
+```
+
+If your IPython or Jupyter instance was launched from outside your Kedro project then you will need to run a second line magic to set the project path so that Kedro can load the `context`, `session`, `catalog` and `pipelines` variables:
+```ipython
+In [2]: %reload_kedro <path_to_project_root>
+```
+The Kedro IPython extension remembers the project path so that subsequent calls to `%reload_kedro` do not need to specify it:
+
+```ipython
+In [1]: %load_ext kedro.extras.extensions.ipython
+In [2]: %reload_kedro <path_to_project_root>
+In [3]: %reload_kedro
+```
+
+```eval_rst
+    .. note:: Note that if you want to pass arguments to the `reload_kedro` line magic, you should call it like a normal Python function (e.g `reload_kedro(env=env, extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(extra_params=extra_params)` wouldn’t work). You might have to call `%automagic False` beforehand to make this work.
+```
 
 ## Kedro and IPython
 
@@ -227,7 +264,7 @@ def reload_kedro(project_path, line=None):
 ```
 
 
-## Convert functions from Jupyter Notebooks into Kedro nodes
+## Convert functions from Jupyter notebooks into Kedro nodes
 
 Built into the Kedro Jupyter workflow is the ability to convert multiple functions defined in the Jupyter notebook(s) into Kedro nodes. You need a single CLI command.
 
@@ -261,141 +298,7 @@ def some_action():
 
 * The `some_action` function can now be used in your Kedro pipelines
 
-## IPython extension
-
-Kedro also has an IPython extension (`kedro.extras.extensions.ipython`) that allows you to start an `ipython` shell directly and then initialize `context`, `catalog`, and `session` variables. This can be used as a replacement for `<your_project>.ipython/profile_default/startup/00-kedro-init.py`.
-
-When you start an `ipython` shell in a project root then you only need to load the extension to get the variables.
-
-```bash
-cd <your-project-root>
-ipython
-
-In [1]: %load_ext kedro.extras.extensions.ipython
-```
-
-When you start an `ipython` shell outside a project root and load the extension the variables won't be loaded.
-Run `%reload_kedro <path_to_project_root>` to get the variables, and to set the project path for subsequent calls. You can then call just `%reload_kedro` without having to specify the path.
-
-```ipython
-In [1]: %load_ext kedro.extras.extensions.ipython
-In [2]: %reload_kedro <path_to_project_root>
-```
-
-or
-
-```ipython
-In [1]: %load_ext kedro.extras.extensions.ipython
-In [2]: %reload_kedro <path_to_project_root>
-In [3]: %reload_kedro
-```
-
-```eval_rst
-    .. note:: Note that if you want to pass an argument to `reload_kedro` line magic function, you should call it like a normal Python function (e.g `reload_kedro(path, env=env, extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(path, extra_params=extra_params)` wouldn’t work). You might have to call `%automagic False` beforehand to make this work.
-```
-
-To configure the extension to be loaded automatically every time when you open an IPython shell, do the following:
-
-* Run `ipython profile create` to create the config file `~/.ipython/profile_default/ipython_config.py` if it doesn't exist
-* Edit `~/.ipython/profile_default/ipython_config.py`:
-  - uncomment the extensions
-  - add Kedro extension to the list as follows: `c.InteractiveShellApp.extensions = ["kedro.extras.extensions.ipython"]`
-
-## IPython loader
-
-The script `tools/ipython/ipython_loader.py` helps to locate IPython startup directory and run all Python scripts in it when working with Jupyter notebooks and IPython sessions. It should work identically not just within a Kedro project, but also with any project that contains IPython startup scripts.
-
-The script automatically locates the `.ipython/profile_default/startup` directory by starting from the current working directory and going up the directory tree. If the directory is found, all Python scripts in it are executed.
-
-```eval_rst
-.. note:: This script will only run startup scripts from the first encountered ``.ipython/profile_default/startup`` directory. All consecutive ``.ipython`` directories higher up in the directory tree will be disregarded.
-```
-
-
-### Installation
-
-To install this script simply download it into your default IPython config directory:
-
-```bash
-mkdir -p ~/.ipython/profile_default/startup
-wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/kedro-org/kedro/main/tools/ipython/ipython_loader.py
-```
-
-### Prerequisites
-
-For this script to work, the following conditions must be met:
-
-* Your project must contain the `.ipython/profile_default/startup` folder in its root directory.
-* The Jupyter notebook should be saved inside the project root directory or within any nested subfolder of the project directory.
-* An IPython interactive session should be started with the working directory pointing to the project root directory or any nested subdirectory.
-
-For example, given the following project structure:
-
-```console
-new-kedro-project/
-├── .ipython
-│   └── profile_default
-│       └── startup
-│           └── 00-kedro-init.py
-├── conf/
-├── data/
-├── docs/
-├── logs/
-├── notebooks
-│   └── subdir1
-│       └── subdir2
-└── src/
-```
-
-If your `Notebook.ipynb` is placed anywhere in the following, `.ipython/profile_default/startup/00-kedro-init.py` will automatically be executed on every notebook startup:
-
-* `new-kedro-project/notebooks/`
-* `new-kedro-project/notebooks/subdir1/`
-* `new-kedro-project/notebooks/subdir1/subdir2/`
-* or even `new-kedro-project/` (although this is strongly discouraged).
-
-
-```eval_rst
-.. note:: Given the example structure above, this script will not load your IPython startup scripts if the notebook is saved anywhere outside ``new-kedro-project`` directory.
-```
-
-### Troubleshooting and FAQs
-
-#### How can I stop my notebook terminating?
-
-If you close the notebook and its kernel is idle, it will be automatically terminated by the Jupyter server after 30 seconds of inactivity. However, if the notebook kernel is busy, it won't be automatically terminated by the server.
-
-You can change the timeout by passing `--idle-timeout=<integer>` option to `kedro jupyter notebook` or `kedro jupyter lab` call. If you set `--idle-timeout=0`, this will disable automatic termination of idle notebook kernels.
-
-#### Why can't I run `kedro jupyter notebook`?
-
-In certain cases, you may not be able to run `kedro jupyter notebook`, which means that you have to work in a standard Jupyter session. This may be because you don't have a CLI access to the machine where the Jupyter server is running or you've opened a Jupyter notebook by running `jupyter notebook` from the terminal. In that case, you can create a `context` variable yourself by running the following block of code at the top of your notebook:
-
-```python
-from pathlib import Path
-from kedro.framework.session import KedroSession
-from kedro.framework.startup import bootstrap_project
-from kedro.framework.session.session import _activate_session
-
-current_dir = Path.cwd()  # this points to 'notebooks/' folder
-project_path = current_dir.parent  # point back to the root of the project
-bootstrap_project(project_path)
-session = KedroSession.create("<your-kedro-project-package-name>", project_path)
-_activate_session(session)
-context = session.load_context()
-```
-
-#### How can I reload the `session`, `context`, `catalog` and `startup_error` variables?
-
-To reload these variables at any point (e.g., if you update `catalog.yml`), use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%reload_kedro`. This magic can also be used to see the error message if any of the variables above are undefined.
-
-![reload kedro line magic graphic](../meta/images/jupyter_notebook_loading_context.png)
-
-Note that if you want to pass an argument to `reload_kedro` line magic function, you should call it like a normal Python function (e.g `reload_kedro(extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(extra_params=extra_params)` wouldn't work).
-
-If the `KEDRO_ENV` environment variable is specified, the startup script loads that environment, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [Kedro configuration documentation](../kedro_project_setup/configuration.md#additional-configuration-environments).
-
-### Kedro-Viz and Jupyter
+## Kedro-Viz and Jupyter
 
 If you have [Kedro-Viz](https://github.com/kedro-org/kedro-viz) installed then you can display an interactive visualisation of your pipeline directly in your notebook using the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%run_viz`. You should see a visualisation like the following:
 

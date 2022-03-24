@@ -3,7 +3,6 @@ import shutil
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-import jupyter_client.kernelspecapp
 import pytest
 from click.testing import CliRunner
 from jupyter_client.kernelspec import (

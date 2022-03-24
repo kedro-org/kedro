@@ -138,10 +138,10 @@ commands:
     steps:
       - restore_cache:
           name: Restore package cache
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-Merel-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - restore_cache:
           name: Restore conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-Merel-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - run:
           name: Install all requirements
           command: conda activate kedro_builder; pip install -r test_requirements.txt -U
@@ -307,14 +307,14 @@ jobs:
           steps:
           - save_cache:
               name: Save Python package cache
-              key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+              key: kedro-deps-Merel-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
               paths:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs
                 - c:\users\circleci\appdata\local\pip\cache
       - save_cache:
           name: Save conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-Merel-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
           paths:
             - c:\tools\miniconda3\envs\kedro_builder
       - run:

@@ -3,10 +3,16 @@ import shutil
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import jupyter_client.kernelspecapp
 import pytest
 from click.testing import CliRunner
+from jupyter_client.kernelspec import (
+    KernelSpecManager,
+    get_kernel_spec,
+    find_kernel_specs,
+)
 
-from kedro.framework.cli.jupyter import _export_nodes
+from kedro.framework.cli.jupyter import _export_nodes, _create_kernel
 from kedro.framework.cli.utils import KedroCliError
 
 
@@ -22,13 +28,17 @@ def python_call_mock(mocker):
     return mocker.patch("kedro.framework.cli.jupyter.python_call")
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.fixture
+def create_kernel_mock(mocker):
+    return mocker.patch("kedro.framework.cli.jupyter._create_kernel")
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "patch_log", "create_kernel_mock", "python_call_mock"
+)
 class TestJupyterNotebookCommand:
     def test_happy_path(
-        self,
-        python_call_mock,
-        fake_project_cli,
-        fake_metadata,
+        self, python_call_mock, fake_project_cli, fake_metadata, create_kernel_mock
     ):
         result = CliRunner().invoke(
             fake_project_cli,
@@ -37,6 +47,8 @@ class TestJupyterNotebookCommand:
         )
         assert not result.exit_code, result.stdout
         kernel_name = f"kedro_{fake_metadata.package_name}"
+        display_name = f"Kedro ({fake_metadata.package_name})"
+        create_kernel_mock.assert_called_once_with(kernel_name, display_name)
         python_call_mock.assert_called_once_with(
             "jupyter",
             [
@@ -48,9 +60,7 @@ class TestJupyterNotebookCommand:
         )
 
     @pytest.mark.parametrize("env_flag,env", [("--env", "base"), ("-e", "local")])
-    def test_env(
-        self, env_flag, env, fake_project_cli, python_call_mock, fake_metadata, mocker
-    ):
+    def test_env(self, env_flag, env, fake_project_cli, fake_metadata, mocker):
         """This tests passing an environment variable to the jupyter subprocess."""
         mock_environ = mocker.patch.dict("kedro.framework.cli.jupyter.os.environ")
         result = CliRunner().invoke(
@@ -73,55 +83,85 @@ class TestJupyterNotebookCommand:
         assert error in result.output
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "patch_log", "create_kernel_mock", "python_call_mock"
+)
 class TestJupyterLabCommand:
-    def test_default_kernel(self, python_call_mock, fake_project_cli, fake_metadata):
+    def test_happy_path(
+        self, python_call_mock, fake_project_cli, fake_metadata, create_kernel_mock
+    ):
         result = CliRunner().invoke(
             fake_project_cli,
-            ["jupyter", "lab", "--ip", "0.0.0.0"],
+            ["jupyter", "lab", "--random-arg", "value"],
             obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
+        kernel_name = f"kedro_{fake_metadata.package_name}"
+        display_name = f"Kedro ({fake_metadata.package_name})"
+        create_kernel_mock.assert_called_once_with(kernel_name, display_name)
         python_call_mock.assert_called_once_with(
-            *default_jupyter_options("lab", "0.0.0.0")
+            "jupyter",
+            [
+                "lab",
+                f"--MappingKernelManager.default_kernel_name={kernel_name}",
+                "--random-arg",
+                "value",
+            ],
         )
 
-    def test_all_kernels(self, python_call_mock, fake_project_cli, fake_metadata):
-        result = CliRunner().invoke(
-            fake_project_cli, ["jupyter", "lab", "--all-kernels"], obj=fake_metadata
-        )
-        assert not result.exit_code, result.stdout
-        python_call_mock.assert_called_once_with(
-            *default_jupyter_options("lab", all_kernels=True)
-        )
-
-    @pytest.mark.parametrize("env_flag", ["--env", "-e"])
-    def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
+    @pytest.mark.parametrize("env_flag,env", [("--env", "base"), ("-e", "local")])
+    def test_env(self, env_flag, env, fake_project_cli, fake_metadata, mocker):
         """This tests passing an environment variable to the jupyter subprocess."""
+        mock_environ = mocker.patch.dict("kedro.framework.cli.jupyter.os.environ")
         result = CliRunner().invoke(
             fake_project_cli,
-            ["jupyter", "lab", env_flag, "base"],
+            ["jupyter", "lab", env_flag, env],
             obj=fake_metadata,
         )
-        assert not result.exit_code
+        assert not result.exit_code, result.stdout
+        assert mock_environ["KEDRO_ENV"] == env
 
-        args, kwargs = python_call_mock.call_args
-        assert args == default_jupyter_options("lab")
-        assert "env" in kwargs
-        assert kwargs["env"]["KEDRO_ENV"] == "base"
-
-    def test_fail_no_jupyter_core(self, fake_project_cli, mocker):
-        mocker.patch.dict("sys.modules", {"jupyter_core": None})
+    def test_fail_no_jupyter(self, fake_project_cli, mocker):
+        mocker.patch.dict("sys.modules", {"jupyterlab": None})
         result = CliRunner().invoke(fake_project_cli, ["jupyter", "lab"])
 
         assert result.exit_code
         error = (
-            "Module `jupyter_core` not found. Make sure to install required project "
+            "Module `jupyterlab` not found. Make sure to install required project "
             "dependencies by running the `pip install -r src/requirements.txt` command first."
         )
         assert error in result.output
 
 
+@pytest.fixture
+def cleanup_kernel():
+    yield
+    if "my_kernel_name" in find_kernel_specs():
+        KernelSpecManager().remove_kernel_spec("my_kernel_name")
+
+
+@pytest.mark.usefixtures("cleanup_kernel")
+class TestCreateKernel:
+    def test_create_new_kernel(self):
+        _create_kernel("my_kernel_name", "My display name")
+        kernel_spec = get_kernel_spec("my_kernel_name")
+        assert kernel_spec.display_name == "My display name"
+        assert kernel_spec.language == "python"
+        assert kernel_spec.argv[-2:] == ["--ext", "kedro.extras.extensions.ipython"]
+        kernel_files = {file.name for file in Path(kernel_spec.resource_dir).iterdir()}
+        assert kernel_files == {"logo-32x32.png", "logo-64x64.png", "kernel.json"}
+
+    def test_kernel_installs_once(self, mocker):
+        _create_kernel("my_kernel_name", "My display name")
+        install_mock = mocker.patch("ipykernel.kernelspec.install")
+        _create_kernel("my_kernel_name", "My display name")
+        install_mock.assert_not_called()
+
+    def test_error(self, mocker):
+        mocker.patch("ipykernel.kernelspec.install", side_effect=ValueError)
+        pattern = "Cannot setup kedro kernel for Jupyter"
+        with pytest.raises(KedroCliError, match=pattern):
+            _create_kernel("my_kernel_name", "My display name")
 
 
 @pytest.fixture

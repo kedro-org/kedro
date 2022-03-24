@@ -13,8 +13,6 @@ from warnings import warn
 
 import click
 from click import secho
-from ipykernel.kernelspec import install
-from jupyter_client.kernelspec import find_kernel_specs
 
 from kedro.framework.cli.utils import (
     KedroCliError,
@@ -57,7 +55,7 @@ def jupyter_notebook(
     **kwargs,
 ):  # pylint: disable=unused-argument
     """Open Jupyter Notebook with project specific variables loaded."""
-    _check_module_importable("jupyter_core")
+    _check_module_importable("notebook")
 
     validate_settings()
 
@@ -84,7 +82,7 @@ def jupyter_lab(
     **kwargs,
 ):  # pylint: disable=unused-argument
     """Open Jupyter Lab with project specific variables loaded."""
-    _check_module_importable("jupyter_core")
+    _check_module_importable("jupyterlab")
 
     validate_settings()
 
@@ -136,6 +134,12 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
     Raises:
         KedroCliError: When kernel cannot be setup.
     """
+    # These packages are required by jupyter lab and notebook, which we have already
+    # checked are importable, so we don't run _check_module_importable on them.
+    # pylint: disable=import-outside-toplevel
+    from ipykernel.kernelspec import install
+    from jupyter_client.kernelspec import find_kernel_specs
+
     try:
         if kernel_name in find_kernel_specs():
             secho(

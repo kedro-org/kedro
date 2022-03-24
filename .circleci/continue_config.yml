@@ -142,13 +142,6 @@ commands:
       - restore_cache:
           name: Restore conda environment cache
           key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-        # pytables and Fiona have a series of binary dependencies under Windows that
-        # are best handled by conda-installing instead of pip-installing them.
-        # Dependency resolution works best when installing these altogether in one
-        # `conda install` command rather than one at a time in several sequential `conda install`s.
-#      - run:
-#          name: Install GDAL, Fiona and pytables
-#          command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
       - run:
           name: Install all requirements
           command: conda activate kedro_builder; pip install -r test_requirements.txt -U
@@ -269,7 +262,7 @@ jobs:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
-                name: Run unit tests withou spark sequentially
+                name: Run unit tests without spark sequentially
                 command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
 
   lint:
@@ -518,47 +511,47 @@ workflows:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
-#      - e2e_tests:
-#          matrix:
-#            parameters:
-#              python_version: ["3.7", "3.8", "3.9", "3.10"]
-#      - win_e2e_tests:
-#          matrix:
-#            parameters:
-#              python_version: ["3.7", "3.8", "3.9", "3.10"]
-#      - unit_tests:
-#          matrix:
-#            parameters:
-#              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - e2e_tests:
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - win_e2e_tests:
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - unit_tests:
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_unit_tests:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
-#      - lint:
-#          matrix:
-#            parameters:
-#              python_version: ["3.7", "3.8", "3.9", "3.10"]
-#      - pip_compile:
-#          matrix:
-#            parameters:
-#              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - lint:
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - pip_compile:
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_pip_compile:
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
-#      - build_docs
-#      - docs_linkcheck
-#      - all_circleci_checks_succeeded:
-#          requires:
-#            - e2e_tests
-#            - win_e2e_tests
-#            - unit_tests
-#            - win_unit_tests
-#            - lint
-#            - pip_compile
-#            - win_pip_compile
-#            - build_docs
-#            - docs_linkcheck
+      - build_docs
+      - docs_linkcheck
+      - all_circleci_checks_succeeded:
+          requires:
+            - e2e_tests
+            - win_e2e_tests
+            - unit_tests
+            - win_unit_tests
+            - lint
+            - pip_compile
+            - win_pip_compile
+            - build_docs
+            - docs_linkcheck
 
   main_updated:
     unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set

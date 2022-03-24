@@ -66,8 +66,8 @@ def jupyter_notebook(
 
     python_call(
         "jupyter",
-        ("notebook", f"--MappingKernelManager.default_kernel_name={kernel_name}")
-        + args,
+        ["notebook", f"--MappingKernelManager.default_kernel_name={kernel_name}"]
+        + list(args),
     )
 
 
@@ -92,7 +92,7 @@ def jupyter_lab(
 
     python_call(
         "jupyter",
-        ("lab", f"--MultiKernelManager.default_kernel_name={kernel_name}") + args,
+        ["lab", f"--MultiKernelManager.default_kernel_name={kernel_name}"] + list(args),
     )
 
 
@@ -155,7 +155,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
         )
 
         kernel_json = Path(kernel_path) / "kernel.json"
-        kernel_spec = json.loads(kernel_json.read_text())
+        kernel_spec = json.load(kernel_json.read_text())
         kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
         # indent=1 is to match the default ipykernel style (see
         # ipykernel.write_kernel_spec).

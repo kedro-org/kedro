@@ -190,6 +190,8 @@ class KedroSession:
         if extra_params:
             session_data["extra_params"] = extra_params
 
+        session_data["username"] = os.getlogin()
+
         session._store.update(session_data)
 
         # we need a ConfigLoader registered in order to be able to set up logging

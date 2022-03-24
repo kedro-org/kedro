@@ -204,6 +204,13 @@ def fake_project(tmp_path, local_logging_config, mock_package_name):
     return fake_project_dir
 
 
+@pytest.fixture
+def fake_username(mocker):
+    username = "user1"
+    mocker.patch("kedro.framework.session.session.os.getlogin", return_value=username)
+    return username
+
+
 class FakeException(Exception):
     """Fake exception class for testing purposes"""
 
@@ -225,6 +232,7 @@ class TestKedroSession:
         mocker,
         env,
         extra_params,
+        fake_username,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
         session = KedroSession.create(
@@ -247,6 +255,8 @@ class TestKedroSession:
             expected_store["env"] = env
         if extra_params:
             expected_store["extra_params"] = extra_params
+        if fake_username:
+            expected_store["username"] = fake_username
 
         assert session.store == expected_store
         # called for logging setup
@@ -267,6 +277,7 @@ class TestKedroSession:
         fake_session_id,
         mock_package_name,
         mocker,
+        fake_username,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
         session = KedroSession.create(mock_package_name, fake_project)
@@ -283,6 +294,9 @@ class TestKedroSession:
             "package_name": mock_package_name,
             "cli": expected_cli_data,
         }
+
+        if fake_username:
+            expected_store["username"] = fake_username
 
         assert session.store == expected_store
         mock_context_class.assert_called_once_with(

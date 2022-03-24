@@ -455,7 +455,7 @@ jobs:
             # give some time for GitHub release to propagate
             # otherwise RTD fails to build a new tag
             sleep 120
-            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION} 
+            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
 
   # Trigger kedro-viz build to ensure tests in that project pass
   viz_build:

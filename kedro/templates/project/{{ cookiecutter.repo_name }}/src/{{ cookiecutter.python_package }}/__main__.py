@@ -36,11 +36,11 @@ def _find_run_command_in_plugins(plugins):
             return group.commands["run"]
 
 
-def main():
+def main(*args, **kwargs):
     package_name = Path(__file__).parent.name
     configure_project(package_name)
     run = _find_run_command(package_name)
-    run()
+    run(*args, **kwargs)
 
 
 if __name__ == "__main__":

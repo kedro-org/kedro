@@ -7,11 +7,11 @@ import pytest
 from click.testing import CliRunner
 from jupyter_client.kernelspec import (
     KernelSpecManager,
-    get_kernel_spec,
     find_kernel_specs,
+    get_kernel_spec,
 )
 
-from kedro.framework.cli.jupyter import _export_nodes, _create_kernel
+from kedro.framework.cli.jupyter import _create_kernel, _export_nodes
 from kedro.framework.cli.utils import KedroCliError
 
 
@@ -52,7 +52,7 @@ class TestJupyterNotebookCommand:
             "jupyter",
             [
                 "notebook",
-                f"--MappingKernelManager.default_kernel_name={kernel_name}",
+                f"--MultiKernelManager.default_kernel_name={kernel_name}",
                 "--random-arg",
                 "value",
             ],
@@ -102,7 +102,7 @@ class TestJupyterLabCommand:
             "jupyter",
             [
                 "lab",
-                f"--MappingKernelManager.default_kernel_name={kernel_name}",
+                f"--MultiKernelManager.default_kernel_name={kernel_name}",
                 "--random-arg",
                 "value",
             ],

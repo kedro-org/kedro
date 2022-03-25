@@ -20,7 +20,7 @@ The simplest way to make use of the Kedro IPython extension is through the follo
 * `kedro jupyter notebook`. This creates a custom Jupyter kernel that automatically loads the extension and launches Jupyter Notebook with this kernel selected.
 * `kedro jupyter lab`. This creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected.
 
-Running any of the above from within your Kedro project will make the `catalog`, `context`, `pipelines` and `session` variables immediately accessible to you. 
+Running any of the above from within your Kedro project will make the `catalog`, `context`, `pipelines` and `session` variables immediately accessible to you.
 
 ### Managed Jupyter instances
 
@@ -47,7 +47,7 @@ In [3]: %reload_kedro
 
 ## Kedro variables: `catalog`, `context`, `pipelines` and `session`
 
-The Kedro IPython extension makes the following variables available in your IPython or Jupyter session: 
+The Kedro IPython extension makes the following variables available in your IPython or Jupyter session:
 
 * `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
@@ -62,7 +62,7 @@ We will now give some examples of how these variables can be used in the [Iris e
 
 ```ipython
 In [1]: catalog.list()
-Out[1]: 
+Out[1]:
 ['example_iris_data',
  'parameters',
  'params:example_test_data_ratio',
@@ -70,7 +70,7 @@ Out[1]:
  'params:example_learning_rate']
 
 In [2]: catalog.load("example_iris_data")
-Out[2]: 
+Out[2]:
      sepal_length  sepal_width  petal_length  petal_width    species
 0             5.1          3.5           1.4          0.2     setosa
 1             4.9          3.0           1.4          0.2     setosa
@@ -85,7 +85,7 @@ Out[2]:
 149           5.9          3.0           5.1          1.8  virginica
 
 In [3]: catalog.load("parameters")
-Out[3]: 
+Out[3]:
 {'example_test_data_ratio': 0.2,
  'example_num_train_iter': 10000,
  'example_learning_rate': 0.01}
@@ -98,7 +98,7 @@ Out[3]:
 
 ### `context`
 
-`context` enables you to access Kedro's library components and project metadata. For example: 
+`context` enables you to access Kedro's library components and project metadata. For example:
 
 ```ipython
 In [1]: context.project_path
@@ -111,7 +111,7 @@ Out[1]: PosixPath('/Users/username/kedro_projects/iris')
 
 ```ipython
 In [1]: pipelines
-Out[1]: 
+Out[1]:
 {'de': Pipeline([
 Node(split_data, ['example_iris_data', 'params:example_test_data_ratio'], {'train_x': 'example_train_x', 'train_y': 'example_train_y', 'test_x': 'example_test_x', 'test_y': 'example_test_y'}, 'split')
 ]), 'ds': Pipeline([
@@ -130,14 +130,14 @@ This can be very useful for exploring your pipelines and the nodes they contain:
 
 ```ipython
 In [2]: pipelines["__default__"].all_outputs()
-Out[2]: 
+Out[2]:
 {'example_model',
  'example_predictions',
  'example_test_x',
  'example_test_y',
  'example_train_x',
  'example_train_y'}
- 
+
 In [3]: [node.name for node in pipelines["__default__"].nodes]
 Out[3]: ['split', 'train', 'predict', 'report']
 ```
@@ -201,7 +201,7 @@ We recommend that you store your Jupyter notebooks in the `notebooks` folder of 
 ```eval_rst
 .. note:: Restarting the kernel will reload the Kedro IPython extension and hence refresh the :code:`catalog`, :code:`context`, :code:`pipelines` and :code:`session` variables.
 ```
-For example, to create a new notebook in the Iris example project use the following button: 
+For example, to create a new notebook in the Iris example project use the following button:
 
 ![Make a new notebook using the Kedro (iris) kernel](../meta/images/jupyter_new_notebook.png)
 
@@ -209,7 +209,7 @@ From inside a notebook, the kernel selected appears as follows:
 
 ![Select the Kedro (iris) kernel inside a notebook](../meta/images/jupyter_select_kernel.png)
 
-If you are not able to execute `kedro jupyter notebook` or `kedro jupyter lab` then follow the [instructions on managed Jupyter instances](#managed-jupyter-instances) to manually load the Kedro IPython extension. 
+If you are not able to execute `kedro jupyter notebook` or `kedro jupyter lab` then follow the [instructions on managed Jupyter instances](#managed-jupyter-instances) to manually load the Kedro IPython extension.
 
 ### Manage Jupyter kernels
 
@@ -217,7 +217,7 @@ Behind the scenes, the `kedro jupyter notebook` and `kedro jupyter lab` commands
 
 As each Kedro project has its own Jupyter kernel, you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel.
 
-You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove the kernel created as part of the Iris example project, you would run `jupyter kernelspec remove kedro_iris`. 
+You can use the `jupyter kernelspec` set of commands to manage your Jupyter kernels. For example, to remove the kernel created as part of the Iris example project, you would run `jupyter kernelspec remove kedro_iris`.
 
 ### Use an alternative Jupyter client
 
@@ -225,11 +225,11 @@ In addition to Jupyter notebook and JupyterLab, you can use any other Jupyter cl
 
 ```bash
 jupyter qtconsole --kernel=kedro_iris
-``` 
+```
 
-This will automatically load the Kedro IPython in a console that supports graphical features such as embedded figures: 
+This will automatically load the Kedro IPython in a console that supports graphical features such as embedded figures:
 ![Plot of example iris data in a Qt Console](../meta/images/jupyter_qtconsole.png)
- 
+
 ### Convert functions from Jupyter notebooks into Kedro nodes
 
 Built into the Kedro Jupyter workflow is the ability to convert multiple functions defined in the Jupyter notebook(s) into Kedro nodes. You need a single CLI command.

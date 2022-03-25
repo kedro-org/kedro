@@ -66,7 +66,7 @@ def jupyter_notebook(
 
     python_call(
         "jupyter",
-        ["notebook", f"--MappingKernelManager.default_kernel_name={kernel_name}"]
+        ["notebook", f"--MultiKernelManager.default_kernel_name={kernel_name}"]
         + list(args),
     )
 

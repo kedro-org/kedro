@@ -18,7 +18,7 @@ holoviews~=1.13.0
 import-linter[toml]==1.2.6
 ipython>=7.31.1, <8.0; python_version > '3.6'
 ipython~=7.16.3; python_version == '3.6'
-Jinja2<3.1.0,
+Jinja2<3.1.0
 joblib>=0.14
 lxml~=4.6.3
 matplotlib>=3.0.3, <3.4  # 3.4.0 breaks holoviews

@@ -7,7 +7,7 @@
 # bit on juptyer console/qtconsole
 -->
 
-This page follows the [Iris dataset example](../get_started/example_project.md) and demonstrates how to use Kedro with IPython, Jupyter Notebook and JupyterLab. We also recommend [a video by Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne) that explains the transition from the use of vanilla Jupyter notebooks to Kedro.
+This page demonstrates how to use Kedro with IPython, Jupyter Notebook and JupyterLab. We also recommend [a video by Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne) that explains the transition from the use of vanilla Jupyter notebooks to Kedro.
 
 <iframe width="560" height="315" style="max-width: 100%" src="https://www.youtube.com/embed/dRnCovp1GRQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -20,21 +20,21 @@ There are reasons why you may want to use a notebook, although in general, the p
 
 ## Kedro IPython extension
 
-The best way to interact with Kedro in IPython and Jupyter is through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`. This launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `context`, `session`, `catalog` and `pipelines`. It also provides the `%reload_kedro` line magic that is useful for reloading these variables (for example, if you change entries in your Data Catalog).
+The recommended way to interact with Kedro in IPython and Jupyter is through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`. This launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` line magic that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
 The simplest way to make use of the Kedro IPython extension is through the following commands:
 * `kedro ipython`. This launches an IPython shell with the extension already loaded and is equivalent to the command `ipython --ext kedro.extras.extensions.ipython`.
 * `kedro jupyter notebook`. This creates a custom Jupyter kernel that automatically loads the extension and launches Jupyter Notebook with this kernel selected.
 * `kedro jupyter lab`. This creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected.
 
-Running any of the above from within your Kedro project will make the `context`, `session`, `catalog` and `pipelines` variables immediately accessible to you. 
+Running any of the above from within your Kedro project will make the `catalog`, `context`, `pipelines` and `session` variables immediately accessible to you. 
 
-If the above commands are not available to you (e.g. if you are working on a managed Jupyter service such as a Databricks notebook) then equivalent behaviour can be achieved by explicitly loading the Kedro IPython extension using the `%load_ext` line magic:
+If the above commands are not available to you (e.g. you work in a managed Jupyter service such as a Databricks notebook) then equivalent behaviour can be achieved by explicitly loading the Kedro IPython extension with the `%load_ext` line magic:
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython
 ```
 
-If your IPython or Jupyter instance was launched from outside your Kedro project then you will need to run a second line magic to set the project path so that Kedro can load the `context`, `session`, `catalog` and `pipelines` variables:
+If your IPython or Jupyter instance was launched from outside your Kedro project then you will need to run a second line magic to set the project path so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
 ```ipython
 In [2]: %reload_kedro <path_to_project_root>
 ```
@@ -47,165 +47,132 @@ In [3]: %reload_kedro
 ```
 
 ```eval_rst
-    .. note:: Note that if you want to pass arguments to the `reload_kedro` line magic, you should call it like a normal Python function (e.g `reload_kedro(env=env, extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(extra_params=extra_params)` wouldn’t work). You might have to call `%automagic False` beforehand to make this work.
+.. note:: Note that if you want to pass arguments to the :code:`reload_kedro` line magic, e.g. to specify a configuration environment, you should call it like a normal Python function (:code:`reload_kedro(env=env, extra_params=extra_params`) rather than using :code:`%reload_kedro` in a notebook cell (:code:`%reload_kedro(extra_params=extra_params)` wouldn’t work). You might have to call :code:`%automagic False` beforehand to make this work.
 ```
 
-## Kedro and IPython
+## Kedro variables: `catalog`, `context`, `pipelines` and `session`
 
-You may want to use a Python kernel inside a Jupyter notebook (formerly known as IPython) to experiment with your Kedro code.
+The Kedro IPython extension makes the following variables available in your IPython or Jupyter session: 
 
-To start a standalone IPython session, run the following command in the root directory of your Kedro project:
+* `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
+* `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
+* `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) instance that orchestrates the run
 
-```bash
-kedro ipython
-```
-This opens an iPython session in your shell, which you can terminate, when you have finished, by typing:
+We will now give some examples of how these variables can be used in the [Iris example project](../get_started/example_project.md). To explore the full range of attributes methods and methods available, you might like to consult the relevant [API documentation](/kedro) or use [the Python `dir` function](https://docs.python.org/3/library/functions.html#dir) (e.g. `dir(catalog)`).
 
-```python
-exit()
-```
-### Load `DataCatalog` in IPython
+### `catalog`
 
-To test the IPython session, load the [Iris test example](https://www.kaggle.com/uciml/iris) data inside the IPython console as follows:
+`catalog` can be used to explore your [Data Catalog](../data/data_catalog.md), including parameters. Useful methods include `catalog.list`, `catalog.load` and `catalog.save`. For example:
 
-```python
-catalog.load("example_iris_data").head()
-```
-You should see the following in your shell:
+```ipython
+In [1]: catalog.list()
+Out[1]: 
+['example_iris_data',
+ 'parameters',
+ 'params:example_test_data_ratio',
+ 'params:example_num_train_iter',
+ 'params:example_learning_rate']
 
-```bash
-kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataSet)...
+In [2]: catalog.load("example_iris_data")
+2022-03-25 11:08:46,274 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataSet)...
+Out[2]: 
+     sepal_length  sepal_width  petal_length  petal_width    species
+0             5.1          3.5           1.4          0.2     setosa
+1             4.9          3.0           1.4          0.2     setosa
+2             4.7          3.2           1.3          0.2     setosa
+3             4.6          3.1           1.5          0.2     setosa
+4             5.0          3.6           1.4          0.2     setosa
+..            ...          ...           ...          ...        ...
+145           6.7          3.0           5.2          2.3  virginica
+146           6.3          2.5           5.0          1.9  virginica
+147           6.5          3.0           5.2          2.0  virginica
+148           6.2          3.4           5.4          2.3  virginica
+149           5.9          3.0           5.1          1.8  virginica
 
-   sepal_length  sepal_width  petal_length  petal_width species
-0           5.1          3.5           1.4          0.2  setosa
-1           4.9          3.0           1.4          0.2  setosa
-2           4.7          3.2           1.3          0.2  setosa
-3           4.6          3.1           1.5          0.2  setosa
-4           5.0          3.6           1.4          0.2  setosa
-```
+In [3]: catalog.load("parameters")
+2022-03-25 11:23:45,014 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
+Out[3]: 
+{'example_test_data_ratio': 0.2,
+ 'example_num_train_iter': 10000,
+ 'example_learning_rate': 0.01}
 
-
-#### Dataset versioning
-
-If you enable [versioning](../data/data_catalog.md#versioning-datasets-and-ml-models), you can load a particular version of a dataset. Given a catalog entry:
-
-```yaml
-example_train_x:
-  type: pandas.CSVDataSet
-  filepath: data/02_intermediate/example_train_x.csv
-  versioned: true
-```
-
-and having run your pipeline at least once, you may specify which version to load:
-
-```python
-catalog.load("example_train_x", version="2019-12-13T15.08.09.255Z")
-```
-
-## Kedro and Jupyter
-
-You may want to use Jupyter notebooks to experiment with your code as you develop new nodes for a pipeline, although you can write them as regular Python functions without a notebook. To use Kedro's Jupyter session:
-
-```bash
-kedro jupyter notebook
-```
-
-This starts a Jupyter server and opens a window in your default browser.
-
-```eval_rst
-.. note::  If you want Jupyter to listen to a different port number, then run ``kedro jupyter notebook --port <port>``.
-```
-
-Navigate to the `notebooks` folder of your Kedro project and create a new notebook.
-
-![](../meta/images/jupyter_create_new_notebook.png)
-
-```eval_rst
-.. note::  The only kernel available by default has a name of the current project. If you need to access all available kernels, add ``--all-kernels`` to the command above.
-```
-
-Every time you start or restart a Jupyter or IPython session in the CLI using a `kedro` command, a startup script in `.ipython/profile_default/startup/00-kedro-init.py` is executed. It adds the following variables in scope:
-
-* `catalog` (`DataCatalog`) - Data catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`, but it's only created at startup time, whereas `context.catalog` is rebuilt everytime.
-* `context` (`KedroContext`) - Kedro project context that provides access to Kedro's library components.
-* `session` (`KedroSession`) - Kedro session that orchestrates the run
-* `startup_error` (`Exception`) - An error that was raised during the execution of the startup script or `None` if no errors occurred
-
-## How to use `context`
-
-The `context` variable allows you to interact with Kedro library components from within the Kedro Jupyter notebook.
-
-![context input graphic](../meta/images/jupyter_notebook_showing_context.png)
-
-With `context`, you can access the following variables and methods:
-
-- `context.project_path` (`Path`) - Root directory of the project
-- `context.catalog` (`DataCatalog`) - An instance of [DataCatalog](/kedro.io.DataCatalog)
-
-### Run the pipeline
-
-If you wish to run the whole main pipeline within a notebook cell, you can do so by running:
-
-```python
-session.run()
-```
-
-The command runs the nodes from your default project pipeline in a sequential manner.
-
-To parameterise your pipeline run, refer to [a later section on this page on run parameters](#additional-parameters-for-session-run) which lists all available options.
-
-```eval_rst
-.. note::  You can only execute one _successful_ run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run `%reload_kedro` to obtain a new `KedroSession` object.
-```
-
-
-### Parameters
-
-The `context` object exposes the `params` property, which allows you to access all project parameters:
-
-```python
-parameters = context.params  # type: Dict
-parameters["example_test_data_ratio"]
-# returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
 ```
 
 ```eval_rst
-.. note::  You need to reload Kedro variables by calling `%reload_kedro` and re-run the code snippet above if you change the contents of ``parameters.yml``.
+.. note:: If you enable `versioning <../data/data_catalog.md#versioning-datasets-and-ml-models>`_ then you can load a particular version of a dataset, e.g. :code:`catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
 ```
 
-### Load/Save `DataCatalog` in Jupyter
+### `context`
 
-You can load a dataset defined in your `conf/base/catalog.yml`:
+`context` enables you to access to Kedro's library components and project metadata. For example: 
 
-```python
-df = catalog.load("example_iris_data")
-df.head()
+```ipython
+In [1]: context.project_path
+Out[1]: PosixPath('/Users/username/kedro_projects/iris')
 ```
 
-![load the catalog and output head graphic](../meta/images/jupyter_notebook_workflow_loading_data.png)
+### `pipelines`
 
-The save operation in the example below is analogous to the load.
+`pipelines` is a dictionary containing your project's [registered pipelines](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name):
 
-Put the following dataset entry in `conf/base/catalog.yml`:
-
-```yaml
-my_dataset:
-  type: pandas.JSONDataSet
-  filepath: data/01_raw/my_dataset.json
+```ipython
+In [1]: pipelines
+Out[1]: 
+{'de': Pipeline([
+Node(split_data, ['example_iris_data', 'params:example_test_data_ratio'], {'train_x': 'example_train_x', 'train_y': 'example_train_y', 'test_x': 'example_test_x', 'test_y': 'example_test_y'}, 'split')
+]), 'ds': Pipeline([
+Node(train_model, ['example_train_x', 'example_train_y', 'parameters'], 'example_model', 'train'),
+Node(predict, {'model': 'example_model', 'test_x': 'example_test_x'}, 'example_predictions', 'predict'),
+Node(report_accuracy, ['example_predictions', 'example_test_y'], None, 'report')
+]), '__default__': Pipeline([
+Node(split_data, ['example_iris_data', 'params:example_test_data_ratio'], {'train_x': 'example_train_x', 'train_y': 'example_train_y', 'test_x': 'example_test_x', 'test_y': 'example_test_y'}, 'split'),
+Node(train_model, ['example_train_x', 'example_train_y', 'parameters'], 'example_model', 'train'),
+Node(predict, {'model': 'example_model', 'test_x': 'example_test_x'}, 'example_predictions', 'predict'),
+Node(report_accuracy, ['example_predictions', 'example_test_y'], None, 'report')
+])}
 ```
 
-Next, you need to reload Kedro variables by calling `%reload_kedro` line magic in your Jupyter notebook.
+This can be very useful for exploring your pipeline and the nodes it contains:
 
-Finally, you can save the data by executing the following command:
-
-```python
-my_dict = {"key1": "some_value", "key2": None}
-catalog.save("my_dataset", my_dict)
+```ipython
+In [2]: pipelines["__default__"].all_outputs()
+Out[2]: 
+{'example_model',
+ 'example_predictions',
+ 'example_test_x',
+ 'example_test_y',
+ 'example_train_x',
+ 'example_train_y'}
+ 
+In [3]: [node.name for node in pipelines["__default__"].nodes]
+Out[3]: ['split', 'train', 'predict', 'report']
 ```
 
-### Additional parameters for `session.run()`
+### `session`
+
+`session.run` allows you to run a pipeline. With no arguments, this will run your `__default__` project pipeline in a sequential manner:
+
+```ipython.md
+In [1]: session.run()
+2022-03-25 11:20:48,900 - kedro.framework.session.session - INFO - ** Kedro project iris
+2022-03-25 11:20:48,911 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataSet)...
+2022-03-25 11:20:48,915 - kedro.io.data_catalog - INFO - Loading data from `params:example_test_data_ratio` (MemoryDataSet)...
+2022-03-25 11:20:48,915 - kedro.pipeline.node - INFO - Running node: split: split_data([example_iris_data,params:example_test_data_ratio]) -> [example_train_x,example_train_y,example_test_x,example_test_y]
+...
+2022-03-25 11:20:49,314 - kedro.runner.sequential_runner - INFO - Completed 4 out of 4 tasks
+2022-03-25 11:20:49,314 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+Out[1]: {}
+```
+
+```eval_rst
+.. note::  You can only execute one _successful_ run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run `%reload_kedro` to obtain a new `session`.
+```
+
 You can also specify the following optional arguments for `session.run()`:
 
+<details>
+<summary><b>Click to expand</b></summary>
 ```eval_rst
 +---------------+----------------+-------------------------------------------------------------------------------+
 | Argument name | Accepted types | Description                                                                   |
@@ -235,33 +202,27 @@ You can also specify the following optional arguments for `session.run()`:
 |               |                | by register_pipelines function from src/<package_name>/pipeline_registry.py   |
 +---------------+----------------+-------------------------------------------------------------------------------+
 ```
-
 This list of options is fully compatible with the list of CLI options for the `kedro run` command. In fact, `kedro run` is calling `session.run()` behind the scenes.
+</details>
 
+## Kedro and Jupyter
 
-## Global variables
+You may want to use Jupyter notebooks to experiment with your code as you develop new nodes for a pipeline, although you can write them as regular Python functions without a notebook. To use Kedro's Jupyter session:
 
-Add customised global variables to `.ipython/profile_default/startup/00-kedro-init.py`. For example, if you want to add a global variable for `parameters` from `parameters.yml`, update `reload_kedro()` as follows:
-
-```python
-@register_line_magic
-def reload_kedro(project_path, line=None):
-    """Line magic which reloads all Kedro default variables."""
-    # ...
-    global parameters
-    try:
-        # ...
-        session = KedroSession.create("<your-kedro-project-package-name>", project_path)
-        _activate_session(session)
-        context = session.load_context()
-        parameters = context.params
-        # ...
-        logging.info(
-            "Defined global variable `context`, `session`, `catalog` and `parameters`"
-        )
-    except:
-        pass
+```bash
+kedro jupyter notebook
 ```
+
+This starts a Jupyter server and opens a window in your default browser.
+
+```eval_rst
+.. note::  If you want Jupyter to listen to a different port number, then run ``kedro jupyter notebook --port <port>``.
+```
+
+Navigate to the `notebooks` folder of your Kedro project and create a new notebook.
+
+![](../meta/images/jupyter_create_new_notebook.png)
+
 
 
 ## Convert functions from Jupyter notebooks into Kedro nodes

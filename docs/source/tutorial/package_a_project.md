@@ -42,7 +42,9 @@ Once you have your project installed, you can run your pipelines from any Python
 ```python
 from kedro_spaceflights.__main__ import main
 
-main(["--pipeline", "__default__"]) # or simply main() if you don't want to provide any arguments
+main(
+    ["--pipeline", "__default__"]
+)  # or simply main() if you don't want to provide any arguments
 ```
 
 This is equivalent to running `kedro run` and you can provide all the parameters described by `kedro run --help`.

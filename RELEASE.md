@@ -22,7 +22,9 @@
 ```python
 from my_package.__main__ import main
 
-main(["--pipleine", "my_pipeline"])  # or just main() if no parameters are needed for the run
+main(
+    ["--pipleine", "my_pipeline"]
+)  # or just main() if no parameters are needed for the run
 ```
 * Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
 * Added `save_args` to `feather.FeatherDataSet`.

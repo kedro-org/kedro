@@ -6,6 +6,7 @@ ipython>=7.31.1, <8.0; python_version > '3.6'
 isort~=5.0
 jupyter~=1.0
 jupyter_client>=5.1, <8.0
+Jinja2<3.1.0
 jupyterlab~=3.0
 kedro=={{ cookiecutter.kedro_version }}
 kedro-telemetry~=0.1.0

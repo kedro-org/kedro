@@ -16,11 +16,17 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 ## Major features and improvements
 
 ### Framework
-* Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
-* The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
 * Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
 * Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
 * The `hook_manager` is no longer a global singleton. The `hook_manager` lifecycle is now managed by the `KedroSession`, a new `hook_manager` will be created everytime a `session` is instantiated.
+* Added support for specifying parameters mapping in `pipeline()` without the `params:` prefix.
+* Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
+
+### Project template
+* Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side; you can still define  custom CLI commands by creating your own `cli.py`.
+* Removed `hooks.py` from the Kedro project template. TODO
+* Removed `.ipython` directory from the Kedro project template; the IPython/Jupyter workflow no longer uses IPython profiles.
+* The default `kedro` run configuration environment names can now be set in `settings.py`using the `CONFIG_LOADER_ARGS` variable. The relevant keys to supply are `base_env` and `default_run_env`, which are set to `base` and `local` respectively by default.
 
 ### DataSets
 * Added the following new datasets:
@@ -44,11 +50,7 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 
 ### Dependencies
 * Bumped the minimum version of `pandas` to 1.3. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
-
-### Other
 * Added support for Python 3.9 and 3.10, dropped support for Python 3.6.
-* Added support for specifying parameters mapping in `pipeline()` without the `params:` prefix.
-* Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
 
 ## Breaking changes to the API
 

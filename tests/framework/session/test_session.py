@@ -205,7 +205,7 @@ def fake_project(tmp_path, local_logging_config, mock_package_name):
 
 
 @pytest.fixture
-def fake_username(monkeypatch, mocker):
+def fake_username(monkeypatch):
     username = "user1"
     monkeypatch.setenv("USER", username)
     return username

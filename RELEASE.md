@@ -55,9 +55,12 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 ## Breaking changes to the API
 
 ### Framework
+* Removed `RegistrationSpecs` and its associated `register_config_loader` and `register_catalog` hook specifications in favour of `CONFIG_LOADER_CLASS`/`CONFIG_LOADER_ARGS` and `DATA_CATALOG_CLASS` in `settings.py`.
 * Removed deprecated functions `load_context` and `get_project_context`.
-* Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
-* Added `CONFIG_LOADER_ARGS` to `settings.py` to facilitate the provision of additional keyword arguments to the constructor of the project `config_loader`. The default option for `CONFIG_LOADER_ARGS` is an empty dictionary.
+* Removed deprecated `CONF_SOURCE`, `package_name`, `pipeline`, `pipelines`, `config_loader` and `io` attributes from `KedroContext` as well as the deprecated `KedroContext.run` method.
+* Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
+* Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
+* Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result.
 * The environment defaulting behaviour has been removed from `KedroContext` and is now implemented in a `ConfigLoader` class (or equivalent) with the `base_env` and `default_run_env` attributes.
 * `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
 * The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.

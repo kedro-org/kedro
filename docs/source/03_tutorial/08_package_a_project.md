@@ -35,6 +35,14 @@ For example, having installed project `kedro-spaceflights` and package `kedro_sp
 python -m kedro_spaceflights
 ```
 
+The packaged project can also be run from within a Python file:
+
+```bash
+from kedro_spaceflights__main__ import main
+
+main()
+```
+
 An executable, `kedro-spaceflights`, is also placed in the `bin/` subfolder of the Python installation location.
 
 

@@ -190,7 +190,7 @@ class KedroSession:
         if extra_params:
             session_data["extra_params"] = extra_params
 
-        session_data["username"] = os.getlogin()
+        session_data["username"] = os.environ.get("USER") or os.environ.get("USERNAME")
 
         session._store.update(session_data)
 

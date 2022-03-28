@@ -114,16 +114,12 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 
 ### To update
 
-#### ConfigLoader
-* Update the key-word argument `conf_root` to `conf_source` when calling `ConfigLoader` or `TemplatedConfigLoader` directly.
-* Rename `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`, or your custom implementation, if it calls to `ConfigLoader` or any of its parent classes.
-* If you were using the `KedroContext` to access `ConfigLoader`, please use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
-* Populate `settings.py` with `CONFIG_LOADER_CLASS` set to your expected config loader class (for example `kedro.config.TemplatedConfigLoader` or custom implementation). If `CONFIG_LOADER_CLASS` value is not set, it will default to `kedro.config.ConfigLoader` at runtime.
-* Populate `settings.py` with `CONFIG_LOADER_ARGS` set to a dictionary with expected keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.
-* Update the `settings.py` setting `CONF_ROOT` to `CONF_SOURCE` and set to a string with the expected configuration location. If `CONF_SOURCE` is not set, it will default to "conf".
-
-#### DataCatalog
-* Populate `settings.py` with `DATA_CATALOG_CLASS` set to your expected data catalog class. If `DATA_CATALOG_CLASS` value is not set, it will default to `kedro.io.DataCatalog` at runtime.
+#### `settings.py`
+* If you use a custom config loader class, alter `CONFIG_LOADER_CLASS` in `settings.py` to specify the class (e.g.`kedro.config.TemplatedConfigLoader`). If `CONFIG_LOADER_CLASS` is not set, it will default to `kedro.config.ConfigLoader`. Use `CONFIG_LOADER_ARGS` to specify keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.
+* If you use a custom data catalog class, alter `DATA_CATALOG_CLASS` in `settings.py` to specify the class. If `DATA_CATALOG_CLASS` is not set, it will default to `kedro.io.DataCatalog`.
+* If you have a custom config location (i.e. not `conf`), update the `settings.py` setting `CONF_ROOT` to `CONF_SOURCE` and set it to a string with the expected configuration location. If `CONF_SOURCE` is not set, it will default to "conf".
+* If you call `ConfigLoader` or `TemplatedConfigLoader` directly, update the keyword arguments `conf_root` to `conf_source` and `extra_params` to `runtime_params`.
+* If you use `KedroContext` to access `ConfigLoader`, use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
 
 #### Modular pipelines
 * If you use any modular pipelines with parameters, make sure they are declared with the correct namespace. See example below:

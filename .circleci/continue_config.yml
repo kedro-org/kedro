@@ -518,8 +518,6 @@ workflows:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
     jobs:
-      - win_pip_compile:
-          python_version: "3.10"
 #      - e2e_tests:
 #          matrix:
 #            parameters:
@@ -535,7 +533,7 @@ workflows:
       - win_unit_tests:
           matrix:
             parameters:
-              python_version: ["3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
 #      - lint:
 #          matrix:
 #            parameters:
@@ -544,10 +542,10 @@ workflows:
 #          matrix:
 #            parameters:
 #              python_version: ["3.7", "3.8", "3.9", "3.10"]
-#      - win_pip_compile:
-#          matrix:
-#            parameters:
-#              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - win_pip_compile:
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
 #      - build_docs
 #      - docs_linkcheck
 #      - all_circleci_checks_succeeded:

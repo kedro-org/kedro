@@ -12,6 +12,6 @@ pluggy~=1.0.0
 python-json-logger~=2.0
 PyYAML>=4.2, <6.0
 rope~=0.21.0  # subject to LGPLv3 license
-setuptools>=42.0
+setuptools>=38.0
 toml~=0.10
 toposort~=1.5  # Needs to be at least 1.5 to be able to raise CircularDependencyError

@@ -4,6 +4,7 @@
 * Documented distribution of Kedro pipelines with Dask.
 
 ## Bug fixes and other changes
+* Added `username` to Session store for logging during Experiment Tracking.
 
 ## Upcoming deprecations for Kedro 0.18.0
 

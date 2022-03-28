@@ -90,6 +90,7 @@ main(
 * Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
 * Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result of that.
 * Removed `%init_kedro` IPython line magic, with its functionality incorporated into `%reload_kedro`. This means that if `%reload_kedro` is called with a filepath, that will be set as default for subsequent calls.
+* Removed the `kedro pipeline package/pull` CLI commands, in favour of `kedro micropkg package/pull`.
 
 ## Thanks for supporting contributions
 

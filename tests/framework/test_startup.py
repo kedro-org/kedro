@@ -33,8 +33,7 @@ class TestIsProject:
 
     def test_non_kedro_project(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
-        pyproject_toml_payload = {"tool": {}}
-        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+        mocker.patch.object(Path, "read_text", return_value="[tool]")
 
         assert not _is_project(self.project_path)
 

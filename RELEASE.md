@@ -23,8 +23,8 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
 
 ### Project template
-* Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side; you can still define  custom CLI commands by creating your own `cli.py`.
-* Removed `hooks.py` from the Kedro project template. TODO
+* Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side; you can still define custom CLI commands by creating your own `cli.py`.
+* Removed `hooks.py` from the Kedro project template. Registration hooks have been removed in favour of `settings.py` configuration, but you can still define execution timeline hooks by creating your own `hooks.py`.
 * Removed `.ipython` directory from the Kedro project template; the IPython/Jupyter workflow no longer uses IPython profiles.
 * The default `kedro` run configuration environment names can now be set in `settings.py`using the `CONFIG_LOADER_ARGS` variable. The relevant keys to supply are `base_env` and `default_run_env`, which are set to `base` and `local` respectively by default.
 
@@ -106,7 +106,6 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * Removed the `Journal` and `DataCatalogWithDefault`.
 * Removed `%init_kedro` IPython line magic, with its functionality incorporated into `%reload_kedro`. This means that if `%reload_kedro` is called with a filepath, that will be set as default for subsequent calls.
 
-
 ## Migration guide from Kedro 0.17.* to 0.18.*
 
 ### To remove
@@ -170,26 +169,26 @@ The parameters should look like this:
 * If you were packaging any modular pipelines with `kedro pipeline package my_pipeline`, please use `kedro micropkg package pipelines.my_pipeline` instead.
 * Similarly, if you were packaging any modular pipelines using `pyproject.toml`, you should modify the keys to include the full module path, and wrapped in double-quotes, e.g:
 
-  ```toml
-  [tool.kedro.micropkg.package]
-  data_engineering = {destination = "path/to/here"}
-  data_science = {alias = "ds", env = "local"}
+```toml
+[tool.kedro.micropkg.package]
+data_engineering = {destination = "path/to/here"}
+data_science = {alias = "ds", env = "local"}
 
-  [tool.kedro.micropkg.pull]
-  "s3://my_bucket/my_pipeline" = {alias = "aliased_pipeline"}
-  ```
+[tool.kedro.micropkg.pull]
+"s3://my_bucket/my_pipeline" = {alias = "aliased_pipeline"}
+```
 
-  becomes
+becomes
 
-  ```toml
-  [tool.kedro.micropkg.package]
-  "pipelines.data_engineering" = {destination = "path/to/here"}
-  "pipelines.data_science" = {alias = "ds", env = "local"}
+```toml
+[tool.kedro.micropkg.package]
+"pipelines.data_engineering" = {destination = "path/to/here"}
+"pipelines.data_science" = {alias = "ds", env = "local"}
 
   [tool.kedro.micropkg.pull]
   "s3://my_bucket/my_pipeline" = {alias = "pipelines.aliased_pipeline"}
 
-  ```
+```
 
 #### DataSets
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.

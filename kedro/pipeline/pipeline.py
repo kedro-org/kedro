@@ -1,7 +1,6 @@
 """A ``Pipeline`` is a collection of ``Node`` objects which can be executed as
 a Directed Acyclic Graph, sequentially or in parallel. The ``Pipeline`` class
-offers quick access to input dependencies,
-produced outputs and execution order.
+offers quick access to input dependencies, produced outputs and execution order.
 """
 import copy
 import json

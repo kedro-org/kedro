@@ -5,6 +5,8 @@
 
 ## Bug fixes and other changes
 * Fix `kedro new` invalid package name when user input contains hyphen.
+* Added `username` to Session store for logging during Experiment Tracking.
+
 
 ## Upcoming deprecations for Kedro 0.18.0
 

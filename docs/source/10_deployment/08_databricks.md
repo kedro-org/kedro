@@ -1,25 +1,22 @@
 # Deployment to a Databricks cluster
 
-This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
-
-* [Databricks Connect workflow](#run-the-kedro-project-with-databricks-connect) (recommended)
-* [Databricks Notebook workflow](#run-kedro-project-from-a-databricks-notebook) (the setup of this is more involved)
+This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws).
 
 ## Prerequisites
-
-Both section have the following prerequisites:
 
 * New or existing [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/) with administrative privileges
 * Active [Databricks deployment](https://docs.databricks.com/getting-started/account-setup.html) on AWS (Databricks Community Edition won't suffice as it doesn't allow you to provision personal tokens)
 * [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) installed on your local machine
+* An account on [GitHub](https://github.com/) (free tier or above)
+* [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) installed on your local machine
 
-## Run the Kedro project with Databricks Connect
 
-In this section, we show how to create a sample Iris project with PySpark, connect it to the Databricks cluster using [Databricks Connect](https://docs.databricks.com/dev-tools/databricks-connect.html), and trigger a run from the local machine.
+## Running Kedro project from a Databricks notebook
 
-```eval_rst
-.. note:: The additional requirement in this section is to have `Java 8 installed <https://www.java.com/en/download/help/download_options.html>`_ on your local machine (as Databricks Connect does not support Java 11).
-```
+As noted in [this post describing CI/CD automation on Databricks](https://databricks.com/blog/2020/06/05/automate-continuous-integration-and-continuous-delivery-on-databricks-using-databricks-labs-ci-cd-templates.html#toc-2), _"Users may find themselves struggling to keep up with the numerous notebooks containing the ETL, data science experimentation, dashboards etc."_
+
+Therefore, we do not recommend that you rely on the notebooks for running and/or deploying your Kedro pipelines unless it is unavoidable. The workflow described in this section may be useful for experimentation and initial data analysis stages, but it is _not_ designed for productionisation.
+
 
 ### 1. Project setup
 
@@ -33,7 +30,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.17.6"
+pip install "kedro~=0.17.7"
 # name your project Iris Databricks when prompted for it
 kedro new --starter pyspark-iris
 ```
@@ -58,7 +55,6 @@ You should get a similar output:
 2020-09-09 18:57:36,762 - kedro.runner.sequential_runner - INFO - Completed 5 out of 5 tasks
 2020-09-09 18:57:36,762 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
-
 ### 3. Create a Databricks cluster
 
 If you already have an active cluster with runtime version `7.1`, you can skip this step. Here is [how to find clusters](https://docs.databricks.com/clusters/clusters-manage.html) in your Databricks workspace.
@@ -74,154 +70,11 @@ Follow the [Databricks official guide](https://docs.databricks.com/clusters/crea
 
 While your cluster is being provisioned, you can continue to the next step.
 
-### 4. Install Databricks Connect
-
-[Databricks Connect](https://docs.databricks.com/dev-tools/databricks-connect.html) is a Python library that you must install within your local environment:
-
-```bash
-# first, we need to uninstall pyspark package
-# as Databricks Connect comes with its own implementation of it
-pip uninstall -y pyspark
-
-# install the version equal to the cluster environment
-pip install "databricks-connect==7.1"
-```
-
-### 5. Configure Databricks Connect
-
-You can [create the personal access token](https://docs.databricks.com/dev-tools/api/latest/authentication.html#generate-a-personal-access-token) needed by Databricks Connect by following the official documentation.
-
-```eval_rst
-.. note:: Databricks Community Edition does not allow you to provision personal tokens, therefore it won't work for this.
-```
-
-You also need to retrieve the [Databricks workspace URL](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) (the domain you log into when accessing your deployment), and the [Cluster ID](https://docs.databricks.com/workspace/workspace-details.html#cluster-url-and-id), which you connect to.
-
-Now, as you have all the necessary credentials, [configure `databricks-connect`](https://docs.databricks.com/dev-tools/databricks-connect.html#step-2-configure-connection-properties). To do so, run the CLI command and follow the prompts:
-
-```bash
-databricks-connect configure
-```
-
-Alternatively, you can configure Databricks Connect by setting the environment variables as follows:
-
-```bash
-export DATABRICKS_ADDRESS=https://dbc-XXXXXXXX-XXXX.cloud.databricks.com \
-    DATABRICKS_API_TOKEN=XXX \
-    DATABRICKS_CLUSTER_ID=XXXX-XXXXXX-XXXXXX \
-    DATABRICKS_ORG_ID=0 \
-    DATABRICKS_PORT=15001
-```
-
-Let's test the configuration by running from the CLI:
-
-```bash
-databricks-connect test
-```
-
-### 6. Copy local data into DBFS
-
-Our Spark jobs will now run on Databricks, so we need to give them access to the relevant input data. Copy your local `data/` directory into the [Databricks File System (DBFS)](https://docs.databricks.com/data/databricks-file-system.html).
-
-Run `python` from the CLI to start the interactive session, and then execute the following script:
-
-```python
-from pyspark.dbutils import DBUtils
-from pyspark.sql import SparkSession
-
-from pathlib import Path
-
-spark = SparkSession.builder.getOrCreate()
-dbutils = DBUtils(spark.sparkContext)
-
-data_dir = Path.cwd() / "data"
-dbutils.fs.cp(
-    f"file://{data_dir.as_posix()}", "dbfs:/iris-databricks/data", recurse=True
-)
-
-# make sure DBFS ls returns a similar result
-dbutils.fs.ls("dbfs:/iris-databricks/data/01_raw/")
-# [FileInfo(path='dbfs:/iris-databricks/data/01_raw/.gitkeep', name='.gitkeep', size=0),
-# FileInfo(path='dbfs:/iris-databricks/data/01_raw/iris.csv', name='iris.csv', size=3858)]
-```
-
-Then type `exit()` to terminate the Python session.
-
-Finally, modify the project catalog so that the `example_iris_data` dataset points to a new DBFS location instead of local. You can use Kedro [configuration environments](../04_kedro_project_setup/02_configuration.md#additional-configuration-environments) for this.
-
-Copy the `catalog.yml` from `base` into `dbfs` environment by running the CLI command:
-
-```bash
-mkdir conf/dbfs
-cp conf/base/catalog.yml conf/dbfs/catalog.yml
-```
-
-Then open `conf/dbfs/catalog.yml` in any text editor and modify the `filepath` for `example_iris_data` as follows:
-
-```yaml
-example_iris_data:
-  type: spark.SparkDataSet
-  filepath: dbfs:/iris-databricks/data/01_raw/iris.csv  # <<< change the filepath to this
-  file_format: csv
-  load_args:
-    header: true
-    inferSchema: true
-  save_args:
-    sep: ","
-    header: true
-```
-
-### 7. Run the project
-
-Configuration is now complete, and you are ready to run your Kedro project on Databricks!
-
-Trigger the run from the CLI locally using the `dbfs` configuration environment:
-
-```bash
-kedro run --env dbfs
-```
-
-You will notice that the logs of the run execution differ slightly. You should see similar output:
-```console
-...
-2020-09-09 20:28:16,482 - kedro.io.data_catalog - INFO - Loading data from `example_predictions` (MemoryDataSet)...
-2020-09-09 20:28:16,483 - kedro.pipeline.node - INFO - Running node: report_accuracy([example_predictions]) -> None
-View job details at https://dbc-XXXXXX-XXXX.cloud.databricks.com/?o=0#/setting/clusters/XXXX-XXXXXX-XXXXXX/sparkUi
-2020-09-09 20:28:19,531 - iris_databricks.pipelines.data_science.nodes - INFO - Model accuracy: 97.06%
-2020-09-09 20:28:19,533 - kedro.runner.sequential_runner - INFO - Completed 5 out of 5 tasks
-2020-09-09 20:28:19,533 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
-```
-
-Open the `Spark UI` tab in your Databricks cluster UI, and you should see a similar list of completed jobs:
-
-![](../meta/images/spark_jobs_databricks.png)
-
-
-## Run Kedro project from a Databricks notebook
-
-As noted in [this post describing CI/CD automation on Databricks](https://databricks.com/blog/2020/06/05/automate-continuous-integration-and-continuous-delivery-on-databricks-using-databricks-labs-ci-cd-templates.html#toc-2), _"Users may find themselves struggling to keep up with the numerous notebooks containing the ETL, data science experimentation, dashboards etc."_
-
-Therefore, we do not recommend that you rely on the notebooks for running and/or deploying your Kedro pipelines unless it is unavoidable. The workflow described in this section may be useful for experimentation and initial data analysis stages, but it is _not_ designed for productionisation.
-
-### Extra requirements
-
-In addition to the [common prerequisites](#prerequisites), to run through this section you would need:
-
-* An account on [GitHub](https://github.com/) (free tier or above)
-* [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) installed on your local machine
-
-### 1. Create Kedro project
-
-Firstly, we will need to reproduce the first three steps from the previous section:
-1. [Project setup](#project-setup)
-2. [Dependency installation](#install-dependencies-and-run-locally)
-3. [Databricks cluster provisioning](#create-a-databricks-cluster)
-
-As a result you should get:
+As a result you should have:
 * A Kedro project, which runs with the local version of PySpark library
 * A running Databricks cluster
 
-### 2. Create GitHub personal access token
+### 4. Create GitHub personal access token
 
 To synchronise the project between the local development environment and Databricks we will use a private GitHub repository that you will create in the next step. For authentication we will need a GitHub personal access token, so go ahead and [create such token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) in your GitHub developer settings.
 
@@ -229,7 +82,7 @@ To synchronise the project between the local development environment and Databri
 .. note:: Make sure that ``repo`` scopes are enabled for your token.
 ```
 
-### 3. Create a GitHub repository
+### 5. Create a GitHub repository
 
 Now you should [create a new repository in GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo) using the official guide. You can keep the repository private and you don't need to commit to it just yet.
 
@@ -238,7 +91,7 @@ To connect to the newly created repository you can use one of 2 options:
 * **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys) configured for GitHub
 * **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
 
-### 4. Push Kedro project to the GitHub repository
+### 6. Push Kedro project to the GitHub repository
 
 We will use a CLI to push the newly created Kedro project to GitHub. First, you need to initialise Git in your project root directory:
 
@@ -274,7 +127,7 @@ git remote -v
 git push --set-upstream origin main
 ```
 
-### 5. Configure the Databricks cluster
+### 7. Configure the Databricks cluster
 
 The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#create-github-personal-access-token).
 
@@ -297,7 +150,7 @@ Then in the `Environment Variables` section add your `GITHUB_USER` and `GITHUB_T
 
 Then press `Confirm` button. Your cluster will be restarted to apply the changes, this will take a few minutes.
 
-### 6. Run your Kedro project from the Databricks notebook
+### 8. Run your Kedro project from the Databricks notebook
 
 Congratulations, you are now ready to run your Kedro project from the Databricks!
 

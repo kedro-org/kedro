@@ -109,9 +109,6 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * Removed the `Journal` and `DataCatalogWithDefault`.
 * Removed `%init_kedro` IPython line magic, with its functionality incorporated into `%reload_kedro`. This means that if `%reload_kedro` is called with a filepath, that will be set as default for subsequent calls.
 
-## Thanks for supporting contributions
-
-[Deepyaman Datta](https://github.com/deepyaman), [Lucas Jamar](https://github.com/lucasjamar), [Simon Brugman](https://github.com/sbrugman)
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 

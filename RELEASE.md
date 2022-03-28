@@ -37,6 +37,11 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
 * Added `save_args` to `feather.FeatherDataSet`.
 
+### Jupyter and IPython integration
+* The only recommended way to work with Kedro in Jupyter or IPython is now the Kedro IPython extension. Managed Jupyter instances should load this via `%load_ext kedro.extras.extensions.ipython` and use the line magic `%reload_kedro`.
+* `kedro ipython` launches an IPython session that preloads the Kedro IPython extension. 
+* `kedro jupyter notebook/lab` creates a custom Jupyter kernel that preloads the Kedro IPython extension and launches a notebook with that kernel selected. There is no longer a need to specify `--all-kernels` to show all available kernels.
+
 ### Dependencies
 * Bumped the minimum version of `pandas` to 1.3. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
 
@@ -94,6 +99,7 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
 * Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 * Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
+* `kedro jupyter notebook/lab` no longer accept `--all-kernels` or `--idle-timeout` flags. `--all-kernels` is now the default behaviour. 
 
 ### Other
 * Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
@@ -101,7 +107,7 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
 * Removed transformer API from `DataCatalog`, as well as the modules `kedro.extras.transformers` and `kedro.io.transformers`.
 * Removed the `Journal` and `DataCatalogWithDefault`.
-
+* Removed `%init_kedro` IPython line magic, with its functionality incorporated into `%reload_kedro`. This means that if `%reload_kedro` is called with a filepath, that will be set as default for subsequent calls.
 
 ## Thanks for supporting contributions
 

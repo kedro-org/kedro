@@ -109,17 +109,15 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 ## Migration guide from Kedro 0.17.* to 0.18.*
 
 ### To remove
-* Please remove any existing `hook_impl` of the `register_config_loader` and `register_catalog` methods from `ProjectHooks` (or custom alternatives).
+* Please remove any existing `hook_impl` of the `register_config_loader` and `register_catalog` methods from `ProjectHooks` in `hooks.py` (or custom alternatives).
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 
 ### To update
 
-#### `settings.py`
-* If you use a custom config loader class, alter `CONFIG_LOADER_CLASS` in `settings.py` to specify the class (e.g.`kedro.config.TemplatedConfigLoader`). If `CONFIG_LOADER_CLASS` is not set, it will default to `kedro.config.ConfigLoader`. Use `CONFIG_LOADER_ARGS` to specify keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.
-* If you use a custom data catalog class, alter `DATA_CATALOG_CLASS` in `settings.py` to specify the class. If `DATA_CATALOG_CLASS` is not set, it will default to `kedro.io.DataCatalog`.
-* If you have a custom config location (i.e. not `conf`), update the `settings.py` setting `CONF_ROOT` to `CONF_SOURCE` and set it to a string with the expected configuration location. If `CONF_SOURCE` is not set, it will default to "conf".
-* If you call `ConfigLoader` or `TemplatedConfigLoader` directly, update the keyword arguments `conf_root` to `conf_source` and `extra_params` to `runtime_params`.
-* If you use `KedroContext` to access `ConfigLoader`, use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
+#### Project `settings.py` file
+* If you use a custom config loader class, alter `CONFIG_LOADER_CLASS` to specify the class (e.g.`kedro.config.TemplatedConfigLoader`) and `CONFIG_LOADER_ARGS` to specify keyword arguments. If not set, these default to `kedro.config.ConfigLoader` and an empty dictionary respectively.
+* If you use a custom data catalog class, alter `DATA_CATALOG_CLASS` to specify the class. If not set, this defaults to `kedro.io.DataCatalog`.
+* If you have a custom config location (i.e. not `conf`), update `CONF_ROOT` to `CONF_SOURCE` and set it to a string with the expected configuration location. If not set, this defaults to `"conf"`.
 
 #### Modular pipelines
 * If you use any modular pipelines with parameters, make sure they are declared with the correct namespace. See example below:
@@ -195,9 +193,11 @@ becomes
 * If you have any `pandas.AppendableExcelDataSet` entries in your catalog, replace them with `pandas.ExcelDataSet`.
 * If you have any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 
-#### CLI
+#### Other
 * Edit any scripts containing `kedro pipeline package --version` to use `kedro micropkg package` instead. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
 * To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
+* If you call `ConfigLoader` or `TemplatedConfigLoader` directly, update the keyword arguments `conf_root` to `conf_source` and `extra_params` to `runtime_params`.
+* If you use `KedroContext` to access `ConfigLoader`, use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
 
 #### Hooks
 * If you use `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead.

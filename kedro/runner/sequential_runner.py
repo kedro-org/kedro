@@ -6,6 +6,8 @@ of provided nodes.
 from collections import Counter
 from itertools import chain
 
+from pluggy import PluginManager
+
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner, run_node
@@ -41,14 +43,18 @@ class SequentialRunner(AbstractRunner):
         return MemoryDataSet()
 
     def _run(
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         """The method implementing sequential pipeline running.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
-            run_id: The id of the run.
+            session_id: The id of the session.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -60,7 +66,7 @@ class SequentialRunner(AbstractRunner):
 
         for exec_index, node in enumerate(nodes):
             try:
-                run_node(node, catalog, self._is_async, run_id)
+                run_node(node, catalog, hook_manager, self._is_async, session_id)
                 done_nodes.add(node)
             except Exception:
                 self._suggest_resume_scenario(pipeline, done_nodes)

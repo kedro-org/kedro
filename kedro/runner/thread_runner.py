@@ -8,6 +8,8 @@ from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
 from typing import Set
 
+from pluggy import PluginManager
+
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -79,14 +81,18 @@ class ThreadRunner(AbstractRunner):
         )
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
-            run_id: The id of the run.
+            session_id: The id of the session.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -107,7 +113,14 @@ class ThreadRunner(AbstractRunner):
                 todo_nodes -= ready
                 for node in ready:
                     futures.add(
-                        pool.submit(run_node, node, catalog, self._is_async, run_id)
+                        pool.submit(
+                            run_node,
+                            node,
+                            catalog,
+                            hook_manager,
+                            self._is_async,
+                            session_id,
+                        )
                     )
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)

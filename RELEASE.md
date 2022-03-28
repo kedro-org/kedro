@@ -62,13 +62,6 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
 * The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
 * Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
-* Removed the `config_loader` property from `KedroContext`.
-* Removed deprecated `CONF_SOURCE`, `package_name`, `pipeline`, `pipelines`, and `io` attributes from `KedroContext` as well as the deprecated `KedroContext.run` method.
-* Removed `ProjectHooks.register_catalog` `hook_spec` in favour of loading `DATA_CATALOG_CLASS` directly from `settings.py`. The default option for `DATA_CATALOG_CLASS` is now set to `kedro.io.DataCatalog`.
-* Removed `RegistrationSpecs` and all registration hooks that belonged to it. Going forward users can register custom library components through `settings.py`.
-* Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
-* Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
-* Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result of that.
 
 ### DataSets
 * `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
@@ -101,15 +94,6 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * `kedro jupyter notebook/lab` no longer accept `--all-kernels` or `--idle-timeout` flags. `--all-kernels` is now the default behaviour.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
-* Removed the `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.
-* Removed `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
-* `kedro pipeline package` has been replaced by `kedro micropkg package` and now accepts a module name and path to the pipeline or utility module to package, relative to `src/<package_name>/`. In addition to the `--alias` flag used to rename the package.
-* `kedro pipeline pull` has been replaced by `kedro micropkg pull` and now also supports `--destination` to provide a location for pulling the package.
-* The `kedro package` and `kedro micropkg package` now save `egg` and `whl` or `tar` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
-* Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
-* Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
-* Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
-* `kedro jupyter notebook/lab` no longer accept `--all-kernels` or `--idle-timeout` flags. `--all-kernels` is now the default behaviour. 
 
 ### Other
 * Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)

@@ -34,7 +34,7 @@ from pathlib import Path
 import click
 
 from prefect import Client, Flow, Task
-from prefect.utilities.exceptions import ClientError
+from prefect.exceptions import ClientError
 
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession

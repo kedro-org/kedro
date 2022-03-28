@@ -205,9 +205,11 @@ def fake_project(tmp_path, local_logging_config, mock_package_name):
 
 
 @pytest.fixture
-def fake_username(monkeypatch):
+def fake_username(mocker):
     username = "user1"
-    monkeypatch.setenv("USER", username)
+    mocker.patch(
+        "kedro.framework.session.session.getpass.getuser", return_value=username
+    )
     return username
 
 
@@ -255,8 +257,8 @@ class TestKedroSession:
             expected_store["env"] = env
         if extra_params:
             expected_store["extra_params"] = extra_params
-        if fake_username:
-            expected_store["username"] = fake_username
+
+        expected_store["username"] = fake_username
 
         assert session.store == expected_store
         # called for logging setup
@@ -295,8 +297,7 @@ class TestKedroSession:
             "cli": expected_cli_data,
         }
 
-        if fake_username:
-            expected_store["username"] = fake_username
+        expected_store["username"] = fake_username
 
         assert session.store == expected_store
         mock_context_class.assert_called_once_with(

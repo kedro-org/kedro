@@ -1,5 +1,6 @@
 # pylint: disable=invalid-name,global-statement
 """This module implements Kedro session responsible for project lifecycle."""
+import getpass
 import logging
 import logging.config
 import os
@@ -190,7 +191,7 @@ class KedroSession:
         if extra_params:
             session_data["extra_params"] = extra_params
 
-        session_data["username"] = os.environ.get("USER") or os.environ.get("USERNAME")
+        session_data["username"] = getpass.getuser()
 
         session._store.update(session_data)
 

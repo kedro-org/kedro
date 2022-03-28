@@ -166,8 +166,8 @@ The parameters should look like this:
 ```diff
 [tool.kedro.micropkg.package]
 -data_engineering = {destination = "path/to/here"}
-+"pipelines.data_engineering" = {destination = "path/to/here"}
 -data_science = {alias = "ds", env = "local"}
++"pipelines.data_engineering" = {destination = "path/to/here"}
 +"pipelines.data_science" = {alias = "ds", env = "local"}
 
 [tool.kedro.micropkg.pull]

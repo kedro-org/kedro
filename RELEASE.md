@@ -126,7 +126,7 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * Populate `settings.py` with `DATA_CATALOG_CLASS` set to your expected data catalog class. If `DATA_CATALOG_CLASS` value is not set, it will default to `kedro.io.DataCatalog` at runtime.
 
 #### Modular pipelines
-* If you are using any modular pipelines with parameters, make sure they are declared with the correct namespace. See example below:
+* If you use any modular pipelines with parameters, make sure they are declared with the correct namespace. See example below:
 
 For a given pipeline:
 ```python
@@ -165,8 +165,8 @@ The parameters should look like this:
 
 ```
 
-* If you were pulling any modular pipelines with `kedro pipeline pull my_pipeline --alias other_pipeline`, please use `kedro micropkg pull my_pipeline --alias pipelines.other_pipeline` instead.
-* If you were packaging any modular pipelines with `kedro pipeline package my_pipeline`, please use `kedro micropkg package pipelines.my_pipeline` instead.
+* If you pull modular pipelines with `kedro pipeline pull my_pipeline --alias other_pipeline`, now use `kedro micropkg pull my_pipeline --alias pipelines.other_pipeline` instead.
+* If you package any modular pipelines with `kedro pipeline package my_pipeline`, no use `kedro micropkg package pipelines.my_pipeline` instead.
 * Similarly, if you were packaging any modular pipelines using `pyproject.toml`, you should modify the keys to include the full module path, and wrapped in double-quotes, e.g:
 
 ```toml
@@ -185,28 +185,27 @@ becomes
 "pipelines.data_engineering" = {destination = "path/to/here"}
 "pipelines.data_science" = {alias = "ds", env = "local"}
 
-  [tool.kedro.micropkg.pull]
-  "s3://my_bucket/my_pipeline" = {alias = "pipelines.aliased_pipeline"}
+[tool.kedro.micropkg.pull]
+"s3://my_bucket/my_pipeline" = {alias = "pipelines.aliased_pipeline"}
 
 ```
 
 #### DataSets
-* If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
-* If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
-* If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, please update this to `append` in line with the Spark styleguide. If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, please make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
-* If you were using `pandas~=1.2.0` and passing `storage_options` through `load_args` or `savs_args`, please specify them under `fs_args` or via `credentials` instead.
-* If you were importing from `kedro.io.lambda_data_set`, `kedro.io.memory_data_set`, or `kedro.io.partitioned_data_set`, change the import to `kedro.io.lambda_dataset`, `kedro.io.memory_dataset`, or `kedro.io.partitioned_dataset`, respectively (or import the dataset directly from `kedro.io`).
-* If you had any `pandas.AppendableExcelDataSet` entries in your catalog, replace them with `pandas.ExcelDataSet`.
-* If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
+* If you use `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
+* If you use`pandas.ParquetDataSet`, pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
+* If you use `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, this to `append` in line with the Spark styleguide. If you use `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
+* If you use `pandas~=1.2.0` and pass `storage_options` through `load_args` or `savs_args`, specify them under `fs_args` or via `credentials` instead.
+* If you import from `kedro.io.lambda_data_set`, `kedro.io.memory_data_set`, or `kedro.io.partitioned_data_set`, change the import to `kedro.io.lambda_dataset`, `kedro.io.memory_dataset`, or `kedro.io.partitioned_dataset`, respectively (or import the dataset directly from `kedro.io`).
+* If you have any `pandas.AppendableExcelDataSet` entries in your catalog, replace them with `pandas.ExcelDataSet`.
+* If you have any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 
 #### CLI
 * Edit any scripts containing `kedro pipeline package --version` to use `kedro micropkg package` instead. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
 * To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
 
 #### Hooks
-* If you were using `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead.
-* If you were using `run_id` in any of the `before_node_run`, `after_node_run`, `on_node_error`, `before_pipeline_run`, `after_pipeline_run` or `on_pipeline_error` hooks, replace it with `session_id` instead.
-
+* If you use `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead.
+* If you use `run_id` in any of the `before_node_run`, `after_node_run`, `on_node_error`, `before_pipeline_run`, `after_pipeline_run` or `on_pipeline_error` hooks, replace it with `session_id` instead.
 
 # Release 0.17.7
 

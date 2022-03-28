@@ -651,3 +651,21 @@ def check_path_doesnt_exist(context: behave.runner.Context, path: str):
 def check_file_exists(context: behave.runner.Context, filepath: str):
     filepath = context.root_project_dir / filepath
     assert filepath.is_file()
+
+
+@given("I have installed the project dependencies")
+@when("I install the project dependencies")
+def pip_install_dependencies(context):
+    """Install project dependencies using pip."""
+    reqs_path = "src/requirements.txt"
+    res = run([context.pip, "install", "setuptools", "-U"])
+    res = run(
+        [context.pip, "install", "-r", reqs_path],
+        env=context.env,
+        cwd=str(context.root_project_dir),
+    )
+
+    if res.returncode != OK_EXIT_CODE:
+        print(res.stdout)
+        print(res.stderr)
+        assert False

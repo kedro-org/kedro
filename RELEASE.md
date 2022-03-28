@@ -91,6 +91,14 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ðŸ
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
 
 ### CLI
+* Removed `kedro install` in favour of `pip install -r src/requirements.txt` to install project dependencies.
+* Removed `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.
+* `kedro pipeline package` has been replaced by `kedro micropkg package` and, in addition to the `--alias` flag used to rename the package, now accepts a module name and path to the pipeline or utility module to package, relative to `src/<package_name>/`. The `--version` CLI option has been removed in favour of setting a `__version__` variable in the micro-package's `__init__.py` file.
+* `kedro pipeline pull` has been replaced by `kedro micropkg pull` and now also supports `--destination` to provide a location for pulling the package.
+* Removed `kedro pipeline list` and `kedro pipeline describe` in favour of `kedro registry list` and `kedro registry describe`.
+* `kedro package` and `kedro micropkg package` now save `egg` and `whl` or `tar` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
+* Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
+* `kedro jupyter notebook/lab` no longer accept `--all-kernels` or `--idle-timeout` flags. `--all-kernels` is now the default behaviour.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
 * Removed the `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.

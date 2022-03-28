@@ -658,7 +658,17 @@ def check_file_exists(context: behave.runner.Context, filepath: str):
 def pip_install_dependencies(context):
     """Install project dependencies using pip."""
     reqs_path = "src/requirements.txt"
-    res = run([context.pip, "install", "setuptools", "-U"])
+    # res = run([context.pip, "install", "setuptools", "-U"])
+    res = run(
+        [
+            context.python,
+            "-m",
+            "pip",
+            "install",
+            "setuptools",
+            "-U",
+        ],
+    )
     res = run(
         [context.pip, "install", "-r", reqs_path],
         env=context.env,

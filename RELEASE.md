@@ -10,30 +10,29 @@
 # Upcoming Release 0.18.0
 
 ## TL;DR ‚ú®
-Kedro 0.18.0 strives to reduce the complexity of the project template and get us closer to a stable release of the framework. We've also introduced the full [micro-packaging workflow](/docs/source/nodes_and_pipelines/micro_packaging.md) üì¶, which allows you to import packages, utility functions and existing pipelines into your Kedro project.
-Additionally, the release comes with long-awaited Python 3.9 and 3.10 support üêç.
+Kedro 0.18.0 strives to reduce the complexity of the project template and get us closer to a stable release of the framework. We've introduced the full [micro-packaging workflow](https://kedro.readthedocs.io/en/0.18.0/nodes_and_pipelines/micro_packaging.html) üì¶, which allows you to import packages, utility functions and existing pipelines into your Kedro project. [Integration with IPython and Jupyter](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html) has been streamlined in preparation for enhancements to Kedro's interactive workflow. Additionally, the release comes with long-awaited Python 3.9 and 3.10 support üêç.
 
 ## Major features and improvements
 
 ### Framework
 * Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
 * Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
-* The `hook_manager` is no longer a global singleton. The `hook_manager` lifecycle is now managed by the `KedroSession`, a new `hook_manager` will be created everytime a `session` is instantiated.
+* The `hook_manager` is no longer a global singleton. The `hook_manager` lifecycle is now managed by the `KedroSession`, and a new `hook_manager` will be created every time a `session` is instantiated.
 * Added support for specifying parameters mapping in `pipeline()` without the `params:` prefix.
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
 
 ### Project template
-* Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side; you can still define custom CLI commands by creating your own `cli.py`.
+* Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. You can still define custom CLI commands by creating your own `cli.py`.
 * Removed `hooks.py` from the Kedro project template. Registration hooks have been removed in favour of `settings.py` configuration, but you can still define execution timeline hooks by creating your own `hooks.py`.
-* Removed `.ipython` directory from the Kedro project template; the IPython/Jupyter workflow no longer uses IPython profiles.
-* The default `kedro` run configuration environment names can now be set in `settings.py`using the `CONFIG_LOADER_ARGS` variable. The relevant keys to supply are `base_env` and `default_run_env`, which are set to `base` and `local` respectively by default.
+* Removed `.ipython` directory from the Kedro project template; the IPython/Jupyter workflow no longer uses IPython profiles but instead just an IPython extension. 
+* The default `kedro` run configuration environment names can now be set in `settings.py` using the `CONFIG_LOADER_ARGS` variable. The relevant keyword arguments to supply are `base_env` and `default_run_env`, which are set to `base` and `local` respectively by default.
 
 ### DataSets
 * Added the following new datasets:
 
-| Type                | Description                                                    | Location                       |
-| ------------------- | -------------------------------------------------------------- | ------------------------------ |
-| `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas` |
+| Type                | Description                                                   | Location                       |
+| ------------------- | ------------------------------------------------------------- | ------------------------------ |
+| `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML | `kedro.extras.datasets.pandas` |
 | `networkx.GraphMLDataSet`       |  Work with NetworkX using GraphML files            | `kedro.extras.datasets.networkx` |
 | `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
 
@@ -61,10 +60,12 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ü
 * Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
 * Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
 * Enforced that only one run can be successfully executed as part of a `KedroSession`. `run_id` has been renamed to `session_id` as a result.
+
+### Configuration loaders
+* The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE`. Default value of `conf` remains unchanged.
+* `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source`.
+* `extra_params` has been renamed to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
 * The environment defaulting behaviour has been removed from `KedroContext` and is now implemented in a `ConfigLoader` class (or equivalent) with the `base_env` and `default_run_env` attributes.
-* `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
-* The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
-* Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
 
 ### DataSets
 * `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
@@ -99,8 +100,8 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ü
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
 
 ### Other
-* Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399)
-* Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
+* Added namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/kedro-org/kedro/issues/399).
+* Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`).
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
 * Removed transformer API from `DataCatalog`, as well as the modules `kedro.extras.transformers` and `kedro.io.transformers`.
 * Removed the `Journal` and `DataCatalogWithDefault`.
@@ -108,18 +109,17 @@ Additionally, the release comes with long-awaited Python 3.9 and 3.10 support ü
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 
-### To remove
-* Please remove any existing `hook_impl` of the `register_config_loader` and `register_catalog` methods from `ProjectHooks` in `hooks.py` (or custom alternatives).
-* Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
+### Hooks
+* Remove any existing `hook_impl` of the `register_config_loader` and `register_catalog` methods from `ProjectHooks` in `hooks.py` (or custom alternatives).
+* If you use `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead.
+* If you use `run_id` in any of the `before_node_run`, `after_node_run`, `on_node_error`, `before_pipeline_run`, `after_pipeline_run` or `on_pipeline_error` hooks, replace it with `session_id` instead.
 
-### To update
-
-#### Project `settings.py` file
-* If you use a custom config loader class, alter `CONFIG_LOADER_CLASS` to specify the class (e.g.`kedro.config.TemplatedConfigLoader`) and `CONFIG_LOADER_ARGS` to specify keyword arguments. If not set, these default to `kedro.config.ConfigLoader` and an empty dictionary respectively.
+### `settings.py` file
+* If you use a custom config loader class such as `kedro.config.TemplatedConfigLoader`, alter `CONFIG_LOADER_CLASS` to specify the class and `CONFIG_LOADER_ARGS` to specify keyword arguments. If not set, these default to `kedro.config.ConfigLoader` and an empty dictionary respectively.
 * If you use a custom data catalog class, alter `DATA_CATALOG_CLASS` to specify the class. If not set, this defaults to `kedro.io.DataCatalog`.
 * If you have a custom config location (i.e. not `conf`), update `CONF_ROOT` to `CONF_SOURCE` and set it to a string with the expected configuration location. If not set, this defaults to `"conf"`.
 
-#### Modular pipelines
+### Modular pipelines
 * If you use any modular pipelines with parameters, make sure they are declared with the correct namespace. See example below:
 
 For a given pipeline:
@@ -158,50 +158,37 @@ The parameters should look like this:
 +        - crew
 
 ```
-
+* Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 * If you pull modular pipelines with `kedro pipeline pull my_pipeline --alias other_pipeline`, now use `kedro micropkg pull my_pipeline --alias pipelines.other_pipeline` instead.
-* If you package any modular pipelines with `kedro pipeline package my_pipeline`, no use `kedro micropkg package pipelines.my_pipeline` instead.
-* Similarly, if you were packaging any modular pipelines using `pyproject.toml`, you should modify the keys to include the full module path, and wrapped in double-quotes, e.g:
+* If you package modular pipelines with `kedro pipeline package my_pipeline`, now use `kedro micropkg package pipelines.my_pipeline` instead.
+* Similarly, if you package any modular pipelines using `pyproject.toml`, you should modify the keys to include the full module path, and wrapped in double-quotes, e.g:
 
-```toml
+```diff
 [tool.kedro.micropkg.package]
-data_engineering = {destination = "path/to/here"}
-data_science = {alias = "ds", env = "local"}
+-data_engineering = {destination = "path/to/here"}
++"pipelines.data_engineering" = {destination = "path/to/here"}
+-data_science = {alias = "ds", env = "local"}
++"pipelines.data_science" = {alias = "ds", env = "local"}
 
 [tool.kedro.micropkg.pull]
-"s3://my_bucket/my_pipeline" = {alias = "aliased_pipeline"}
+-"s3://my_bucket/my_pipeline" = {alias = "aliased_pipeline"}
++"s3://my_bucket/my_pipeline" = {alias = "pipelines.aliased_pipeline"}
 ```
 
-becomes
-
-```toml
-[tool.kedro.micropkg.package]
-"pipelines.data_engineering" = {destination = "path/to/here"}
-"pipelines.data_science" = {alias = "ds", env = "local"}
-
-[tool.kedro.micropkg.pull]
-"s3://my_bucket/my_pipeline" = {alias = "pipelines.aliased_pipeline"}
-
-```
-
-#### DataSets
-* If you use `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
+### DataSets
+* If you use `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. This is automatically installed if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.txt`. You can uninstall `xlrd` if you were only using it for this dataset.
 * If you use`pandas.ParquetDataSet`, pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
-* If you use `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, this to `append` in line with the Spark styleguide. If you use `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
+* If you use `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, change this to `append` in line with the Spark styleguide. If you use `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
 * If you use `pandas~=1.2.0` and pass `storage_options` through `load_args` or `savs_args`, specify them under `fs_args` or via `credentials` instead.
 * If you import from `kedro.io.lambda_data_set`, `kedro.io.memory_data_set`, or `kedro.io.partitioned_data_set`, change the import to `kedro.io.lambda_dataset`, `kedro.io.memory_dataset`, or `kedro.io.partitioned_dataset`, respectively (or import the dataset directly from `kedro.io`).
 * If you have any `pandas.AppendableExcelDataSet` entries in your catalog, replace them with `pandas.ExcelDataSet`.
 * If you have any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 
-#### Other
+### Other
 * Edit any scripts containing `kedro pipeline package --version` to use `kedro micropkg package` instead. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
 * To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
 * If you call `ConfigLoader` or `TemplatedConfigLoader` directly, update the keyword arguments `conf_root` to `conf_source` and `extra_params` to `runtime_params`.
 * If you use `KedroContext` to access `ConfigLoader`, use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
-
-#### Hooks
-* If you use `run_id` in the `after_catalog_created` hook, replace it with `save_version` instead.
-* If you use `run_id` in any of the `before_node_run`, `after_node_run`, `on_node_error`, `before_pipeline_run`, `after_pipeline_run` or `on_pipeline_error` hooks, replace it with `session_id` instead.
 
 # Release 0.17.7
 

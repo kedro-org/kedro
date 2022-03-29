@@ -170,8 +170,8 @@ class TestGMLDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match "
-            fr"load version `{load_version}` for GMLDataSet\(.+\)"
+            rf"Save version `{save_version}` did not match "
+            rf"load version `{load_version}` for GMLDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_gml_data_set.save(dummy_graph_data)

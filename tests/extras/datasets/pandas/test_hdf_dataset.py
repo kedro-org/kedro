@@ -205,8 +205,8 @@ class TestHDFDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for HDFDataSet\(.+\)"
+            rf"Save version `{save_version}` did not match load version "
+            rf"`{load_version}` for HDFDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hdf_data_set.save(dummy_dataframe)

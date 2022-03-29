@@ -302,8 +302,8 @@ class TestGenericCSVDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for GenericDataSet\(.+\)"
+            rf"Save version `{save_version}` did not match load version "
+            rf"`{load_version}` for GenericDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_csv_data_set.save(dummy_dataframe)

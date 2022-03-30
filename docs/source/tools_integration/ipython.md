@@ -1,6 +1,6 @@
 # Use Kedro with IPython and Jupyter
 
-This page demonstrates how to use Kedro with IPython, Jupyter Notebook and JupyterLab. We also recommend [a video by Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne) that explains the transition from the use of vanilla Jupyter Notebooks to Kedro.
+This page demonstrates how to use Kedro with IPython, Jupyter Notebook and JupyterLab. We also recommend [a video by Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne) and [a PyCon presentation by Yetunde Dada](https://www.youtube.com/watch?v=JLTYNPoK7nw&ab_channel=PyConUS) that explain the transition from the use of vanilla Jupyter Notebooks to Kedro.
 
 <iframe width="560" height="315" style="max-width: 100%" src="https://www.youtube.com/embed/dRnCovp1GRQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 

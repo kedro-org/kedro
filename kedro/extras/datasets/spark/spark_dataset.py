@@ -177,6 +177,17 @@ class SparkDataSet(AbstractVersionedDataSet):
         >>>     sep: '|'
         >>>     header: True
         >>>
+        >>> weather_schema:
+        >>>   type: spark.SparkDataSet
+        >>>   filepath: s3a://your_bucket/data/01_raw/weather/*
+        >>>   file_format: csv
+        >>>   load_args:
+        >>>     header: True
+        >>>     schema: path/to/schema.json
+        >>>   save_args:
+        >>>     sep: '|'
+        >>>     header: True
+        >>>
         >>> weather_cleaned:
         >>>   type: spark.SparkDataSet
         >>>   filepath: data/02_intermediate/data.parquet
@@ -204,6 +215,8 @@ class SparkDataSet(AbstractVersionedDataSet):
         >>> reloaded = data_set.load()
         >>>
         >>> reloaded.take(4)
+
+
     """
 
     # this dataset cannot be used with ``ParallelRunner``,

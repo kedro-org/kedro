@@ -61,7 +61,7 @@ class TestJupyterNotebookCommand:
     @pytest.mark.parametrize("env_flag,env", [("--env", "base"), ("-e", "local")])
     def test_env(self, env_flag, env, fake_project_cli, fake_metadata, mocker):
         """This tests passing an environment variable to the jupyter subprocess."""
-        mock_environ = mocker.patch.dict("kedro.framework.cli.jupyter.os.environ")
+        mock_environ = mocker.patch("os.environ", {})
         result = CliRunner().invoke(
             fake_project_cli,
             ["jupyter", "notebook", env_flag, env],
@@ -111,7 +111,7 @@ class TestJupyterLabCommand:
     @pytest.mark.parametrize("env_flag,env", [("--env", "base"), ("-e", "local")])
     def test_env(self, env_flag, env, fake_project_cli, fake_metadata, mocker):
         """This tests passing an environment variable to the jupyter subprocess."""
-        mock_environ = mocker.patch.dict("kedro.framework.cli.jupyter.os.environ")
+        mock_environ = mocker.patch("os.environ", {})
         result = CliRunner().invoke(
             fake_project_cli,
             ["jupyter", "lab", env_flag, env],

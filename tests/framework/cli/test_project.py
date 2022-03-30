@@ -268,13 +268,11 @@ class TestIpythonCommand:
         env_flag,
         env,
         fake_project_cli,
-        call_mock,
-        fake_repo_path,
         mocker,
         fake_metadata,
     ):
         """This tests starting ipython with specific env."""
-        mock_environ = mocker.patch.dict("kedro.framework.cli.jupyter.os.environ")
+        mock_environ = mocker.patch("os.environ", {})
         result = CliRunner().invoke(
             fake_project_cli, ["ipython", env_flag, env], obj=fake_metadata
         )

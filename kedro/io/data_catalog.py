@@ -278,7 +278,7 @@ class DataCatalog:
             >>>     "boats": {
             >>>         "type": "pandas.CSVDataSet",
             >>>         "filepath": "s3://aws-bucket-name/boats.csv",
-            >>>         "credentials": "boats_credentials"
+            >>>         "credentials": "boats_credentials",
             >>>         "save_args": {
             >>>             "index": False
             >>>         }

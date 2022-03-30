@@ -155,11 +155,11 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
         )
 
         kernel_json = Path(kernel_path) / "kernel.json"
-        kernel_spec = json.loads(kernel_json.read_text())
+        kernel_spec = json.loads(kernel_json.read_text(encoding="utf-8"))
         kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
         # indent=1 is to match the default ipykernel style (see
         # ipykernel.write_kernel_spec).
-        kernel_json.write_text(json.dumps(kernel_spec, indent=1))
+        kernel_json.write_text(json.dumps(kernel_spec, indent=1), encoding="utf-8")
 
         kedro_extensions_dir = Path(__file__).parents[2] / "extras" / "extensions"
         shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)

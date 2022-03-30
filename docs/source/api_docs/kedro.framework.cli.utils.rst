@@ -17,7 +17,6 @@ kedro.framework.cli.utils
       find_stylesheets
       forward_command
       get_pkg_version
-      ipython_message
       python_call
       split_string
 

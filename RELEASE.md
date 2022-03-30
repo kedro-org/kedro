@@ -4,6 +4,7 @@
 * Documented distribution of Kedro pipelines with Dask.
 
 ## Bug fixes and other changes
+* Added `username` to Session store for logging during Experiment Tracking.
 
 ## Upcoming deprecations for Kedro 0.18.0
 
@@ -20,6 +21,14 @@ Kedro 0.18.0 strives to reduce the complexity of the project template and get us
 * The `hook_manager` is no longer a global singleton. The `hook_manager` lifecycle is now managed by the `KedroSession`, and a new `hook_manager` will be created every time a `session` is instantiated.
 * Added support for specifying parameters mapping in `pipeline()` without the `params:` prefix.
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
+* A packaged Kedro project can now be imported and run from another Python project as following:
+```python
+from my_package.__main__ import main
+
+main(
+    ["--pipleine", "my_pipeline"]
+)  # or just main() if no parameters are needed for the run
+```
 
 ### Project template
 * Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. You can still define custom CLI commands by creating your own `cli.py`.
@@ -30,11 +39,12 @@ Kedro 0.18.0 strives to reduce the complexity of the project template and get us
 ### DataSets
 * Added the following new datasets:
 
-| Type                | Description                                                   | Location                       |
-| ------------------- | ------------------------------------------------------------- | ------------------------------ |
-| `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML | `kedro.extras.datasets.pandas` |
-| `networkx.GraphMLDataSet`       |  Work with NetworkX using GraphML files            | `kedro.extras.datasets.networkx` |
-| `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
+| Type                      | Description                                                   | Location                         |
+| ------------------------- | ------------------------------------------------------------- | -------------------------------- |
+| `pandas.XMLDataSet`       | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML | `kedro.extras.datasets.pandas`   |
+| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                         | `kedro.extras.datasets.networkx` |
+| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files        | `kedro.extras.datasets.networkx` |
+| `redis.PickleDataSet`     | loads/saves data from/to a Redis database                      | `kedro.extras.datasets.redis`    |
 
 * Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
 * Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.
@@ -50,6 +60,7 @@ Kedro 0.18.0 strives to reduce the complexity of the project template and get us
 ### Dependencies
 * Bumped the minimum version of `pandas` to 1.3. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
 * Added support for Python 3.9 and 3.10, dropped support for Python 3.6.
+* Updated `black` dependency in the project template to a non pre-release version.
 
 ## Breaking changes to the API
 
@@ -220,12 +231,12 @@ The parameters should look like this:
 * Extended `ExcelDataSet` to support saving Excel files with multiple sheets.
 * Added the following new datasets:
 
-| Type                        | Description                                          | Location                          |
-| --------------------------- | ---------------------------------------------------- | --------------------------------- |
-| `plotly.JSONDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
-| `pandas.GenericDataSet` | Provides a 'best effort' facility to read / write any format provided by the `pandas` library | `kedro.extras.datasets.pandas` |
-| `pandas.GBQQueryDataSet` | Loads data from a Google Bigquery table using provided SQL query | `kedro.extras.datasets.pandas` |
-| `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark` |
+| Type                      | Description                                                                                                            | Location                       |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `plotly.JSONDataSet`      | Works with plotly graph object Figures (saves as json file)                                                            | `kedro.extras.datasets.plotly` |
+| `pandas.GenericDataSet`   | Provides a 'best effort' facility to read / write any format provided by the `pandas` library                          | `kedro.extras.datasets.pandas` |
+| `pandas.GBQQueryDataSet`  | Loads data from a Google Bigquery table using provided SQL query                                                       | `kedro.extras.datasets.pandas` |
+| `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark`  |
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.

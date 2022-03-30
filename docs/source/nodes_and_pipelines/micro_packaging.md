@@ -1,7 +1,3 @@
-```eval_rst
-.. warning::  `kedro pipeline package/pull` will be deprecated in 0.18.0. We recommend using `kedro micropkg package/pull` instead.
-```
-
 # Micro-packaging
 
 Micro-packaging allows users to share Kedro micro-packages across codebases, organisations and beyond. A micro-package can be any part of Python code in a Kedro project including pipelines and utility functions.

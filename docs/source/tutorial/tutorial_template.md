@@ -23,12 +23,11 @@ Up to this point, we haven't discussed project dependencies, so now is a good ti
 The generic project template bundles some typical dependencies, in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers are slightly different depending on the version of Kedro that you are using:
 
 ```text
-black==21.5b1 # Used for formatting code with `kedro lint`
+black==22.1.0 # Used for formatting code with `kedro lint`
 flake8>=3.7.9, <4.0 # Used for linting code with `kedro lint`
 ipython==7.0 # Used for an IPython session with `kedro ipython`
 isort~=5.0 # Used for linting code with `kedro lint`
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
-jupyter_client>=5.1.0, <8.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab~=3.0 # Used to open a Kedro-session in Jupyter Lab
 kedro==0.17.7
 nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file

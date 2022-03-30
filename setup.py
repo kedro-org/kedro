@@ -9,8 +9,8 @@ from setuptools import find_packages, setup
 name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
-
-PANDAS = "pandas~=1.3"  # to be able to use XMLDataSet and pandas integration with fsspec
+# at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
+PANDAS = "pandas~=1.3"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -88,6 +88,7 @@ plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
+redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
@@ -119,7 +120,6 @@ extras_require = {
         "ipykernel>=5.3, <7.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
-    "ipython": ["ipython>=7.31.1, <8.0"],
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
@@ -128,6 +128,7 @@ extras_require = {
     "pillow": _collect_requirements(pillow_require),
     "plotly": _collect_requirements(plotly_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
+    "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
     "tensorflow": _collect_requirements(tensorflow_required),
     "yaml": _collect_requirements(yaml_require),

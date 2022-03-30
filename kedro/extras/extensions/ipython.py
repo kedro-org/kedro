@@ -11,8 +11,7 @@ from typing import Any, Dict
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 
-startup_path = Path.cwd()
-project_path = startup_path
+default_project_path = Path.cwd()
 
 
 def _remove_cached_modules(package_name):
@@ -23,7 +22,7 @@ def _remove_cached_modules(package_name):
         del sys.modules[module]  # pragma: no cover
 
 
-def _find_kedro_project(current_dir):  # pragma: no cover
+def _find_kedro_project(current_dir: Path):  # pragma: no cover
     from kedro.framework.startup import _is_project
 
     while current_dir != current_dir.parent:
@@ -34,8 +33,12 @@ def _find_kedro_project(current_dir):  # pragma: no cover
     return None
 
 
-def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
-    """Line magic which reloads all Kedro default variables."""
+def reload_kedro(
+    path: str = None, env: str = None, extra_params: Dict[str, Any] = None
+):
+    """Line magic which reloads all Kedro default variables.
+    Setting the path will also make it default for subsequent calls.
+    """
 
     import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
@@ -44,17 +47,24 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
     from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import bootstrap_project
 
-    path = path or project_path
-    metadata = bootstrap_project(path)
+    # If a path is provided, set it as default for subsequent calls
+    global default_project_path
+    if path:
+        default_project_path = Path(path).expanduser().resolve()
+        logging.info("Updated path to Kedro project: %s", default_project_path)
+    else:
+        logging.info("No path argument was provided. Using: %s", default_project_path)
+
+    metadata = bootstrap_project(default_project_path)
 
     _remove_cached_modules(metadata.package_name)
 
     configure_project(metadata.package_name)
     session = KedroSession.create(
-        metadata.package_name, path, env=env, extra_params=extra_params
+        metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )
     _activate_session(session, force=True)
-    logging.debug("Loading the context from %s", str(path))
+    logging.debug("Loading the context from %s", default_project_path)
     context = session.load_context()
     catalog = context.catalog
 
@@ -77,35 +87,21 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
         logging.info("Registered line magic `%s`", line_magic.__name__)  # type: ignore
 
 
-def init_kedro(path=""):
-    """Line magic to set path to Kedro project.
-    `%reload_kedro` will default to this location.
-    """
-    global project_path
-    if path:
-        project_path = Path(path).expanduser().resolve()
-        logging.info("Updated path to Kedro project: %s", str(project_path))
-    else:
-        logging.info("No path argument was provided. Using: %s", str(project_path))
-
-
 def load_ipython_extension(ipython):
     """Main entry point when %load_ext is executed"""
 
-    global project_path
-    global startup_path  # pylint:disable=global-variable-not-assigned
+    global default_project_path
 
-    ipython.register_magic_function(init_kedro, "line")
     ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
 
-    project_path = _find_kedro_project(startup_path)
+    default_project_path = _find_kedro_project(Path.cwd())
 
     try:
-        reload_kedro(project_path)
+        reload_kedro(default_project_path)
     except (ImportError, ModuleNotFoundError):
         logging.error("Kedro appears not to be installed in your current environment.")
     except Exception:  # pylint: disable=broad-except
         logging.warning(
-            "Kedro extension was registered. Make sure you pass the project path to "
-            "`%reload_kedro` or set it using `%init_kedro`."
+            "Kedro extension was registered but couldn't find a Kedro project. "
+            "Make sure you run `%reload_kedro <path_to_kedro_project>`."
         )

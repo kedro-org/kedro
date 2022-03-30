@@ -144,7 +144,7 @@ def fake_project_cli(
     # PACKAGE_NAME.settings to sys.modules. These need to be removed.
     # Ideally we would reset sys.modules to exactly what it was before
     # running anything, but removal of distutils.build.commands from
-    # sys.modules mysteriously makes some tests for `kedro pipeline package`
+    # sys.modules mysteriously makes some tests for `kedro micropkg package`
     # fail on Windows, Python 3.7 and 3.8.
     for module in list(sys.modules.keys()):
         if module.startswith(PACKAGE_NAME):

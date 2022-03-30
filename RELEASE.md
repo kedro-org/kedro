@@ -1,13 +1,3 @@
-# Release 0.17.8
-
-## Major features and improvements
-* Documented distribution of Kedro pipelines with Dask.
-
-## Bug fixes and other changes
-* Added `username` to Session store for logging during Experiment Tracking.
-
-## Upcoming deprecations for Kedro 0.18.0
-
 # Upcoming Release 0.18.0
 
 ## TL;DR ✨
@@ -21,6 +11,7 @@ Kedro 0.18.0 strives to reduce the complexity of the project template and get us
 * The `hook_manager` is no longer a global singleton. The `hook_manager` lifecycle is now managed by the `KedroSession`, and a new `hook_manager` will be created every time a `session` is instantiated.
 * Added support for specifying parameters mapping in `pipeline()` without the `params:` prefix.
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
+* Added `username` to Session store for logging during Experiment Tracking.
 * A packaged Kedro project can now be imported and run from another Python project as following:
 ```python
 from my_package.__main__ import main
@@ -61,6 +52,9 @@ main(
 * Bumped the minimum version of `pandas` to 1.3. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
 * Added support for Python 3.9 and 3.10, dropped support for Python 3.6.
 * Updated `black` dependency in the project template to a non pre-release version.
+
+### Other
+* Documented distribution of Kedro pipelines with Dask.
 
 ## Breaking changes to the API
 

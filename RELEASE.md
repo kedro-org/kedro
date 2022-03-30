@@ -33,7 +33,7 @@ main(
 ### Project template
 * Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. You can still define custom CLI commands by creating your own `cli.py`.
 * Removed `hooks.py` from the Kedro project template. Registration hooks have been removed in favour of `settings.py` configuration, but you can still define execution timeline hooks by creating your own `hooks.py`.
-* Removed `.ipython` directory from the Kedro project template. The IPython/Jupyter workflow no longer uses IPython profiles; it now uses an IPython extension. 
+* Removed `.ipython` directory from the Kedro project template. The IPython/Jupyter workflow no longer uses IPython profiles; it now uses an IPython extension.
 * The default `kedro` run configuration environment names can now be set in `settings.py` using the `CONFIG_LOADER_ARGS` variable. The relevant keyword arguments to supply are `base_env` and `default_run_env`, which are set to `base` and `local` respectively by default.
 
 ### DataSets
@@ -54,7 +54,7 @@ main(
 
 ### Jupyter and IPython integration
 * The [only recommended way to work with Kedro in Jupyter or IPython is now the Kedro IPython extension](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html). Managed Jupyter instances should load this via `%load_ext kedro.extras.extensions.ipython` and use the line magic `%reload_kedro`.
-* `kedro ipython` launches an IPython session that preloads the Kedro IPython extension. 
+* `kedro ipython` launches an IPython session that preloads the Kedro IPython extension.
 * `kedro jupyter notebook/lab` creates a custom Jupyter kernel that preloads the Kedro IPython extension and launches a notebook with that kernel selected. There is no longer a need to specify `--all-kernels` to show all available kernels.
 
 ### Dependencies

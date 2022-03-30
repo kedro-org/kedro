@@ -3,8 +3,8 @@ adlfs>=2021.7.1, <=2022.2
 bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython~=1.73
-black==21.5b1
 blacken-docs==1.9.2
+black~=22.0
 compress-pickle[lz4]~=1.2.0
 coverage[toml]
 dask[complete]~=2021.10  # pinned by Snyk to avoid a vulnerability
@@ -16,7 +16,8 @@ geopandas>=0.6.0, <1.0
 hdfs>=2.5.8, <3.0
 holoviews~=1.13.0
 import-linter[toml]==1.2.6
-ipython>=7.31.1, <8.0
+ipython>=7.31.1, <9.0
+Jinja2<3.1.0
 joblib>=0.14
 jupyterlab~=3.0
 jupyter~=1.0
@@ -44,6 +45,7 @@ pytest-cov~=3.0
 pytest-mock>=1.7.1, <2.0
 pytest-xdist[psutil]~=2.2.1
 pytest~=6.2
+redis~=4.1
 requests-mock~=1.6
 requests~=2.20
 s3fs>=0.3.0, <0.5  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.

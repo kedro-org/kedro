@@ -1,7 +1,7 @@
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_sdist_name, _safe_parse_requirements
+from kedro.framework.cli.micropkg import _get_sdist_name, _safe_parse_requirements
 
 PIPELINE_NAME = "my_pipeline"
 
@@ -36,10 +36,10 @@ http://some.website.com/package.whl
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "cleanup_dist")
-class TestPipelineRequirements:
+class TestMicropkgRequirements:
     """Many of these tests follow the pattern:
     - create a pipeline with some sort of requirements.txt
-    - package the pipeline
+    - package the pipeline/micro-package
     - delete the pipeline and pull in the packaged one
     - assert the project's modified requirements.txt is as expected
     """

@@ -176,8 +176,8 @@ class TestInvalidParallelRunner:
         pipeline = Pipeline([node(return_not_serializable, "A", "B")])
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pattern = (
-            fr"{str(data.__class__)} cannot be serialized. ParallelRunner implicit "
-            fr"memory datasets can only be used with serializable data"
+            rf"{str(data.__class__)} cannot be serialized. ParallelRunner implicit "
+            rf"memory datasets can only be used with serializable data"
         )
 
         with pytest.raises(DataSetError, match=pattern):

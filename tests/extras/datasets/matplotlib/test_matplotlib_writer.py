@@ -310,8 +310,8 @@ class TestMatplotlibWriterVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for MatplotlibWriter\(.+\)"
+            rf"Save version `{save_version}` did not match load version "
+            rf"`{load_version}` for MatplotlibWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_plot_writer.save(mock_single_plot)

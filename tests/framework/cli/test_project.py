@@ -27,11 +27,6 @@ def python_call_mock(mocker):
 
 
 @pytest.fixture
-def fake_ipython_message(mocker):
-    return mocker.patch("kedro.framework.cli.project.ipython_message")
-
-
-@pytest.fixture
 def fake_copyfile(mocker):
     return mocker.patch("shutil.copyfile")
 
@@ -244,19 +239,12 @@ class TestLintCommand:
         assert mocked_environ == {"PYTHONPATH": str(fake_repo_path / "src")}
 
 
-@pytest.fixture
-def os_mock(mocker):
-    return mocker.patch("kedro.framework.cli.project.os")
-
-
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "os_mock")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestIpythonCommand:
     def test_happy_path(
         self,
         call_mock,
         fake_project_cli,
-        fake_ipython_message,
-        os_mock,
         fake_repo_path,
         fake_metadata,
     ):
@@ -264,27 +252,15 @@ class TestIpythonCommand:
             fake_project_cli, ["ipython", "--random-arg", "value"], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
-        fake_ipython_message.assert_called_once_with()
-        call_mock.assert_called_once_with(["ipython", "--random-arg", "value"])
-        os_mock.environ.__setitem__.assert_called_once_with(
-            "IPYTHONDIR", str(fake_repo_path / ".ipython")
+        call_mock.assert_called_once_with(
+            [
+                "ipython",
+                "--ext",
+                "kedro.extras.extensions.ipython",
+                "--random-arg",
+                "value",
+            ]
         )
-
-    @pytest.mark.parametrize("help_flag", ["-h", "--help"])
-    def test_help(
-        self,
-        help_flag,
-        call_mock,
-        fake_project_cli,
-        fake_ipython_message,
-        fake_metadata,
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["ipython", help_flag], obj=fake_metadata
-        )
-        assert not result.exit_code, result.stdout
-        fake_ipython_message.assert_not_called()
-        call_mock.assert_called_once_with(["ipython", help_flag])
 
     @pytest.mark.parametrize("env_flag,env", [("--env", "base"), ("-e", "local")])
     def test_env(
@@ -292,23 +268,16 @@ class TestIpythonCommand:
         env_flag,
         env,
         fake_project_cli,
-        call_mock,
-        fake_repo_path,
-        os_mock,
         mocker,
         fake_metadata,
     ):
         """This tests starting ipython with specific env."""
+        mock_environ = mocker.patch("os.environ", {})
         result = CliRunner().invoke(
             fake_project_cli, ["ipython", env_flag, env], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
-
-        calls = [
-            mocker.call("IPYTHONDIR", str(fake_repo_path / ".ipython")),
-            mocker.call("KEDRO_ENV", env),
-        ]
-        os_mock.environ.__setitem__.assert_has_calls(calls)
+        assert mock_environ["KEDRO_ENV"] == env
 
     def test_fail_no_ipython(self, fake_project_cli, mocker):
         mocker.patch.dict("sys.modules", {"IPython": None})

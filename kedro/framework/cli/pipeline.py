@@ -1,5 +1,3 @@
-# pylint: disable=too-many-lines
-
 """A collection of CLI commands for working with Kedro pipelines."""
 import re
 import shutil

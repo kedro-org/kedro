@@ -1,3 +1,23 @@
+# Upcoming Release 0.19.0
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Migration guide from Kedro 0.17.* to 0.18.*
+
+
+# Upcoming Release 0.18.1
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Upcoming deprecations for Kedro 0.19.0
+
+
 # Release 0.18.0
 
 ## TL;DR ✨

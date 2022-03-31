@@ -25,7 +25,7 @@ workflows:
       # parameters to update, i.e. which builds to run.
       - path-filtering/filter:
           name: check-updated-files
-          base-revision: develop
+          base-revision: main
           config-path: .circleci/continue_config.yml
           # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
           mapping: |

@@ -13,6 +13,14 @@ parameters:
   release_kedro:
     type: boolean
     default: false
+  # The parameters below are set in CircleCI UI.
+  # https://app.circleci.com/settings/project/github/kedro-org/kedro/triggers?return-to=https%3A%2F%2Fapp.circleci.com%2Fpipelines%2Fgithub%2Fkedro-org%2Fkedro&triggerSource=&scheduledTriggerId=61f7226f-f092-4449-98d9-40420f8c46b2&success=true
+  run_hourly:
+    type: boolean
+    default: false
+  run_nightly:
+    type: boolean
+    default: false
 
 orbs:
   win: circleci/windows@2.4.1
@@ -370,7 +378,6 @@ jobs:
           name: Maybe trigger the release workflow
           command: |
               KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
-
               if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
               then
                   echo "Starting the release of Kedro ${KEDRO_VERSION}!"
@@ -447,7 +454,6 @@ jobs:
           name: Check Kedro version
           command: |
             KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
-
             if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
             then
                 echo "export KEDRO_VERSION=\"${KEDRO_VERSION}\"" >> $BASH_ENV
@@ -573,54 +579,54 @@ workflows:
               only: main
 
   hourly_pr_merge:
-    triggers:
-      - schedule:
-          cron: 0 * * * *
-          filters:
-            branches:
-              only: main
+    when: <<pipeline.parameters.run_hourly>>
     jobs:
-      - merge_pr_to_develop
+      - merge_pr_to_develop:
+        filters:
+          branches:
+            only: main
 
   # Python versions that are supported on `main`.
   nightly_build_main:
-    triggers:
-      - schedule:
-          cron: 30 2 * * *
+    when: <<pipeline.parameters.run_nightly>>
+    jobs:
+      - build_docker_image:
+          matrix:
+            parameters:
+              python_version: ["3.6", "3.7", "3.8"]
           filters:
             branches:
               only: main
-    jobs:
-      - build_docker_image:
-          matrix:
-            parameters:
-              python_version: ["3.6", "3.7", "3.8"]
       - build_kedro:
           matrix:
             parameters:
               python_version: ["3.6", "3.7", "3.8"]
           requires:
             - build_docker_image-<<matrix.python_version>>
+          filters:
+            branches:
+              only: main
 
   # Python version that are *only* supported on `develop`.
   nightly_build_develop:
-    triggers:
-      - schedule:
-          cron: 30 2 * * *
-          filters:
-            branches:
-              only: develop
+    when: << pipeline.parameters.run_nightly >>
     jobs:
       - build_docker_image:
           matrix:
             parameters:
               python_version: ["3.9", "3.10"]
+          filters:
+            branches:
+              only: develop
       - build_kedro:
           matrix:
             parameters:
               python_version: ["3.9", "3.10"]
           requires:
             - build_docker_image-<<matrix.python_version>>
+          filters:
+            branches:
+              only: develop
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

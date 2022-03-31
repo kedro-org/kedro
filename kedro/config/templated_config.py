@@ -5,11 +5,12 @@ with the values from the passed dictionary.
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, Optional
 
 import jmespath
 
-from kedro.config.config import ConfigLoader
+from kedro.config import AbstractConfigLoader
+from kedro.config.common import _get_config_from_patterns, _remove_duplicates
 
 IDENTIFIER_PATTERN = re.compile(
     r"""\$\{
@@ -23,31 +24,25 @@ FULL_STRING_IDENTIFIER_PATTERN = re.compile(
 )
 
 
-class TemplatedConfigLoader(ConfigLoader):
+class TemplatedConfigLoader(AbstractConfigLoader):
     """
     Extension of the ``ConfigLoader`` class that allows for template values,
     wrapped in brackets like: ${...}, to be automatically formatted
     based on the configs.
 
-    The easiest way to use this class is by registering it into the
-    ``KedroContext`` using hooks. This can be done by updating the
-    hook implementation `register_config_loader` in `hooks.py`, making it return
-    a ``TemplatedConfigLoader`` object instead of a ``ConfigLoader`` object.
+    The easiest way to use this class is by setting the `CONFIG_LOADER_CLASS` constant
+    in `settings.py`.
 
     Example:
     ::
 
+        >>> # in settings.py
         >>> from kedro.config import TemplatedConfigLoader
         >>>
-        >>>
-        >>> class ProjectHooks:
-        >>>     @hook_impl
-        >>>     def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        >>>         return TemplatedConfigLoader(
-        >>>             conf_paths,
-        >>>             globals_pattern="*globals.yml",
-        >>>             globals_dict={"param1": "pandas.CSVDataSet"}
-        >>>         )
+        >>> CONFIG_LOADER_CLASS = TemplatedConfigLoader
+        >>> CONFIG_LOADER_ARGS = {
+        >>>     "globals_pattern": "*globals.yml",
+        >>> }
 
     The contents of the dictionary resulting from the `globals_pattern` get
     merged with the ``globals_dict``. In case of conflicts, the keys in
@@ -94,16 +89,23 @@ class TemplatedConfigLoader(ConfigLoader):
 
     def __init__(
         self,
-        conf_paths: Union[str, Iterable[str]],
+        conf_source: str,
+        env: str = None,
+        runtime_params: Dict[str, Any] = None,
         *,
+        base_env: str = "base",
+        default_run_env: str = "local",
         globals_pattern: Optional[str] = None,
         globals_dict: Optional[Dict[str, Any]] = None,
     ):
-        """Instantiate a ``TemplatedConfigLoader``.
+        """Instantiates a ``TemplatedConfigLoader``.
 
         Args:
-            conf_paths: Non-empty path or list of paths to configuration
-                directories.
+            conf_source: Path to use as root directory for loading configuration.
+            env: Environment that will take precedence over base.
+            runtime_params: Extra parameters passed to a Kedro run.
+            base_env:
+            default_run_env:
             globals_pattern: Optional keyword-only argument specifying a glob
                 pattern. Files that match the pattern will be loaded as a
                 formatting dictionary.
@@ -112,31 +114,28 @@ class TemplatedConfigLoader(ConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
+        super().__init__(
+            conf_source=conf_source, env=env, runtime_params=runtime_params
+        )
+        self.base_env = base_env
+        self.default_run_env = default_run_env
 
-        super().__init__(conf_paths)
-
-        self._arg_dict = super().get(globals_pattern) if globals_pattern else {}
+        self._config_mapping = (
+            _get_config_from_patterns(
+                conf_paths=self.conf_paths,
+                patterns=list(globals_pattern),
+                ac_template=False,
+            )
+            if globals_pattern
+            else {}
+        )
         globals_dict = deepcopy(globals_dict) or {}
-        self._arg_dict = {**self._arg_dict, **globals_dict}
+        self._config_mapping = {**self._config_mapping, **globals_dict}
 
-    @staticmethod
-    def _load_config_file(config_file: Path) -> Dict[str, Any]:
-        """Load an individual config file using `anyconfig` as a backend.
-
-        Args:
-            config_file: Path to a config file to process.
-
-        Returns:
-            Parsed configuration.
-        """
-        # for performance reasons
-        import anyconfig  # pylint: disable=import-outside-toplevel
-
-        return {
-            k: v
-            for k, v in anyconfig.load(config_file, ac_template=True).items()
-            if not k.startswith("_")
-        }
+    @property
+    def conf_paths(self):
+        """Property method to return deduplicated configuration paths."""
+        return _remove_duplicates(self._build_conf_paths())
 
     def get(self, *patterns: str) -> Dict[str, Any]:
         """Tries to resolve the template variables in the config dictionary
@@ -159,9 +158,17 @@ class TemplatedConfigLoader(ConfigLoader):
         Raises:
             ValueError: malformed config found.
         """
+        config_raw = _get_config_from_patterns(
+            conf_paths=self.conf_paths, patterns=list(patterns), ac_template=True
+        )
+        return _format_object(config_raw, self._config_mapping)
 
-        config_raw = super().get(*patterns)
-        return _format_object(config_raw, self._arg_dict)
+    def _build_conf_paths(self) -> Iterable[str]:
+        run_env = self.env or self.default_run_env
+        return [
+            str(Path(self.conf_source) / self.base_env),
+            str(Path(self.conf_source) / run_env),
+        ]
 
 
 def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:

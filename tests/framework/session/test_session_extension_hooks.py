@@ -10,15 +10,16 @@ from dynaconf.validator import Validator
 
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectPipelines, _ProjectSettings
+from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
 from kedro.runner.runner import _run_node_async
 from tests.framework.session.conftest import (
     _assert_hook_call_record_has_expected_parameters,
+    _assert_pipeline_equal,
     _mock_imported_settings_paths,
     assert_exceptions_equal,
 )
@@ -36,7 +37,7 @@ def broken_node():
 
 @pytest.fixture
 def broken_pipeline():
-    return Pipeline(
+    return pipeline(
         [
             node(broken_node, None, "A", name="node1"),
             node(broken_node, None, "B", name="node2"),
@@ -58,31 +59,12 @@ def mock_broken_pipelines(mocker, broken_pipeline):
     return mock_get_pipelines_registry_callable()
 
 
-@pytest.fixture
-def mock_pipelines(mocker, mock_pipeline):
-    def mock_get_pipelines_registry_callable():
-        return {
-            "__default__": mock_pipeline,
-            "pipe": mock_pipeline,
-        }
-
-    mocker.patch.object(
-        _ProjectPipelines,
-        "_get_pipelines_registry_callable",
-        return_value=mock_get_pipelines_registry_callable,
-    )
-    return mock_get_pipelines_registry_callable()
-
-
 class TestCatalogHooks:
-    def test_after_catalog_created_hook(self, mocker, mock_session, caplog):
+    def test_after_catalog_created_hook(self, mock_session, caplog):
         context = mock_session.load_context()
-        fake_run_id = mocker.sentinel.fake_run_id
-        mocker.patch.object(context, "_get_run_id", return_value=fake_run_id)
-
         project_path = context.project_path
         catalog = context.catalog
-        config_loader = context.config_loader
+        config_loader = mock_session._get_config_loader()
 
         relevant_records = [
             r for r in caplog.records if r.getMessage() == "Catalog created"
@@ -97,24 +79,29 @@ class TestCatalogHooks:
         # save_version is only passed during a run, not on the property getter
         assert record.save_version is None
         assert record.load_versions is None
-        assert record.run_id is fake_run_id
 
-    def test_after_catalog_created_hook_default_run_id(
+    def test_after_catalog_created_hook_on_session_run(
         self, mocker, mock_session, dummy_dataframe, caplog
     ):
         context = mock_session.load_context()
         fake_save_version = mocker.sentinel.fake_save_version
-        mocker.patch.object(
-            context, "_get_save_version", return_value=fake_save_version
+
+        mocker.patch(
+            "kedro.framework.session.KedroSession.store",
+            new_callable=mocker.PropertyMock,
+            return_value={
+                "session_id": fake_save_version,
+                "save_version": fake_save_version,
+            },
         )
 
         catalog = context.catalog
-        config_loader = context.config_loader
+        config_loader = mock_session._get_config_loader()
         project_path = context.project_path
 
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
-        context.run()
+        mock_session.run()
 
         relevant_records = [
             r for r in caplog.records if r.getMessage() == "Catalog created"
@@ -128,7 +115,6 @@ class TestCatalogHooks:
         )
         assert record.save_version is fake_save_version
         assert record.load_versions is None
-        assert record.run_id is record.save_version
 
 
 class TestPipelineHooks:
@@ -138,7 +124,7 @@ class TestPipelineHooks:
     ):
         context = mock_session.load_context()
         catalog = context.catalog
-        default_pipeline = context.pipeline
+        default_pipeline = pipelines["__default__"]
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
         mock_session.run()
@@ -151,7 +137,7 @@ class TestPipelineHooks:
         ]
         assert len(before_pipeline_run_calls) == 1
         call_record = before_pipeline_run_calls[0]
-        assert call_record.pipeline is default_pipeline
+        _assert_pipeline_equal(call_record.pipeline, default_pipeline)
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
@@ -167,7 +153,7 @@ class TestPipelineHooks:
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
-        assert call_record.pipeline is default_pipeline
+        _assert_pipeline_equal(call_record.pipeline, default_pipeline)
 
     @pytest.mark.usefixtures("mock_broken_pipelines")
     def test_on_pipeline_error_hook(self, caplog, mock_session):
@@ -198,7 +184,8 @@ class TestPipelineHooks:
         assert len(on_node_error_calls) == 1
         call_record = on_node_error_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["error", "node", "catalog", "inputs", "is_async", "run_id"]
+            call_record,
+            ["error", "node", "catalog", "inputs", "is_async", "session_id"],
         )
         expected_error = ValueError("broken")
         assert_exceptions_equal(call_record.error, expected_error)
@@ -221,11 +208,10 @@ class TestNodeHooks:
         assert len(before_node_run_calls) == 1
         call_record = before_node_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["node", "catalog", "inputs", "is_async", "run_id"]
+            call_record, ["node", "catalog", "inputs", "is_async", "session_id"]
         )
         # sanity check a couple of important parameters
         assert call_record.inputs["cars"].to_dict() == dummy_dataframe.to_dict()
-        assert call_record.run_id == mock_session.session_id
 
         # test after node run hook
         after_node_run_calls = [
@@ -234,11 +220,11 @@ class TestNodeHooks:
         assert len(after_node_run_calls) == 1
         call_record = after_node_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["node", "catalog", "inputs", "outputs", "is_async", "run_id"]
+            call_record,
+            ["node", "catalog", "inputs", "outputs", "is_async", "session_id"],
         )
         # sanity check a couple of important parameters
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
-        assert call_record.run_id == mock_session.session_id
 
     @SKIP_ON_WINDOWS
     @pytest.mark.usefixtures("mock_broken_pipelines")
@@ -257,7 +243,7 @@ class TestNodeHooks:
         for call_record in on_node_error_records:
             _assert_hook_call_record_has_expected_parameters(
                 call_record,
-                ["error", "node", "catalog", "inputs", "is_async", "run_id"],
+                ["error", "node", "catalog", "inputs", "is_async", "session_id"],
             )
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)
@@ -562,7 +548,11 @@ class TestAsyncNodeDatasetHooks:
         mock_session.load_context()
 
         # run the node asynchronously with an instance of `LogCatalog`
-        _run_node_async(node=sample_node, catalog=memory_catalog)
+        _run_node_async(
+            node=sample_node,
+            catalog=memory_catalog,
+            hook_manager=mock_session._hook_manager,
+        )
 
         hooks_log_messages = [r.message for r in logs_listener.logs]
 

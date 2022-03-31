@@ -1,62 +1,17 @@
 """``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark`` on Apache Hive.
 """
-
 import pickle
-import uuid
+from copy import deepcopy
 from typing import Any, Dict, List
 
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import coalesce, col, lit
+from pyspark.sql import DataFrame, SparkSession, Window
+from pyspark.sql.functions import col, lit, row_number
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class StagedHiveDataSet:
-    """
-    Provides a context manager for temporarily writing data to a staging hive table, for example
-    where you want to replace the contents of a hive table with data which relies on the data
-    currently present in that table.
-
-    Once initialised, the ``staged_data`` ``DataFrame`` can be queried and underlying tables used to
-    define the initial dataframe can be modified without affecting ``staged_data``.
-
-    Upon exiting this object it will drop the redundant staged table.
-    """
-
-    def __init__(
-        self, data: DataFrame, stage_table_name: str, stage_database_name: str
-    ):
-        """
-        Creates a new instance eof `StagedHiveDataSet`.
-
-        Args:
-            data: The spark dataframe to be staged
-            stage_table_name: the database destination for the staged data
-            stage_database_name: the table destination for the staged data
-        """
-        self.staged_data = None
-        self._data = data
-        self._stage_table_name = stage_table_name
-        self._stage_database_name = stage_database_name
-        self._spark_session = SparkSession.builder.getOrCreate()
-
-    def __enter__(self):
-        self._data.createOrReplaceTempView("tmp")
-
-        _table = f"{self._stage_database_name}.{self._stage_table_name}"
-        self._spark_session.sql(
-            f"create table {_table} as select * from tmp"  # nosec
-        ).take(1)
-        self.staged_data = self._spark_session.sql(f"select * from {_table}")  # nosec
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._spark_session.sql(
-            f"drop table {self._stage_database_name}.{self._stage_table_name}"  # nosec
-        )
-
-
+# pylint:disable=too-many-instance-attributes
 class SparkHiveDataSet(AbstractDataSet):
     """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
@@ -68,10 +23,11 @@ class SparkHiveDataSet(AbstractDataSet):
     duration of the pipeline)
     - Tables are not being externally modified during upserts. The upsert method is NOT ATOMIC
     to external changes to the target table while executing.
+    Upsert methodology works by leveraging Spark DataFrame execution plan checkpointing.
 
     Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -105,8 +61,16 @@ class SparkHiveDataSet(AbstractDataSet):
         >>> reloaded.take(4)
     """
 
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+
+    # pylint:disable=too-many-arguments
     def __init__(
-        self, database: str, table: str, write_mode: str, table_pk: List[str] = None
+        self,
+        database: str,
+        table: str,
+        write_mode: str = "errorifexists",
+        table_pk: List[str] = None,
+        save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
 
@@ -116,13 +80,25 @@ class SparkHiveDataSet(AbstractDataSet):
             write_mode: ``insert``, ``upsert`` or ``overwrite`` are supported.
             table_pk: If performing an upsert, this identifies the primary key columns used to
                 resolve preexisting data. Is required for ``write_mode="upsert"``.
+            save_args: Optional mapping of any options,
+                passed to the `DataFrameWriter.saveAsTable` as kwargs.
+                Key example of this is `partitionBy` which allows data partitioning
+                on a list of column names.
+                Other `HiveOptions` can be found here:
+                https://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html#specifying-storage-format-for-hive-tables
+
+        Note:
+            For users leveraging the `upsert` functionality,
+            a `checkpoint` directory must be set, e.g. using
+            `spark.sparkContext.setCheckpointDir("/path/to/dir")`
+            or directly in the Spark conf folder.
 
         Raises:
             DataSetError: Invalid configuration supplied
         """
-        valid_write_modes = ["insert", "upsert", "overwrite"]
-        if write_mode not in valid_write_modes:
-            valid_modes = ", ".join(valid_write_modes)
+        _write_modes = ["append", "error", "errorifexists", "upsert", "overwrite"]
+        if write_mode not in _write_modes:
+            valid_modes = ", ".join(_write_modes)
             raise DataSetError(
                 f"Invalid `write_mode` provided: {write_mode}. "
                 f"`write_mode` must be one of: {valid_modes}"
@@ -134,10 +110,12 @@ class SparkHiveDataSet(AbstractDataSet):
         self._table_pk = table_pk or []
         self._database = database
         self._table = table
-        self._stage_table = "_temp_" + table
-
-        # self._table_columns is set up in _save() to speed up initialization
-        self._table_columns = []  # type: List[str]
+        self._full_table_address = f"{database}.{table}"
+        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
+        self._format = self._save_args.get("format") or "hive"
+        self._eager_checkpoint = self._save_args.pop("eager_checkpoint", None) or True
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -145,86 +123,73 @@ class SparkHiveDataSet(AbstractDataSet):
             table=self._table,
             write_mode=self._write_mode,
             table_pk=self._table_pk,
+            partition_by=self._save_args.get("partitionBy"),
+            format=self._format,
         )
 
     @staticmethod
     def _get_spark() -> SparkSession:
-        return SparkSession.builder.getOrCreate()
+        """
+        This method should only be used to get an existing SparkSession
+        with valid Hive configuration.
+        Configuration for Hive is read from hive-site.xml on the classpath.
+        It supports running both SQL and HiveQL commands.
+        Additionally, if users are leveraging the `upsert` functionality,
+        then a `checkpoint` directory must be set, e.g. using
+        `spark.sparkContext.setCheckpointDir("/path/to/dir")`
+        """
+        _spark = SparkSession.builder.getOrCreate()
+        return _spark
 
-    def _create_empty_hive_table(self, data):
-        data.createOrReplaceTempView("tmp")
-        self._get_spark().sql(
-            f"create table {self._database}.{self._table} select * from tmp limit 1"  # nosec
+    def _create_hive_table(self, data: DataFrame, mode: str = None):
+        _mode: str = mode or self._write_mode
+        data.write.saveAsTable(
+            self._full_table_address,
+            mode=_mode,
+            format=self._format,
+            **self._save_args,
         )
-        self._get_spark().sql(f"truncate table {self._database}.{self._table}")  # nosec
 
     def _load(self) -> DataFrame:
-        if not self._exists():
-            raise DataSetError(
-                f"Requested table not found: {self._database}.{self._table}"
-            )
-        return self._get_spark().sql(
-            f"select * from {self._database}.{self._table}"  # nosec
-        )
+        return self._get_spark().read.table(self._full_table_address)
 
     def _save(self, data: DataFrame) -> None:
-        if not self._exists():
-            self._create_empty_hive_table(data)
-            self._table_columns = data.columns
-        else:
-            self._table_columns = self._load().columns
-            if self._write_mode == "upsert":
-                non_existent_columns = set(self._table_pk) - set(self._table_columns)
-                if non_existent_columns:
-                    colnames = ", ".join(sorted(non_existent_columns))
-                    raise DataSetError(
-                        f"Columns [{colnames}] selected as primary key(s) not found in "
-                        f"table {self._database}.{self._table}"
-                    )
-
         self._validate_save(data)
-        write_methods = {
-            "insert": self._insert_save,
-            "upsert": self._upsert_save,
-            "overwrite": self._overwrite_save,
-        }
-        write_methods[self._write_mode](data)
-
-    def _insert_save(self, data: DataFrame) -> None:
-        data.createOrReplaceTempView("tmp")
-        columns = ", ".join(self._table_columns)
-        self._get_spark().sql(
-            f"insert into {self._database}.{self._table} select {columns} from tmp"  # nosec
-        )
+        if self._write_mode == "upsert":
+            # check if _table_pk is a subset of df columns
+            if not set(self._table_pk) <= set(self._load().columns):
+                raise DataSetError(
+                    f"Columns {str(self._table_pk)} selected as primary key(s) not found in "
+                    f"table {self._full_table_address}"
+                )
+            self._upsert_save(data=data)
+        else:
+            self._create_hive_table(data=data)
 
     def _upsert_save(self, data: DataFrame) -> None:
-        if self._load().rdd.isEmpty():
-            self._insert_save(data)
+        if not self._exists() or self._load().rdd.isEmpty():
+            self._create_hive_table(data=data, mode="overwrite")
         else:
-            joined_data = data.alias("new").join(
-                self._load().alias("old"), self._table_pk, "outer"
+            _tmp_colname = "tmp_colname"
+            _tmp_row = "tmp_row"
+            _w = Window.partitionBy(*self._table_pk).orderBy(col(_tmp_colname).desc())
+            df_old = self._load().select("*", lit(1).alias(_tmp_colname))
+            df_new = data.select("*", lit(2).alias(_tmp_colname))
+            df_stacked = df_new.unionByName(df_old).select(
+                "*", row_number().over(_w).alias(_tmp_row)
             )
-            upsert_dataset = joined_data.select(
-                [  # type: ignore
-                    coalesce(f"new.{col_name}", f"old.{col_name}").alias(col_name)
-                    for col_name in set(data.columns)
-                    - set(self._table_pk)  # type: ignore
-                ]
-                + self._table_pk
+            df_filtered = (
+                df_stacked.filter(col(_tmp_row) == 1)
+                .drop(_tmp_colname, _tmp_row)
+                .checkpoint(eager=self._eager_checkpoint)
             )
-            temporary_persisted_tbl_name = f"temp_{uuid.uuid4().int}"
-            with StagedHiveDataSet(
-                upsert_dataset,
-                stage_database_name=self._database,
-                stage_table_name=temporary_persisted_tbl_name,
-            ) as temp_table:
-                self._overwrite_save(temp_table.staged_data)
-
-    def _overwrite_save(self, data: DataFrame) -> None:
-        self._get_spark().sql(f"truncate table {self._database}.{self._table}")  # nosec
-        self._insert_save(data)
+            self._create_hive_table(data=df_filtered, mode="overwrite")
 
     def _validate_save(self, data: DataFrame):
+        # do not validate when the table doesn't exist
+        # or if the `write_mode` is set to overwrite
+        if (not self._exists()) or self._write_mode == "overwrite":
+            return
         hive_dtypes = set(self._load().dtypes)
         data_dtypes = set(data.dtypes)
         if data_dtypes != hive_dtypes:
@@ -237,21 +202,15 @@ class SparkHiveDataSet(AbstractDataSet):
             )
 
     def _exists(self) -> bool:
-        if (
+        # noqa # pylint:disable=protected-access
+        return (
             self._get_spark()
-            .sql("show databases")
-            .filter(col("namespace") == lit(self._database))
-            .take(1)
-        ):
-            self._get_spark().sql(f"use {self._database}")
-            if (
-                self._get_spark()
-                .sql("show tables")
-                .filter(col("tableName") == lit(self._table))
-                .take(1)
-            ):
-                return True
-        return False
+            ._jsparkSession.catalog()
+            .tableExists(self._database, self._table)
+        )
 
     def __getstate__(self) -> None:
-        raise pickle.PicklingError("PySpark datasets can't be serialized")
+        raise pickle.PicklingError(
+            "PySpark datasets objects cannot be pickled "
+            "or serialised as Python objects."
+        )

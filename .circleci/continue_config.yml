@@ -568,7 +568,7 @@ workflows:
       - merge_pr_to_develop:
         filters:
           branches:
-            only: main
+            only: fix/ci-config
 
   # Python versions that are supported on `main`.
   nightly_build_main:
@@ -580,7 +580,7 @@ workflows:
               python_version: ["3.6", "3.7", "3.8"]
           filters:
             branches:
-              only: main
+              only: fix/ci-config
       - build_kedro:
           matrix:
             parameters:
@@ -589,7 +589,7 @@ workflows:
             - build_docker_image-<<matrix.python_version>>
           filters:
             branches:
-              only: main
+              only: fix/ci-config
 
   # Python version that are *only* supported on `develop`.
   nightly_build_develop:
@@ -601,7 +601,7 @@ workflows:
               python_version: ["3.9"]
           filters:
             branches:
-              only: develop
+              only: fix/ci-config
       - build_kedro:
           matrix:
             parameters:
@@ -610,7 +610,7 @@ workflows:
             - build_docker_image-<<matrix.python_version>>
           filters:
             branches:
-              only: develop
+              only: fix/ci-config
 
   kedro_release:
     when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set

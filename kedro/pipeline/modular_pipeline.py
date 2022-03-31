@@ -10,8 +10,6 @@ from kedro.pipeline.pipeline import (
     _transcode_split,
 )
 
-_PARAMETER_KEYWORDS = ("params:", "parameters")
-
 
 class ModularPipelineError(Exception):
     """Raised when a modular pipeline is not adapted and integrated
@@ -21,8 +19,16 @@ class ModularPipelineError(Exception):
     pass
 
 
+def _is_all_parameters(name: str) -> bool:
+    return name == "parameters"
+
+
+def _is_single_parameter(name: str) -> bool:
+    return name.startswith("params:")
+
+
 def _is_parameter(name: str) -> bool:
-    return any(name.startswith(param) for param in _PARAMETER_KEYWORDS)
+    return _is_single_parameter(name) or _is_all_parameters(name)
 
 
 def _validate_inputs_outputs(
@@ -68,12 +74,86 @@ def _validate_datasets_exist(
         )
 
 
+def _get_dataset_names_mapping(
+    names: Union[str, Set[str], Dict[str, str]] = None
+) -> Dict[str, str]:
+    """Take a name or a collection of dataset names
+    and turn it into a mapping from the old dataset names to the provided ones if necessary.
+
+    Args:
+        names: A dataset name or collection of dataset names.
+            When str or Set[str] is provided, the listed names will stay
+            the same as they are named in the provided pipeline.
+            When Dict[str, str] is provided, current names will be
+            mapped to new names in the resultant pipeline.
+    Returns:
+        A dictionary that maps the old dataset names to the provided ones.
+    Examples:
+        >>> _get_dataset_names_mapping("dataset_name")
+        {"dataset_name": "dataset_name"}  # a str name will stay the same
+        >>> _get_dataset_names_mapping(set(["ds_1", "ds_2"]))
+        {"ds_1": "ds_1", "ds_2": "ds_2"}  # a Set[str] of names will stay the same
+        >>> _get_dataset_names_mapping({"ds_1": "new_ds_1_name"})
+        {"ds_1": "new_ds_1_name"}  # a Dict[str, str] of names will map key to value
+    """
+    if names is None:
+        return {}
+    if isinstance(names, str):
+        return {names: names}
+    if isinstance(names, dict):
+        return copy.deepcopy(names)
+
+    return {item: item for item in names}
+
+
+def _normalize_param_name(name: str) -> str:
+    """Make sure that a param name has a `params:` prefix before passing to the node"""
+    return name if name.startswith("params:") else f"params:{name}"
+
+
+def _get_param_names_mapping(
+    names: Union[str, Set[str], Dict[str, str]] = None
+) -> Dict[str, str]:
+    """Take a parameter or a collection of parameter names
+    and turn it into a mapping from existing parameter names to new ones if necessary.
+    It follows the same rule as `_get_dataset_names_mapping` and
+    prefixes the keys on the resultant dictionary with `params:` to comply with node's syntax.
+
+    Args:
+        names: A parameter name or collection of parameter names.
+            When str or Set[str] is provided, the listed names will stay
+            the same as they are named in the provided pipeline.
+            When Dict[str, str] is provided, current names will be
+            mapped to new names in the resultant pipeline.
+    Returns:
+        A dictionary that maps the old parameter names to the provided ones.
+    Examples:
+        >>> _get_param_names_mapping("param_name")
+        {"params:param_name": "params:param_name"}  # a str name will stay the same
+        >>> _get_param_names_mapping(set(["param_1", "param_2"]))
+        # a Set[str] of names will stay the same
+        {"params:param_1": "params:param_1", "params:param_2": "params:param_2"}
+        >>> _get_param_names_mapping({"param_1": "new_name_for_param_1"})
+        # a Dict[str, str] of names will map key to valu
+        {"params:param_1": "params:new_name_for_param_1"}
+    """
+    params = {}
+    for name, new_name in _get_dataset_names_mapping(names).items():
+        if _is_all_parameters(name):
+            params[name] = name  # don't map parameters into params:parameters
+        else:
+            param_name = _normalize_param_name(name)
+            param_new_name = _normalize_param_name(new_name)
+            params[param_name] = param_new_name
+    return params
+
+
 def pipeline(
     pipe: Union[Iterable[Union[Node, Pipeline]], Pipeline],
     *,
     inputs: Union[str, Set[str], Dict[str, str]] = None,
     outputs: Union[str, Set[str], Dict[str, str]] = None,
-    parameters: Dict[str, str] = None,
+    parameters: Union[str, Set[str], Dict[str, str]] = None,
     tags: Union[str, Iterable[str]] = None,
     namespace: str = None,
 ) -> Pipeline:
@@ -101,7 +181,12 @@ def pipeline(
             mapped to new names.
             Can refer to both the pipeline's free outputs, as well as
             intermediate results that need to be exposed.
-        parameters: A map of existing parameter to the new one.
+        parameters: A name or collection of parameters to namespace.
+            When str or Set[str] are provided, the listed parameter names will stay
+            the same as they are named in the provided pipeline.
+            When Dict[str, str] is provided, current parameter names will be
+            mapped to new names.
+            The parameters can be specified without the `params:` prefix.
         tags: Optional set of tags to be applied to all the pipeline nodes.
         namespace: A prefix to give to all dataset names,
             except those explicitly named with the `inputs`/`outputs`
@@ -126,17 +211,21 @@ def pipeline(
         return pipe
 
     # pylint: disable=protected-access
-    inputs = _to_dict(inputs)
-    outputs = _to_dict(outputs)
-    parameters = _to_dict(parameters)
+    inputs = _get_dataset_names_mapping(inputs)
+    outputs = _get_dataset_names_mapping(outputs)
+    parameters = _get_param_names_mapping(parameters)
 
     _validate_datasets_exist(inputs.keys(), outputs.keys(), parameters.keys(), pipe)
     _validate_inputs_outputs(inputs.keys(), outputs.keys(), pipe)
 
     mapping = {**inputs, **outputs, **parameters}
 
-    def _prefix(name: str) -> str:
-        return f"{namespace}.{name}" if namespace else name
+    def _prefix_dataset(name: str) -> str:
+        return f"{namespace}.{name}"
+
+    def _prefix_param(name: str) -> str:
+        _, param_name = name.split("params:")
+        return f"params:{namespace}.{param_name}"
 
     def _is_transcode_base_in_mapping(name: str) -> bool:
         base_name, _ = _transcode_split(name)
@@ -150,12 +239,14 @@ def pipeline(
         rules = [
             # if name mapped to new name, update with new name
             (lambda n: n in mapping, lambda n: mapping[n]),
-            # if it's a parameter, leave as is (don't namespace)
-            (_is_parameter, lambda n: n),
+            # if name refers to the set of all "parameters", leave as is
+            (_is_all_parameters, lambda n: n),
             # if transcode base is mapped to a new name, update with new base
             (_is_transcode_base_in_mapping, _map_transcode_base),
-            # if namespace given, prefix name using that namespace
-            (lambda n: bool(namespace), _prefix),
+            # if name refers to a single parameter and a namespace is given, apply prefix
+            (lambda n: bool(namespace) and _is_single_parameter(n), _prefix_param),
+            # if namespace given for a dataset, prefix name using that namespace
+            (lambda n: bool(namespace), _prefix_dataset),
         ]
 
         for predicate, processor in rules:
@@ -197,13 +288,3 @@ def pipeline(
     new_nodes = [_copy_node(n) for n in pipe.nodes]
 
     return Pipeline(new_nodes, tags=tags)
-
-
-def _to_dict(element: Union[None, str, Set[str], Dict[str, str]]) -> Dict[str, str]:
-    if element is None:
-        return {}
-    if isinstance(element, str):
-        return {element: element}
-    if isinstance(element, dict):
-        return copy.deepcopy(element)
-    return {item: item for item in element}

@@ -183,7 +183,8 @@ class SparkDataSet(AbstractVersionedDataSet):
         >>>   file_format: csv
         >>>   load_args:
         >>>     header: True
-        >>>     schema: path/to/schema.json
+        >>>     schema:
+        >>>       filepath: path/to/schema.json
         >>>   save_args:
         >>>     sep: '|'
         >>>     header: True

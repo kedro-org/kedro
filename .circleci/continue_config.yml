@@ -593,14 +593,14 @@ workflows:
       - build_docker_image:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
           filters:
             branches:
               only: main
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
           requires:
             - build_docker_image-<<matrix.python_version>>
           filters:
@@ -614,14 +614,14 @@ workflows:
       - build_docker_image:
           matrix:
             parameters:
-              python_version: ["3.9", "3.10"]
+              python_version: []
           filters:
             branches:
               only: develop
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.9", "3.10"]
+              python_version: []
           requires:
             - build_docker_image-<<matrix.python_version>>
           filters:

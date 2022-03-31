@@ -277,7 +277,7 @@ jobs:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
-                name: Run unit tests withou spark sequentially
+                name: Run unit tests without spark sequentially
                 command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
 
   lint:

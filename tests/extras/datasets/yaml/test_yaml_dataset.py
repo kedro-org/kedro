@@ -102,7 +102,7 @@ class TestYAMLDataSet:
 
     def test_dataframe_support(self, yaml_data_set):
         data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5]})
-        yaml_data_set.save(data)
+        yaml_data_set.save(data.to_dict())
         reloaded = yaml_data_set.load()
         assert isinstance(reloaded, dict)
 
@@ -175,8 +175,8 @@ class TestYAMLDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for YAMLDataSet\(.+\)"
+            rf"Save version `{save_version}` did not match load version "
+            rf"`{load_version}` for YAMLDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_yaml_data_set.save(dummy_data)

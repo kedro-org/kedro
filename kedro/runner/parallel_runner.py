@@ -14,6 +14,14 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
 
+from pluggy import PluginManager
+
+from kedro.framework.hooks.manager import (
+    _create_hook_manager,
+    _register_hooks,
+    _register_hooks_setuptools,
+)
+from kedro.framework.project import settings
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -52,11 +60,11 @@ class _SharedMemoryDataSet:
             # Checks if the error is due to serialisation or not
             try:
                 pickle.dumps(data)
-            except Exception as exc:  # SKIP_IF_NO_SPARK, pylint: disable=redefined-outer-name
+            except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
                 raise DataSetError(
                     f"{str(data.__class__)} cannot be serialized. ParallelRunner "
                     "implicit memory datasets can only be used with serializable data"
-                ) from exc
+                ) from serialisation_exc
             else:
                 raise exc
 
@@ -84,23 +92,20 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,
-    run_id: str = None,
+    session_id: str = None,
     package_name: str = None,
     conf_logging: Dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
-    `KedroSession` instance is activated in every subprocess because of Windows
-    (and latest OSX with Python 3.8) limitation.
-    Windows has no "fork", so every subprocess is a brand new process
-    created via "spawn", hence the need to a) setup the logging, b) register
-    the hooks, and c) activate `KedroSession` in every subprocess.
+    A `PluginManager` `hook_manager` instance is created in every subprocess because
+    the `PluginManager` can't be serialised.
 
     Args:
         node: The ``Node`` to run.
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
-        run_id: The id of the pipeline run.
+        session_id: The session id of the pipeline run.
         package_name: The name of the project Python package.
         conf_logging: A dictionary containing logging configuration.
 
@@ -112,7 +117,11 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
         conf_logging = conf_logging or {}
         _bootstrap_subprocess(package_name, conf_logging)
 
-    return run_node(node, catalog, is_async, run_id)
+    hook_manager = _create_hook_manager()
+    _register_hooks(hook_manager, settings.HOOKS)
+    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+    return run_node(node, catalog, hook_manager, is_async, session_id)
 
 
 class ParallelRunner(AbstractRunner):
@@ -220,19 +229,19 @@ class ParallelRunner(AbstractRunner):
                 f"decorated using functools.wraps()."
             )
 
-        memory_data_sets = []
+        memory_datasets = []
         for name, data_set in data_sets.items():
             if (
                 name in pipeline.all_outputs()
                 and isinstance(data_set, MemoryDataSet)
                 and not isinstance(data_set, BaseProxy)
             ):
-                memory_data_sets.append(name)
+                memory_datasets.append(name)
 
-        if memory_data_sets:
+        if memory_datasets:
             raise AttributeError(
                 f"The following data sets are memory data sets: "
-                f"{sorted(memory_data_sets)}\n"
+                f"{sorted(memory_datasets)}\n"
                 f"ParallelRunner does not support output to externally created "
                 f"MemoryDataSets"
             )
@@ -252,14 +261,18 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
-            run_id: The id of the run.
+            session_id: The id of the session.
 
         Raises:
             AttributeError: When the provided pipeline is not suitable for
@@ -270,7 +283,6 @@ class ParallelRunner(AbstractRunner):
 
         """
         # pylint: disable=import-outside-toplevel,cyclic-import
-        from kedro.framework.session.session import get_current_session
 
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
@@ -284,11 +296,7 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
-        from kedro.framework.project import PACKAGE_NAME
-
-        session = get_current_session(silent=True)
-        # pylint: disable=protected-access
-        conf_logging = session._get_logging_config() if session else None
+        from kedro.framework.project import LOGGING, PACKAGE_NAME
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:
@@ -301,9 +309,9 @@ class ParallelRunner(AbstractRunner):
                             node,
                             catalog,
                             self._is_async,
-                            run_id,
+                            session_id,
                             package_name=PACKAGE_NAME,
-                            conf_logging=conf_logging,
+                            conf_logging=LOGGING,
                         )
                     )
                 if not futures:

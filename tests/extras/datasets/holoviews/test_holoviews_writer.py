@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path, PurePosixPath
 
 import holoviews as hv
@@ -33,6 +34,10 @@ def versioned_hv_writer(filepath_png, load_version, save_version):
     return HoloviewsWriter(filepath_png, version=Version(load_version, save_version))
 
 
+@pytest.mark.skipif(
+    sys.version_info.minor == 10,
+    reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
+)
 class TestHoloviewsWriter:
     def test_save_data(self, tmp_path, dummy_hv_object, hv_writer):
         """Test saving Holoviews object."""
@@ -112,6 +117,10 @@ class TestHoloviewsWriter:
         assert isinstance(data_set._filepath, PurePosixPath)
 
 
+@pytest.mark.skipif(
+    sys.version_info.minor == 10,
+    reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
+)
 class TestHoloviewsWriterVersioned:
     def test_version_str_repr(self, hv_writer, versioned_hv_writer):
         """Test that version is in string representation of the class instance
@@ -151,8 +160,8 @@ class TestHoloviewsWriterVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for HoloviewsWriter\(.+\)"
+            rf"Save version `{save_version}` did not match load version "
+            rf"`{load_version}` for HoloviewsWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)

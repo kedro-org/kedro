@@ -6,7 +6,7 @@
 
 ## Breaking changes to the API
 
-## Migration guide from Kedro 0.17.* to 0.18.*
+## Migration guide from Kedro 0.18.* to 0.19.*
 
 
 # Upcoming Release 0.18.1

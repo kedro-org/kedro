@@ -36,6 +36,10 @@ from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Set
 from warnings import warn
 
+import traceback
+import sys
+from yaml.parser import ParserError
+
 from kedro.config import BadConfigException, MissingConfigException
 
 SUPPORTED_EXTENSIONS = [
@@ -153,6 +157,11 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
             }
     except AttributeError as exc:
         raise BadConfigException(f"Couldn't load config file: {config_file}") from exc
+
+    except ParserError as exc:
+        traceback.print_exc()
+        print(f"Failed to parse file: {config_file} is invalid.")
+        sys.exit(1)
 
 
 def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, Any]:

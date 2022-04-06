@@ -52,7 +52,9 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
 
     try:
         res = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"], cwd=project_path
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=project_path,
+            stderr=subprocess.STDOUT,
         )
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):

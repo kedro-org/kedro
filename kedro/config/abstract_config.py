@@ -1,11 +1,12 @@
+"""This module provides ``kedro.abstract_config`` with the baseline
+class model for a `ConfigLoader` implementation.
 """
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 
 class AbstractConfigLoader(ABC):
-    """
-    ``AbstractConfigLoader`` is the abstract base class
+    """``AbstractConfigLoader`` is the abstract base class
         for all `ConfigLoader` implementations.
     All user-defined `ConfigLoader` implementations should inherit
         from `AbstractConfigLoader` and implement all relevant abstract methods.

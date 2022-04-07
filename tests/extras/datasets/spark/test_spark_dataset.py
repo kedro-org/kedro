@@ -1,9 +1,9 @@
-import boto3
 import re
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
+import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
@@ -264,7 +264,13 @@ class TestSparkDataSet:
         spark_data_set = SparkDataSet(
             filepath=filepath,
             file_format="csv",
-            load_args={"header": True, "schema": {"filepath": f"s3://{BUCKET_NAME}/{SCHEMA_FILE_NAME}",  "credentials": AWS_CREDENTIALS}},
+            load_args={
+                "header": True,
+                "schema": {
+                    "filepath": f"s3://{BUCKET_NAME}/{SCHEMA_FILE_NAME}",
+                    "credentials": AWS_CREDENTIALS,
+                },
+            },
         )
 
         spark_df = spark_data_set.load()

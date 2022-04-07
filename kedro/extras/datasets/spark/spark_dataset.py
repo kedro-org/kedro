@@ -335,8 +335,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._fs_prefix = fs_prefix
         self._handle_delta_format()
 
-    @staticmethod
-    def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
+    def _load_schema_from_file(self, schema: Dict[str, Any]) -> StructType:
 
         filepath = schema.get("filepath")
         if not filepath:

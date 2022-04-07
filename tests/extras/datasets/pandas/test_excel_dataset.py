@@ -76,19 +76,6 @@ class TestExcelDataSet:
         assert_frame_equal(dummy_multisheet["sheet 1"], reloaded["sheet 1"])
         assert_frame_equal(dummy_multisheet["sheet 2"], reloaded["sheet 2"])
 
-    def test_save_and_load_multiple_sheets(
-        self, excel_multisheet_data_set, dummy_dataframe, another_dummy_dataframe
-    ):
-        """Test saving and reloading the data set with multiple sheets."""
-        dummy_multisheet = {
-            "sheet 1": dummy_dataframe,
-            "sheet 2": another_dummy_dataframe,
-        }
-        excel_multisheet_data_set.save(dummy_multisheet)
-        reloaded = excel_multisheet_data_set.load()
-        assert_frame_equal(dummy_multisheet["sheet 1"], reloaded["sheet 1"])
-        assert_frame_equal(dummy_multisheet["sheet 2"], reloaded["sheet 2"])
-
     def test_exists(self, excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""

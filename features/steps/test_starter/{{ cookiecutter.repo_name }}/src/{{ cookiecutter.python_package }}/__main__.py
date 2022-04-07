@@ -41,6 +41,13 @@ def main(**kwargs):
     package_name = Path(__file__).parent.name
     configure_project(package_name)
     run = _find_run_command(package_name)
+    # This is what happens under the hood of run.__call__. The click context contains
+    # arguments coming from the CLI command (sys.argv, e.g. ["--pipeline", "ds"]) and
+    # default values of arguments that are not supplied. We forward the context to the
+    # invocation of run. Any **kwargs supplied (e.g. `main(pipeline="ds")` will
+    # overwrite the arguments supplied by the context. Overall this means we have a
+    # system where the same main function can handle both arguments coming from CLI and
+    # a Python API.
     with run.make_context("run", sys.argv[1:]) as ctx:
         return ctx.forward(run, **kwargs)
 

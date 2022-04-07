@@ -116,7 +116,7 @@ def fake_project_cli(
     fake_repo_path: Path, dummy_config: Path, fake_kedro_cli: click.CommandCollection
 ):
     old_settings = settings.as_dict()
-    starter_path = Path(__file__).parents[3].resolve()
+    starter_path = Path(__file__).resolve().parents[3]
     starter_path = starter_path / "features" / "steps" / "test_starter"
     CliRunner().invoke(
         fake_kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)]
@@ -134,7 +134,8 @@ def fake_project_cli(
     yield fake_kedro_cli
 
     # reset side-effects of configure_project
-    pipelines._clear(PACKAGE_NAME)  # this resets pipelines loading state
+    pipelines.configure()
+
     for key, value in old_settings.items():
         settings.set(key, value)
     sys.path = old_path
@@ -143,7 +144,7 @@ def fake_project_cli(
     # PACKAGE_NAME.settings to sys.modules. These need to be removed.
     # Ideally we would reset sys.modules to exactly what it was before
     # running anything, but removal of distutils.build.commands from
-    # sys.modules mysteriously makes some tests for `kedro pipeline package`
+    # sys.modules mysteriously makes some tests for `kedro micropkg package`
     # fail on Windows, Python 3.7 and 3.8.
     for module in list(sys.modules.keys()):
         if module.startswith(PACKAGE_NAME):

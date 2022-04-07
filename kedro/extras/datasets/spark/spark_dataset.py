@@ -161,8 +161,8 @@ class SparkDataSet(AbstractVersionedDataSet):
     """``SparkDataSet`` loads and saves Spark dataframes.
 
     Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -216,8 +216,6 @@ class SparkDataSet(AbstractVersionedDataSet):
         >>> reloaded = data_set.load()
         >>>
         >>> reloaded.take(4)
-
-
     """
 
     # this dataset cannot be used with ``ParallelRunner``,
@@ -253,14 +251,14 @@ class SparkDataSet(AbstractVersionedDataSet):
                 It is dependent on the selected file format. You can find
                 a list of read options for each supported format
                 in Spark DataFrame read documentation:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis
             save_args: Save args passed to Spark DataFrame write options.
                 Similar to load_args this is dependent on the selected file
                 format. You can pass ``mode`` and ``partitionBy`` to specify
                 your overwrite mode and partitioning respectively. You can find
                 a list of options for each format in Spark DataFrame
                 write documentation:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -323,6 +321,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
+        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
 
@@ -362,6 +361,8 @@ class SparkDataSet(AbstractVersionedDataSet):
                     f"Contents of `schema.filepath` ({schema_path}) are invalid. Please"
                     f"provide a valid JSON serialized `pyspark.sql.types.StructType`."
                 ) from exc
+
+        self._handle_delta_format()
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

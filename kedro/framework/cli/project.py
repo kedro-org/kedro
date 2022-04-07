@@ -349,7 +349,7 @@ def run(
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
     with KedroSession.create(env=env, extra_params=params) as session:
-        session.run(
+        return session.run(
             tags=tag,
             runner=runner(is_async=is_async),
             node_names=node_names,

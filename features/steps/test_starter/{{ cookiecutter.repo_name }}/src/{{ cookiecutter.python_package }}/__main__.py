@@ -3,6 +3,7 @@ as `{{ cookiecutter.repo_name }}` and `python -m {{ cookiecutter.python_package 
 """
 import importlib
 from pathlib import Path
+import sys
 
 from kedro.framework.cli.utils import KedroCliError, load_entry_points
 from kedro.framework.project import configure_project
@@ -36,11 +37,12 @@ def _find_run_command_in_plugins(plugins):
             return group.commands["run"]
 
 
-def main(*args, **kwargs):
+def main(**kwargs):
     package_name = Path(__file__).parent.name
     configure_project(package_name)
     run = _find_run_command(package_name)
-    run(*args, **kwargs)
+    with run.make_context("run", sys.argv[1:]) as ctx:
+        return ctx.forward(run, **kwargs)
 
 
 if __name__ == "__main__":

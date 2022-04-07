@@ -36,8 +36,6 @@ from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Set
 from warnings import warn
 
-import traceback
-import sys
 from yaml.parser import ParserError
 
 from kedro.config import BadConfigException, MissingConfigException

@@ -6,7 +6,6 @@ from typing import Dict
 
 import pytest
 import yaml
-
 from yaml.parser import ParserError
 
 from kedro.config import BadConfigException, ConfigLoader, MissingConfigException
@@ -319,6 +318,6 @@ class TestConfigLoader:
 
         (conf_path / "catalog.yml").write_text(example_catalog)
 
-        pattern = f"Invalid YAML file {conf_path / 'catalog.yml'}, unable to read line 3, position 10."
-        with pytest.raises(ParserError, match=re.escape(pattern)):
+        msg = f"Invalid YAML file {conf_path / 'catalog.yml'}, unable to read line 3, position 10."
+        with pytest.raises(ParserError, match=re.escape(msg)):
             ConfigLoader(str(tmp_path)).get("catalog*.yml")

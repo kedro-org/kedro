@@ -227,20 +227,12 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - setup
-      - unless:
-          condition:
-            equal: ["3.10", <<parameters.python_version>>]
-          steps:
-            - run:
-                name: Run unit tests in parallel
-                command: make test
-      - when:
-          condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
-          steps:
-            - run:
-                name: Run unit tests sequentially
-                command: pytest tests --cov-config pyproject.toml
+      - run:
+          name: Run majority of unit tests in parallel
+          command: make test
+      - run:
+          name: Run partioned_dataset unit tests sequentially
+          command: pytest tests/io/test_partitioned_dataset.py
 
 
   win_unit_tests:
@@ -265,20 +257,12 @@ jobs:
           # Setting it to 2 or higher will suppress the warning messages totally.
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
-      - unless:
-          condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
-          steps:
-            - run:
-                name: Run unit tests without spark in parallel
-                command: conda activate kedro_builder; make test-no-spark
-      - when:
-          condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
-          steps:
-            - run:
-                name: Run unit tests without spark sequentially
-                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
+      - run:
+          name: Run majority of unit tests without spark in parallel
+          command: conda activate kedro_builder; make test-no-spark
+      - run:
+          name: Run partitioned_dataset unit tests sequentially
+          command: conda activate kedro_builder; pytest tests/io/test_partitioned_datase --no-cov
 
   lint:
     parameters:

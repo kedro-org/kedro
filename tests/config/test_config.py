@@ -7,6 +7,8 @@ from typing import Dict
 import pytest
 import yaml
 
+from yaml.parser import ParserError
+
 from kedro.config import BadConfigException, ConfigLoader, MissingConfigException
 
 _DEFAULT_RUN_ENV = "local"
@@ -304,3 +306,19 @@ class TestConfigLoader:
             f"Config file(s): {expected_path} already processed, skipping loading..."
         )
         assert expected_message in log_messages
+
+    def test_yaml_parser_error(self, tmp_path):
+        conf_path = tmp_path / _BASE_ENV
+        conf_path.mkdir(parents=True, exist_ok=True)
+
+        example_catalog = """
+        example_iris_data:
+              type: pandas.CSVDataSet
+          filepath: data/01_raw/iris.csv
+        """
+
+        (conf_path / "catalog.yml").write_text(example_catalog)
+
+        pattern = f"Invalid YAML file {conf_path / 'catalog.yml'}, unable to read line 3, position 10."
+        with pytest.raises(ParserError, match=re.escape(pattern)):
+            ConfigLoader(str(tmp_path)).get("catalog*.yml")

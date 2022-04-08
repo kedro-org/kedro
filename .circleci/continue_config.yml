@@ -231,7 +231,7 @@ jobs:
           name: Run majority of unit tests in parallel
           command: make test
       - run:
-          name: Run partioned_dataset unit tests sequentially
+          name: Run partioned_dataset & incremental_dataset unit tests sequentially
           command: pytest tests/io/test_partitioned_dataset.py
 
 
@@ -261,7 +261,7 @@ jobs:
           name: Run majority of unit tests without spark in parallel
           command: conda activate kedro_builder; make test-no-spark
       - run:
-          name: Run partitioned_dataset unit tests sequentially
+          name: Run partitioned_dataset & incremental_dataset unit tests sequentially
           command: conda activate kedro_builder; pytest tests/io/test_partitioned_datase --no-cov
 
   lint:

@@ -13,6 +13,8 @@
 
 ## Major features and improvements
 
+* Added more detail to YAML ParserError error message
+
 ## Bug fixes and other changes
 
 ## Upcoming deprecations for Kedro 0.19.0

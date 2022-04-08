@@ -232,7 +232,7 @@ jobs:
           command: make test
       - run:
           name: Run partioned_dataset & incremental_dataset unit tests sequentially
-          command: pytest tests/io/test_partitioned_dataset.py
+          command: pytest --no-cov tests/io/test_partitioned_dataset.py
 
 
   win_unit_tests:

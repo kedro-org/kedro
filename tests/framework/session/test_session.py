@@ -565,8 +565,9 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "runner":mock_runner.__name__
+            "runner": mock_runner.__name__,
         }
+
         mock_hook.before_pipeline_run.assert_called_once_with(
             run_params=record_data,
             pipeline=mock_pipeline,
@@ -651,7 +652,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "runner": mock_runner.__name__
+            "runner": mock_runner.__name__,
         }
 
         mock_hook.on_pipeline_error.assert_called_once_with(

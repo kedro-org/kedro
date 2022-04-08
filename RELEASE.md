@@ -13,6 +13,8 @@
 
 ## Major features and improvements
 
+* Added more detail to YAML ParserError error message
+
 ## Bug fixes and other changes
 * Removes fatal error from git in run log on directories without git
 

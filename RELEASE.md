@@ -78,7 +78,7 @@
 * Removed `RegistrationSpecs` and all registration hooks that belonged to it. Going forward users can register custom library components through `settings.py`.
 * Added the `PluginManager` `hook_manager` argument to `KedroContext` and the `Runner.run()` method, which will be provided by the `KedroSession`.
 * Removed the public method `get_hook_manager()` and replaced its functionality by `_create_hook_manager()`.
-* Added `run_id` and `runner_name` attributes to pipeline hook specs.
+* Added `runner` class name to pipeline `run_params` hook specs.
 * Added `after_command_run` CLI hook spec.
 
 ## Thanks for supporting contributions

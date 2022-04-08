@@ -278,8 +278,6 @@ class LoggingHooks:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner_name: str,
-        run_id: str,
     ) -> None:
         logger.info(
             "About to run pipeline",
@@ -287,8 +285,6 @@ class LoggingHooks:
                 "pipeline": pipeline,
                 "run_params": run_params,
                 "catalog": catalog,
-                "runner_name": runner_name,
-                "run_id": run_id,
             },
         )
 
@@ -299,8 +295,6 @@ class LoggingHooks:
         run_result: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner_name: str,
-        run_id: str,
     ) -> None:
         logger.info(
             "Ran pipeline",
@@ -309,8 +303,6 @@ class LoggingHooks:
                 "run_params": run_params,
                 "run_result": run_result,
                 "catalog": catalog,
-                "runner_name": runner_name,
-                "run_id": run_id,
             },
         )
 
@@ -321,8 +313,6 @@ class LoggingHooks:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner_name: str,
-        run_id: str,
     ) -> None:
         logger.info(
             "Pipeline error",
@@ -331,8 +321,6 @@ class LoggingHooks:
                 "run_params": run_params,
                 "pipeline": pipeline,
                 "catalog": catalog,
-                "runner_name": runner_name,
-                "run_id": run_id,
             },
         )
 

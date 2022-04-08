@@ -144,7 +144,7 @@ class TestPipelineHooks:
         call_record = before_pipeline_run_calls[0]
         _assert_pipeline_equal(call_record.pipeline, default_pipeline)
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["pipeline", "catalog", "run_params", "runner_name", "run_id"]
+            call_record, ["pipeline", "catalog", "run_params"]
         )
 
         # test after pipeline run hook
@@ -156,7 +156,7 @@ class TestPipelineHooks:
         assert len(after_pipeline_run_calls) == 1
         call_record = after_pipeline_run_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record, ["pipeline", "catalog", "run_params", "runner_name", "run_id"]
+            call_record, ["pipeline", "catalog", "run_params"]
         )
         _assert_pipeline_equal(call_record.pipeline, default_pipeline)
 
@@ -174,7 +174,7 @@ class TestPipelineHooks:
         call_record = on_pipeline_error_calls[0]
         _assert_hook_call_record_has_expected_parameters(
             call_record,
-            ["error", "run_params", "pipeline", "catalog", "runner_name", "run_id"],
+            ["error", "run_params", "pipeline", "catalog"],
         )
         expected_error = ValueError("broken")
         assert_exceptions_equal(call_record.error, expected_error)

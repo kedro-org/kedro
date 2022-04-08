@@ -365,6 +365,7 @@ class KedroSession:
             "load_versions": load_versions,
             "extra_params": extra_params,
             "pipeline_name": pipeline_name,
+            "runner": getattr(runner, "__name__", str(runner))
         }
 
         catalog = context._get_catalog(
@@ -378,8 +379,6 @@ class KedroSession:
             run_params=record_data,
             pipeline=filtered_pipeline,
             catalog=catalog,
-            runner_name=getattr(runner, "__name__", str(runner)),
-            run_id=run_id,
         )
 
         try:
@@ -390,8 +389,6 @@ class KedroSession:
                 run_params=record_data,
                 pipeline=filtered_pipeline,
                 catalog=catalog,
-                runner_name=getattr(runner, "__name__", str(runner)),
-                run_id=run_id,
             )
             raise
 
@@ -400,7 +397,5 @@ class KedroSession:
             run_result=run_result,
             pipeline=filtered_pipeline,
             catalog=catalog,
-            runner_name=getattr(runner, "__name__", str(runner)),
-            run_id=run_id,
         )
         return run_result

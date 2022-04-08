@@ -138,8 +138,6 @@ class PipelineSpecs:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner_name: str,
-        run_id: str,
     ) -> None:
         """Hook to be invoked before a pipeline runs.
 
@@ -148,7 +146,7 @@ class PipelineSpecs:
                 Should have the following schema::
 
                    {
-                     "run_id": str
+                     "run_id": str,
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -165,8 +163,6 @@ class PipelineSpecs:
 
             pipeline: The ``Pipeline`` that will be run.
             catalog: The ``DataCatalog`` to be used during the run.
-            runner_name: The runner class name that will be used to execute this run.
-            run_id: The ID of the run about to be executed.
         """
         pass
 
@@ -177,8 +173,6 @@ class PipelineSpecs:
         run_result: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner_name: str,
-        run_id: str,
     ) -> None:
         """Hook to be invoked after a pipeline runs.
 
@@ -187,7 +181,7 @@ class PipelineSpecs:
                 Should have the following schema::
 
                    {
-                     "run_id": str
+                     "run_id": str,
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -205,8 +199,6 @@ class PipelineSpecs:
             run_result: The output of ``Pipeline`` run.
             pipeline: The ``Pipeline`` that was run.
             catalog: The ``DataCatalog`` used during the run.
-            runner_name: The runner class name that was used to execute this run.
-            run_id: The ID of the run that completed.
         """
         pass
 
@@ -217,8 +209,6 @@ class PipelineSpecs:
         run_params: Dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
-        runner_name: str,
-        run_id: str,
     ):
         """Hook to be invoked if a pipeline run throws an uncaught Exception.
         The signature of this error hook should match the signature of ``before_pipeline_run``
@@ -246,8 +236,6 @@ class PipelineSpecs:
                    }
             pipeline: The ``Pipeline`` that will was run.
             catalog: The ``DataCatalog`` used during the run.
-            runner_name: The runner class name that was used during the run.
-            run_id: The ID of the run that was used.
         """
         pass
 

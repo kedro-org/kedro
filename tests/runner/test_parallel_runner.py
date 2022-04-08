@@ -176,8 +176,8 @@ class TestInvalidParallelRunner:
         pipeline = Pipeline([node(return_not_serializable, "A", "B")])
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pattern = (
-            fr"{str(data.__class__)} cannot be serialized. ParallelRunner implicit "
-            fr"memory datasets can only be used with serializable data"
+            rf"{str(data.__class__)} cannot be serialized. ParallelRunner implicit "
+            rf"memory datasets can only be used with serializable data"
         )
 
         with pytest.raises(DataSetError, match=pattern):
@@ -364,14 +364,14 @@ class TestRunNodeSynchronisationHelper:
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
         _run_node_synchronization(
             node_,
             catalog,
             is_async,
-            run_id,
+            session_id,
             package_name=package_name,
             conf_logging=conf_logging,
         )
@@ -390,11 +390,11 @@ class TestRunNodeSynchronisationHelper:
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
         _run_node_synchronization(
-            node_, catalog, is_async, run_id, package_name=package_name
+            node_, catalog, is_async, session_id, package_name=package_name
         )
         mock_run_node.assert_called_once()
         mock_logging.assert_called_once_with({})
@@ -406,11 +406,11 @@ class TestRunNodeSynchronisationHelper:
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
         _run_node_synchronization(
-            node_, catalog, is_async, run_id, package_name=package_name
+            node_, catalog, is_async, session_id, package_name=package_name
         )
         mock_run_node.assert_called_once()
         mock_logging.assert_not_called()

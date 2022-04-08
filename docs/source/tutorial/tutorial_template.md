@@ -23,14 +23,13 @@ Up to this point, we haven't discussed project dependencies, so now is a good ti
 The generic project template bundles some typical dependencies, in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers are slightly different depending on the version of Kedro that you are using:
 
 ```text
-black==21.5b1 # Used for formatting code with `kedro lint`
+black==22.1.0 # Used for formatting code with `kedro lint`
 flake8>=3.7.9, <4.0 # Used for linting code with `kedro lint`
 ipython==7.0 # Used for an IPython session with `kedro ipython`
 isort~=5.0 # Used for linting code with `kedro lint`
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
-jupyter_client>=5.1.0, <8.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab~=3.0 # Used to open a Kedro-session in Jupyter Lab
-kedro==0.17.7
+kedro==0.18.0
 nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov~=3.0 # Produces test coverage reports
 pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with pytest
@@ -46,7 +45,7 @@ The dependencies above may be sufficient for some projects, but for this tutoria
 Edit your `src/requirements.txt` file to include the following lines:
 
 ```text
-kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.17.7   # Specify optional Kedro dependencies
+kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.0   # Specify optional Kedro dependencies
 kedro-viz~=4.0                                                                 # Visualise your pipelines
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```

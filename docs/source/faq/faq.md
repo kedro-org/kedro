@@ -21,9 +21,9 @@ Andrew Mackay,
 [Ivan Danov](https://github.com/idanov),
 [Joel Schwarzmann](https://github.com/datajoely),
 [Lim Hoang](https://github.com/limdauto),
-[Lorena Bălan](https://github.com/lorenabalan),
 [Merel Theisen](https://github.com/MerelTheisenQB),
 [Nero Okwa](https://github.com/NeroOkwa),
+[Nok Lam Chan](https://github.com/noklam),
 [Rashida Kanchwala](https://github.com/rashidakanchwala),
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Susanna Wong](https://github.com/studioswong),
@@ -42,6 +42,7 @@ Former core team members with significant contributions include:
 [Kiyohito Kunii](https://github.com/921kiyo),
 [Laís Carvalho](https://github.com/laisbsc),
 [Liam Brummitt](https://github.com/bru5),
+[Lorena Bălan](https://github.com/lorenabalan),
 [Nasef Khan](https://github.com/nakhan98),
 [Richard Westenra](https://github.com/richardwestenra) and
 [Zain Patel](https://github.com/mzjp2).

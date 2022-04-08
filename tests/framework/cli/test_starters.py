@@ -14,7 +14,7 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 from kedro import __version__ as version
 from kedro.framework.cli.starters import _STARTER_ALIASES, TEMPLATE_PATH
 
-FILES_IN_TEMPLATE = 33
+FILES_IN_TEMPLATE = 32
 
 
 @pytest.fixture
@@ -113,6 +113,19 @@ class TestNewFromUserPromptsValid:
         _assert_template_ok(
             result,
             project_name="My Project",
+            repo_name="my-project",
+            python_package="my_project",
+        )
+
+    def test_custom_project_name_with_hyphen(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(project_name="My-Project"),
+        )
+        _assert_template_ok(
+            result,
+            project_name="My-Project",
             repo_name="my-project",
             python_package="my_project",
         )

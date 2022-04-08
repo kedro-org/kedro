@@ -290,7 +290,6 @@ class KedroContext:
             feed_dict=feed_dict,
             save_version=save_version,
             load_versions=load_versions,
-            run_id=self.run_id or save_version,
         )
         return catalog
 
@@ -334,22 +333,6 @@ class KedroContext:
             warn(f"Credentials not found in your Kedro project config.\n{str(exc)}")
             conf_creds = {}
         return conf_creds
-
-    @property
-    def run_id(self) -> Union[None, str]:
-        """Unique identifier for a run, defaults to None.
-        If `run_id` is None, `save_version` will be used instead.
-        """
-        return self._get_run_id()
-
-    def _get_run_id(  # pylint: disable=no-self-use
-        self, *args, **kwargs  # pylint: disable=unused-argument
-    ) -> Union[None, str]:
-        """A hook for generating a unique identifier for a
-        run, defaults to None.
-        If None, `save_version` will be used instead.
-        """
-        return None
 
 
 class KedroContextError(Exception):

@@ -16,7 +16,7 @@ Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loade
 ```python
 from kedro.config import ConfigLoader
 
-conf_loader = ConfigLoader(conf_root="conf", env="local")
+conf_loader = ConfigLoader(conf_source="conf", env="local")
 conf_catalog = conf_loader.get("catalog*", "catalog*/**")
 ```
 

@@ -37,6 +37,17 @@ python -m kedro_spaceflights
 
 An executable, `kedro-spaceflights`, is also placed in the `bin/` subfolder of the Python installation location.
 
+Once you have your project installed, you can run your pipelines from any Python code by simply importing it as follows:
+
+```python
+from kedro_spaceflights.__main__ import main
+
+main(
+    ["--pipeline", "__default__"]
+)  # or simply main() if you don't want to provide any arguments
+```
+
+This is equivalent to running `kedro run` and you can provide all the parameters described by `kedro run --help`.
 
 ### Docker, Airflow and Deployment
 

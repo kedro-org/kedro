@@ -305,8 +305,8 @@ class TestParquetDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for ParquetDataSet\(.+\)"
+            rf"Save version `{save_version}` did not match load version "
+            rf"`{load_version}` for ParquetDataSet\(.+\)"
         )
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",

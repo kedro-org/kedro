@@ -297,23 +297,6 @@ def env_option(func_=None, **kwargs):
     return opt(func_) if func_ else opt
 
 
-def ipython_message(all_kernels=True):
-    """Show a message saying how we have configured the IPython env."""
-    ipy_vars = ["startup_error", "context"]
-    click.secho("-" * 79, fg="cyan")
-    click.secho("Starting a Kedro session with the following variables in scope")
-    click.secho(", ".join(ipy_vars), fg="green")
-    line_magic = click.style("%reload_kedro", fg="green")
-    click.secho(f"Use the line magic {line_magic} to refresh them")
-    click.secho("or to see the error message if they are undefined")
-
-    if not all_kernels:
-        click.secho("The choice of kernels is limited to the default one.", fg="yellow")
-        click.secho("(restart with --all-kernels to get access to others)", fg="yellow")
-
-    click.secho("-" * 79, fg="cyan")
-
-
 @contextmanager
 def _filter_deprecation_warnings():
     """Temporarily suppress all DeprecationWarnings."""

@@ -2,7 +2,9 @@
   "type": "object",
   "patternProperties": {
     "^[a-z0-9-_]+$": {
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
         "type": {
           "type": "string",
@@ -34,6 +36,7 @@
             "pillow.ImageDataSet",
             "pickle.PickleDataSet",
             "plotly.PlotlyDataSet",
+            "redis.PickleDataSet",
             "spark.SparkDataSet",
             "spark.SparkHiveDataSet",
             "spark.SparkJDBCDataSet",
@@ -47,9 +50,17 @@
       },
       "allOf": [
         {
-          "if": { "properties": { "type": { "const": "CachedDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "CachedDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["dataset"],
+            "required": [
+              "dataset"
+            ],
             "properties": {
               "dataset": {
                 "pattern": ".*",
@@ -63,9 +74,18 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "IncrementalDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "IncrementalDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["path", "dataset"],
+            "required": [
+              "path",
+              "dataset"
+            ],
             "properties": {
               "path": {
                 "type": "string",
@@ -88,7 +108,10 @@
                 "description": "If specified, only partitions that end with this\nstring will be processed."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/0.18.0/data/kedro_io.html#partitioned-dataset-credentials"
               },
               "load_args": {
@@ -103,7 +126,13 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "MemoryDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "MemoryDataSet"
+              }
+            }
+          },
           "then": {
             "required": [],
             "properties": {
@@ -119,9 +148,18 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "LambdaDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "LambdaDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["load", "save"],
+            "required": [
+              "load",
+              "save"
+            ],
             "properties": {
               "load": {
                 "pattern": ".*",
@@ -143,9 +181,18 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "PartitionedDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "PartitionedDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["path", "dataset"],
+            "required": [
+              "path",
+              "dataset"
+            ],
             "properties": {
               "path": {
                 "type": "string",
@@ -164,7 +211,10 @@
                 "description": "If specified, only partitions that end with this\nstring will be processed."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/0.18.0/data/kedro_io.html#partitioned-dataset-credentials"
               },
               "load_args": {
@@ -179,9 +229,17 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "api.APIDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "api.APIDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "properties": {
               "url": {
                 "type": "string",
@@ -221,11 +279,15 @@
         {
           "if": {
             "properties": {
-              "type": { "const": "biosequence.BioSequenceDataSet" }
+              "type": {
+                "const": "biosequence.BioSequenceDataSet"
+              }
             }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -240,7 +302,10 @@
                 "description": "file format supported by Biopython ``SeqIO.write()``.\nE.g. `{\"format\": \"fasta\"}`."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -252,10 +317,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "dask.ParquetDataSet" } }
+            "properties": {
+              "type": {
+                "const": "dask.ParquetDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -270,7 +341,10 @@
                 "description": "Additional saving options for `dask.dataframe.to_parquet`:\nhttps://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet"
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -282,10 +356,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "email.EmailMessageDataSet" } }
+            "properties": {
+              "type": {
+                "const": "email.EmailMessageDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -300,7 +380,10 @@
                 "description": "``email`` options for generating MIME documents (arguments passed into\n``email.generator.Generator.flatten``). Here you can find all available arguments:\nhttps://docs.python.org/3/library/email.generator.html#email.generator.Generator.flatten\nIf you would like to specify options for the `Generator`,\nyou can include them under the \"generator\" key. Here you can\nfind all available arguments:\nhttps://docs.python.org/3/library/email.generator.html#email.generator.Generator\nAll defaults are preserved."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -312,10 +395,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "geopandas.GeoJSONDataSet" } }
+            "properties": {
+              "type": {
+                "const": "geopandas.GeoJSONDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -330,7 +419,10 @@
                 "description": "GeoPandas options for saving geojson files.\nHere you can find all available arguments:\nhttps://geopandas.org/reference.html#geopandas.GeoDataFrame.to_file\nThe default_save_arg driver is 'GeoJSON', all others preserved."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "credentials required to access the underlying filesystem.\nEg. for ``GCFileSystem`` it would look like `{'token': None}`."
               },
               "fs_args": {
@@ -342,10 +434,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "holoviews.HoloviewsWriter" } }
+            "properties": {
+              "type": {
+                "const": "holoviews.HoloviewsWriter"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -356,7 +454,10 @@
                 "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested key `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `wb` when saving."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``S3FileSystem`` it should look like:\n`{'key': '<id>', 'secret': '<key>'}}`"
               },
               "save_args": {
@@ -367,9 +468,17 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "json.JSONDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "json.JSONDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -380,7 +489,10 @@
                 "description": "json options for saving JSON files (arguments passed\ninto ```json.dump``). Here you can find all available arguments:\nhttps://docs.python.org/3/library/json.html\nAll defaults are preserved, but \"default_flow_style\", which is set to False."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -392,10 +504,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "matplotlib.MatplotlibWriter" } }
+            "properties": {
+              "type": {
+                "const": "matplotlib.MatplotlibWriter"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -406,7 +524,10 @@
                 "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested key `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `wb` when saving."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``S3FileSystem`` it should look like:\n`{'key': '<id>', 'secret': '<key>'}}`"
               },
               "save_args": {
@@ -418,10 +539,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "networkx.NetworkXDataSet" } }
+            "properties": {
+              "type": {
+                "const": "networkx.NetworkXDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -436,7 +563,10 @@
                 "description": "Arguments passed on to ```networkx.node_link_data``.\nSee the details in\nhttps://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html"
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -447,9 +577,17 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "pandas.CSVDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "pandas.CSVDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -464,7 +602,10 @@
                 "description": "Pandas options for saving CSV files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -476,10 +617,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "pandas.ExcelDataSet" } }
+            "properties": {
+              "type": {
+                "const": "pandas.ExcelDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -498,7 +645,10 @@
                 "description": "Pandas options for saving Excel files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html\nAll defaults are preserved, but \"index\", which is set to False.\nIf you would like to specify options for the `ExcelWriter`,\nyou can include them under the \"writer\" key. Here you can\nfind all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html"
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -510,10 +660,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "pandas.FeatherDataSet" } }
+            "properties": {
+              "type": {
+                "const": "pandas.FeatherDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -524,7 +680,10 @@
                 "description": "Pandas options for loading feather files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_feather.html\nAll defaults are preserved."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -536,10 +695,17 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "pandas.GBQTableDataSet" } }
+            "properties": {
+              "type": {
+                "const": "pandas.GBQTableDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["dataset", "table_name"],
+            "required": [
+              "dataset",
+              "table_name"
+            ],
             "properties": {
               "dataset": {
                 "type": "string",
@@ -569,9 +735,18 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "pandas.HDFDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "pandas.HDFDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath", "key"],
+            "required": [
+              "filepath",
+              "key"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -590,7 +765,10 @@
                 "description": "PyTables options for saving hdf files.\nYou can find all available arguments at:\nhttps://www.pytables.org/usersguide/libref/top_level.html#tables.open_file\nAll defaults are preserved."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -601,9 +779,17 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "pandas.JSONDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "pandas.JSONDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -618,7 +804,10 @@
                 "description": "Pandas options for saving JSON files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_json.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{'token': None}`."
               },
               "fs_args": {
@@ -630,10 +819,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "pandas.ParquetDataSet" } }
+            "properties": {
+              "type": {
+                "const": "pandas.ParquetDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -648,7 +843,10 @@
                 "description": "Additional saving options for `pyarrow.parquet.write_table` and\n`pyarrow.Table.from_pandas`.\nHere you can find all available arguments for `write_table()`:\nhttps://arrow.apache.org/docs/python/generated/pyarrow.parquet.write_table.html?highlight=write_table#pyarrow.parquet.write_table\nThe arguments for `from_pandas()` should be passed through a nested\nkey: `from_pandas`. E.g.: `save_args = {\"from_pandas\": {\"preserve_index\": False}}`\nHere you can find all available arguments for `from_pandas()`:\nhttps://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas"
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -660,17 +858,27 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "pandas.SQLTableDataSet" } }
+            "properties": {
+              "type": {
+                "const": "pandas.SQLTableDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["table_name", "credentials"],
+            "required": [
+              "table_name",
+              "credentials"
+            ],
             "properties": {
               "table_name": {
                 "type": "string",
                 "description": "The table name to load or save data to. It\noverwrites name in ``save_args`` and ``table_name``\nparameters in ``load_args``."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "A dictionary with a ``SQLAlchemy`` connection string.\nUsers are supposed to provide the connection string 'con'\nthrough credentials. It overwrites `con` parameter in\n``load_args`` and ``save_args`` in case it is provided. To find\nall supported connection string formats, see here:\nhttps://docs.sqlalchemy.org/en/13/core/engines.html#database-urls"
               },
               "load_args": {
@@ -686,17 +894,27 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "pandas.SQLQueryDataSet" } }
+            "properties": {
+              "type": {
+                "const": "pandas.SQLQueryDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["sql", "credentials"],
+            "required": [
+              "sql",
+              "credentials"
+            ],
             "properties": {
               "sql": {
                 "type": "string",
                 "description": "The sql query statement."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "A dictionary with a ``SQLAlchemy`` connection string.\nUsers are supposed to provide the connection string 'con'\nthrough credentials. It overwrites `con` parameter in\n``load_args`` and ``save_args`` in case it is provided. To find\nall supported connection string formats, see here:\nhttps://docs.sqlalchemy.org/en/13/core/engines.html#database-urls"
               },
               "load_args": {
@@ -707,9 +925,17 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "pandas.XMLDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "pandas.XMLDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -724,7 +950,10 @@
                 "description": "Pandas options for saving XML files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_xml.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -736,10 +965,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "pickle.PickleDataSet" } }
+            "properties": {
+              "type": {
+                "const": "pickle.PickleDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -758,7 +993,10 @@
                 "description": "Pickle options for saving pickle files.\nHere you can find all available arguments for different backends:\npickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump\njoblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html\nAll defaults are preserved."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -770,10 +1008,16 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "pillow.ImageDataSet" } }
+            "properties": {
+              "type": {
+                "const": "pillow.ImageDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -784,7 +1028,10 @@
                 "description": "Pillow options for saving image files.\nHere you can find all available arguments:\nhttps://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save\nAll defaults are preserved."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -796,10 +1043,17 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "plotly.PlotlyDataSet" } }
+            "properties": {
+              "type": {
+                "const": "plotly.PlotlyDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["filepath", "plotly_args"],
+            "required": [
+              "filepath",
+              "plotly_args"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -818,7 +1072,10 @@
                 "description": "Plotly options for saving JSON files.\nHere you can find all available arguments:\nhttps://plotly.com/python-api-reference/generated/plotly.io.write_json.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{'token': None}`."
               },
               "fs_args": {
@@ -829,9 +1086,57 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "spark.SparkDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "redis.PickleDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "key"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "The key to use for saving/loading object to Redis."
+              },
+              "backend": {
+                "type": "string",
+                "description": "Backend to use, must be an import path to a module which satisfies the ``pickle`` interface.\nThat is, contains a `loads` and `dumps` function. Defaults to 'pickle'."
+              },
+              "load_args": {
+                "type": "object",
+                "description": "Pickle options for loading pickle files.\nHere you can find all available arguments:\nhttps://docs.python.org/3/library/pickle.html#pickle.loads\nAll defaults are preserved."
+              },
+              "save_args": {
+                "type": "object",
+                "description": "Pickle options for saving pickle files.\nHere you can find all available arguments:\nhttps://docs.python.org/3/library/pickle.html#pickle.dumps\nAll defaults are preserved."
+              },
+              "credentials": {
+                "type": "object",
+                "description": "Credentials required to get access to the redis server."
+              },
+              "redis_args": {
+                "type": "object",
+                "description": "Extra arguments to pass into the redis client constructor ``redis.StrictRedis.from_url``, as well as to pass to the ``redis.StrictRedis.set``"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "spark.SparkDataSet"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -850,7 +1155,10 @@
                 "description": "Save args passed to Spark DataFrame write options.\nSimilar to load_args this is dependent on the selected file\nformat. You can pass ``mode`` and ``partitionBy`` to specify\nyour overwrite mode and partitioning respectively. You can find\na list of options for each format in Spark DataFrame\nwrite documentation:\nhttps://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html"
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials to access the S3 bucket, such as\n``key``, ``secret``, if ``filepath`` prefix is ``s3a://`` or ``s3n://``.\nOptional keyword arguments passed to ``hdfs.client.InsecureClient``\nif ``filepath`` prefix is ``hdfs://``. Ignored otherwise."
               }
             }
@@ -858,10 +1166,18 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "spark.SparkHiveDataSet" } }
+            "properties": {
+              "type": {
+                "const": "spark.SparkHiveDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["database", "table", "write_mode"],
+            "required": [
+              "database",
+              "table",
+              "write_mode"
+            ],
             "properties": {
               "database": {
                 "type": "string",
@@ -884,10 +1200,17 @@
         },
         {
           "if": {
-            "properties": { "type": { "const": "spark.SparkJDBCDataSet" } }
+            "properties": {
+              "type": {
+                "const": "spark.SparkJDBCDataSet"
+              }
+            }
           },
           "then": {
-            "required": ["url", "table"],
+            "required": [
+              "url",
+              "table"
+            ],
             "properties": {
               "url": {
                 "type": "string",
@@ -898,7 +1221,10 @@
                 "description": "The name of the table to load or save data to."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "A dictionary of JDBC database connection arguments.\nNormally at least properties ``user`` and ``password`` with\ntheir corresponding values.  It updates ``properties``\nparameter in ``load_args`` and ``save_args`` in case it is\nprovided."
               },
               "load_args": {
@@ -915,11 +1241,15 @@
         {
           "if": {
             "properties": {
-              "type": { "const": "tensorflow.TensorFlowModelDataset" }
+              "type": {
+                "const": "tensorflow.TensorFlowModelDataset"
+              }
             }
           },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -934,7 +1264,10 @@
                 "description": "TensorFlow options for saving models.\nHere you can find all available arguments:\nhttps://www.tensorflow.org/api_docs/python/tf/keras/models/save_model\nAll defaults are preserved, except for \"save_format\", which is set to \"tf\"."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{'token': None}`."
               },
               "fs_args": {
@@ -945,16 +1278,27 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "text.TextDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "text.TextDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
                 "description": "Filepath in POSIX format to a text file prefixed with a protocol like `s3://`.\nIf prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nNote: `http(s)` doesn't support versioning."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -965,9 +1309,17 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "tracking.JSONDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "tracking.JSONDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -978,7 +1330,10 @@
                 "description": "json options for saving JSON files (arguments passed\ninto ```json.dump``). Here you can find all available arguments:\nhttps://docs.python.org/3/library/json.html\nAll defaults are preserved, but \"default_flow_style\", which is set to False."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -989,9 +1344,17 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "tracking.MetricsDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "tracking.MetricsDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -1002,7 +1365,10 @@
                 "description": "json options for saving JSON files (arguments passed\ninto ```json.dump``). Here you can find all available arguments:\nhttps://docs.python.org/3/library/json.html\nAll defaults are preserved, but \"default_flow_style\", which is set to False."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -1013,9 +1379,17 @@
           }
         },
         {
-          "if": { "properties": { "type": { "const": "yaml.YAMLDataSet" } } },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "yaml.YAMLDataSet"
+              }
+            }
+          },
           "then": {
-            "required": ["filepath"],
+            "required": [
+              "filepath"
+            ],
             "properties": {
               "filepath": {
                 "type": "string",
@@ -1026,7 +1400,10 @@
                 "description": "PyYAML options for saving YAML files (arguments passed\ninto ```yaml.dump``). Here you can find all available arguments:\nhttps://pyyaml.org/wiki/PyYAMLDocumentation\nAll defaults are preserved, but \"default_flow_style\", which is set to False."
               },
               "credentials": {
-                "type": ["object", "string"],
+                "type": [
+                  "object",
+                  "string"
+                ],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {

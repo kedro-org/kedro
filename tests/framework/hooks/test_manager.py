@@ -17,23 +17,22 @@ from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpe
                 "feed_dict",
                 "save_version",
                 "load_versions",
-                "run_id",
             ),
         ),
         (
             NodeSpecs,
             "before_node_run",
-            ("node", "catalog", "inputs", "is_async", "run_id"),
+            ("node", "catalog", "inputs", "is_async", "session_id"),
         ),
         (
             NodeSpecs,
             "after_node_run",
-            ("node", "catalog", "inputs", "outputs", "is_async", "run_id"),
+            ("node", "catalog", "inputs", "outputs", "is_async", "session_id"),
         ),
         (
             NodeSpecs,
             "on_node_error",
-            ("error", "node", "catalog", "inputs", "is_async", "run_id"),
+            ("error", "node", "catalog", "inputs", "is_async", "session_id"),
         ),
         (
             PipelineSpecs,

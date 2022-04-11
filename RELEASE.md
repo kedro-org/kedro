@@ -13,6 +13,8 @@
 
 ## Major features and improvements
 
+* Added more detail to YAML ParserError error message
+
 ## Bug fixes and other changes
 
 - Added runner name to pipeline hook spec `run_params`

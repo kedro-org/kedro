@@ -17,10 +17,6 @@
 
 ## Bug fixes and other changes
 
-## Thanks for supporting contributions
-
-[Laurens Vijnck](https://github.com/lvijnck)
-
 ## Upcoming deprecations for Kedro 0.19.0
 
 

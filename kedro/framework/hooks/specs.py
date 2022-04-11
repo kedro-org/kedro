@@ -165,7 +165,7 @@ class PipelineSpecs:
         pass
 
     @hook_spec
-    def after_pipeline_run(  # pylint: disable=too-many-arguments
+    def after_pipeline_run(
         self,
         run_params: Dict[str, Any],
         run_result: Dict[str, Any],
@@ -201,7 +201,7 @@ class PipelineSpecs:
         pass
 
     @hook_spec
-    def on_pipeline_error(  # pylint: disable=too-many-arguments
+    def on_pipeline_error(
         self,
         error: Exception,
         run_params: Dict[str, Any],

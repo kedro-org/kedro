@@ -13,10 +13,10 @@
 
 ## Major features and improvements
 
-* Added more detail to YAML ParserError error message
+* Added more detail to YAML ParserError error message.
 
 ## Bug fixes and other changes
-* Removes fatal error from git in run log on directories without git
+* Removed fatal error from being logged when a Kedro session is created in a directory without git.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

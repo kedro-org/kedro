@@ -801,7 +801,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "runner": broken_runner.__name__
+            "runner": broken_runner.__name__,
         }
 
         mock_hook.on_pipeline_error.assert_called_once_with(

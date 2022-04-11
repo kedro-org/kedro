@@ -580,7 +580,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
-            "runner" : mock_runner.__name__
+            "runner": mock_runner.__name__,
         }
 
         mock_hook.before_pipeline_run.assert_called_once_with(

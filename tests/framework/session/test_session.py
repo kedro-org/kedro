@@ -778,6 +778,7 @@ class TestKedroSession:
         mock_catalog = mock_context._get_catalog.return_value
         error = FakeException("You shall not pass!")
         broken_runner = mocker.Mock()
+        broken_runner.__name__ = "SequentialRunner"
         broken_runner.run.side_effect = error  # runner.run() raises an error
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
@@ -800,6 +801,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "runner": broken_runner.__name__
         }
 
         mock_hook.on_pipeline_error.assert_called_once_with(

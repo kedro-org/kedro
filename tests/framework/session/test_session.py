@@ -580,6 +580,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "runner" : mock_runner.__name__
         }
 
         mock_hook.before_pipeline_run.assert_called_once_with(
@@ -621,6 +622,7 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner = mocker.Mock()
+        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         message = (
@@ -814,6 +816,7 @@ class TestKedroSession:
 
         # Execute run another time with fixed runner
         fixed_runner = mocker.Mock()
+        fixed_runner.__name__ = "SequentialRunner"
         session.run(runner=fixed_runner, pipeline_name=fake_pipeline_name)
 
         fixed_runner.run.assert_called_once_with(

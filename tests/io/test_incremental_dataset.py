@@ -374,9 +374,27 @@ class TestPartitionedDataSetS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
-    def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
+    def test_load_and_confirm(self, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
         a IncrementalDataSet in S3"""
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
         loaded = pds.load()
@@ -389,10 +407,29 @@ class TestPartitionedDataSetS3:
         pds.confirm()
         assert pds._checkpoint.exists()
         assert pds._read_checkpoint() == max(partitioned_data_pandas)
+        mock.stop()
 
     def test_load_and_confirm_s3a(
-        self, mocked_csvs_in_s3, partitioned_data_pandas, mocker
+        self, partitioned_data_pandas, mocker
     ):
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         s3a_path = f"s3a://{mocked_csvs_in_s3.split('://', 1)[1]}"
         pds = IncrementalDataSet(s3a_path, DATASET)
         assert pds._protocol == "s3a"
@@ -408,6 +445,7 @@ class TestPartitionedDataSetS3:
         pds.confirm()
         assert pds._checkpoint.exists()
         assert pds._read_checkpoint() == max(partitioned_data_pandas)
+        mock.stop()
 
     @pytest.mark.parametrize(
         "forced_checkpoint,expected_partitions",
@@ -430,10 +468,28 @@ class TestPartitionedDataSetS3:
         ],
     )
     def test_force_checkpoint_no_checkpoint_file(
-        self, forced_checkpoint, expected_partitions, mocked_csvs_in_s3
+        self, forced_checkpoint, expected_partitions, partitioned_data_pandas
     ):
         """Test how forcing checkpoint value affects the available partitions
         in S3 if the checkpoint file does not exist"""
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         pds = IncrementalDataSet(
             mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
         )
@@ -444,6 +500,7 @@ class TestPartitionedDataSetS3:
         pds.confirm()
         assert pds._checkpoint.exists()
         assert pds._checkpoint.load() == max(expected_partitions)
+        mock.stop()
 
     @pytest.mark.parametrize(
         "forced_checkpoint,expected_partitions",
@@ -466,11 +523,29 @@ class TestPartitionedDataSetS3:
         ],
     )
     def test_force_checkpoint_checkpoint_file_exists(
-        self, forced_checkpoint, expected_partitions, mocked_csvs_in_s3
+        self, forced_checkpoint, expected_partitions, partitioned_data_pandas
     ):
         """Test how forcing checkpoint value affects the available partitions
         in S3 if the checkpoint file exists"""
         # create checkpoint and assert that it exists
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         IncrementalDataSet(mocked_csvs_in_s3, DATASET).confirm()
         checkpoint_path = (
             f"{mocked_csvs_in_s3}/{IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME}"
@@ -484,13 +559,32 @@ class TestPartitionedDataSetS3:
         assert pds._checkpoint.exists()
         loaded = pds.load()
         assert loaded.keys() == expected_partitions
+        mock.stop()
 
     @pytest.mark.parametrize(
         "forced_checkpoint", ["p04/data.csv", "p10/data.csv", "p100/data.csv"]
     )
-    def test_force_checkpoint_no_partitions(self, forced_checkpoint, mocked_csvs_in_s3):
+    def test_force_checkpoint_no_partitions(self, forced_checkpoint, partitioned_data_pandas):
         """Test that forcing the checkpoint to certain values results in no
         partitions returned from S3"""
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         pds = IncrementalDataSet(
             mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
         )
@@ -501,3 +595,4 @@ class TestPartitionedDataSetS3:
         pds.confirm()
         # confirming with no partitions available must have no effect
         assert not pds._checkpoint.exists()
+        mock.stop()

@@ -410,8 +410,7 @@ S3_DATASET_DEFINITION = [
     {"type": CSVDataSet},
 ]
 
-
-@pytest.fixture
+@pytest.fixture()
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
@@ -425,7 +424,6 @@ def mocked_s3_bucket():
         yield conn
 
 
-@pytest.fixture
 def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     prefix = "csvs"
     for key, data in partitioned_data_pandas.items():
@@ -442,7 +440,25 @@ class TestPartitionedDataSetS3:
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):
+    def test_load(self, dataset, partitioned_data_pandas):
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
         loaded_partitions = pds.load()
 
@@ -450,8 +466,27 @@ class TestPartitionedDataSetS3:
         for partition_id, load_func in loaded_partitions.items():
             df = load_func()
             assert_frame_equal(df, partitioned_data_pandas[partition_id])
+        mock.stop()
 
-    def test_load_s3a(self, mocked_csvs_in_s3, partitioned_data_pandas, mocker):
+    def test_load_s3a(self, partitioned_data_pandas, mocker):
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
         # any type is fine as long as it passes isinstance check
@@ -470,9 +505,28 @@ class TestPartitionedDataSetS3:
             for partition_id in loaded_partitions
         ]
         mocked_ds.assert_has_calls(expected, any_order=True)
+        mock.stop()
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_save(self, dataset, mocked_csvs_in_s3):
+    def test_save(self, dataset, partitioned_data_pandas):
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         part_id = "new/data.csv"
@@ -485,9 +539,28 @@ class TestPartitionedDataSetS3:
         assert part_id in loaded_partitions
         reloaded_data = loaded_partitions[part_id]()
         assert_frame_equal(reloaded_data, original_data)
+        mock.stop()
 
-    def test_save_s3a(self, mocked_csvs_in_s3, mocker):
+    def test_save_s3a(self, mocker, partitioned_data_pandas):
         """Test that save works in case of s3a protocol"""
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         path = mocked_csvs_in_s3.split("://", 1)[1]
         s3a_path = f"s3a://{path}"
         # any type is fine as long as it passes isinstance check
@@ -503,9 +576,28 @@ class TestPartitionedDataSetS3:
         pds.save({new_partition: data})
         mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.csv")
         mocked_ds.return_value.save.assert_called_once_with(data)
+        mock.stop()
 
     @pytest.mark.parametrize("dataset", ["pandas.CSVDataSet", "pandas.HDFDataSet"])
-    def test_exists(self, dataset, mocked_csvs_in_s3):
+    def test_exists(self, dataset, partitioned_data_pandas):
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         assert PartitionedDataSet(mocked_csvs_in_s3, dataset).exists()
 
         empty_folder = "/".join([mocked_csvs_in_s3, "empty", "folder"])
@@ -513,9 +605,28 @@ class TestPartitionedDataSetS3:
 
         s3fs.S3FileSystem().mkdir(empty_folder)
         assert not PartitionedDataSet(empty_folder, dataset).exists()
+        mock.stop()
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
-    def test_release(self, dataset, mocked_csvs_in_s3):
+    def test_release(self, dataset, partitioned_data_pandas):
+        mock = mock_s3()
+        mock.start()
+
+        conn = boto3.client(
+            "s3",
+            region_name="us-east-1",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        prefix = "csvs"
+        for key, data in partitioned_data_pandas.items():
+            conn.put_object(
+                Bucket=BUCKET_NAME,
+                Key=f"{prefix}/{key}",
+                Body=data.to_csv(index=False),
+            )
+        mocked_csvs_in_s3 = f"s3://{BUCKET_NAME}/{prefix}"
         partition_to_remove = "p2.csv"
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
         initial_load = pds.load()
@@ -529,6 +640,7 @@ class TestPartitionedDataSetS3:
         pds.release()
         load_after_release = pds.load()
         assert initial_load.keys() ^ load_after_release.keys() == {partition_to_remove}
+        mock.stop()
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_describe(self, dataset):

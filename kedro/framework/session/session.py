@@ -399,9 +399,7 @@ class KedroSession:
         runner = runner or SequentialRunner()
         hook_manager = self._hook_manager
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
-            run_params=record_data,
-            pipeline=filtered_pipeline,
-            catalog=catalog,
+            run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 
         try:

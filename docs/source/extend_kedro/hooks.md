@@ -50,7 +50,7 @@ Lastly, Kedro defines a small set of CLI hooks that inject additional behaviour 
 * `before_command_run`
 * `after_command_run`
 
-The [`kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) plugin relies on these hooks under the hood in order to be able to collect CLI usage statistics.
+This is what the [`kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) plugin relies on under the hood in order to be able to collect CLI usage statistics.
 
 ### Hook implementation
 

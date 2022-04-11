@@ -131,11 +131,8 @@ class PipelineSpecs:
     """Namespace that defines all specifications for a pipeline's lifecycle hooks."""
 
     @hook_spec
-    def before_pipeline_run(  # pylint: disable=too-many-arguments
-        self,
-        run_params: Dict[str, Any],
-        pipeline: Pipeline,
-        catalog: DataCatalog,
+    def before_pipeline_run(
+        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         """Hook to be invoked before a pipeline runs.
 

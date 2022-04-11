@@ -168,8 +168,7 @@ class TestPipelineHooks:
         assert len(on_pipeline_error_calls) == 1
         call_record = on_pipeline_error_calls[0]
         _assert_hook_call_record_has_expected_parameters(
-            call_record,
-            ["error", "run_params", "pipeline", "catalog"],
+            call_record, ["error", "run_params", "pipeline", "catalog"]
         )
         expected_error = ValueError("broken")
         assert_exceptions_equal(call_record.error, expected_error)

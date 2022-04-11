@@ -34,16 +34,8 @@ from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpe
             "on_node_error",
             ("error", "node", "catalog", "inputs", "is_async", "session_id"),
         ),
-        (
-            PipelineSpecs,
-            "before_pipeline_run",
-            ("run_params", "pipeline", "catalog"),
-        ),
-        (
-            PipelineSpecs,
-            "after_pipeline_run",
-            ("run_params", "pipeline", "catalog"),
-        ),
+        (PipelineSpecs, "before_pipeline_run", ("run_params", "pipeline", "catalog")),
+        (PipelineSpecs, "after_pipeline_run", ("run_params", "pipeline", "catalog")),
         (
             PipelineSpecs,
             "on_pipeline_error",

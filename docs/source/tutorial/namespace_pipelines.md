@@ -220,7 +220,7 @@ The table below describes the purpose of each keyword arguments in detail:
     This renders as follows:
 
     ![modular_ds](../meta/images/modular_ds.gif)
-    
+
     * As we've created an outer namespace `data_science`, we'll be updating our catalog entries as below by adding `data_science` prefix.
     ```yaml
     data_science.active_modelling_pipeline.regressor:

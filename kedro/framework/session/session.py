@@ -34,7 +34,7 @@ _active_session = None
 def _activate_session(session: "KedroSession", force: bool = False) -> None:
     global _active_session
 
-    if _active_session and not force and session is not _active_session:
+    if not force and session is not _active_session:
         raise RuntimeError(
             "Cannot activate the session as another active session already exists."
         )

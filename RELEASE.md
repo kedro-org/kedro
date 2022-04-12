@@ -17,7 +17,7 @@
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
- 
+
 
 ## Upcoming deprecations for Kedro 0.19.0
 

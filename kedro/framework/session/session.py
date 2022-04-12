@@ -56,12 +56,12 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
             stderr=subprocess.STDOUT,
         )
         git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
-        res = subprocess.check_output(
+        git_status_res = subprocess.check_output(
             ["git", "status", "--short"],
             cwd=project_path,
             stderr=subprocess.STDOUT,
         )
-        git_data["dirty"] = bool(res.decode().strip())
+        git_data["dirty"] = bool(git_status_res.decode().strip())
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):

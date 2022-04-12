@@ -146,12 +146,12 @@ class KedroCLI(CommandCollection):
                 standalone_mode=standalone_mode,
                 **extra,
             )
+        # click.core.main() method exits by default, we capture this and then
+        # exit as originally intended
         except SystemExit as exc:
             self._cli_hook_manager.hook.after_command_run(  # pylint: disable=no-member
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
-            # click.core.main() method exits by default, we capture this and then
-            # exit as originally intended
             sys.exit(exc.code)
 
     @property

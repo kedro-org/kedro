@@ -40,7 +40,6 @@ Kedro also creates the following hidden files and folders:
 get-started
 ├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
 ├── .gitignore      # Prevent staging of unnecessary files to `git`
-├── .ipython        # IPython startup scripts
 └── pyproject.toml  # Identifies the project root and [contains configuration information](../faq/architecture_overview.md#kedro-project)
 ```
 
@@ -101,22 +100,21 @@ kedro run
 When the command completes, you should see a log message similar to the following in your console:
 
 ```bash
-2019-02-13 16:59:26,293 - kedro.runner.sequential_runner - INFO - Completed 4 out of 4 tasks
-2019-02-13 16:59:26,293 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+2022-04-08 11:55:03,043 - get_started.nodes - INFO - Model has a accuracy of 0.933 on test data.
+2022-04-08 11:55:03,044 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
+2022-04-08 11:55:03,044 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
 ## Under the hood: Pipelines and nodes
 
-The example project contains two modular pipelines:
+The example project contains a single pipeline:
 
-- A `data_engineering` pipeline (`src/get_started/pipelines/data_engineering/pipeline.py`) responsible for splitting the data into training and testing samples
-
-- A `data_science` pipeline (`src/get_started/pipelines/data_science/pipeline.py`) responsible for model training, predictions and accuracy-reporting
+- The pipeline (`src/get_started/pipeline.py`) is responsible for splitting the data into training and testing samples, running the 1-nearest neighbour algorithm to make predictions and accuracy-reporting.
 
 
-**Data engineering node**
+**Nodes in Pipeline**
 
-This is the data engineering node function within `src/get_started/pipelines/data_engineering/nodes.py`:
+These are the node function within `src/get_started/nodes.py`:
 
 ```eval_rst
 +-----------------+----------------------------------------------------------------+--------------------------+
@@ -126,20 +124,8 @@ This is the data engineering node function within `src/get_started/pipelines/dat
 |                 | `Iris dataset <https://www.kaggle.com/uciml/iris>`             |                          |
 |                 | into train and test samples                                    |                          |
 +-----------------+----------------------------------------------------------------+--------------------------+
-```
-
-**Data science node**
-
-These are the data science node functions within `pipelines/data_science/nodes.py`:
-
-```eval_rst
-+-----------------+----------------------------------------------------------------+--------------------------+
-| Node            | Description                                                    | Node Function Name       |
-+=================+================================================================+==========================+
-| Train model     | Trains a simple multi-class logistic regression model          | :code:`train_model`      |
-+-----------------+----------------------------------------------------------------+--------------------------+
-| Predict         | Makes class predictions given a pre-trained model and a test   | :code:`predict`          |
-|                 | set                                                            |                          |
+| Make Predictions| Makes class predictions using 1-nearest neighbour classifier   | :code:`make_predictions` |
+|                 | and train-test set                                             |                          |
 +-----------------+----------------------------------------------------------------+--------------------------+
 | Report accuracy | Reports the accuracy of the predictions performed by the       | :code:`report_accuracy`  |
 |                 | previous node                                                  |                          |
@@ -147,4 +133,4 @@ These are the data science node functions within `pipelines/data_science/nodes.p
 ```
 
 
-The file `src/pipeline_registry.py` creates and collates the project's modular pipelines into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.
+The file `src/pipeline_registry.py` creates and collates into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.

@@ -216,6 +216,7 @@ The parameters should look like this:
 * To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
 * If you call `ConfigLoader` or `TemplatedConfigLoader` directly, update the keyword arguments `conf_root` to `conf_source` and `extra_params` to `runtime_params`.
 * If you use `KedroContext` to access `ConfigLoader`, use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
+* The signature of `KedroContext` has changed and now needs `config_loader` and `hook_manager` as additional arguments of type `ConfigLoader` and `PluginManager` respectively.
 
 # Release 0.17.7
 

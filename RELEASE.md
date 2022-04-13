@@ -18,6 +18,8 @@
 * Extended `TemplatedConfigLoader` to accept `anyconfig_args` so the user can [directly customise](https://python-anyconfig.readthedocs.io/en/latest/usage.html#common-and-backend-specific-keyword-options-on-load-single-config-file) their load strategy.
 
 ## Bug fixes and other changes
+* Removed fatal error from being logged when a Kedro session is created in a directory without git.
+
 
 ## Upcoming deprecations for Kedro 0.19.0
 
@@ -57,9 +59,9 @@ main(
 | Type                      | Description                                                   | Location                         |
 | ------------------------- | ------------------------------------------------------------- | -------------------------------- |
 | `pandas.XMLDataSet`       | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML | `kedro.extras.datasets.pandas`   |
-| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                         | `kedro.extras.datasets.networkx` |
-| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files        | `kedro.extras.datasets.networkx` |
-| `redis.PickleDataSet`     | loads/saves data from/to a Redis database                      | `kedro.extras.datasets.redis`    |
+| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                        | `kedro.extras.datasets.networkx` |
+| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files       | `kedro.extras.datasets.networkx` |
+| `redis.PickleDataSet`     | loads/saves data from/to a Redis database                     | `kedro.extras.datasets.redis`    |
 
 * Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
 * Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.

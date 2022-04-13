@@ -82,6 +82,7 @@ def proj_catalog_prod(tmp_path, param_config):
         proj_catalog, {**param_config, **{"env_test": "s3a://${KEDRO_ENV}/dir"}}
     )
 
+
 @pytest.fixture
 def proj_catalog_base(tmp_path, param_config):
     proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"

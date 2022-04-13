@@ -5,6 +5,7 @@ This section contains detailed information about configuration, for which the re
 ## Configuration root
 
 We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by setting the `CONF_SOURCE` variable in [`src/<project-package>/settings.py`](settings.md) as follows:
+
 ```python
 CONF_SOURCE = "new_conf"
 ```
@@ -66,6 +67,7 @@ from kedro.config import TemplatedConfigLoader  # new import
 
 ...
 CONFIG_LOADER_CLASS = TemplatedConfigLoader
+CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
 ...
 ```
 
@@ -165,7 +167,6 @@ The output Python dictionary will look as follows:
 .. warning::  Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do not recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
 ```
 
-
 ## Parameters
 
 ### Load parameters
@@ -214,7 +215,7 @@ Kedro also allows you to specify runtime parameters for the `kedro run` CLI comm
 kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
 ```
 
-Values provided in the CLI take precedence and overwrite parameters specified in configuration files. Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise they are also treated as string.
+Values provided in the CLI take precedence and overwrite parameters specified in configuration files. Parameter keys are *always* treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise they are also treated as string.
 
 If any extra parameter key and/or value contains spaces, you should wrap the whole option contents in quotes:
 
@@ -261,7 +262,6 @@ model_params:
     test_data_ratio: 0.2
     number_of_train_iterations: 10000
 ```
-
 
 ```python
 def train_model(data, model):
@@ -348,7 +348,7 @@ When working with AWS credentials on datasets, you are not required to store AWS
 An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../development/commands_reference.md#run-the-project). However, instead of specifying all the command line options in a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
 
 ```console
-$ kedro run --config config.yml
+kedro run --config config.yml
 ```
 
 where `config.yml` is formatted as below (for example):
@@ -369,4 +369,43 @@ run:
 
 ```eval_rst
 .. note::  If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
+```
+
+## Altering the behaviour of ``anyconfig.load``
+
+To extend and modify the default load behaviour of the config loader provide ``anyconfig_args`` within ``settings.py``. These are passed directly to the ``anyconfig.load()`` method at runtime and can be used to enable functionality [as per the anyconfig API](https://python-anyconfig.readthedocs.io/en/latest/usage.html#common-and-backend-specific-keyword-options-on-load-single-config-file).
+
+The snippet below demonstrates how to ensure that certain Jinja2 variables are already scoped from ``settings.py``:
+
+```python
+from kedro.config import TemplatedConfigLoader
+
+CONFIG_LOADER_CLASS = TemplatedConfigLoader
+CONFIG_LOADER_ARGS = {
+    "globals_pattern": "*globals.yml",
+    "anyconfig_args": {"ac_template": True, "ac_context": {"S3_bucket": "my_bucket"}},
+}
+```
+
+Ths snippet below demonstrates how to enable the full range of complex [YAML tags and Python Types](https://pyyaml.org/wiki/PyYAMLDocumentation) from ``settings.py``:
+
+```eval_rst
+.. warning::  As the name suggests 'unsafe loader' should be used sparingly and will often be flagged in enterprise code scanners. This has a similar risk profile to Python's ``eval()`` statement which is also so powerful that it `should only be used as a last resort <https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)>`_
+```
+
+```python
+from kedro.config import TemplatedConfigLoader
+import yaml
+
+CONFIG_LOADER_CLASS = TemplatedConfigLoader
+CONFIG_LOADER_ARGS = {
+    "globals_pattern": "*globals.yml",
+    "anyconfig_args": {"ac_parser": "yaml", "Loader": yaml.UnsafeLoader},
+}
+```
+
+Including the `!!` tag within ``parameters.yml`` will cast the YAML list to a python tuple on read:
+
+```yaml
+weights: !!python/tuple [0.3, 0.4]
 ```

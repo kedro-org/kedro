@@ -33,7 +33,7 @@ implementations.
 import logging
 from glob import iglob
 from pathlib import Path
-from typing import AbstractSet, Any, Dict, Iterable, List, Set
+from typing import AbstractSet, Any, Dict, Iterable, List, Optional, Set
 from warnings import warn
 
 from yaml.parser import ParserError
@@ -49,13 +49,16 @@ SUPPORTED_EXTENSIONS = [
     ".properties",
     ".xml",
 ]
+
+DEFAULT_ANYCONFIG_ARGS = {"ac_template": True}
+
 _config_logger = logging.getLogger(__name__)
 
 
 def _get_config_from_patterns(
     conf_paths: Iterable[str],
     patterns: Iterable[str] = None,
-    ac_template: bool = False,
+    anyconfig_args: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Recursively scan for configuration files, load and merge them, and
     return them in the form of a config dictionary.
@@ -64,9 +67,10 @@ def _get_config_from_patterns(
         conf_paths: List of configuration paths to directories
         patterns: Glob patterns to match. Files, which names match
             any of the specified patterns, will be processed.
-        ac_template: Boolean flag to indicate whether to use the `ac_template`
-            argument of the ``anyconfig.load`` method. Used in the context of
-            `_load_config_file` function.
+        anyconfig_args: Keyword arguments to pass to the the ``anyconfig.load``
+            method.  If not provided, the DEFAULT_ANYCONFIG_ARGS are applied
+            enabling jinja2 via the ``ac_template`` argument.
+            This is called via the `_load_config_file` function.
 
     Raises:
         ValueError: If 2 or more configuration files inside the same
@@ -103,7 +107,8 @@ def _get_config_from_patterns(
             Path(conf_path), patterns, processed_files, _config_logger
         )
         new_conf = _load_configs(
-            config_filepaths=config_filepaths, ac_template=ac_template
+            config_filepaths=config_filepaths,
+            anyconfig_args=anyconfig_args if anyconfig_args else DEFAULT_ANYCONFIG_ARGS,
         )
 
         common_keys = config.keys() & new_conf.keys()
@@ -126,13 +131,16 @@ def _get_config_from_patterns(
     return config
 
 
-def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str, Any]:
+def _load_config_file(
+    config_file: Path, anyconfig_args: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Load an individual config file using `anyconfig` as a backend.
 
     Args:
         config_file: Path to a config file to process.
-        ac_template: Boolean flag to indicate whether to use the `ac_template`
-            argument of the ``anyconfig.load`` method.
+        anyconfig_args: Keyword arguments to pass to the the ``anyconfig.load``
+            method. If not provided, the DEFAULT_ANYCONFIG_ARGS are applied
+            enabling jinja2 via the ``ac_template`` argument.
 
     Raises:
         BadConfigException: If configuration is poorly formatted and
@@ -147,11 +155,14 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
 
     try:
         # Default to UTF-8, which is Python 3 default encoding, to decode the file
-        with open(config_file, encoding="utf8") as yml:
+        with open(config_file, encoding="utf8") as file:
             _config_logger.debug("Loading config file: '%s'", config_file)
             return {
                 k: v
-                for k, v in anyconfig.load(yml, ac_template=ac_template).items()
+                for k, v in anyconfig.load(
+                    file,
+                    **(anyconfig_args if anyconfig_args else DEFAULT_ANYCONFIG_ARGS),
+                ).items()
                 if not k.startswith("_")
             }
     except AttributeError as exc:
@@ -165,15 +176,19 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
         ) from exc
 
 
-def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, Any]:
+def _load_configs(
+    config_filepaths: List[Path],
+    anyconfig_args: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Recursively load all configuration files, which satisfy
     a given list of glob patterns from a specific path.
 
     Args:
         config_filepaths: Configuration files sorted in the order of precedence.
-        ac_template: Boolean flag to indicate whether to use the `ac_template`
-            argument of the ``anyconfig.load`` method. Used in the context of
-            `_load_config_file` function.
+        anyconfig_args: Keyword arguments to pass to the the ``anyconfig.load``
+            method. If not provided, the DEFAULT_ANYCONFIG_ARGS are applied
+            enabling jinja2 via the ``ac_template`` argument. This is applied to
+            via the `_load_config_file` function.
 
     Raises:
         ValueError: If 2 or more configuration files contain the same key(s).
@@ -189,7 +204,10 @@ def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, 
     seen_file_to_keys = {}  # type: Dict[Path, AbstractSet[str]]
 
     for config_filepath in config_filepaths:
-        single_config = _load_config_file(config_filepath, ac_template=ac_template)
+        single_config = _load_config_file(
+            config_filepath,
+            anyconfig_args=anyconfig_args if anyconfig_args else DEFAULT_ANYCONFIG_ARGS,
+        )
         _check_duplicate_keys(seen_file_to_keys, config_filepath, single_config)
         seen_file_to_keys[config_filepath] = single_config.keys()
         aggregate_config.update(single_config)

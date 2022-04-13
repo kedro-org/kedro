@@ -14,6 +14,8 @@
 ## Major features and improvements
 
 * Added more detail to YAML ParserError error message
+* Extended `TemplatedConfigLoader` to automatically include `$KEDRO_ENV` when running in a configuration environment
+* Extended `TemplatedConfigLoader` to accept `anyconfig_args` so the user can [directly customise](https://python-anyconfig.readthedocs.io/en/latest/usage.html#common-and-backend-specific-keyword-options-on-load-single-config-file) their load strategy.
 
 ## Bug fixes and other changes
 

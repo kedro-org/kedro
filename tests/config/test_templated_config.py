@@ -76,9 +76,24 @@ def proj_catalog_param(tmp_path, param_config):
 
 
 @pytest.fixture
+def proj_catalog_prod(tmp_path, param_config):
+    proj_catalog = tmp_path / "prod" / "catalog.yml"
+    _write_yaml(
+        proj_catalog, {**param_config, **{"env_test": "s3a://${KEDRO_ENV}/dir"}}
+    )
+
+
+@pytest.fixture
 def proj_catalog_globals(tmp_path, template_config):
     global_yml = tmp_path / _BASE_ENV / "globals.yml"
     _write_yaml(global_yml, template_config)
+
+
+@pytest.fixture
+def proj_unsafe_yaml(tmp_path):
+    catalog_yml = tmp_path / _BASE_ENV / "catalog.yml"
+    catalog_yml.parent.mkdir(parents=True, exist_ok=True)
+    catalog_yml.write_text("my_object: !!python/tuple [0.3, 0.4]")
 
 
 @pytest.fixture
@@ -366,6 +381,37 @@ class TestTemplatedConfigLoader:
             },
         }
         assert catalog == expected_catalog
+
+    @pytest.mark.usefixtures("proj_catalog_prod", "proj_catalog_param")
+    def test_catalog_kedro_env(self, tmp_path, template_config):
+        """Test parameterized config with input from dictionary with values"""
+        prod_env_config_loader = TemplatedConfigLoader(
+            str(tmp_path), globals_dict=template_config, env="prod"
+        )
+        assert "KEDRO_ENV" in prod_env_config_loader._config_mapping
+        prod_catalog = prod_env_config_loader.get("catalog*.yml")
+        assert prod_catalog["env_test"] == "s3a://prod/dir"
+
+        base_env_config_loader = TemplatedConfigLoader(
+            str(tmp_path), globals_dict=template_config
+        )
+        base_env_config_loader.default_run_env = ""
+        catalog = base_env_config_loader.get("catalog*.yml")
+        assert "env_test" not in catalog.keys()
+
+    @pytest.mark.usefixtures("proj_unsafe_yaml")
+    def test_catalog_unsafe_yaml(self, tmp_path, template_config):
+
+        base_env_config_loader = TemplatedConfigLoader(
+            str(tmp_path),
+            globals_dict=template_config,
+            anyconfig_args={"ac_parser": "yaml", "Loader": yaml.UnsafeLoader},
+        )
+        base_env_config_loader.default_run_env = ""
+        catalog = base_env_config_loader.get("catalog*.yml")
+        my_tuple = catalog["my_object"]
+        isinstance(my_tuple, tuple)
+        assert my_tuple == (0.3, 0.4)
 
 
 class TestFormatObject:

@@ -97,6 +97,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         default_run_env: str = "local",
         globals_pattern: Optional[str] = None,
         globals_dict: Optional[Dict[str, Any]] = None,
+        anyconfig_args: Optional[Dict[str, Any]] = None,
     ):
         """Instantiates a ``TemplatedConfigLoader``.
 
@@ -113,6 +114,8 @@ class TemplatedConfigLoader(AbstractConfigLoader):
                 dictionary. This dictionary will get merged with the globals dictionary
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
+            anyconfig_kwargs: Keyword arguments to pass to the the ``anyconfig.load``
+                method. By default we enabled jinja2 via the ``ac_template`` argument.
         """
         super().__init__(
             conf_source=conf_source, env=env, runtime_params=runtime_params
@@ -124,13 +127,17 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             _get_config_from_patterns(
                 conf_paths=self.conf_paths,
                 patterns=list(globals_pattern),
-                ac_template=False,
+                anyconfig_args={"ac_template": False},
             )
             if globals_pattern
             else {}
         )
+        env_dict = deepcopy({"KEDRO_ENV": env}) if env else {}
         globals_dict = deepcopy(globals_dict) or {}
-        self._config_mapping = {**self._config_mapping, **globals_dict}
+        self._config_mapping = {**self._config_mapping, **globals_dict, **env_dict}
+        self._anyconfig_args = (
+            anyconfig_args if anyconfig_args else {"ac_template": True}
+        )
 
     @property
     def conf_paths(self):
@@ -159,7 +166,9 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             ValueError: malformed config found.
         """
         config_raw = _get_config_from_patterns(
-            conf_paths=self.conf_paths, patterns=list(patterns), ac_template=True
+            conf_paths=self.conf_paths,
+            patterns=list(patterns),
+            anyconfig_args=self._anyconfig_args,
         )
         return _format_object(config_raw, self._config_mapping)
 

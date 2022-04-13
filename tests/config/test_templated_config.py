@@ -82,6 +82,13 @@ def proj_catalog_prod(tmp_path, param_config):
         proj_catalog, {**param_config, **{"env_test": "s3a://${KEDRO_ENV}/dir"}}
     )
 
+@pytest.fixture
+def proj_catalog_base(tmp_path, param_config):
+    proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+    _write_yaml(
+        proj_catalog, {**param_config, **{"env_test": "s3a://${KEDRO_ENV}/dir"}}
+    )
+
 
 @pytest.fixture
 def proj_catalog_globals(tmp_path, template_config):
@@ -382,7 +389,7 @@ class TestTemplatedConfigLoader:
         }
         assert catalog == expected_catalog
 
-    @pytest.mark.usefixtures("proj_catalog_prod", "proj_catalog_param")
+    @pytest.mark.usefixtures("proj_catalog_prod", "proj_catalog_base")
     def test_catalog_kedro_env(self, tmp_path, template_config):
         """Test parameterized config with input from dictionary with values"""
         prod_env_config_loader = TemplatedConfigLoader(
@@ -395,9 +402,9 @@ class TestTemplatedConfigLoader:
         base_env_config_loader = TemplatedConfigLoader(
             str(tmp_path), globals_dict=template_config
         )
-        base_env_config_loader.default_run_env = ""
+        base_env_config_loader.default_run_env = "base"
         catalog = base_env_config_loader.get("catalog*.yml")
-        assert "env_test" not in catalog.keys()
+        assert catalog["env_test"] == "s3a://base/dir"
 
     @pytest.mark.usefixtures("proj_unsafe_yaml")
     def test_catalog_unsafe_yaml(self, tmp_path, template_config):

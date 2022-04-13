@@ -135,7 +135,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             if globals_pattern
             else {}
         )
-        env_dict = deepcopy({"KEDRO_ENV": env}) if env else {}
+        env_dict = deepcopy({"KEDRO_ENV": env}) if env else deepcopy({"KEDRO_ENV": self.base_env})
         globals_dict = deepcopy(globals_dict) or {}
         self._config_mapping = {**self._config_mapping, **globals_dict, **env_dict}
         

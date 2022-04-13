@@ -58,6 +58,8 @@ export KEDRO_ENV=test
 .. note::  If you specify both the ``KEDRO_ENV`` environment variable and provide the ``--env`` argument to a CLI command, the CLI argument takes precedence.
 ```
 
+The active environment is also available as ``${KEDRO_ENV}`` within the scope of ``TemplatedConfigLoader``.
+
 ## Template configuration
 
 Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, you will need to set the `CONFIG_LOADER_CLASS` constant in your `src/<project-name>/settings.py`:

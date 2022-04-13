@@ -122,12 +122,15 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         )
         self.base_env = base_env
         self.default_run_env = default_run_env
+        self._anyconfig_args = (
+            anyconfig_args if anyconfig_args else {"ac_template": True}
+        )
 
         self._config_mapping = (
             _get_config_from_patterns(
                 conf_paths=self.conf_paths,
                 patterns=list(globals_pattern),
-                anyconfig_args={"ac_template": False},
+                anyconfig_args=self._anyconfig_args,
             )
             if globals_pattern
             else {}
@@ -135,9 +138,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         env_dict = deepcopy({"KEDRO_ENV": env}) if env else {}
         globals_dict = deepcopy(globals_dict) or {}
         self._config_mapping = {**self._config_mapping, **globals_dict, **env_dict}
-        self._anyconfig_args = (
-            anyconfig_args if anyconfig_args else {"ac_template": True}
-        )
+        
 
     @property
     def conf_paths(self):

@@ -406,7 +406,7 @@ CONFIG_LOADER_ARGS = {
 }
 ```
 
-Including the `!!` tag within ``parameters.yml`` will cast the YAML list to a python tuple on read:
+Including the `!!python/tuple` tag within ``parameters.yml`` will cast the YAML list to a Python tuple on read:
 
 ```yaml
 weights: !!python/tuple [0.3, 0.4]

@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 import toml
 
+import kedro
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
@@ -18,6 +19,7 @@ from kedro.framework.project import (
     _ProjectSettings,
 )
 from kedro.framework.session import KedroSession
+from kedro.framework.session.session import _activate_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
 _FAKE_PROJECT_NAME = "fake_project"
@@ -284,10 +286,16 @@ class TestKedroSession:
         assert isinstance(session._get_config_loader(), ConfigLoader)
 
     @pytest.mark.usefixtures("mock_settings")
-    def test_create_multiple_sessions(self, fake_project, mock_package_name):
-        KedroSession.create(mock_package_name, fake_project)
-        with KedroSession.create(mock_package_name, fake_project):
-            pass
+    def test_create_session_with_unclosed_session(
+        self, fake_project, mock_package_name
+    ):
+        first_session = KedroSession.create(mock_package_name, fake_project)
+        _activate_session(first_session)
+        assert kedro.framework.session.session._active_session is first_session
+
+        new_session = KedroSession.create(mock_package_name, fake_project)
+        _activate_session(new_session)
+        assert kedro.framework.session.session._active_session is new_session
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_create_no_env_extra_params(

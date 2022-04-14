@@ -44,6 +44,7 @@ def reload_kedro(
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import configure_project, pipelines
     from kedro.framework.session import KedroSession
+    from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import bootstrap_project
 
     # If a path is provided, set it as default for subsequent calls
@@ -62,6 +63,7 @@ def reload_kedro(
     session = KedroSession.create(
         metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )
+    _activate_session(session, force=True)
     logging.debug("Loading the context from %s", default_project_path)
     context = session.load_context()
     catalog = context.catalog

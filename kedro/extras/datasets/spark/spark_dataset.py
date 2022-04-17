@@ -335,7 +335,8 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._fs_prefix = fs_prefix
         self._handle_delta_format()
 
-    def _load_schema_from_file(self, schema: Dict[str, Any]) -> StructType:
+    @staticmethod
+    def _load_schema_from_file(schema: Dict[str, Any]) -> StructType:
 
         filepath = schema.get("filepath")
         if not filepath:
@@ -360,8 +361,6 @@ class SparkDataSet(AbstractVersionedDataSet):
                     f"Contents of `schema.filepath` ({schema_path}) are invalid. Please"
                     f"provide a valid JSON serialized `pyspark.sql.types.StructType`."
                 ) from exc
-
-        self._handle_delta_format()
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

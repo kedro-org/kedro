@@ -44,6 +44,7 @@ class APIDataSet(AbstractDataSet):
         auth: Union[Iterable[str], AuthBase] = None,
         json: Union[List, Dict[str, Any]] = None,
         timeout: int = 60,
+        load_args: Dict[str, Any] = None,
         credentials: Union[Iterable[str], AuthBase] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
@@ -65,6 +66,8 @@ class APIDataSet(AbstractDataSet):
                 https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests
             timeout: The wait time in seconds for a response, defaults to 1 minute.
                 https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
+            load_args: Additional parameters to be fed to requests.request.
+                https://docs.python-requests.org/en/latest/api/
             credentials: same as ``auth``. Allows specifying ``auth`` secrets in
                 credentials.yml.
 
@@ -90,6 +93,7 @@ class APIDataSet(AbstractDataSet):
             "auth": auth,
             "json": json,
             "timeout": timeout,
+            "load_args": load_args
         }
 
     def _describe(self) -> Dict[str, Any]:

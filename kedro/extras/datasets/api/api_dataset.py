@@ -93,7 +93,7 @@ class APIDataSet(AbstractDataSet):
             "auth": auth,
             "json": json,
             "timeout": timeout,
-            "load_args": load_args
+            **load_args
         }
 
     def _describe(self) -> Dict[str, Any]:

@@ -50,7 +50,7 @@ SUPPORTED_EXTENSIONS = [
     ".xml",
 ]
 
-DEFAULT_ANYCONFIG_ARGS = {"ac_template": True}
+DEFAULT_ANYCONFIG_ARGS: Dict[str, Any] = {"ac_template": False}
 
 _config_logger = logging.getLogger(__name__)
 
@@ -95,6 +95,7 @@ def _get_config_from_patterns(
 
     config = {}  # type: Dict[str, Any]
     processed_files = set()  # type: Set[Path]
+    custom_anyconfig_args = anyconfig_args if anyconfig_args else DEFAULT_ANYCONFIG_ARGS
 
     for conf_path in conf_paths:
         if not Path(conf_path).is_dir():
@@ -107,8 +108,7 @@ def _get_config_from_patterns(
             Path(conf_path), patterns, processed_files, _config_logger
         )
         new_conf = _load_configs(
-            config_filepaths=config_filepaths,
-            anyconfig_args=anyconfig_args if anyconfig_args else DEFAULT_ANYCONFIG_ARGS,
+            config_filepaths=config_filepaths, anyconfig_args=custom_anyconfig_args
         )
 
         common_keys = config.keys() & new_conf.keys()
@@ -161,7 +161,7 @@ def _load_config_file(
                 k: v
                 for k, v in anyconfig.load(
                     file,
-                    **(anyconfig_args if anyconfig_args else DEFAULT_ANYCONFIG_ARGS),
+                    **anyconfig_args,
                 ).items()
                 if not k.startswith("_")
             }
@@ -178,7 +178,7 @@ def _load_config_file(
 
 def _load_configs(
     config_filepaths: List[Path],
-    anyconfig_args: Optional[Dict[str, Any]] = None,
+    anyconfig_args: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Recursively load all configuration files, which satisfy
     a given list of glob patterns from a specific path.
@@ -206,7 +206,7 @@ def _load_configs(
     for config_filepath in config_filepaths:
         single_config = _load_config_file(
             config_filepath,
-            anyconfig_args=anyconfig_args if anyconfig_args else DEFAULT_ANYCONFIG_ARGS,
+            anyconfig_args=anyconfig_args,
         )
         _check_duplicate_keys(seen_file_to_keys, config_filepath, single_config)
         seen_file_to_keys[config_filepath] = single_config.keys()

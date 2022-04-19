@@ -375,18 +375,26 @@ run:
 
 ## Altering the behaviour of ``anyconfig.load``
 
-To extend and modify the default load behaviour of the config loader provide ``anyconfig_args`` within ``settings.py``. These are passed directly to the ``anyconfig.load()`` method at runtime and can be used to enable functionality [as per the anyconfig API](https://python-anyconfig.readthedocs.io/en/latest/usage.html#common-and-backend-specific-keyword-options-on-load-single-config-file).
+Some advanced users may find themselves wanting to customize and extend the behaviour of the way the Kedro configuration loader class(es) perform read operations. Behind the scenes Kedro uses a library called [anyconfig](https://github.com/ssato/python-anyconfig), the ``anyconfig.load()`` method accepts various arguments as per [as per the API](https://python-anyconfig.readthedocs.io/en/latest/usage.html#common-and-backend-specific-keyword-options-on-load-single-config-file) and these can be modified by extending a native class like ``TemplatedConfigLoader`` and overriding the ``_anyconfig_args`` class attribute.
 
 The snippet below demonstrates how to ensure that certain Jinja2 variables are already scoped from ``settings.py``:
 
 ```python
 from kedro.config import TemplatedConfigLoader
 
-CONFIG_LOADER_CLASS = TemplatedConfigLoader
-CONFIG_LOADER_ARGS = {
-    "globals_pattern": "*globals.yml",
-    "anyconfig_args": {"ac_template": True, "ac_context": {"S3_bucket": "my_bucket"}},
-}
+class JinjaScopedTemplatedConfigLoader(TemplatedConfigLoader): # This would likely be an import
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._anyconfig_args = {"ac_template": True, "ac_context": {"S3_bucket": "my_bucket"}}
+
+CONFIG_LOADER_CLASS = JinjaScopedTemplatedConfigLoader
+CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
+```
+
+This would then make any of the items passed to the ``ac_context`` argument via a available to the runtime Jinja2 scope:
+
+```yaml
+path: s3/{{ S3_bucket }}/my_file.png
 ```
 
 Ths snippet below demonstrates how to enable the full range of complex [YAML tags and Python Types](https://pyyaml.org/wiki/PyYAMLDocumentation) from ``settings.py``:
@@ -399,11 +407,13 @@ Ths snippet below demonstrates how to enable the full range of complex [YAML tag
 from kedro.config import TemplatedConfigLoader
 import yaml
 
-CONFIG_LOADER_CLASS = TemplatedConfigLoader
-CONFIG_LOADER_ARGS = {
-    "globals_pattern": "*globals.yml",
-    "anyconfig_args": {"ac_parser": "yaml", "Loader": yaml.UnsafeLoader},
-}
+class UnsafeYAMLTemplatedConfigLoader(TemplatedConfigLoader): # This would likely be an import
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._anyconfig_args = {"ac_parser": "yaml", "Loader": yaml.UnsafeLoader}
+
+CONFIG_LOADER_CLASS = UnsafeYAMLTemplatedConfigLoader
+CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
 ```
 
 Including the `!!python/tuple` tag within ``parameters.yml`` will cast the YAML list to a Python tuple on read:

@@ -97,7 +97,6 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         default_run_env: str = "local",
         globals_pattern: Optional[str] = None,
         globals_dict: Optional[Dict[str, Any]] = None,
-        anyconfig_args: Optional[Dict[str, Any]] = None,
     ):
         """Instantiates a ``TemplatedConfigLoader``.
 
@@ -114,17 +113,13 @@ class TemplatedConfigLoader(AbstractConfigLoader):
                 dictionary. This dictionary will get merged with the globals dictionary
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
-            anyconfig_kwargs: Keyword arguments to pass to the the ``anyconfig.load``
-                method. By default we enabled jinja2 via the ``ac_template`` argument.
         """
         super().__init__(
             conf_source=conf_source, env=env, runtime_params=runtime_params
         )
         self.base_env = base_env
         self.default_run_env = default_run_env
-        self._anyconfig_args = (
-            anyconfig_args if anyconfig_args else {"ac_template": True}
-        )
+        self._anyconfig_args = {"ac_template": True}
 
         self._config_mapping = (
             _get_config_from_patterns(
@@ -135,13 +130,12 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             if globals_pattern
             else {}
         )
-        env_dict = (
-            deepcopy({"KEDRO_ENV": env})
-            if env
-            else deepcopy({"KEDRO_ENV": self.base_env})
-        )
         globals_dict = deepcopy(globals_dict) or {}
-        self._config_mapping = {**self._config_mapping, **globals_dict, **env_dict}
+        self._config_mapping = {
+            **self._config_mapping,
+            **globals_dict,
+            **{"KEDRO_ENV": env or base_env},
+        }
 
     @property
     def conf_paths(self):

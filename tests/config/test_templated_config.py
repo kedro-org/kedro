@@ -409,14 +409,20 @@ class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_unsafe_yaml")
     def test_catalog_unsafe_yaml(self, tmp_path, template_config):
+        class CustomTemplatedConfigLoader(TemplatedConfigLoader):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self._anyconfig_args = {
+                    "ac_parser": "yaml",
+                    "Loader": yaml.UnsafeLoader,
+                }
 
-        base_env_config_loader = TemplatedConfigLoader(
+        custom_config_loader = CustomTemplatedConfigLoader(
             str(tmp_path),
             globals_dict=template_config,
-            anyconfig_args={"ac_parser": "yaml", "Loader": yaml.UnsafeLoader},
         )
-        base_env_config_loader.default_run_env = ""
-        catalog = base_env_config_loader.get("catalog*.yml")
+        custom_config_loader.default_run_env = ""
+        catalog = custom_config_loader.get("catalog*.yml")
         my_tuple = catalog["my_object"]
         isinstance(my_tuple, tuple)
         assert my_tuple == (0.3, 0.4)

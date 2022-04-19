@@ -505,13 +505,13 @@ workflows:
   version: 2.1
 
   build_docs_only:
-    when: <<pipeline.parameters.docs_change>>
-    unless:
-      or:
-        - <<pipeline.parameters.code_change>>
-        - <<pipeline.parameters.release_kedro>>
-        - <<pipeline.parameters.run_hourly>>
-        - <<pipeline.parameters.run_nightly>>
+    when:
+      and:
+        - <<pipeline.parameters.docs_change>>
+        - not: <<pipeline.parameters.code_change>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_docs
       - docs_linkcheck
@@ -521,12 +521,12 @@ workflows:
             - docs_linkcheck
 
   build_code_and_docs:
-    when: <<pipeline.parameters.code_change>>
-    unless:
-      or:
-        - <<pipeline.parameters.release_kedro>>
-        - <<pipeline.parameters.run_hourly>>
-        - <<pipeline.parameters.run_nightly>>
+    when:
+      and:
+        - <<pipeline.parameters.code_change>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - e2e_tests:
           matrix:
@@ -571,11 +571,11 @@ workflows:
             - docs_linkcheck
 
   main_updated:
-    unless:
-      or:
-        - <<pipeline.parameters.release_kedro>>
-        - <<pipeline.parameters.run_hourly>>
-        - <<pipeline.parameters.run_nightly>>
+    when:
+      and:
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - sync:
           filters:
@@ -587,11 +587,11 @@ workflows:
               only: main
 
   hourly_pr_merge:
-    when: <<pipeline.parameters.run_hourly>>
-    unless:
-      or:
-        - <<pipeline.parameters.release_kedro>>
-        - <<pipeline.parameters.run_nightly>>
+    when:
+      and:
+        - <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - merge_pr_to_develop:
         filters:
@@ -600,11 +600,11 @@ workflows:
 
   # Python versions that are supported on `main`.
   nightly_build_main:
-    when: <<pipeline.parameters.run_nightly>>
-    unless:
-      or:
-        - <<pipeline.parameters.release_kedro>>
-        - <<pipeline.parameters.run_hourly>>
+    when:
+      and:
+        - <<pipeline.parameters.run_nightly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
     jobs:
       - build_docker_image:
           matrix:
@@ -625,11 +625,11 @@ workflows:
 
   # Python version that are *only* supported on `develop`.
   nightly_build_develop:
-    when: <<pipeline.parameters.run_nightly>>
-    unless:
-      or:
-        - <<pipeline.parameters.release_kedro>>
-        - <<pipeline.parameters.run_hourly>>
+    when:
+      and:
+        - <<pipeline.parameters.run_nightly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
     jobs:
       - build_docker_image:
           matrix:
@@ -649,11 +649,11 @@ workflows:
               only: develop
 
   kedro_release:
-    when: <<pipeline.parameters.release_kedro>>
-    unless:
-      or:
-        - <<pipeline.parameters.run_hourly>>
-        - <<pipeline.parameters.run_nightly>>
+    when:
+      and:
+        - <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_kedro:
           matrix:

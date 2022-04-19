@@ -280,7 +280,6 @@ def _get_cookiecutter_dir(
             no_input=True,
             directory=directory,
         )
-        print("****", template_path, cookiecutter_dir)
     except (RepositoryNotFound, RepositoryCloneFailed) as exc:
         error_message = f"Kedro project template not found at {template_path}."
 

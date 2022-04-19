@@ -31,14 +31,10 @@ from kedro.runner import AbstractRunner, SequentialRunner
 _active_session = None
 
 
-def _activate_session(session: "KedroSession", force: bool = False) -> None:
+def _activate_session(
+    session: "KedroSession", force: bool = False  # pylint: disable=unused-argument
+) -> None:
     global _active_session
-
-    if not force and session is not _active_session:
-        raise RuntimeError(
-            "Cannot activate the session as another active session already exists."
-        )
-
     _active_session = session
 
 

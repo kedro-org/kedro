@@ -591,6 +591,8 @@ workflows:
     when: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_docker_image:
+          context:
+            - kedro-ecr-publish
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
@@ -612,6 +614,8 @@ workflows:
     when: << pipeline.parameters.run_nightly >>
     jobs:
       - build_docker_image:
+          context:
+            - kedro-ecr-publish
           matrix:
             parameters:
               python_version: []

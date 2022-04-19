@@ -36,6 +36,8 @@ from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Set
 from warnings import warn
 
+from yaml.parser import ParserError
+
 from kedro.config import BadConfigException, MissingConfigException
 
 SUPPORTED_EXTENSIONS = [
@@ -135,6 +137,7 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
     Raises:
         BadConfigException: If configuration is poorly formatted and
             cannot be loaded.
+        ParserError: If file is invalid and cannot be parsed.
 
     Returns:
         Parsed configuration.
@@ -153,6 +156,13 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
             }
     except AttributeError as exc:
         raise BadConfigException(f"Couldn't load config file: {config_file}") from exc
+
+    except ParserError as exc:
+        line = exc.problem_mark.line
+        cursor = exc.problem_mark.column
+        raise ParserError(
+            f"Invalid YAML file {config_file}, unable to read line {line}, position {cursor}."
+        ) from exc
 
 
 def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, Any]:

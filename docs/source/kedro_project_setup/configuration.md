@@ -383,9 +383,7 @@ The snippet below demonstrates how to ensure that certain Jinja2 variables are a
 from kedro.config import TemplatedConfigLoader
 
 
-class JinjaScopedTemplatedConfigLoader(
-    TemplatedConfigLoader
-):  # This would likely be an import
+class JinjaScopedTemplatedConfigLoader(TemplatedConfigLoader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._anyconfig_args = {
@@ -407,7 +405,7 @@ path: s3/{{ S3_bucket }}/my_file.png
 Ths snippet below demonstrates how to enable the full range of complex [YAML tags and Python Types](https://pyyaml.org/wiki/PyYAMLDocumentation) from ``settings.py``:
 
 ```eval_rst
-.. warning::  As the name suggests 'unsafe loader' should be used sparingly and will often be flagged in enterprise code scanners. This has a similar risk profile to Python's ``eval()`` statement which is also so powerful that it `should only be used as a last resort <https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)>`_
+.. warning::  As the name suggests the 'unsafe loader' will often be flagged in enterprise code scanners. You can read more about the various `trade-offs in this article <https://www.serendipidata.com/posts/safe-api-design-and-pyyaml>`_.
 ```
 
 ```python
@@ -415,9 +413,7 @@ from kedro.config import TemplatedConfigLoader
 import yaml
 
 
-class UnsafeYAMLTemplatedConfigLoader(
-    TemplatedConfigLoader
-):  # This would likely be an import
+class UnsafeYAMLTemplatedConfigLoader(TemplatedConfigLoader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._anyconfig_args = {"ac_parser": "yaml", "Loader": yaml.UnsafeLoader}

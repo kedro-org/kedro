@@ -134,7 +134,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         self._config_mapping = {
             **self._config_mapping,
             **globals_dict,
-            **{"KEDRO_ENV": env or base_env},
+            "KEDRO_ENV": env or base_env,
         }
 
     @property

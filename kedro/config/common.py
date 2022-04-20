@@ -67,7 +67,7 @@ def _get_config_from_patterns(
 
     config = {}  # type: Dict[str, Any]
     processed_files = set()  # type: Set[Path]
-    custom_anyconfig_args = anyconfig_args if anyconfig_args else DEFAULT_ANYCONFIG_ARGS
+    custom_anyconfig_args = anyconfig_args or DEFAULT_ANYCONFIG_ARGS
 
     for conf_path in conf_paths:
         if not Path(conf_path).is_dir():
@@ -104,7 +104,7 @@ def _get_config_from_patterns(
 
 
 def _load_config_file(
-    config_file: Path, anyconfig_args: Optional[Dict[str, Any]] = None
+    config_file: Path, anyconfig_args: Dict[str, Any]]
 ) -> Dict[str, Any]:
     """Load an individual config file using `anyconfig` as a backend.
 

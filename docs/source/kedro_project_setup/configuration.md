@@ -382,10 +382,17 @@ The snippet below demonstrates how to ensure that certain Jinja2 variables are a
 ```python
 from kedro.config import TemplatedConfigLoader
 
-class JinjaScopedTemplatedConfigLoader(TemplatedConfigLoader): # This would likely be an import
+
+class JinjaScopedTemplatedConfigLoader(
+    TemplatedConfigLoader
+):  # This would likely be an import
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._anyconfig_args = {"ac_template": True, "ac_context": {"S3_bucket": "my_bucket"}}
+        self._anyconfig_args = {
+            "ac_template": True,
+            "ac_context": {"S3_bucket": "my_bucket"},
+        }
+
 
 CONFIG_LOADER_CLASS = JinjaScopedTemplatedConfigLoader
 CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
@@ -407,10 +414,14 @@ Ths snippet below demonstrates how to enable the full range of complex [YAML tag
 from kedro.config import TemplatedConfigLoader
 import yaml
 
-class UnsafeYAMLTemplatedConfigLoader(TemplatedConfigLoader): # This would likely be an import
+
+class UnsafeYAMLTemplatedConfigLoader(
+    TemplatedConfigLoader
+):  # This would likely be an import
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._anyconfig_args = {"ac_parser": "yaml", "Loader": yaml.UnsafeLoader}
+
 
 CONFIG_LOADER_CLASS = UnsafeYAMLTemplatedConfigLoader
 CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}

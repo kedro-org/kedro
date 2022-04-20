@@ -5,7 +5,7 @@ with the values from the passed dictionary.
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 import jmespath
 
@@ -41,7 +41,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         >>>
         >>> CONFIG_LOADER_CLASS = TemplatedConfigLoader
         >>> CONFIG_LOADER_ARGS = {
-        >>>     "globals_pattern": "*globals.yml",
+        >>>     "globals_pattern": ["*globals.yml"],
         >>> }
 
     The contents of the dictionary resulting from the `globals_pattern` get
@@ -95,7 +95,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         *,
         base_env: str = "base",
         default_run_env: str = "local",
-        globals_pattern: Optional[str] = None,
+        globals_pattern: Optional[List[str]] = None,
         globals_dict: Optional[Dict[str, Any]] = None,
     ):
         """Instantiates a ``TemplatedConfigLoader``.

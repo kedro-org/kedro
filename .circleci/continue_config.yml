@@ -510,6 +510,8 @@ workflows:
         - <<pipeline.parameters.docs_change>>
         - not: <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_docs
       - docs_linkcheck
@@ -523,6 +525,8 @@ workflows:
       and:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - e2e_tests:
           matrix:
@@ -567,7 +571,11 @@ workflows:
             - docs_linkcheck
 
   main_updated:
-    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
+    when:
+      and:
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - sync:
           filters:
@@ -579,7 +587,11 @@ workflows:
               only: main
 
   hourly_pr_merge:
-    when: <<pipeline.parameters.run_hourly>>
+    when:
+      and:
+        - <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - merge_pr_to_develop:
         filters:
@@ -588,9 +600,15 @@ workflows:
 
   # Python versions that are supported on `main`.
   nightly_build_main:
-    when: <<pipeline.parameters.run_nightly>>
+    when:
+      and:
+        - <<pipeline.parameters.run_nightly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
     jobs:
       - build_docker_image:
+          context:
+            - kedro-ecr-publish
           matrix:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
@@ -609,9 +627,15 @@ workflows:
 
   # Python version that are *only* supported on `develop`.
   nightly_build_develop:
-    when: << pipeline.parameters.run_nightly >>
+    when:
+      and:
+        - <<pipeline.parameters.run_nightly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
     jobs:
       - build_docker_image:
+          context:
+            - kedro-ecr-publish
           matrix:
             parameters:
               python_version: []
@@ -629,7 +653,11 @@ workflows:
               only: develop
 
   kedro_release:
-    when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set
+    when:
+      and:
+        - <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_kedro:
           matrix:

@@ -12,10 +12,12 @@
 # Upcoming Release 0.18.1
 
 ## Major features and improvements
-
-* Added more detail to YAML ParserError error message
+* Added more detail to YAML ParserError error message.
+* Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
 
 ## Bug fixes and other changes
+* Removed fatal error from being logged when a Kedro session is created in a directory without git.
+
 
 - Added runner name to pipeline hook spec `run_params`
 - Introduced an `after_command_run` CLI hook spec

@@ -30,7 +30,7 @@ TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
 _STARTER_ALIASES = {
     "astro-airflow-iris",
-    "mini-kedro",
+    "standalone-datacatalog",
     "pandas-iris",
     "pyspark",
     "pyspark-iris",

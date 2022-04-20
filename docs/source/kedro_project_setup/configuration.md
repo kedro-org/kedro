@@ -186,7 +186,7 @@ parameters = conf_loader.get("parameters*", "parameters*/**")
 This will load configuration files from any subdirectories in `conf` that have a filename starting with `parameters` or are located inside a folder with name starting with `parameters`.
 
 ```eval_rst
-.. note::  Since it ``local`` is set as the environment, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
+.. note::  Since ``local`` is set as the environment, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
 ```
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:

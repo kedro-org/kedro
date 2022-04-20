@@ -124,7 +124,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         self._config_mapping = (
             _get_config_from_patterns(
                 conf_paths=self.conf_paths,
-                patterns=list(globals_pattern),
+                patterns=[globals_pattern],
                 anyconfig_args=self._anyconfig_args,
             )
             if globals_pattern
@@ -165,7 +165,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         """
         config_raw = _get_config_from_patterns(
             conf_paths=self.conf_paths,
-            patterns=list(patterns),
+            patterns=patterns,
             anyconfig_args=self._anyconfig_args,
         )
         return _format_object(config_raw, self._config_mapping)

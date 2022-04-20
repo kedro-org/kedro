@@ -4,13 +4,14 @@ import getpass
 import logging
 import logging.config
 import os
-import subprocess
 import traceback
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Iterable, Union
 
 import click
+from git import GitError, InvalidGitRepositoryError, Repo
+from sqlalchemy import Boolean
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
@@ -47,28 +48,34 @@ def _deactivate_session() -> None:
     _active_session = None
 
 
-def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
-    project_path = str(project_path)
+def _is_git_repo(project_path: Path) -> Boolean:
     try:
-        res = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"],
-            cwd=project_path,
-            stderr=subprocess.STDOUT,
+        _ = Repo(project_path)
+        return True
+    except InvalidGitRepositoryError:
+        logging.getLogger(__name__).info("No git repository detected %s", project_path)
+        return False
+    except GitError as err:
+        logging.getLogger(__name__).info(
+            "Git Error, unable to git describe %s", project_path
         )
-        git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
-        git_status_res = subprocess.check_output(
-            ["git", "status", "--short"],
-            cwd=project_path,
-            stderr=subprocess.STDOUT,
-        )
-        git_data["dirty"] = bool(git_status_res.decode().strip())
+        logging.getLogger(__name__).info(err)
+        return False
 
-    # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
-        logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
+
+def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
+    if _is_git_repo(project_path):
+        try:
+            repo = Repo(project_path)
+            git_sha = repo.git.rev_parse("HEAD", short=True)
+            git_data = {"commit_sha": git_sha}
+            git_data["dirty"] = repo.is_dirty()
+            return {"git": git_data}
+        except GitError as err:
+            logging.getLogger(__name__).info("Unable to execute git command %s", err)
+            return {}
+    else:
         return {}
-
-    return {"git": git_data}
 
 
 def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:

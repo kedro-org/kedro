@@ -104,7 +104,7 @@ def _get_config_from_patterns(
 
 
 def _load_config_file(
-    config_file: Path, anyconfig_args: Dict[str, Any]]
+    config_file: Path, anyconfig_args: Dict[str, Any]
 ) -> Dict[str, Any]:
     """Load an individual config file using `anyconfig` as a backend.
 

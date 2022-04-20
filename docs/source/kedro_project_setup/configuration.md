@@ -15,8 +15,11 @@ Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loade
 
 ```python
 from kedro.config import ConfigLoader
+from kedro.framework.project import settings
+from pathlib import Path
 
-conf_loader = ConfigLoader(conf_source="conf", env="local")
+conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 conf_catalog = conf_loader.get("catalog*", "catalog*/**")
 ```
 
@@ -174,28 +177,32 @@ Parameters project configuration can be loaded with the help of the `ConfigLoade
 
 ```python
 from kedro.config import ConfigLoader
+from kedro.framework.project import settings
+from pathlib import Path
 
-conf_paths = ["conf/base", "conf/local"]
-conf_loader = ConfigLoader(conf_paths)
+conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 parameters = conf_loader.get("parameters*", "parameters*/**")
 ```
 
-This will load configuration files from `conf/base` and `conf/local` that have a filename starting with `parameters` or are located inside a folder with name starting with `parameters`.
+This will load configuration files from any subdirectories in `conf` that have a filename starting with `parameters` or are located inside a folder with name starting with `parameters`.
 
 ```eval_rst
-.. note::  Since it is loaded after ``conf/base``, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
+.. note::  Since it ``local`` is set as the environment, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
 ```
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
+from kedro.framework.project import settings
+from pathlib import Path
 
-conf_paths = ["conf/base", "conf/local"]
-conf_loader = ConfigLoader(conf_paths)
+conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:
-    parameters = conf_loader.get("parameters*", "parameters*/**")
+    parameters = conf_loader.get("parameters*", "parameters*/**", "**/parameters*")
 except MissingConfigException:
     parameters = {}
 ```
@@ -307,25 +314,29 @@ Credentials configuration can be loaded the same way as any other project config
 
 ```python
 from kedro.config import ConfigLoader
+from kedro.framework.project import settings
+from pathlib import Path
 
-conf_paths = ["conf/base", "conf/local"]
-conf_loader = ConfigLoader(conf_paths)
+conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 credentials = conf_loader.get("credentials*", "credentials*/**")
 ```
 
 This will load configuration files from `conf/base` and `conf/local` that have filename starting with `credentials` or are located inside a folder with name starting with `credentials`.
 
 ```eval_rst
-.. note::  Since it is loaded after ``conf/base``, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
+.. note::  Since ``local`` is set as the environment, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
 ```
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
+from kedro.framework.project import settings
+from pathlib import Path
 
-conf_paths = ["conf/base", "conf/local"]
-conf_loader = ConfigLoader(conf_paths)
+conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:
     credentials = conf_loader.get("credentials*", "credentials*/**")

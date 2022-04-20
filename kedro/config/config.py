@@ -51,8 +51,11 @@ class ConfigLoader(AbstractConfigLoader):
 
         >>> import logging.config
         >>> from kedro.config import ConfigLoader
+        >>> from kedro.framework.project import settings
+        >>> from pathlib import Path
         >>>
-        >>> conf_loader = ConfigLoader('conf', 'local')
+        >>> conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+        >>> conf_loader = ConfigLoader(conf_source=conf_path, env="local")
         >>>
         >>> conf_logging = conf_loader.get('logging*')
         >>> logging.config.dictConfig(conf_logging)  # set logging conf

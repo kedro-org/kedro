@@ -253,7 +253,7 @@ class TestTemplatedConfigLoader:
         proj_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
         _write_yaml(proj_catalog, {})
         catalog = TemplatedConfigLoader(
-            str(tmp_path), globals_pattern="*globals.yml"
+            str(tmp_path), globals_pattern=["*globals.yml"]
         ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
@@ -322,7 +322,7 @@ class TestTemplatedConfigLoader:
         proj_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
         _write_yaml(proj_catalog, {})
         catalog = TemplatedConfigLoader(
-            str(tmp_path), globals_pattern="*globals.yml", globals_dict=get_environ
+            str(tmp_path), globals_pattern=["*globals.yml"], globals_dict=get_environ
         ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"

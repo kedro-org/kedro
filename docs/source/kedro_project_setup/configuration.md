@@ -69,7 +69,7 @@ from kedro.config import TemplatedConfigLoader  # new import
 
 ...
 CONFIG_LOADER_CLASS = TemplatedConfigLoader
-CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
+CONFIG_LOADER_ARGS = {"globals_pattern": ["*globals.yml"]}
 ...
 ```
 
@@ -393,7 +393,7 @@ class JinjaScopedTemplatedConfigLoader(TemplatedConfigLoader):
 
 
 CONFIG_LOADER_CLASS = JinjaScopedTemplatedConfigLoader
-CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
+CONFIG_LOADER_ARGS = {"globals_pattern": ["*globals.yml"]}
 ```
 
 This would then make any of the items passed to the ``ac_context`` argument via a available to the runtime Jinja2 scope:
@@ -420,7 +420,7 @@ class UnsafeYAMLTemplatedConfigLoader(TemplatedConfigLoader):
 
 
 CONFIG_LOADER_CLASS = UnsafeYAMLTemplatedConfigLoader
-CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
+CONFIG_LOADER_ARGS = {"globals_pattern": ["*globals.yml"]}
 ```
 
 Including the `!!python/tuple` tag within ``parameters.yml`` will cast the YAML list to a Python tuple on read:

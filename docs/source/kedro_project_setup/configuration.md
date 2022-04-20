@@ -16,9 +16,8 @@ Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loade
 ```python
 from kedro.config import ConfigLoader
 from kedro.framework.project import settings
-from pathlib import Path
 
-conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 conf_catalog = conf_loader.get("catalog*", "catalog*/**")
 ```
@@ -178,9 +177,8 @@ Parameters project configuration can be loaded with the help of the `ConfigLoade
 ```python
 from kedro.config import ConfigLoader
 from kedro.framework.project import settings
-from pathlib import Path
 
-conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 parameters = conf_loader.get("parameters*", "parameters*/**")
 ```
@@ -196,9 +194,8 @@ Calling `conf_loader.get()` in the example above will throw a `MissingConfigExce
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from pathlib import Path
 
-conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:
@@ -315,9 +312,8 @@ Credentials configuration can be loaded the same way as any other project config
 ```python
 from kedro.config import ConfigLoader
 from kedro.framework.project import settings
-from pathlib import Path
 
-conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 credentials = conf_loader.get("credentials*", "credentials*/**")
 ```
@@ -333,9 +329,8 @@ Calling `conf_loader.get()` in the example above will throw a `MissingConfigExce
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
-from pathlib import Path
 
-conf_path = str(Path.cwd() / settings.CONF_SOURCE)
+conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:

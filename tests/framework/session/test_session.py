@@ -557,7 +557,11 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner = mocker.Mock()
+        mock_runner = mocker.patch(
+            "kedro.runner.sequential_runner.SequentialRunner",
+            autospec=True,
+        )
+        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         with KedroSession.create(mock_package_name, fake_project) as session:
@@ -577,6 +581,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "runner": mock_runner.__name__,
         }
 
         mock_hook.before_pipeline_run.assert_called_once_with(
@@ -618,6 +623,7 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner = mocker.Mock()
+        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         message = (
@@ -644,10 +650,13 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "runner": mock_runner.__name__,
         }
 
         mock_hook.before_pipeline_run.assert_called_once_with(
-            run_params=record_data, pipeline=mock_pipeline, catalog=mock_catalog
+            run_params=record_data,
+            pipeline=mock_pipeline,
+            catalog=mock_catalog,
         )
         mock_runner.run.assert_called_once_with(
             mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
@@ -661,7 +670,11 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_run_non_existent_pipeline(self, fake_project, mock_package_name, mocker):
-        mock_runner = mocker.Mock()
+        mock_runner = mocker.patch(
+            "kedro.runner.sequential_runner.SequentialRunner",
+            autospec=True,
+        )
+        mock_runner.__name__ = "SequentialRunner"
 
         pattern = (
             "Failed to find the pipeline named 'doesnotexist'. "
@@ -697,7 +710,11 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         error = FakeException("You shall not pass!")
-        mock_runner = mocker.Mock()
+        mock_runner = mocker.patch(
+            "kedro.runner.sequential_runner.SequentialRunner",
+            autospec=True,
+        )
+        mock_runner.__name__ = "SequentialRunner"
         mock_runner.run.side_effect = error  # runner.run() raises an error
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
@@ -720,6 +737,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "runner": mock_runner.__name__,
         }
 
         mock_hook.on_pipeline_error.assert_called_once_with(
@@ -763,6 +781,7 @@ class TestKedroSession:
         mock_catalog = mock_context._get_catalog.return_value
         error = FakeException("You shall not pass!")
         broken_runner = mocker.Mock()
+        broken_runner.__name__ = "SequentialRunner"
         broken_runner.run.side_effect = error  # runner.run() raises an error
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
@@ -785,6 +804,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "runner": broken_runner.__name__,
         }
 
         mock_hook.on_pipeline_error.assert_called_once_with(
@@ -797,6 +817,7 @@ class TestKedroSession:
 
         # Execute run another time with fixed runner
         fixed_runner = mocker.Mock()
+        fixed_runner.__name__ = "SequentialRunner"
         session.run(runner=fixed_runner, pipeline_name=fake_pipeline_name)
 
         fixed_runner.run.assert_called_once_with(

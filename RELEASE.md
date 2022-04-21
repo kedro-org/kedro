@@ -20,6 +20,9 @@
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py.
 
 
+- Added runner name to pipeline hook spec `run_params`
+- Introduced an `after_command_run` CLI hook spec
+
 ## Upcoming deprecations for Kedro 0.19.0
 
 

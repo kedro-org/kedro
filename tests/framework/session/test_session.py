@@ -9,15 +9,15 @@ import pytest
 import toml
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, AbstractConfigLoader
+from kedro.config import AbstractConfigLoader, ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     ValidationError,
     Validator,
+    _HasSharedParentClassValidator,
     _IsSubclassValidator,
     _ProjectSettings,
     configure_project,
-    _HasSharedParentClassValidator,
 )
 from kedro.framework.session import KedroSession
 from kedro.framework.session.store import BaseSessionStore, ShelveStore

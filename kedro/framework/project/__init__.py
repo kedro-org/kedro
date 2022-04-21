@@ -1,8 +1,6 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
-import abc
-
 import importlib
 import logging.config
 import operator

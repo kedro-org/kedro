@@ -19,6 +19,9 @@
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
 
 
+- Added runner name to pipeline hook spec `run_params`
+- Introduced an `after_command_run` CLI hook spec
+
 ## Upcoming deprecations for Kedro 0.19.0
 
 

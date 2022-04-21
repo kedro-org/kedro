@@ -19,11 +19,14 @@ from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
+
 class _NullPluginManager:
-    def __init__(self, *args, **kwargs): 
+    def __init__(self, *args, **kwargs):
         pass
+
     def __getattr__(self, name):
         return self
+
     def __call__(self, *args, **kwargs):
         pass
 

@@ -1,6 +1,6 @@
 """This module provides context for Kedro project."""
-
 from copy import deepcopy
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
@@ -159,6 +159,7 @@ def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> N
                 old_dict[key] = value
 
 
+@dataclass
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
@@ -249,6 +250,17 @@ class KedroContext:
             params = {}
         _update_nested_dict(params, self._extra_params or {})
         return params
+
+    @property
+    def config_loader(self) -> ConfigLoader:
+        """Read-only property referring to Kedro's ``ConfigLoader`` for this
+        context.
+        Returns:
+            Instance of `ConfigLoader`.
+        Raises:
+            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
+        """
+        return self._config_loader
 
     def _get_catalog(
         self,

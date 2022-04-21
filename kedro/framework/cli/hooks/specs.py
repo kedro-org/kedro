@@ -28,3 +28,19 @@ class CLICommandSpecs:
             command_args: The command line arguments that were used.
         """
         pass
+
+    @cli_hook_spec
+    def after_command_run(
+        self, project_metadata: ProjectMetadata, command_args: List[str], exit_code: int
+    ):
+        """Hooks to be invoked after a CLI command runs.
+        It receives the ``project_metadata`` as well as
+        all command line arguments that were used, including the command
+        and subcommand themselves and if the operation was successful or not.
+
+        Args:
+            project_metadata: The Kedro project's metadata.
+            command_args: The command line arguments that were used.
+            exit_code: Exit code raised by Click application after completion
+        """
+        pass

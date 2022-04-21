@@ -19,6 +19,14 @@ from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
+class _NullPluginManager:
+    def __init__(self, *args, **kwargs): 
+        pass
+    def __getattr__(self, name):
+        return self
+    def __call__(self, *args, **kwargs):
+        pass
+
 
 class AbstractRunner(ABC):
     """``AbstractRunner`` is the base class for all ``Pipeline`` runner
@@ -43,7 +51,7 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
-        hook_manager: PluginManager,
+        hook_manager: PluginManager = _NullPluginManager(),
         session_id: str = None,
     ) -> Dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
@@ -232,15 +240,16 @@ def _collect_inputs_from_hook(
     )
 
     additional_inputs = {}
-    for response in hook_response:
-        if response is not None and not isinstance(response, dict):
-            response_type = type(response).__name__
-            raise TypeError(
-                f"`before_node_run` must return either None or a dictionary mapping "
-                f"dataset names to updated values, got `{response_type}` instead."
-            )
-        response = response or {}
-        additional_inputs.update(response)
+    if hook_response is not None:
+        for response in hook_response:
+            if response is not None and not isinstance(response, dict):
+                response_type = type(response).__name__
+                raise TypeError(
+                    f"`before_node_run` must return either None or a dictionary mapping "
+                    f"dataset names to updated values, got `{response_type}` instead."
+                )
+            response = response or {}
+            additional_inputs.update(response)
 
     return additional_inputs
 

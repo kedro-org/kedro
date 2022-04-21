@@ -3,29 +3,63 @@ import textwrap
 
 import pytest
 
+from kedro.config import ConfigLoader, TemplatedConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings
-from kedro.framework.session.store import BaseSessionStore
+from kedro.framework.session.store import BaseSessionStore, ShelveStore
+from kedro.io import DataCatalog
 
 
 class MyContext(KedroContext):
     pass
 
 
+class MyDataCatalog(DataCatalog):
+    pass
+
+
+class ProjectHooks:
+    pass
+
+
 @pytest.fixture
 def mock_package_name_with_settings_file(tmpdir):
+    """This mock settings file tests everything that can be customised in settings.py.
+    Where there are suggestions in the project template settings.py (e.g. as for
+    CONFIG_LOADER_CLASS), those suggestions should be tested."""
     old_settings = settings.as_dict()
     settings_file_path = tmpdir.mkdir("test_package").join("settings.py")
+    project_path, package_name, _ = str(settings_file_path).rpartition("test_package")
     settings_file_path.write(
         textwrap.dedent(
             f"""
+                from {__name__} import ProjectHooks
+                HOOKS = (ProjectHooks(),)
+
+                DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
+
+                from kedro.framework.session.store import ShelveStore
+                SESSION_STORE_CLASS = ShelveStore
+                SESSION_STORE_ARGS = {{
+                    "path": "./sessions"
+                }}
+
                 from {__name__} import MyContext
-                CONF_SOURCE = "test_conf"
                 CONTEXT_CLASS = MyContext
+                CONF_SOURCE = "test_conf"
+
+                from kedro.config import TemplatedConfigLoader
+                CONFIG_LOADER_CLASS = TemplatedConfigLoader
+                CONFIG_LOADER_ARGS = {{
+                     "globals_pattern": "*globals.yml",
+                }}
+
+                # Class that manages the Data Catalog.
+                from {__name__} import MyDataCatalog
+                DATA_CATALOG_CLASS = MyDataCatalog
             """
         )
     )
-    project_path, package_name, _ = str(settings_file_path).rpartition("test_package")
     sys.path.insert(0, project_path)
     yield package_name
     sys.path.pop(0)
@@ -34,17 +68,28 @@ def mock_package_name_with_settings_file(tmpdir):
         settings.set(key, value)
 
 
-def test_settings_without_configure_project_show_default_values():
-    assert settings.CONF_SOURCE == "conf"
-    assert settings.CONTEXT_CLASS is KedroContext
+def test_settings_without_configure_project_shows_default_values():
+    assert len(settings.HOOKS) == 0
+    assert settings.DISABLE_HOOKS_FOR_PLUGINS.to_list() == []
     assert settings.SESSION_STORE_CLASS is BaseSessionStore
     assert settings.SESSION_STORE_ARGS == {}
-    assert len(settings.DISABLE_HOOKS_FOR_PLUGINS) == 0
+    assert settings.CONTEXT_CLASS is KedroContext
+    assert settings.CONF_SOURCE == "conf"
+    assert settings.CONFIG_LOADER_CLASS == ConfigLoader
+    assert settings.CONFIG_LOADER_ARGS == {}
+    assert settings.DATA_CATALOG_CLASS == DataCatalog
 
 
 def test_settings_after_configuring_project_shows_updated_values(
     mock_package_name_with_settings_file,
 ):
     configure_project(mock_package_name_with_settings_file)
-    assert settings.CONF_SOURCE == "test_conf"
+    assert len(settings.HOOKS) == 1 and isinstance(settings.HOOKS[0], ProjectHooks)
+    assert settings.DISABLE_HOOKS_FOR_PLUGINS.to_list() == ["kedro-viz"]
+    assert settings.SESSION_STORE_CLASS is ShelveStore
+    assert settings.SESSION_STORE_ARGS == {"path": "./sessions"}
     assert settings.CONTEXT_CLASS is MyContext
+    assert settings.CONF_SOURCE == "test_conf"
+    assert settings.CONFIG_LOADER_CLASS == TemplatedConfigLoader
+    assert settings.CONFIG_LOADER_ARGS == {"globals_pattern": "*globals.yml"}
+    assert settings.DATA_CATALOG_CLASS == MyDataCatalog

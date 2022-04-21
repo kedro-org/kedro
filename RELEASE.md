@@ -20,6 +20,9 @@
 * Made `hook_manager` argument optional for `runner.run`.
 
 
+- Added runner name to pipeline hook spec `run_params`
+- Introduced an `after_command_run` CLI hook spec
+
 ## Upcoming deprecations for Kedro 0.19.0
 
 

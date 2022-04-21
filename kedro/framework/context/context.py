@@ -242,7 +242,7 @@ class KedroContext:
         """
         try:
             # '**/parameters*' reads modular pipeline configs
-            params = self._config_loader.get(
+            params = self.config_loader.get(
                 "parameters*", "parameters*/**", "**/parameters*"
             )
         except MissingConfigException as exc:
@@ -276,7 +276,7 @@ class KedroContext:
 
         """
         # '**/catalog*' reads modular pipeline configs
-        conf_catalog = self._config_loader.get("catalog*", "catalog*/**", "**/catalog*")
+        conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
         conf_catalog = _convert_paths_to_absolute_posix(
@@ -338,7 +338,7 @@ class KedroContext:
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self._config_loader.get(
+            conf_creds = self.config_loader.get(
                 "credentials*", "credentials*/**", "**/credentials*"
             )
         except MissingConfigException as exc:

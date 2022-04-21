@@ -1,6 +1,8 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
+import abc
+
 import importlib
 import logging.config
 import operator
@@ -39,6 +41,22 @@ class _IsSubclassValidator(Validator):
                 )
 
 
+class _HasSharedParentClassValidator(Validator):
+    def validate(self, settings, *args, **kwargs):
+        super().validate(settings, *args, **kwargs)
+
+        default_class = self.default(settings, self)
+        for name in self.names:
+            setting_value = getattr(settings, name)
+            default_class_parent = default_class.mro()[1]
+            if default_class_parent not in setting_value.mro():
+                raise ValidationError(
+                    f"Invalid value `{setting_value.__module__}.{setting_value.__qualname__}` "
+                    f"received for setting `{name}`. It must be a subclass of "
+                    f"`{default_class_parent.__module__}.{default_class_parent.__qualname__}`."
+                )
+
+
 class _ProjectSettings(LazySettings):
     """Define all settings available for users to configure in Kedro,
     along with their validation rules and default values.
@@ -57,7 +75,7 @@ class _ProjectSettings(LazySettings):
     )
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())
-    _CONFIG_LOADER_CLASS = _IsSubclassValidator(
+    _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
         "CONFIG_LOADER_CLASS", default=_get_default_class("kedro.config.ConfigLoader")
     )
     _CONFIG_LOADER_ARGS = Validator("CONFIG_LOADER_ARGS", default={})

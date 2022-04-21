@@ -42,6 +42,9 @@ class _IsSubclassValidator(Validator):
 
 
 class _HasSharedParentClassValidator(Validator):
+    """A validator to check that the parent of the default class is an ancestor of
+    the settings value."""
+
     def validate(self, settings, *args, **kwargs):
         super().validate(settings, *args, **kwargs)
 

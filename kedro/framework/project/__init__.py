@@ -9,7 +9,7 @@ import importlib
 import logging.config
 import operator
 from collections.abc import MutableMapping
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Dict, Optional, Callable, List
 
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -222,7 +222,7 @@ class _Run(Callable):
         # NEED ALL THREE OF THESE??
 
     @_load_callable_wrapper
-    def __call__(self, args=None, **kwargs):
+    def __call__(self, args: Optional[List[str]] = None, **kwargs):
         # This is what happens under the hood of click. The click context contains
         # a list of arguments (e.g. ["--pipeline", "ds"]) and default values of
         # arguments that are not supplied. We forward the context to the

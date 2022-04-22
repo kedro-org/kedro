@@ -125,8 +125,12 @@ Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyD
 The below functions can be added to the nodes.py and pipeline.py files respectively.
 
 ```python
+import pandas as pd
+import numpy as np
+
 def compare_shuttle_speed():
-    return pd.DataFrame([])
+    df = pd.DataFrame(np.random.randint(0, 100, size=(100, 2)), columns=['shuttle_name', 'shuttle_speed'])
+    return df
 
 
 def create_pipeline(**kwargs) -> Pipeline:
@@ -135,7 +139,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             node(
                 func=compare_shuttle_speed,
-                inputs="shuttle_speed_data",
+                inputs=None,
                 outputs="shuttle_speed_comparison_plot",
             ),
         ]
@@ -170,8 +174,6 @@ The below functions can be added to the nodes.py and pipeline.py files respectiv
 
 ```python
 import plotly.express as px
-from kedro.extras.datasets.plotly import JSONDataSet
-
 
 def compare_shuttle_speed(shuttle_data):
     fig = px.bar(x=shuttle_data.name, y=shuttle_data.speed)

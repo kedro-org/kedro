@@ -193,13 +193,13 @@ class KedroContext:
             the parameters retrieved from the project configuration.
     """
 
-    def __post_init__(self, package_name, project_path, extra_params, hook_manager):
+    def __post_init__(self, package_name, project_path, hook_manager, extra_params):
         object.__setattr__(self, "_package_name", package_name)
         object.__setattr__(
             self, "project_path", Path(project_path).expanduser().resolve()
         )
-        object.__setattr__(self, "_extra_params", deepcopy(extra_params))
         object.__setattr__(self, "_hook_manager", hook_manager)
+        object.__setattr__(self, "_extra_params", deepcopy(extra_params))
 
     @property
     def catalog(self) -> DataCatalog:

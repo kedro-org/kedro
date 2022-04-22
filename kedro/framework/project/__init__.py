@@ -49,6 +49,16 @@ class _HasSharedParentClassValidator(Validator):
         default_class = self.default(settings, self)
         for name in self.names:
             setting_value = getattr(settings, name)
+            # In the case of ConfigLoader, default_class.mro() will be:
+            # [kedro.config.config.ConfigLoader,
+            # kedro.config.abstract_config.AbstractConfigLoader,
+            # abc.ABC,
+            # object]
+            # We pick out the direct parent and check if it's in any of the ancestors of
+            # the supplied setting_value. This assumes that the direct parent is
+            # the abstract class that must be inherited from.
+            # A more general check just for a shared ancestor would be:
+            # set(default_class.mro()) & set(setting_value.mro()) - {abc.ABC, object}
             default_class_parent = default_class.mro()[1]
             if default_class_parent not in setting_value.mro():
                 raise ValidationError(

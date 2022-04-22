@@ -17,11 +17,9 @@
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
-* Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py.
-
-
-- Added runner name to pipeline hook spec `run_params`
-- Introduced an `after_command_run` CLI hook spec
+* Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
+* Added runner name to the `run_params` dictionary used in pipeline hooks.
+* Introduced `after_command_run` CLI hook.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

@@ -25,7 +25,7 @@ Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipeline
     from kedro.pipeline import Pipeline, node
     from kedro.pipeline.modular_pipeline import pipeline
 
-    from kedro_tutorial.pipelines.data_processing.nodes import (
+    from .nodes import (
         preprocess_companies,
         preprocess_shuttles,
         create_model_input_table,
@@ -76,18 +76,33 @@ Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipeline
 
 In this section we want to add some namespaces in the modelling component of the pipeline and also highlight the power of instantiating the same modular pipeline multiple times with different parameters.
 
-1. Add some more parameters to the bottom of `conf/base/parameters/data_science.yml` using this snippet:
+1. Update the parameters file `conf/base/parameters/data_science.yml` using this snippet:
 
     ```yaml
-
-    model_options_experimental:
-      test_size: 0.2
-      random_state: 8
-      features:
-        - engines
-        - passenger_capacity
-        - crew
-        - review_scores_rating
+   
+    active_modelling_pipeline:
+        model_options:
+          test_size: 0.2
+          random_state: 3
+          features:
+            - engines
+            - passenger_capacity
+            - crew
+            - d_check_complete
+            - moon_clearance_complete
+            - iata_approved
+            - company_rating
+            - review_scores_rating
+       
+    candidate_modelling_pipeline:
+        model_options:
+          test_size: 0.2
+          random_state: 8
+          features:
+            - engines
+            - passenger_capacity
+            - crew
+            - review_scores_rating
 
     ```
 
@@ -120,7 +135,7 @@ In this section we want to add some namespaces in the modelling component of the
 
     from .nodes import evaluate_model, split_data, train_model
 
-
+   
     def create_pipeline(**kwargs) -> Pipeline:
         pipeline_instance = pipeline(
             [
@@ -153,9 +168,8 @@ In this section we want to add some namespaces in the modelling component of the
             pipe=pipeline_instance,
             inputs="model_input_table",
             namespace="candidate_modelling_pipeline",
-            parameters={"params:model_options": "params:model_options_experimental"},
         )
-
+   
         return ds_pipeline_1 + ds_pipeline_2
     ```
 
@@ -178,7 +192,6 @@ ds_pipeline_2 = pipeline(
     pipe=pipeline_instance,
     inputs="model_input_table",
     namespace="candidate_modelling_pipeline",
-    parameters={"params:model_options": "params:model_options_experimental"},
 )
 ```
 
@@ -216,6 +229,40 @@ The table below describes the purpose of each keyword arguments in detail:
         namespace="data_science",
     )
     ```
+  
+  > If you do this, you will also need to add the `data_science` namespace at the top level of your parameter file `data_science.active_modelling_pipeline.model_options` and indent the other entries. The complete parameters file should look like the below.
+
+    <details>                                                                                                                                                                                                                                                                                                                                                             
+    <summary><b>Click to expand</b></summary>
+
+    ```yaml
+      data_science:
+          active_modelling_pipeline:
+            model_options:
+              test_size: 0.2
+              random_state: 3
+              features:
+                - engines
+                - passenger_capacity
+                - crew
+                - d_check_complete
+                - moon_clearance_complete
+                - iata_approved
+                - company_rating
+                - review_scores_rating
+  
+          candidate_modelling_pipeline:
+            model_options:
+              test_size: 0.2
+              random_state: 8
+              features:
+                - engines
+                - passenger_capacity
+                - crew
+                - review_scores_rating
+    ```
+
+    </details>
 
     This renders as follows:
 

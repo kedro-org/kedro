@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """This module contains methods and facade interfaces for various ConfigLoader
 implementations.
 """
@@ -35,6 +7,8 @@ from glob import iglob
 from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Set
 from warnings import warn
+
+from yaml.parser import ParserError
 
 from kedro.config import BadConfigException, MissingConfigException
 
@@ -135,6 +109,7 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
     Raises:
         BadConfigException: If configuration is poorly formatted and
             cannot be loaded.
+        ParserError: If file is invalid and cannot be parsed.
 
     Returns:
         Parsed configuration.
@@ -153,6 +128,13 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
             }
     except AttributeError as exc:
         raise BadConfigException(f"Couldn't load config file: {config_file}") from exc
+
+    except ParserError as exc:
+        line = exc.problem_mark.line
+        cursor = exc.problem_mark.column
+        raise ParserError(
+            f"Invalid YAML file {config_file}, unable to read line {line}, position {cursor}."
+        ) from exc
 
 
 def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, Any]:

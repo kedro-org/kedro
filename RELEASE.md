@@ -12,8 +12,14 @@
 # Upcoming Release 0.18.1
 
 ## Major features and improvements
+* Added more detail to YAML ParserError error message.
+* Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
 
 ## Bug fixes and other changes
+* Removed fatal error from being logged when a Kedro session is created in a directory without git.
+* Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
+* Added runner name to the `run_params` dictionary used in pipeline hooks.
+* Introduced `after_command_run` CLI hook.
 
 ## Upcoming deprecations for Kedro 0.19.0
 
@@ -214,6 +220,7 @@ The parameters should look like this:
 * To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
 * If you call `ConfigLoader` or `TemplatedConfigLoader` directly, update the keyword arguments `conf_root` to `conf_source` and `extra_params` to `runtime_params`.
 * If you use `KedroContext` to access `ConfigLoader`, use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
+* The signature of `KedroContext` has changed and now needs `config_loader` and `hook_manager` as additional arguments of type `ConfigLoader` and `PluginManager` respectively.
 
 # Release 0.17.7
 

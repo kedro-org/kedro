@@ -49,20 +49,24 @@ def _deactivate_session() -> None:
 
 def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
     project_path = str(project_path)
-
     try:
         res = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"], cwd=project_path
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=project_path,
+            stderr=subprocess.STDOUT,
         )
+        git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
+        git_status_res = subprocess.check_output(
+            ["git", "status", "--short"],
+            cwd=project_path,
+            stderr=subprocess.STDOUT,
+        )
+        git_data["dirty"] = bool(git_status_res.decode().strip())
+
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
         logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
         return {}
-
-    git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
-
-    res = subprocess.check_output(["git", "status", "--short"], cwd=project_path)
-    git_data["dirty"] = bool(res.decode().strip())
 
     return {"git": git_data}
 
@@ -387,6 +391,7 @@ class KedroSession:
             "load_versions": load_versions,
             "extra_params": extra_params,
             "pipeline_name": pipeline_name,
+            "runner": getattr(runner, "__name__", str(runner)),
         }
 
         catalog = context._get_catalog(

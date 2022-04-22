@@ -128,8 +128,12 @@ The below functions can be added to the nodes.py and pipeline.py files respectiv
 import pandas as pd
 import numpy as np
 
+
 def compare_shuttle_speed():
-    df = pd.DataFrame(np.random.randint(0, 100, size=(100, 2)), columns=['shuttle_name', 'shuttle_speed'])
+    df = pd.DataFrame(
+        np.random.randint(0, 100, size=(100, 2)),
+        columns=["shuttle_name", "shuttle_speed"],
+    )
     return df
 
 
@@ -174,9 +178,16 @@ The below functions can be added to the nodes.py and pipeline.py files respectiv
 
 ```python
 import plotly.express as px
+import pandas as pd
+import numpy as np
 
-def compare_shuttle_speed(shuttle_data):
-    fig = px.bar(x=shuttle_data.name, y=shuttle_data.speed)
+
+def compare_shuttle_speed():
+    shuttle_data = pd.DataFrame(
+        np.random.randint(0, 100, size=(100, 2)),
+        columns=["shuttle_name", "shuttle_speed"],
+    )
+    fig = px.bar(x=shuttle_data.shuttle_name, y=shuttle_data.shuttle_speed)
     return fig
 
 
@@ -186,7 +197,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             node(
                 func=compare_shuttle_speed,
-                inputs="shuttle_speed_data",
+                inputs=None,
                 outputs="shuttle_speed_comparison_plot",
             ),
         ]

@@ -1,6 +1,8 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
+import logging
+
 import sys
 
 import inspect
@@ -234,6 +236,8 @@ class _Run(Callable):
         # NOTE args rather than *args. So do run(["-p", "ds"]), not run("-p", "ds").
         # TRY ON DATABRICKS entrypoints
         args = args or []
+        logging.info(args)
+        logging.info(kwargs)
         with self._callable.make_context("run", args) as ctx:
             return ctx.forward(self._callable, **kwargs)
 

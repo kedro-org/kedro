@@ -252,7 +252,7 @@ class TestKedroContext:
         assert PurePath(ds_path.as_posix()).is_absolute()
         assert (
             ds_path.as_posix()
-            == (dummy_context._project_path / "horses.csv").as_posix()
+            == (dummy_context.project_path / "horses.csv").as_posix()
         )
 
     def test_get_catalog_validates_layers(self, dummy_context, mocker):

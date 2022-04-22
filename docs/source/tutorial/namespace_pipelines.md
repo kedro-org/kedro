@@ -62,6 +62,8 @@ Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipeline
 
     </details>
 
+* Update the catalog entries for `preprocessed_shuttles` and `preprocessed_companies` by appending the `data_processing` namespace. This is to ensure both datasets are still persisted when running the pipeline.
+
 ### Why do we need to provide explicit inputs and outputs?
 
 * When introducing a namespace you must tell Kedro which inputs/outputs live at the 'edges' of the namespace
@@ -79,7 +81,7 @@ In this section we want to add some namespaces in the modelling component of the
 1. Update the parameters file `conf/base/parameters/data_science.yml` using this snippet:
 
     ```yaml
-   
+
     active_modelling_pipeline:
         model_options:
           test_size: 0.2
@@ -93,7 +95,7 @@ In this section we want to add some namespaces in the modelling component of the
             - iata_approved
             - company_rating
             - review_scores_rating
-       
+
     candidate_modelling_pipeline:
         model_options:
           test_size: 0.2
@@ -135,7 +137,7 @@ In this section we want to add some namespaces in the modelling component of the
 
     from .nodes import evaluate_model, split_data, train_model
 
-   
+
     def create_pipeline(**kwargs) -> Pipeline:
         pipeline_instance = pipeline(
             [
@@ -169,7 +171,7 @@ In this section we want to add some namespaces in the modelling component of the
             inputs="model_input_table",
             namespace="candidate_modelling_pipeline",
         )
-   
+
         return ds_pipeline_1 + ds_pipeline_2
     ```
 
@@ -229,12 +231,60 @@ The table below describes the purpose of each keyword arguments in detail:
         namespace="data_science",
     )
     ```
-  
-  > If you do this, you will also need to add the `data_science` namespace at the top level of your parameter file `data_science.yml` and indent the other entries. The complete parameters file should look like the below.
 
-    <details>                                                                                                                                                                                                                                                                                                                                                             
+  > If you do this, you will also need to add the `data_science` namespace to the `regressor` datasets in `catalogl.yml` as well as at the top level of your parameter file `data_science.yml` and indent the other entries. The complete `catalog.yml` and `data_science.yml` parameter file should look like the below.
+
+    <details>
     <summary><b>Click to expand</b></summary>
 
+    `catalog.yml`
+    ```yaml
+    companies:
+      type: pandas.CSVDataSet
+      filepath: data/01_raw/companies.csv
+      # more about layers in the Data Engineering Convention:
+      # https://kedro.readthedocs.io/en/stable/tutorial/visualise_pipeline.html#interact-with-data-engineering-convention
+      layer: raw
+
+    reviews:
+      type: pandas.CSVDataSet
+      filepath: data/01_raw/reviews.csv
+      layer: raw
+
+    shuttles:
+      type: pandas.ExcelDataSet
+      filepath: data/01_raw/shuttles.xlsx
+      layer: raw
+
+    data_processing.preprocessed_companies:
+      type: pandas.ParquetDataSet
+      filepath: data/02_intermediate/preprocessed_companies.pq
+      layer: intermediate
+
+    data_processing.preprocessed_shuttles:
+      type: pandas.ParquetDataSet
+      filepath: data/02_intermediate/preprocessed_shuttles.pq
+      layer: intermediate
+
+    model_input_table:
+      type: pandas.ParquetDataSet
+      filepath: data/03_primary/model_input_table.pq
+      layer: primary
+
+    data_science.active_modelling_pipeline.regressor:
+      type: pickle.PickleDataSet
+      filepath: data/06_models/regressor_active.pickle
+      versioned: true
+      layer: models
+
+    data_science.candidate_modelling_pipeline.regressor:
+      type: pickle.PickleDataSet
+      filepath: data/06_models/regressor_candidate.pickle
+      versioned: true
+      layer: models
+    ```
+
+    `parameters/data_science.yml`
     ```yaml
       data_science:
           active_modelling_pipeline:
@@ -250,7 +300,7 @@ The table below describes the purpose of each keyword arguments in detail:
                 - iata_approved
                 - company_rating
                 - review_scores_rating
-  
+
           candidate_modelling_pipeline:
             model_options:
               test_size: 0.2

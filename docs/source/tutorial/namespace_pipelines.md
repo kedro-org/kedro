@@ -230,7 +230,7 @@ The table below describes the purpose of each keyword arguments in detail:
     )
     ```
   
-  > If you do this, you will also need to add the `data_science` namespace at the top level of your parameter file `data_science.active_modelling_pipeline.model_options` and indent the other entries. The complete parameters file should look like the below.
+  > If you do this, you will also need to add the `data_science` namespace at the top level of your parameter file `data_science.yml` and indent the other entries. The complete parameters file should look like the below.
 
     <details>                                                                                                                                                                                                                                                                                                                                                             
     <summary><b>Click to expand</b></summary>

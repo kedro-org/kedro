@@ -9,11 +9,12 @@ import pytest
 import toml
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader
+from kedro.config import AbstractConfigLoader, ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     ValidationError,
     Validator,
+    _HasSharedParentClassValidator,
     _IsSubclassValidator,
     _ProjectSettings,
     configure_project,
@@ -33,7 +34,7 @@ class BadStore:  # pylint: disable=too-few-public-methods
 
 class BadConfigLoader:  # pylint: disable=too-few-public-methods
     """
-    ConfigLoader class that doesn't subclass `ConfigLoader`, for testing only.
+    ConfigLoader class that doesn't subclass `AbstractConfigLoader`, for testing only.
     """
 
 
@@ -90,7 +91,7 @@ def mock_settings_custom_config_loader_class(mocker):
         pass
 
     class MockSettings(_ProjectSettings):
-        _CONFIG_LOADER_CLASS = _IsSubclassValidator(
+        _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
             "CONFIG_LOADER_CLASS", default=lambda *_: MyConfigLoader
         )
 
@@ -359,14 +360,14 @@ class TestKedroSession:
         session = KedroSession.create(mock_package_name, fake_project)
         result = session._get_config_loader()
 
-        assert isinstance(result, ConfigLoader)
+        assert isinstance(result, AbstractConfigLoader)
         assert result.__class__.__name__ == "MyConfigLoader"
 
     def test_broken_config_loader(self, mock_settings_file_bad_config_loader_class):
         pattern = (
             "Invalid value `tests.framework.session.test_session.BadConfigLoader` received "
             "for setting `CONFIG_LOADER_CLASS`. "
-            "It must be a subclass of `kedro.config.config.ConfigLoader`."
+            "It must be a subclass of `kedro.config.abstract_config.AbstractConfigLoader`."
         )
         mock_settings = _ProjectSettings(
             settings_file=str(mock_settings_file_bad_config_loader_class)

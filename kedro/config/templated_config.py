@@ -123,7 +123,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         self._config_mapping = (
             _get_config_from_patterns(
                 conf_paths=self.conf_paths,
-                patterns=list(globals_pattern),
+                patterns=[globals_pattern],
                 ac_template=False,
             )
             if globals_pattern
@@ -159,7 +159,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             ValueError: malformed config found.
         """
         config_raw = _get_config_from_patterns(
-            conf_paths=self.conf_paths, patterns=list(patterns), ac_template=True
+            conf_paths=self.conf_paths, patterns=patterns, ac_template=True
         )
         return _format_object(config_raw, self._config_mapping)
 

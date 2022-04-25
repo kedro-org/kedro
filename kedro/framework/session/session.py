@@ -356,8 +356,6 @@ class KedroSession:
         save_version = session_id
         extra_params = self.store.get("extra_params") or {}
         context = self.load_context()
-        hook_manager = self._hook_manager
-        hook_manager.hook.after_context_created(context=context)
 
         name = pipeline_name or "__default__"
 
@@ -402,6 +400,7 @@ class KedroSession:
         )
 
         # Run the runner
+        hook_manager = self._hook_manager
         runner = runner or SequentialRunner()
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog

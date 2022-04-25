@@ -3,7 +3,6 @@ For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
 from typing import Any, Dict, Optional
-from kedro.framework.context.context import KedroContext
 
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
@@ -288,13 +287,12 @@ class ContextSpecs:
     @hook_spec
     def after_context_created(  # pylint: disable=too-many-arguments
         self,
-        context: KedroContext,
+        context,
     ) -> None:
-        """Hooks to be invoked after a `KedroContext` is created. This is the earliest 
-        hook trigger within a kedro's run. The `KedroContext` stores useful information 
+        """Hooks to be invoked after a `KedroContext` is created. This is the earliest
+        hook trigger within a kedro's run. The `KedroContext` stores useful information
         such as `credentials`, `config_loader` and `env`.
         .
         Args:
             context: The context that was created.
         """
-

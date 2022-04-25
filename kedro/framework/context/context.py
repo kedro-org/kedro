@@ -199,6 +199,8 @@ class KedroContext:
         self._extra_params = deepcopy(extra_params)
         self._hook_manager = hook_manager
 
+        self._hook_manager.hook.after_context_created(context=self)
+
     @property  # type: ignore
     def env(self) -> Optional[str]:
         """Property for the current Kedro environment.

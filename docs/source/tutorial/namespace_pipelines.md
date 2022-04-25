@@ -179,7 +179,7 @@ In this section we want to add some namespaces in the modelling component of the
 
 ### Let's explain what's going on here
 
-Modular pipelines allow you instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters.
+Modular pipelines allow you to instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters.
 
 ```python
 pipeline_instance = pipeline(...)
@@ -210,8 +210,6 @@ The table below describes the purpose of each keyword arguments in detail:
 +--------------------+-------------------------------------------------------------------------------------------+------------------------------+
 | :code:`outputs`    | No outputs are at the boundary of this pipeline so nothing to list here                   | Same as `ds_pipeline_1`      |
 +--------------------+-------------------------------------------------------------------------------------------+------------------------------+
-| :code:`parameters` | Inherits defaults from template                                                           | Overrides provided           |
-+--------------------+-------------------------------------------------------------------------------------------+------------------------------+
 | :code:`namespace`  | A unique namespace                                                                        | A different unique namespace |
 +--------------------+-------------------------------------------------------------------------------------------+------------------------------+
 ```
@@ -220,7 +218,7 @@ The table below describes the purpose of each keyword arguments in detail:
 
 * Modular pipelines can be nested an arbitrary number of times
 * This can be an effective pattern for simplifying you mental model and to reduce visual noise
-* Namespaces will be chained using the `.` syntax just you `import` modules in Python
+* Namespaces will be chained using the `.` syntax just like you `import` modules in Python
 * You can quickly wrap your two modelling pipeline instances under one 'Data science' namespace by adding the following to your `pipelines/data_science/pipeline.py` return statement:
 
     ```python
@@ -232,7 +230,7 @@ The table below describes the purpose of each keyword arguments in detail:
     )
     ```
 
-  > If you do this, you will also need to add the `data_science` namespace to the `regressor` datasets in `catalogl.yml` as well as at the top level of your parameter file `data_science.yml` and indent the other entries. The complete `catalog.yml` and `data_science.yml` parameter file should look like the below.
+  * As we've created an outer namespace `data_science`, we'll be updating our catalog entries for the `regressor` datasets by adding the `data_science` prefix. Additionally, you need to add the `data_science` prefix at the top level of your parameter file `data_science.yml` and indent the other entries. The complete `catalog.yml` and `data_science.yml` parameter files should look like the below.
 
     <details>
     <summary><b>Click to expand</b></summary>
@@ -317,18 +315,3 @@ The table below describes the purpose of each keyword arguments in detail:
     This renders as follows:
 
     ![modular_ds](../meta/images/modular_ds.gif)
-
-    * As we've created an outer namespace `data_science`, we'll be updating our catalog entries as below by adding `data_science` prefix.
-    ```yaml
-    data_science.active_modelling_pipeline.regressor:
-        type: pickle.PickleDataSet
-        filepath: data/06_models/regressor_active.pickle
-        versioned: true
-        layer: models
-
-    data_science.candidate_modelling_pipeline.regressor:
-        type: pickle.PickleDataSet
-        filepath: data/06_models/regressor_candidate.pickle
-        versioned: true
-        layer: models
-    ```

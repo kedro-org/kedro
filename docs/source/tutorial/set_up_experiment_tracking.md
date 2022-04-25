@@ -9,11 +9,15 @@ Enabling experiment tracking features on Kedro-Viz relies on:
 * [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets)
 * [modifying your nodes and pipelines to output those metrics](#setting-up-your-nodes-and-pipelines-to-log-metrics).
 
-This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project that is outlined in [this tutorial](../tutorial/spaceflights_tutorial.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
+This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project that is outlined in [this tutorial](../tutorial/spaceflights_tutorial.md) and build on previously discussed topics such as [namespacing](../tutorial/namespace_pipelines.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
 
 You can also access a more detailed demo [here](https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
 
 ## Set up a project
+
+```eval_rst
+  .. note:: You can skip this step if you have been following all previous parts of the tutorial.
+```
 
 We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../tutorial/visualise_pipeline.md). Set up a new project using the spaceflights starter by running:
 
@@ -55,6 +59,10 @@ data_science.active_modelling_pipeline.metrics:
 data_processing.companies_columns:
   type: tracking.JSONDataSet
   filepath: data/09_tracking/companies_columns.json
+```
+
+```eval_rst
+  .. note:: Note that these two datasets include namespaces to correspond to the pipeline setup. If you have a project without namespaces you can still use experiment tracking.
 ```
 
 ## Set up your nodes and pipelines to log metrics

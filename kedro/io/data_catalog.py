@@ -282,15 +282,16 @@ class DataCatalog:
         return cls(data_sets=data_sets, layers=dataset_layers)
 
     def _get_dataset(
-        self, data_set_name: str, version: Version = None
+        self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
         if data_set_name not in self._data_sets:
             error_msg = f"DataSet '{data_set_name}' not found in the catalog"
 
-            matches = difflib.get_close_matches(data_set_name, self._data_sets.keys())
-            if matches:
-                suggestions = ", ".join(matches)  # type: ignore
-                error_msg += f" - did you mean one of these instead: {suggestions}"
+            if suggest:
+                matches = difflib.get_close_matches(data_set_name, self._data_sets.keys())
+                if matches:
+                    suggestions = ", ".join(matches)
+                    error_msg += f" - did you mean one of these instead: {suggestions}"
 
             raise DataSetNotFoundError(error_msg)
 

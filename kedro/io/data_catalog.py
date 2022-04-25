@@ -288,7 +288,9 @@ class DataCatalog:
             error_msg = f"DataSet '{data_set_name}' not found in the catalog"
 
             if suggest:
-                matches = difflib.get_close_matches(data_set_name, self._data_sets.keys())
+                matches = difflib.get_close_matches(
+                    data_set_name, self._data_sets.keys()
+                )
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"

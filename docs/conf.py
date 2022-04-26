@@ -58,6 +58,8 @@ extensions = [
     "nbsphinx",
     "recommonmark",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
+    "myst_parser",
 ]
 
 # enable autosummary plugin (table of contents for modules/classes/class

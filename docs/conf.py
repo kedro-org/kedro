@@ -74,7 +74,10 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
+source_suffix = {
+    ".rst": "restructuredtext",
+    # ".md": "markdown",  # `myst_parser` adds the source suffix itself.
+}
 
 # The master toctree document.
 master_doc = "index"

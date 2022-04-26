@@ -172,11 +172,14 @@ from kedro.framework.cli.project import (
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     _config_file_callback,
+    _get_values_as_tuple,
     _reformat_load_versions,
     _split_params,
     env_option,
     split_string,
 )
+from kedro.framework.session import KedroSession
+from kedro.utils import load_obj
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
@@ -244,9 +247,26 @@ def run(
     params,
 ):
     """Run the pipeline."""
-    """Run the pipeline."""
 
-    == ADD YOUR CUSTOM RUN COMMAND CODE HERE ==
+    ##### ADD YOUR CUSTOM RUN COMMAND CODE HERE #####
+    runner = load_obj(runner or "SequentialRunner", "kedro.runner")
+
+    tag = _get_values_as_tuple(tag) if tag else tag
+    node_names = _get_values_as_tuple(node_names) if node_names else node_names
+
+    with KedroSession.create(env=env, extra_params=params) as session:
+        session.run(
+            tags=tag,
+            runner=runner(is_async=is_async),
+            node_names=node_names,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            from_inputs=from_inputs,
+            to_outputs=to_outputs,
+            load_versions=load_version,
+            pipeline_name=pipeline,
+        )
+
 
 ```
 </details>

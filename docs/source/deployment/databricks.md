@@ -239,7 +239,7 @@ After you load the IPython extension, you must explicitly upgrade your pip versi
 
 ### 10. Running Kedro-viz on Databricks 
 
-Currently, if you try to run %run_viz on Databricks it will only display the below: 
+Currently, if you try to run `%run_viz` on Databricks it will only display the below: 
 
 ```console
 <IPython.core.display.HTML object>

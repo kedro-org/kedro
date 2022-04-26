@@ -8,9 +8,9 @@ from pluggy import PluginManager
 
 from .markers import HOOK_NAMESPACE
 from .specs import (
-    KedroContextSpecs,
     DataCatalogSpecs,
     DatasetSpecs,
+    KedroContextSpecs,
     NodeSpecs,
     PipelineSpecs,
 )

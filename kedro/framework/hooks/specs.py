@@ -286,7 +286,7 @@ class KedroContextSpecs:
     """Namespace that defines all specifications for a kedro context's lifecycle hooks."""
 
     @hook_spec
-    def after_context_created(  # pylint: disable=too-many-arguments
+    def after_context_created(
         self,
         context: KedroContext,
     ) -> None:

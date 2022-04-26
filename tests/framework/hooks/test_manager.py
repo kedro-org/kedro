@@ -2,9 +2,9 @@ import pytest
 
 from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.framework.hooks.specs import (
-    KedroContextSpecs,
     DataCatalogSpecs,
     DatasetSpecs,
+    KedroContextSpecs,
     NodeSpecs,
     PipelineSpecs,
 )

@@ -137,7 +137,7 @@ kedro new
 kedro docs
 ```
 
-## Customize Project-specific Kedro commands
+## Customize or Override Project-specific Kedro commands
 
 ```eval_rst
 .. note::  All project related CLI commands should be run from the project’s root directory.

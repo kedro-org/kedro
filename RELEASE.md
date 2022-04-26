@@ -20,6 +20,7 @@
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Introduced `after_command_run` CLI hook.
+* Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`. 
 
 ## Upcoming deprecations for Kedro 0.19.0
 

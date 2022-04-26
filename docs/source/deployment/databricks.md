@@ -263,7 +263,7 @@ runExample("01_hello")
 
 ![](../meta/images/databricks_shiny_command.png)
 
-When you click on the Shiny app link and it will open a browser with an example Shiny app running. Now edit the port at the end of the URL and change it to 4141. 
+When you click on the Shiny app link, it will open a browser with an example Shiny app running. Now edit the port at the end of the URL and change it to 4141. 
 
 ![](../meta/images/databricks_kedro_viz.gif)
 

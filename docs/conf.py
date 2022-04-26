@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import List, Tuple
 
 from click import secho, style
-from recommonmark.transform import AutoStructify
 
 from kedro import __version__ as release
 
@@ -56,7 +55,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "nbsphinx",
-    "recommonmark",
     "sphinx_copybutton",
     "sphinxcontrib.mermaid",
     "myst_parser",
@@ -539,9 +537,6 @@ def setup(app):
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
     app.add_css_file("css/theme-overrides.css")
-    # enable rendering RST tables in Markdown
-    app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
-    app.add_transform(AutoStructify)
 
 
 # (regex, restructuredText link replacement, object) list

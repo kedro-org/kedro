@@ -21,6 +21,7 @@
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Introduced `after_command_run` CLI hook.
 * Update sections on visualisation, namespacing, and experiment tracking in the spaceflight tutorial to correspond to the complete spaceflights starter.
+* Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

@@ -110,7 +110,7 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
   .. note:: Kedro's Plotly integration only supports `Plotly Express <https://plotly.com/python/plotly-express/>` charts.
 ```
 
-You need to update requirements.txt in your Kedro project and add the following datasets to enable plotly for your project.
+You need to update `requirements.txt` in your Kedro project and add the following datasets to enable plotly for your project.
 
 `kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.0`
 
@@ -125,8 +125,11 @@ Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyD
 The below functions can be added to the nodes.py and pipeline.py files respectively.
 
 ```python
-def compare_shuttle_speed():
-    return pd.DataFrame([])
+import pandas as pd
+
+
+def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
+    return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
 
 
 def create_pipeline(**kwargs) -> Pipeline:
@@ -134,9 +137,9 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(
-                func=compare_shuttle_speed,
-                inputs="shuttle_speed_data",
-                outputs="shuttle_speed_comparison_plot",
+                func=compare_passenger_capacity,
+                inputs="preprocessed_shuttles",
+                outputs="shuttle_passenger_capacity_plot",
             ),
         ]
     )
@@ -145,19 +148,19 @@ def create_pipeline(**kwargs) -> Pipeline:
 You need to then configure the plot in `catalog.yml`
 
 ```yaml
-shuttle_speed_comparison_plot:
+shuttle_passenger_capacity_plot:
   type: plotly.PlotlyDataSet
-  filepath: data/08_reporting/shuttle_speed_comparison_plot.json
+  filepath: data/08_reporting/shuttle_passenger_capacity_plot.json
   plotly_args:
     type: bar
     fig:
-      x: shuttle_name
-      y: shuttle_speed
+      x: shuttle_type
+      y: passenger_capacity
       orientation: h
     layout:
       xaxis_title: Shuttles
-      yaxis_title: Shuttle Speed (km/hr)
-      title: Shuttle Speed Comaprison
+      yaxis_title: Average passenger capacity
+      title: Shuttle Passenger capacity
 ```
 
 
@@ -170,11 +173,15 @@ The below functions can be added to the nodes.py and pipeline.py files respectiv
 
 ```python
 import plotly.express as px
-from kedro.extras.datasets.plotly import JSONDataSet
+import pandas as pd
 
 
-def compare_shuttle_speed(shuttle_data):
-    fig = px.bar(x=shuttle_data.name, y=shuttle_data.speed)
+def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
+    fig = px.bar(
+        data_frame=preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index(),
+        x="shuttle_type",
+        y="passenger_capacity",
+    )
     return fig
 
 
@@ -183,9 +190,9 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(
-                func=compare_shuttle_speed,
-                inputs="shuttle_speed_data",
-                outputs="shuttle_speed_comparison_plot",
+                func=compare_passenger_capacity,
+                inputs="preprocessed_shuttles",
+                outputs="shuttle_passenger_capacity_plot",
             ),
         ]
     )
@@ -194,9 +201,9 @@ def create_pipeline(**kwargs) -> Pipeline:
 For `plotly.JSONDataSet`, you will also need to specify the output type in `catalog.yml` like below.
 
 ```yaml
-shuttle_speed_comparison_plot:
+shuttle_passenger_capacity_plot:
   type: plotly.JSONDataSet
-  filepath: data/08_reporting/shuttle_speed_comparison_plot.json
+  filepath: data/08_reporting/shuttle_passenger_capacity_plot.json
 ```
 
 Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.

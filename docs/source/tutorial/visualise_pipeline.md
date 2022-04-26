@@ -129,14 +129,14 @@ import pandas as pd
 
 
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
-    return preprocessed_shuttles.groupby(['shuttle_type']).mean().reset_index()
+    return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
 
 
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
     return pipeline(
         [
-             node(
+            node(
                 func=compare_passenger_capacity,
                 inputs="preprocessed_shuttles",
                 outputs="shuttle_passenger_capacity_plot",
@@ -175,11 +175,12 @@ The below functions can be added to the nodes.py and pipeline.py files respectiv
 import plotly.express as px
 import pandas as pd
 
+
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     fig = px.bar(
-        data_frame=preprocessed_shuttles.groupby(['shuttle_type']).mean().reset_index(),
+        data_frame=preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index(),
         x="shuttle_type",
-        y="passenger_capacity"
+        y="passenger_capacity",
     )
     return fig
 
@@ -188,7 +189,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
     return pipeline(
         [
-             node(
+            node(
                 func=compare_passenger_capacity,
                 inputs="preprocessed_shuttles",
                 outputs="shuttle_passenger_capacity_plot",

@@ -282,7 +282,7 @@ class DatasetSpecs:
         pass
 
 
-class ContextSpecs:
+class KedroContextSpecs:
     """Namespace that defines all specifications for a kedro context's lifecycle hooks."""
 
     @hook_spec

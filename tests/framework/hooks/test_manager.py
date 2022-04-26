@@ -2,7 +2,7 @@ import pytest
 
 from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.framework.hooks.specs import (
-    ContextSpecs,
+    KedroContextSpecs,
     DataCatalogSpecs,
     DatasetSpecs,
     NodeSpecs,
@@ -13,7 +13,7 @@ from kedro.framework.hooks.specs import (
 @pytest.mark.parametrize(
     "hook_specs,hook_name,hook_params",
     [
-        (ContextSpecs, "after_context_created", ("context")),
+        (KedroContextSpecs, "after_context_created", ("context")),
         (
             DataCatalogSpecs,
             "after_catalog_created",

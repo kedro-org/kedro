@@ -8,7 +8,7 @@ from pluggy import PluginManager
 
 from .markers import HOOK_NAMESPACE
 from .specs import (
-    ContextSpecs,
+    KedroContextSpecs,
     DataCatalogSpecs,
     DatasetSpecs,
     NodeSpecs,
@@ -27,7 +27,7 @@ def _create_hook_manager() -> PluginManager:
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)
     manager.add_hookspecs(DatasetSpecs)
-    manager.add_hookspecs(ContextSpecs)
+    manager.add_hookspecs(KedroContextSpecs)
     return manager
 
 

@@ -9,11 +9,15 @@ Enabling experiment tracking features on Kedro-Viz relies on:
 * [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets)
 * [modifying your nodes and pipelines to output those metrics](#setting-up-your-nodes-and-pipelines-to-log-metrics).
 
-This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project that is outlined in [this tutorial](../tutorial/spaceflights_tutorial.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
+This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project that is outlined in [this tutorial](../tutorial/spaceflights_tutorial.md) and build on previously discussed topics such as [namespacing](../tutorial/namespace_pipelines.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
 
 You can also access a more detailed demo [here](https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
 
 ## Set up a project
+
+```eval_rst
+  .. note:: You can skip this step if you have been following all previous parts of the tutorial.
+```
 
 We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../tutorial/visualise_pipeline.md). Set up a new project using the spaceflights starter by running:
 
@@ -48,13 +52,17 @@ There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.ext
 Set up two datasets to log `r2 scores` and `parameters` for each run by adding the following in the `conf/base/catalog.yml` file:
 
 ```yaml
-metrics:
+data_science.active_modelling_pipeline.metrics:
   type: tracking.MetricsDataSet
   filepath: data/09_tracking/metrics.json
 
-companies_columns:
+data_processing.companies_columns:
   type: tracking.JSONDataSet
   filepath: data/09_tracking/companies_columns.json
+```
+
+```eval_rst
+  .. note:: Note that these two datasets include namespaces to correspond to the pipeline setup. If you have a project without namespaces you can still use experiment tracking.
 ```
 
 ## Set up your nodes and pipelines to log metrics
@@ -66,6 +74,9 @@ Set up the data to be logged for the metrics dataset - under `nodes.py` of your 
 The new `evaluate_model` function would look like this:
 
 ```python
+from sklearn.metrics import mean_absolute_error, max_error
+
+
 def evaluate_model(
     regressor: LinearRegression, X_test: pd.DataFrame, y_test: pd.Series
 ) -> Dict[str, float]:
@@ -101,6 +112,9 @@ node(
 You have to repeat the same steps for setting up the `companies_column` dataset. For this dataset you should log the column that contains the list of companies as outlined in `companies.csv` under `/data/01_raw`. Modify the `preprocess_companies` node under the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`) to return the data under a key value pair, as shown below:
 
 ```python
+from typing import Tuple, Dict
+
+
 def preprocess_companies(companies: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
     """Preprocesses the data for companies.
 

@@ -35,7 +35,7 @@ def spark_session(tmp_path_factory):
     # https://github.com/pytest-dev/pytest-xdist#making-session-scoped-fixtures-execute-only-once
     root_tmp_dir = tmp_path_factory.getbasetemp().parent
     lock = root_tmp_dir / "semaphore.lock"
-    with FileLock(lock):  # pylint: disable=abstract-class-instantiated
+    with FileLock(lock):
         spark = _setup_spark_session()
     yield spark
     spark.stop()

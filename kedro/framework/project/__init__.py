@@ -39,6 +39,35 @@ class _IsSubclassValidator(Validator):
                 )
 
 
+class _HasSharedParentClassValidator(Validator):
+    """A validator to check that the parent of the default class is an ancestor of
+    the settings value."""
+
+    def validate(self, settings, *args, **kwargs):
+        super().validate(settings, *args, **kwargs)
+
+        default_class = self.default(settings, self)
+        for name in self.names:
+            setting_value = getattr(settings, name)
+            # In the case of ConfigLoader, default_class.mro() will be:
+            # [kedro.config.config.ConfigLoader,
+            # kedro.config.abstract_config.AbstractConfigLoader,
+            # abc.ABC,
+            # object]
+            # We pick out the direct parent and check if it's in any of the ancestors of
+            # the supplied setting_value. This assumes that the direct parent is
+            # the abstract class that must be inherited from.
+            # A more general check just for a shared ancestor would be:
+            # set(default_class.mro()) & set(setting_value.mro()) - {abc.ABC, object}
+            default_class_parent = default_class.mro()[1]
+            if default_class_parent not in setting_value.mro():
+                raise ValidationError(
+                    f"Invalid value `{setting_value.__module__}.{setting_value.__qualname__}` "
+                    f"received for setting `{name}`. It must be a subclass of "
+                    f"`{default_class_parent.__module__}.{default_class_parent.__qualname__}`."
+                )
+
+
 class _ProjectSettings(LazySettings):
     """Define all settings available for users to configure in Kedro,
     along with their validation rules and default values.
@@ -57,7 +86,7 @@ class _ProjectSettings(LazySettings):
     )
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())
-    _CONFIG_LOADER_CLASS = _IsSubclassValidator(
+    _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
         "CONFIG_LOADER_CLASS", default=_get_default_class("kedro.config.ConfigLoader")
     )
     _CONFIG_LOADER_ARGS = Validator("CONFIG_LOADER_ARGS", default={})

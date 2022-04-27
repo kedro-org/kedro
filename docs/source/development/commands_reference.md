@@ -2,7 +2,7 @@
 
 Kedro's command line interface (CLI) is used to give commands to Kedro via a terminal shell (such as the terminal app on macOS, or cmd.exe or PowerShell on Windows). You need to use the CLI to set up a new Kedro project, and to run it.
 
-### Autocompletion (optional)
+## Autocompletion (optional)
 
 If you are using macOS or Linux, you can set up your shell to autocomplete `kedro` commands. If you don't know the type of shell you are using, first type the following:
 
@@ -40,7 +40,7 @@ eval (env _KEDRO_COMPLETE=source_fish kedro)
 ```
 </details>
 
-### Invoke Kedro CLI from Python (optional)
+## Invoke Kedro CLI from Python (optional)
 You can invoke the Kedro CLI as a Python module:
 
 ```bash

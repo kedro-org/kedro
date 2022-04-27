@@ -6,7 +6,8 @@ This page explains the principles and development process that we ask contributi
 
 In short, when you submit code changes, your submissions are understood to be under the same the [Apache 2.0 License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md) that covers the Kedro project. You should have permission to share the submitted code.
 
-```{note} You don't need to contribute code to help the Kedro project. See our list of other ways `you can contribute to Kedro <https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md>`_.
+```{note}
+You don't need to contribute code to help the Kedro project. See our list of other ways `you can contribute to Kedro <https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md>`_.
 ```
 
 ## Introduction

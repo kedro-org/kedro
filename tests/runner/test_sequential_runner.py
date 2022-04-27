@@ -41,42 +41,32 @@ def multi_input_list_output(arg1, arg2):
 
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSeqentialRunnerBranchlessPipeline:
-    def test_no_input_seq(
-        self, is_async, branchless_no_input_pipeline, catalog, hook_manager
-    ):
+    def test_no_input_seq(self, is_async, branchless_no_input_pipeline, catalog):
         outputs = SequentialRunner(is_async=is_async).run(
-            branchless_no_input_pipeline, catalog, hook_manager
+            branchless_no_input_pipeline, catalog
         )
         assert "E" in outputs
         assert len(outputs) == 1
 
-    def test_no_data_sets(self, is_async, branchless_pipeline, hook_manager):
+    def test_no_data_sets(self, is_async, branchless_pipeline):
         catalog = DataCatalog({}, {"ds1": 42})
-        outputs = SequentialRunner(is_async=is_async).run(
-            branchless_pipeline, catalog, hook_manager
-        )
+        outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
         assert outputs["ds3"] == 42
 
-    def test_no_feed(self, is_async, memory_catalog, branchless_pipeline, hook_manager):
+    def test_no_feed(self, is_async, memory_catalog, branchless_pipeline):
         outputs = SequentialRunner(is_async=is_async).run(
-            branchless_pipeline, memory_catalog, hook_manager
+            branchless_pipeline, memory_catalog
         )
         assert "ds3" in outputs
         assert outputs["ds3"]["data"] == 42
 
-    def test_node_returning_none(
-        self, is_async, saving_none_pipeline, catalog, hook_manager
-    ):
+    def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
         pattern = "Saving `None` to a `DataSet` is not allowed"
         with pytest.raises(DataSetError, match=pattern):
-            SequentialRunner(is_async=is_async).run(
-                saving_none_pipeline, catalog, hook_manager
-            )
+            SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
-    def test_result_saved_not_returned(
-        self, is_async, saving_result_pipeline, hook_manager
-    ):
+    def test_result_saved_not_returned(self, is_async, saving_result_pipeline):
         """The pipeline runs ds->dsX but save does not save the output."""
 
         def _load():
@@ -92,7 +82,7 @@ class TestSeqentialRunnerBranchlessPipeline:
             }
         )
         output = SequentialRunner(is_async=is_async).run(
-            saving_result_pipeline, catalog, hook_manager
+            saving_result_pipeline, catalog
         )
 
         assert output == {}
@@ -119,11 +109,10 @@ class TestSeqentialRunnerBranchedPipeline:
         memory_catalog,
         unfinished_outputs_pipeline,
         pandas_df_feed_dict,
-        hook_manager,
     ):
         memory_catalog.add_feed_dict(pandas_df_feed_dict, replace=True)
         outputs = SequentialRunner(is_async=is_async).run(
-            unfinished_outputs_pipeline, memory_catalog, hook_manager
+            unfinished_outputs_pipeline, memory_catalog
         )
         assert set(outputs.keys()) == {"ds8", "ds5", "ds6"}
         # the pipeline runs ds2->ds5
@@ -140,24 +129,21 @@ class TestSeqentialRunnerBranchedPipeline:
         memory_catalog,
         unfinished_outputs_pipeline,
         conflicting_feed_dict,
-        hook_manager,
     ):
         """ds1 and ds3 will be replaced with new inputs."""
         memory_catalog.add_feed_dict(conflicting_feed_dict, replace=True)
         outputs = SequentialRunner(is_async=is_async).run(
-            unfinished_outputs_pipeline, memory_catalog, hook_manager
+            unfinished_outputs_pipeline, memory_catalog
         )
         assert isinstance(outputs["ds8"], dict)
         assert outputs["ds8"]["data"] == 0
         assert isinstance(outputs["ds6"], pd.DataFrame)
 
-    def test_unsatisfied_inputs(
-        self, is_async, unfinished_outputs_pipeline, catalog, hook_manager
-    ):
+    def test_unsatisfied_inputs(self, is_async, unfinished_outputs_pipeline, catalog):
         """ds1, ds2 and ds3 were not specified."""
         with pytest.raises(ValueError, match=r"not found in the DataCatalog"):
             SequentialRunner(is_async=is_async).run(
-                unfinished_outputs_pipeline, catalog, hook_manager
+                unfinished_outputs_pipeline, catalog
             )
 
 
@@ -184,7 +170,7 @@ class LoggingDataSet(AbstractDataSet):
 
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSequentialRunnerRelease:
-    def test_dont_release_inputs_and_outputs(self, is_async, hook_manager):
+    def test_dont_release_inputs_and_outputs(self, is_async):
         log = []
         pipeline = Pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
@@ -196,12 +182,12 @@ class TestSequentialRunnerRelease:
                 "out": LoggingDataSet(log, "out"),
             }
         )
-        SequentialRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+        SequentialRunner(is_async=is_async).run(pipeline, catalog)
 
         # we don't want to see release in or out in here
         assert log == [("load", "in"), ("load", "middle"), ("release", "middle")]
 
-    def test_release_at_earliest_opportunity(self, is_async, hook_manager):
+    def test_release_at_earliest_opportunity(self, is_async):
         log = []
         pipeline = Pipeline(
             [
@@ -216,7 +202,7 @@ class TestSequentialRunnerRelease:
                 "second": LoggingDataSet(log, "second"),
             }
         )
-        SequentialRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+        SequentialRunner(is_async=is_async).run(pipeline, catalog)
 
         # we want to see "release first" before "load second"
         assert log == [
@@ -226,7 +212,7 @@ class TestSequentialRunnerRelease:
             ("release", "second"),
         ]
 
-    def test_count_multiple_loads(self, is_async, hook_manager):
+    def test_count_multiple_loads(self, is_async):
         log = []
         pipeline = Pipeline(
             [
@@ -236,12 +222,12 @@ class TestSequentialRunnerRelease:
             ]
         )
         catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
-        SequentialRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+        SequentialRunner(is_async=is_async).run(pipeline, catalog)
 
         # we want to the release after both the loads
         assert log == [("load", "dataset"), ("load", "dataset"), ("release", "dataset")]
 
-    def test_release_transcoded(self, is_async, hook_manager):
+    def test_release_transcoded(self, is_async):
         log = []
         pipeline = Pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
@@ -253,7 +239,7 @@ class TestSequentialRunnerRelease:
             }
         )
 
-        SequentialRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+        SequentialRunner(is_async=is_async).run(pipeline, catalog)
 
         # we want to see both datasets being released
         assert log == [("release", "save"), ("load", "load"), ("release", "load")]
@@ -270,8 +256,8 @@ class TestSequentialRunnerRelease:
             ),
         ],
     )
-    def test_confirms(self, mocker, pipeline, is_async, hook_manager):
+    def test_confirms(self, mocker, pipeline, is_async):
         fake_dataset_instance = mocker.Mock()
         catalog = DataCatalog(data_sets={"ds1": fake_dataset_instance})
-        SequentialRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+        SequentialRunner(is_async=is_async).run(pipeline, catalog)
         fake_dataset_instance.confirm.assert_called_once_with()

@@ -42,11 +42,6 @@ def catalog():
 
 
 @pytest.fixture
-def hook_manager():
-    return _NullPluginManager()
-
-
-@pytest.fixture
 def fan_out_fan_in():
     return Pipeline(
         [

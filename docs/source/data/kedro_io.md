@@ -1,7 +1,7 @@
 # Kedro IO
 
 
-In this tutorial, we cover advanced uses of the [Kedro IO](/kedro.io.rst) module to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
+In this tutorial, we cover advanced uses of the [Kedro IO](/kedro.io) module to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
 
 ## Error handling
 
@@ -128,8 +128,8 @@ The last row in the example above would attempt to load a CSV file from `data/01
 
 * We recommend that you do not override `save_version` argument in `DataCatalog.from_config` unless strongly required to do so, since it may lead to inconsistencies between loaded and saved versions of the versioned datasets.
 
-```eval_rst
-.. attention::  The ``DataCatalog`` does not re-generate save versions between instantiations. Therefore, if you call ``catalog.save('cars', some_data)`` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling ``%reload_kedro`` line magic. This limitation does not apply to ``load`` operation.
+```{warning}
+The ``DataCatalog`` does not re-generate save versions between instantiations. Therefore, if you call ``catalog.save('cars', some_data)`` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling ``%reload_kedro`` line magic. This limitation does not apply to ``load`` operation.
 ```
 
 ### Versioning using the Code API
@@ -189,8 +189,8 @@ assert data1.equals(reloaded)
 io.save("test_data_set", data2)
 ```
 
-```eval_rst
-.. attention::  Passing exact load and/or save versions to the dataset instantiation is not recommended, since it may lead to inconsistencies between operations. For example, if versions for load and save operations do not match, save operation would result in a ``UserWarning`` indicating that save a load versions do not match. Load after save may also return an error if the corresponding load version is not found:
+```{warning}
+Passing exact load and/or save versions to the dataset instantiation is not recommended, since it may lead to inconsistencies between operations. For example, if versions for load and save operations do not match, save operation would result in a ``UserWarning`` indicating that save a load versions do not match. Load after save may also return an error if the corresponding load version is not found:
 ```
 
 ```python
@@ -310,7 +310,7 @@ my_partitioned_dataset:
 
 Here is an exhaustive list of the arguments supported by `PartitionedDataSet`:
 
-```eval_rst
+```{eval-rst}
 +-------------------------+--------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Argument                | Required                       | Supported types                                  | Description                                                                                                                                                                                                                                               |
 +=========================+================================+==================================================+===========================================================================================================================================================================================================================================================+
@@ -356,7 +356,7 @@ Credentials management for `PartitionedDataSet` is somewhat special in a sense t
 
 Here is the full list of possible scenarios:
 
-```eval_rst
+```{eval-rst}
 +-------------------+--------------------+--------------------------------------------------------------------+----------------------------------------------------------------------------+
 | Top-level         | Underlying dataset | Example :code:`PartitionedDataSet` definition                      | Description                                                                |
 | credentials       | credentials        |                                                                    |                                                                            |

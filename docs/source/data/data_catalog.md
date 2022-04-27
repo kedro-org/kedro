@@ -574,8 +574,8 @@ io.list()
 
 You can save data using an API similar to that used to load data.
 
-```eval_rst
-.. caution::  This use is not recommended unless you are prototyping in notebooks.
+```{warning}
+This use is not recommended unless you are prototyping in notebooks.
 ```
 
 #### Saving data to memory

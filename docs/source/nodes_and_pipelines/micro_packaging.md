@@ -79,7 +79,7 @@ If a micro-package has embedded requirements and a project ``requirements.in`` f
 
 You can pull a micro-package from different locations, including local storage, PyPI and the cloud:
 
-```eval_rst
+```{eval-rst}
 +--------------------------------+-----------------------------------------------------------------------------------------+
 | Operation                      | Command                                                                                 |
 +================================+=========================================================================================+
@@ -121,6 +121,6 @@ client_kwargs:
 * The keys (tar references in this case) are the package paths
 * The values are the options that `kedro micropkg pull <package_path>` CLI command accepts.
 
-```eval_rst
+```{eval-rst}
 .. attention:: As per the `TOML specification <https://toml.io/en/v1.0.0#keys>`_, a key that contains any character outside ``A-Za-z0-9_-`` must be quoted.
 ```

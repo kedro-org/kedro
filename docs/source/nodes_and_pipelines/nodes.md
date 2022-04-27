@@ -69,7 +69,7 @@ There is a syntax to describe function inputs and outputs. This allows different
 
 ### Syntax for input variables
 
-```eval_rst
+```{eval-rst}
 +----------------------------------+-----------------+-----------------------------+---------------------------------------+
 | Input syntax                     | Meaning         | Example function parameters | How function is called when node runs |
 +==================================+=================+=============================+=======================================+
@@ -85,7 +85,7 @@ There is a syntax to describe function inputs and outputs. This allows different
 
 ### Syntax for output variables
 
-```eval_rst
+```{eval-rst}
 +----------------------------------+-------------------+-------------------------------------+
 | Output syntax                    | Meaning           | Example return statement            |
 +==================================+===================+=====================================+

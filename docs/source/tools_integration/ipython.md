@@ -97,8 +97,8 @@ Out[3]:
  'example_learning_rate': 0.01}
 ```
 
-```eval_rst
-.. tip:: If you enable `versioning <../data/data_catalog.md#versioning-datasets-and-ml-models>`_ then you can load a particular version of a dataset, e.g. :code:`catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
+```{note}
+If you enable `versioning <../data/data_catalog.md#versioning-datasets-and-ml-models>`_ then you can load a particular version of a dataset, e.g. :code:`catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
 ```
 
 ### `context`
@@ -169,7 +169,7 @@ You can only execute one *successful* run per session, as there's a one-to-one m
 
 You can also specify the following optional arguments for `session.run`:
 
-```eval_rst
+```{eval-rst}
 +---------------+----------------+-------------------------------------------------------------------------------+
 | Argument name | Accepted types | Description                                                                   |
 +===============+================+===============================================================================+
@@ -255,16 +255,16 @@ def some_action():
 * Add the `node` tag to the cell containing your function
 ![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
 
-```eval_rst
-.. tip:: The Notebook can contain multiple functions tagged as ``node``, each of them will be exported into the resulting Python file
+```{note}
+The Notebook can contain multiple functions tagged as ``node``, each of them will be exported into the resulting Python file
 ```
 
 * Save your Jupyter Notebook to `notebooks/my_notebook.ipynb`
 * Run `kedro jupyter convert notebooks/my_notebook.ipynb` from the terminal to create a Python file `src/<package_name>/nodes/my_notebook.py` containing `some_action` function definition
 
 
-```eval_rst
-.. tip:: You can also convert all your Notebooks at once by calling ``kedro jupyter convert --all``.
+```{note}
+You can also convert all your Notebooks at once by calling ``kedro jupyter convert --all``.
 ```
 
 * The `some_action` function can now be used in your Kedro pipelines

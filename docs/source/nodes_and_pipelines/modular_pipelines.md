@@ -113,7 +113,7 @@ from kedro.pipeline.modular_pipeline import pipeline
 
 The `pipeline()` wrapper method takes the following arguments:
 
-```eval_rst
+```{eval-rst}
 +--------------------+---------------------------------------------------------------------+
 | Keyword argument   | Description                                                         |
 +====================+=====================================================================+

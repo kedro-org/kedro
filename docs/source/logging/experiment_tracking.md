@@ -1,6 +1,6 @@
 # Experiment tracking
 
-```eval_rst
+```{eval-rst}
 .. attention::  Experiment tracking in Kedro is launched as beta functionality. We encourage everyone to try it out and give us feedback so that we can settle on the final implementation of the feature.
 ```
 

@@ -106,8 +106,8 @@ Kedro-Viz aims to help users communicate different aspects of their workflow thr
 We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
 
 
-```eval_rst
-  .. note:: Kedro's Plotly integration only supports `Plotly Express <https://plotly.com/python/plotly-express/>` charts.
+```{note}
+Kedro's Plotly integration only supports `Plotly Express <https://plotly.com/python/plotly-express/>` charts.
 ```
 
 You need to update `requirements.txt` in your Kedro project and add the following datasets to enable plotly for your project.

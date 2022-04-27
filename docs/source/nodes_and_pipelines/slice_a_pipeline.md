@@ -264,8 +264,8 @@ Outputs: m, m2
 
 This will create a sliced pipeline, comprised of the nodes you specify in the method call.
 
-```eval_rst
-.. note::  All the inputs required by the specified nodes must exist, i.e. already produced or present in the data catalog.
+```{note}
+All the inputs required by the specified nodes must exist, i.e. already produced or present in the data catalog.
 ```
 
 ## How to recreate missing outputs

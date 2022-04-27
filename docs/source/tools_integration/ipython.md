@@ -43,8 +43,8 @@ In [2]: %reload_kedro <path_to_project_root>
 In [3]: %reload_kedro
 ```
 
-```eval_rst
-.. note:: If you want to pass arguments to the :code:`reload_kedro` line magic, e.g. to specify a configuration environment, you should call it as a normal Python function (:code:`reload_kedro(env=env, extra_params=extra_params`) rather than using :code:`%reload_kedro` in a Notebook cell (:code:`%reload_kedro(extra_params=extra_params)` wouldn’t work). You might have to call :code:`%automagic False` beforehand to make this work.
+```{note}
+If you want to pass arguments to the :code:`reload_kedro` line magic, e.g. to specify a configuration environment, you should call it as a normal Python function (:code:`reload_kedro(env=env, extra_params=extra_params`) rather than using :code:`%reload_kedro` in a Notebook cell (:code:`%reload_kedro(extra_params=extra_params)` wouldn’t work). You might have to call :code:`%automagic False` beforehand to make this work.
 ```
 
 ## Kedro variables: `catalog`, `context`, `pipelines` and `session`
@@ -163,8 +163,8 @@ In [1]: session.run()
 Out[1]: {}
 ```
 
-```eval_rst
-.. note::  You can only execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run :code:`%reload_kedro` to obtain a new :code:`session`.
+```{note}
+You can only execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run :code:`%reload_kedro` to obtain a new :code:`session`.
 ```
 
 You can also specify the following optional arguments for `session.run`:
@@ -203,8 +203,8 @@ You can also specify the following optional arguments for `session.run`:
 
 We recommend that you store your Jupyter Notebooks in the `notebooks` folder of your Kedro project. If you are using `kedro jupyter notebook` or `kedro jupyter lab` then you should use the default kernel selected for you, which is listed as `Kedro (<project_package_name>)`. This will run the Kedro IPython extension automatically when the kernel is started, so that the `catalog`, `context`, `pipelines` and `session` variables are available immediately to you.
 
-```eval_rst
-.. note:: Restarting the kernel will reload the Kedro IPython extension and hence refresh the :code:`catalog`, :code:`context`, :code:`pipelines` and :code:`session` variables.
+```{note}
+Restarting the kernel will reload the Kedro IPython extension and hence refresh the :code:`catalog`, :code:`context`, :code:`pipelines` and :code:`session` variables.
 ```
 For example, to create a new Notebook in the Iris example project use the following button:
 

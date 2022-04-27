@@ -11,8 +11,8 @@ spark.driver.maxResultSize: 3g
 spark.scheduler.mode: FAIR
 ```
 
-```eval_rst
-.. note::  Optimal configuration for Spark depends on the setup of your Spark cluster.
+```{note}
+Optimal configuration for Spark depends on the setup of your Spark cluster.
 ```
 
 ## Initialise a `SparkSession` in custom project context class

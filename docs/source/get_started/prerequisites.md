@@ -40,8 +40,8 @@ To exit `kedro-environment`:
 conda deactivate
 ```
 
-```eval_rst
-.. note::  The ``conda`` virtual environment is not dependent on your current working directory and can be activated from any directory.
+```{note}
+The ``conda`` virtual environment is not dependent on your current working directory and can be activated from any directory.
 ```
 
 ### `venv` (instead of `conda`)

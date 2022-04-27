@@ -42,8 +42,8 @@ While `ParallelRunner` uses multiprocessing, you can also run the pipeline with 
 kedro run --runner=ThreadRunner
 ```
 
-```eval_rst
-.. note::  ``SparkDataSet`` doesn't work correctly with ``ParallelRunner``. To add concurrency to the pipeline with ``SparkDataSet``, you must use ``ThreadRunner``.
+```{note}
+``SparkDataSet`` doesn't work correctly with ``ParallelRunner``. To add concurrency to the pipeline with ``SparkDataSet``, you must use ``ThreadRunner``.
 ```
 
 For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../tools_integration/pyspark.md).
@@ -115,8 +115,8 @@ $ kedro run --runner=<python_package>.runner.DryRunner
 
 ## Load and save asynchronously
 
-```eval_rst
-.. note::  ``ThreadRunner`` doesn't support asynchronous load-input or save-output operations.
+```{note}
+``ThreadRunner`` doesn't support asynchronous load-input or save-output operations.
 ```
 
 When processing a node, both `SequentialRunner` and `ParallelRunner` perform the following steps in order:
@@ -135,8 +135,8 @@ $ kedro run --async
 ...
 ```
 
-```eval_rst
-.. note::  All the datasets used in the run have to be `thread-safe <https://www.quora.com/What-is-thread-safety-in-Python>`_ in order for asynchronous loading/saving to work properly.
+```{note}
+All the datasets used in the run have to be `thread-safe <https://www.quora.com/What-is-thread-safety-in-Python>`_ in order for asynchronous loading/saving to work properly.
 ```
 
 ## Run a pipeline by name
@@ -177,8 +177,8 @@ Then from the command line, execute the following:
 kedro run --pipeline my_pipeline
 ```
 
-```eval_rst
-.. note::  If you specify ``kedro run`` without the ``--pipeline`` option, it runs the ``__default__`` pipeline from the dictionary returned by ``register_pipelines()``.
+```{note}
+If you specify ``kedro run`` without the ``--pipeline`` option, it runs the ``__default__`` pipeline from the dictionary returned by ``register_pipelines()``.
 ```
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../development/commands_reference.md#run-the-project).

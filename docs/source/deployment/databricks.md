@@ -78,8 +78,8 @@ As a result you should have:
 
 To synchronise the project between the local development environment and Databricks we will use a private GitHub repository that you will create in the next step. For authentication we will need a GitHub personal access token, so go ahead and [create such token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) in your GitHub developer settings.
 
-```eval_rst
-.. note:: Make sure that ``repo`` scopes are enabled for your token.
+```{note}
+Make sure that ``repo`` scopes are enabled for your token.
 ```
 
 ### 5. Create a GitHub repository
@@ -144,8 +144,8 @@ Then in the `Environment Variables` section add your `GITHUB_USER` and `GITHUB_T
 ![](../meta/images/databricks_cluster_env_vars.png)
 
 
-```eval_rst
-.. note:: For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
+```{note}
+For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
 ```
 
 Then press `Confirm` button. Your cluster will be restarted to apply the changes, this will take a few minutes.

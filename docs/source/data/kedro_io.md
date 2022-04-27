@@ -44,8 +44,8 @@ In order to enable versioning, you need to update the `catalog.yml` config file 
   3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with `glob` and `exists` functions if it uses a non-local filesystem (see [kedro.extras.datasets.pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) as an example) AND
   4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.extras.datasets.pandas.CSVDataSet`](/kedro.extras.datasets.pandas.CSVDataSet) for an example implementation)
 
-```eval_rst
-.. note::  If a new version of a dataset is created mid-run, for instance by an external system adding new files, it will not interfere in the current run, i.e. the load version stays the same throughout subsequent loads.
+```{note}
+If a new version of a dataset is created mid-run, for instance by an external system adding new files, it will not interfere in the current run, i.e. the load version stays the same throughout subsequent loads.
 ```
 
 An example dataset could look similar to the below:
@@ -163,8 +163,8 @@ reloaded = io.load("test_data_set")
 assert data2.equals(reloaded)
 ```
 
-```eval_rst
-.. note::  In the example above we did not fix any versions. If we do, then the behaviour of load and save operations becomes slightly different:
+```{note}
+In the example above we did not fix any versions. If we do, then the behaviour of load and save operations becomes slightly different:
 ```
 
 ```python
@@ -233,8 +233,8 @@ Currently the following datasets support versioning:
 - `kedro.extras.datasets.tensorflow.TensorFlowModelDataset`
 - `kedro.extras.datasets.json.JSONDataSet`
 
-```eval_rst
-.. note::  Although, HTTPs is a supported file system in the dataset implementations, it does not support versioning.
+```{note}
+Although, HTTPs is a supported file system in the dataset implementations, it does not support versioning.
 ```
 
 ## Partitioned dataset
@@ -247,8 +247,8 @@ This is the reason why Kedro provides a built-in [PartitionedDataSet](/kedro.io.
 * Is platform agnostic and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and many more.
 * Implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach and does not attempt to load any partition data until a processing node explicitly requests it.
 
-```eval_rst
-.. note::  In this section each individual file inside a given location is called a partition.
+```{note}
+In this section each individual file inside a given location is called a partition.
 ```
 
 ### Partitioned dataset definition
@@ -268,8 +268,8 @@ my_partitioned_dataset:
     load_arg2: value2
 ```
 
-```eval_rst
-.. note::  As any other dataset ``PartitionedDataSet`` can also be instantiated programmatically in Python:
+```{note}
+As any other dataset ``PartitionedDataSet`` can also be instantiated programmatically in Python:
 ```
 
 ```python
@@ -348,8 +348,8 @@ Full notation allows you to specify a dictionary with the full underlying datase
 
 #### Partitioned dataset credentials
 
-```eval_rst
-.. note::  Support for ``dataset_credentials`` key in the credentials for ``PartitionedDataSet`` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+```{note}
+Support for ``dataset_credentials`` key in the credentials for ``PartitionedDataSet`` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 ```
 
 Credentials management for `PartitionedDataSet` is somewhat special in a sense that it may contain credentials for both `PartitionedDataSet` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config (unless such config already has credentials configured), but not the other way around - dataset credentials are never propagated to the filesystem.
@@ -472,8 +472,8 @@ def create_partitions() -> Dict[str, Any]:
     }
 ```
 
-```eval_rst
-.. note::  Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a ``PartitionedDataSet``. The simplest safety mechanism could be to use partition IDs that have a high chance of uniqueness: for example, the current timestamp.
+```{note}
+Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a ``PartitionedDataSet``. The simplest safety mechanism could be to use partition IDs that have a high chance of uniqueness: for example, the current timestamp.
 ```
 
 `PartitionedDataSet` also supports lazy saving, where the partition's data is not materialized until it's time to write.
@@ -520,8 +520,8 @@ Loading `IncrementalDataSet` works similarly to [`PartitionedDataSet`](#partitio
 
 #### Incremental dataset confirm
 
-```eval_rst
-.. note::  The checkpoint value *is not* automatically updated by the fact that a new set of partitions was successfully loaded or saved.
+```{note}
+The checkpoint value *is not* automatically updated by the fact that a new set of partitions was successfully loaded or saved.
 ```
 
 Partitioned dataset checkpoint update is triggered by an explicit `confirms` instruction in one of the nodes downstream. It can be the same node, which processes the partitioned dataset:
@@ -616,8 +616,8 @@ my_partitioned_dataset:
     force_checkpoint: 2020-01-01/data.csv
 ```
 
-```eval_rst
-.. note::  Specification of ``force_checkpoint`` is also supported via the shorthand notation as follows:
+```{note}
+Specification of ``force_checkpoint`` is also supported via the shorthand notation as follows:
 ```
 
 ```yaml
@@ -628,8 +628,8 @@ my_partitioned_dataset:
   checkpoint: 2020-01-01/data.csv
 ```
 
-```eval_rst
-.. note::  If you need to force the partitioned dataset to load all available partitions, set ``checkpoint`` to an empty string:
+```{note}
+If you need to force the partitioned dataset to load all available partitions, set ``checkpoint`` to an empty string:
 ```
 
 ```yaml

@@ -28,20 +28,6 @@ from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 
-_active_session = None
-
-
-def _activate_session(
-    session: "KedroSession", force: bool = False  # pylint: disable=unused-argument
-) -> None:
-    global _active_session
-    _active_session = session
-
-
-def _deactivate_session() -> None:
-    global _active_session
-    _active_session = None
-
 
 def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
     project_path = str(project_path)
@@ -278,12 +264,7 @@ class KedroSession:
         if self.save_on_close:
             self._store.save()
 
-        if _active_session is self:
-            _deactivate_session()
-
     def __enter__(self):
-        if _active_session is not self:
-            _activate_session(self)
         return self
 
     def __exit__(self, exc_type, exc_value, tb_):

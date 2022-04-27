@@ -105,7 +105,7 @@ The data layers don’t have to exist locally in the ``data`` folder within your
 
 ![](../meta/images/data_engineering_convention.png)
 
-```eval_rst
+```{eval-rst}
 +----------------+---------------------------------------------------------------------------------------------------+
 | Folder in data | Description                                                                                       |
 +================+===================================================================================================+

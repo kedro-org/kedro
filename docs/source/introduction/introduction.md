@@ -14,7 +14,7 @@ Once you are set up, we suggest working through our examples, including:
 - An [introduction to the project template](../get_started/example_project.md) using the Iris dataset
 - A more detailed [spaceflights tutorial](../tutorial/tutorial_template.md) to give you hands-on experience
 
-We also recommend the [frequently asked questions](../faq/faq.md) and the [API reference documentation](/kedro.rst) for additional information.
+We also recommend the [frequently asked questions](../faq/faq.md) and the [API reference documentation](/kedro) for additional information.
 
 ## Assumptions
 

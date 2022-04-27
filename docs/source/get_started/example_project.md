@@ -116,7 +116,7 @@ The example project contains a single pipeline:
 
 These are the node function within `src/get_started/nodes.py`:
 
-```eval_rst
+```{eval-rst}
 +-----------------+----------------------------------------------------------------+--------------------------+
 | Node            | Description                                                    | Node Function Name       |
 +=================+================================================================+==========================+

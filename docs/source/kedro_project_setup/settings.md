@@ -8,7 +8,7 @@ Application settings is distinct from `run time configuration <configuration.md>
 
 By default, all code in `settings.py` is commented out. In the case that settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.
 
-```eval_rst
+```{eval-rst}
 +-----------------------------------+---------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------+
 | Setting                           | Default value                                           | Use                                                                                                                  |
 +===================================+=========================================================+======================================================================================================================+

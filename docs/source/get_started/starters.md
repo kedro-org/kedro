@@ -77,7 +77,7 @@ This mode assumes that the starter doesn't require any additional configuration 
 
 ## Use a starter with a configuration file
 
-Kedro also allows you to [specify a configuration file](./new_project.md#Create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
+Kedro also allows you to [specify a configuration file](./new_project.md#create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
 
 ```bash
 kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark

@@ -21,7 +21,7 @@ We also provide information to help you deploy to the following:
 
 In addition, we also provide instructions on [how to integrate a Kedro project with Amazon SageMaker](aws_sagemaker.md).
 
-```mermaid
+```{mermaid}
 flowchart TD
     A{Can your Kedro pipeline run on a single machine?} -- YES --> B[Consult the single-machine deployment guide];
     B --> C{Do you have Docker on your machine?};

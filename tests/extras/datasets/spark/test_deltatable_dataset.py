@@ -86,6 +86,4 @@ class TestDeltaTableDataSet:
             r"multiprocessing: \['delta_in'\]"
         )
         with pytest.raises(AttributeError, match=pattern):
-            ParallelRunner(is_async=is_async).run(
-                pipeline, catalog
-            )
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)

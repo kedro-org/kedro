@@ -15,10 +15,10 @@ from typing import Any, Dict, Iterable
 
 from pluggy import PluginManager
 
+from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
-from kedro.framework.hooks.manager import _NullPluginManager
 
 
 class AbstractRunner(ABC):

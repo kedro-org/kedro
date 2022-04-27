@@ -84,6 +84,7 @@ def _register_hooks_setuptools(
             ", ".join(sorted(plugin_names)),
         )
 
+
 class _NullPluginManager:
     def __init__(self, *args, **kwargs):
         pass

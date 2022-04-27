@@ -2,7 +2,7 @@ from random import random
 
 import pytest
 
-from kedro.framework.hooks import _create_hook_manager
+from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
 
@@ -43,7 +43,7 @@ def catalog():
 
 @pytest.fixture
 def hook_manager():
-    return _create_hook_manager()
+    return _NullPluginManager()
 
 
 @pytest.fixture

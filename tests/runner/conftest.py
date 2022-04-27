@@ -2,7 +2,6 @@ from random import random
 
 import pytest
 
-from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
 

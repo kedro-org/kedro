@@ -234,7 +234,9 @@ def _collect_inputs_from_hook(
     )
 
     additional_inputs = {}
-    if hook_response is not None:
+    if (
+        hook_response is not None
+    ):  # all hooks on a _NullPluginManager will return None instead of a list
         for response in hook_response:
             if response is not None and not isinstance(response, dict):
                 response_type = type(response).__name__

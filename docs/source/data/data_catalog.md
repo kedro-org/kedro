@@ -614,6 +614,6 @@ Finally we can save the processed data in Parquet format.
 io.save("ranked", ranked)
 ```
 
-```eval_rst
-.. attention::  Saving ``None`` to a dataset is not allowed!
+```{warning}
+Saving ``None`` to a dataset is not allowed!
 ```

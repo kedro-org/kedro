@@ -6,8 +6,7 @@ This page explains the principles and development process that we ask contributi
 
 In short, when you submit code changes, your submissions are understood to be under the same the [Apache 2.0 License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md) that covers the Kedro project. You should have permission to share the submitted code.
 
-```eval_rst
-.. note::  You don't need to contribute code to help the Kedro project. See our list of other ways `you can contribute to Kedro <https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md>`_.
+```{note} You don't need to contribute code to help the Kedro project. See our list of other ways `you can contribute to Kedro <https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md>`_.
 ```
 
 ## Introduction
@@ -22,8 +21,7 @@ This guide is a practical description of:
 
 To work on the Kedro codebase, you will need to be set up with Git, and Make.
 
-```eval_rst
-.. note::  If your development environment is Windows, you can use the ``win_setup_conda`` and ``win_setup_env`` commands from `Circle CI configuration <https://github.com/kedro-org/kedro/blob/main/.circleci/config.yml>`_ to guide you in the correct way to do this.
+```{note} If your development environment is Windows, you can use the ``win_setup_conda`` and ``win_setup_env`` commands from `Circle CI configuration <https://github.com/kedro-org/kedro/blob/main/.circleci/config.yml>`_ to guide you in the correct way to do this.
 ```
 
 You will also need to create and activate virtual environment. If this is unfamiliar to you, read through our [pre-requisites documentation](../get_started/prerequisites.md).
@@ -50,8 +48,7 @@ Once the above commands have executed successfully, do a sanity check to ensure 
 make test
 ```
 
-```eval_rst
-.. note::  If the tests in ``tests/extras/datasets/spark`` are failing, and you are not planning to work on `Spark <https://spark.apache.org>`_ related features, then you can run a reduced test suite that excludes them. Do this by executing ``make test-no-spark``.
+```{note} If the tests in ``tests/extras/datasets/spark`` are failing, and you are not planning to work on `Spark <https://spark.apache.org>`_ related features, then you can run a reduced test suite that excludes them. Do this by executing ``make test-no-spark``.
 ```
 
 ## Get started: areas of contribution
@@ -77,7 +74,7 @@ To contribute:
      <li><code>main</code> if you intend for it to be a non-breaking, backwards-compatible change.</li>
      <li><code>develop</code> if you intend for it to be a breaking change.</li>
    </ol>
-3. Before you submit a pull request (PR), please ensure that unit, end-to-end (E2E) tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](#ci--cd-and-running-checks-locally) below.
+3. Before you submit a pull request (PR), please ensure that unit tests, end-to-end (E2E) tests and linters are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally; see the [development set up](#before-you-start-development-set-up) section above.
 4. Open a PR:
    <ol type="a">
      <li>For backwards compatible changes, open a PR against the <code>kedro-org:main</code> branch from your feature branch.</li>
@@ -88,8 +85,7 @@ To contribute:
 6. Update the PR according to the reviewer's comments.
 7. Your PR will be merged by the Kedro team once all the comments are addressed.
 
-```eval_rst
-.. note::  We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
+```{note} We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
 ```
 
 ### `extras` contribution process
@@ -98,7 +94,7 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 
 1. Create an [issue](https://github.com/kedro-org/kedro/issues) describing your contribution.
 2. Work in [`extras`](https://github.com/kedro-org/kedro/tree/main/kedro/extras) and create a feature branch on your forked repository and push all your local changes to that feature branch.
-3. Before you submit a pull request, please ensure that unit, E2E tests and linting are passing for your changes by running `make test`,`make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](#ci--cd-and-running-checks-locally) below.
+3. Before you submit a pull request, please ensure that unit tests, end-to-end (E2E) tests and linters are passing for your changes by running `make test`,`make e2e-tests` and `make lint` locally, have a look at the section [development set up](#before-you-start-development-set-up) section above.
 4. Include a `README.md` with instructions on how to use your contribution.
 5. Is your change [non-breaking and backwards-compatible](./backwards_compatibility.md)?
    <ol type="a">
@@ -110,12 +106,10 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 7. Await review comments, then update the PR according to the reviewer's comments.
 8. Your PR will be merged by the Kedro team once all the comments are addressed.
 
-```eval_rst
-.. note::  We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
+```{note} We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
 ```
 
-```eval_rst
-.. note::  There are two special considerations when contributing a dataset:
+```{note} There are two special considerations when contributing a dataset:
 
    1. Add the dataset to :code:`kedro.extras.datasets.rst` so it shows up in the API documentation.
    2. Add the dataset to :code:`static/jsonschema/kedro-catalog-X.json` for IDE validation.
@@ -143,12 +137,10 @@ Ensure that your PR builds cleanly before you submit it, by running the CI/CD ch
 * `make test`: unit tests, 100% coverage (`pytest`, `pytest-cov`)
 * `make e2e-tests`: end-to-end tests (`behave`)
 
-```eval_rst
-.. note::  If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using ``export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)`` which `works under macOS or other workarounds <https://stackoverflow.com/questions/53583199/pyspark-error-unsupported-class-file-major-version-55)>`_.
+```{note} If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using ``export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)`` which `works under macOS or other workarounds <https://stackoverflow.com/questions/53583199/pyspark-error-unsupported-class-file-major-version-55)>`_.
 ```
 
-```eval_rst
-.. note::  We place `conftest.py <https://docs.pytest.org/en/latest/reference/fixtures.html>`_ files in some test directories to make fixtures reusable by any tests in that directory. If you need to see which test fixtures are available and where they come from, you can issue the following command ``pytest --fixtures path/to/the/test/location.py``.
+```{note} We place `conftest.py <https://docs.pytest.org/en/latest/reference/fixtures.html>`_ files in some test directories to make fixtures reusable by any tests in that directory. If you need to see which test fixtures are available and where they come from, you can issue the following command ``pytest --fixtures path/to/the/test/location.py``.
 ```
 
 ### Hints on `pre-commit` usage

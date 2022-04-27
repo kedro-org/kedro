@@ -387,6 +387,7 @@ class KedroSession:
             "load_versions": load_versions,
             "extra_params": extra_params,
             "pipeline_name": pipeline_name,
+            "runner": getattr(runner, "__name__", str(runner)),
         }
 
         catalog = context._get_catalog(

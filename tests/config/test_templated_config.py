@@ -367,6 +367,33 @@ class TestTemplatedConfigLoader:
         }
         assert catalog == expected_catalog
 
+    @pytest.mark.usefixtures("proj_catalog_globals", "catalog_with_jinja2_syntax")
+    def test_catalog_with_jinja2_syntax_and_globals_file(self, tmp_path):
+        """Test catalog with jinja2 syntax with globals yaml file"""
+        proj_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
+        _write_yaml(proj_catalog, {})
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path),
+            globals_pattern="*globals.yml",
+        )
+        config_loader.default_run_env = ""
+        catalog = config_loader.get("catalog*.yml")
+        expected_catalog = {
+            "fast-trains": {"type": "MemoryDataSet"},
+            "fast-cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "s3a://boat-and-car-bucket/fast-cars.csv",
+                "save_args": {"index": True},
+            },
+            "slow-trains": {"type": "MemoryDataSet"},
+            "slow-cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "s3a://boat-and-car-bucket/slow-cars.csv",
+                "save_args": {"index": True},
+            },
+        }
+        assert catalog == expected_catalog
+
 
 class TestFormatObject:
     @pytest.mark.parametrize(

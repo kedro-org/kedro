@@ -44,7 +44,7 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
-        hook_manager: PluginManager = _NullPluginManager(),
+        hook_manager: PluginManager = None,
         session_id: str = None,
     ) -> Dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
@@ -66,6 +66,7 @@ class AbstractRunner(ABC):
 
         """
 
+        hook_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
 
         unsatisfied = pipeline.inputs() - set(catalog.list())

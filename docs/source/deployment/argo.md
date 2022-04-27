@@ -237,6 +237,6 @@ $ kubectl delete -f secret.yml
 
 As an alternative, you can use [Kedro-Argo plugin](https://pypi.org/project/kedro-argo/) to convert a Kedro project to Argo Workflows.
 
-```eval_rst
-.. warning::  The plugin is not supported by the Kedro team and we can't guarantee its workability.
+```{warning}
+The plugin is not supported by the Kedro team and we can't guarantee its workability.
 ```

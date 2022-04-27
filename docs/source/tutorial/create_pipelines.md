@@ -629,8 +629,8 @@ kedro run --pipeline=ds
 
 See the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
 
-```eval_rst
-.. warning::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
+```{warning}
+To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
 ```
 
 ```bash

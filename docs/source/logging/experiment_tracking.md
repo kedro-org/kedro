@@ -1,7 +1,7 @@
 # Experiment tracking
 
-```{eval-rst}
-.. attention::  Experiment tracking in Kedro is launched as beta functionality. We encourage everyone to try it out and give us feedback so that we can settle on the final implementation of the feature.
+```{warning}
+Experiment tracking in Kedro is launched as beta functionality. We encourage everyone to try it out and give us feedback so that we can settle on the final implementation of the feature.
 ```
 
 Experiment tracking is a way to record all information that you would need to recreate and analyse a data science experiment. We think of it as logging for parameters, metrics, models and other dataset types.

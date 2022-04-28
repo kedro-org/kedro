@@ -159,7 +159,7 @@ def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> N
                 old_dict[key] = value
 
 
-def _convert_full_path(project_path: Union[str, Path]) -> Path:
+def _expand_full_path(project_path: Union[str, Path]) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
@@ -170,7 +170,7 @@ class KedroContext:
     """
 
     _package_name: str
-    project_path: Union[Path, str] = field(converter=_convert_full_path)
+    project_path: Path = field(converter=_expand_full_path)
     _config_loader: ConfigLoader
     _hook_manager: PluginManager
     env: Optional[str] = None
@@ -255,7 +255,7 @@ class KedroContext:
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
         conf_catalog = _convert_paths_to_absolute_posix(
-            project_path=self.project_path, conf_dictionary=conf_catalog  # type: ignore
+            project_path=self.project_path, conf_dictionary=conf_catalog
         )
         conf_creds = self._get_config_credentials()
 

@@ -227,15 +227,27 @@ Your complete notebook should look similar to this (the results are hidden):
 
 ### 9. Using IPython Extension 
 
-Kedro's IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](https://kedro.readthedocs.io/en/0.17.4/11_tools_integration/02_ipython.html#ipython-extension)
+You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`.
+
+The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro`  [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+
+It can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html)
 
 There's one additional installation you need to do in the Databricks notebook to make use of the IPython extension. 
 
-After you load the IPython extension, you must explicitly upgrade your pip version by doing the below command before you run the line magic command  `%reload_kedro <path_to_project_root>`:
+After you load the IPython extension using the below command:
+
+```ipython
+In [1]: %load_ext kedro.extras.extensions.ipython
+```
+
+you must explicitly upgrade your pip version by doing the below:
 
 ```bash
 %pip install -U pip
 ```
+
+and then reload kedro by running the line magic command  `%reload_kedro <path_to_project_root>`:
 
 ### 10. Running Kedro-viz on Databricks 
 
@@ -253,7 +265,11 @@ To run Kedro-viz, first run the below command in your Databricks notebook:
 %sh kedro viz --no-browser --host 0.0.0.0 --port 4141
 ```
 
-If the command is still executing, cancel it. After this, you must try and run an example Shiny app using the below command: 
+```eval_rst
+.. note:: The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the kedro-viz server.
+```
+
+After this, you must try and run an example Shiny app using the below command: 
 
 ```bash
 %r

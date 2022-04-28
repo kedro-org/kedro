@@ -1,11 +1,11 @@
 """This module provides context for Kedro project."""
 from copy import deepcopy
-from dataclasses import InitVar, dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
+from attrs import define, field
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -159,18 +159,22 @@ def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> N
                 old_dict[key] = value
 
 
-@dataclass(frozen=True)
+def _convert_full_path(project_path: Union[str, Path]) -> Path:
+    return Path(project_path).expanduser().resolve()
+
+
+@define
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
     """
 
-    package_name: InitVar[str]
-    project_path: InitVar[Union[Path, str]]
-    config_loader: ConfigLoader
-    hook_manager: InitVar[PluginManager]
+    _package_name: str
+    project_path: Union[Path, str] = field(converter=_convert_full_path)
+    _config_loader: ConfigLoader
+    _hook_manager: PluginManager
     env: Optional[str] = None
-    extra_params: InitVar[Dict[str, Any]] = None
+    _extra_params: Optional[Dict[str, Any]] = field(default=None, converter=deepcopy)
 
     """Create a context object by providing the root of a Kedro project and
     the environment configuration subfolders
@@ -192,14 +196,6 @@ class KedroContext:
             If specified, will update (and therefore take precedence over)
             the parameters retrieved from the project configuration.
     """
-
-    def __post_init__(self, package_name, project_path, hook_manager, extra_params):
-        object.__setattr__(self, "_package_name", package_name)
-        object.__setattr__(
-            self, "project_path", Path(project_path).expanduser().resolve()
-        )
-        object.__setattr__(self, "_hook_manager", hook_manager)
-        object.__setattr__(self, "_extra_params", deepcopy(extra_params))
 
     @property
     def catalog(self) -> DataCatalog:
@@ -232,6 +228,15 @@ class KedroContext:
         _update_nested_dict(params, self._extra_params or {})
         return params
 
+    @property
+    def config_loader(self) -> ConfigLoader:
+        """Read-only propertt referring to Kedro's `ConfigLoader` for this context.
+
+        Returns:
+            Kedro's `ConfigLoader`
+        """
+        return self._config_loader
+
     def _get_catalog(
         self,
         save_version: str = None,
@@ -250,7 +255,7 @@ class KedroContext:
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
         conf_catalog = _convert_paths_to_absolute_posix(
-            project_path=self.project_path, conf_dictionary=conf_catalog
+            project_path=self.project_path, conf_dictionary=conf_catalog  # type: ignore
         )
         conf_creds = self._get_config_credentials()
 

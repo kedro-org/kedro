@@ -238,6 +238,14 @@ class TestKedroContext:
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
+    def test_immutble_attributes(self, dummy_context):
+        with pytest.raises(AttributeError):
+            dummy_context.catalog = 1
+        with pytest.raises(AttributeError):
+            dummy_context.params = 1
+        with pytest.raises(AttributeError):
+            dummy_context.config_loader = 1
+
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader
         conf_catalog = config_loader.get("catalog*")

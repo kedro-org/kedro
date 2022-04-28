@@ -86,7 +86,7 @@ def _register_hooks_setuptools(
 
 
 class _NullPluginManager:
-    """This class creates an empty hook_manager that will ignore all calls to hooks."""
+    """This class creates an empty ``hook_manager`` that will ignore all calls to hooks, allowing the runner to function if no ``hook_manager`` has been instantiated."""
 
     def __init__(self, *args, **kwargs):
         pass

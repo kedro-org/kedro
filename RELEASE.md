@@ -21,6 +21,8 @@
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Introduced `after_command_run` CLI hook.
 * Updated [Databricks documentation](https://kedro.readthedocs.io/en/stable/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-viz. 
+* Update sections on visualisation, namespacing, and experiment tracking in the spaceflight tutorial to correspond to the complete spaceflights starter.
+* Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

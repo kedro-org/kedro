@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 import pytest
 
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ThreadRunner
@@ -17,6 +18,14 @@ class TestValidThreadRunner:
     def test_thread_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
         result = ThreadRunner().run(fan_out_fan_in, catalog)
+        assert "Z" in result
+        assert result["Z"] == (42, 42, 42)
+
+    def test_thread_run_with_plugin_manager(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = ThreadRunner().run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 

@@ -3,6 +3,7 @@ from typing import Any, Dict
 import pandas as pd
 import pytest
 
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
@@ -37,6 +38,22 @@ def conflicting_feed_dict(pandas_df_feed_dict):
 
 def multi_input_list_output(arg1, arg2):
     return [arg1, arg2]
+
+
+class TestValidRun:
+    def test_run_with_plugin_manager(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = SequentialRunner().run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
+        assert "Z" in result
+        assert result["Z"] == (42, 42, 42)
+
+    def test_run_without_plugin_manager(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = SequentialRunner().run(fan_out_fan_in, catalog)
+        assert "Z" in result
+        assert result["Z"] == (42, 42, 42)
 
 
 @pytest.mark.parametrize("is_async", [False, True])

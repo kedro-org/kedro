@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 import pytest
 
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
@@ -42,6 +43,16 @@ class TestValidParallelRunner:
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
         result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
+        assert "Z" in result
+        assert len(result["Z"]) == 3
+        assert result["Z"] == (42, 42, 42)
+
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_parallel_run_with_plugin_manager(self, is_async, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = ParallelRunner(is_async=is_async).run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)

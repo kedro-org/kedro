@@ -229,7 +229,7 @@ Your complete notebook should look similar to this (the results are hidden):
 
 Kedro's IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](https://kedro.readthedocs.io/en/0.17.4/11_tools_integration/02_ipython.html#ipython-extension)
 
-There's one additional installation you need to do in the Databricks notebook to avoid `ContextualVersionConflict` error.
+There's one additional installation you need to do in the Databricks notebook to make use of the IPython extension. 
 
 After you load the IPython extension, you must explicitly upgrade your pip version by doing the below command before you run the line magic command  `%reload_kedro <path_to_project_root>`:
 

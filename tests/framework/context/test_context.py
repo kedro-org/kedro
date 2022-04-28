@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 import toml
 import yaml
+from attrs.exceptions import FrozenAttributeError
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
@@ -243,8 +244,10 @@ class TestKedroContext:
             dummy_context.catalog = 1
         with pytest.raises(AttributeError):
             dummy_context.params = 1
-        with pytest.raises(AttributeError):
+        with pytest.raises(FrozenAttributeError):
             dummy_context.config_loader = 1
+        with pytest.raises(FrozenAttributeError):
+            dummy_context.env = 1
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader

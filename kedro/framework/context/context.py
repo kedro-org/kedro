@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 """This module provides context for Kedro project."""
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -5,6 +6,7 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
+import attrs
 from attrs import define, field
 from pluggy import PluginManager
 
@@ -171,9 +173,9 @@ class KedroContext:
 
     _package_name: str
     project_path: Path = field(converter=_expand_full_path)
-    _config_loader: ConfigLoader
+    config_loader: ConfigLoader = field(on_setattr=attrs.setters.frozen)
     _hook_manager: PluginManager
-    env: Optional[str] = None
+    env: Optional[str] = field(default=None, on_setattr=attrs.setters.frozen)
     _extra_params: Optional[Dict[str, Any]] = field(default=None, converter=deepcopy)
 
     """Create a context object by providing the root of a Kedro project and
@@ -227,15 +229,6 @@ class KedroContext:
             params = {}
         _update_nested_dict(params, self._extra_params or {})
         return params
-
-    @property
-    def config_loader(self) -> ConfigLoader:
-        """Read-only propertt referring to Kedro's `ConfigLoader` for this context.
-
-        Returns:
-            Kedro's `ConfigLoader`
-        """
-        return self._config_loader
 
     def _get_catalog(
         self,

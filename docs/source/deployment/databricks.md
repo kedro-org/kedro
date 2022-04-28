@@ -231,11 +231,9 @@ You can interact with Kedro in Databricks through the Kedro [IPython extension](
 
 The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro`  [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
-It can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html)
+The IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html)
 
-There's one additional installation you need to do in the Databricks notebook to make use of the IPython extension. 
-
-After you load the IPython extension using the below command:
+There's one additional installation you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
 
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython
@@ -247,7 +245,7 @@ you must explicitly upgrade your pip version by doing the below:
 %pip install -U pip
 ```
 
-and then reload kedro by running the line magic command  `%reload_kedro <path_to_project_root>`:
+after this, you can reload kedro by running the line magic command  `%reload_kedro <path_to_project_root>`:
 
 ### 10. Running Kedro-viz on Databricks 
 

@@ -233,13 +233,13 @@ The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/se
 
 The IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html).
 
-There's one additional installation you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
+Currently in Databricks, when you try to do a kedro run, it throws you a `ContextualVersionConflictError` because it downgrades pip to 21.0.1. We are not sure why this happens and hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
 
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython
 ```
 
-You must explicitly upgrade your `pip` version by doing the below:
+You must explicitly upgrade your `pip` version by doing the below so it is on the latest version pip ~= 22.0.4. 
 
 ```bash
 %pip install -U pip
@@ -247,25 +247,28 @@ You must explicitly upgrade your `pip` version by doing the below:
 
 After this, you can reload Kedro by running the line magic command `%reload_kedro <path_to_project_root>`.
 
-### 10. Running Kedro-viz on Databricks 
+### 10. Running Kedro-Viz on Databricks 
 
 Currently, if you try to run `%run_viz` on Databricks it will only display the below: 
 
 ```console
 <IPython.core.display.HTML object>
 ```
+Instead of running the Kedro-Viz app in the notebook. 
+While we fix this issue,  we have a temporary workaround which involves you setting up a R Shiny application to run Kedro-Viz on Databricks.
 
-While we fix this issue, we have a temporary workaround to run Kedro-viz on Databricks. 
-
-To run Kedro-viz, first run the below command in your Databricks notebook: 
+To run Kedro-Viz, first run the below command in your Databricks notebook: 
 
 ```bash
 %sh kedro viz --no-browser --host 0.0.0.0 --port 4141
 ```
 
 ```eval_rst
-.. note:: The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the kedro-viz server.
+.. note:: The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below gif on how to cancel
 ```
+
+![](../meta/images/databricks_cancel_command.png)
+
 
 After this, you must try and run an example Shiny app using the below command: 
 
@@ -281,10 +284,10 @@ When you click on the Shiny app link, it will open a browser with an example Shi
 
 ![](../meta/images/databricks_kedro_viz.gif)
 
-You will notice Kedro-viz is blank at first, but if you click on the flowchart tab, Kedro-viz will run as normal. 
+You will notice Kedro-Viz is blank at first, but if you click on the flowchart tab, Kedro-Viz will run as normal. 
 
 ```eval_rst
-.. note:: Ctrl+C to quit the Kedro-viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
+.. note:: Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
 ```
 
 

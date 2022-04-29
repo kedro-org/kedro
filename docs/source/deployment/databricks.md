@@ -249,12 +249,12 @@ After this, you can reload Kedro by running the line magic command `%reload_kedr
 
 ### 10. Running Kedro-Viz on Databricks 
 
-Currently, if you try to run `%run_viz` on Databricks it will only display the below: 
+Currently, if you try to run `%run_viz` on Databricks it will only display the below instead of running the Kedro-Viz app in the notebook. 
 
 ```console
 <IPython.core.display.HTML object>
 ```
-Instead of running the Kedro-Viz app in the notebook. 
+
 While we fix this issue,  we have a temporary workaround which involves you setting up a R Shiny application to run Kedro-Viz on Databricks.
 
 To run Kedro-Viz, first run the below command in your Databricks notebook: 

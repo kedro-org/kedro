@@ -172,7 +172,9 @@ class KedroContext:
     """
 
     _package_name: str
-    project_path: Path = field(converter=_expand_full_path)
+    project_path: Path = field(
+        converter=_expand_full_path, on_setattr=attrs.setters.frozen
+    )
     config_loader: ConfigLoader = field(on_setattr=attrs.setters.frozen)
     _hook_manager: PluginManager
     env: Optional[str] = field(default=None, on_setattr=attrs.setters.frozen)

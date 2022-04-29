@@ -248,6 +248,8 @@ class TestKedroContext:
             dummy_context.config_loader = 1
         with pytest.raises(FrozenAttributeError):
             dummy_context.env = 1
+        with pytest.raises(FrozenAttributeError):
+            dummy_context.project_path = 1
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader

@@ -33,15 +33,21 @@ handlers:
 
 loggers:
     anyconfig:
-        level: WARNING
-        handlers: [console]
+        level: INFO
+        handlers: [console, info_file_handler, error_file_handler]
         propagate: no
 
     kedro.framework.cli.hooks.manager:
         level: INFO
-        handlers: [console]
+        handlers: [console, info_file_handler, error_file_handler]
         propagate: no
 
-root:
-    level: INFO
-    handlers: [console, info_file_handler, error_file_handler]
+    kedro.io:
+        level: INFO
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
+    kedro.pipeline:
+        level: INFO
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no

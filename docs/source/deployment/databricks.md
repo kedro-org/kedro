@@ -233,13 +233,13 @@ The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/se
 
 The IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html).
 
-Currently in Databricks, when you try to do a kedro run, it throws you a `ContextualVersionConflictError` because it downgrades pip to 21.0.1. We are not sure why this happens and hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
+Currently in Databricks, when you try to do a kedro run, it throws you a `ContextualVersionConflictError` because it downgrades `pip` to 21.0.1. We are not sure why this happens and hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
 
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython
 ```
 
-You must explicitly upgrade your `pip` version by doing the below so it is on the latest version pip ~= 22.0.4. 
+You must explicitly upgrade your `pip` version by doing the below so it is on the latest version `pip ~= 22.0.4`. 
 
 ```bash
 %pip install -U pip
@@ -267,7 +267,7 @@ To run Kedro-Viz, first run the below command in your Databricks notebook:
 .. note:: The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below gif on how to cancel
 ```
 
-![](../meta/images/databricks_cancel_command.png)
+![](../meta/images/databricks_cancel_command.gif)
 
 
 After this, you must try and run an example Shiny app using the below command: 

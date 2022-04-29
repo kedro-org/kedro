@@ -284,7 +284,7 @@ When you click on the Shiny app link, it will open a browser with an example Shi
 You will notice Kedro-viz is blank at first, but if you click on the flowchart tab, Kedro-viz will run as normal. 
 
 ```eval_rst
-.. note:: Ctrl+C to quit the Kedro-viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command kill -9 PID
+.. note:: Ctrl+C to quit the Kedro-viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
 ```
 
 

@@ -13,6 +13,14 @@ parameters:
   release_kedro:
     type: boolean
     default: false
+  # The parameters below are set in CircleCI UI.
+  # https://app.circleci.com/settings/project/github/kedro-org/kedro/triggers?return-to=https%3A%2F%2Fapp.circleci.com%2Fpipelines%2Fgithub%2Fkedro-org%2Fkedro&triggerSource=&scheduledTriggerId=61f7226f-f092-4449-98d9-40420f8c46b2&success=true
+  run_hourly:
+    type: boolean
+    default: false
+  run_nightly:
+    type: boolean
+    default: false
 
 orbs:
   win: circleci/windows@2.4.1
@@ -44,9 +52,13 @@ commands:
           name: Install pip setuptools
           command: make install-pip-setuptools
       - run:
-          # Virtualenv 20.0.20 broke pre-commit, capped for now
           name: Install venv for some pre-commit hooks
-          command: conda install -y "virtualenv<20.0"
+          command: conda install -y virtualenv
+      - run:
+          # pytables does not work properly with python 3.9 to handle our HDFDataSet
+          # if pip-installed, so we install this dependency via conda
+          name: Install pytables
+          command: conda install -c conda-forge pytables -y
       - run:
           name: Install requirements and test requirements
           command: pip install --upgrade -r test_requirements.txt
@@ -128,13 +140,23 @@ commands:
           command: choco install make
 
   win_setup_requirements:
+    parameters:
+      python_version:
+        type: string
     steps:
+      - restore_cache:
+          name: Restore package cache
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+      - restore_cache:
+          name: Restore conda environment cache
+          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+        # pytables and Fiona have a series of binary dependencies under Windows that
+        # are best handled by conda-installing instead of pip-installing them.
+        # Dependency resolution works best when installing these altogether in one
+        # `conda install` command rather than one at a time in several sequential `conda install`s.
       - run:
-          name: Install GDAL
-          command: conda activate kedro_builder; conda install -c conda-forge gdal -y
-      - run:
-          name: Install Fiona
-          command: conda activate kedro_builder; conda install -c conda-forge fiona -y
+          name: Install GDAL, Fiona and pytables
+          command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
       - run:
           name: Install all requirements
           command: conda activate kedro_builder; pip install -r test_requirements.txt -U
@@ -154,9 +176,8 @@ commands:
       - win_setup_conda:
           python_version: <<parameters.python_version>>
       - win_setup_env
-      - restore_cache:
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - win_setup_requirements
+      - win_setup_requirements:
+          python_version: <<parameters.python_version>>
 
 jobs:
   e2e_tests:
@@ -186,6 +207,10 @@ jobs:
       - run:
           name: Install 'make' command
           command: choco install make
+      # We don't use the `win_setup` command here, which would install the full set
+      # of requirements used by unit tests. Even when those packages are cached
+      # it is faster to just install the minimal set of dependencies needed for e2e
+      # tests in a new empty environment rather than restore the cache.
       - run:
           name: Install dependencies
           command: conda activate kedro_builder; pip install -r features/windows_reqs.txt
@@ -202,9 +227,21 @@ jobs:
       python_version: <<parameters.python_version>>
     steps:
       - setup
-      - run:
-          name: Run unit tests
-          command: make test
+      - unless:
+          condition:
+            equal: ["3.10", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests in parallel
+                command: make test
+      - when:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Run unit tests sequentially
+                command: pytest tests --cov-config pyproject.toml
+
 
   win_unit_tests:
     parameters:
@@ -230,18 +267,18 @@ jobs:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - unless:
           condition:
-            equal: ["3.6", <<parameters.python_version>>]
+            equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
-                name: Run unit tests without spark
+                name: Run unit tests without spark in parallel
                 command: conda activate kedro_builder; make test-no-spark
       - when:
           condition:
-            equal: ["3.6", <<parameters.python_version>>]
+            equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
-                name: Run unit tests without spark or tensorflow
-                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark --ignore tests/extras/datasets/tensorflow --numprocesses 4 --dist loadfile
+                name: Run unit tests without spark sequentially
+                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
 
   lint:
     parameters:
@@ -278,16 +315,23 @@ jobs:
       - win_setup:
           python_version: <<parameters.python_version>>
       - when:
-          # Save cache only for Python 3.7. There is no need to save it for each Python.
+          # Save Python package cache only for Python 3.7. The conda environment itself
+          # is specific to a Python version and is cached separately for each.
           condition:
             equal: ["3.7", <<parameters.python_version>>]
           steps:
-            - save_cache:
-                key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-                paths:
-                  # Cache pip cache and conda packages directories
-                  - c:\tools\miniconda3\pkgs
-                  - c:\users\circleci\appdata\local\pip\cache
+          - save_cache:
+              name: Save Python package cache
+              key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+              paths:
+                # Cache pip cache and conda packages directories
+                - c:\tools\miniconda3\pkgs
+                - c:\users\circleci\appdata\local\pip\cache
+      - save_cache:
+          name: Save conda environment cache
+          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          paths:
+            - c:\tools\miniconda3\envs\kedro_builder
       - run:
           name: Pip-compile requirements file
           command: conda activate kedro_builder; make pip-compile
@@ -334,7 +378,6 @@ jobs:
           name: Maybe trigger the release workflow
           command: |
               KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
-
               if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
               then
                   echo "Starting the release of Kedro ${KEDRO_VERSION}!"
@@ -411,7 +454,6 @@ jobs:
           name: Check Kedro version
           command: |
             KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
-
             if ./tools/circleci/check-no-version-pypi.sh "${KEDRO_VERSION}"
             then
                 echo "export KEDRO_VERSION=\"${KEDRO_VERSION}\"" >> $BASH_ENV
@@ -468,6 +510,8 @@ workflows:
         - <<pipeline.parameters.docs_change>>
         - not: <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_docs
       - docs_linkcheck
@@ -481,45 +525,43 @@ workflows:
       and:
         - <<pipeline.parameters.code_change>>
         - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
-      - build_docs
-      - docs_linkcheck
       - e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - unit_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_unit_tests:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - lint:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - pip_compile:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - win_pip_compile:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - build_docs
+      - docs_linkcheck
       - all_circleci_checks_succeeded:
           requires:
             - e2e_tests
-            # win_e2e_tests-3.6 is not required due to the error
-            # `Cargo, the Rust package manager, is not installed or is not on PATH`.
-            # - win_e2e_tests
-            - win_e2e_tests-3.7
-            - win_e2e_tests-3.8
+            - win_e2e_tests
             - unit_tests
             - win_unit_tests
             - lint
@@ -529,7 +571,11 @@ workflows:
             - docs_linkcheck
 
   main_updated:
-    unless: <<pipeline.parameters.release_kedro>>  # don't run if 'release_kedro' flag is set
+    when:
+      and:
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - sync:
           filters:
@@ -541,62 +587,82 @@ workflows:
               only: main
 
   hourly_pr_merge:
-    triggers:
-      - schedule:
-          cron: 0 * * * *
-          filters:
-            branches:
-              only: main
+    when:
+      and:
+        - <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
-      - merge_pr_to_develop
+      - merge_pr_to_develop:
+        filters:
+          branches:
+            only: main
 
   # Python versions that are supported on `main`.
   nightly_build_main:
-    triggers:
-      - schedule:
-          cron: 30 2 * * *
+    when:
+      and:
+        - <<pipeline.parameters.run_nightly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+    jobs:
+      - build_docker_image:
+          context:
+            - kedro-ecr-publish
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
           filters:
             branches:
               only: main
-    jobs:
-      - build_docker_image:
-          matrix:
-            parameters:
-              python_version: ["3.6", "3.7", "3.8"]
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
           requires:
             - build_docker_image-<<matrix.python_version>>
+          filters:
+            branches:
+              only: main
 
   # Python version that are *only* supported on `develop`.
   nightly_build_develop:
-    triggers:
-      - schedule:
-          cron: 30 2 * * *
+    when:
+      and:
+        - <<pipeline.parameters.run_nightly>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+    jobs:
+      - build_docker_image:
+          context:
+            - kedro-ecr-publish
+          matrix:
+            parameters:
+              python_version: []
           filters:
             branches:
               only: develop
-    jobs:
-      - build_docker_image:
-          matrix:
-            parameters:
-              python_version: ["3.9"]
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.9"]
+              python_version: []
           requires:
             - build_docker_image-<<matrix.python_version>>
+          filters:
+            branches:
+              only: develop
 
   kedro_release:
-    when: <<pipeline.parameters.release_kedro>>  # only run if 'release_kedro' flag is set
+    when:
+      and:
+        - <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.6", "3.7", "3.8"]
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - publish_kedro:
           requires:
             - build_kedro

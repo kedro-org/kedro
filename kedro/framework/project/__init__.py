@@ -2,16 +2,14 @@
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
 import importlib
+import logging.config
 import operator
 from collections.abc import MutableMapping
-from typing import Dict, Optional
-from warnings import warn
+from typing import Any, Dict, Optional
 
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
-from kedro.framework.hooks import get_hook_manager
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 from kedro.pipeline import Pipeline
 
 
@@ -41,15 +39,44 @@ class _IsSubclassValidator(Validator):
                 )
 
 
+class _HasSharedParentClassValidator(Validator):
+    """A validator to check that the parent of the default class is an ancestor of
+    the settings value."""
+
+    def validate(self, settings, *args, **kwargs):
+        super().validate(settings, *args, **kwargs)
+
+        default_class = self.default(settings, self)
+        for name in self.names:
+            setting_value = getattr(settings, name)
+            # In the case of ConfigLoader, default_class.mro() will be:
+            # [kedro.config.config.ConfigLoader,
+            # kedro.config.abstract_config.AbstractConfigLoader,
+            # abc.ABC,
+            # object]
+            # We pick out the direct parent and check if it's in any of the ancestors of
+            # the supplied setting_value. This assumes that the direct parent is
+            # the abstract class that must be inherited from.
+            # A more general check just for a shared ancestor would be:
+            # set(default_class.mro()) & set(setting_value.mro()) - {abc.ABC, object}
+            default_class_parent = default_class.mro()[1]
+            if default_class_parent not in setting_value.mro():
+                raise ValidationError(
+                    f"Invalid value `{setting_value.__module__}.{setting_value.__qualname__}` "
+                    f"received for setting `{name}`. It must be a subclass of "
+                    f"`{default_class_parent.__module__}.{default_class_parent.__qualname__}`."
+                )
+
+
 class _ProjectSettings(LazySettings):
     """Define all settings available for users to configure in Kedro,
     along with their validation rules and default values.
     Use Dynaconf's LazySettings as base.
     """
 
-    _CONF_ROOT = Validator("CONF_ROOT", default="conf")
+    _CONF_SOURCE = Validator("CONF_SOURCE", default="conf")
     _HOOKS = Validator("HOOKS", default=tuple())
-    _CONTEXT_CLASS = Validator(
+    _CONTEXT_CLASS = _IsSubclassValidator(
         "CONTEXT_CLASS",
         default=_get_default_class("kedro.framework.context.KedroContext"),
     )
@@ -59,17 +86,27 @@ class _ProjectSettings(LazySettings):
     )
     _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={})
     _DISABLE_HOOKS_FOR_PLUGINS = Validator("DISABLE_HOOKS_FOR_PLUGINS", default=tuple())
+    _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
+        "CONFIG_LOADER_CLASS", default=_get_default_class("kedro.config.ConfigLoader")
+    )
+    _CONFIG_LOADER_ARGS = Validator("CONFIG_LOADER_ARGS", default={})
+    _DATA_CATALOG_CLASS = _IsSubclassValidator(
+        "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
+    )
 
     def __init__(self, *args, **kwargs):
 
         kwargs.update(
             validators=[
-                self._CONF_ROOT,
+                self._CONF_SOURCE,
                 self._HOOKS,
                 self._CONTEXT_CLASS,
                 self._SESSION_STORE_CLASS,
                 self._SESSION_STORE_ARGS,
                 self._DISABLE_HOOKS_FOR_PLUGINS,
+                self._CONFIG_LOADER_CLASS,
+                self._CONFIG_LOADER_ARGS,
+                self._DATA_CATALOG_CLASS,
             ]
         )
         super().__init__(*args, **kwargs)
@@ -113,49 +150,22 @@ class _ProjectPipelines(MutableMapping):
         if self._pipelines_module is None or self._is_data_loaded:
             return
 
-        try:
-            register_pipelines = self._get_pipelines_registry_callable(
-                self._pipelines_module
-            )
-        except (ModuleNotFoundError, AttributeError) as exc:
-            # for backwards compatibility with templates < 0.17.2
-            # where no pipelines_registry is defined
-            if self._pipelines_module in str(exc):  # pragma: no cover
-                project_pipelines = {}
-            else:
-                raise
-        else:
-            project_pipelines = register_pipelines()
-
-        hook_manager = get_hook_manager()
-        pipelines_dicts = (
-            hook_manager.hook.register_pipelines()  # pylint: disable=no-member
+        register_pipelines = self._get_pipelines_registry_callable(
+            self._pipelines_module
         )
-        for pipeline_collection in pipelines_dicts:
-            duplicate_keys = pipeline_collection.keys() & project_pipelines.keys()
-            if duplicate_keys:
-                warn(
-                    f"Found duplicate pipeline entries. "
-                    f"The following will be overwritten: {', '.join(duplicate_keys)}"
-                )
-            project_pipelines.update(pipeline_collection)
+        project_pipelines = register_pipelines()
 
         self._content = project_pipelines
         self._is_data_loaded = True
 
-    def configure(self, pipelines_module: str) -> None:
+    def configure(self, pipelines_module: Optional[str] = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every `configure` call,
         data are reloaded.
         """
-        self._clear(pipelines_module)
-
-    def _clear(self, pipelines_module: str) -> None:
-        """Helper method to clear the pipelines so new content will be reloaded
-        next time data is accessed. Useful for testing purpose.
-        """
-        self._is_data_loaded = False
         self._pipelines_module = pipelines_module
+        self._is_data_loaded = False
+        self._content = {}
 
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)
@@ -170,6 +180,7 @@ class _ProjectPipelines(MutableMapping):
 
 
 PACKAGE_NAME = None
+LOGGING = None
 
 settings = _ProjectSettings()
 
@@ -183,11 +194,6 @@ def configure_project(package_name: str):
     settings_module = f"{package_name}.settings"
     settings.configure(settings_module)
 
-    # set up all hooks so we can discover all pipelines
-    hook_manager = get_hook_manager()
-    _register_hooks(hook_manager, settings.HOOKS)
-    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
-
     pipelines_module = f"{package_name}.pipeline_registry"
     pipelines.configure(pipelines_module)
 
@@ -197,6 +203,13 @@ def configure_project(package_name: str):
     # time a new subprocess is spawned.
     global PACKAGE_NAME
     PACKAGE_NAME = package_name
+
+
+def configure_logging(logging_config: Dict[str, Any]) -> None:
+    """Configure logging to make it available as a global variable."""
+    logging.config.dictConfig(logging_config)
+    global LOGGING
+    LOGGING = logging_config
 
 
 def validate_settings():

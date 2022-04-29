@@ -1,8 +1,6 @@
 """Behave step definitions for the cli_scenarios feature."""
 
-import itertools
 import json
-import shlex
 import shutil
 from pathlib import Path
 from time import time
@@ -161,12 +159,15 @@ def create_config_file(context):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
-@given('I have executed the kedro command "{command}"')
-def exec_kedro_target_checked(context, command):
-    """Execute Kedro command and check the status."""
-    cmd = [context.kedro] + command.split()
-
-    res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+@given("I have installed the project dependencies")
+def pip_install_dependencies(context):
+    """Install project dependencies using pip."""
+    reqs_path = "src/requirements.txt"
+    res = run(
+        [context.pip, "install", "-r", reqs_path],
+        env=context.env,
+        cwd=str(context.root_project_dir),
+    )
 
     if res.returncode != OK_EXIT_CODE:
         print(res.stdout)
@@ -174,52 +175,10 @@ def exec_kedro_target_checked(context, command):
         assert False
 
 
-@given('I have created new environment "{}"')
-def create_new_env(context, env_name):
-    env_path = context.root_project_dir / "conf" / env_name
-    env_path.mkdir()
-
-    for config_name in ("catalog", "parameters", "credentials"):
-        path = env_path / f"{config_name}.yml"
-        with path.open("w") as config_file:
-            yaml.dump({}, config_file, default_flow_style=False)
-
-    # overwrite the log level for anyconfig from WARNING to INFO
-    logging_path = env_path / "logging.yml"
-    logging_json = {
-        "loggers": {
-            "anyconfig": {
-                "level": "INFO",
-                "handlers": ["console", "info_file_handler", "error_file_handler"],
-                "propagate": "no",
-            },
-            "kedro.io": {
-                "level": "INFO",
-                "handlers": ["console", "info_file_handler", "error_file_handler"],
-                "propagate": "no",
-            },
-            "kedro.pipeline": {
-                "level": "INFO",
-                "handlers": ["console", "info_file_handler", "error_file_handler"],
-                "propagate": "no",
-            },
-        }
-    }
-    with logging_path.open("w") as config_file:
-        yaml.dump(logging_json, config_file, default_flow_style=False)
-
-
-@given('the python package "{package}" has been uninstalled')
-def uninstall_package_via_pip(context, package):
-    """Uninstall a python package using pip."""
-    run([context.pip, "uninstall", "-y", package], env=context.env)
-
-
-@given("I have installed the project's python package")
 @when("I install the project's python package")
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
-    dist_dir = context.root_project_dir / "src" / "dist"
+    dist_dir = context.root_project_dir / "dist"
     (whl_file,) = dist_dir.glob("*.whl")
     run([context.pip, "install", str(whl_file)], env=context.env)
 
@@ -298,13 +257,6 @@ def create_project_without_starter(context):
     telemetry_file.write_text("consent: false", encoding="utf-8")
 
 
-@given("I have deleted the credentials file")
-def delete_credentials_file(context):
-    """Delete configuration file from project"""
-    path_to_config_file = context.root_project_dir / "conf" / "base" / "credentials.yml"
-    path_to_config_file.unlink()
-
-
 @given("I have added the project directory to staging")
 @when("I add the project directory to staging")
 def add_proj_dir_to_staging(context):
@@ -321,6 +273,7 @@ def commit_changes_to_git(context):
         check_run(f"git commit -m 'Change {time()}'")
 
 
+@given('I have executed the kedro command "{command}"')
 @when('I execute the kedro command "{command}"')
 def exec_kedro_target(context, command):
     """Execute Kedro target."""
@@ -339,21 +292,6 @@ def exec_project(context):
     # We take care to delete with `delete_unnecessary_assets` to simulate the behaviour
     # of a installed package in a fresh environment.
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
-
-
-@when('with tags {tags:CSV}, I execute the kedro command "{cmd}"')
-def exec_kedro_run_with_tag(context, cmd, tags):
-    """Execute `kedro run` with tags"""
-    kedro_args = shlex.split(cmd)
-    context.logfile_count = util.get_logline_count(
-        util.get_logfile_path(context.root_project_dir)
-    )
-
-    tag_list = [["--tag", t] for t in tags]
-    tag_args = list(itertools.chain.from_iterable(tag_list))
-    run_cmd = [context.kedro] + kedro_args + tag_args
-
-    context.result = run(run_cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
 @when("I ask the CLI for a version")
@@ -461,7 +399,7 @@ def update_kedro_req(context: behave.runner.Context):
 
 @when("I add {dependency} to the requirements")
 def add_req(context: behave.runner.Context, dependency: str):
-    reqs_path = context.root_project_dir / "src" / "requirements.in"
+    reqs_path = context.root_project_dir / "src" / "requirements.txt"
     if reqs_path.is_file():
         reqs_path.write_text(reqs_path.read_text() + "\n" + str(dependency) + "\n")
 
@@ -552,16 +490,6 @@ def check_failed_status_code(context):
             f"but got {context.result.returncode}"
         )
         assert False, error_msg
-
-
-@then("the relevant packages should be created")
-def check_python_packages_created(context):
-    """Check that egg and whl files exist in dist dir."""
-    dist_dir = context.root_project_dir / "src" / "dist"
-    egg_file = dist_dir.glob("*.egg")
-    whl_file = dist_dir.glob("*.whl")
-    assert any(egg_file)
-    assert any(whl_file)
 
 
 @then('I should get a message including "{msg}"')
@@ -690,13 +618,10 @@ def check_docs_generated(context: behave.runner.Context):
 
 @then("requirements should be generated")
 def check_reqs_generated(context: behave.runner.Context):
-    """Check that new project docs are generated."""
-    reqs_path = context.root_project_dir / "src" / "requirements.in"
+    """Check that new project requirements are generated."""
+    reqs_path = context.root_project_dir / "src" / "requirements.lock"
     assert reqs_path.is_file()
-    assert (
-        "This file is autogenerated by pip-compile"
-        in (context.root_project_dir / "src" / "requirements.txt").read_text()
-    )
+    assert "This file is autogenerated by pip-compile" in reqs_path.read_text()
 
 
 @then("{dependency} should be in the requirements")
@@ -715,15 +640,3 @@ def check_cell_conversion(context: behave.runner.Context):
         / "hello_world.py"
     )
     assert "Hello World!" in converted_file.read_text()
-
-
-@then("{path} must not exist")
-def check_path_doesnt_exist(context: behave.runner.Context, path: str):
-    path = context.root_project_dir / path
-    assert not path.exists()
-
-
-@then("{filepath} file must exist")
-def check_file_exists(context: behave.runner.Context, filepath: str):
-    filepath = context.root_project_dir / filepath
-    assert filepath.is_file()

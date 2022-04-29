@@ -3,11 +3,19 @@ import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
+import boto3
 import pandas as pd
 import pytest
+from moto import mock_s3
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+from pyspark.sql.types import (
+    FloatType,
+    IntegerType,
+    StringType,
+    StructField,
+    StructType,
+)
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
@@ -18,6 +26,7 @@ from kedro.extras.datasets.spark.spark_dataset import (
     _dbfs_glob,
     _get_dbutils,
 )
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -26,6 +35,7 @@ from kedro.runner import ParallelRunner, SequentialRunner
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
+SCHEMA_FILE_NAME = "schema.json"
 AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
 HDFS_PREFIX = f"{FOLDER_NAME}/{FILENAME}"
@@ -100,6 +110,17 @@ def sample_spark_df():
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
 
 
+@pytest.fixture
+def sample_spark_df_schema() -> StructType:
+    return StructType(
+        [
+            StructField("name", StringType(), True),
+            StructField("age", IntegerType(), True),
+            StructField("height", FloatType(), True),
+        ]
+    )
+
+
 def identity(arg):
     return arg  # pragma: no cover
 
@@ -109,6 +130,31 @@ def spark_in(tmp_path, sample_spark_df):
     spark_in = SparkDataSet(filepath=(tmp_path / "input").as_posix())
     spark_in.save(sample_spark_df)
     return spark_in
+
+
+@pytest.fixture
+def mocked_s3_bucket():
+    """Create a bucket for testing using moto."""
+    with mock_s3():
+        conn = boto3.client(
+            "s3",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        yield conn
+
+
+@pytest.fixture
+def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructType):
+    """Creates schema file and adds it to mocked S3 bucket."""
+    temporary_path = tmp_path / SCHEMA_FILE_NAME
+    temporary_path.write_text(sample_spark_df_schema.json(), encoding="utf-8")
+
+    mocked_s3_bucket.put_object(
+        Bucket=BUCKET_NAME, Key=SCHEMA_FILE_NAME, Body=temporary_path.read_bytes()
+    )
+    return mocked_s3_bucket
 
 
 class FileInfo:
@@ -158,6 +204,109 @@ class TestSparkDataSet:
         )
         spark_df = spark_data_set.load()
         assert spark_df.filter(col("Name") == "Alex").count() == 1
+
+    def test_load_options_schema_ddl_string(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema": "name STRING, age INT, height FLOAT"},
+        )
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    def test_load_options_schema_obj(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema": sample_spark_df_schema},
+        )
+
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    def test_load_options_schema_path(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        schemapath = (tmp_path / SCHEMA_FILE_NAME).as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+        Path(schemapath).write_text(sample_spark_df_schema.json(), encoding="utf-8")
+
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema": {"filepath": schemapath}},
+        )
+
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    @pytest.mark.usefixtures("mocked_s3_schema")
+    def test_load_options_schema_path_with_credentials(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={
+                "header": True,
+                "schema": {
+                    "filepath": f"s3://{BUCKET_NAME}/{SCHEMA_FILE_NAME}",
+                    "credentials": AWS_CREDENTIALS,
+                },
+            },
+        )
+
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    def test_load_options_invalid_schema_file(self, tmp_path):
+        filepath = (tmp_path / "data").as_posix()
+        schemapath = (tmp_path / SCHEMA_FILE_NAME).as_posix()
+        Path(schemapath).write_text("dummy", encoding="utf-8")
+
+        pattern = (
+            f"Contents of `schema.filepath` ({schemapath}) are invalid. Please"
+            f"provide a valid JSON serialized `pyspark.sql.types.StructType`."
+        )
+
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            SparkDataSet(
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True, "schema": {"filepath": schemapath}},
+            )
+
+    def test_load_options_invalid_schema(self, tmp_path):
+        filepath = (tmp_path / "data").as_posix()
+
+        pattern = (
+            "Schema load argument does not specify a `filepath` attribute. Please"
+            "include a path to a JSON serialized `pyspark.sql.types.StructType`."
+        )
+
+        with pytest.raises(DataSetError, match=pattern):
+            SparkDataSet(
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True, "schema": {}},
+            )
 
     def test_save_options_csv(self, tmp_path, sample_spark_df):
         # To cross check the correct Spark save operation we save to
@@ -275,7 +424,9 @@ class TestSparkDataSet:
             r"multiprocessing: \['spark_in'\]"
         )
         with pytest.raises(AttributeError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(
+                pipeline, catalog, _create_hook_manager()
+            )
 
     def test_s3_glob_refresh(self):
         spark_dataset = SparkDataSet(filepath="s3a://bucket/data")
@@ -567,7 +718,6 @@ class TestSparkDataSetVersionedS3:
         ds_s3 = SparkDataSet(
             filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
             version=Version(ts, None),
-            credentials=AWS_CREDENTIALS,
         )
         get_spark = mocker.patch.object(ds_s3, "_get_spark")
 
@@ -808,7 +958,9 @@ class TestDataFlowSequentialRunner:
     def test_spark_load_save(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> Spark (save)."""
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
-        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+        SequentialRunner(is_async=is_async).run(
+            pipeline, data_catalog, _create_hook_manager()
+        )
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
@@ -819,7 +971,9 @@ class TestDataFlowSequentialRunner:
         pipeline = Pipeline([node(identity, "spark_in", "pickle_ds")])
         pattern = ".* was not serialized due to.*"
         with pytest.raises(DataSetError, match=pattern):
-            SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+            SequentialRunner(is_async=is_async).run(
+                pipeline, data_catalog, _create_hook_manager()
+            )
 
     def test_spark_memory_spark(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> MemoryDataSet (save and then load) ->
@@ -830,7 +984,9 @@ class TestDataFlowSequentialRunner:
                 node(identity, "memory_ds", "spark_out"),
             ]
         )
-        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+        SequentialRunner(is_async=is_async).run(
+            pipeline, data_catalog, _create_hook_manager()
+        )
 
         save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))

@@ -239,7 +239,7 @@ There's one additional installation you need to do in the Databricks notebook to
 In [1]: %load_ext kedro.extras.extensions.ipython
 ```
 
-you must explicitly upgrade your pip version by doing the below:
+You must explicitly upgrade your `pip` version by doing the below:
 
 ```bash
 %pip install -U pip

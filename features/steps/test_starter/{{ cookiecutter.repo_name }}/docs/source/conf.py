@@ -17,8 +17,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import re
-
-from recommonmark.transform import AutoStructify
 from {{cookiecutter.python_package}} import __version__ as release
 
 from kedro.framework.cli.utils import find_stylesheets
@@ -52,8 +50,9 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "nbsphinx",
-    "recommonmark",
     "sphinx_copybutton",
+    "myst_parser",
+    #TODO: verify native mermaid support?
 ]
 
 # enable autosummary plugin (table of contents for modules/classes/class
@@ -222,6 +221,4 @@ def setup(app):
     # add Kedro stylesheets
     for stylesheet in find_stylesheets():
         app.add_css_file(stylesheet)
-    # enable rendering RST tables in Markdown
-    app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
-    app.add_transform(AutoStructify)
+

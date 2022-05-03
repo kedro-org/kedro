@@ -260,6 +260,8 @@ class KedroSession:
             extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
+        self._hook_manager.hook.after_context_created(context)
+
         return context
 
     def _get_config_loader(self) -> ConfigLoader:

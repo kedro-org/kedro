@@ -12,7 +12,7 @@ kedro build-reqs
 The `build-reqs` command will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in `src/requirements.txt` into a `src/requirements.lock` that specifies a list of pinned project dependencies (those with a strict version).
 
 ```{note}
-``src/requirements.txt`` contains "source" requirements, while ``src/requirements.lock`` contains the compiled version of those and requires no manual updates.
+`src/requirements.txt` contains "source" requirements, while `src/requirements.lock` contains the compiled version of those and requires no manual updates.
 ```
 
 To further update the project requirements, you should modify `src/requirements.txt` (not `src/requirements.lock`) and re-run `kedro build-reqs`.

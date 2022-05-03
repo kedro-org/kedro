@@ -112,7 +112,7 @@ You can find more information about setting up environmental variables [here](ht
 Go to **Debug > Add Configurations**.
 
 ```{note}
-If you encounter the following error: ``Cannot read property 'openConfigFile' of undefined``, you can manually create ``launch.json`` file in ``.vscode`` directory and paste the configuration from below.
+If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`, you can manually create `launch.json` file in `.vscode` directory and paste the configuration from below.
 ```
 
 Edit the `launch.json` that opens in the editor with:
@@ -217,7 +217,7 @@ scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/
 
 
 ```{note}
-`There is also a third-party plugin for VS Code that supports remote workspaces <https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace>`_.
+[There is also a third-party plugin for VS Code that supports remote workspaces.](https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace)
 ```
 
 Start executing the pipeline on your remote computer:

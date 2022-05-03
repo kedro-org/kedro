@@ -139,7 +139,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 </details>
 
 ```{note}
-``companies`` and ``shuttles`` refer to the datasets defined in ``conf/base/catalog.yml``. These are inputs to the ``preprocess_companies`` and ``preprocess_shuttles`` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
+`companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. These are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
 ```
 
 Be sure to import `node`, and your functions by adding them to the beginning of `pipeline.py`:
@@ -361,7 +361,7 @@ The `autoreload` flag will ensure that changes to your pipeline are automaticall
 ![autoreload](../meta/images/autoreload.gif)
 
 ```{note}
-This is also a great time to highlight how Kedro's `topological sorting <https://en.wikipedia.org/wiki/Topological_sorting>`_ works. The actual order of the ``node()`` calls in the ``pipeline`` is irrelevant; Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means that you, as a developer, simply ask Kedro what data you want and it will derive the execution graph automatically.
+This is also a great time to highlight how Kedro's [topological sorting](https://en.wikipedia.org/wiki/Topological_sorting) works. The actual order of the `node()` calls in the `pipeline` is irrelevant; Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means that you, as a developer, simply ask Kedro what data you want and it will derive the execution graph automatically.
 ```
 
 ## Data science pipeline
@@ -541,7 +541,7 @@ from kedro_tutorial.pipelines import data_science as ds
 * The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
 
 ```{note}
-The order in which you add the pipelines together is not significant (``data_science_pipeline + data_processing_pipeline`` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
+The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
 ```
 
 ### Test the pipelines
@@ -614,7 +614,7 @@ kedro run --runner=module.path.to.my.runner
 ```
 
 ```{note}
-``ParallelRunner`` performs task parallelisation via multiprocessing. ``ThreadRunner`` is intended for use with remote execution engines such as `Spark <../tools_integration/pyspark.md>`_ and `Dask <https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py>`_. You can find out more about the runners Kedro provides, and how to create your own, in the `pipeline documentation about runners ` <../nodes_and_pipelines/run_a_pipeline.md>`_.
+`ParallelRunner` performs task parallelisation via multiprocessing. `ThreadRunner` is intended for use with remote execution engines such as [Spark](../tools_integration/pyspark.md) and [Dask](https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py). You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
 ```
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).

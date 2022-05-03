@@ -3,7 +3,7 @@
 A Kedro project's `settings.py` file contains the application settings for the project, including registration of hooks and library components. This page explains how settings work and which settings are available.
 
 ```{note}
-Application settings is distinct from `run time configuration <configuration.md>`_, which is stored in the ``conf`` folder and can vary by configuration environment, and `pyproject.toml <../faq/architecture_overview.md#kedro-project>`_ , which provides project metadata and build configuration.
+Application settings is distinct from [run time configuration](configuration.md), which is stored in the `conf` folder and can vary by configuration environment, and [pyproject.toml](../faq/architecture_overview.md#kedro-project) , which provides project metadata and build configuration.
 ```
 
 By default, all code in `settings.py` is commented out. In the case that settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.

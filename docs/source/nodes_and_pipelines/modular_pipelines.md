@@ -7,7 +7,7 @@ In many typical Kedro projects, a single (“main”) pipeline increases in comp
 Modular pipelines allow you to instantiate pipelines multiple times whilst allowing the user to override inputs/outputs/parameters. They are reusable within the same codebase and shareable across projects via [micro-packaging](micro_packaging.md). This is the modern way to use Kedro and will change the way you think about your pipelines.
 
 ```{note}
-The Kedro project visualised below is representative of one that might be seen in the real world. It takes full advantage of modular pipelines for ``Data Ingestion``, ``Feature Engineering``, ``Reporting`` and ``Train Evaluation`` (which even includes nested instances).
+The Kedro project visualised below is representative of one that might be seen in the real world. It takes full advantage of modular pipelines for `Data Ingestion`, `Feature Engineering`, `Reporting` and `Train Evaluation` (which even includes nested instances).
 ```
 
 ### Key concepts
@@ -44,7 +44,7 @@ kedro pipeline create <pipeline_name>
 ```
 
 ```{note}
-For the full list of available CLI options, you can always run ``kedro pipeline create --help`` for more information.
+For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
 ```
 
 ### What does the ``kedro pipeline create`` do?
@@ -173,7 +173,7 @@ Providing this input/output override will join up the pipeline nicely:
 ![joined](../meta/images/cook_joined.png)
 
 ```{note}
-In this example we have used the ``+`` operator to join two pipelines. Remember you can also use ``sum()`` or pass a list of pipelines to the `pipe` argument as well.
+In this example we have used the `+` operator to join two pipelines. You can also use `sum()` or pass a list of pipelines to the `pipe` argument.
 ```
 
 </details>
@@ -250,7 +250,7 @@ final_pipeline = (
 * Namespaces can also be arbitrarily nested with the `.` character.
 
 ```{note}
-Parameter references (``params:`` and ``parameters``) will not be namespaced
+Parameter references (`params:` and `parameters`) will not be namespaced.
 ```
 
 </details>

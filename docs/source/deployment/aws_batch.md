@@ -108,7 +108,7 @@ A job queue is the bridge between the submitted jobs and the compute environment
 Ensure you have the necessary AWS credentials in place before moving on, so that your pipeline can access and interact with the AWS services. Check out [the AWS CLI documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-config) for instructions on how to set this up.
 
 ```{note}
-You should configure the ``default region`` to match the region where you've created the Batch resources.
+You should configure the default region to match the region where you've created the Batch resources.
 ```
 
 

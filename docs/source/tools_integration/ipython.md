@@ -98,7 +98,7 @@ Out[3]:
 ```
 
 ```{note}
-If you enable `versioning <../data/data_catalog.md#versioning-datasets-and-ml-models>`_ then you can load a particular version of a dataset, e.g. :code:`catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
+If you enable [versioning](../data/data_catalog.md#versioning-datasets-and-ml-models) then you can load a particular version of a dataset, e.g. `catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
 ```
 
 ### `context`
@@ -256,7 +256,7 @@ def some_action():
 ![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
 
 ```{note}
-The Notebook can contain multiple functions tagged as ``node``, each of them will be exported into the resulting Python file
+The Notebook can contain multiple functions tagged as `node`, each of them will be exported into the resulting Python file
 ```
 
 * Save your Jupyter Notebook to `notebooks/my_notebook.ipynb`

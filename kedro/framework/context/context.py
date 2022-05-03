@@ -1,4 +1,3 @@
-# pylint: disable=no-member
 """This module provides context for Kedro project."""
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -223,7 +222,7 @@ class KedroContext:
         """
         try:
             # '**/parameters*' reads modular pipeline configs
-            params = self.config_loader.get(
+            params = self.config_loader.get(  # pylint: disable=no-member
                 "parameters*", "parameters*/**", "**/parameters*"
             )
         except MissingConfigException as exc:
@@ -246,7 +245,9 @@ class KedroContext:
 
         """
         # '**/catalog*' reads modular pipeline configs
-        conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
+        conf_catalog = self.config_loader.get(  # pylint: disable=no-member
+            "catalog*", "catalog*/**", "**/catalog*"
+        )
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
         conf_catalog = _convert_paths_to_absolute_posix(
@@ -308,7 +309,7 @@ class KedroContext:
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self.config_loader.get(
+            conf_creds = self.config_loader.get(  # pylint: disable=no-member
                 "credentials*", "credentials*/**", "**/credentials*"
             )
         except MissingConfigException as exc:

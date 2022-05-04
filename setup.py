@@ -37,11 +37,6 @@ with open("test_requirements.txt", encoding="utf-8") as f:
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
-doc_html_files = [
-    name.replace("kedro/", "", 1)
-    for name in glob("kedro/framework/html/**/*", recursive=True)
-]
-
 template_files = []
 for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
     template_files.extend(
@@ -165,7 +160,7 @@ setup(
     author="Kedro",
     entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},
     package_data={
-        name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files
+        name: ["py.typed", "test_requirements.txt"] + template_files
     },
     zip_safe=False,
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",

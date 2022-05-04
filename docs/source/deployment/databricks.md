@@ -264,7 +264,7 @@ To run Kedro-Viz, first run the below command in your Databricks notebook:
 ```
 
 ```eval_rst
-.. note:: The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below gif on how to cancel
+.. note:: The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below gif on how to cancel.
 ```
 
 ![](../meta/images/databricks_cancel_command.gif)

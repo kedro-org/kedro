@@ -5,8 +5,7 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
-import attrs
-from attrs import field
+from attrs import field, frozen
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -164,7 +163,7 @@ def _expand_full_path(project_path: Union[str, Path]) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
-@attrs.frozen
+@frozen
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.

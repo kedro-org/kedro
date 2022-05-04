@@ -52,7 +52,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "nbsphinx",
-    "recommonmark",
+    "myst_parser",
     "sphinx_copybutton",
 ]
 

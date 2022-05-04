@@ -596,14 +596,13 @@ def mock_session_with_after_context_created_hook(
 
 class TestKedroContextSpecsHook:
     """Test the behavior of `after_context_created` when updating node inputs."""
-    @pytest.mark.usefixtures("mock_settings")
+    
     def test_attributes_are_accessible(
         self,
-        mock_session,
+        mock_session_with_after_context_created_hook,
         logs_listener,
 
     ):
-        mock_session.load_context()
+        mock_session_with_after_context_created_hook.load_context()
         hooks_log_messages = [r.message for r in logs_listener.logs]
-        # check the logs are in the correct order
         assert "After context created" in str(hooks_log_messages).strip("[]")

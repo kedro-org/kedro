@@ -13,16 +13,14 @@ dill~=0.3.1
 filelock>=3.4.0, <4.0
 gcsfs>=2021.4, <=2022.1
 geopandas>=0.6.0, <1.0
+h5py>3.5.0
 hdfs>=2.5.8, <3.0
 holoviews~=1.13.0
 import-linter[toml]==1.2.6
-importlib-metadata~=4.0
 ipython>=7.31.1, <8.0
-jedi~=0.18
 Jinja2<3.1.0
 joblib>=0.14
 jupyterlab~=3.0
-jsonschema~=4.0
 jupyter~=1.0
 lxml~=4.6
 matplotlib>=3.0.3, <3.4; python_version < '3.10' # 3.4.0 breaks holoviews
@@ -45,7 +43,7 @@ pylint>=2.5.2, <3.0
 pyproj~=3.0
 pyspark>=2.2, <4.0
 pytest-cov~=3.0
-pytest-mock>=1.7.1, <2.0rgf
+pytest-mock>=1.7.1, <2.0
 pytest-xdist[psutil]~=2.2.1
 pytest~=6.2
 redis~=4.1

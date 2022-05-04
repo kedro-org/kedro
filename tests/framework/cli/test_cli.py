@@ -129,13 +129,6 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["docs"])
 
         assert result.exit_code == 0
-        for each in ("Opening file", join("html", "index.html")):
-            assert each in result.output
-
-        assert patched_browser.call_count == 1
-        args, _ = patched_browser.call_args
-        for each in ("file://", join("kedro", "framework", "html", "index.html")):
-            assert each in args[0]
 
 
 class TestCommandCollection:

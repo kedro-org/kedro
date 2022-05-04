@@ -24,7 +24,7 @@
 * Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
 
 ## Upcoming deprecations for Kedro 0.19.0
-
+* `kedro docs` will be deprecated in 0.19.0.
 
 # Release 0.18.0
 

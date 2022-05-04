@@ -291,9 +291,8 @@ class KedroContextSpecs:
         context: KedroContext,
     ) -> None:
         """Hooks to be invoked after a `KedroContext` is created. This is the earliest
-        hook trigger within a kedro's run. The `KedroContext` stores useful information
+        hook triggered within a Kedro run. The `KedroContext` stores useful information
         such as `credentials`, `config_loader` and `env`.
-        .
         Args:
             context: The context that was created.
         """

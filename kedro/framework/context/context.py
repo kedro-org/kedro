@@ -180,8 +180,7 @@ class KedroContext:
     _extra_params: Optional[Dict[str, Any]] = field(default=None, converter=deepcopy)
 
     """Create a context object by providing the root of a Kedro project and
-    the environment configuration subfolders
-    (see ``kedro.config.ConfigLoader``)
+    the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
 
     Raises:
         KedroContextError: If there is a mismatch

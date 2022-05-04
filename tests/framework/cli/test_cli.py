@@ -1,6 +1,5 @@
 from collections import namedtuple
 from itertools import cycle
-from os.path import join
 from pathlib import Path
 from unittest.mock import patch
 
@@ -124,7 +123,7 @@ class TestCliCommands:
         assert "-h, --help     Show this message and exit." in result.output
 
     @patch("webbrowser.open")
-    def test_docs(self, patched_browser):
+    def test_docs(self):
         """Check that `kedro docs` opens a correct file in the browser."""
         result = CliRunner().invoke(cli, ["docs"])
 

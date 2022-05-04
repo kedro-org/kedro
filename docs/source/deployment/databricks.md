@@ -225,7 +225,7 @@ Your complete notebook should look similar to this (the results are hidden):
 ![](../meta/images/databricks_notebook_example.png)
 
 
-### 9. Using IPython Extension 
+### 9. Using the Kedro IPython Extension 
 
 You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`.
 

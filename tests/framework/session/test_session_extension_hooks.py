@@ -8,7 +8,10 @@ import pandas as pd
 import pytest
 from dynaconf.validator import Validator
 
-from kedro.framework.context.context import _convert_paths_to_absolute_posix
+from kedro.framework.context.context import (
+    KedroContext,
+    _convert_paths_to_absolute_posix,
+)
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
@@ -560,3 +563,47 @@ class TestAsyncNodeDatasetHooks:
         assert str(
             ["Before dataset loaded", "Catalog load", "After dataset loaded"]
         ).strip("[]") in str(hooks_log_messages).strip("[]")
+
+
+@pytest.fixture
+def mock_session_with_after_context_created_hook(
+    mocker, project_hooks, mock_package_name, tmp_path
+):
+    class AfterContextCreatedHook:
+        """Should able to retrieve `KedroContext` and its attributes"""
+
+        @hook_impl
+        def after_context_created(self, context: KedroContext):
+            attributes = [
+                "_project_path",
+                "_package_name",
+                "_config_loader",
+                "_hook_manager",
+                "env",
+                "_extra_params",
+                "params",
+                "catalog",
+            ]
+            for attr in attributes:
+                getattr(context, attr)  # Try to access the attribute
+
+    class MockSettings(_ProjectSettings):
+        _HOOKS = Validator("HOOKS", default=(project_hooks, AfterContextCreatedHook()))
+
+    _mock_imported_settings_paths(mocker, MockSettings())
+    return KedroSession.create(mock_package_name, tmp_path)
+
+
+class TestKedroContextSpecsHook:
+    """Test the behavior of `after_context_created` when updating node inputs."""
+
+    def test_attributes_are_accessible(
+        self,
+        mock_session_with_after_context_created_hook,
+        logs_listener,
+    ):
+        mock_session_with_after_context_created_hook.load_context()
+        hooks_log_messages = [r.message for r in logs_listener.logs]
+
+        # check the logs are in the correct order
+        assert "After context created" in str(hooks_log_messages).strip("[]")

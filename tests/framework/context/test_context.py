@@ -239,7 +239,7 @@ class TestKedroContext:
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
-    def test_immutble_attributes(self, dummy_context):
+    def test_immutable_attributes(self, dummy_context):
         with pytest.raises(AttributeError):
             dummy_context.catalog = 1
         with pytest.raises(AttributeError):

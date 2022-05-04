@@ -13,7 +13,7 @@ from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
 )
 from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
+from kedro.framework.project import _ProjectPipelines, _ProjectSettings, configure_project, pipelines
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import node, pipeline
@@ -561,7 +561,7 @@ class TestAsyncNodeDatasetHooks:
 
         # check the logs are in the correct order
         assert str(
-            ["Before dataset loaded", "Catalog load", "After dataset loaded"]
+            ["Before dataset loadefd", "Catalog load", "After dataset loaded"]
         ).strip("[]") in str(hooks_log_messages).strip("[]")
 
 
@@ -596,14 +596,14 @@ def mock_session_with_after_context_created_hook(
 
 class TestKedroContextSpecsHook:
     """Test the behavior of `after_context_created` when updating node inputs."""
-
+    @pytest.mark.usefixtures("mock_settings")
     def test_attributes_are_accessible(
         self,
-        mock_session_with_after_context_created_hook,
+        mock_session,
         logs_listener,
-    ):
-        mock_session_with_after_context_created_hook.load_context()
-        hooks_log_messages = [r.message for r in logs_listener.logs]
 
+    ):
+        mock_session.load_context()
+        hooks_log_messages = [r.message for r in logs_listener.logs]
         # check the logs are in the correct order
         assert "After context created" in str(hooks_log_messages).strip("[]")

@@ -4,7 +4,7 @@ For more information about these specifications, please visit
 """
 from typing import Any, Dict, Optional
 
-from kedro.framework.context import KedroContext
+from kedro.framework.context.context import KedroContext
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node

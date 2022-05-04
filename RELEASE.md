@@ -12,7 +12,7 @@
 # Upcoming Release 0.18.1
 
 ## Major features and improvements
-* Added a new hook `after_context_created`.
+* Added a new hook `after_context_created` that passes the `KedroContext` instance as `context`.
 * Added more detail to YAML ParserError error message.
 * Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
 

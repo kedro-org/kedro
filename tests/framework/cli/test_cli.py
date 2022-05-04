@@ -122,7 +122,6 @@ class TestCliCommands:
         assert result.exit_code == 0
         assert "-h, --help     Show this message and exit." in result.output
 
-    @patch("webbrowser.open")
     def test_docs(self):
         """Check that `kedro docs` opens a correct file in the browser."""
         result = CliRunner().invoke(cli, ["docs"])

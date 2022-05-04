@@ -283,7 +283,7 @@ class DatasetSpecs:
 
 
 class KedroContextSpecs:
-    """Namespace that defines all specifications for a kedro context's lifecycle hooks."""
+    """Namespace that defines all specifications for a Kedro context's lifecycle hooks."""
 
     @hook_spec
     def after_context_created(

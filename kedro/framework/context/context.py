@@ -5,8 +5,7 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
-import attrs
-from attrs import field
+from attrs import field, frozen
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException

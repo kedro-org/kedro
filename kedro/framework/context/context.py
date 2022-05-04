@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from warnings import warn
 
 import attrs
-from attrs import define, field
+from attrs import field
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -164,19 +164,17 @@ def _expand_full_path(project_path: Union[str, Path]) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
-@define
+@attrs.frozen
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
     """
 
     _package_name: str
-    project_path: Path = field(
-        converter=_expand_full_path, on_setattr=attrs.setters.frozen
-    )
-    config_loader: ConfigLoader = field(on_setattr=attrs.setters.frozen)
+    project_path: Path = field(converter=_expand_full_path)
+    config_loader: ConfigLoader
     _hook_manager: PluginManager
-    env: Optional[str] = field(default=None, on_setattr=attrs.setters.frozen)
+    env: Optional[str] = None
     _extra_params: Optional[Dict[str, Any]] = field(default=None, converter=deepcopy)
 
     """Create a context object by providing the root of a Kedro project and
@@ -221,7 +219,7 @@ class KedroContext:
         """
         try:
             # '**/parameters*' reads modular pipeline configs
-            params = self.config_loader.get(  # pylint: disable=no-member
+            params = self.config_loader.get(
                 "parameters*", "parameters*/**", "**/parameters*"
             )
         except MissingConfigException as exc:
@@ -244,9 +242,7 @@ class KedroContext:
 
         """
         # '**/catalog*' reads modular pipeline configs
-        conf_catalog = self.config_loader.get(  # pylint: disable=no-member
-            "catalog*", "catalog*/**", "**/catalog*"
-        )
+        conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
         conf_catalog = _convert_paths_to_absolute_posix(
@@ -308,7 +304,7 @@ class KedroContext:
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self.config_loader.get(  # pylint: disable=no-member
+            conf_creds = self.config_loader.get(
                 "credentials*", "credentials*/**", "**/credentials*"
             )
         except MissingConfigException as exc:

@@ -85,11 +85,12 @@ def info():
 
 @cli.command(short_help="See the kedro API docs and introductory tutorial.")
 def docs():
+    """Display the online API docs and introductory tutorial in the browser."""
     deprecation_message = (
-        "DeprecationWarning: Command `kedro docs` is deprecated in 0.18.1 and will not be available from 0.19.0."
+        "DeprecationWarning: Command `kedro docs` is deprecated in 0.18.1 and "
+        "will not be available from 0.19.0."
     )
     click.secho(deprecation_message, fg="red")
-    """Display the online API docs and introductory tutorial in the browser."""
     index_path = f"https://kedro.readthedocs.io/en/{version}"
     click.echo(f"Opening {index_path}")
     webbrowser.open(index_path)

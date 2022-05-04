@@ -163,7 +163,7 @@ def _expand_full_path(project_path: Union[str, Path]) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
-@attrs.frozen
+@frozen
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.

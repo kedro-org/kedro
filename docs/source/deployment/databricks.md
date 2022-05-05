@@ -233,7 +233,7 @@ The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/se
 
 The IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](../tools_integration/ipython.md).
 
-Currently in Databricks, when you try to do a kedro run, it throws you a `ContextualVersionConflictError` because it downgrades `pip` to 21.0.1. We are not sure why this happens and hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
+If you encounter a `ContextualVersionConflictError`, it is likely caused by Databricks using an old version of `pip`. Hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
 
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython

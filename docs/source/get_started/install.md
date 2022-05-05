@@ -7,7 +7,7 @@ pip install kedro
 ```
 
 ```{note}
-It is also possible to install Kedro using ``conda``, as follows, but we recommend using ``pip`` at this point to eliminate any potential dependency issues, as follows:
+It is also possible to install Kedro using `conda`, as follows, but we recommend using `pip` at this point to eliminate any potential dependency issues, as follows:
 ```
 
 ```bash

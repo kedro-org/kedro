@@ -118,7 +118,7 @@ if __name__ == "__main__":
 ```
 
 ```{note}
-The script launches a `local agent <https://docs.prefect.io/orchestration/agents/local.html>`_. Remember to stop the agent with Ctrl-C when you complete.
+The script launches a [local agent](https://docs.prefect.io/orchestration/agents/local.html). Remember to stop the agent with Ctrl-C when you complete.
 ```
 
 

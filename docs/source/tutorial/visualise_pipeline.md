@@ -107,7 +107,7 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
 
 
 ```{note}
-Kedro's Plotly integration only supports `Plotly Express <https://plotly.com/python/plotly-express/>` charts.
+Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/python/plotly-express/) charts.
 ```
 
 You need to update `requirements.txt` in your Kedro project and add the following datasets to enable plotly for your project.

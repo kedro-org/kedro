@@ -109,7 +109,7 @@ hooks = MyHooks()
 ```
 
 ```{note}
-``hooks`` should be an instance of the class defining the Hooks.
+`hooks` should be an instance of the class defining the Hooks.
 ```
 
 ## CLI Hooks
@@ -163,7 +163,7 @@ See the full list of plugins using the GitHub tag [kedro-plugin](https://github.
 
 
 ```{note}
-Your plugin needs to have an `Apache 2.0 compatible license <https://www.apache.org/legal/resolved.html#category-a>`_ to be considered for this list.
+Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 ```
 
 - [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling), by [Justin Malloy](https://github.com/BrickFrog), uses [Pandas Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog

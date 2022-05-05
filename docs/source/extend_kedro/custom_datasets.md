@@ -465,7 +465,7 @@ pikachu:
 ```
 
 ```{note}
-Using an HTTP(S)-based ``filepath`` with ``versioned: true`` is NOT supported.
+Using an HTTP(S)-based `filepath` with `versioned: true` is NOT supported.
 ```
 
 Create an initial version of the data by creating an example first version (e.g. `2020-02-22T00.00.00.000Z`):

@@ -37,7 +37,7 @@ pytest~=6.2 # Testing framework for Python code
 ```
 
 ```{note}
-If your project has ``conda`` dependencies, you can create a ``src/environment.yml`` file and list them there.
+If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
 ```
 
 The dependencies above may be sufficient for some projects, but for this tutorial you need to add some extra requirements. These will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.

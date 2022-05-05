@@ -81,7 +81,7 @@ This subfolder contains the project's source code. It contains 2 subfolders:
 * Avoid committing credentials in `conf/`. Only the `conf/local/` folder should be used for sensitive information like access credentials.
 
 ```{note}
-By default any file inside the ``conf/`` folder (and its subfolders) containing ``credentials`` in its name will be ignored via ``.gitignore``.
+By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore`.
 ```
 
 

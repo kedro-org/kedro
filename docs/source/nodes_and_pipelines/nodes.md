@@ -193,5 +193,5 @@ Out[2]: {'sum': 5}
 ```
 
 ```{note}
-It is also possible to call a node as a regular Python function: ``adder_node(dict(a=2, b=3))``. This will call ``adder_node.run(dict(a=2, b=3))`` behind the scenes.
+It is also possible to call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
 ```

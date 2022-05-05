@@ -129,7 +129,7 @@ The last row in the example above would attempt to load a CSV file from `data/01
 * We recommend that you do not override `save_version` argument in `DataCatalog.from_config` unless strongly required to do so, since it may lead to inconsistencies between loaded and saved versions of the versioned datasets.
 
 ```{warning}
-The ``DataCatalog`` does not re-generate save versions between instantiations. Therefore, if you call ``catalog.save('cars', some_data)`` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling ``%reload_kedro`` line magic. This limitation does not apply to ``load`` operation.
+The `DataCatalog` does not re-generate save versions between instantiations. Therefore, if you call `catalog.save('cars', some_data)` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling `%reload_kedro` line magic. This limitation does not apply to `load` operation.
 ```
 
 ### Versioning using the Code API
@@ -190,7 +190,7 @@ io.save("test_data_set", data2)
 ```
 
 ```{warning}
-Passing exact load and/or save versions to the dataset instantiation is not recommended, since it may lead to inconsistencies between operations. For example, if versions for load and save operations do not match, save operation would result in a ``UserWarning`` indicating that save a load versions do not match. Load after save may also return an error if the corresponding load version is not found:
+Passing exact load and/or save versions to the dataset instantiation is not recommended, since it may lead to inconsistencies between operations. For example, if versions for load and save operations do not match, save operation would result in a `UserWarning` indicating that save a load versions do not match. Load after save may also return an error if the corresponding load version is not found:
 ```
 
 ```python
@@ -234,7 +234,7 @@ Currently the following datasets support versioning:
 - `kedro.extras.datasets.json.JSONDataSet`
 
 ```{note}
-Although, HTTPs is a supported file system in the dataset implementations, it does not support versioning.
+Although, HTTP(S) is a supported file system in the dataset implementations, it does not support versioning.
 ```
 
 ## Partitioned dataset
@@ -269,7 +269,7 @@ my_partitioned_dataset:
 ```
 
 ```{note}
-As any other dataset ``PartitionedDataSet`` can also be instantiated programmatically in Python:
+As any other dataset `PartitionedDataSet` can also be instantiated programmatically in Python:
 ```
 
 ```python
@@ -349,7 +349,7 @@ Full notation allows you to specify a dictionary with the full underlying datase
 #### Partitioned dataset credentials
 
 ```{note}
-Support for ``dataset_credentials`` key in the credentials for ``PartitionedDataSet`` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 ```
 
 Credentials management for `PartitionedDataSet` is somewhat special in a sense that it may contain credentials for both `PartitionedDataSet` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config (unless such config already has credentials configured), but not the other way around - dataset credentials are never propagated to the filesystem.
@@ -473,7 +473,7 @@ def create_partitions() -> Dict[str, Any]:
 ```
 
 ```{note}
-Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a ``PartitionedDataSet``. The simplest safety mechanism could be to use partition IDs that have a high chance of uniqueness: for example, the current timestamp.
+Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a `PartitionedDataSet`. The simplest safety mechanism could be to use partition IDs that have a high chance of uniqueness: for example, the current timestamp.
 ```
 
 `PartitionedDataSet` also supports lazy saving, where the partition's data is not materialized until it's time to write.
@@ -617,7 +617,7 @@ my_partitioned_dataset:
 ```
 
 ```{note}
-Specification of ``force_checkpoint`` is also supported via the shorthand notation as follows:
+Specification of `force_checkpoint` is also supported via the shorthand notation as follows:
 ```
 
 ```yaml
@@ -629,7 +629,7 @@ my_partitioned_dataset:
 ```
 
 ```{note}
-If you need to force the partitioned dataset to load all available partitions, set ``checkpoint`` to an empty string:
+If you need to force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
 ```
 
 ```yaml

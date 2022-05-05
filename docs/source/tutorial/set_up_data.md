@@ -108,7 +108,7 @@ companies.head()
 ```
 
 ```{note}
-If this is the first ``kedro`` command you have executed in the project, you will be asked whether you wish to opt into `usage analytics <https://github.com/quantumblacklabs/kedro-telemetry>`_. Your decision is recorded in the ``.telemetry`` file so that subsequent calls to ``kedro`` in this project do not ask you again.
+If this is the first `kedro` command you have executed in the project, you will be asked whether you wish to opt into [usage analytics](https://github.com/quantumblacklabs/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask you again.
 ```
 
 The command loads the dataset named `companies` (as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv` into the variable `companies`, which is of type `pandas.DataFrame`. The `head` method from `pandas` then displays the first five rows of the DataFrame.
@@ -133,7 +133,7 @@ shuttles:
 
 ```{note}
 
- The ``load_args`` are passed to the ``pd.read_excel`` method as `keyword arguments <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html>`_; although not specified here, ``save_args`` would be passed to the ``pd.DataFrame.to_excel`` `method <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html>`_.
+ The `load_args` are passed to the `pd.read_excel` method as [keyword arguments](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html); although not specified here, `save_args` would be passed to the [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
 ```
 
 To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session and display its first five rows:

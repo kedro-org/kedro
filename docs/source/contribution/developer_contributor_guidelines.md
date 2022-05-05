@@ -7,7 +7,7 @@ This page explains the principles and development process that we ask contributi
 In short, when you submit code changes, your submissions are understood to be under the same the [Apache 2.0 License](https://github.com/kedro-org/kedro/blob/main/LICENSE.md) that covers the Kedro project. You should have permission to share the submitted code.
 
 ```{note}
-You don't need to contribute code to help the Kedro project. See our list of other ways `you can contribute to Kedro <https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md>`_.
+You don't need to contribute code to help the Kedro project. See our list of other ways [you can contribute to Kedro](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This guide is a practical description of:
 To work on the Kedro codebase, you will need to be set up with Git, and Make.
 
 ```{note}
-If your development environment is Windows, you can use the ``win_setup_conda`` and ``win_setup_env`` commands from `Circle CI configuration <https://github.com/kedro-org/kedro/blob/main/.circleci/config.yml>`_ to guide you in the correct way to do this.
+If your development environment is Windows, you can use the `win_setup_conda` and `win_setup_env` commands from [Circle CI configuration](https://github.com/kedro-org/kedro/blob/main/.circleci/config.yml) to guide you in the correct way to do this.
 ```
 
 You will also need to create and activate virtual environment. If this is unfamiliar to you, read through our [pre-requisites documentation](../get_started/prerequisites.md).
@@ -51,7 +51,7 @@ make test
 ```
 
 ```{note}
-If the tests in ``tests/extras/datasets/spark`` are failing, and you are not planning to work on `Spark <https://spark.apache.org>`_ related features, then you can run a reduced test suite that excludes them. Do this by executing ``make test-no-spark``.
+If the tests in `tests/extras/datasets/spark` are failing, and you are not planning to work on [Spark](https://spark.apache.org) related features, then you can run a reduced test suite that excludes them. Do this by executing `make test-no-spark`.
 ```
 
 ## Get started: areas of contribution
@@ -89,7 +89,7 @@ To contribute:
 7. Your PR will be merged by the Kedro team once all the comments are addressed.
 
 ```{note}
-We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
+We will work with you to complete your contribution, but we reserve the right to take over abandoned PRs.
 ```
 
 ### `extras` contribution process
@@ -111,7 +111,7 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 8. Your PR will be merged by the Kedro team once all the comments are addressed.
 
 ```{note}
-We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
+We will work with you to complete your contribution, but we reserve the right to take over abandoned PRs.
 ```
 
 ```{note}
@@ -144,11 +144,11 @@ Ensure that your PR builds cleanly before you submit it, by running the CI/CD ch
 * `make e2e-tests`: end-to-end tests (`behave`)
 
 ```{note}
-If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using ``export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)`` which `works under macOS or other workarounds <https://stackoverflow.com/questions/53583199/pyspark-error-unsupported-class-file-major-version-55)>`_.
+If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using `export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)` which [works under macOS or other workarounds](https://stackoverflow.com/questions/53583199/spark-error-unsupported-class-file-major-version).
 ```
 
 ```{note}
-We place `conftest.py <https://docs.pytest.org/en/latest/reference/fixtures.html>`_ files in some test directories to make fixtures reusable by any tests in that directory. If you need to see which test fixtures are available and where they come from, you can issue the following command ``pytest --fixtures path/to/the/test/location.py``.
+We place [conftest.py](https://docs.pytest.org/en/latest/reference/fixtures.html) files in some test directories to make fixtures reusable by any tests in that directory. If you need to see which test fixtures are available and where they come from, you can issue the following command `pytest --fixtures path/to/the/test/location.py`.
 ```
 
 ### Hints on `pre-commit` usage

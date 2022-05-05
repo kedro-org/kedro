@@ -117,7 +117,6 @@ extras_require = {
         "sphinx-autodoc-typehints==1.11.1",
         "sphinx_copybutton==0.3.1",
         "ipykernel>=5.3, <7.0",
-        "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=0.17.2",
     ],
     "geopandas": _collect_requirements(geopandas_require),

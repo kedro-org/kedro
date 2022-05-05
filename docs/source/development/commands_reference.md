@@ -83,7 +83,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 The following are Kedro commands that apply globally and can be run from any directory location.
 
 ```{note}
-You only need to use one of those given below (e.g. specify ``kedro -V`` **OR** ``kedro --version``).
+You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
 ```
 
 ### Get help on Kedro commands

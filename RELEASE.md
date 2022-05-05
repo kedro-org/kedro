@@ -22,7 +22,7 @@
 * Introduced `after_command_run` CLI hook.
 * Update sections on visualisation, namespacing, and experiment tracking in the spaceflight tutorial to correspond to the complete spaceflights starter.
 * Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
-* Deprecated global `_active_session`, `_activate_session and `_deactivate_session`
+* Removed global `_active_session`, `_activate_session` and `_deactivate_session`. Plugins that need to access objects such as the config loader should now do so through `context` in the new `after_context_created` hook.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

@@ -239,7 +239,7 @@ If you encounter a `ContextualVersionConflictError`, it is likely caused by Data
 In [1]: %load_ext kedro.extras.extensions.ipython
 ```
 
-You must explicitly upgrade your `pip` version by doing the below so it is on the latest version `pip ~= 22.0.4`. 
+You must explicitly upgrade your `pip` version by doing the below: 
 
 ```bash
 %pip install -U pip

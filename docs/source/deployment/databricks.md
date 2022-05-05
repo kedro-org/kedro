@@ -257,7 +257,7 @@ Currently, if you try to run `%run_viz` on Databricks it will only display the b
 
 While we fix this issue, we have a temporary workaround which involves you setting up a R Shiny application to run Kedro-Viz on Databricks.
 
-To run Kedro-Viz, first run the below command in your Databricks notebook: 
+To run Kedro-Viz, first ensure that you are in your Kedro project directory and then run the below command in your Databricks notebook: 
 
 ```bash
 %sh kedro viz --no-browser --host 0.0.0.0 --port 4141

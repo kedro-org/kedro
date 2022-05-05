@@ -1,7 +1,7 @@
 version: 2.1
 
 
-#  the default pipeline parameters, which will be updated according to
+# the default pipeline parameters, which will be updated according to
 # the results of the path-filtering orb
 parameters:
   code_change:

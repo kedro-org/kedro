@@ -11,7 +11,6 @@ from typing import Any, Dict
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 
-
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
 

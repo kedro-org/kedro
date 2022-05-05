@@ -32,22 +32,13 @@ handlers:
         delay: True
 
 loggers:
-    anyconfig:
-        level: WARNING
+    kedro.framework.cli.hooks.manager:
         handlers: [console]
         propagate: no
 
-    kedro.framework.cli.hooks.manager:
+    kedro:
         level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
 
-    kedro.io:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
+root:
+    handlers: [console, info_file_handler, error_file_handler]
 
-    kedro.pipeline:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no

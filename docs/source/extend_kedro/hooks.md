@@ -48,7 +48,6 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 Lastly, Kedro defines a small set of CLI hooks that inject additional behaviour around execution of a Kedro CLI command:
 
 * `before_command_run`
-* `after_command_run`
 
 This is what the [`kedro-telemetry`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry) plugin relies on under the hood in order to be able to collect CLI usage statistics.
 
@@ -240,13 +239,13 @@ def _logger(self):
 @hook_impl
 def before_dataset_loaded(self, dataset_name: str) -> None:
     start = time.time()
-    logging.info("Loading dataset %s started at %0.3f", dataset_name, start)
+    self._logger.info("Loading dataset %s started at %0.3f", dataset_name, start)
 
 
 @hook_impl
 def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
     end = time.time()
-    logging.info("Loading dataset %s ended at %0.3f", dataset_name, end)
+    self._logger.info("Loading dataset %s ended at %0.3f", dataset_name, end)
 ```
 
 ## Under the hood

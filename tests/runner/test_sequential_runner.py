@@ -40,7 +40,7 @@ def multi_input_list_output(arg1, arg2):
     return [arg1, arg2]
 
 
-class TestValidRun:
+class TestValidSequentialRunner:
     def test_run_with_plugin_manager(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
         result = SequentialRunner().run(

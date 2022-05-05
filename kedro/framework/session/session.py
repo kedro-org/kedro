@@ -260,7 +260,7 @@ class KedroSession:
             extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
-        self._hook_manager.hook.after_context_created(  # pylint: no-member
+        self._hook_manager.hook.after_context_created(  # pylint: disable=no-member
             context=context
         )
 

@@ -52,7 +52,6 @@ extensions = [
     "nbsphinx",
     "sphinx_copybutton",
     "myst_parser",
-    #TODO: verify native mermaid support?
 ]
 
 # enable autosummary plugin (table of contents for modules/classes/class

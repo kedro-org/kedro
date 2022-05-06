@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 import pytest
 
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
@@ -39,20 +40,28 @@ class TestValidParallelRunner:
         assert isinstance(data_set, _SharedMemoryDataSet)
 
     @pytest.mark.parametrize("is_async", [False, True])
-    def test_parallel_run(self, is_async, fan_out_fan_in, catalog, hook_manager):
+    def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
+        assert "Z" in result
+        assert len(result["Z"]) == 3
+        assert result["Z"] == (42, 42, 42)
+
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_parallel_run_with_plugin_manager(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
         result = ParallelRunner(is_async=is_async).run(
-            fan_out_fan_in, catalog, hook_manager
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
 
     @pytest.mark.parametrize("is_async", [False, True])
-    def test_memory_dataset_input(self, is_async, fan_out_fan_in, hook_manager):
+    def test_memory_dataset_input(self, is_async, fan_out_fan_in):
         pipeline = Pipeline([fan_out_fan_in])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        result = ParallelRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+        result = ParallelRunner(is_async=is_async).run(pipeline, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == ("42", "42", "42")
@@ -84,7 +93,6 @@ class TestMaxWorkers:
         cpu_cores,
         user_specified_number,
         expected_number,
-        hook_manager,
     ):  # pylint: disable=too-many-arguments
         """
         The system has 2 cores, but we initialize the runner with max_workers=4.
@@ -101,7 +109,7 @@ class TestMaxWorkers:
         catalog.add_feed_dict(dict(A=42))
         result = ParallelRunner(
             max_workers=user_specified_number, is_async=is_async
-        ).run(fan_out_fan_in, catalog, hook_manager)
+        ).run(fan_out_fan_in, catalog)
         assert result == {"Z": (42, 42, 42)}
 
         executor_cls_mock.assert_called_once_with(max_workers=expected_number)
@@ -123,36 +131,36 @@ class TestMaxWorkers:
 )
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
-    def test_task_validation(self, is_async, fan_out_fan_in, catalog, hook_manager):
+    def test_task_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialize the lambda function."""
         catalog.add_feed_dict(dict(A=42))
         pipeline = Pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_task_exception(self, is_async, fan_out_fan_in, catalog, hook_manager):
+    def test_task_exception(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pipeline = Pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_memory_dataset_output(self, is_async, fan_out_fan_in, hook_manager):
+    def test_memory_dataset_output(self, is_async, fan_out_fan_in):
         """ParallelRunner does not support output to externally
         created MemoryDataSets.
         """
         pipeline = Pipeline([fan_out_fan_in])
         catalog = DataCatalog({"C": MemoryDataSet()}, dict(A=42))
         with pytest.raises(AttributeError, match="['C']"):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_node_returning_none(self, is_async, hook_manager):
+    def test_node_returning_none(self, is_async):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         pattern = "Saving `None` to a `DataSet` is not allowed"
         with pytest.raises(DataSetError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_data_set_not_serializable(self, is_async, fan_out_fan_in, hook_manager):
+    def test_data_set_not_serializable(self, is_async, fan_out_fan_in):
         """Data set A cannot be serializable because _load and _save are not
         defined in global scope.
         """
@@ -168,9 +176,9 @@ class TestInvalidParallelRunner:
 
         pipeline = Pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_memory_dataset_not_serializable(self, is_async, catalog, hook_manager):
+    def test_memory_dataset_not_serializable(self, is_async, catalog):
         """Memory dataset cannot be serializable because of data it stores."""
         data = return_not_serializable(None)
         pipeline = Pipeline([node(return_not_serializable, "A", "B")])
@@ -181,10 +189,10 @@ class TestInvalidParallelRunner:
         )
 
         with pytest.raises(DataSetError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog, hook_manager)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_unable_to_schedule_all_nodes(
-        self, mocker, is_async, fan_out_fan_in, catalog, hook_manager
+        self, mocker, is_async, fan_out_fan_in, catalog
     ):
         """Test the error raised when `futures` variable is empty,
         but `todo_nodes` is not (can barely happen in real life).
@@ -205,7 +213,7 @@ class TestInvalidParallelRunner:
 
         pattern = "Unable to schedule new tasks although some nodes have not been run"
         with pytest.raises(RuntimeError, match=pattern):
-            runner.run(fan_out_fan_in, catalog, hook_manager)
+            runner.run(fan_out_fan_in, catalog)
 
 
 class LoggingDataSet(AbstractDataSet):
@@ -240,7 +248,7 @@ if not sys.platform.startswith("win"):
 )
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:
-    def test_dont_release_inputs_and_outputs(self, is_async, hook_manager):
+    def test_dont_release_inputs_and_outputs(self, is_async):
         runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
@@ -255,12 +263,12 @@ class TestParallelRunnerRelease:
                 "out": runner._manager.LoggingDataSet(log, "out"),
             }
         )
-        ParallelRunner().run(pipeline, catalog, hook_manager)
+        ParallelRunner().run(pipeline, catalog)
 
         # we don't want to see release in or out in here
         assert list(log) == [("load", "in"), ("load", "middle"), ("release", "middle")]
 
-    def test_release_at_earliest_opportunity(self, is_async, hook_manager):
+    def test_release_at_earliest_opportunity(self, is_async):
         runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
@@ -278,7 +286,7 @@ class TestParallelRunnerRelease:
                 "second": runner._manager.LoggingDataSet(log, "second"),
             }
         )
-        runner.run(pipeline, catalog, hook_manager)
+        runner.run(pipeline, catalog)
 
         # we want to see "release first" before "load second"
         assert list(log) == [
@@ -288,7 +296,7 @@ class TestParallelRunnerRelease:
             ("release", "second"),
         ]
 
-    def test_count_multiple_loads(self, is_async, hook_manager):
+    def test_count_multiple_loads(self, is_async):
         runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
@@ -303,7 +311,7 @@ class TestParallelRunnerRelease:
         catalog = DataCatalog(
             {"dataset": runner._manager.LoggingDataSet(log, "dataset")}
         )
-        runner.run(pipeline, catalog, hook_manager)
+        runner.run(pipeline, catalog)
 
         # we want to the release after both the loads
         assert list(log) == [
@@ -312,7 +320,7 @@ class TestParallelRunnerRelease:
             ("release", "dataset"),
         ]
 
-    def test_release_transcoded(self, is_async, hook_manager):
+    def test_release_transcoded(self, is_async):
         runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
@@ -326,7 +334,7 @@ class TestParallelRunnerRelease:
             }
         )
 
-        ParallelRunner().run(pipeline, catalog, hook_manager)
+        ParallelRunner().run(pipeline, catalog)
 
         # we want to see both datasets being released
         assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]

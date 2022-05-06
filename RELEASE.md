@@ -24,6 +24,7 @@
 * Update sections on visualisation, namespacing, and experiment tracking in the spaceflight tutorial to correspond to the complete spaceflights starter.
 * Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
 * Removed global `_active_session`, `_activate_session` and `_deactivate_session`. Plugins that need to access objects such as the config loader should now do so through `context` in the new `after_context_created` hook.
+* `config_loader` is available as a public read-only attribute of `KedroContext`.
 * Made `hook_manager` argument optional for `runner.run`.
 
 

@@ -225,7 +225,7 @@ Your complete notebook should look similar to this (the results are hidden):
 ![](../meta/images/databricks_notebook_example.png)
 
 
-### 9. Using the Kedro IPython Extension 
+### 9. Using the Kedro IPython Extension
 
 You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`.
 
@@ -239,7 +239,7 @@ If you encounter a `ContextualVersionConflictError`, it is likely caused by Data
 In [1]: %load_ext kedro.extras.extensions.ipython
 ```
 
-You must explicitly upgrade your `pip` version by doing the below: 
+You must explicitly upgrade your `pip` version by doing the below:
 
 ```bash
 %pip install -U pip
@@ -247,12 +247,12 @@ You must explicitly upgrade your `pip` version by doing the below:
 
 After this, you can reload Kedro by running the line magic command `%reload_kedro <path_to_project_root>`.
 
-### 10. Running Kedro-Viz on Databricks 
+### 10. Running Kedro-Viz on Databricks
 
-For Kedro-Viz to run with your Kedro project, you need to ensure that both the packages are installed in the same scope (notebook-scoped vs. cluster library). i.e. if you `%pip install kedro` from inside your notebook then you should also `%pip install kedro-viz` from inside your notebook. 
+For Kedro-Viz to run with your Kedro project, you need to ensure that both the packages are installed in the same scope (notebook-scoped vs. cluster library). i.e. if you `%pip install kedro` from inside your notebook then you should also `%pip install kedro-viz` from inside your notebook.
 If your cluster comes with Kedro installed on it as a library already then you should also add Kedro-Viz as a [cluster library](https://docs.microsoft.com/en-us/azure/databricks/libraries/cluster-libraries).
 
-Currently, if you try to run `%run_viz` on Databricks it will only display the below instead of running the Kedro-Viz app in the notebook. 
+Currently, if you try to run `%run_viz` on Databricks it will only display the below instead of running the Kedro-Viz app in the notebook.
 
 ```console
 <IPython.core.display.HTML object>
@@ -260,7 +260,7 @@ Currently, if you try to run `%run_viz` on Databricks it will only display the b
 
 While we fix this issue, we have a temporary workaround which involves you setting up a R Shiny application to run Kedro-Viz on Databricks.
 
-To run Kedro-Viz, first ensure that you are in your Kedro project directory and then run the below command in your Databricks notebook: 
+To run Kedro-Viz, first ensure that you are in your Kedro project directory and then run the below command in your Databricks notebook:
 
 ```bash
 %sh kedro viz --no-browser --host 0.0.0.0 --port 4141
@@ -273,7 +273,7 @@ To run Kedro-Viz, first ensure that you are in your Kedro project directory and 
 ![](../meta/images/databricks_cancel_command.gif)
 
 
-After this, you must try and run an example Shiny app using the below command: 
+After this, you must try and run an example Shiny app using the below command:
 
 ```bash
 %r
@@ -283,14 +283,12 @@ runExample("01_hello")
 
 ![](../meta/images/databricks_shiny_command.png)
 
-When you click on the Shiny app link, it will open a browser with an example Shiny app running. Now edit the port at the end of the URL and change it to 4141. 
+When you click on the Shiny app link, it will open a browser with an example Shiny app running. Now edit the port at the end of the URL and change it to 4141.
 
 ![](../meta/images/databricks_kedro_viz.gif)
 
-You will notice Kedro-Viz is blank at first, but if you click on the flowchart tab, Kedro-Viz will run as normal. 
+You will notice Kedro-Viz is blank at first, but if you click on the flowchart tab, Kedro-Viz will run as normal.
 
 ```eval_rst
 .. note:: Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
 ```
-
-

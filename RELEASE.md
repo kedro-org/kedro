@@ -24,6 +24,7 @@
 * Updated [Databricks documentation](https://kedro.readthedocs.io/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.
 * Update sections on visualisation, namespacing, and experiment tracking in the spaceflight tutorial to correspond to the complete spaceflights starter.
 * Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
+* `config_loader` is available as a public read-only attribute of `KedroContext`.
 * Made `hook_manager` argument optional for `runner.run`.
 
 

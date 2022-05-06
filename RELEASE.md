@@ -22,6 +22,7 @@
 * Introduced `after_command_run` CLI hook.
 * Update sections on visualisation, namespacing, and experiment tracking in the spaceflight tutorial to correspond to the complete spaceflights starter.
 * Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
+* Changed the behaviour of `kedro docs`, it will now open an online version of the Kedro documentation instead of a locally built version.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.

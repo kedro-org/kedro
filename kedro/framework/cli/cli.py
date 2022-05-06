@@ -88,7 +88,7 @@ def docs():
     """Display the online API docs and introductory tutorial in the browser. (DEPRECATED)"""
     deprecation_message = (
         "DeprecationWarning: Command `kedro docs` is deprecated and "
-        "will not be available from 0.19.0."
+        "will not be available from Kedro 0.19.0."
     )
     click.secho(deprecation_message, fg="red")
     index_path = f"https://kedro.readthedocs.io/en/{version}"

@@ -1,6 +1,6 @@
 import pytest
 
-from kedro.framework.hooks.manager import _create_hook_manager
+from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
 from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
 
 
@@ -55,3 +55,10 @@ def test_hook_manager_can_call_hooks_defined_in_specs(
     # since there hasn't been any hook implementation, the result should be empty
     # but it shouldn't have raised
     assert result == []
+
+
+def test_null_plugin_manager_returns_none_when_called():
+    plugin_manager = _NullPluginManager()
+    assert (
+        plugin_manager.hook.before_dataset_saved(dataset_name="mock", data=[]) is None
+    )

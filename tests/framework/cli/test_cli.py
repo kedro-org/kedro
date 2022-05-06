@@ -128,7 +128,7 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["docs"])
 
         assert result.exit_code == 0
-        expected = f'https://kedro.readthedocs.io/en/{version}'
+        expected = f"https://kedro.readthedocs.io/en/{version}"
 
         assert patched_browser.call_count == 1
         args, _ = patched_browser.call_args

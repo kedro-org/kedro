@@ -1,4 +1,4 @@
-install: build-docs
+install:
 	pip install .
 
 clean:

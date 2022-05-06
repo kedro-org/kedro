@@ -21,4 +21,15 @@ We also provide information to help you deploy to the following:
 
 In addition, we also provide instructions on [how to integrate a Kedro project with Amazon SageMaker](aws_sagemaker.md).
 
-![](../meta/images/deployments.png)
+```{mermaid}
+flowchart TD
+    A{Can your Kedro pipeline run on a single machine?} -- YES --> B[Consult the single-machine deployment guide];
+    B --> C{Do you have Docker on your machine?};
+    C -- YES --> D[Use a container-based approach];
+    C -- NO --> E[Use the CLI or package mode];
+    A -- NO --> F[Consult the distributed deployment guide];
+    F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Argo</li><li>Prefect</li><li>Kubeflow Pipelines</li><li>AWS Batch</li><li>Databricks</li><li>Dask</li>"];
+    style G text-align:left
+    H["Does (part of) your pipeline integrate with Amazon SageMaker?<br/><br/>Read the SageMaker integration guide"];
+    style H text-align:left
+```

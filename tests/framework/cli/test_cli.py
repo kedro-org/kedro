@@ -1,6 +1,5 @@
 from collections import namedtuple
 from itertools import cycle
-from os.path import join
 from pathlib import Path
 from unittest.mock import patch
 

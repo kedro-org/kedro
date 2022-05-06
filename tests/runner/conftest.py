@@ -2,7 +2,6 @@ from random import random
 
 import pytest
 
-from kedro.framework.hooks import _create_hook_manager
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
 
@@ -39,11 +38,6 @@ def return_not_serializable(arg):  # pylint: disable=unused-argument
 @pytest.fixture
 def catalog():
     return DataCatalog()
-
-
-@pytest.fixture
-def hook_manager():
-    return _create_hook_manager()
 
 
 @pytest.fixture

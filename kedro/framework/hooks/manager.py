@@ -83,3 +83,17 @@ def _register_hooks_setuptools(
             len(plugin_names),
             ", ".join(sorted(plugin_names)),
         )
+
+
+class _NullPluginManager:
+    """This class creates an empty ``hook_manager`` that will ignore all calls to hooks,
+    allowing the runner to function if no ``hook_manager`` has been instantiated."""
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __getattr__(self, name):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        pass

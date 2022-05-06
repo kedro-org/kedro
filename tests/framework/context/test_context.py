@@ -239,7 +239,7 @@ class TestKedroContext:
         assert dummy_context.project_path == tmp_path.resolve()
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
-        config_loader = dummy_context._config_loader
+        config_loader = dummy_context.config_loader
         conf_catalog = config_loader.get("catalog*")
 
         # even though the raw configuration uses relative path

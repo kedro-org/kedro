@@ -51,7 +51,7 @@ class CustomContext(KedroContext):
         """Initialises a SparkSession using the config defined in project's conf folder."""
 
         # Load the spark configuration in spark.yaml using the config loader
-        parameters = self._config_loader.get("spark*", "spark*/**")
+        parameters = self.config_loader.get("spark*", "spark*/**")
         spark_conf = SparkConf().setAll(parameters.items())
 
         # Initialise the spark session

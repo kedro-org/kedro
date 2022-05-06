@@ -1,6 +1,6 @@
 import pytest
 
-from kedro.framework.hooks.manager import _create_hook_manager
+from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
 from kedro.framework.hooks.specs import (
     DataCatalogSpecs,
     DatasetSpecs,
@@ -8,7 +8,6 @@ from kedro.framework.hooks.specs import (
     NodeSpecs,
     PipelineSpecs,
 )
-from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
 
 
 @pytest.mark.parametrize(

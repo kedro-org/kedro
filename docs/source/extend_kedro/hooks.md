@@ -240,13 +240,13 @@ def _logger(self):
 @hook_impl
 def before_dataset_loaded(self, dataset_name: str) -> None:
     start = time.time()
-    logging.info("Loading dataset %s started at %0.3f", dataset_name, start)
+    self._logger.info("Loading dataset %s started at %0.3f", dataset_name, start)
 
 
 @hook_impl
 def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
     end = time.time()
-    logging.info("Loading dataset %s ended at %0.3f", dataset_name, end)
+    self._logger.info("Loading dataset %s ended at %0.3f", dataset_name, end)
 ```
 
 ## Under the hood

@@ -242,6 +242,10 @@ class KedroSession:
             extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
+        self._hook_manager.hook.after_context_created(  # pylint: disable=no-member
+            context=context
+        )
+
         return context
 
     def _get_config_loader(self) -> ConfigLoader:
@@ -377,8 +381,8 @@ class KedroSession:
         )
 
         # Run the runner
-        runner = runner or SequentialRunner()
         hook_manager = self._hook_manager
+        runner = runner or SequentialRunner()
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )

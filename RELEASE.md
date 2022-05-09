@@ -16,6 +16,7 @@
 * Added a new CLI hook `after_command_run`.
 * Added more detail to YAML `ParserError` exception error message.
 * Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
+* The Kedro package no longer contains a built version of the Kedro documentation significantly reducing the package size.
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
@@ -28,7 +29,6 @@
 * `config_loader` is available as a public read-only attribute of `KedroContext`.
 * Made `hook_manager` argument optional for `runner.run`.
 * `kedro docs` now opens an online version of the Kedro documentation instead of a locally built version.
-* The Kedro package no longer contains a built version of the Kedro documentation significantly reducing the package size.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.

@@ -32,27 +32,12 @@ def mock_package_name() -> str:
     return MOCK_PACKAGE_NAME
 
 
-# This is running correctly. For some reason need to set propagate: True.
 @pytest.fixture
 def local_logging_config() -> Dict[str, Any]:
     return {
         "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {
-            "kedro": {"level": "INFO", "handlers": ["console"]},
-            "tests.framework.session.conftest": {"propagate": True},
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
+        "incremental": True,
+        "root": {"level": "INFO"},
     }
 
 
@@ -164,12 +149,10 @@ class LogsListener(QueueListener):
 
         # Tells python logging to send logs to this queue
         self.log_handler = QueueHandler(queue)
-        # self.log_handler.setLevel(logging.INFO)
         logger.addHandler(self.log_handler)
 
         # The listener listens to new logs on the queue and saves it to the recorder
         self.log_recorder = LogRecorder()
-        # self.log_recorder.setLevel(logging.INFO)
         super().__init__(queue, self.log_recorder)
 
     @property
@@ -348,13 +331,6 @@ class LoggingHooks:
 def project_hooks():
     """A set of project hook implementations that log to stdout whenever it is invoked."""
     return LoggingHooks()
-
-
-# @pytest.fixture(autouse=True)
-# def mock_logging(mocker):
-#     # Disable logging.config.dictConfig in KedroSession._setup_logging as
-#     # it changes logging.config and affects other unit tests
-#     return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)

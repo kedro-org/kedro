@@ -287,7 +287,8 @@ class DataCatalog:
         if data_set_name not in self._data_sets:
             error_msg = f"DataSet '{data_set_name}' not found in the catalog"
 
-           # Flag to turn on/off fuzzy-matching which can be time consuming and slow down plugins like `kedro-viz`
+            # Flag to turn on/off fuzzy-matching which can be time consuming and
+            # slow down plugins like `kedro-viz`
             if suggest:
                 matches = difflib.get_close_matches(
                     data_set_name, self._data_sets.keys()

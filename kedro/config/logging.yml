@@ -33,6 +33,7 @@ handlers:
 
 loggers:
     kedro.framework.cli.hooks.manager:
+        level: INFO
         handlers: [console]
         propagate: no
 

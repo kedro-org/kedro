@@ -11,6 +11,7 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
+from kedro.framework.context.context import KedroContext
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
     _ProjectPipelines,
@@ -325,6 +326,10 @@ class LoggingHooks:
         logger.info(
             "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
         )
+
+    @hook_impl
+    def after_context_created(self, context: KedroContext) -> None:
+        logger.info("After context created", extra={"context": context})
 
 
 @pytest.fixture

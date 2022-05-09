@@ -12,6 +12,7 @@
 # Upcoming Release 0.18.1
 
 ## Major features and improvements
+* Added a new hook `after_context_created` that passes the `KedroContext` instance as `context`.
 * Added more detail to YAML ParserError error message.
 * Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
 
@@ -23,6 +24,7 @@
 * Updated [Databricks documentation](https://kedro.readthedocs.io/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.
 * Update sections on visualisation, namespacing, and experiment tracking in the spaceflight tutorial to correspond to the complete spaceflights starter.
 * Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
+* Removed global `_active_session`, `_activate_session` and `_deactivate_session`. Plugins that need to access objects such as the config loader should now do so through `context` in the new `after_context_created` hook.
 * `config_loader` is available as a public read-only attribute of `KedroContext`.
 * Made `hook_manager` argument optional for `runner.run`.
 * Changed the behaviour of `kedro docs`, it will now open an online version of the Kedro documentation instead of a locally built version.

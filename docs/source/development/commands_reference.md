@@ -113,14 +113,14 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.18.0
+v0.18.1
 
 Kedro is a Python framework for
 creating reproducible, maintainable
 and modular data science code.
 
 Installed plugins:
-kedro_viz: 3.4.0 (hooks:global,line_magic)
+kedro_viz: 4.4.0 (hooks:global,line_magic)
 
 ```
 

@@ -1,6 +1,5 @@
 from collections import namedtuple
 from itertools import cycle
-from os.path import join
 from pathlib import Path
 from unittest.mock import patch
 
@@ -129,13 +128,11 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["docs"])
 
         assert result.exit_code == 0
-        for each in ("Opening file", join("html", "index.html")):
-            assert each in result.output
+        expected = f"https://kedro.readthedocs.io/en/{version}"
 
         assert patched_browser.call_count == 1
         args, _ = patched_browser.call_args
-        for each in ("file://", join("kedro", "framework", "html", "index.html")):
-            assert each in args[0]
+        assert expected in args[0]
 
 
 class TestCommandCollection:

@@ -148,7 +148,7 @@ class LogRecorder(logging.Handler):  # pylint: disable=abstract-method
     """Record logs received from a process-safe log listener"""
 
     def __init__(self):
-        # super().__init__(level=logging.INFO)
+        super().__init__()
         self.log_records = []
 
     def handle(self, record):

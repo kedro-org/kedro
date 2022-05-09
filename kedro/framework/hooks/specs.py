@@ -4,6 +4,7 @@ For more information about these specifications, please visit
 """
 from typing import Any, Dict, Optional
 
+from kedro.framework.context import KedroContext
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -279,3 +280,19 @@ class DatasetSpecs:
             data: the actual data that was saved to the catalog.
         """
         pass
+
+
+class KedroContextSpecs:
+    """Namespace that defines all specifications for a Kedro context's lifecycle hooks."""
+
+    @hook_spec
+    def after_context_created(
+        self,
+        context: KedroContext,
+    ) -> None:
+        """Hooks to be invoked after a `KedroContext` is created. This is the earliest
+        hook triggered within a Kedro run. The `KedroContext` stores useful information
+        such as `credentials`, `config_loader` and `env`.
+        Args:
+            context: The context that was created.
+        """

@@ -560,3 +560,16 @@ class TestAsyncNodeDatasetHooks:
         assert str(
             ["Before dataset loaded", "Catalog load", "After dataset loaded"]
         ).strip("[]") in str(hooks_log_messages).strip("[]")
+
+
+class TestKedroContextSpecsHook:
+    """Test the behavior of `after_context_created` when updating node inputs."""
+
+    def test_after_context_created_hook(self, mock_session, caplog):
+        context = mock_session.load_context()
+        relevant_records = [
+            r for r in caplog.records if r.getMessage() == "After context created"
+        ]
+        assert len(relevant_records) == 1
+        record = relevant_records[0]
+        assert record.context is context

@@ -28,24 +28,6 @@ from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 
-_active_session = None
-
-
-def _activate_session(session: "KedroSession", force: bool = False) -> None:
-    global _active_session
-
-    if _active_session and not force and session is not _active_session:
-        raise RuntimeError(
-            "Cannot activate the session as another active session already exists."
-        )
-
-    _active_session = session
-
-
-def _deactivate_session() -> None:
-    global _active_session
-    _active_session = None
-
 
 def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
     project_path = str(project_path)
@@ -260,6 +242,10 @@ class KedroSession:
             extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
+        self._hook_manager.hook.after_context_created(  # pylint: disable=no-member
+            context=context
+        )
+
         return context
 
     def _get_config_loader(self) -> ConfigLoader:
@@ -282,12 +268,7 @@ class KedroSession:
         if self.save_on_close:
             self._store.save()
 
-        if _active_session is self:
-            _deactivate_session()
-
     def __enter__(self):
-        if _active_session is not self:
-            _activate_session(self)
         return self
 
     def __exit__(self, exc_type, exc_value, tb_):
@@ -400,8 +381,8 @@ class KedroSession:
         )
 
         # Run the runner
-        runner = runner or SequentialRunner()
         hook_manager = self._hook_manager
+        runner = runner or SequentialRunner()
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )

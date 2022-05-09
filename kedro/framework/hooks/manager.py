@@ -7,7 +7,13 @@ from typing import Any, Iterable
 from pluggy import PluginManager
 
 from .markers import HOOK_NAMESPACE
-from .specs import DataCatalogSpecs, DatasetSpecs, NodeSpecs, PipelineSpecs
+from .specs import (
+    DataCatalogSpecs,
+    DatasetSpecs,
+    KedroContextSpecs,
+    NodeSpecs,
+    PipelineSpecs,
+)
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
 
@@ -21,6 +27,7 @@ def _create_hook_manager() -> PluginManager:
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)
     manager.add_hookspecs(DatasetSpecs)
+    manager.add_hookspecs(KedroContextSpecs)
     return manager
 
 

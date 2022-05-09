@@ -11,7 +11,7 @@ kedro.framework.context
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.framework.context.context.KedroContext
+   kedro.framework.context.KedroContext
 
 .. rubric:: Exceptions
 
@@ -19,4 +19,4 @@ kedro.framework.context
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.framework.context.context.KedroContextError
+   kedro.framework.context.KedroContextError

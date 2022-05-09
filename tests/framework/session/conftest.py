@@ -40,7 +40,14 @@ def local_logging_config() -> Dict[str, Any]:
             "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
         },
         "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {"kedro": {"level": "INFO", "handlers": ["console"]}},
+        "loggers": {
+            "kedro": {"level": "INFO", "handlers": ["console"]},
+            "tests.framework.session.conftest": {
+                "propagate": True,
+                # "level": "INFO",
+                # "handlers": ["console"],
+            },
+        },
         "handlers": {
             "console": {
                 "class": "logging.StreamHandler",
@@ -144,7 +151,7 @@ class LogRecorder(logging.Handler):  # pylint: disable=abstract-method
     """Record logs received from a process-safe log listener"""
 
     def __init__(self):
-        super().__init__()
+        # super().__init__(level=logging.INFO)
         self.log_records = []
 
     def handle(self, record):
@@ -160,10 +167,12 @@ class LogsListener(QueueListener):
 
         # Tells python logging to send logs to this queue
         self.log_handler = QueueHandler(queue)
+        # self.log_handler.setLevel(logging.INFO)
         logger.addHandler(self.log_handler)
 
         # The listener listens to new logs on the queue and saves it to the recorder
         self.log_recorder = LogRecorder()
+        # self.log_recorder.setLevel(logging.INFO)
         super().__init__(queue, self.log_recorder)
 
     @property
@@ -344,11 +353,11 @@ def project_hooks():
     return LoggingHooks()
 
 
-@pytest.fixture(autouse=True)
-def mock_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
+# @pytest.fixture(autouse=True)
+# def mock_logging(mocker):
+#     # Disable logging.config.dictConfig in KedroSession._setup_logging as
+#     # it changes logging.config and affects other unit tests
+#     return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)

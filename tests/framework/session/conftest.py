@@ -43,11 +43,7 @@ def local_logging_config() -> Dict[str, Any]:
         "root": {"level": "INFO", "handlers": ["console"]},
         "loggers": {
             "kedro": {"level": "INFO", "handlers": ["console"]},
-            #     "tests.framework.session.conftest": {
-            #         # "propagate": True,
-            #         "level": "INFO",
-            #         "handlers": ["console"],
-            #     },
+            "tests.framework.session.conftest": {"propagate": True},
         },
         "handlers": {
             "console": {

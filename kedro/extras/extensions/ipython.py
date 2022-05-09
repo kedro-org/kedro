@@ -63,7 +63,6 @@ def reload_kedro(
     session = KedroSession.create(
         metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )
-    _activate_session(session, force=True)
     logger.debug("Loading the context from %s", default_project_path)
     context = session.load_context()
     catalog = context.catalog

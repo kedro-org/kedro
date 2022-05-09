@@ -13,9 +13,9 @@
 
 ## Major features and improvements
 * Added a new hook `after_context_created` that passes the `KedroContext` instance as `context`.
-* Added more detail to YAML ParserError error message.
+* Added a new CLI hook `after_command_run`.
+* Added more detail to YAML `ParserError` exception error message.
 * Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
-* Introduced `after_command_run` CLI hook.
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.

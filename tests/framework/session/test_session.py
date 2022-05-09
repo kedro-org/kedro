@@ -288,7 +288,7 @@ class TestKedroSession:
     def test_create_multiple_sessions(self, fake_project, mock_package_name):
         with KedroSession.create(mock_package_name, fake_project):
             with KedroSession.create(mock_package_name, fake_project):
-                ...
+                pass
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_create_no_env_extra_params(

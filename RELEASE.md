@@ -9,7 +9,7 @@
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
 
-# Upcoming Release 0.18.1
+# Release 0.18.1
 
 ## Major features and improvements
 * Added a new hook `after_context_created` that passes the `KedroContext` instance as `context`.

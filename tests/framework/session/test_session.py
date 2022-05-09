@@ -17,7 +17,6 @@ from kedro.framework.project import (
     _HasSharedParentClassValidator,
     _IsSubclassValidator,
     _ProjectSettings,
-    configure_project,
 )
 from kedro.framework.session import KedroSession
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
@@ -285,6 +284,12 @@ class TestKedroSession:
         assert session.load_context() is mock_context_class.return_value
         assert isinstance(session._get_config_loader(), ConfigLoader)
 
+    @pytest.mark.usefixtures("mock_settings")
+    def test_create_multiple_sessions(self, fake_project, mock_package_name):
+        with KedroSession.create(mock_package_name, fake_project):
+            with KedroSession.create(mock_package_name, fake_project):
+                pass
+
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_create_no_env_extra_params(
         self,
@@ -518,19 +523,6 @@ class TestKedroSession:
         assert any(
             "raise FakeException" in tb_line for tb_line in exception["traceback"]
         )
-
-    @pytest.mark.usefixtures("mock_settings")
-    def test_nested_sessions(self, fake_project, mock_package_name):
-        configure_project(mock_package_name)
-        session1 = KedroSession.create(mock_package_name, fake_project)
-        session2 = KedroSession.create(mock_package_name, fake_project)
-
-        with session1:
-            pattern = (
-                "Cannot activate the session as another active session already exists"
-            )
-            with pytest.raises(RuntimeError, match=pattern), session2:
-                pass  # pragma: no cover
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])

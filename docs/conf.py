@@ -208,7 +208,6 @@ linkcheck_ignore = [
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf",
 
-    # Number section removal, temporarily ignore until 0.18.0 release
     "https://kedro.readthedocs.io/en/stable/data/data_catalog.html#using-the-data-catalog-with-the-yaml-api",
     "https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention",
     "https://kedro.readthedocs.io/en/stable/faq/faq.html",

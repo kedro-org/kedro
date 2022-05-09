@@ -234,7 +234,6 @@ class _Run(Callable):
         # (when invoked from a packaged project through the main entry point) and
         # using a Python API.
         # NOTE args rather than *args. So do run(["-p", "ds"]), not run("-p", "ds").
-        # TRY ON DATABRICKS entrypoints
         args = args or []
         logging.info(args)
         logging.info(kwargs)
@@ -245,69 +244,6 @@ class _Run(Callable):
     __repr__ = _load_callable_wrapper(repr)
     __str__ = _load_callable_wrapper(str)
     __doc__ = _load_callable_wrapper(__doc__)
-
-
-#
-# class _Run:
-#     def __init__(self):
-#         pass
-#
-#     # self._pipelines_module: Optional[str] = None
-#     # self._is_data_loaded = False
-#     # self._content: Dict[str, Pipeline] = {}
-#
-#     def _find_run_command(self):
-#         from kedro.framework.cli.utils import (
-#             KedroCliError,
-#             load_entry_points,
-#         )  ### needs to go in here to avoid circular imports
-#
-#         try:
-#             project_cli = importlib.import_module(self._cli_module)
-#             # fail gracefully if cli.py does not exist
-#         except ModuleNotFoundError as exc:
-#             if self._cli_module not in str(exc):
-#                 raise
-#             plugins = load_entry_points("project")
-#             run = self._find_run_command_in_plugins(plugins) if plugins else None
-#             if run:
-#                 # use run command from installed plugin if it exists
-#                 return run
-#             # use run command from the framework project
-#             from kedro.framework.cli.project import run
-#
-#             return run
-#         # fail badly if cli.py exists, but has no `cli` in it
-#         if not hasattr(project_cli, "cli"):
-#             raise KedroCliError(f"Cannot load commands from {self._cli_module}")
-#         return project_cli.run
-#
-#     @staticmethod
-#     def _find_run_command_in_plugins(plugins):
-#         for group in plugins:
-#             if "run" in group.commands:
-#                 return group.commands["run"]
-#
-#     def configure(self, cli_module: str):
-#         self._cli_module = cli_module
-#         self._run_cmd = self._find_run_command()
-#
-#         self.__call__.__func__.__name__ = self._run_cmd.callback.__name__
-#         self.__call__.__func__.__signature__ = inspect.signature(self._run_cmd.callback)
-#         self.__call__.__func__.__annotations__ = self._run_cmd.callback.__annotations__
-#
-#     def __call__(self, *args, **kwargs):
-#         # This is what happens under the hood of click. The click context contains
-#         # a list of arguments (e.g. ["--pipeline", "ds"]) and default values of
-#         # arguments that are not supplied. We forward the context to the
-#         # invocation of run. Any **kwargs supplied (e.g. `pipeline="ds"` will
-#         # overwrite the arguments supplied by the context. Overall this means
-#         # that an instantiation of _Run can handle both arguments from the CLI
-#         # (when invoked from a packaged project through the main entry point) and
-#         # using a Python API.
-#         args = list(args) or sys.argv[1:]
-#         with self._run_cmd.make_context("run", args) as ctx:
-#             return ctx.forward(self._run_cmd, **kwargs)
 
 
 PACKAGE_NAME = None

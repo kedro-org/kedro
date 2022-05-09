@@ -5,6 +5,8 @@ authors:
   given-names: Sajid
 - family-names: Bălan
   given-names: Lorena
+- family-names: Chan
+  given-names: Nok Lam
 - family-names: Comym
   given-names: Gabriel
 - family-names: Dada
@@ -26,6 +28,6 @@ authors:
 - family-names: Wong
   given-names: Susanna
 title: Kedro
-version: 0.18.0
-date-released: 2022-03-31
+version: 0.18.1
+date-released: 2022-05-09
 url: https://github.com/kedro-org/kedro

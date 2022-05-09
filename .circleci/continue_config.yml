@@ -436,9 +436,20 @@ jobs:
       - run:
           name: Run linters
           command: make lint
-      - run:
-          name: Run unit tests
-          command: make test
+      - unless:
+          condition:
+            equal: ["3.10", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests in parallel
+                command: make test
+      - when:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Run unit tests sequentially
+                command: pytest tests --cov-config pyproject.toml
       - run:
           name: Run e2e tests
           command: make e2e-tests

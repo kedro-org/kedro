@@ -32,6 +32,7 @@ def mock_package_name() -> str:
     return MOCK_PACKAGE_NAME
 
 
+# This is running correctly. For some reason need to set propagate: True.
 @pytest.fixture
 def local_logging_config() -> Dict[str, Any]:
     return {
@@ -43,9 +44,9 @@ def local_logging_config() -> Dict[str, Any]:
         "loggers": {
             "kedro": {"level": "INFO", "handlers": ["console"]},
             "tests.framework.session.conftest": {
-                "propagate": True,
-                # "level": "INFO",
-                # "handlers": ["console"],
+                # "propagate": True,
+                "level": "INFO",
+                "handlers": ["console"],
             },
         },
         "handlers": {

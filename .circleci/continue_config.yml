@@ -560,13 +560,22 @@ workflows:
       - docs_linkcheck
       - all_circleci_checks_succeeded:
           requires:
+            # win_pip_compile-3.10 and win_unit_tests-3.10 and not required currently 
+            # due to failing requirements installation. 
+            # See https://github.com/kedro-org/kedro/issues/1517
             - e2e_tests
             - win_e2e_tests
             - unit_tests
-            - win_unit_tests
+            # - win_unit_tests
+            - win_unit_tests-3.7
+            - win_unit_tests-3.8
+            - win_unit_tests-3.9
             - lint
             - pip_compile
-            - win_pip_compile
+            # - win_pip_compile
+            - win_pip_compile-3.7
+            - win_pip_compile-3.8
+            - win_pip_compile-3.9
             - build_docs
             - docs_linkcheck
 

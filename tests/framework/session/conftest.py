@@ -37,19 +37,8 @@ def mock_package_name() -> str:
 def local_logging_config() -> Dict[str, Any]:
     return {
         "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {"kedro": {"level": "INFO", "handlers": ["console"]}},
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
+        "incremental": True,
+        "root": {"level": "INFO"},
     }
 
 
@@ -347,13 +336,6 @@ class LoggingHooks:
 def project_hooks():
     """A set of project hook implementations that log to stdout whenever it is invoked."""
     return LoggingHooks()
-
-
-@pytest.fixture(autouse=True)
-def mock_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)

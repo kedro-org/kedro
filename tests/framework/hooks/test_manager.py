@@ -1,12 +1,19 @@
 import pytest
 
 from kedro.framework.hooks.manager import _create_hook_manager, _NullPluginManager
-from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
+from kedro.framework.hooks.specs import (
+    DataCatalogSpecs,
+    DatasetSpecs,
+    KedroContextSpecs,
+    NodeSpecs,
+    PipelineSpecs,
+)
 
 
 @pytest.mark.parametrize(
     "hook_specs,hook_name,hook_params",
     [
+        (KedroContextSpecs, "after_context_created", ("context")),
         (
             DataCatalogSpecs,
             "after_catalog_created",
@@ -41,6 +48,10 @@ from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpe
             "on_pipeline_error",
             ("error", "run_params", "pipeline", "catalog"),
         ),
+        (DatasetSpecs, "before_dataset_loaded", ("dataset_name")),
+        (DatasetSpecs, "after_dataset_loaded", ("dataset_name", "data")),
+        (DatasetSpecs, "before_dataset_saved", ("dataset_name", "data")),
+        (DatasetSpecs, "after_dataset_saved", ("dataset_name", "data")),
     ],
 )
 def test_hook_manager_can_call_hooks_defined_in_specs(

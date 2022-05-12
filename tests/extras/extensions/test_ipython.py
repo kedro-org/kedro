@@ -2,7 +2,6 @@
 import pytest
 
 from kedro.extras.extensions.ipython import load_ipython_extension, reload_kedro
-from kedro.framework.session.session import _deactivate_session
 from kedro.framework.startup import ProjectMetadata
 from kedro.pipeline import Pipeline
 
@@ -23,7 +22,6 @@ def mocked_logging(mocker):
 @pytest.fixture(autouse=True)
 def cleanup_session():
     yield
-    _deactivate_session()
 
 
 @pytest.fixture()

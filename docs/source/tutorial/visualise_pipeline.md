@@ -112,7 +112,7 @@ Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/pyt
 
 You need to update `requirements.txt` in your Kedro project and add the following datasets to enable plotly for your project.
 
-`kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.0`
+`kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.1`
 
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.

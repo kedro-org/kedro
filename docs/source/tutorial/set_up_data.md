@@ -128,7 +128,7 @@ shuttles:
   type: pandas.ExcelDataSet
   filepath: data/01_raw/shuttles.xlsx
   load_args:
-    engine: openpyxl # Use modern Excel engine, will be default in Kedro 0.18.0
+    engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
 ```
 
 ```{note}

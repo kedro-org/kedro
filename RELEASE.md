@@ -7,7 +7,7 @@
 ## Breaking changes to the API
 
 ### CLI
-* Removed deprecated`kedro docs` cli command.
+* Removed deprecated `kedro docs` command.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 

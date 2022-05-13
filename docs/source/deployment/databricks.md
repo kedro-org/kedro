@@ -266,8 +266,8 @@ To run Kedro-Viz, first ensure that you are in your Kedro project directory and 
 %sh kedro viz --no-browser --host 0.0.0.0 --port 4141
 ```
 
-```eval_rst
-.. note:: The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below gif on how to cancel.
+```{note}
+The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below GIF on how to cancel.
 ```
 
 ![](../meta/images/databricks_cancel_command.gif)
@@ -289,6 +289,6 @@ When you click on the Shiny app link, it will open a browser with an example Shi
 
 You will notice Kedro-Viz is blank at first, but if you click on the flowchart tab, Kedro-Viz will run as normal.
 
-```eval_rst
-.. note:: Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
+```{note}
+Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
 ```

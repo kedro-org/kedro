@@ -159,7 +159,10 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             ValueError: malformed config found.
         """
         config_raw = _get_config_from_patterns(
-            conf_paths=self.conf_paths, patterns=patterns, ac_template=True
+            conf_paths=self.conf_paths,
+            patterns=patterns,
+            ac_template=True,
+            ac_context=self._config_mapping,
         )
         return _format_object(config_raw, self._config_mapping)
 

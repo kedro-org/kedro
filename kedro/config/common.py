@@ -28,6 +28,7 @@ def _get_config_from_patterns(
     conf_paths: Iterable[str],
     patterns: Iterable[str] = None,
     ac_template: bool = False,
+    ac_context: Dict[str, Any] = {},
 ) -> Dict[str, Any]:
     """Recursively scan for configuration files, load and merge them, and
     return them in the form of a config dictionary.
@@ -75,7 +76,9 @@ def _get_config_from_patterns(
             Path(conf_path), patterns, processed_files, _config_logger
         )
         new_conf = _load_configs(
-            config_filepaths=config_filepaths, ac_template=ac_template
+            config_filepaths=config_filepaths,
+            ac_template=ac_template,
+            ac_context=ac_context,
         )
 
         common_keys = config.keys() & new_conf.keys()
@@ -98,7 +101,11 @@ def _get_config_from_patterns(
     return config
 
 
-def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str, Any]:
+def _load_config_file(
+    config_file: Path,
+    ac_template: bool = False,
+    ac_context: Dict[str, Any] = {},
+) -> Dict[str, Any]:
     """Load an individual config file using `anyconfig` as a backend.
 
     Args:
@@ -123,11 +130,15 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
             _config_logger.debug("Loading config file: '%s'", config_file)
             return {
                 k: v
-                for k, v in anyconfig.load(yml, ac_template=ac_template).items()
+                for k, v in anyconfig.load(
+                    yml, ac_template=ac_template, ac_context=ac_context
+                ).items()
                 if not k.startswith("_")
             }
     except AttributeError as exc:
-        raise BadConfigException(f"Couldn't load config file: {config_file}") from exc
+        raise BadConfigException(
+            f"Couldn't load config file: {config_file}"
+        ) from exc
 
     except ParserError as exc:
         line = exc.problem_mark.line
@@ -137,7 +148,11 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
         ) from exc
 
 
-def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, Any]:
+def _load_configs(
+    config_filepaths: List[Path],
+    ac_template: bool,
+    ac_context: Dict[str, Any] = {},
+) -> Dict[str, Any]:
     """Recursively load all configuration files, which satisfy
     a given list of glob patterns from a specific path.
 
@@ -161,7 +176,9 @@ def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, 
     seen_file_to_keys = {}  # type: Dict[Path, AbstractSet[str]]
 
     for config_filepath in config_filepaths:
-        single_config = _load_config_file(config_filepath, ac_template=ac_template)
+        single_config = _load_config_file(
+            config_filepath, ac_template=ac_template, ac_context=ac_context
+        )
         _check_duplicate_keys(seen_file_to_keys, config_filepath, single_config)
         seen_file_to_keys[config_filepath] = single_config.keys()
         aggregate_config.update(single_config)
@@ -203,7 +220,9 @@ def _remove_duplicates(items: Iterable[str]):
 
 
 def _check_duplicate_keys(
-    processed_files: Dict[Path, AbstractSet[str]], filepath: Path, conf: Dict[str, Any]
+    processed_files: Dict[Path, AbstractSet[str]],
+    filepath: Path,
+    conf: Dict[str, Any],
 ) -> None:
     duplicates = []
 
@@ -218,7 +237,9 @@ def _check_duplicate_keys(
 
     if duplicates:
         dup_str = "\n- ".join(duplicates)
-        raise ValueError(f"Duplicate keys found in {filepath} and:\n- {dup_str}")
+        raise ValueError(
+            f"Duplicate keys found in {filepath} and:\n- {dup_str}"
+        )
 
 
 def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> Set[Path]:

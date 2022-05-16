@@ -18,7 +18,7 @@
 
 
 ## Bug fixes and other changes
-* Updated Starter template to use `myst_parser` instead of `recommonmark`
+* Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
 
 
 # Release 0.18.1

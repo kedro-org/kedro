@@ -78,8 +78,8 @@ As a result you should have:
 
 To synchronise the project between the local development environment and Databricks we will use a private GitHub repository that you will create in the next step. For authentication we will need a GitHub personal access token, so go ahead and [create such token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) in your GitHub developer settings.
 
-```eval_rst
-.. note:: Make sure that ``repo`` scopes are enabled for your token.
+```{note}
+Make sure that `repo` scopes are enabled for your token.
 ```
 
 ### 5. Create a GitHub repository
@@ -89,7 +89,7 @@ Now you should [create a new repository in GitHub](https://docs.github.com/en/gi
 To connect to the newly created repository you can use one of 2 options:
 
 * **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys) configured for GitHub
-* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
+* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#4-create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
 
 ### 6. Push Kedro project to the GitHub repository
 
@@ -129,7 +129,7 @@ git push --set-upstream origin main
 
 ### 7. Configure the Databricks cluster
 
-The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#create-github-personal-access-token).
+The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#4-create-github-personal-access-token).
 
 [Log into your Databricks workspace](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) and then:
 1. Open `Clusters` tab
@@ -144,8 +144,8 @@ Then in the `Environment Variables` section add your `GITHUB_USER` and `GITHUB_T
 ![](../meta/images/databricks_cluster_env_vars.png)
 
 
-```eval_rst
-.. note:: For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
+```{note}
+For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
 ```
 
 Then press `Confirm` button. Your cluster will be restarted to apply the changes, this will take a few minutes.
@@ -164,10 +164,10 @@ In your newly created notebook put each code snippet from below into a separate 
 %sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch main https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
 ```
 
-* Install the latest version of Kedro compatible with version `0.18.0`
+* Install the latest version of Kedro compatible with version `0.18.1`
 
 ```console
-%pip install "kedro[spark.SparkDataSet]~=0.18.0"
+%pip install "kedro[spark.SparkDataSet]~=0.18.1"
 ```
 
 * Copy input data into DBFS
@@ -223,3 +223,72 @@ Out[12]: {}
 Your complete notebook should look similar to this (the results are hidden):
 
 ![](../meta/images/databricks_notebook_example.png)
+
+
+### 9. Using the Kedro IPython Extension
+
+You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`.
+
+The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+
+The IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](../tools_integration/ipython.md).
+
+If you encounter a `ContextualVersionConflictError`, it is likely caused by Databricks using an old version of `pip`. Hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
+
+```ipython
+In [1]: %load_ext kedro.extras.extensions.ipython
+```
+
+You must explicitly upgrade your `pip` version by doing the below:
+
+```bash
+%pip install -U pip
+```
+
+After this, you can reload Kedro by running the line magic command `%reload_kedro <path_to_project_root>`.
+
+### 10. Running Kedro-Viz on Databricks
+
+For Kedro-Viz to run with your Kedro project, you need to ensure that both the packages are installed in the same scope (notebook-scoped vs. cluster library). i.e. if you `%pip install kedro` from inside your notebook then you should also `%pip install kedro-viz` from inside your notebook.
+If your cluster comes with Kedro installed on it as a library already then you should also add Kedro-Viz as a [cluster library](https://docs.microsoft.com/en-us/azure/databricks/libraries/cluster-libraries).
+
+Currently, if you try to run `%run_viz` on Databricks it will only display the below instead of running the Kedro-Viz app in the notebook.
+
+```console
+<IPython.core.display.HTML object>
+```
+
+While we fix this issue, we have a temporary workaround which involves you setting up a R Shiny application to run Kedro-Viz on Databricks.
+
+To run Kedro-Viz, first ensure that you are in your Kedro project directory and then run the below command in your Databricks notebook:
+
+```bash
+%sh kedro viz --no-browser --host 0.0.0.0 --port 4141
+```
+
+```{note}
+The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below GIF on how to cancel.
+```
+
+![](../meta/images/databricks_cancel_command.gif)
+
+
+After this, you must try and run an example Shiny app using the below command:
+
+```bash
+%r
+library(shiny)
+runExample("01_hello")
+```
+
+![](../meta/images/databricks_shiny_command.png)
+
+When you click on the Shiny app link, it will open a browser with an example Shiny app running. Now edit the port at the end of the URL and change it to 4141.
+
+![](../meta/images/databricks_kedro_viz.gif)
+
+You will notice Kedro-Viz is blank at first, but if you click on the flowchart tab, Kedro-Viz will run as normal.
+
+```{note}
+Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
+```

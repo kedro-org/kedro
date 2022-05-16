@@ -11,6 +11,7 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
+from kedro.framework.context.context import KedroContext
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
     _ProjectPipelines,
@@ -36,19 +37,8 @@ def mock_package_name() -> str:
 def local_logging_config() -> Dict[str, Any]:
     return {
         "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {"kedro": {"level": "INFO", "handlers": ["console"]}},
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
+        "incremental": True,
+        "root": {"level": "INFO"},
     }
 
 
@@ -337,18 +327,15 @@ class LoggingHooks:
             "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
         )
 
+    @hook_impl
+    def after_context_created(self, context: KedroContext) -> None:
+        logger.info("After context created", extra={"context": context})
+
 
 @pytest.fixture
 def project_hooks():
     """A set of project hook implementations that log to stdout whenever it is invoked."""
     return LoggingHooks()
-
-
-@pytest.fixture(autouse=True)
-def mock_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)

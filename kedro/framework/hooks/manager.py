@@ -7,7 +7,13 @@ from typing import Any, Iterable
 from pluggy import PluginManager
 
 from .markers import HOOK_NAMESPACE
-from .specs import DataCatalogSpecs, DatasetSpecs, NodeSpecs, PipelineSpecs
+from .specs import (
+    DataCatalogSpecs,
+    DatasetSpecs,
+    KedroContextSpecs,
+    NodeSpecs,
+    PipelineSpecs,
+)
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
 
@@ -21,6 +27,7 @@ def _create_hook_manager() -> PluginManager:
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)
     manager.add_hookspecs(DatasetSpecs)
+    manager.add_hookspecs(KedroContextSpecs)
     return manager
 
 
@@ -83,3 +90,17 @@ def _register_hooks_setuptools(
             len(plugin_names),
             ", ".join(sorted(plugin_names)),
         )
+
+
+class _NullPluginManager:
+    """This class creates an empty ``hook_manager`` that will ignore all calls to hooks,
+    allowing the runner to function if no ``hook_manager`` has been instantiated."""
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __getattr__(self, name):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        pass

@@ -93,8 +93,8 @@ class DataCatalogHooks:
         self._logger.info(catalog.list())
 ```
 
-```eval_rst
-.. note::  The name of a module that contains Hooks implementation is arbitrary and is not restricted to ``hooks.py``.
+```{note}
+The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
 ```
 
 We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file that you create in your project.
@@ -116,8 +116,8 @@ HOOKS = (ProjectHooks(), DataCatalogHooks())
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](plugins.md#hooks).
 
-```eval_rst
-.. note::  Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
+```{note}
+Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
 ```
 
 
@@ -240,13 +240,13 @@ def _logger(self):
 @hook_impl
 def before_dataset_loaded(self, dataset_name: str) -> None:
     start = time.time()
-    logging.info("Loading dataset %s started at %0.3f", dataset_name, start)
+    self._logger.info("Loading dataset %s started at %0.3f", dataset_name, start)
 
 
 @hook_impl
 def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
     end = time.time()
-    logging.info("Loading dataset %s ended at %0.3f", dataset_name, end)
+    self._logger.info("Loading dataset %s ended at %0.3f", dataset_name, end)
 ```
 
 ## Under the hood
@@ -574,8 +574,8 @@ class NodeInputReplacementHook:
 Node input overwrites implemented in `before_node_run` affect only a specific node and do not modify the corresponding datasets in the `DataCatalog`.
 
 
-```eval_rst
-.. note:: In the example above, the ``before_node_run`` hook implementation must return datasets present in the ``inputs`` dictionary. If they are not in ``inputs``, the node fails with the following error: ``Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>``.
+```{note}
+In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
 ```
 
 

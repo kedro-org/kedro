@@ -5,9 +5,9 @@ Experiment tracking is the process of saving all machine-learning related experi
 ![](../meta/images/experiment-tracking_demo_small.gif)
 
 Enabling experiment tracking features on Kedro-Viz relies on:
-* [setting up a session store to capture experiment metadata](#set-up-session-store),
+* [setting up a session store to capture experiment metadata](#set-up-the-session-store),
 * [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets)
-* [modifying your nodes and pipelines to output those metrics](#setting-up-your-nodes-and-pipelines-to-log-metrics).
+* [modifying your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
 
 This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project that is outlined in [this tutorial](../tutorial/spaceflights_tutorial.md) and build on previously discussed topics such as [namespacing](../tutorial/namespace_pipelines.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
 
@@ -15,8 +15,8 @@ You can also access a more detailed demo [here](https://kedro-viz-live-demo.hfa4
 
 ## Set up a project
 
-```eval_rst
-  .. note:: You can skip this step if you have been following all previous parts of the tutorial.
+```{note}
+You can skip this step if you have been following all previous parts of the tutorial.
 ```
 
 We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../tutorial/visualise_pipeline.md). Set up a new project using the spaceflights starter by running:
@@ -61,8 +61,8 @@ data_processing.companies_columns:
   filepath: data/09_tracking/companies_columns.json
 ```
 
-```eval_rst
-  .. note:: Note that these two datasets include namespaces to correspond to the pipeline setup. If you have a project without namespaces you can still use experiment tracking.
+```{note}
+These two datasets include namespaces to correspond to the pipeline setup. If you have a project without namespaces you can still use experiment tracking.
 ```
 
 ## Set up your nodes and pipelines to log metrics

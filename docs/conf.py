@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import List, Tuple
 
 from click import secho, style
-from recommonmark.transform import AutoStructify
 
 from kedro import __version__ as release
 
@@ -56,8 +55,8 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "nbsphinx",
-    "recommonmark",
     "sphinx_copybutton",
+    "myst_parser",
 ]
 
 # enable autosummary plugin (table of contents for modules/classes/class
@@ -207,14 +206,6 @@ linkcheck_ignore = [
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf",
-
-    # Number section removal, temporarily ignore until 0.18.0 release
-    "https://kedro.readthedocs.io/en/stable/data/data_catalog.html#using-the-data-catalog-with-the-yaml-api",
-    "https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention",
-    "https://kedro.readthedocs.io/en/stable/faq/faq.html",
-    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials",
-    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html",
-    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#checkpoint-configuration",
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -534,9 +525,6 @@ def setup(app):
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
     app.add_css_file("css/theme-overrides.css")
-    # enable rendering RST tables in Markdown
-    app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
-    app.add_transform(AutoStructify)
 
 
 # (regex, restructuredText link replacement, object) list
@@ -562,3 +550,5 @@ except Exception as e:
     )
 
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
+
+myst_heading_anchors = 5

@@ -21,8 +21,8 @@ To use Argo Workflows, make sure you have the following prerequisites in place:
 - A `name` attribute is set for each Kedro [node](/kedro.pipeline.node) since it is used to build a DAG
 - All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` in your workflow
 
-```eval_rst
-.. note::  Each node will run in its own container.
+```{note}
+Each node will run in its own container.
 ```
 
 ## How to run your Kedro pipeline using Argo Workflows
@@ -165,8 +165,8 @@ spec:
 ```
 
 
-```eval_rst
-.. note::  The Argo Workflows is defined as the dependencies between tasks using a directed-acyclic graph (DAG).
+```{note}
+The Argo Workflows is defined as the dependencies between tasks using a directed-acyclic graph (DAG).
 ```
 
 For the purpose of this walk-through, we are going to use AWS S3 bucket for DataSets therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example Kubernetes Secrets spec is given [below](#submit-argo-workflows-spec-to-kubernetes)).
@@ -222,8 +222,8 @@ $ cd <project_root>
 $ argo submit --watch templates/argo-<project_name>.yml
 ```
 
-```eval_rst
-.. note::  The Argo Workflows should be submitted to the same namespace as the Kubernetes Secrets. Please refer to the Argo CLI help to get more details about the usage.
+```{note}
+The Argo Workflows should be submitted to the same namespace as the Kubernetes Secrets. Please refer to the Argo CLI help to get more details about the usage.
 ```
 
 In order to clean up your Kubernetes cluster you can use the following commands:
@@ -237,6 +237,6 @@ $ kubectl delete -f secret.yml
 
 As an alternative, you can use [Kedro-Argo plugin](https://pypi.org/project/kedro-argo/) to convert a Kedro project to Argo Workflows.
 
-```eval_rst
-.. warning::  The plugin is not supported by the Kedro team and we can't guarantee its workability.
+```{warning}
+The plugin is not supported by the Kedro team and we can't guarantee its workability.
 ```

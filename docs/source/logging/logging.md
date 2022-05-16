@@ -18,8 +18,8 @@ log.warning("Issue warning")
 log.info("Send information")
 ```
 
-```eval_rst
-.. note:: The name of a logger corresponds to a key in the ``loggers``  section in ``logging.yml`` (e.g. ``kedro.io``). See `Python's logging documentation <https://docs.python.org/3/library/logging.html#logger-objects>`_ for more information.
+```{note}
+The name of a logger corresponds to a key in the `loggers`  section in `logging.yml` (e.g. `kedro.io`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
 ```
 
 ## Logging for `anyconfig`

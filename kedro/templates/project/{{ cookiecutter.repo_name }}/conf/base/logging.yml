@@ -37,5 +37,8 @@ loggers:
   kedro:
     level: INFO
 
+  {{ cookiecutter.python_package }}:
+    level: INFO
+
 root:
   handlers: [console, info_file_handler, error_file_handler]

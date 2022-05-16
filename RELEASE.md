@@ -32,7 +32,7 @@
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.
-* `kedro.extras.ColorHandler` is being deprecated.
+* `kedro.extras.ColorHandler` will be removed in 0.19.0.
 
 # Release 0.18.0
 

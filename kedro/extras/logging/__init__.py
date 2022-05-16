@@ -10,6 +10,6 @@ __all__ = ["ColorHandler"]
 warnings.simplefilter("default", DeprecationWarning)
 
 warnings.warn(
-    "Support for ColorHandler will be deprecated in Kedro 0.19.0.",
+    "Support for ColorHandler will be removed in Kedro 0.19.0.",
     DeprecationWarning,
 )

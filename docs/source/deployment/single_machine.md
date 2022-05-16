@@ -1,12 +1,12 @@
 # Single-machine deployment
 This topic explains how to deploy Kedro on a production server. You can use three alternative methods to deploy your Kedro pipelines:
 
-- Container based using [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker)
-- Package based using [`kedro package`](../development/commands_reference.md#deploy-the-project)
-- CLI based using the [Kedro CLI](../development/commands_reference.md)
+- Container-based using [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker)
+- Package-based using [`kedro package`](../development/commands_reference.md#deploy-the-project)
+- CLI-based using the [Kedro CLI](../development/commands_reference.md)
 
 
-## Container based
+## Container-based
 This approach uses containers, such as [`Docker`](https://www.docker.com/) or any other container solution, to build an image and run the entire Kedro project in your preferred environment.
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process, and [usage instructions are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md). After you’ve built the Docker image for your project locally, transfer the image to the production server. You can do this as follows:
@@ -32,13 +32,13 @@ Pull the image from Docker hub onto your production server:
 docker pull <DockerID>/<image-name>
 ```
 
-```eval_rst
-.. note::  Repositories on Docker Hub are set to public visibility by default. You can change your project to private on the Docker Hub website.
+```{note}
+Repositories on Docker Hub are set to public visibility by default. You can change your project to private on the Docker Hub website.
 ```
 
 The procedure for using other container registries, like AWS ECR or GitLab Container Registry, will be almost identical to the steps described above. However, authentication will be different for each solution.
 
-## Package based
+## Package-based
 If you prefer not to use containerisation, you can instead package your Kedro project by running the following in your project’s root directory:
 
 ```console
@@ -67,10 +67,10 @@ After having installed your project on the remote server, run the Kedro project 
 python -m project_name
 ```
 
-## CLI based
+## CLI-based
 If neither containers nor packages are viable options for your project, you can also run it on a production server by cloning your project codebase to the server. You will need to follow these steps to get your project running:
 
-#### Use GitHub workflow to copy your project
+### Use GitHub workflow to copy your project
 This workflow posits that development of the Kedro project is done on a local environment under version control by Git. Commits are pushed to a remote server (e.g. GitHub, GitLab, Bitbucket, etc.).
 
 Deployment of the (latest) code on a production server is accomplished through cloning and the periodic pulling of changes from the Git remote. The pipeline is then executed on the server.
@@ -96,7 +96,7 @@ Finally clone the project to the server:
 git clone <repository>
 ```
 
-#### Install and run the Kedro project
+### Install and run the Kedro project
 Once you have copied your Kedro project to the server, you need to follow these steps to install all project requirements and run the project.
 
 Install Kedro on the server using pip:

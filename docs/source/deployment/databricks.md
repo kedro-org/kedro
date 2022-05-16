@@ -78,8 +78,8 @@ As a result you should have:
 
 To synchronise the project between the local development environment and Databricks we will use a private GitHub repository that you will create in the next step. For authentication we will need a GitHub personal access token, so go ahead and [create such token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) in your GitHub developer settings.
 
-```eval_rst
-.. note:: Make sure that ``repo`` scopes are enabled for your token.
+```{note}
+Make sure that `repo` scopes are enabled for your token.
 ```
 
 ### 5. Create a GitHub repository
@@ -89,7 +89,7 @@ Now you should [create a new repository in GitHub](https://docs.github.com/en/gi
 To connect to the newly created repository you can use one of 2 options:
 
 * **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys) configured for GitHub
-* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
+* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#4-create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
 
 ### 6. Push Kedro project to the GitHub repository
 
@@ -129,7 +129,7 @@ git push --set-upstream origin main
 
 ### 7. Configure the Databricks cluster
 
-The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#create-github-personal-access-token).
+The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#4-create-github-personal-access-token).
 
 [Log into your Databricks workspace](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) and then:
 1. Open `Clusters` tab
@@ -144,8 +144,8 @@ Then in the `Environment Variables` section add your `GITHUB_USER` and `GITHUB_T
 ![](../meta/images/databricks_cluster_env_vars.png)
 
 
-```eval_rst
-.. note:: For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
+```{note}
+For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
 ```
 
 Then press `Confirm` button. Your cluster will be restarted to apply the changes, this will take a few minutes.
@@ -266,8 +266,8 @@ To run Kedro-Viz, first ensure that you are in your Kedro project directory and 
 %sh kedro viz --no-browser --host 0.0.0.0 --port 4141
 ```
 
-```eval_rst
-.. note:: The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below gif on how to cancel.
+```{note}
+The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below GIF on how to cancel.
 ```
 
 ![](../meta/images/databricks_cancel_command.gif)
@@ -289,6 +289,6 @@ When you click on the Shiny app link, it will open a browser with an example Shi
 
 You will notice Kedro-Viz is blank at first, but if you click on the flowchart tab, Kedro-Viz will run as normal.
 
-```eval_rst
-.. note:: Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
+```{note}
+Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
 ```

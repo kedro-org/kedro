@@ -8,6 +8,11 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+# Release 0.18.2
+
+## Bug fixes and other changes
+
+* Bumped `pyyaml` version to 6.0.0. This version of PyYAML drops Python 2.7 support and makes Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
 
 # Release 0.18.1
 

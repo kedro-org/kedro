@@ -227,17 +227,6 @@ class KedroContext:
         _update_nested_dict(params, self._extra_params or {})
         return params
 
-    @property
-    def config_loader(self):
-        """Read-only property referring to Kedro's ``ConfigLoader`` for this
-        context.
-        Returns:
-            Instance of `ConfigLoader`.
-        Raises:
-            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
-        """
-        return self._config_loader
-
     def _get_catalog(
         self,
         save_version: str = None,

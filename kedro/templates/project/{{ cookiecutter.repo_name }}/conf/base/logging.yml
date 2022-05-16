@@ -33,9 +33,5 @@ handlers:
     encoding: utf8
     delay: True
 
-loggers:
-  kedro:
-    level: INFO
-
 root:
   handlers: [console, info_file_handler, error_file_handler]

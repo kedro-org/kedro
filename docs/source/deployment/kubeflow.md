@@ -20,8 +20,8 @@ To use Kubeflow Pipelines, make sure you have the following prerequisites in pla
 - A `name` attribute is set for each Kedro [node](/kedro.pipeline.node) since it is used to trigger runs
 - All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` in your workflow
 
-```eval_rst
-.. note::  Each node runs in its own container.
+```{note}
+Each node runs in its own container.
 ```
 
 ## How to run your Kedro pipeline using Kubeflow Pipelines
@@ -168,8 +168,8 @@ data:
 type: Opaque
 ```
 
-```eval_rst
-.. note::  Kubeflow uses `kubeflow` as the default namespace.
+```{note}
+Kubeflow uses `kubeflow` as the default namespace.
 ```
 
 You can use the following command to encode AWS keys to base64:

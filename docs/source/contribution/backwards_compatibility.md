@@ -8,7 +8,7 @@ A breaking change is any change that modifies Kedro's public APIs. Examples incl
 
 Your change is **not** considered a breaking change, and so is backwards compatible, **if a user can upgrade their Kedro version and include your change without anything breaking in their project**.
 
-### When should I make a breaking change?
+## When should I make a breaking change?
 
 We aim to minimise the number of breaking changes to keep Kedro software stable and reduce the overhead for users as they migrate their projects. However, there are cases where a breaking change brings considerable value or increases the maintainability of the codebase. In these cases, breaking backwards compatibility can make sense.
 

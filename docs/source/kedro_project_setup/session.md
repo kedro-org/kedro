@@ -1,6 +1,6 @@
 # Lifecycle management with `KedroSession`
 
-### Overview
+## Overview
 A `KedroSession` allows you to:
 
 * Manage the lifecycle of a Kedro run
@@ -16,7 +16,7 @@ The main methods and properties of `KedroSession` are:
 - `close()`: Close the current session — although we recommend that you [use the session object as a context manager](#create-a-session), which will call `close()` automatically, as opposed to calling the method explicitly
 - `run()`: Run the pipeline with the arguments provided; see  [Running pipelines](../nodes_and_pipelines/run_a_pipeline) for details
 
-### Create a session
+## Create a session
 
 The following code creates a `KedroSession` object as a context manager and runs a pipeline inside the context, with session data provided. The session automatically closes after exit:
 

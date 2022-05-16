@@ -334,7 +334,9 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         try:
             entry_point_commands.append(entry_point.load())
         except Exception as exc:
-            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
+            # raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
+            import logging
+            logging.warning(KedroCliError(f"Fail to load {name} commands from {entry_point}"))
     return entry_point_commands
 
 

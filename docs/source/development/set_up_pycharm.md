@@ -92,8 +92,8 @@ Then click the bug button in the toolbar (![](../meta/images/pycharm_debugger_bu
 
 ## Advanced: Remote SSH interpreter
 
-```eval_rst
-.. note::  This section uses features supported in PyCharm Professional Edition only.
+```{note}
+This section uses features supported in PyCharm Professional Edition only.
 ```
 
 Firstly, add an SSH interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **SSH Interpreter** and fill in details of the remote computer:
@@ -121,8 +121,8 @@ To remotely debug, click the debugger button as [described above](#debugging).
 
 ## Advanced: Docker interpreter
 
-```eval_rst
-.. note::  This section uses features supported by PyCharm Professional Edition only.
+```{note}
+This section uses features supported by PyCharm Professional Edition only.
 ```
 
 First, add a Docker interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **Docker Interpreter** and then choose the target Docker image:

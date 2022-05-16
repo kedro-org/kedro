@@ -14,7 +14,7 @@ kedro new
 
 You will be asked to enter each of the following variables in turn. Once you have entered text for the first option (the project's name), you will be offered a default choice for the other options:
 
-```eval_rst
+```{eval-rst}
 +------------------------+---------------------+----------------------------------------------------------------------------+
 | Option                 | Example             | Description                                                                |
 +========================+=====================+============================================================================+

@@ -6,10 +6,6 @@
 
 ## Breaking changes to the API
 
-## Upcoming deprecations for Kedro 0.19.0
-* `kedro docs` will be removed in 0.19.0.
-* `kedro.extras.ColorHandler` will be removed in 0.19.0.
-
 ### CLI
 * Removed deprecated `kedro docs` command.
 
@@ -21,6 +17,9 @@
 
 ## Bug fixes and other changes
 * Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro.extras.ColorHandler` will be removed in 0.19.0.
 
 # Release 0.18.1
 
@@ -42,6 +41,9 @@
 * `config_loader` is available as a public read-only attribute of `KedroContext`.
 * Made `hook_manager` argument optional for `runner.run`.
 * `kedro docs` now opens an online version of the Kedro documentation instead of a locally built version.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro docs` will be removed in 0.19.0.
 
 # Release 0.18.0
 

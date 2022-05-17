@@ -6,4 +6,4 @@ pandas~=1.3
 psutil==5.8.0
 requests~=2.20
 toml~=0.10.1
-PyYAML~=6.0.0
+PyYAML>=4.2, <7.0

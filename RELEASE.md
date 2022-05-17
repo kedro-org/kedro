@@ -6,10 +6,6 @@
 
 ## Breaking changes to the API
 
-## Upcoming deprecations for Kedro 0.19.0
-* `kedro docs` will be removed in 0.19.0.
-* `kedro.extras.ColorHandler` will be removed in 0.19.0.
-
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
 ## Major features and improvements
@@ -24,6 +20,9 @@
 
 * Bumped `pyyaml` upper-bound to 7.0.0. This version 6.0.0 of PyYAML drops Python 2.7 support and makes Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
 * Updated Starter template to use `myst_parser` instead of `recommonmark`
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro.extras.ColorHandler` will be removed in 0.19.0.
 
 # Release 0.18.1
 
@@ -45,6 +44,9 @@
 * `config_loader` is available as a public read-only attribute of `KedroContext`.
 * Made `hook_manager` argument optional for `runner.run`.
 * `kedro docs` now opens an online version of the Kedro documentation instead of a locally built version.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro docs` will be removed in 0.19.0.
 
 # Release 0.18.0
 

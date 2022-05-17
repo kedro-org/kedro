@@ -18,7 +18,7 @@
 
 ## Bug fixes and other changes
 
-* Bumped `pyyaml` upper-bound to 7.0.0. This version 6.0.0 of PyYAML drops Python 2.7 support and makes Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
+* Bumped `pyyaml` upper-bound to 7.0.0. Version 6.0.0 of PyYAML dropoed Python 2.7 support and relaxing this makes Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
 * Updated Starter template to use `myst_parser` instead of `recommonmark`
 
 ## Upcoming deprecations for Kedro 0.19.0

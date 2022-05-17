@@ -11,15 +11,15 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-
 # Upcoming Release 0.18.2
 
 ## Major features and improvements
 
-
 ## Bug fixes and other changes
 * Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
 
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro.extras.ColorHandler` will be removed in 0.19.0.
 
 # Release 0.18.1
 

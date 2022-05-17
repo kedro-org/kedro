@@ -18,6 +18,7 @@
 
 ## Bug fixes and other changes
 * Updated Starter template to use `myst_parser` instead of `recommonmark`
+* Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.
 
 # Release 0.18.1
 

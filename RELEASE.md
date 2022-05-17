@@ -6,8 +6,19 @@
 
 ## Breaking changes to the API
 
-## Migration guide from Kedro 0.18.* to 0.19.*
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro docs` will be removed in 0.19.0.
+* `kedro.extras.ColorHandler` will be removed in 0.19.0.
 
+
+## Migration guide from Kedro 0.18.* to 0.19.*
+# Upcoming Release 0.18.2
+
+## Major features and improvements
+
+
+## Bug fixes and other changes
+* Updated Starter template to use `myst_parser` instead of `recommonmark`
 
 # Release 0.18.1
 
@@ -29,10 +40,6 @@
 * `config_loader` is available as a public read-only attribute of `KedroContext`.
 * Made `hook_manager` argument optional for `runner.run`.
 * `kedro docs` now opens an online version of the Kedro documentation instead of a locally built version.
-
-## Upcoming deprecations for Kedro 0.19.0
-* `kedro docs` will be removed in 0.19.0.
-* `kedro.extras.ColorHandler` will be removed in 0.19.0.
 
 # Release 0.18.0
 
@@ -69,9 +76,9 @@ main(
 | Type                      | Description                                                   | Location                         |
 | ------------------------- | ------------------------------------------------------------- | -------------------------------- |
 | `pandas.XMLDataSet`       | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML | `kedro.extras.datasets.pandas`   |
-| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                         | `kedro.extras.datasets.networkx` |
-| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files        | `kedro.extras.datasets.networkx` |
-| `redis.PickleDataSet`     | loads/saves data from/to a Redis database                      | `kedro.extras.datasets.redis`    |
+| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                        | `kedro.extras.datasets.networkx` |
+| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files       | `kedro.extras.datasets.networkx` |
+| `redis.PickleDataSet`     | loads/saves data from/to a Redis database                     | `kedro.extras.datasets.redis`    |
 
 * Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
 * Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.

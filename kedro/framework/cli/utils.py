@@ -1,5 +1,6 @@
 """Utilities for use with click."""
 import difflib
+import logging
 import re
 import shlex
 import shutil
@@ -16,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
-# import pkg_resources
+from importlib_metadata import entry_points
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -33,7 +34,6 @@ ENTRY_POINT_GROUPS = {
     "cli_hooks": "kedro.cli_hooks",
 }
 
-import logging
 logger = logging.getLogger(__name__)
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
@@ -330,18 +330,19 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    # entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
-    from importlib_metadata import entry_points
     eps = entry_points()
-    entry_points = eps.select(group=ENTRY_POINT_GROUPS[name])
+    eps = eps.select(group=ENTRY_POINT_GROUPS[name])
+
     entry_point_commands = []
-    for entry_point in entry_points:
+    for entry_point in eps:
         try:
+            # raise KedroCliError()
             entry_point_commands.append(entry_point.load())
-        except Exception as exc:
-            # logger.warning(KedroCliError(f"Loading {name} commands from {entry_point}"))
-            # logger.warning(exc)
-            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.warning(KedroCliError(f"Fail to load {name} commands from {entry_point}"))
+            logger.warning(exc)
+            print("Skipped the error")
+            # raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
     return entry_point_commands
 
 

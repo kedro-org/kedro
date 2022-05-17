@@ -33,6 +33,8 @@ ENTRY_POINT_GROUPS = {
     "cli_hooks": "kedro.cli_hooks",
 }
 
+import logging
+logger = logging.getLogger(__name__)
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
     """Run a subprocess command and raise if it fails.
@@ -334,9 +336,9 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         try:
             entry_point_commands.append(entry_point.load())
         except Exception as exc:
-            # raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
-            import logging
-            logging.warning(KedroCliError(f"Fail to load {name} commands from {entry_point}"))
+            # logger.warning(KedroCliError(f"Loading {name} commands from {entry_point}"))
+            # logger.warning(exc)
+            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
     return entry_point_commands
 
 

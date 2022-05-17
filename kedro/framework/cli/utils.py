@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
-import pkg_resources
+# import pkg_resources
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -330,7 +330,10 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+    # entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+    from importlib_metadata import entry_points
+    eps = entry_points()
+    entry_points = eps.select(group=ENTRY_POINT_GROUPS[name])
     entry_point_commands = []
     for entry_point in entry_points:
         try:

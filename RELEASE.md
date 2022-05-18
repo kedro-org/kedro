@@ -6,6 +6,12 @@
 
 ## Breaking changes to the API
 
+### CLI
+* Removed deprecated `kedro docs` command.
+
+### Other
+* Removed deprecated `kedro.extras.ColorHandler`.
+
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
 ## Major features and improvements
@@ -19,7 +25,7 @@
 ## Bug fixes and other changes
 
 * Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
-* Updated Starter template to use `myst_parser` instead of `recommonmark`
+* Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.

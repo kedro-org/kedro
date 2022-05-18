@@ -156,7 +156,7 @@ commands:
           steps:
             - run:
                 name: Update Conda
-                command: conda update --all
+                command: conda update -n base -c defaults conda
       # pytables and Fiona have a series of binary dependencies under Windows that
       # are best handled by conda-installing instead of pip-installing them.
       # Dependency resolution works best when installing these altogether in one

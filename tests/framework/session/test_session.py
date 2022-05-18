@@ -165,7 +165,7 @@ def fake_session_id(mocker):
 
 
 @pytest.fixture
-def fake_project(tmp_path, local_logging_config, mock_package_name):
+def fake_project(tmp_path, mock_package_name):
     fake_project_dir = Path(tmp_path) / "fake_project"
     (fake_project_dir / "src").mkdir(parents=True)
 
@@ -182,9 +182,7 @@ def fake_project(tmp_path, local_logging_config, mock_package_name):
     toml_str = toml.dumps(payload)
     pyproject_toml_path.write_text(toml_str, encoding="utf-8")
 
-    env_logging = fake_project_dir / "conf" / "base" / "logging.yml"
-    env_logging.parent.mkdir(parents=True)
-    env_logging.write_text(yaml.dump(local_logging_config))
+    (fake_project_dir / "conf" / "base").mkdir(parents=True)
     (fake_project_dir / "conf" / "local").mkdir()
     return fake_project_dir
 
@@ -348,6 +346,24 @@ class TestKedroSession:
         with pytest.raises(ValidationError, match=re.escape(pattern)):
             assert mock_settings.CONFIG_LOADER_CLASS
 
+    def test_no_logging_config(self, fake_project, caplog, mock_package_name, mocker):
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
+        mocker.patch("subprocess.check_output")
+        session = KedroSession.create(mock_package_name, fake_project)
+        session.close()
+
+        expected_log_messages = [
+            "No project logging configuration loaded; "
+            "Kedro's default logging configuration will be used."
+        ]
+        actual_log_messages = [
+            rec.getMessage()
+            for rec in caplog.records
+            if rec.name == SESSION_LOGGER_NAME and rec.levelno == logging.DEBUG
+        ]
+        assert actual_log_messages == expected_log_messages
+
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_default_store(
         self, fake_project, fake_session_id, caplog, mock_package_name
@@ -468,6 +484,7 @@ class TestKedroSession:
         """
         caplog.set_level(logging.DEBUG, logger="kedro")
 
+        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         mocker.patch("subprocess.check_output", side_effect=exception)
         session = KedroSession.create(mock_package_name, fake_project)
         assert "git" not in session.store

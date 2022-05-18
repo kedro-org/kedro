@@ -29,6 +29,7 @@ SKIP_ON_WINDOWS = pytest.mark.skipif(
 )
 
 logger = logging.getLogger("tests.framework.session.conftest")
+logger.setLevel(logging.DEBUG)
 
 
 def broken_node():

@@ -55,7 +55,7 @@ class TestLoadKedroObjects:
         )
         mocker.patch("kedro.framework.project.settings.configure")
         mocker.patch("kedro.framework.session.session.validate_settings")
-        mocker.patch("kedro.framework.project.KedroSession._setup_logging")
+        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
         )

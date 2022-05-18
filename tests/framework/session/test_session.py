@@ -3,6 +3,7 @@ import logging
 import re
 import subprocess
 import textwrap
+import yaml
 from pathlib import Path
 
 import pytest
@@ -183,7 +184,7 @@ def fake_project(tmp_path, local_logging_config, mock_package_name):
 
     env_logging = fake_project_dir / "conf" / "base" / "logging.yml"
     env_logging.parent.mkdir(parents=True)
-    env_logging.write_text(json.dumps(local_logging_config), encoding="utf-8")
+    env_logging.write_text(yaml.dump(local_logging_config))
     (fake_project_dir / "conf" / "local").mkdir()
     return fake_project_dir
 
@@ -794,15 +795,29 @@ class TestKedroSession:
         )
 
 
+@pytest.fixture
+def fake_project_with_logging_file_handler(fake_project):
+    logging_config = {
+        "version": 1,
+        "handlers": {"info_file_handler": {"filename": "logs/info.log"}},
+    }
+    logging_yml = fake_project / "conf" / "base" / "logging.yml"
+    logging_yml.write_text(yaml.dump(logging_config))
+    return fake_project
+
+
 @pytest.mark.usefixtures("mock_settings")
 def test_setup_logging_using_absolute_path(
-    fake_project, mocked_logging, mock_package_name
+    fake_project_with_logging_file_handler, mocker, mock_package_name
 ):
-    KedroSession.create(mock_package_name, fake_project)
+    mocked_logging = mocker.patch("logging.config.dictConfig")
+    KedroSession.create(mock_package_name, fake_project_with_logging_file_handler)
 
     mocked_logging.assert_called_once()
     call_args = mocked_logging.call_args[0][0]
 
-    expected_log_filepath = (fake_project / "logs" / "info.log").as_posix()
-    actual_log_filepath = call_args["info_file_handler"]["filename"]
+    expected_log_filepath = (
+        fake_project_with_logging_file_handler / "logs" / "info.log"
+    ).as_posix()
+    actual_log_filepath = call_args["handlers"]["info_file_handler"]["filename"]
     assert actual_log_filepath == expected_log_filepath

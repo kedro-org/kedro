@@ -146,10 +146,10 @@ commands:
     steps:
       - restore_cache:
           name: Restore package cache
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-v2-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - restore_cache:
           name: Restore conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-v2-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one
@@ -157,14 +157,6 @@ commands:
       - run:
           name: Install GDAL, Fiona and pytables
           command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
-        # The above lines causes zlib.dll to go missing in kedro_builder for python 3.10, therefore we need to re-install zlib
-      - when:
-          condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
-          steps:
-            - run:
-                name: Install zlib
-                command: conda activate kedro_builder; conda install zlib=1.2.11=*_5
       - run:
           name: Install all requirements
           command: conda activate kedro_builder; pip install -r test_requirements.txt -U
@@ -330,14 +322,14 @@ jobs:
           steps:
           - save_cache:
               name: Save Python package cache
-              key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+              key: kedro-deps-v2-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
               paths:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs
                 - c:\users\circleci\appdata\local\pip\cache
       - save_cache:
           name: Save conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-v2-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
           paths:
             - c:\tools\miniconda3\envs\kedro_builder
       - run:

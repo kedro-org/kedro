@@ -9,6 +9,9 @@
 ### CLI
 * Removed deprecated `kedro docs` command.
 
+### Other
+* Removed deprecated `kedro.extras.ColorHandler`.
+
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
 # Upcoming Release 0.18.2

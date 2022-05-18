@@ -324,7 +324,7 @@ class KedroSession:
         """
         # pylint: disable=protected-access,no-member
         # Report project name
-        self._logger.info("** Kedro project %s", self._project_path.name)
+        self._logger.info("Kedro project %s", self._project_path.name)
 
         if self._run_called:
             raise KedroSessionError(

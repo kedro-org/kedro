@@ -14,11 +14,17 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+## Major features and improvements
+
+# Release 0.18.2
+
 # Upcoming Release 0.18.2
 
 ## Major features and improvements
 
 ## Bug fixes and other changes
+
+* Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
 * Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
 
 ## Upcoming deprecations for Kedro 0.19.0

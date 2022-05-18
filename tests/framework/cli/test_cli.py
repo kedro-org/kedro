@@ -299,37 +299,44 @@ class TestEntryPoints:
         entry_point.load.return_value = "groups"
         groups = load_entry_points("project")
         assert groups == ["groups"]
-        entry_points.assert_called_once_with(group="kedro.project_commands")
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.project_commands"
+        )
 
-    def test_project_error_is_caught(self, entry_points, entry_point):
+    def test_project_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Loading project commands"):
-            load_entry_points("project")
-
-        entry_points.assert_called_once_with(group="kedro.project_commands")
+        load_entry_points("project")
+        assert "Fail to load project commands" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.project_commands"
+        )
 
     def test_global_groups(self, entry_points, entry_point):
         entry_point.load.return_value = "groups"
         groups = load_entry_points("global")
         assert groups == ["groups"]
-        entry_points.assert_called_once_with(group="kedro.global_commands")
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.global_commands"
+        )
 
-    def test_global_error_is_caught(self, entry_points, entry_point):
+    def test_global_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Loading global commands from"):
-            load_entry_points("global")
-        entry_points.assert_called_once_with(group="kedro.global_commands")
+        load_entry_points("global")
+        assert "Fail to load global commands" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.global_commands"
+        )
 
     def test_init(self, entry_points, entry_point):
         _init_plugins()
-        entry_points.assert_called_once_with(group="kedro.init")
+        entry_points.return_value.select.assert_called_once_with(group="kedro.init")
         entry_point.load().assert_called_once_with()
 
-    def test_init_error_is_caught(self, entry_points, entry_point):
+    def test_init_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Initializing"):
-            _init_plugins()
-        entry_points.assert_called_once_with(group="kedro.init")
+        _init_plugins()
+        assert "Initializing" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(group="kedro.init")
 
 
 class TestKedroCLI:

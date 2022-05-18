@@ -33,13 +33,14 @@ PACKAGE_NAME = "dummy_package"
 
 @fixture
 def entry_points(mocker):
-    return mocker.patch("pkg_resources.iter_entry_points")
+    return mocker.patch("kedro.utils.importlib_metadata.entry_points")
 
 
 @fixture
 def entry_point(mocker, entry_points):
     ep = mocker.MagicMock()
-    entry_points.return_value = [ep]
+    entry_points.return_value = ep
+    entry_points.return_value.select.return_value = [ep]
     return ep
 
 

@@ -144,12 +144,6 @@ commands:
       python_version:
         type: string
     steps:
-      - restore_cache:
-          name: Restore package cache
-          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - restore_cache:
-          name: Restore conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one

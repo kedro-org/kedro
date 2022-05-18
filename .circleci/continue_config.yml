@@ -339,7 +339,6 @@ jobs:
           key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
           paths:
             - c:\tools\miniconda3\envs\kedro_builder
-
       - run:
           name: Pip-compile requirements file
           command: conda activate kedro_builder; make pip-compile

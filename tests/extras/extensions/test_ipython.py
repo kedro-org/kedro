@@ -13,13 +13,6 @@ def project_path(mocker, tmp_path):
 
 
 @pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
-@pytest.fixture(autouse=True)
 def cleanup_session():
     yield
 
@@ -62,7 +55,7 @@ class TestLoadKedroObjects:
         )
         mocker.patch("kedro.framework.project.settings.configure")
         mocker.patch("kedro.framework.session.session.validate_settings")
-        mocker.patch("kedro.framework.session.KedroSession._get_config_loader")
+        mocker.patch("kedro.framework.project.KedroSession._setup_logging")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
         )
@@ -176,7 +169,7 @@ class TestLoadKedroObjects:
         )
         mocker.patch("kedro.framework.project.settings.configure")
         mocker.patch("kedro.framework.session.session.validate_settings")
-        mocker.patch("kedro.framework.session.KedroSession._get_config_loader")
+        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
         )

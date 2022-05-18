@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 from itertools import cycle
 from pathlib import Path
@@ -28,6 +29,11 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
+
+import logging
+
+# pylint: disable=unused-import
+import kedro.config.default_logger  # noqa
 
 
 @click.group(name="stub_cli")
@@ -69,6 +75,16 @@ def fake_session(mocker):
     mock_session_create = mocker.patch.object(KedroSession, "create")
     mocked_session = mock_session_create.return_value.__enter__.return_value
     return mocked_session
+
+
+class TestDefaultLogging:
+    def test_setup_root_logger(self):
+        root_logger = logging.getLogger()
+        assert "console" in {handler.name for handler in root_logger.handlers}
+
+    def test_setup_kedro_logger(self):
+        kedro_logger = logging.getLogger("kedro")
+        assert kedro_logger.level == logging.INFO
 
 
 class TestCliCommands:

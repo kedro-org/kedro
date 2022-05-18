@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
-from importlib_metadata import entry_points
+import importlib_metadata
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -331,13 +331,12 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    eps = entry_points()
-    eps = eps.select(group=ENTRY_POINT_GROUPS[name])
+    entry_points = importlib_metadata.entry_points()
+    entry_points = entry_points.select(group=ENTRY_POINT_GROUPS[name])
 
     entry_point_commands = []
-    for entry_point in eps:
+    for entry_point in entry_points:
         try:
-            # raise KedroCliError()
             entry_point_commands.append(entry_point.load())
         except Exception as exc:  # pylint: disable=broad-except
             logger.warning(

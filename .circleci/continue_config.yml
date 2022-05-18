@@ -157,10 +157,14 @@ commands:
       - run:
           name: Install GDAL, Fiona and pytables
           command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
-        # The above lines causes zlib.dll to go missing in kedro_builder therefore we need to re-install zlib
-      - run:
-          name: Install zlib
-          command: conda activate kedro_builder; conda install zlib=1.2.11=*_5
+        # The above lines causes zlib.dll to go missing in kedro_builder for python 3.10, therefore we need to re-install zlib
+      - when:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Install zlib
+                command: conda activate kedro_builder; conda install zlib=1.2.11=*_5
       - run:
           name: Install all requirements
           command: conda activate kedro_builder; pip install -r test_requirements.txt -U

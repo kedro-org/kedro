@@ -1,13 +1,12 @@
-import json
 import logging
 import re
 import subprocess
 import textwrap
-import yaml
 from pathlib import Path
 
 import pytest
 import toml
+import yaml
 
 from kedro import __version__ as kedro_version
 from kedro.config import AbstractConfigLoader, ConfigLoader

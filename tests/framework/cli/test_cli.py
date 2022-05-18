@@ -9,6 +9,8 @@ import click
 from click.testing import CliRunner
 from pytest import fixture, mark, raises
 
+# pylint: disable=unused-import
+import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli
@@ -29,11 +31,6 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
-
-import logging
-
-# pylint: disable=unused-import
-import kedro.config.default_logger  # noqa
 
 
 @click.group(name="stub_cli")

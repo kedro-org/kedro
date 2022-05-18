@@ -90,6 +90,7 @@ commands:
       - setup_requirements
 
   # Windows specific commands
+  # REMOVE ME THIS IS FOR TESTING CI
   win_setup_conda:
     parameters:
       python_version:

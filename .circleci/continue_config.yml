@@ -155,14 +155,12 @@ commands:
         # Dependency resolution works best when installing these altogether in one
         # `conda install` command rather than one at a time in several sequential `conda install`s.
       - run:
-          name: Install GDAL
-          command: conda activate kedro_builder; conda install gdal -c conda-forge -y
+          name: Install GDAL, Fiona and pytables
+          command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
+        # The above lines causes zlib.dll to go missing in kedro_builder therefore we need to re-install zlib
       - run:
-          name: Install Fiona
-          command: conda activate kedro_builder; conda install fiona -c conda-forge -y
-      - run:
-          name: Install pytables
-          command: conda activate kedro_builder; conda install pytables -c conda-forge -y
+          name: Install zlib
+          command: conda activate kedro_builder; conda install zlib=1.2.11=*_5
       - run:
           name: Install all requirements
           command: conda activate kedro_builder; pip install -r test_requirements.txt -U

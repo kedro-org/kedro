@@ -146,7 +146,7 @@ commands:
     steps:
       - restore_cache:
           name: Restore package cache
-          key: kedro-deps-v2-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - unless:
           condition:
             equal: [ "3.10", <<parameters.python_version>> ]
@@ -333,7 +333,7 @@ jobs:
           steps:
           - save_cache:
               name: Save Python package cache
-              key: kedro-deps-v2-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+              key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
               paths:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs

@@ -11,7 +11,6 @@ from typing import Sequence
 
 import click
 from importlib_metadata import entry_points
-import pkg_resources
 
 # pylint: disable=unused-import
 import kedro.config.default_logger  # noqa
@@ -66,11 +65,9 @@ def info():
     plugin_versions = {}
     plugin_entry_points = defaultdict(set)
     for plugin_entry_point, group in ENTRY_POINT_GROUPS.items():
-        from importlib_metadata import entry_points
-        for entry_point in entry_points.select(group=group):
-            module_name = entry_point.module_name.split(".")[0]
-            plugin_version = entry_point.dist.version
-            plugin_versions[module_name] = plugin_version
+        for entry_point in entry_points().select(group=group):
+            module_name = entry_point.name
+            plugin_versions[module_name] = entry_point.dist.version
             plugin_entry_points[module_name].add(plugin_entry_point)
 
     click.echo()

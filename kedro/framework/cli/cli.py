@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Sequence
 
 import click
+from importlib_metadata import entry_points
 import pkg_resources
 
 # pylint: disable=unused-import
@@ -65,9 +66,10 @@ def info():
     plugin_versions = {}
     plugin_entry_points = defaultdict(set)
     for plugin_entry_point, group in ENTRY_POINT_GROUPS.items():
-        for entry_point in pkg_resources.iter_entry_points(group=group):
+        from importlib_metadata import entry_points
+        for entry_point in entry_points.select(group=group):
             module_name = entry_point.module_name.split(".")[0]
-            plugin_version = pkg_resources.get_distribution(module_name).version
+            plugin_version = entry_point.dist.version
             plugin_versions[module_name] = plugin_version
             plugin_entry_points[module_name].add(plugin_entry_point)
 
@@ -98,7 +100,7 @@ def docs():
 
 def _init_plugins():
     group = ENTRY_POINT_GROUPS["init"]
-    for entry_point in pkg_resources.iter_entry_points(group=group):
+    for entry_point in entry_points().select(group=group):
         try:
             init_hook = entry_point.load()
             init_hook()

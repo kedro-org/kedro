@@ -451,7 +451,7 @@ class TestKedroCLI:
         assert "Project specific commands from Kedro" in result.output
 
 
-@mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@mark.usefixtures("chdir_to_dummy_project")
 class TestRunCommand:
     @staticmethod
     @fixture(params=["run_config.yml", "run_config.json"])

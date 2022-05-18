@@ -37,13 +37,6 @@ class BadConfigLoader:  # pylint: disable=too-few-public-methods
     """
 
 
-@pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
 @pytest.fixture
 def mock_context_class(mocker):
     return mocker.patch("kedro.framework.session.session.KedroContext", autospec=True)
@@ -171,34 +164,6 @@ def fake_session_id(mocker):
 
 
 @pytest.fixture
-def local_logging_config():
-    return {
-        "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {
-            "kedro": {"level": "INFO", "handlers": ["console"], "propagate": False}
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
-        "info_file_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "level": "INFO",
-            "formatter": "simple",
-            "filename": "logs/info.log",
-        },
-    }
-
-
-@pytest.fixture
 def fake_project(tmp_path, local_logging_config, mock_package_name):
     fake_project_dir = Path(tmp_path) / "fake_project"
     (fake_project_dir / "src").mkdir(parents=True)
@@ -256,7 +221,7 @@ class TestKedroSession:
         fake_username,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
-        mocker.patch("kedro.framework.session.KedroSession._get_logging_config")
+        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         session = KedroSession.create(
             mock_package_name, fake_project, env=env, extra_params=extra_params
         )
@@ -327,6 +292,7 @@ class TestKedroSession:
         self, fake_project, monkeypatch, mock_package_name, mocker
     ):
         mocker.patch("kedro.config.config.ConfigLoader.get")
+        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 
         session = KedroSession.create(mock_package_name, fake_project)
@@ -341,6 +307,7 @@ class TestKedroSession:
         self, fake_project, monkeypatch, mock_package_name, mocker
     ):
         mocker.patch("kedro.config.config.ConfigLoader.get")
+        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 
         session = KedroSession.create(mock_package_name, fake_project)

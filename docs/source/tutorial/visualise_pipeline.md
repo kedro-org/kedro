@@ -106,10 +106,6 @@ Kedro-Viz aims to help users communicate different aspects of their workflow thr
 We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
 
 
-```{note}
-Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/python/plotly-express/) charts.
-```
-
 You need to update `requirements.txt` in your Kedro project and add the following datasets to enable plotly for your project.
 
 `kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.1`
@@ -118,7 +114,7 @@ You need to update `requirements.txt` in your Kedro project and add the followin
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
 
 There are two types of plotly datasets in Kedro :
-- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - To use this dataset you need to configure your plot in the `catalog.yml`.
+- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - To use this dataset you need to configure your plot in the `catalog.yml`. This datasets supports only [Plotly Express](https://plotly.com/python/plotly-express).
 
 Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyDataSet`
 
@@ -164,7 +160,7 @@ shuttle_passenger_capacity_plot:
 ```
 
 
-- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to configure your plot using plotly-express python library in your kedro node.
+- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to configure your plot using plotly-express python library in your kedro node. This datasets supports both [Plotly Express](https://plotly.com/python/plotly-express) and [Plotly Graph Objects](https://plotly.com/python/graph-objects/).
 
 
 Below is an example of how to visualise plots on Kedro-Viz using `plotly.JSONDataSet`

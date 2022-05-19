@@ -2,16 +2,7 @@
 of kedro package.
 """
 import importlib
-import sys
 from typing import Any
-
-# backward compatiblity
-if sys.version_info >= (3, 8):
-    from importlib import (  # noqa: F401 # pylint: disable=unused-import,
-        metadata as importlib_metadata,
-    )
-else:
-    import importlib_metadata  # noqa: F401 # pylint: disable=unused-import
 
 
 def load_obj(obj_path: str, default_obj_path: str = "") -> Any:

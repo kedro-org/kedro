@@ -17,8 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
-
-from kedro.utils import importlib_metadata
+import importlib_metadata
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3

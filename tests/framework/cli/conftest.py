@@ -33,7 +33,7 @@ PACKAGE_NAME = "dummy_package"
 
 @fixture
 def entry_points(mocker):
-    return mocker.patch("kedro.utils.importlib_metadata.entry_points")
+    return mocker.patch("importlib_metadata.entry_points")
 
 
 @fixture

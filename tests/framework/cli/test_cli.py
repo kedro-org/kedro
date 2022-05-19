@@ -91,12 +91,12 @@ class TestCliCommands:
         assert result_abr.exit_code == 0
         assert version in result_abr.output
 
-    def test_info_contains_plugin_versions(self, entry_point, mocker):
-        get_distribution = mocker.patch("pkg_resources.get_distribution")
-        get_distribution().version = "1.0.2"
+    def test_info_contains_plugin_versions(self, entry_point):
+        entry_point.dist.version = "1.0.2"
         entry_point.module_name = "bob.fred"
 
         result = CliRunner().invoke(cli, ["info"])
+        print(result.output)
         assert result.exit_code == 0
         assert (
             "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project)"
@@ -335,7 +335,7 @@ class TestEntryPoints:
     def test_init_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
         _init_plugins()
-        assert "Initializing" in caplog.text
+        assert "Fail to initialize" in caplog.text
         entry_points.return_value.select.assert_called_once_with(group="kedro.init")
 
 

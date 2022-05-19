@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Sequence
 
 import click
+import importlib_metadata
 
 # pylint: disable=unused-import
 import kedro.config.default_logger  # noqa
@@ -31,7 +32,6 @@ from kedro.framework.cli.utils import (
     load_entry_points,
 )
 from kedro.framework.startup import _is_project, bootstrap_project
-from kedro.utils import importlib_metadata
 
 LOGO = rf"""
  _            _
@@ -69,7 +69,7 @@ def info():
     plugin_entry_points = defaultdict(set)
     for plugin_entry_point, group in ENTRY_POINT_GROUPS.items():
         for entry_point in importlib_metadata.entry_points().select(group=group):
-            module_name = entry_point.name
+            module_name = entry_point.module_name.split(".")[0]
             plugin_versions[module_name] = entry_point.dist.version
             plugin_entry_points[module_name].add(plugin_entry_point)
 

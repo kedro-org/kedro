@@ -147,16 +147,17 @@ commands:
       - restore_cache:
           name: Restore package cache
           key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - restore_cache:
-          name: Restore conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+      - unless:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - restore_cache:
+                name: Restore conda environment cache
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one
         # `conda install` command rather than one at a time in several sequential `conda install`s.
-      - run:
-          name: Update Conda
-          command: conda update conda
       - run:
           name: Install GDAL, Fiona and pytables
           command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
@@ -330,11 +331,15 @@ jobs:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs
                 - c:\users\circleci\appdata\local\pip\cache
-      - save_cache:
-          name: Save conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-          paths:
-            - c:\tools\miniconda3\envs\kedro_builder
+      - unless:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - save_cache:
+                name: Save conda environment cache
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+                paths:
+                  - c:\tools\miniconda3\envs\kedro_builder
       - run:
           name: Pip-compile requirements file
           command: conda activate kedro_builder; make pip-compile

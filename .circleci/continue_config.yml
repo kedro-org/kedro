@@ -432,7 +432,7 @@ jobs:
       - run:
           name: Logout from AWS ECR
           command: docker logout public.ecr.aws
-          when: always  # logout even if the previous step has failed b
+          when: always  # logout even if the previous step has failed
 
   # This is effectively just a combination of the lint, unit_tests and e2e_tests jobs.
   # It's used to check that the nightly docker image is working ok and before publishing a release.

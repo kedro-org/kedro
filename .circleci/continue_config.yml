@@ -23,7 +23,7 @@ parameters:
     default: false
 
 orbs:
-  win: circleci/windows@4.1.1
+  win: circleci/windows@2.4.1
 
 # No windows executor is listed here since windows builds use win/default and modify
 # the Python version through the conda environment.
@@ -154,6 +154,9 @@ commands:
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one
         # `conda install` command rather than one at a time in several sequential `conda install`s.
+      - run:
+          name: Update Conda
+          command: conda update conda
       - run:
           name: Install GDAL, Fiona and pytables
           command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y

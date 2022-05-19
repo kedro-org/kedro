@@ -92,6 +92,7 @@ class TestKedroCLIHooks:
         mocker,
         fake_metadata,
         fake_plugin_distribution,
+        entry_points
     ):
         # Workaround to ensure that the log messages are picked up by caplog.
         # https://github.com/pytest-dev/pytest/issues/3697

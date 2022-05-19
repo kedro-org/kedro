@@ -138,8 +138,8 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 </details>
 
-```eval_rst
-.. note::  ``companies`` and ``shuttles`` refer to the datasets defined in ``conf/base/catalog.yml``. These are inputs to the ``preprocess_companies`` and ``preprocess_shuttles`` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
+```{note}
+`companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. These are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
 ```
 
 Be sure to import `node`, and your functions by adding them to the beginning of `pipeline.py`:
@@ -360,8 +360,8 @@ The `autoreload` flag will ensure that changes to your pipeline are automaticall
 
 ![autoreload](../meta/images/autoreload.gif)
 
-```eval_rst
-.. note::  This is also a great time to highlight how Kedro's `topological sorting <https://en.wikipedia.org/wiki/Topological_sorting>`_ works. The actual order of the ``node()`` calls in the ``pipeline`` is irrelevant; Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means that you, as a developer, simply ask Kedro what data you want and it will derive the execution graph automatically.
+```{note}
+This is also a great time to highlight how Kedro's [topological sorting](https://en.wikipedia.org/wiki/Topological_sorting) works. The actual order of the `node()` calls in the `pipeline` is irrelevant; Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means that you, as a developer, simply ask Kedro what data you want and it will derive the execution graph automatically.
 ```
 
 ## Data science pipeline
@@ -459,7 +459,7 @@ model_options:
     - review_scores_rating
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../kedro_project_setup/configuration.md#Parameters) is available in later documentation for advanced usage. Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
+These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../kedro_project_setup/configuration.md#parameters) is available in later documentation for advanced usage. Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
 
 ### Register the dataset
 
@@ -540,8 +540,8 @@ from kedro_tutorial.pipelines import data_science as ds
 * The two modular pipelines are merged together into a project `__default__` pipeline using the `+` operator.
 * The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
 
-```eval_rst
-.. note::  The order in which you add the pipelines together is not significant (``data_science_pipeline + data_processing_pipeline`` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
+```{note}
+The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
 ```
 
 ### Test the pipelines
@@ -613,8 +613,8 @@ kedro run --runner=ThreadRunner
 kedro run --runner=module.path.to.my.runner
 ```
 
-```eval_rst
-.. note::  ``ParallelRunner`` performs task parallelisation via multiprocessing. ``ThreadRunner`` is intended for use with remote execution engines such as `Spark <../tools_integration/pyspark.md>`_ and `Dask <https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py>`_. You can find out more about the runners Kedro provides, and how to create your own, in the `pipeline documentation about runners ` <../nodes_and_pipelines/run_a_pipeline.md>`_.
+```{note}
+`ParallelRunner` performs task parallelisation via multiprocessing. `ThreadRunner` is intended for use with remote execution engines such as [Spark](../tools_integration/pyspark.md) and [Dask](https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py). You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
 ```
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
@@ -629,8 +629,8 @@ kedro run --pipeline=ds
 
 See the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
 
-```eval_rst
-.. warning::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
+```{warning}
+To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
 ```
 
 ```bash

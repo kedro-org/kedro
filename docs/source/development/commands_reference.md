@@ -2,7 +2,7 @@
 
 Kedro's command line interface (CLI) is used to give commands to Kedro via a terminal shell (such as the terminal app on macOS, or cmd.exe or PowerShell on Windows). You need to use the CLI to set up a new Kedro project, and to run it.
 
-### Autocompletion (optional)
+## Autocompletion (optional)
 
 If you are using macOS or Linux, you can set up your shell to autocomplete `kedro` commands. If you don't know the type of shell you are using, first type the following:
 
@@ -40,7 +40,7 @@ eval (env _KEDRO_COMPLETE=source_fish kedro)
 ```
 </details>
 
-### Invoke Kedro CLI from Python (optional)
+## Invoke Kedro CLI from Python (optional)
 You can invoke the Kedro CLI as a Python module:
 
 ```bash
@@ -82,8 +82,8 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 The following are Kedro commands that apply globally and can be run from any directory location.
 
-```eval_rst
-.. note::  You only need to use one of those given below (e.g. specify ``kedro -V`` **OR** ``kedro --version``).
+```{note}
+You only need to use one of those given below (e.g. specify `kedro -V` **OR** `kedro --version`).
 ```
 
 ### Get help on Kedro commands
@@ -139,8 +139,8 @@ kedro docs
 
 ## Customise or Override Project-specific Kedro commands
 
-```eval_rst
-.. note::  All project related CLI commands should be run from the project’s root directory.
+```{note}
+All project related CLI commands should be run from the project’s root directory.
 ```
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
@@ -309,7 +309,7 @@ kedro run
 
 Kedro has options to modify pipeline runs. Here is a list of CLI arguments supported out of the box:
 
-```eval_rst
+```{eval-rst}
 +---------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+-----------------------------+
 | CLI command                                                               | Description                                                                             | Multiple instances allowed? |
 +===========================================================================+=========================================================================================+=============================+

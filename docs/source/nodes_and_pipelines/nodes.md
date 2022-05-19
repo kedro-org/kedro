@@ -69,7 +69,7 @@ There is a syntax to describe function inputs and outputs. This allows different
 
 ### Syntax for input variables
 
-```eval_rst
+```{eval-rst}
 +----------------------------------+-----------------+-----------------------------+---------------------------------------+
 | Input syntax                     | Meaning         | Example function parameters | How function is called when node runs |
 +==================================+=================+=============================+=======================================+
@@ -85,7 +85,7 @@ There is a syntax to describe function inputs and outputs. This allows different
 
 ### Syntax for output variables
 
-```eval_rst
+```{eval-rst}
 +----------------------------------+-------------------+-------------------------------------+
 | Output syntax                    | Meaning           | Example return statement            |
 +==================================+===================+=====================================+
@@ -192,6 +192,6 @@ The output is as follows:
 Out[2]: {'sum': 5}
 ```
 
-```eval_rst
-.. note::  It is also possible to call a node as a regular Python function: ``adder_node(dict(a=2, b=3))``. This will call ``adder_node.run(dict(a=2, b=3))`` behind the scenes.
+```{note}
+It is also possible to call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
 ```

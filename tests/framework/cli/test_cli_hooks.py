@@ -97,6 +97,8 @@ class TestKedroCLIHooks:
         # Workaround to ensure that the log messages are picked up by caplog.
         # https://github.com/pytest-dev/pytest/issues/3697
         logging.getLogger("kedro.framework.cli.hooks.manager").propagate = True
+        logging.getLogger("kedro.framework.cli.hooks.manager").setLevel(logging.DEBUG)
+
         Module = namedtuple("Module", ["cli"])
         mocker.patch(
             "kedro.framework.cli.cli.importlib.import_module",

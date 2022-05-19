@@ -16,8 +16,8 @@ To create a Kedro project using a starter, apply the `--starter` flag to `kedro 
 kedro new --starter=<path-to-starter>
 ```
 
-```eval_rst
-.. note::  ``path-to-starter`` could be a local directory or a VCS repository, as long as it is supported by `Cookiecutter <https://cookiecutter.readthedocs.io/en/1.7.2/usage.html>`_.
+```{note}
+`path-to-starter` could be a local directory or a VCS repository, as long as it is supported by [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/usage.html).
 ```
 
 To create a project using the `PySpark` starter:
@@ -77,7 +77,7 @@ This mode assumes that the starter doesn't require any additional configuration 
 
 ## Use a starter with a configuration file
 
-Kedro also allows you to [specify a configuration file](./new_project.md#Create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
+Kedro also allows you to [specify a configuration file](./new_project.md#create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
 
 ```bash
 kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark

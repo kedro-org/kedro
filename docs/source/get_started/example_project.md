@@ -80,8 +80,8 @@ This subfolder contains the project's source code. It contains 2 subfolders:
 * Avoid committing notebook output cells (data can easily sneak into notebooks when you don't delete output cells).
 * Avoid committing credentials in `conf/`. Only the `conf/local/` folder should be used for sensitive information like access credentials.
 
-```eval_rst
-.. note::  By default any file inside the ``conf/`` folder (and its subfolders) containing ``credentials`` in its name will be ignored via ``.gitignore``.
+```{note}
+By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore`.
 ```
 
 
@@ -116,7 +116,7 @@ The example project contains a single pipeline:
 
 These are the node function within `src/get_started/nodes.py`:
 
-```eval_rst
+```{eval-rst}
 +-----------------+----------------------------------------------------------------+--------------------------+
 | Node            | Description                                                    | Node Function Name       |
 +=================+================================================================+==========================+

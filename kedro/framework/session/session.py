@@ -46,7 +46,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
-        logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
+        logging.getLogger(__name__).debug("Unable to git describe %s", project_path)
         return {}
 
     return {"git": git_data}
@@ -323,7 +323,7 @@ class KedroSession:
         """
         # pylint: disable=protected-access,no-member
         # Report project name
-        self._logger.info("** Kedro project %s", self._project_path.name)
+        self._logger.info("Kedro project %s", self._project_path.name)
 
         if self._run_called:
             raise KedroSessionError(

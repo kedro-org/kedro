@@ -42,7 +42,7 @@ class CLIHooksManager(PluginManager):
         }
 
         if plugin_names:
-            logging.getLogger(__name__).info(
+            logging.getLogger(__name__).debug(
                 "Registered CLI hooks from %d installed plugin(s): %s",
                 len(plugin_names),
                 ", ".join(sorted(plugin_names)),

@@ -67,8 +67,8 @@ We prefer to think of the following list as guidelines rather than rules because
 
 Where it's not obvious what the style should be, it's worth consulting the [Microsoft style guide](https://docs.microsoft.com/en-gb/style-guide/welcome/). We also use the [INCITS Inclusive Terminology Guidelines](https://standards.incits.org/apps/group_public/download.php/131246/eb-2021-00288-001-INCITS-Inclusive-Terminology-Guidelines.pdf).
 
-```eval_rst
-.. note:: If you are unsure of our preferred style, just do what you can in your documentation contribution, and note any queries. We can always iterate the submission with you when you create a pull request.
+```{note}
+If you are unsure of our preferred style, just do what you can in your documentation contribution, and note any queries. We can always iterate the submission with you when you create a pull request.
 ```
 
 ### Language
@@ -119,10 +119,10 @@ Don't write this:
 * Don't use numbered bullets except for a sequence of activities or where you have to refer back to one of them in the text (or a diagram).
 
 ### Notes
-We use callout sections formatted in `.rst` to bring attention to key points. For example:
+We use directives to bring attention to key points. For example:
 
-```eval_rst
-.. note::  Do not pass "Go", do not collect £200.
+```{note}
+Do not pass "Go", do not collect £200.
 ```
 
 * You will need to use restructured text formatting within the box. Aim to keep the formatting of the callout text plain, although you can include bold, italic, code and links.

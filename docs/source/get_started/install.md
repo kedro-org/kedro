@@ -6,8 +6,8 @@ To install Kedro from the Python Package Index (PyPI) simply run:
 pip install kedro
 ```
 
-```eval_rst
-.. note::  It is also possible to install Kedro using ``conda``, as follows, but we recommend using ``pip`` at this point to eliminate any potential dependency issues, as follows:
+```{note}
+It is also possible to install Kedro using `conda`, as follows, but we recommend using `pip` at this point to eliminate any potential dependency issues, as follows:
 ```
 
 ```bash

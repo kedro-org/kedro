@@ -4,8 +4,8 @@ This page explains how to run your Kedro pipeline using [Prefect Core](https://w
 
 In scope of this deployment, we are interested in [Prefect Server](https://docs.prefect.io/orchestration/server/overview.html#what-is-prefect-server), an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends the Prefect Core.
 
-```eval_rst
-.. note::  Prefect Server ships out-of-the-box with a fully featured user interface.
+```{note}
+Prefect Server ships out-of-the-box with a fully featured user interface.
 ```
 
 ## Prerequisites
@@ -117,8 +117,8 @@ if __name__ == "__main__":
     build_and_register_flow()
 ```
 
-```eval_rst
-.. note::  The script launches a `local agent <https://docs.prefect.io/orchestration/agents/local.html>`_. Remember to stop the agent with Ctrl-C when you complete.
+```{note}
+The script launches a [local agent](https://docs.prefect.io/orchestration/agents/local.html). Remember to stop the agent with Ctrl-C when you complete.
 ```
 
 

@@ -10,7 +10,7 @@ At this stage, you should be able to see the `conda` environment that you have c
 
 ![](../meta/images/vscode_setup_interpreter.png)
 
-### Advanced: For those using `venv` / `virtualenv`
+## Advanced: For those using `venv` / `virtualenv`
 
 We're going to show you how to get your virtual environments to show up in your Python interpreter in VS Code. You do this by opening [`settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settings-file-locations) and adding the following:
 
@@ -111,8 +111,8 @@ You can find more information about setting up environmental variables [here](ht
 
 Go to **Debug > Add Configurations**.
 
-```eval_rst
-.. note::  If you encounter the following error: ``Cannot read property 'openConfigFile' of undefined``, you can manually create ``launch.json`` file in ``.vscode`` directory and paste the configuration from below.
+```{note}
+If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`, you can manually create `launch.json` file in `.vscode` directory and paste the configuration from below.
 ```
 
 Edit the `launch.json` that opens in the editor with:
@@ -216,8 +216,8 @@ scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/
 
 
 
-```eval_rst
-.. note:: `There is also a third-party plugin for VS Code that supports remote workspaces <https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace>`_.
+```{note}
+[There is also a third-party plugin for VS Code that supports remote workspaces.](https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace)
 ```
 
 Start executing the pipeline on your remote computer:

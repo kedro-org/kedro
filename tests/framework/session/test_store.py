@@ -11,6 +11,8 @@ STORE_LOGGER_NAME = "kedro.framework.session.store"
 
 class TestBaseStore:
     def test_init(self, caplog):
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
         path = "fake_path"
         store = BaseSessionStore(path, FAKE_SESSION_ID)
         assert store == {}
@@ -28,6 +30,8 @@ class TestBaseStore:
         assert actual_debug_messages == expected_debug_messages
 
     def test_save(self, caplog):
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
         path = "fake_path"
         store = BaseSessionStore(path, FAKE_SESSION_ID)
         store.save()

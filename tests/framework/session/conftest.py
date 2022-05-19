@@ -25,9 +25,6 @@ from kedro.pipeline.node import Node, node
 
 logger = logging.getLogger(__name__)
 
-# Modify kedro logger to show DEBUG level messages, which are tested for using caplog.
-logging.getLogger("kedro").setLevel(logging.DEBUG)
-
 MOCK_PACKAGE_NAME = "fake_package"
 
 

@@ -151,8 +151,8 @@ commands:
           name: Restore conda environment cache
           key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
       - run:
-          name: Remove GDAL, Fiona and pytables
-          command: conda activate kedro_builder; conda remove gdal fiona pytables
+          name: Remove GDAL
+          command: conda activate kedro_builder; conda remove gdal
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one

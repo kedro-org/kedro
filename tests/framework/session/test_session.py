@@ -824,7 +824,7 @@ def fake_project_with_logging_file_handler(fake_project):
 
 @pytest.mark.usefixtures("mock_settings")
 def test_setup_logging_using_absolute_path(
-    self, fake_project_with_logging_file_handler, mocker, mock_package_name
+    fake_project_with_logging_file_handler, mocker, mock_package_name
 ):
     mocked_logging = mocker.patch("logging.config.dictConfig")
     KedroSession.create(mock_package_name, fake_project_with_logging_file_handler)

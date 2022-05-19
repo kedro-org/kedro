@@ -405,7 +405,8 @@ class TestRunNodeSynchronisationHelper:
             node_, catalog, is_async, session_id, package_name=package_name
         )
         mock_run_node.assert_called_once()
-        mock_logging.assert_called_once_with({})
+        # No project-side logging.yml has been provided, so logging should not be re-configured.
+        mock_logging.assert_not_called()
         mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_not_provided(

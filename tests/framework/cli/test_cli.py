@@ -2,7 +2,6 @@ import logging
 from collections import namedtuple
 from itertools import cycle
 from pathlib import Path
-from unittest.mock import patch
 
 import anyconfig
 import click
@@ -133,18 +132,6 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["-h"])
         assert result.exit_code == 0
         assert "-h, --help     Show this message and exit." in result.output
-
-    @patch("webbrowser.open")
-    def test_docs(self, patched_browser):
-        """Check that `kedro docs` opens a correct file in the browser."""
-        result = CliRunner().invoke(cli, ["docs"])
-
-        assert result.exit_code == 0
-        expected = f"https://kedro.readthedocs.io/en/{version}"
-
-        assert patched_browser.call_count == 1
-        args, _ = patched_browser.call_args
-        assert expected in args[0]
 
 
 class TestCommandCollection:

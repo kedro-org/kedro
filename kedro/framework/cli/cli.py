@@ -5,7 +5,6 @@ This module implements commands available from the kedro CLI.
 import importlib
 import logging
 import sys
-import webbrowser
 from collections import defaultdict
 from pathlib import Path
 from typing import Sequence
@@ -83,6 +82,7 @@ def info():
             )
     else:
         click.echo("No plugins installed")
+
 
 
 @cli.command(short_help="See the kedro API docs and introductory tutorial.")

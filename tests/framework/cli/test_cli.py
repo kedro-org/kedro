@@ -305,7 +305,7 @@ class TestEntryPoints:
     def test_project_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
         load_entry_points("project")
-        assert "Fail to load project commands" in caplog.text
+        assert "Failed to load project commands" in caplog.text
         entry_points.return_value.select.assert_called_once_with(
             group="kedro.project_commands"
         )
@@ -321,7 +321,7 @@ class TestEntryPoints:
     def test_global_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
         load_entry_points("global")
-        assert "Fail to load global commands" in caplog.text
+        assert "Failed to load global commands" in caplog.text
         entry_points.return_value.select.assert_called_once_with(
             group="kedro.global_commands"
         )

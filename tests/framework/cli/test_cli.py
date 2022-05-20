@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 from itertools import cycle
 from pathlib import Path
@@ -7,6 +8,8 @@ import click
 from click.testing import CliRunner
 from pytest import fixture, mark, raises
 
+# pylint: disable=unused-import
+import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli
@@ -68,6 +71,16 @@ def fake_session(mocker):
     mock_session_create = mocker.patch.object(KedroSession, "create")
     mocked_session = mock_session_create.return_value.__enter__.return_value
     return mocked_session
+
+
+class TestDefaultLogging:
+    def test_setup_root_logger(self):
+        root_logger = logging.getLogger()
+        assert "console" in {handler.name for handler in root_logger.handlers}
+
+    def test_setup_kedro_logger(self):
+        kedro_logger = logging.getLogger("kedro")
+        assert kedro_logger.level == logging.INFO
 
 
 class TestCliCommands:
@@ -422,7 +435,7 @@ class TestKedroCLI:
         assert "Project specific commands from Kedro" in result.output
 
 
-@mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@mark.usefixtures("chdir_to_dummy_project")
 class TestRunCommand:
     @staticmethod
     @fixture(params=["run_config.yml", "run_config.json"])

@@ -15,7 +15,7 @@ FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_dist")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "cleanup_dist")
 class TestMicropkgPackageCommand:
     def assert_sdist_contents_correct(
         self, sdist_location, package_name=PIPELINE_NAME, version="0.1"
@@ -491,7 +491,7 @@ class TestMicropkgPackageCommand:
 
 
 @pytest.mark.usefixtures(
-    "chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pyproject_toml"
+    "chdir_to_dummy_project", "cleanup_dist", "cleanup_pyproject_toml"
 )
 class TestMicropkgPackageFromManifest:
     def test_micropkg_package_all(  # pylint: disable=too-many-locals

@@ -3,37 +3,10 @@
 
 import os
 import re
-import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from time import sleep, time
 from typing import Any, Callable, Iterator, List
-
-import pandas as pd
-
-
-def get_sample_csv_content():
-    return """col1, col2, col3
-    1, 2, 3
-    4, 5, 6
-    """
-
-
-def get_sample_data_frame():
-    data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-    return pd.DataFrame(data)
-
-
-def create_temp_csv():
-    _, csv_file_path = tempfile.mkstemp(suffix=".csv")
-    return csv_file_path
-
-
-def create_sample_csv():
-    csv_file_path = create_temp_csv()
-    with open(csv_file_path, mode="w", encoding="utf-8") as output_file:
-        output_file.write(get_sample_csv_content())
-    return csv_file_path
 
 
 @contextmanager
@@ -97,55 +70,6 @@ def wait_for(
     raise WaitForException(
         f"func: {func}, didn't return within specified timeout: {timeout_}"
     )
-
-
-def get_logline_count(logfile: str) -> int:
-    """Get line count in logfile
-
-    Note: If logfile doesn't exist will return 0
-
-    Args:
-        logfile: path to logfile
-
-    Returns:
-        line count of logfile
-    """
-    try:
-        with open(logfile, encoding="utf-8") as file_handle:
-            return sum(1 for i in file_handle)
-    except FileNotFoundError:
-        return 0
-
-
-def get_last_logline(logfile: str) -> str:
-    """Get last line of logfile
-
-    Args:
-        logfile: path to logfile
-
-    Returns:
-        last line of logfile
-    """
-    line = ""
-    with open(logfile, encoding="utf-8") as file_handle:
-        for line in file_handle:
-            pass
-
-    return line
-
-
-def get_logfile_path(proj_dir: Path) -> str:
-    """
-    Helper function to fet full path of `pipeline.log` inside project
-
-    Args:
-        proj_dir: path to proj_dir
-
-    Returns:
-        path to `pipeline.log`
-    """
-    log_file = (proj_dir / "logs" / "visualization" / "pipeline.log").absolute()
-    return str(log_file)
 
 
 def parse_csv(text: str) -> List[str]:

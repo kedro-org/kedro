@@ -42,6 +42,7 @@
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
+* `KedroContext` is now an `attrs`'s frozen class and `config_loader` is available as public attribute.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Updated [Databricks documentation](https://kedro.readthedocs.io/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.
@@ -54,6 +55,10 @@
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro docs` will be removed in 0.19.0.
+
 
 # Release 0.18.0
 

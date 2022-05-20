@@ -17,13 +17,6 @@ def fake_load_context(mocker):
     )
 
 
-@pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
 PIPELINE_NAME = "pipeline"
 
 
@@ -158,7 +151,7 @@ def identity(data):
     return data  # pragma: no cover
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestCatalogCreateCommand:
     PIPELINE_NAME = "de"
 

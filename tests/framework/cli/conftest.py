@@ -122,6 +122,9 @@ def fake_project_cli(
     CliRunner().invoke(
         fake_kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)]
     )
+    # Delete the project logging.yml, which leaves behind info.log and error.log files.
+    # This leaves logging config as the framework default.
+    (fake_repo_path / "conf" / "base" / "logging.yml").unlink()
 
     # NOTE: Here we load a couple of modules, as they would be imported in
     # the code and tests.
@@ -155,8 +158,3 @@ def fake_project_cli(
 @fixture
 def chdir_to_dummy_project(fake_repo_path, monkeypatch):
     monkeypatch.chdir(str(fake_repo_path))
-
-
-@fixture
-def patch_log(mocker):
-    mocker.patch("logging.config.dictConfig")

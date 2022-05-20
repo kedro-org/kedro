@@ -98,15 +98,14 @@ def docs():
     webbrowser.open(index_path)
 
 
-def _init_plugins():
-    group = ENTRY_POINT_GROUPS["init"]
-    for entry_point in importlib_metadata.entry_points().select(group=group):
+def _init_plugins() -> None:
+    init_hooks = load_entry_points("init")
+    for init_hook in init_hooks:
         try:
-            init_hook = entry_point.load()
             init_hook()
         except Exception as exc:  # pylint: disable=broad-except
             logger.warning(
-                "Failed to initialise %s. Full exception: %s", entry_point, exc
+                "Failed to initialise %s. Full exception: %s", init_hook, exc
             )
 
 

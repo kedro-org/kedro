@@ -332,9 +332,9 @@ class TestEntryPoints:
         entry_point.load().assert_called_once_with()
 
     def test_init_error_is_caught(self, entry_points, entry_point, caplog):
-        entry_point.load.side_effect = Exception()
+        entry_point.load.return_value.side_effect = Exception()
         _init_plugins()
-        assert "Fail to initialize" in caplog.text
+        assert "Failed to initialise" in caplog.text
         entry_points.return_value.select.assert_called_once_with(group="kedro.init")
 
 

@@ -104,9 +104,8 @@ class TestCliCommands:
         assert result_abr.exit_code == 0
         assert version in result_abr.output
 
-    def test_info_contains_plugin_versions(self, entry_point, mocker):
-        get_distribution = mocker.patch("pkg_resources.get_distribution")
-        get_distribution().version = "1.0.2"
+    def test_info_contains_plugin_versions(self, entry_point):
+        entry_point.dist.version = "1.0.2"
         entry_point.module_name = "bob.fred"
 
         result = CliRunner().invoke(cli, ["info"])
@@ -312,37 +311,44 @@ class TestEntryPoints:
         entry_point.load.return_value = "groups"
         groups = load_entry_points("project")
         assert groups == ["groups"]
-        entry_points.assert_called_once_with(group="kedro.project_commands")
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.project_commands"
+        )
 
-    def test_project_error_is_caught(self, entry_points, entry_point):
+    def test_project_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Loading project commands"):
-            load_entry_points("project")
-
-        entry_points.assert_called_once_with(group="kedro.project_commands")
+        load_entry_points("project")
+        assert "Failed to load project commands" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.project_commands"
+        )
 
     def test_global_groups(self, entry_points, entry_point):
         entry_point.load.return_value = "groups"
         groups = load_entry_points("global")
         assert groups == ["groups"]
-        entry_points.assert_called_once_with(group="kedro.global_commands")
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.global_commands"
+        )
 
-    def test_global_error_is_caught(self, entry_points, entry_point):
+    def test_global_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Loading global commands from"):
-            load_entry_points("global")
-        entry_points.assert_called_once_with(group="kedro.global_commands")
+        load_entry_points("global")
+        assert "Failed to load global commands" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.global_commands"
+        )
 
     def test_init(self, entry_points, entry_point):
         _init_plugins()
-        entry_points.assert_called_once_with(group="kedro.init")
+        entry_points.return_value.select.assert_called_once_with(group="kedro.init")
         entry_point.load().assert_called_once_with()
 
     def test_init_error_is_caught(self, entry_points, entry_point):
-        entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Initializing"):
+        entry_point.load.return_value.side_effect = Exception()
+        with raises(Exception):
             _init_plugins()
-        entry_points.assert_called_once_with(group="kedro.init")
+        entry_points.return_value.select.assert_called_once_with(group="kedro.init")
 
 
 class TestKedroCLI:
@@ -356,6 +362,7 @@ class TestKedroCLI:
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
+        print(kedro_cli.project_groups)
         assert len(kedro_cli.project_groups) == 6
         assert kedro_cli.project_groups == [
             catalog_cli,

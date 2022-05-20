@@ -92,6 +92,7 @@ class TestKedroCLIHooks:
         mocker,
         fake_metadata,
         fake_plugin_distribution,
+        entry_points,  # pylint: disable=unused-argument
     ):
         caplog.set_level(logging.DEBUG, logger="kedro")
 

@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name,global-statement
 """This module implements Kedro session responsible for project lifecycle."""
 import getpass
 import logging

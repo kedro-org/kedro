@@ -1,5 +1,6 @@
 """Utilities for use with click."""
 import difflib
+import logging
 import re
 import shlex
 import shutil
@@ -16,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
-import pkg_resources
+import importlib_metadata
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -32,6 +33,8 @@ ENTRY_POINT_GROUPS = {
     "hooks": "kedro.hooks",
     "cli_hooks": "kedro.cli_hooks",
 }
+
+logger = logging.getLogger(__name__)
 
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
@@ -328,13 +331,20 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+    entry_points = importlib_metadata.entry_points()
+    entry_points = entry_points.select(group=ENTRY_POINT_GROUPS[name])
+
     entry_point_commands = []
     for entry_point in entry_points:
         try:
             entry_point_commands.append(entry_point.load())
-        except Exception as exc:
-            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.warning(
+                "Failed to load %s commands from %s. Full exception: %s",
+                name,
+                entry_point,
+                exc,
+            )
     return entry_point_commands
 
 

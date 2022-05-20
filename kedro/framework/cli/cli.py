@@ -3,6 +3,7 @@
 This module implements commands available from the kedro CLI.
 """
 import importlib
+import logging
 import sys
 import webbrowser
 from collections import defaultdict
@@ -10,7 +11,7 @@ from pathlib import Path
 from typing import Sequence
 
 import click
-import pkg_resources
+import importlib_metadata
 
 # pylint: disable=unused-import
 import kedro.config.default_logger  # noqa
@@ -41,6 +42,8 @@ LOGO = rf"""
 v{version}
 """
 
+logger = logging.getLogger(__name__)
+
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 @click.version_option(version, "--version", "-V", help="Show version and exit")
@@ -65,10 +68,9 @@ def info():
     plugin_versions = {}
     plugin_entry_points = defaultdict(set)
     for plugin_entry_point, group in ENTRY_POINT_GROUPS.items():
-        for entry_point in pkg_resources.iter_entry_points(group=group):
+        for entry_point in importlib_metadata.entry_points().select(group=group):
             module_name = entry_point.module_name.split(".")[0]
-            plugin_version = pkg_resources.get_distribution(module_name).version
-            plugin_versions[module_name] = plugin_version
+            plugin_versions[module_name] = entry_point.dist.version
             plugin_entry_points[module_name].add(plugin_entry_point)
 
     click.echo()
@@ -96,14 +98,10 @@ def docs():
     webbrowser.open(index_path)
 
 
-def _init_plugins():
-    group = ENTRY_POINT_GROUPS["init"]
-    for entry_point in pkg_resources.iter_entry_points(group=group):
-        try:
-            init_hook = entry_point.load()
-            init_hook()
-        except Exception as exc:
-            raise KedroCliError(f"Initializing {entry_point}") from exc
+def _init_plugins() -> None:
+    init_hooks = load_entry_points("init")
+    for init_hook in init_hooks:
+        init_hook()
 
 
 class KedroCLI(CommandCollection):

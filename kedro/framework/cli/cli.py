@@ -101,12 +101,7 @@ def docs():
 def _init_plugins() -> None:
     init_hooks = load_entry_points("init")
     for init_hook in init_hooks:
-        try:
-            init_hook()
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.warning(
-                "Failed to initialise %s. Full exception: %s", init_hook, exc
-            )
+        init_hook()
 
 
 class KedroCLI(CommandCollection):

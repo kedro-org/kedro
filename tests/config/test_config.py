@@ -14,27 +14,6 @@ _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
 
 
-def _get_local_logging_config():
-    return {
-        "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {
-            "kedro": {"level": "INFO", "handlers": ["console"], "propagate": False}
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
-    }
-
-
 def _write_yaml(filepath: Path, config: Dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
@@ -86,14 +65,12 @@ def local_config(tmp_path):
 def create_config_dir(tmp_path, base_config, local_config):
     proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
     local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
-    local_logging = tmp_path / _DEFAULT_RUN_ENV / "logging.yml"
     parameters = tmp_path / _BASE_ENV / "parameters.json"
     db_config_path = tmp_path / _BASE_ENV / "db.ini"
     project_parameters = dict(param1=1, param2=2)
 
     _write_yaml(proj_catalog, base_config)
     _write_yaml(local_catalog, local_config)
-    _write_yaml(local_logging, _get_local_logging_config())
     _write_json(parameters, project_parameters)
     _write_dummy_ini(db_config_path)
 

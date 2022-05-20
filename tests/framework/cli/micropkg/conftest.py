@@ -6,13 +6,6 @@ from kedro.framework.project import settings
 
 
 @pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
-@pytest.fixture(autouse=True)
 def cleanup_micropackages(fake_repo_path, fake_package_path):
     packages = {p.name for p in fake_package_path.iterdir() if p.is_dir()}
 

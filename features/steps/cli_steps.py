@@ -451,20 +451,24 @@ def check_pipeline_not_empty(context):
     assert "pipeline = pipeline([])" not in pipeline_file.read_text("utf-8")
 
 
-@then("the console log should show that {number} nodes were run")
+@then("the logs should show that {number} nodes were run")
 def check_one_node_run(context, number):
     expected_log_line = f"Completed {number} out of {number} tasks"
+    info_log = context.root_project_dir / "logs" / "info.log"
     assert expected_log_line in context.result.stdout
+    assert expected_log_line in info_log.read_text()
 
 
-@then('the console log should show that "{node}" was run')
+@then('the logs should show that "{node}" was run')
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
+    info_log = context.root_project_dir / "logs" / "info.log"
     stdout = context.result.stdout
     assert expected_log_line in stdout, (
         "Expected the following message segment to be printed on stdout: "
         f"{expected_log_line},\nbut got {stdout}"
     )
+    assert expected_log_line in info_log.read_text()
 
 
 @then("I should get a successful exit code")

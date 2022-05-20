@@ -6,18 +6,30 @@
 
 ## Breaking changes to the API
 
-## Upcoming deprecations for Kedro 0.19.0
-* `kedro docs` will be removed in 0.19.0.
+### CLI
+* Removed deprecated `kedro docs` command.
 
+### Other
+* Removed deprecated `kedro.extras.ColorHandler`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+
+## Major features and improvements
+
+# Release 0.18.2
+
 # Upcoming Release 0.18.2
 
 ## Major features and improvements
 
-
 ## Bug fixes and other changes
-* Updated Starter template to use `myst_parser` instead of `recommonmark`
+
+* Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
+* Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
+* Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro.extras.ColorHandler` will be removed in 0.19.0.
 
 # Release 0.18.1
 
@@ -41,6 +53,8 @@
 * Made `hook_manager` argument optional for `runner.run`.
 * `kedro docs` now opens an online version of the Kedro documentation instead of a locally built version.
 
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro docs` will be removed in 0.19.0.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.

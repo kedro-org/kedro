@@ -16,13 +16,6 @@ from kedro.framework.cli.utils import KedroCliError
 
 
 @pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
-@pytest.fixture(autouse=True)
 def python_call_mock(mocker):
     return mocker.patch("kedro.framework.cli.jupyter.python_call")
 
@@ -33,7 +26,7 @@ def create_kernel_mock(mocker):
 
 
 @pytest.mark.usefixtures(
-    "chdir_to_dummy_project", "patch_log", "create_kernel_mock", "python_call_mock"
+    "chdir_to_dummy_project", "create_kernel_mock", "python_call_mock"
 )
 class TestJupyterNotebookCommand:
     def test_happy_path(
@@ -83,7 +76,7 @@ class TestJupyterNotebookCommand:
 
 
 @pytest.mark.usefixtures(
-    "chdir_to_dummy_project", "patch_log", "create_kernel_mock", "python_call_mock"
+    "chdir_to_dummy_project", "create_kernel_mock", "python_call_mock"
 )
 class TestJupyterLabCommand:
     def test_happy_path(
@@ -171,7 +164,7 @@ def cleanup_nodes_dir(fake_package_path):
         shutil.rmtree(str(nodes_dir))
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_nodes_dir")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "cleanup_nodes_dir")
 class TestConvertNotebookCommand:
     @pytest.fixture
     def fake_export_nodes(self, mocker):

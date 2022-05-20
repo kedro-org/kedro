@@ -13,7 +13,7 @@ from typing import Any, Dict, Iterable, Union
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader
+from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
@@ -47,7 +47,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
-        logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
+        logging.getLogger(__name__).debug("Unable to git describe %s", project_path)
         return {}
 
     return {"git": git_data}
@@ -185,8 +185,15 @@ class KedroSession:
 
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
-        conf_logging = self._get_logging_config()
-        configure_logging(conf_logging)
+        try:
+            conf_logging = self._get_logging_config()
+        except MissingConfigException:
+            self._logger.debug(
+                "No project logging configuration loaded; "
+                "Kedro's default logging configuration will be used."
+            )
+        else:
+            configure_logging(conf_logging)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS
@@ -324,7 +331,7 @@ class KedroSession:
         """
         # pylint: disable=protected-access,no-member
         # Report project name
-        self._logger.info("** Kedro project %s", self._project_path.name)
+        self._logger.info("Kedro project %s", self._project_path.name)
 
         if self._run_called:
             raise KedroSessionError(

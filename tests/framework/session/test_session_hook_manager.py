@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 
 import pytest
@@ -53,7 +54,7 @@ class TestSessionHookManager:
     def test_hooks_registered_when_session_created(
         self, mocker, request, caplog, project_hooks, num_plugins
     ):
-
+        caplog.set_level(logging.DEBUG, logger="kedro")
         load_setuptools_entrypoints = mocker.patch(
             "pluggy._manager.PluginManager.load_setuptools_entrypoints",
             return_value=num_plugins,
@@ -89,6 +90,7 @@ class TestSessionHookManager:
         naughty_plugin,
         good_plugin,
     ):
+        caplog.set_level(logging.DEBUG, logger="kedro")
 
         distinfo = [("plugin_obj_1", naughty_plugin), ("plugin_obj_2", good_plugin)]
         mocked_distinfo = mocker.patch(

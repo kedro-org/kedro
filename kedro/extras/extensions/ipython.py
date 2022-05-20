@@ -76,7 +76,7 @@ def reload_kedro(
         }
     )
 
-    logger.info("** Kedro project %s", str(metadata.project_name))
+    logger.info("Kedro project %s", str(metadata.project_name))
     logger.info(
         "Defined global variable `context`, `session`, `catalog` and `pipelines`"
     )

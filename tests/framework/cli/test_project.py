@@ -10,13 +10,6 @@ from kedro.framework.cli.project import NO_DEPENDENCY_MESSAGE
 
 
 @pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
-@pytest.fixture(autouse=True)
 def call_mock(mocker):
     return mocker.patch("kedro.framework.cli.project.call")
 
@@ -31,7 +24,7 @@ def fake_copyfile(mocker):
     return mocker.patch("shutil.copyfile")
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestActivateNbstripoutCommand:
     @staticmethod
     @pytest.fixture()
@@ -112,7 +105,7 @@ class TestActivateNbstripoutCommand:
         assert "Git executable not found. Install Git first." in result.stdout
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestTestCommand:
     def test_happy_path(self, fake_project_cli, python_call_mock):
         result = CliRunner().invoke(fake_project_cli, ["test", "--random-arg", "value"])
@@ -136,7 +129,7 @@ class TestTestCommand:
         python_call_mock.assert_not_called()
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestLintCommand:
     @pytest.mark.parametrize("files", [(), ("src",)])
     def test_lint(
@@ -239,7 +232,7 @@ class TestLintCommand:
         assert mocked_environ == {"PYTHONPATH": str(fake_repo_path / "src")}
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestIpythonCommand:
     def test_happy_path(
         self,
@@ -291,7 +284,7 @@ class TestIpythonCommand:
         assert error in result.output
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestPackageCommand:
     def test_happy_path(
         self, call_mock, fake_project_cli, mocker, fake_repo_path, fake_metadata
@@ -328,7 +321,7 @@ class TestPackageCommand:
         )
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestBuildDocsCommand:
     def test_happy_path(
         self,
@@ -383,7 +376,7 @@ class TestBuildDocsCommand:
         patched_browser.assert_called_once_with(expected_path)
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "fake_copyfile")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "fake_copyfile")
 class TestBuildReqsCommand:
     def test_compile_from_requirements_file(
         self,

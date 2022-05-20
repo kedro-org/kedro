@@ -1,8 +1,3 @@
-# PEP-518 https://peps.python.org/pep-0518/
-[build-system]
-# Minimum requirements for the build system to execute.
-requires = ["setuptools>=38.0", "wheel"]  # PEP 508 specifications.
-
 [tool.black]
 exclude = "/templates/|^features/steps/test_starter"
 

@@ -105,8 +105,9 @@ def _init_plugins():
             init_hook = entry_point.load()
             init_hook()
         except Exception as exc:  # pylint: disable=broad-except
-            logger.warning(KedroCliError(f"Fail to initialize {entry_point}"))
-            logger.warning(exc)
+            logger.warning(
+                "Failed to initialise %s. Full exception: %s", entry_point, exc
+            )
 
 
 class KedroCLI(CommandCollection):

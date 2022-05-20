@@ -96,7 +96,6 @@ class TestCliCommands:
         entry_point.module_name = "bob.fred"
 
         result = CliRunner().invoke(cli, ["info"])
-        print(result.output)
         assert result.exit_code == 0
         assert (
             "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project)"

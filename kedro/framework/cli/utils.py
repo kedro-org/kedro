@@ -340,9 +340,11 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
             entry_point_commands.append(entry_point.load())
         except Exception as exc:  # pylint: disable=broad-except
             logger.warning(
-                KedroCliError(f"Fail to load {name} commands from {entry_point}")
+                "Failed to load %s commands from %s. Full exception: %s",
+                name,
+                entry_point,
+                exc,
             )
-            logger.warning(exc)
     return entry_point_commands
 
 

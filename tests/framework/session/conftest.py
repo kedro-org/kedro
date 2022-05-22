@@ -11,6 +11,7 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
+from kedro.framework.context.context import KedroContext
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
     _ProjectPipelines,
@@ -30,26 +31,6 @@ MOCK_PACKAGE_NAME = "fake_package"
 @pytest.fixture
 def mock_package_name() -> str:
     return MOCK_PACKAGE_NAME
-
-
-@pytest.fixture
-def local_logging_config() -> Dict[str, Any]:
-    return {
-        "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {"kedro": {"level": "INFO", "handlers": ["console"]}},
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
-    }
 
 
 def _write_yaml(filepath: Path, config: Dict):
@@ -96,14 +77,12 @@ def local_config(tmp_path):
 
 
 @pytest.fixture(autouse=True)
-def config_dir(tmp_path, local_config, local_logging_config):
+def config_dir(tmp_path, local_config):
     catalog = tmp_path / "conf" / "base" / "catalog.yml"
     credentials = tmp_path / "conf" / "local" / "credentials.yml"
-    logging = tmp_path / "conf" / "local" / "logging.yml"
     pyproject_toml = tmp_path / "pyproject.toml"
     _write_yaml(catalog, local_config)
     _write_yaml(credentials, {"dev_s3": "foo"})
-    _write_yaml(logging, local_logging_config)
     payload = {
         "tool": {
             "kedro": {
@@ -337,18 +316,15 @@ class LoggingHooks:
             "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
         )
 
+    @hook_impl
+    def after_context_created(self, context: KedroContext) -> None:
+        logger.info("After context created", extra={"context": context})
+
 
 @pytest.fixture
 def project_hooks():
     """A set of project hook implementations that log to stdout whenever it is invoked."""
     return LoggingHooks()
-
-
-@pytest.fixture(autouse=True)
-def mock_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)

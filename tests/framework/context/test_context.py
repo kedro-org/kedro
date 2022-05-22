@@ -106,44 +106,22 @@ def local_config(tmp_path):
     }
 
 
-@pytest.fixture
-def local_logging_config() -> Dict[str, Any]:
-    return {
-        "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {"kedro": {"level": "INFO", "handlers": ["console"]}},
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
-    }
-
-
 @pytest.fixture(params=[None])
 def env(request):
     return request.param
 
 
 @pytest.fixture
-def prepare_project_dir(tmp_path, base_config, local_config, local_logging_config, env):
+def prepare_project_dir(tmp_path, base_config, local_config, env):
     env = "local" if env is None else env
     proj_catalog = tmp_path / "conf" / "base" / "catalog.yml"
     env_catalog = tmp_path / "conf" / str(env) / "catalog.yml"
-    logging = tmp_path / "conf" / "local" / "logging.yml"
     env_credentials = tmp_path / "conf" / str(env) / "credentials.yml"
     parameters = tmp_path / "conf" / "base" / "parameters.json"
     db_config_path = tmp_path / "conf" / "base" / "db.ini"
     project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
-    _write_yaml(logging, local_logging_config)
     _write_yaml(env_credentials, local_config)
     _write_json(parameters, project_parameters)
     _write_dummy_ini(db_config_path)
@@ -207,13 +185,6 @@ def extra_params(request):
     return request.param
 
 
-@pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
 @pytest.fixture
 def dummy_context(
     tmp_path, prepare_project_dir, env, extra_params
@@ -239,7 +210,7 @@ class TestKedroContext:
         assert dummy_context.project_path == tmp_path.resolve()
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
-        config_loader = dummy_context._config_loader
+        config_loader = dummy_context.config_loader
         conf_catalog = config_loader.get("catalog*")
 
         # even though the raw configuration uses relative path

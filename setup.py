@@ -37,11 +37,6 @@ with open("test_requirements.txt", encoding="utf-8") as f:
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
-doc_html_files = [
-    name.replace("kedro/", "", 1)
-    for name in glob("kedro/framework/html/**/*", recursive=True)
-]
-
 template_files = []
 for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
     template_files.extend(
@@ -102,7 +97,7 @@ tensorflow_required = {
         "tensorflow~=2.0"
     ]
 }
-yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <6.0"]}
+yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
 extras_require = {
     "api": _collect_requirements(api_require),
@@ -124,11 +119,9 @@ extras_require = {
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
-    "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat~=4.4"],
     "pandas": _collect_requirements(pandas_require),
     "pillow": _collect_requirements(pillow_require),
     "plotly": _collect_requirements(plotly_require),
-    "profilers": ["memory_profiler>=0.50.0, <1.0"],
     "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
     "tensorflow": _collect_requirements(tensorflow_required),
@@ -166,7 +159,7 @@ setup(
     author="Kedro",
     entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},
     package_data={
-        name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files
+        name: ["py.typed", "test_requirements.txt"] + template_files
     },
     zip_safe=False,
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",

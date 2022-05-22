@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name,global-statement
 """This module implements Kedro session responsible for project lifecycle."""
 import getpass
 import logging
@@ -13,7 +12,7 @@ from typing import Any, Dict, Iterable, Union
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader
+from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
@@ -27,24 +26,6 @@ from kedro.framework.project import (
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
-
-_active_session = None
-
-
-def _activate_session(session: "KedroSession", force: bool = False) -> None:
-    global _active_session
-
-    if _active_session and not force and session is not _active_session:
-        raise RuntimeError(
-            "Cannot activate the session as another active session already exists."
-        )
-
-    _active_session = session
-
-
-def _deactivate_session() -> None:
-    global _active_session
-    _active_session = None
 
 
 def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
@@ -65,7 +46,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
-        logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
+        logging.getLogger(__name__).debug("Unable to git describe %s", project_path)
         return {}
 
     return {"git": git_data}
@@ -203,8 +184,15 @@ class KedroSession:
 
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
-        conf_logging = self._get_logging_config()
-        configure_logging(conf_logging)
+        try:
+            conf_logging = self._get_logging_config()
+        except MissingConfigException:
+            self._logger.debug(
+                "No project logging configuration loaded; "
+                "Kedro's default logging configuration will be used."
+            )
+        else:
+            configure_logging(conf_logging)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS
@@ -260,6 +248,10 @@ class KedroSession:
             extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
+        self._hook_manager.hook.after_context_created(  # pylint: disable=no-member
+            context=context
+        )
+
         return context
 
     def _get_config_loader(self) -> ConfigLoader:
@@ -282,12 +274,7 @@ class KedroSession:
         if self.save_on_close:
             self._store.save()
 
-        if _active_session is self:
-            _deactivate_session()
-
     def __enter__(self):
-        if _active_session is not self:
-            _activate_session(self)
         return self
 
     def __exit__(self, exc_type, exc_value, tb_):
@@ -343,7 +330,7 @@ class KedroSession:
         """
         # pylint: disable=protected-access,no-member
         # Report project name
-        self._logger.info("** Kedro project %s", self._project_path.name)
+        self._logger.info("Kedro project %s", self._project_path.name)
 
         if self._run_called:
             raise KedroSessionError(
@@ -400,8 +387,8 @@ class KedroSession:
         )
 
         # Run the runner
-        runner = runner or SequentialRunner()
         hook_manager = self._hook_manager
+        runner = runner or SequentialRunner()
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )

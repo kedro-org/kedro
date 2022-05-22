@@ -3,7 +3,7 @@
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
 """
-import logging.config
+import logging
 import sys
 from pathlib import Path
 from typing import Any, Dict
@@ -11,6 +11,7 @@ from typing import Any, Dict
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 
+logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
 
 
@@ -44,16 +45,15 @@ def reload_kedro(
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import configure_project, pipelines
     from kedro.framework.session import KedroSession
-    from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import bootstrap_project
 
     # If a path is provided, set it as default for subsequent calls
     global default_project_path
     if path:
         default_project_path = Path(path).expanduser().resolve()
-        logging.info("Updated path to Kedro project: %s", default_project_path)
+        logger.info("Updated path to Kedro project: %s", default_project_path)
     else:
-        logging.info("No path argument was provided. Using: %s", default_project_path)
+        logger.info("No path argument was provided. Using: %s", default_project_path)
 
     metadata = bootstrap_project(default_project_path)
 
@@ -63,8 +63,7 @@ def reload_kedro(
     session = KedroSession.create(
         metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )
-    _activate_session(session, force=True)
-    logging.debug("Loading the context from %s", default_project_path)
+    logger.debug("Loading the context from %s", default_project_path)
     context = session.load_context()
     catalog = context.catalog
 
@@ -77,14 +76,14 @@ def reload_kedro(
         }
     )
 
-    logging.info("** Kedro project %s", str(metadata.project_name))
-    logging.info(
+    logger.info("Kedro project %s", str(metadata.project_name))
+    logger.info(
         "Defined global variable `context`, `session`, `catalog` and `pipelines`"
     )
 
     for line_magic in load_entry_points("line_magic"):
         register_line_magic(needs_local_scope(line_magic))
-        logging.info("Registered line magic `%s`", line_magic.__name__)  # type: ignore
+        logger.info("Registered line magic `%s`", line_magic.__name__)  # type: ignore
 
 
 def load_ipython_extension(ipython):
@@ -99,9 +98,9 @@ def load_ipython_extension(ipython):
     try:
         reload_kedro(default_project_path)
     except (ImportError, ModuleNotFoundError):
-        logging.error("Kedro appears not to be installed in your current environment.")
+        logger.error("Kedro appears not to be installed in your current environment.")
     except Exception:  # pylint: disable=broad-except
-        logging.warning(
+        logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
             "Make sure you run `%reload_kedro <path_to_kedro_project>`."
         )

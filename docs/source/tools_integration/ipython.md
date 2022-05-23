@@ -169,35 +169,17 @@ You can only execute one *successful* run per session, as there's a one-to-one m
 
 You can also specify the following optional arguments for `session.run`:
 
-```{eval-rst}
-+---------------+----------------+-------------------------------------------------------------------------------+
-| Argument name | Accepted types | Description                                                                   |
-+===============+================+===============================================================================+
-| tags          | Iterable[str]  | Construct the pipeline using only nodes which have this tag attached.         |
-|               |                | A node is included in the resulting pipeline if it contains any of those tags |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| runner        | AbstractRunner | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner);          |
-|               |                | can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)        |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| node_names    | Iterable[str]  | Run only nodes with specified names                                           |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| from_nodes    | Iterable[str]  | A list of node names which should be used as a starting point                 |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| to_nodes      | Iterable[str]  | A list of node names which should be used as an end point                     |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| from_inputs   | Iterable[str]  | A list of dataset names which should be used as a starting point              |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| to_outputs    | Iterable[str]  | A list of dataset names which should be used as an end point                  |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| to_outputs    | Iterable[str]  | A list of dataset names which should be used as an end point                  |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| load_versions | Dict[str, str] | A mapping of a dataset name to a specific dataset version (timestamp)         |
-|               |                | for loading - this applies to the versioned datasets only                     |
-+---------------+----------------+-------------------------------------------------------------------------------+
-| pipeline_name | str            | Name of the modular pipeline to run - must be one of those returned           |
-|               |                | by register_pipelines function from src/<package_name>/pipeline_registry.py   |
-+---------------+----------------+-------------------------------------------------------------------------------+
-```
+| Argument name | Accepted types | Description                                                                                                                                         |
+| ------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tags          | Iterable[str]  | Construct the pipeline using only nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags |
+| runner        | AbstractRunner | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner); can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)         |
+| node_names    | Iterable[str]  | Run only nodes with specified names                                                                                                                 |
+| from_nodes    | Iterable[str]  | A list of node names which should be used as a starting point                                                                                       |
+| to_nodes      | Iterable[str]  | A list of node names which should be used as an end point                                                                                           |
+| from_inputs   | Iterable[str]  | A list of dataset names which should be used as a starting point                                                                                    |
+| to_outputs    | Iterable[str]  | A list of dataset names which should be used as an end point                                                                                        |
+| load_versions | Dict[str, str] | A mapping of a dataset name to a specific dataset version (timestamp) for loading - this applies to the versioned datasets only                     |
+| pipeline_name | str            | Name of the modular pipeline to run - must be one of those returned by register_pipelines function from src/<package_name>/pipeline_registry.py     |
 
 ## Kedro and Jupyter
 

@@ -69,35 +69,21 @@ There is a syntax to describe function inputs and outputs. This allows different
 
 ### Syntax for input variables
 
-```{eval-rst}
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| Input syntax                     | Meaning         | Example function parameters | How function is called when node runs |
-+==================================+=================+=============================+=======================================+
-| :code:`None`                     | No input        | :code:`def f()`             | :code:`f()`                           |
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| :code:`'a'`                      | Single input    | :code:`def f(arg1)`         | :code:`f(a)`                          |
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| :code:`['a', 'b']`               | Multiple inputs | :code:`def f(arg1, arg2)`   | :code:`f(a, b)`                       |
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| :code:`dict(arg1='x', arg2='y')` | Keyword inputs  | :code:`def f(arg1, arg2)`   | :code:`f(arg1=x, arg2=y)`             |
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-```
+| Input syntax               | Meaning         | Example function parameters | How function is called when node runs |
+| -------------------------- | --------------- | --------------------------- | ------------------------------------- |
+| `None`                     | No input        | `def f()`                   | `f()`                                 |
+| `'a'`                      | Single input    | `def f(arg1)`               | `f(a)`                                |
+| `['a', 'b']`               | Multiple inputs | `def f(arg1, arg2)`         | `f(a, b)`                             |
+| `dict(arg1='x', arg2='y')` | Keyword inputs  | `def f(arg1, arg2)`         | `f(arg1=x, arg2=y)`                   |
 
 ### Syntax for output variables
 
-```{eval-rst}
-+----------------------------------+-------------------+-------------------------------------+
-| Output syntax                    | Meaning           | Example return statement            |
-+==================================+===================+=====================================+
-| :code:`None`                     | No output         | Does not return                     |
-+----------------------------------+-------------------+-------------------------------------+
-| :code:`'a'`                      | Single output     | :code:`return a`                    |
-+----------------------------------+-------------------+-------------------------------------+
-| :code:`['a', 'b']`               | List output       | :code:`return [a, b]`               |
-+----------------------------------+-------------------+-------------------------------------+
-| :code:`dict(key1='a', key2='b')` | Dictionary output | :code:`return dict(key1=a, key2=b)` |
-+----------------------------------+-------------------+-------------------------------------+
-```
+| Output syntax              | Meaning           | Example return statement            |
+| -------------------------- | ----------------- | ----------------------------------- |
+| `None`                     | No output         | Does not return                     |
+| `'a'`                      | Single output     | `return a`                          |
+| `['a', 'b']`               | List output       | `return [a, b]`                     |
+| `dict(key1='a', key2='b')` | Dictionary output | `return dict(key1=a, key2=b)`       |
 
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
 

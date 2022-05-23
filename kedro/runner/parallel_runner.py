@@ -12,7 +12,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Dict, Iterable, Set
+from typing import Any, Dict, Iterable, Optional, Set
 
 from pluggy import PluginManager
 
@@ -80,12 +80,15 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
-def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
+def _bootstrap_subprocess(
+    package_name: str, conf_logging: Optional[Dict[str, Any]] = None
+):
     # pylint: disable=import-outside-toplevel,cyclic-import
     from kedro.framework.project import configure_project
 
     configure_project(package_name)
-    logging.config.dictConfig(conf_logging)
+    if conf_logging is not None:
+        logging.config.dictConfig(conf_logging)
 
 
 def _run_node_synchronization(  # pylint: disable=too-many-arguments
@@ -94,7 +97,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     is_async: bool = False,
     session_id: str = None,
     package_name: str = None,
-    conf_logging: Dict[str, Any] = None,
+    conf_logging: Optional[Dict[str, Any]] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
     A `PluginManager` `hook_manager` instance is created in every subprocess because
@@ -114,7 +117,6 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
 
     """
     if multiprocessing.get_start_method() == "spawn" and package_name:  # type: ignore
-        conf_logging = conf_logging or {}
         _bootstrap_subprocess(package_name, conf_logging)
 
     hook_manager = _create_hook_manager()

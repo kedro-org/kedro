@@ -147,9 +147,15 @@ commands:
       - restore_cache:
           name: Restore package cache
           key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-      - restore_cache:
-          name: Restore conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+        # We don't restore the conda environment cache for python 3.10 as it conflicts with the
+        # 'Install GDAL, Fiona and pytables' step breaking the conda environment (missing zlib.dll).
+      - unless:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - restore_cache:
+                name: Restore conda environment cache
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one
@@ -327,11 +333,17 @@ jobs:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs
                 - c:\users\circleci\appdata\local\pip\cache
-      - save_cache:
-          name: Save conda environment cache
-          key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
-          paths:
-            - c:\tools\miniconda3\envs\kedro_builder
+        # We don't save the conda environment cache for python 3.10 due to conflicts with the
+        # 'Install GDAL, Fiona and pytables' and 'Restore conda environment cache' steps.
+      - unless:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - save_cache:
+                name: Save conda environment cache
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+                paths:
+                  - c:\tools\miniconda3\envs\kedro_builder
       - run:
           name: Pip-compile requirements file
           command: conda activate kedro_builder; make pip-compile
@@ -436,9 +448,20 @@ jobs:
       - run:
           name: Run linters
           command: make lint
-      - run:
-          name: Run unit tests
-          command: make test
+      - unless:
+          condition:
+            equal: ["3.10", <<parameters.python_version>>]
+          steps:
+            - run:
+                name: Run unit tests in parallel
+                command: make test
+      - when:
+          condition:
+            equal: [ "3.10", <<parameters.python_version>> ]
+          steps:
+            - run:
+                name: Run unit tests sequentially
+                command: pytest tests --cov-config pyproject.toml
       - run:
           name: Run e2e tests
           command: make e2e-tests

@@ -43,8 +43,8 @@ In [2]: %reload_kedro <path_to_project_root>
 In [3]: %reload_kedro
 ```
 
-```eval_rst
-.. note:: If you want to pass arguments to the :code:`reload_kedro` line magic, e.g. to specify a configuration environment, you should call it as a normal Python function (:code:`reload_kedro(env=env, extra_params=extra_params`) rather than using :code:`%reload_kedro` in a Notebook cell (:code:`%reload_kedro(extra_params=extra_params)` wouldn’t work). You might have to call :code:`%automagic False` beforehand to make this work.
+```{note}
+If you want to pass arguments to the `reload_kedro` line magic, e.g. to specify a configuration environment, you should call it as a normal Python function (`reload_kedro(env=env, extra_params=extra_params)`) rather than using `%reload_kedro` in a Notebook cell (`%reload_kedro(extra_params=extra_params)` wouldn't work). You might have to call `%automagic False` beforehand to make this work.
 ```
 
 ## Kedro variables: `catalog`, `context`, `pipelines` and `session`
@@ -97,8 +97,8 @@ Out[3]:
  'example_learning_rate': 0.01}
 ```
 
-```eval_rst
-.. tip:: If you enable `versioning <../data/data_catalog.md#versioning-datasets-and-ml-models>`_ then you can load a particular version of a dataset, e.g. :code:`catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
+```{note}
+If you enable [versioning](../data/data_catalog.md#versioning-datasets-and-ml-models) then you can load a particular version of a dataset, e.g. `catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
 ```
 
 ### `context`
@@ -163,13 +163,13 @@ In [1]: session.run()
 Out[1]: {}
 ```
 
-```eval_rst
-.. note::  You can only execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run :code:`%reload_kedro` to obtain a new :code:`session`.
+```{note}
+You can only execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run `%reload_kedro` to obtain a new `session`.
 ```
 
 You can also specify the following optional arguments for `session.run`:
 
-```eval_rst
+```{eval-rst}
 +---------------+----------------+-------------------------------------------------------------------------------+
 | Argument name | Accepted types | Description                                                                   |
 +===============+================+===============================================================================+
@@ -203,8 +203,8 @@ You can also specify the following optional arguments for `session.run`:
 
 We recommend that you store your Jupyter Notebooks in the `notebooks` folder of your Kedro project. If you are using `kedro jupyter notebook` or `kedro jupyter lab` then you should use the default kernel selected for you, which is listed as `Kedro (<project_package_name>)`. This will run the Kedro IPython extension automatically when the kernel is started, so that the `catalog`, `context`, `pipelines` and `session` variables are available immediately to you.
 
-```eval_rst
-.. note:: Restarting the kernel will reload the Kedro IPython extension and hence refresh the :code:`catalog`, :code:`context`, :code:`pipelines` and :code:`session` variables.
+```{note}
+Restarting the kernel will reload the Kedro IPython extension and hence refresh the `catalog`, `context`, `pipelines` and `session` variables.
 ```
 For example, to create a new Notebook in the Iris example project use the following button:
 
@@ -255,16 +255,16 @@ def some_action():
 * Add the `node` tag to the cell containing your function
 ![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
 
-```eval_rst
-.. tip:: The Notebook can contain multiple functions tagged as ``node``, each of them will be exported into the resulting Python file
+```{note}
+The Notebook can contain multiple functions tagged as `node`, each of them will be exported into the resulting Python file
 ```
 
 * Save your Jupyter Notebook to `notebooks/my_notebook.ipynb`
 * Run `kedro jupyter convert notebooks/my_notebook.ipynb` from the terminal to create a Python file `src/<package_name>/nodes/my_notebook.py` containing `some_action` function definition
 
 
-```eval_rst
-.. tip:: You can also convert all your Notebooks at once by calling ``kedro jupyter convert --all``.
+```{note}
+You can also convert all your Notebooks at once by calling `kedro jupyter convert --all`.
 ```
 
 * The `some_action` function can now be used in your Kedro pipelines

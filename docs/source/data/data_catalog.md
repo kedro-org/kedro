@@ -291,8 +291,8 @@ dev_minio:
     endpoint_url : 'http://localhost:9000'
 ```
 
-```eval_rst
-.. note::  The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with ``http://localhost:9000`` and create a bucket and add files as if it is on S3.
+```{note}
+The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
 ```
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
@@ -315,8 +315,8 @@ dev_abs:
 ```
 Example 16: Loading a CSV file stored in a remote location through SSH
 
-```eval_rst
-.. note::  This example requires `Paramiko <https://www.paramiko.org>`_ to be installed (``pip install paramiko``).
+```{note}
+This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
 ```
 ```yaml
 cool_dataset:
@@ -417,8 +417,8 @@ bikes:
 
 The syntax `&csv` names the following block `csv` and the syntax `<<: *csv` inserts the contents of the block named `csv`. Locally declared keys entirely override inserted ones as seen in `bikes`.
 
-```eval_rst
-.. note::  It's important that the name of the template entry starts with a ``_`` so Kedro knows not to try and instantiate it as a dataset.
+```{note}
+It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
 ```
 
 You can also nest reuseable YAML syntax:
@@ -574,8 +574,8 @@ io.list()
 
 You can save data using an API similar to that used to load data.
 
-```eval_rst
-.. caution::  This use is not recommended unless you are prototyping in notebooks.
+```{warning}
+This use is not recommended unless you are prototyping in notebooks.
 ```
 
 #### Saving data to memory
@@ -614,6 +614,6 @@ Finally we can save the processed data in Parquet format.
 io.save("ranked", ranked)
 ```
 
-```eval_rst
-.. attention::  Saving ``None`` to a dataset is not allowed!
+```{warning}
+Saving `None` to a dataset is not allowed!
 ```

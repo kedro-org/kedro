@@ -8,24 +8,46 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+## Major features and improvements
 
-# Upcoming Release 0.18.1
+# Release 0.18.2
+
+# Upcoming Release 0.18.2
 
 ## Major features and improvements
-* Added more detail to YAML ParserError error message.
-* Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
 * Added `abfss` to list of cloud protocols, enabling abfss paths.
+
+## Bug fixes and other changes
+* Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
+* Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
+* Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro.extras.ColorHandler` will be removed in 0.19.0.
+
+# Release 0.18.1
+
+## Major features and improvements
+* Added a new hook `after_context_created` that passes the `KedroContext` instance as `context`.
+* Added a new CLI hook `after_command_run`.
+* Added more detail to YAML `ParserError` exception error message.
+* Added option to `SparkDataSet` to specify a `schema` load argument that allows for supplying a user-defined schema as opposed to relying on the schema inference of Spark.
+* The Kedro package no longer contains a built version of the Kedro documentation significantly reducing the package size.
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
-* Introduced `after_command_run` CLI hook.
+* Updated [Databricks documentation](https://kedro.readthedocs.io/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.
 * Update sections on visualisation, namespacing, and experiment tracking in the spaceflight tutorial to correspond to the complete spaceflights starter.
 * Fixed `Jinja2` syntax loading with `TemplatedConfigLoader` using `globals.yml`.
+* Removed global `_active_session`, `_activate_session` and `_deactivate_session`. Plugins that need to access objects such as the config loader should now do so through `context` in the new `after_context_created` hook.
+* `config_loader` is available as a public read-only attribute of `KedroContext`.
+* Made `hook_manager` argument optional for `runner.run`.
+* `kedro docs` now opens an online version of the Kedro documentation instead of a locally built version.
 
 ## Upcoming deprecations for Kedro 0.19.0
-
+* `kedro docs` will be removed in 0.19.0.
 
 # Release 0.18.0
 
@@ -62,9 +84,9 @@ main(
 | Type                      | Description                                                   | Location                         |
 | ------------------------- | ------------------------------------------------------------- | -------------------------------- |
 | `pandas.XMLDataSet`       | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML | `kedro.extras.datasets.pandas`   |
-| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                         | `kedro.extras.datasets.networkx` |
-| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files        | `kedro.extras.datasets.networkx` |
-| `redis.PickleDataSet`     | loads/saves data from/to a Redis database                      | `kedro.extras.datasets.redis`    |
+| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                        | `kedro.extras.datasets.networkx` |
+| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files       | `kedro.extras.datasets.networkx` |
+| `redis.PickleDataSet`     | loads/saves data from/to a Redis database                     | `kedro.extras.datasets.redis`    |
 
 * Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
 * Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.

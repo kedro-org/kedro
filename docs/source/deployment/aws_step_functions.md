@@ -110,8 +110,8 @@ y_test:
 
 In December 2020, AWS [announced](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) that an AWS Lambda function can now use a container image up to **10 GB in size** as its deployment package, besides the original zip method. As it has a few [requirements](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs) for the container image to work properly, you will need to build your own custom Docker container image to both contain the Kedro pipeline and to comply with Lambda's requirements.
 
-```eval_rst
-.. note::  All of the following steps should be done in the Kedro project's root directory.
+```{note}
+All of the following steps should be done in the Kedro project's root directory.
 ```
 
 * **Step 2.1**: Package the Kedro pipeline as a Python package so you can install it into the container later on:

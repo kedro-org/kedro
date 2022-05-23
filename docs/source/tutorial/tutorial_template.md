@@ -29,15 +29,15 @@ ipython==7.0 # Used for an IPython session with `kedro ipython`
 isort~=5.0 # Used for linting code with `kedro lint`
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab~=3.0 # Used to open a Kedro-session in Jupyter Lab
-kedro==0.18.0
+kedro==0.18.1
 nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov~=3.0 # Produces test coverage reports
 pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with pytest
 pytest~=6.2 # Testing framework for Python code
 ```
 
-```eval_rst
-.. note::  If your project has ``conda`` dependencies, you can create a ``src/environment.yml`` file and list them there.
+```{note}
+If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
 ```
 
 The dependencies above may be sufficient for some projects, but for this tutorial you need to add some extra requirements. These will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.
@@ -45,7 +45,7 @@ The dependencies above may be sufficient for some projects, but for this tutoria
 Edit your `src/requirements.txt` file to include the following lines:
 
 ```text
-kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.0   # Specify optional Kedro dependencies
+kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.1   # Specify optional Kedro dependencies
 kedro-viz~=4.0                                                                 # Visualise your pipelines
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```

@@ -55,8 +55,8 @@ If you set the `KEDRO_ENV` environment variable to the name of your environment,
 export KEDRO_ENV=test
 ```
 
-```eval_rst
-.. note::  If you specify both the ``KEDRO_ENV`` environment variable and provide the ``--env`` argument to a CLI command, the CLI argument takes precedence.
+```{note}
+If you specify both the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
 ```
 
 ## Template configuration
@@ -163,8 +163,8 @@ The output Python dictionary will look as follows:
 }
 ```
 
-```eval_rst
-.. warning::  Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do not recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
+```{warning}
+Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do not recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
 ```
 
 
@@ -185,8 +185,8 @@ parameters = conf_loader.get("parameters*", "parameters*/**")
 
 This will load configuration files from any subdirectories in `conf` that have a filename starting with `parameters` or are located inside a folder with name starting with `parameters`.
 
-```eval_rst
-.. note::  Since ``local`` is set as the environment, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
+```{note}
+Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 ```
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
@@ -204,8 +204,8 @@ except MissingConfigException:
     parameters = {}
 ```
 
-```eval_rst
-.. note::  The ``kedro.framework.context.KedroContext`` class uses the approach above to load project parameters.
+```{note}
+The `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
 ```
 
 Parameters can then be used on their own or fed in as function inputs, as described [below](#use-parameters).
@@ -299,8 +299,8 @@ node(
 
 In both cases, under the hood parameters are added to the Data Catalog through the method `add_feed_dict()` in [`DataCatalog`](/kedro.io.DataCatalog), where they live as `MemoryDataSet`s. This method is also what the `KedroContext` class uses when instantiating the catalog.
 
-```eval_rst
-.. note::  You can use ``add_feed_dict()`` to inject any other entries into your ``DataCatalog`` as per your use case.
+```{note}
+You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
 ```
 
 ## Credentials
@@ -320,8 +320,8 @@ credentials = conf_loader.get("credentials*", "credentials*/**")
 
 This will load configuration files from `conf/base` and `conf/local` that have filename starting with `credentials` or are located inside a folder with name starting with `credentials`.
 
-```eval_rst
-.. note::  Since ``local`` is set as the environment, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
+```{note}
+Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 ```
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
@@ -339,8 +339,8 @@ except MissingConfigException:
     credentials = {}
 ```
 
-```eval_rst
-.. note::  The ``kedro.framework.context.KedroContext`` class uses the approach above to load project credentials.
+```{note}
+The `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
 ```
 
 Credentials configuration can then be used on its own or [fed into the `DataCatalog`](../data/data_catalog.md#feeding-in-credentials).
@@ -373,6 +373,6 @@ run:
   env: env1
 ```
 
-```eval_rst
-.. note::  If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
+```{note}
+If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
 ```

@@ -19,15 +19,20 @@ Feature: Custom Kedro project
         Given I have installed the test plugin
         When I execute the kedro command "run"
         Then I should get a successful exit code
-        And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
         And I should get a message including "Reached after_catalog_created hook"
+        # The below line has been changed to DEBUG level. Currently, it's not possible to show
+        # this message anymore because it's logged before `session._setup_logging` is called.
+        # It is yet to be determined if we should keep it this way, so leaving this here until
+        # we have more clarity on the necessity of these logging messages.
+        # And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
 
-     Scenario: Hooks from installed plugins are automatically registered and work with the parallel runner
+    Scenario: Hooks from installed plugins are automatically registered and work with the parallel runner
         Given I have installed the test plugin
         When I execute the kedro command "run --runner=ParallelRunner"
         Then I should get a successful exit code
-        And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
         And I should get a message including "Reached after_catalog_created hook"
+        # See explanation in test above.
+        # And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
 
     Scenario: Disable automatically registered plugin hooks
         Given I have installed the test plugin
@@ -36,4 +41,5 @@ Feature: Custom Kedro project
         Then I should get a successful exit code
         And I should not get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
         And I should not get a message including "Reached after_catalog_created hook"
-        And I should get a message including "Hooks are disabled for plugin(s): test-plugin-0.1"
+        # See explanation in test above.
+        # And I should get a message including "Hooks are disabled for plugin(s): test-plugin-0.1"

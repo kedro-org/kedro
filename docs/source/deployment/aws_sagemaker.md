@@ -38,8 +38,8 @@ cd <project_root>
 pip install -r src/requirements.txt
 ```
 
-```eval_rst
-.. note:: All CLI commands in the following sections should be executed from the project root directory.
+```{note}
+All CLI commands in the following sections should be executed from the project root directory.
 ```
 
 ### Create SageMaker execution role
@@ -67,8 +67,8 @@ It's generally a good practice to create AWS resources (like S3 bucket above) fo
 
 Configuration in Kedro is logically separated into [configuration environments](../kedro_project_setup/configuration.md#additional-configuration-environments) which are loaded in specific order where the project is run. To separate SageMaker-specific configuration from the default one, let's create a new configuration environment. Go ahead and create a `conf/sagemaker` folder and then create the following files in it.
 
-```eval_rst
-.. note:: ``${key}`` in the YAML snippets below is a special syntax which allows you to template the project configuration. You don't need to replace those values, just paste them as-is.
+```{note}
+`${key}` in the YAML snippets below is a special syntax which allows you to template the project configuration. You don't need to replace those values, just paste them as-is.
 ```
 
 * `catalog.yml` - defines the datasets that need to be saved into S3 (rather than kept in memory):

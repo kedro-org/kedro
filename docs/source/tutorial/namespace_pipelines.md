@@ -201,7 +201,7 @@ ds_pipeline_2 = pipeline(
 
 The table below describes the purpose of each keyword arguments in detail:
 
-```eval_rst
+```{eval-rst}
 
 +--------------------+-------------------------------------------------------------------------------------------+------------------------------+
 | Keyword argument   | :code:`ds_pipeline_1`                                                                     | :code:`ds_pipeline_2`        |

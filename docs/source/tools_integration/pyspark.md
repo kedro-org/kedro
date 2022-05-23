@@ -11,8 +11,8 @@ spark.driver.maxResultSize: 3g
 spark.scheduler.mode: FAIR
 ```
 
-```eval_rst
-.. note::  Optimal configuration for Spark depends on the setup of your Spark cluster.
+```{note}
+Optimal configuration for Spark depends on the setup of your Spark cluster.
 ```
 
 ## Initialise a `SparkSession` in custom project context class
@@ -51,7 +51,7 @@ class CustomContext(KedroContext):
         """Initialises a SparkSession using the config defined in project's conf folder."""
 
         # Load the spark configuration in spark.yaml using the config loader
-        parameters = self._config_loader.get("spark*", "spark*/**")
+        parameters = self.config_loader.get("spark*", "spark*/**")
         spark_conf = SparkConf().setAll(parameters.items())
 
         # Initialise the spark session
@@ -259,7 +259,7 @@ Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `col
 kedro run --runner=ThreadRunner
 ```
 
-To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-in-projectcontext) section:
+To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-in-custom-project-context-class) section:
 
 ```yaml
 spark.scheduler.mode: FAIR

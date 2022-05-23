@@ -116,7 +116,7 @@ The example project contains a single pipeline:
 
 These are the node function within `src/get_started/nodes.py`:
 
-| Node            | Description                                                                                      | Node Function Name |
+| Node            | Description                                                                                      | Node function name |
 | --------------- | ------------------------------------------------------------------------------------------------ | ------------------ |
 | Split data      | Splits the example [Iris dataset](https://www.kaggle.com/uciml/iris) into train and test samples | `split_data`       |
 | Make Predictions| Makes class predictions using 1-nearest neighbour classifier and train-test set                  | `make_predictions` |

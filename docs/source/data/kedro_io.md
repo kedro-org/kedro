@@ -468,7 +468,9 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
     }
 ```
 
-> *Note:* When using lazy saving the dataset will be written _after_ the `after_node_run` [hook](../extend_kedro/hooks).
+```{note}
+When using lazy saving the dataset will be written _after_ the `after_node_run` [hook](../extend_kedro/hooks).
+```
 
 ### Incremental loads with `IncrementalDataSet`
 

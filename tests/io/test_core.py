@@ -64,7 +64,10 @@ class TestCoreFunctions:
             ("gs://bucket/file.txt", {"protocol": "gs", "path": "bucket/file.txt"}),
             ("adl://bucket/file.txt", {"protocol": "adl", "path": "bucket/file.txt"}),
             ("abfs://bucket/file.txt", {"protocol": "abfs", "path": "bucket/file.txt"}),
-            ("abfss://bucket/file.txt", {"protocol": "abfss", "path": "bucket/file.txt"}),
+            (
+                "abfss://bucket/file.txt",
+                {"protocol": "abfss", "path": "bucket/file.txt"},
+            ),
             (
                 "hdfs://namenode:8020/file.txt",
                 {"protocol": "hdfs", "path": "/file.txt"},

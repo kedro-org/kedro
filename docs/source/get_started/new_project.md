@@ -20,6 +20,7 @@ You will be asked to enter each of the following variables in turn. Once you hav
 | `repo_name`      | `get-started` | Directory that holds your project repository                              |
 | `python_package` | `get_started` | A name for the Python package name in your project (short, all-lowercase) |
 
+
 The output lists the directory in which to find the project.
 
 ## Create a new project from a configuration file

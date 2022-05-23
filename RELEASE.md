@@ -1,3 +1,4 @@
+
 # Upcoming Release 0.19.0
 
 ## Major features and improvements
@@ -21,6 +22,7 @@
 * Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
 * Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
 * Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.
+* Refactored `KedroContext` with a simpler `attrs` implementation.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.

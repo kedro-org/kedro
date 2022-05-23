@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 import toml
 import yaml
+from attrs.exceptions import FrozenAttributeError
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
@@ -209,6 +210,15 @@ class TestKedroContext:
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
+    def test_immutable_instance(self, dummy_context):
+        with pytest.raises(FrozenAttributeError):
+            dummy_context.project_path = 1
+            dummy_context.config_loader = 1
+            dummy_context.env = 1
+
+    def test_mutable_instance(self, dummy_context):
+        dummy_context.dummy_attr = 1
+
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         config_loader = dummy_context.config_loader
         conf_catalog = config_loader.get("catalog*")
@@ -222,8 +232,7 @@ class TestKedroContext:
         ds_path = catalog._data_sets["horses"]._filepath
         assert PurePath(ds_path.as_posix()).is_absolute()
         assert (
-            ds_path.as_posix()
-            == (dummy_context._project_path / "horses.csv").as_posix()
+            ds_path.as_posix() == (dummy_context.project_path / "horses.csv").as_posix()
         )
 
     def test_get_catalog_validates_layers(self, dummy_context, mocker):

@@ -20,6 +20,8 @@ TEST_URL_WITH_PARAMS = TEST_URL + "?param=value"
 
 TEST_HEADERS = {"key": "value"}
 
+TEST_LOAD_ARGS = {"allow_redirects": False}
+
 
 @pytest.mark.parametrize("method", POSSIBLE_METHODS)
 class TestAPIDataSet:
@@ -30,13 +32,14 @@ class TestAPIDataSet:
 
     def test_successfully_load_with_response(self, requests_mocker, method):
         api_data_set = APIDataSet(
-            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS, load_args=TEST_LOAD_ARGS
         )
         requests_mocker.register_uri(
             method,
             TEST_URL_WITH_PARAMS,
             headers=TEST_HEADERS,
             text=TEST_TEXT_RESPONSE_DATA,
+            **TEST_LOAD_ARGS,
         )
 
         response = api_data_set.load()

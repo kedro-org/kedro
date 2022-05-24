@@ -84,20 +84,6 @@ def info():
         click.echo("No plugins installed")
 
 
-
-@cli.command(short_help="See the kedro API docs and introductory tutorial.")
-def docs():
-    """Display the online API docs and introductory tutorial in the browser. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro docs` is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-    index_path = f"https://kedro.readthedocs.io/en/{version}"
-    click.echo(f"Opening {index_path}")
-    webbrowser.open(index_path)
-
-
 def _init_plugins() -> None:
     init_hooks = load_entry_points("init")
     for init_hook in init_hooks:

@@ -1,14 +1,18 @@
 # Logging
 
-Kedro uses, and facilitates, the use of Python’s `logging` library by providing a default logging configuration. This can be found in `conf/base/logging.yml` in every project generated using Kedro’s CLI `kedro new` command.
+Kedro uses [Python's `logging` library](https://docs.python.org/3/library/logging.html). Configuration is provided as a dictionary according to the [Python logging configuration schema](https://docs.python.org/3/library/logging.config.html#logging-config-dictschema) in two places:
+1. [Default configuration built into the Kedro framework](https://github.com/kedro-org/kedro/blob/main/kedro/config/logging.yml). This cannot be altered.
+2. Your project-side logging configuration. Every project generated using Kedro's CLI `kedro new` command includes a file `conf/base/logging.yml`. You can alter this configuration and provide different configurations for different run environment according to the [standard Kedro mechanisms for handling configuration](../kedro_project_setup/configuration.md).
 
-## Configure logging
+```{note}
+Providing project-side logging configuration is completely optional. You can delete the `conf/base/logging.yml` file and Kedro will run using purely the framework's built in configuration. 
+```
 
-You can customise project logging in `conf/<env>/logging.yml` using [standard Kedro mechanisms for handling configuration](../kedro_project_setup/configuration.md). The configuration should comply with the guidelines from the `logging` library. Find more about it in [the documentation for `logging` module](https://docs.python.org/3/library/logging.html).
+Framework-side and project-side logging configuration are loaded through subsequent calls to [`logging.config.dictConfig`](https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig). This means that, when it is provided, the project-side logging configuration will typically _fully overwrite_ the default framework-side logging configuration. [Incremental configuration](https://docs.python.org/3/library/logging.config.html#incremental-configuration) is also possible if the `incremental` key is explicitly set to `True` in your project-side logging configuration, but the modifications that are possible are quite limited.
 
 ## Use logging
 
-After reading and applying project logging configuration, `kedro` will start emitting the logs automatically. To log your own code, you are advised to do the following:
+To perform logging in your own code (e.g. in a node), you are advised to do as follows:
 
 ```python
 import logging
@@ -22,16 +26,45 @@ log.info("Send information")
 The name of a logger corresponds to a key in the `loggers`  section in `logging.yml` (e.g. `kedro.io`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
 ```
 
-## Logging for `anyconfig`
+You can take advantage of rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) when enabled in your logging calls: 
+```python
+log.error("[bold red blink]Important error message![/]", extra={"markup": True})
+```
 
-By default, [anyconfig](https://github.com/ssato/python-anyconfig) library that is used by `kedro` to read configuration files emits a log message with `INFO` level on every read. To reduce the amount of logs being sent for CLI calls, default project logging configuration in `conf/base/logging.yml` sets the level for `anyconfig` logger to `WARNING`.
+## Default framework-side logging configuration
 
-If you would like `INFO` level messages to propagate, you can update `anyconfig` logger level in `conf/base/logging.yml` as follows:
+Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/config/logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io/en/stable/logging.html) to format messages and handle exceptions.
 
-```yaml
-loggers:
-    anyconfig:
-        level: INFO  # change
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
+By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`. Kedro's default logging configuration does not alter the level of any other loggers from the default `WARNING`.
+
+## Project-side logging configuration
+
+In addition to the `rich` handler defined in Kedro's framework, the [project-side `conf/base/logging.yml`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/conf/base/logging.yml) defines three further logging handlers:
+* `console`: show logs on standard output (typically your terminal screen) without any rich formatting
+* `info_file_handler`: write logs of level `INFO` and above to `logs/info.log`
+* `error_file_handler`: write logs of level `ERROR` and above to `logs/error.log`
+
+There project-side logging configuration also ensures that [logs emitted from your project](#use-logging) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`). 
+
+We now give some common examples of how you might like to change your project-side configuration.
+
+### Disable file-based logging
+
+The simplest way to disable file-based logging is simply to delete your `conf/base/logging.yml` file and the `logs` directory. This will mean that Kedro uses the default framework-side logging configuration, which does not include any file-based handlers.
+
+Alternatively, if you would like to keep other configuration in `conf/base/logging.yml` and just disable file-based logging, then you can remove the file-based handlers from the `root` logger as follows:
+```diff
+ root:
+-  handlers: [console, info_file_handler, error_file_handler]
++  handlers: [console]
+```
+
+### Use plain console logging
+
+To use plain rather than rich logging, swap the `rich` handler for the `console` one as follows:
+
+```diff
+ root:
+-  handlers: [console, info_file_handler, error_file_handler]
++  handlers: [rich, info_file_handler, error_file_handler]
 ```

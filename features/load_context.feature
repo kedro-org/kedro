@@ -26,13 +26,13 @@ Feature: Custom Kedro project
         # we have more clarity on the necessity of these logging messages.
         # And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
 
-     Scenario: Hooks from installed plugins are automatically registered and work with the parallel runner
+    Scenario: Hooks from installed plugins are automatically registered and work with the parallel runner
         Given I have installed the test plugin
         When I execute the kedro command "run --runner=ParallelRunner"
         Then I should get a successful exit code
         And I should get a message including "Reached after_catalog_created hook"
-         # See explanation in test above.
-         # And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
+        # See explanation in test above.
+        # And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
 
     Scenario: Disable automatically registered plugin hooks
         Given I have installed the test plugin

@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name,global-statement
 """This module implements Kedro session responsible for project lifecycle."""
 import getpass
 import logging
@@ -13,7 +12,7 @@ from typing import Any, Dict, Iterable, Union
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader
+from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
@@ -185,8 +184,15 @@ class KedroSession:
 
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
-        conf_logging = self._get_logging_config()
-        configure_logging(conf_logging)
+        try:
+            conf_logging = self._get_logging_config()
+        except MissingConfigException:
+            self._logger.debug(
+                "No project logging configuration loaded; "
+                "Kedro's default logging configuration will be used."
+            )
+        else:
+            configure_logging(conf_logging)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS

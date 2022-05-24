@@ -33,15 +33,6 @@ def mock_package_name() -> str:
     return MOCK_PACKAGE_NAME
 
 
-@pytest.fixture
-def local_logging_config() -> Dict[str, Any]:
-    return {
-        "version": 1,
-        "incremental": True,
-        "root": {"level": "INFO"},
-    }
-
-
 def _write_yaml(filepath: Path, config: Dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
@@ -86,14 +77,12 @@ def local_config(tmp_path):
 
 
 @pytest.fixture(autouse=True)
-def config_dir(tmp_path, local_config, local_logging_config):
+def config_dir(tmp_path, local_config):
     catalog = tmp_path / "conf" / "base" / "catalog.yml"
     credentials = tmp_path / "conf" / "local" / "credentials.yml"
-    logging = tmp_path / "conf" / "local" / "logging.yml"
     pyproject_toml = tmp_path / "pyproject.toml"
     _write_yaml(catalog, local_config)
     _write_yaml(credentials, {"dev_s3": "foo"})
-    _write_yaml(logging, local_logging_config)
     payload = {
         "tool": {
             "kedro": {

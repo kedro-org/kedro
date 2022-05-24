@@ -41,7 +41,7 @@ repos:
                 )
 
     - repo: https://github.com/asottile/blacken-docs
-      rev: v1.9.2
+      rev: v1.12.1
       hooks:
           - id: blacken-docs
             additional_dependencies: [black==21.5b1]

@@ -341,7 +341,7 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from `%s` (%s)...", name, type(dataset).__name__
+            "[magenta italic]Loading data [/]from [blue bold]`%s`[/] (%s)...", name, type(dataset).__name__
         )
 
         result = dataset.load()
@@ -379,7 +379,7 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to `%s` (%s)...", name, type(dataset).__name__)
+        self._logger.info("[green italic]Saving data [/]to [blue bold]`%s`[/] (%s)...", name, type(dataset).__name__)
 
         dataset.save(data)
 
@@ -444,7 +444,7 @@ class DataCatalog:
         """
         if data_set_name in self._data_sets:
             if replace:
-                self._logger.warning("Replacing DataSet '%s'", data_set_name)
+                self._logger.warning("[blue italic]Replacing DataSet [/][blue bold]'%s'[/]", data_set_name)
             else:
                 raise DataSetAlreadyExistsError(
                     f"DataSet '{data_set_name}' has already been registered"

@@ -42,7 +42,7 @@ def call_pipeline_delete(cli, metadata, pipeline_name=PIPELINE_NAME):
     assert result.exit_code == 0
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_dist")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "cleanup_dist")
 class TestMicropkgPullCommand:
     def assert_package_files_exist(self, source_path):
         assert {f.name for f in source_path.iterdir()} == {
@@ -753,7 +753,7 @@ class TestMicropkgPullCommand:
 
 
 @pytest.mark.usefixtures(
-    "chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pyproject_toml"
+    "chdir_to_dummy_project", "cleanup_dist", "cleanup_pyproject_toml"
 )
 class TestMicropkgPullFromManifest:
     def test_micropkg_pull_all(  # pylint: disable=too-many-locals

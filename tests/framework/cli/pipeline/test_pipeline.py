@@ -41,7 +41,7 @@ FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline(  # pylint: disable=too-many-locals
@@ -252,7 +252,7 @@ class TestPipelineCreateCommand:
         assert f"Unable to locate environment `{env}`" in result.output
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "make_pipelines")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "make_pipelines")
 class TestPipelineDeleteCommand:
     @pytest.mark.parametrize(
         "make_pipelines,env,expected_conf",

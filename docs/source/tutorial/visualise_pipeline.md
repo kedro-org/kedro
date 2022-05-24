@@ -160,7 +160,7 @@ shuttle_passenger_capacity_plot:
 ```
 
 
-- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to configure your plot using plotly-express python library in your kedro node. This dataset supports both [Plotly Express](https://plotly.com/python/plotly-express) and [Plotly Graph Objects](https://plotly.com/python/graph-objects/).
+- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to configure your plot in your kedro node. This dataset supports both [Plotly Express](https://plotly.com/python/plotly-express) and [Plotly Graph Objects](https://plotly.com/python/graph-objects/).
 
 
 Below is an example of how to visualise plots on Kedro-Viz using `plotly.JSONDataSet`
@@ -201,6 +201,36 @@ shuttle_passenger_capacity_plot:
   type: plotly.JSONDataSet
   filepath: data/08_reporting/shuttle_passenger_capacity_plot.json
 ```
+
+Alternatively you could also use [Plotly Graph Objects](https://plotly.com/python/graph-objects/) to do the above.
+
+
+```python
+import plotly.express as px
+import pandas as pd
+
+
+def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
+    data_frame= preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
+    fig = go.Figure([go.Bar(
+        x=data_frame["shuttle_type"],
+        y=data_frame["passenger_capacity"],
+    )])
+    return fig
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """This is a simple pipeline which generates a plot"""
+    return pipeline(
+        [
+            node(
+                func=compare_passenger_capacity,
+                inputs="preprocessed_shuttles",
+                outputs="shuttle_passenger_capacity_plot",
+            ),
+        ]
+    )
+```
+
 
 Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.
 

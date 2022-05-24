@@ -810,6 +810,16 @@ class TestKedroSession:
             catalog=mock_catalog,
         )
 
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_custom_name_for_session_id(
+        self, mock_package_name, fake_project, fake_session_id
+    ):
+
+        with KedroSession.create(
+            mock_package_name, fake_project, session_id=fake_session_id
+        ) as session:
+            assert session.session_id == fake_session_id
+
 
 @pytest.fixture
 def fake_project_with_logging_file_handler(fake_project):

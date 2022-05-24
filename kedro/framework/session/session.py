@@ -115,6 +115,7 @@ class KedroSession:
         save_on_close: bool = True,
         env: str = None,
         extra_params: Dict[str, Any] = None,
+        session_id: str = None,
     ) -> "KedroSession":
         """Create a new instance of ``KedroSession`` with the session data.
 
@@ -129,6 +130,7 @@ class KedroSession:
                 for underlying KedroContext. If specified, will update (and therefore
                 take precedence over) the parameters retrieved from the project
                 configuration.
+            session_id: The id of the session.
 
         Returns:
             A new ``KedroSession`` instance.
@@ -136,10 +138,13 @@ class KedroSession:
 
         validate_settings()
 
+        if session_id is None:
+            session_id = generate_timestamp()
+
         session = cls(
             package_name=package_name,
             project_path=project_path,
-            session_id=generate_timestamp(),
+            session_id=session_id,
             save_on_close=save_on_close,
         )
 

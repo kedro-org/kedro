@@ -65,6 +65,6 @@ To use plain rather than rich logging, swap the `rich` handler for the `console`
 
 ```diff
  root:
--  handlers: [console, info_file_handler, error_file_handler]
-+  handlers: [rich, info_file_handler, error_file_handler]
+-  handlers: [rich, info_file_handler, error_file_handler]
++  handlers: [console, info_file_handler, error_file_handler]
 ```

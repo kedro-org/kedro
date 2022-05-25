@@ -79,17 +79,11 @@ If a micro-package has embedded requirements and a project `requirements.in` fil
 
 You can pull a micro-package from different locations, including local storage, PyPI and the cloud:
 
-```{eval-rst}
-+--------------------------------+-----------------------------------------------------------------------------------------+
-| Operation                      | Command                                                                                 |
-+================================+=========================================================================================+
-| Pulling from a local directory | ``kedro micropkg pull <project-root>/src/dist/<pipeline_name>-0.1-py3-none-any.tar.gz`` |
-+--------------------------------+-----------------------------------------------------------------------------------------+
-| Pull from cloud storage        | ``kedro micropkg pull s3://my_bucket/<pipeline_name>-0.1-py3-none-any.tar.gz``          |
-+--------------------------------+-----------------------------------------------------------------------------------------+
-| Pull from PyPI like endpoint   | ``kedro micropkg pull <pypi-package-name>``                                             |
-+--------------------------------+-----------------------------------------------------------------------------------------+
-```
+| Operation                      | Command                                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------------- |
+| Pulling from a local directory | `kedro micropkg pull <project-root>/src/dist/<pipeline_name>-0.1-py3-none-any.tar.gz` |
+| Pull from cloud storage        | `kedro micropkg pull s3://my_bucket/<pipeline_name>-0.1-py3-none-any.tar.gz`          |
+| Pull from PyPI-like endpoint   | `kedro micropkg pull <pypi-package-name>`                                             |
 
 ### Providing `fsspec` arguments
 

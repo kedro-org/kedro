@@ -14,17 +14,11 @@ kedro new
 
 You will be asked to enter each of the following variables in turn. Once you have entered text for the first option (the project's name), you will be offered a default choice for the other options:
 
-```{eval-rst}
-+------------------------+---------------------+----------------------------------------------------------------------------+
-| Option                 | Example             | Description                                                                |
-+========================+=====================+============================================================================+
-| :code:`project_name`   | :code:`Get Started` | A human-readable name for your new project                                 |
-+------------------------+---------------------+----------------------------------------------------------------------------+
-| :code:`repo_name`      | :code:`get-started` | Directory that holds your project repository                               |
-+------------------------+---------------------+----------------------------------------------------------------------------+
-| :code:`python_package` | :code:`get_started` | A name for the Python package name in your project (short, all-lowercase)  |
-+------------------------+---------------------+----------------------------------------------------------------------------+
-```
+| Option           | Example       | Description                                                               |
+| ---------------- | ------------- | ------------------------------------------------------------------------- |
+| `project_name`   | `Get Started` | A human-readable name for your new project                                |
+| `repo_name`      | `get-started` | Directory that holds your project repository                              |
+| `python_package` | `get_started` | A name for the Python package name in your project (short, all-lowercase) |
 
 
 The output lists the directory in which to find the project.

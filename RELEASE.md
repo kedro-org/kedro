@@ -21,9 +21,9 @@
 # Upcoming Release 0.18.2
 
 ## Major features and improvements
+* Added `abfss` to list of cloud protocols, enabling abfss paths.
 
 ## Bug fixes and other changes
-
 * Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
 * Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
 * Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.

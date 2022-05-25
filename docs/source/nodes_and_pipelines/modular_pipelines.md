@@ -113,21 +113,13 @@ from kedro.pipeline.modular_pipeline import pipeline
 
 The `pipeline()` wrapper method takes the following arguments:
 
-```{eval-rst}
-+--------------------+---------------------------------------------------------------------+
-| Keyword argument   | Description                                                         |
-+====================+=====================================================================+
-| ``pipe``           | The `Pipeline` object you want to wrap                              |
-+--------------------+---------------------------------------------------------------------+
-| ``inputs``         | Any overrides provided to this instance                             |
-+--------------------+ of the underlying wrapped ``Pipeline`` object                       |
-| ``outputs``        |                                                                     |
-+--------------------+                                                                     |
-| ``parameters``     |                                                                     |
-+--------------------+---------------------------------------------------------------------+
-| ``namespace``      | The namespace that will be encapsulated by this pipeline instance   |
-+--------------------+---------------------------------------------------------------------+
-```
+| Keyword argument | Description                                                                         |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| `pipe`           | The `Pipeline` object you want to wrap                                              |
+| `inputs`         | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
+| `outputs`        | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
+| `parameters`     | Any overrides provided to this instance of the underlying wrapped `Pipeline` object |
+| `namespace`      | The namespace that will be encapsulated by this pipeline instance                   |
 
 ## Combining disconnected pipelines
 

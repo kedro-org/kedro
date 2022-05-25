@@ -201,18 +201,11 @@ ds_pipeline_2 = pipeline(
 
 The table below describes the purpose of each keyword arguments in detail:
 
-```{eval-rst}
-
-+--------------------+-------------------------------------------------------------------------------------------+------------------------------+
-| Keyword argument   | :code:`ds_pipeline_1`                                                                     | :code:`ds_pipeline_2`        |
-+====================+===========================================================================================+==============================+
-| :code:`inputs`     | Declaring ``model_input_table`` as a boundary input will not prefix it with the namespace | Same as `ds_pipeline_1`      |
-+--------------------+-------------------------------------------------------------------------------------------+------------------------------+
-| :code:`outputs`    | No outputs are at the boundary of this pipeline so nothing to list here                   | Same as `ds_pipeline_1`      |
-+--------------------+-------------------------------------------------------------------------------------------+------------------------------+
-| :code:`namespace`  | A unique namespace                                                                        | A different unique namespace |
-+--------------------+-------------------------------------------------------------------------------------------+------------------------------+
-```
+| Keyword argument | `ds_pipeline_1`                                                                         | `ds_pipeline_2`              |
+| ---------------- | --------------------------------------------------------------------------------------- | ---------------------------- |
+| `inputs`         | Declaring `model_input_table` as a boundary input will not prefix it with the namespace | Same as `ds_pipeline_1`      |
+| `outputs`        | No outputs are at the boundary of this pipeline so nothing to list here                 | Same as `ds_pipeline_1`      |
+| `namespace`      | A unique namespace                                                                      | A different unique namespace |
 
 ## Nesting modular pipelines
 

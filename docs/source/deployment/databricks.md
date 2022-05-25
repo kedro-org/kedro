@@ -3,7 +3,7 @@
 This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws).
 
 ```{note}
-If you are using [Databricks Repos](https://docs.databricks.com/repos/index.html) to run a Kedro project then you should [disable file-based logging](../logging/logging.md#disable-file-based-logging). This prevents Kedro's Python logging from attempting to write to the read-only file system.
+If you are using [Databricks Repos](https://docs.databricks.com/repos/index.html) to run a Kedro project then you should [disable file-based logging](../logging/logging.md#disable-file-based-logging). This prevents Kedro from attempting to write to the read-only file system.
 ```
 
 ## Prerequisites

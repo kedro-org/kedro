@@ -31,7 +31,7 @@ We now give some common examples of how you might like to change your project's 
 
 ### Disable file-based logging
 
-You might sometimes need to disable file-based logging, e.g. if you are running Kedro on a read-only file system such as [Databricks Repos](https://docs.databricks.com/repos/index.html). The simplest way to do this is simply to delete your `conf/base/logging.yml` file. The `logs` directory can then also be safely removed. With no project-side logging configuration specified, Kedro uses the default framework-side logging configuration, which does not include any file-based handlers.
+You might sometimes need to disable file-based logging, e.g. if you are running Kedro on a read-only file system such as [Databricks Repos](https://docs.databricks.com/repos/index.html). The simplest way to do this is to delete your `conf/base/logging.yml` file. The `logs` directory can then also be safely removed. With no project-side logging configuration specified, Kedro uses the default framework-side logging configuration, which does not include any file-based handlers.
 
 Alternatively, if you would like to keep other configuration in `conf/base/logging.yml` and just disable file-based logging, then you can remove the file-based handlers from the `root` logger as follows:
 ```diff

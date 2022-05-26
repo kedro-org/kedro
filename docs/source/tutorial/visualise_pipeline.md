@@ -114,7 +114,9 @@ You need to update `requirements.txt` in your Kedro project and add the followin
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
 
 There are two types of plotly datasets in Kedro :
-- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - To use this dataset you need to configure your plot in the `catalog.yml`. This dataset only supports [Plotly Express](https://plotly.com/python/plotly-express).
+### [`plotly.PlotlyDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet)
+
+To use this dataset you need to configure your plot in the `catalog.yml`. This dataset only supports [Plotly Express](https://plotly.com/python/plotly-express).
 
 Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyDataSet`
 

@@ -117,7 +117,7 @@ class TestCliCommands:
 
         entry_point.load.assert_not_called()
 
-    @mark.usefixtures("entry_points")
+    @mark.usefixtures("entry_point")
     def test_info_no_plugins(self):
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0

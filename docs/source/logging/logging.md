@@ -8,28 +8,7 @@ Kedro uses [Python's `logging` library](https://docs.python.org/3/library/loggin
 Providing project-side logging configuration is entirely optional. You can delete the `conf/base/logging.yml` file and Kedro will run using the framework's built in configuration. 
 ```
 
-Framework-side and project-side logging configuration are loaded through subsequent calls to [`logging.config.dictConfig`](https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig). This means that, when it is provided, the project-side logging configuration typically _fully overwrites_ the framework-side logging configuration. [Incremental configuration](https://docs.python.org/3/library/logging.config.html#incremental-configuration) is also possible if the `incremental` key is explicitly set to `True` in your project-side logging configuration. In practice, however, the set of options that can be modified through incremental configuration is quite limited.
-
-## Use logging
-
-To perform logging in your own code (e.g. in a node), you are advised to do as follows:
-
-```python
-import logging
-
-log = logging.getLogger(__name__)
-log.warning("Issue warning")
-log.info("Send information")
-```
-
-```{note}
-The name of a logger corresponds to a key in the `loggers`  section in `logging.yml` (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
-```
-
-You can take advantage of rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) when enabled in your logging calls: 
-```python
-log.error("[bold red blink]Important error message![/]", extra={"markup": True})
-```
+Framework-side and project-side logging configuration are loaded through subsequent calls to [`logging.config.dictConfig`](https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig). This means that, when it is provided, the project-side logging configuration typically _fully overwrites_ the framework-side logging configuration. [Incremental configuration](https://docs.python.org/3/library/logging.config.html#incremental-configuration) is also possible if the `incremental` key is explicitly set to `True` in your project-side logging configuration.
 
 ## Default framework-side logging configuration
 
@@ -52,7 +31,7 @@ We now give some common examples of how you might like to change your project's 
 
 ### Disable file-based logging
 
-The simplest way to disable file-based logging is simply to delete your `conf/base/logging.yml` file and the `logs` directory. This will mean that Kedro uses the default framework-side logging configuration, which does not include any file-based handlers.
+You might sometimes need to disable file-based logging, e.g. if you are running Kedro on a read-only file system such as [Databricks Repos](https://docs.databricks.com/repos/index.html). The simplest way to do this is simply to delete your `conf/base/logging.yml` file. The `logs` directory can then also be safely removed. With no project-side logging configuration specified, Kedro uses the default framework-side logging configuration, which does not include any file-based handlers.
 
 Alternatively, if you would like to keep other configuration in `conf/base/logging.yml` and just disable file-based logging, then you can remove the file-based handlers from the `root` logger as follows:
 ```diff
@@ -69,4 +48,25 @@ To use plain rather than rich logging, swap the `rich` handler for the `console`
  root:
 -  handlers: [rich, info_file_handler, error_file_handler]
 +  handlers: [console, info_file_handler, error_file_handler]
+```
+
+## Perform logging in your project
+
+To perform logging in your own code (e.g. in a node), you are advised to do as follows:
+
+```python
+import logging
+
+log = logging.getLogger(__name__)
+log.warning("Issue warning")
+log.info("Send information")
+```
+
+```{note}
+The name of a logger corresponds to a key in the `loggers`  section in `logging.yml` (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
+```
+
+You can take advantage of rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) when enabled in your logging calls: 
+```python
+log.error("[bold red blink]Important error message![/]", extra={"markup": True})
 ```

@@ -104,9 +104,13 @@ class TestCliCommands:
         assert result_abr.exit_code == 0
         assert version in result_abr.output
 
+    def test_info(self):
+        result = CliRunner().invoke(cli, ["info"])
+        assert result.exit_code == 0
+
     def test_info_contains_plugin_versions(self, entry_point):
         entry_point.dist.version = "1.0.2"
-        entry_point.module_name = "bob.fred"
+        entry_point.module = "bob.fred"
 
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0

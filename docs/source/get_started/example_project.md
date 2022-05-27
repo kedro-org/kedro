@@ -121,6 +121,6 @@ These are the node function within `src/get_started/nodes.py`:
 | Split data      | Splits the example [Iris dataset](https://www.kaggle.com/uciml/iris) into train and test samples | `split_data`       |
 | Make Predictions| Makes class predictions using 1-nearest neighbour classifier and train-test set                  | `make_predictions` |
 | Report accuracy | Reports the accuracy of the predictions performed by the previous node                           | `report_accuracy`  |
- 
+
 
 The file `src/pipeline_registry.py` creates and collates into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.

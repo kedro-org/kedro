@@ -5,7 +5,7 @@ Kedro uses [Python's `logging` library](https://docs.python.org/3/library/loggin
 2. Your project-side logging configuration. Every project generated using Kedro's CLI `kedro new` command includes a file `conf/base/logging.yml`. You can alter this configuration and provide different configurations for different run environment according to the [standard Kedro mechanism for handling configuration](../kedro_project_setup/configuration.md).
 
 ```{note}
-Providing project-side logging configuration is entirely optional. You can delete the `conf/base/logging.yml` file and Kedro will run using the framework's built in configuration. 
+Providing project-side logging configuration is entirely optional. You can delete the `conf/base/logging.yml` file and Kedro will run using the framework's built in configuration.
 ```
 
 Framework-side and project-side logging configuration are loaded through subsequent calls to [`logging.config.dictConfig`](https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig). This means that, when it is provided, the project-side logging configuration typically _fully overwrites_ the framework-side logging configuration. [Incremental configuration](https://docs.python.org/3/library/logging.config.html#incremental-configuration) is also possible if the `incremental` key is explicitly set to `True` in your project-side logging configuration.
@@ -25,7 +25,7 @@ In addition to the `rich` handler defined in Kedro's framework, the [project-sid
 
 The logging handlers that are actually used by default are `rich`, `info_file_handler` and `error_file_handler`.
 
-The project-side logging configuration also ensures that [logs emitted from your project's logger](#use-logging) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`). 
+The project-side logging configuration also ensures that [logs emitted from your project's logger](#use-logging) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
 
 We now give some common examples of how you might like to change your project's logging configuration.
 
@@ -66,7 +66,7 @@ log.info("Send information")
 The name of a logger corresponds to a key in the `loggers`  section in `logging.yml` (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
 ```
 
-You can take advantage of rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) when enabled in your logging calls: 
+You can take advantage of rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) when enabled in your logging calls:
 ```python
 log.error("[bold red blink]Important error message![/]", extra={"markup": True})
 ```

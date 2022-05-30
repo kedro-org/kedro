@@ -155,7 +155,7 @@ The wrapper allows us to provide a mapping and fix this disconnect.
 ```python
 from kedro.pipeline.modular_pipeline import pipeline
 
-prep_pipeline = pipeline(pipe=cook_pipeline, inputs={"food": "grilled_veg"})
+prep_pipeline = pipeline(pipe=cook_pipeline, outputs={"grilled_veg": "food"})
 
 meal_pipeline = prep_pipeline + lunch_pipeline
 ```

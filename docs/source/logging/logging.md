@@ -25,7 +25,7 @@ In addition to the `rich` handler defined in Kedro's framework, the [project-sid
 
 The logging handlers that are actually used by default are `rich`, `info_file_handler` and `error_file_handler`.
 
-The project-side logging configuration also ensures that [logs emitted from your project's logger](#Perform-logging-in-your-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
+The project-side logging configuration also ensures that [logs emitted from your project's logger](#perform-logging-in-your-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
 
 We now give some common examples of how you might like to change your project's logging configuration.
 

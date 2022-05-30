@@ -33,13 +33,12 @@ PACKAGE_NAME = "dummy_package"
 
 @fixture
 def entry_points(mocker):
-    return mocker.patch("importlib_metadata.entry_points")
+    return mocker.patch("importlib_metadata.entry_points", spec=True)
 
 
 @fixture
 def entry_point(mocker, entry_points):
-    ep = mocker.MagicMock()
-    entry_points.return_value = ep
+    ep = mocker.patch("importlib_metadata.EntryPoint", spec=True)
     entry_points.return_value.select.return_value = [ep]
     return ep
 

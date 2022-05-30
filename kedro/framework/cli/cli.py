@@ -68,7 +68,7 @@ def info():
     plugin_entry_points = defaultdict(set)
     for plugin_entry_point, group in ENTRY_POINT_GROUPS.items():
         for entry_point in importlib_metadata.entry_points().select(group=group):
-            module_name = entry_point.module_name.split(".")[0]
+            module_name = entry_point.module.split(".")[0]
             plugin_versions[module_name] = entry_point.dist.version
             plugin_entry_points[module_name].add(plugin_entry_point)
 

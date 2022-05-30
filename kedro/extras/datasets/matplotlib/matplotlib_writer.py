@@ -30,22 +30,24 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
         >>> # Saving single plot
+        >>> fig = plt.figure()
         >>> plt.plot([1, 2, 3], [4, 5, 6])
         >>> single_plot_writer = MatplotlibWriter(
         >>>     filepath="matplot_lib_single_plot.png"
         >>> )
         >>> plt.close()
-        >>> single_plot_writer.save(plt)
+        >>> single_plot_writer.save(fig)
         >>>
         >>> # MatplotlibWriter can output other formats as well, such as PDF files.
         >>> # For this, we need to specify the format:
+        >>> fig = plt.figure()
         >>> plt.plot([1, 2, 3], [4, 5, 6])
         >>> single_plot_writer = MatplotlibWriter(
         >>>     filepath="matplot_lib_single_plot.pdf",
         >>>     save_args={"format": "pdf"},
         >>> )
         >>> plt.close()
-        >>> single_plot_writer.save(plt)
+        >>> single_plot_writer.save(fig)
         >>>
         >>> # Saving dictionary of plots
         >>> plots_dict = dict()

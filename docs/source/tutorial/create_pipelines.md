@@ -169,8 +169,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipeline.
 
     Returns:
-    A mapping from a pipeline name to a ``Pipeline`` object.
-
+        A mapping from a pipeline name to a ``Pipeline`` object.
     """
     data_processing_pipeline = dp.create_pipeline()
 

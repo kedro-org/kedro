@@ -76,7 +76,7 @@ def fake_session(mocker):
 class TestDefaultLogging:
     def test_setup_root_logger(self):
         root_logger = logging.getLogger()
-        assert "console" in {handler.name for handler in root_logger.handlers}
+        assert "rich" in {handler.name for handler in root_logger.handlers}
 
     def test_setup_kedro_logger(self):
         kedro_logger = logging.getLogger("kedro")

@@ -209,7 +209,7 @@ class TestExcelDataSetVersioned:
         filepath = str(tmp_path / "test.xlsx")
         save_args = {"writer": {"mode": "a"}}
 
-        pattern = "`ExcelDataSet` doesn't support versioning in append mode."
+        pattern = "'ExcelDataSet' doesn't support versioning in append mode."
         with pytest.raises(DataSetError, match=pattern):
             ExcelDataSet(
                 filepath=filepath,

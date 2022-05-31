@@ -33,9 +33,9 @@ class _IsSubclassValidator(Validator):
             setting_value = getattr(settings, name)
             if not issubclass(setting_value, default_class):
                 raise ValidationError(
-                    f"Invalid value `{setting_value.__module__}.{setting_value.__qualname__}` "
-                    f"received for setting `{name}`. It must be a subclass of "
-                    f"`{default_class.__module__}.{default_class.__qualname__}`."
+                    f"Invalid value'{setting_value.__module__}.{setting_value.__qualname__}' "
+                    f"received for setting '{name}'. It must be a subclass of "
+                    f"'{default_class.__module__}.{default_class.__qualname__}'."
                 )
 
 
@@ -62,9 +62,9 @@ class _HasSharedParentClassValidator(Validator):
             default_class_parent = default_class.mro()[1]
             if default_class_parent not in setting_value.mro():
                 raise ValidationError(
-                    f"Invalid value `{setting_value.__module__}.{setting_value.__qualname__}` "
-                    f"received for setting `{name}`. It must be a subclass of "
-                    f"`{default_class_parent.__module__}.{default_class_parent.__qualname__}`."
+                    f"Invalid value '{setting_value.__module__}.{setting_value.__qualname__}' "
+                    f"received for setting '{name}'. It must be a subclass of "
+                    f"'{default_class_parent.__module__}.{default_class_parent.__qualname__}'."
                 )
 
 

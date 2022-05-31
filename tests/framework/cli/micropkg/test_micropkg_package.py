@@ -339,7 +339,7 @@ class TestMicropkgPackageCommand:
         )
 
         assert result.exit_code == 0
-        assert "`dummy_package.pipelines.retail` packaged!" in result.output
+        assert "'dummy_package.pipelines.retail' packaged!" in result.output
 
         sdist_location = fake_repo_path / "dist"
         assert f"Location: {sdist_location}" in result.output
@@ -404,7 +404,7 @@ class TestMicropkgPackageCommand:
         )
 
         assert result.exit_code == 0
-        assert "`dummy_package.pipelines.retail` packaged!" in result.output
+        assert "'dummy_package.pipelines.retail' packaged!" in result.output
 
         sdist_location = fake_repo_path / "dist"
         assert f"Location: {sdist_location}" in result.output

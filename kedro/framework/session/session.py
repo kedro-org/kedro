@@ -206,11 +206,11 @@ class KedroSession:
         except TypeError as err:
             raise ValueError(
                 f"\n{err}.\nStore config must only contain arguments valid "
-                f"for the constructor of `{classpath}`."
+                f"for the constructor of '{classpath}'."
             ) from err
         except Exception as err:
             raise ValueError(
-                f"\n{err}.\nFailed to instantiate session store of type `{classpath}`."
+                f"\n{err}.\nFailed to instantiate session store of type '{classpath}'."
             ) from err
 
     def _log_exception(self, exc_type, exc_value, exc_tb):

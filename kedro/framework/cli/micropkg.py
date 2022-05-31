@@ -109,7 +109,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     if not package_path and not all_flag:
         click.secho(
             "Please specify a package path or add '--all' to pull all micro-packages in the "
-            "`pyproject.toml` package manifest section."
+            "'pyproject.toml' package manifest section."
         )
         sys.exit(1)
 
@@ -125,7 +125,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
         destination=destination,
         fs_args=fs_args,
     )
-    as_alias = f" as `{alias}`" if alias else ""
+    as_alias = f" as '{alias}'" if alias else ""
     message = f"Micro-package {package_path} pulled and unpacked{as_alias}!"
     click.secho(message, fg="green")
 
@@ -189,7 +189,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
     if not build_specs:
         click.secho(
-            "Nothing to pull. Please update the `pyproject.toml` package manifest section.",
+            "Nothing to pull. Please update the 'pyproject.toml' package manifest section.",
             fg="yellow",
         )
         return
@@ -198,7 +198,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
         if "alias" in specs:
             _assert_pkg_name_ok(specs["alias"].split(".")[-1])
         _pull_package(package_path, metadata, **specs)
-        click.secho(f"Pulled and unpacked `{package_path}`!")
+        click.secho(f"Pulled and unpacked '{package_path}'!")
 
     click.secho("Micro-packages pulled and unpacked!", fg="green")
 
@@ -213,7 +213,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 
     if not build_specs:
         click.secho(
-            "Nothing to package. Please update the `pyproject.toml` package manifest section.",
+            "Nothing to package. Please update the 'pyproject.toml' package manifest section.",
             fg="yellow",
         )
         return
@@ -222,7 +222,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
         if "alias" in specs:
             _assert_pkg_name_ok(specs["alias"])
         _package_micropkg(package_name, metadata, **specs)
-        click.secho(f"Packaged `{package_name}` micro-package!")
+        click.secho(f"Packaged '{package_name}' micro-package!")
 
     click.secho("Micro-packages packaged!", fg="green")
 
@@ -260,7 +260,7 @@ def package_micropkg(
     if not module_path and not all_flag:
         click.secho(
             "Please specify a micro-package name or add '--all' to package all micro-packages in "
-            "the `pyproject.toml` package manifest section."
+            "the 'pyproject.toml' package manifest section."
         )
         sys.exit(1)
 
@@ -819,7 +819,7 @@ def _append_package_reqs(
             )
             file.write(sep.join(sorted_reqs))
         click.secho(
-            f"Added the following requirements from micro-package `{package_name}` to "
+            f"Added the following requirements from micro-package '{package_name}' to "
             f"requirements.txt:\n{sep.join(sorted_reqs)}"
         )
     else:
@@ -832,7 +832,7 @@ def _append_package_reqs(
             file.write(sep.join(sorted_reqs))
 
     click.secho(
-        "Use `kedro build-reqs` to compile and `pip install -r src/requirements.lock` to install "
+        "Use 'kedro build-reqs' to compile and 'pip install -r src/requirements.lock' to install "
         "the updated list of requirements."
     )
 

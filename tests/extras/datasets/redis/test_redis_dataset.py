@@ -143,7 +143,7 @@ class TestPickleDataSet:
     def test_invalid_backend(self, mocker):
         pattern = (
             r"Selected backend 'invalid' should satisfy the pickle interface. "
-            r"Missing one of `loads` and `dumps` on the backend."
+            r"Missing one of 'loads' and 'dumps' on the backend."
         )
         mocker.patch(
             "kedro.extras.datasets.pickle.pickle_dataset.importlib.import_module",

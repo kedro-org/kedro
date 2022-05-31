@@ -67,29 +67,29 @@ class Node:
         if not callable(func):
             raise ValueError(
                 _node_error_message(
-                    f"first argument must be a function, not `{type(func).__name__}`."
+                    f"first argument must be a function, not '{type(func).__name__}'."
                 )
             )
 
         if inputs and not isinstance(inputs, (list, dict, str)):
             raise ValueError(
                 _node_error_message(
-                    f"`inputs` type must be one of [String, List, Dict, None], "
-                    f"not `{type(inputs).__name__}`."
+                    f"'inputs' type must be one of [String, List, Dict, None], "
+                    f"not '{type(inputs).__name__}'."
                 )
             )
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
                 _node_error_message(
-                    f"`outputs` type must be one of [String, List, Dict, None], "
-                    f"not `{type(outputs).__name__}`."
+                    f"'outputs' type must be one of [String, List, Dict, None], "
+                    f"not '{type(outputs).__name__}'."
                 )
             )
 
         if not inputs and not outputs:
             raise ValueError(
-                _node_error_message("it must have some `inputs` or `outputs`.")
+                _node_error_message("it must have some 'inputs' or 'outputs'.")
             )
 
         self._validate_inputs(func, inputs)
@@ -349,7 +349,7 @@ class Node:
 
         # purposely catch all exceptions
         except Exception as exc:
-            self._logger.error("Node `%s` failed with error: \n%s", str(self), str(exc))
+            self._logger.error("Node '%s' failed with error: \n%s", str(self), str(exc))
             raise exc
 
     def _run_with_no_inputs(self, inputs: Dict[str, Any]):
@@ -411,7 +411,7 @@ class Node:
                     f"Failed to save outputs of node {str(self)}.\n"
                     f"The node definition contains a list of "
                     f"outputs {self._outputs}, whereas the node function "
-                    f"returned a `{type(outputs).__name__}`."
+                    f"returned a '{type(outputs).__name__}'."
                 )
             if len(outputs) != len(self._outputs):
                 raise ValueError(

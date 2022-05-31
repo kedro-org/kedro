@@ -258,17 +258,17 @@ class TestPartitionedDataSetLocal:
     @pytest.mark.parametrize(
         "dataset_config,error_pattern",
         [
-            ("UndefinedDatasetType", "Class `UndefinedDatasetType` not found"),
+            ("UndefinedDatasetType", "Class 'UndefinedDatasetType' not found"),
             (
                 "missing.module.UndefinedDatasetType",
-                r"Class `missing\.module\.UndefinedDatasetType` not found",
+                r"Class 'missing\.module\.UndefinedDatasetType' not found",
             ),
             (
                 FakeDataSet,
-                r"DataSet type `tests\.io\.test_partitioned_dataset\.FakeDataSet` "
-                r"is invalid\: all data set types must extend `AbstractDataSet`",
+                r"DataSet type 'tests\.io\.test_partitioned_dataset\.FakeDataSet' "
+                r"is invalid\: all data set types must extend 'AbstractDataSet'",
             ),
-            ({}, "`type` is missing from DataSet catalog configuration"),
+            ({}, "'type' is missing from DataSet catalog configuration"),
         ],
     )
     def test_invalid_dataset_config(self, dataset_config, error_pattern):
@@ -284,8 +284,8 @@ class TestPartitionedDataSetLocal:
     )
     def test_versioned_dataset_not_allowed(self, dataset_config):
         pattern = (
-            "`PartitionedDataSet` does not support versioning of the underlying "
-            "dataset. Please remove `versioned` flag from the dataset definition."
+            "'PartitionedDataSet' does not support versioning of the underlying "
+            "dataset. Please remove 'versioned' flag from the dataset definition."
         )
         with pytest.raises(DataSetError, match=re.escape(pattern)):
             PartitionedDataSet(str(Path.cwd()), dataset_config)
@@ -293,7 +293,7 @@ class TestPartitionedDataSetLocal:
     def test_no_partitions(self, tmpdir):
         pds = PartitionedDataSet(str(tmpdir), "pandas.CSVDataSet")
 
-        pattern = re.escape(f"No partitions found in `{tmpdir}`")
+        pattern = re.escape(f"No partitions found in '{tmpdir}'")
         with pytest.raises(DataSetError, match=pattern):
             pds.load()
 

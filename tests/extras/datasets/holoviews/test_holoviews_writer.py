@@ -68,7 +68,7 @@ class TestHoloviewsWriter:
         assert writer._fs_open_args_save == fs_args["open_args_save"]
 
     def test_load_fail(self, hv_writer):
-        pattern = r"Loading not supported for `HoloviewsWriter`"
+        pattern = r"Loading not supported for 'HoloviewsWriter'"
         with pytest.raises(DataSetError, match=pattern):
             hv_writer.load()
 

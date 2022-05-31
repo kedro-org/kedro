@@ -161,8 +161,8 @@ class PartitionedDataSet(AbstractDataSet):
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
         if VERSION_KEY in self._dataset_config:
             raise DataSetError(
-                f"`{self.__class__.__name__}` does not support versioning of the "
-                f"underlying dataset. Please remove `{VERSIONED_FLAG_KEY}` flag from "
+                f"'{self.__class__.__name__}' does not support versioning of the "
+                f"underlying dataset. Please remove '{VERSIONED_FLAG_KEY}' flag from "
                 f"the dataset definition."
             )
 
@@ -253,7 +253,7 @@ class PartitionedDataSet(AbstractDataSet):
             partitions[partition_id] = dataset.load
 
         if not partitions:
-            raise DataSetError(f"No partitions found in `{self._path}`")
+            raise DataSetError(f"No partitions found in '{self._path}'")
 
         return partitions
 
@@ -425,8 +425,8 @@ class IncrementalDataSet(PartitionedDataSet):
 
         for key in {VERSION_KEY, VERSIONED_FLAG_KEY} & checkpoint_config.keys():
             raise DataSetError(
-                f"`{self.__class__.__name__}` does not support versioning of the "
-                f"checkpoint. Please remove `{key}` key from the checkpoint definition."
+                f"'{self.__class__.__name__}' does not support versioning of the "
+                f"checkpoint. Please remove '{key}' key from the checkpoint definition."
             )
 
         default_checkpoint_path = self._sep.join(

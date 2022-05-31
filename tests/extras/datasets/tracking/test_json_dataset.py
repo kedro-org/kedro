@@ -62,7 +62,7 @@ class TestJSONDataSet:
 
     def test_load_fail(self, json_dataset, dummy_data):
         json_dataset.save(dummy_data)
-        pattern = r"Loading not supported for `JSONDataSet`"
+        pattern = r"Loading not supported for 'JSONDataSet'"
         with pytest.raises(DataSetError, match=pattern):
             json_dataset.load()
 

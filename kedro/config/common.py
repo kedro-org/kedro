@@ -57,7 +57,7 @@ def _get_config_from_patterns(
 
     if not patterns:
         raise ValueError(
-            "`patterns` must contain at least one glob "
+            "'patterns' must contain at least one glob "
             "pattern to match config filenames against."
         )
 

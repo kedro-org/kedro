@@ -281,8 +281,8 @@ class TestSparkDataSet:
         Path(schemapath).write_text("dummy", encoding="utf-8")
 
         pattern = (
-            f"Contents of `schema.filepath` ({schemapath}) are invalid. Please"
-            f"provide a valid JSON serialized `pyspark.sql.types.StructType`."
+            f"Contents of 'schema.filepath' ({schemapath}) are invalid. Please"
+            f"provide a valid JSON serialized 'pyspark.sql.types.StructType'."
         )
 
         with pytest.raises(DataSetError, match=re.escape(pattern)):
@@ -296,8 +296,8 @@ class TestSparkDataSet:
         filepath = (tmp_path / "data").as_posix()
 
         pattern = (
-            "Schema load argument does not specify a `filepath` attribute. Please"
-            "include a path to a JSON serialized `pyspark.sql.types.StructType`."
+            "Schema load argument does not specify a 'filepath' attribute. Please"
+            "include a path to a JSON serialized 'pyspark.sql.types.StructType'."
         )
 
         with pytest.raises(DataSetError, match=pattern):
@@ -363,9 +363,9 @@ class TestSparkDataSet:
     def test_file_format_delta_and_unsupported_mode(self, tmp_path, mode):
         filepath = (tmp_path / "test_data").as_posix()
         pattern = (
-            f"It is not possible to perform `save()` for file format `delta` "
-            f"with mode `{mode}` on `SparkDataSet`. "
-            f"Please use `spark.DeltaTableDataSet` instead."
+            f"It is not possible to perform 'save()' for file format 'delta' "
+            f"with mode '{mode}' on 'SparkDataSet'. "
+            f"Please use 'spark.DeltaTableDataSet' instead."
         )
 
         with pytest.raises(DataSetError, match=re.escape(pattern)):
@@ -502,7 +502,7 @@ class TestSparkDataSetVersionedLocal:
         versioned_local.save(sample_spark_df)
 
         pattern = (
-            r"Save path `.+` for SparkDataSet\(.+\) must not exist "
+            r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -766,7 +766,7 @@ class TestSparkDataSetVersionedS3:
         mocker.patch.object(versioned_dataset_s3, "_exists_function", return_value=True)
 
         pattern = (
-            r"Save path `.+` for SparkDataSet\(.+\) must not exist "
+            r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -776,8 +776,8 @@ class TestSparkDataSetVersionedS3:
 
     def test_s3n_warning(self, version):
         pattern = (
-            "`s3n` filesystem has now been deprecated by Spark, "
-            "please consider switching to `s3a`"
+            "'s3n' filesystem has now been deprecated by Spark, "
+            "please consider switching to 's3a'"
         )
         with pytest.warns(DeprecationWarning, match=pattern):
             SparkDataSet(filepath=f"s3n://{BUCKET_NAME}/{FILENAME}", version=version)
@@ -906,7 +906,7 @@ class TestSparkDataSetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save path `.+` for SparkDataSet\(.+\) must not exist "
+            r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):

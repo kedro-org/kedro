@@ -39,9 +39,9 @@ class ThreadRunner(AbstractRunner):
         """
         if is_async:
             warnings.warn(
-                "`ThreadRunner` doesn't support loading and saving the "
+                "'ThreadRunner' doesn't support loading and saving the "
                 "node inputs and outputs asynchronously with threads. "
-                "Setting `is_async` to False."
+                "Setting 'is_async' to False."
             )
         super().__init__(is_async=False)
 

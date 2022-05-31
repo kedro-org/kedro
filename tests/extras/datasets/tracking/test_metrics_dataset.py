@@ -68,7 +68,7 @@ class TestMetricsDataSet:
 
     def test_load_fail(self, metrics_dataset, dummy_data):
         metrics_dataset.save(dummy_data)
-        pattern = r"Loading not supported for `MetricsDataSet`"
+        pattern = r"Loading not supported for 'MetricsDataSet'"
         with pytest.raises(DataSetError, match=pattern):
             metrics_dataset.load()
 

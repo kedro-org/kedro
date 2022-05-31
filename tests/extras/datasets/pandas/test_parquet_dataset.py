@@ -219,7 +219,7 @@ class TestParquetDataSet:
             filepath=(tmp_path / FILENAME).as_posix(),
             save_args={"partition_cols": ["col2"]},
         )
-        pattern = "does not support save argument `partition_cols`"
+        pattern = "does not support save argument 'partition_cols'"
 
         with pytest.raises(DataSetError, match=pattern):
             data_set.save(dummy_dataframe)

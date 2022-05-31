@@ -234,7 +234,7 @@ class TestMatplotlibWriter:
         assert plot_writer._fs_open_args_save == fs_args["open_args_save"]
 
     def test_load_fail(self, plot_writer):
-        pattern = r"Loading not supported for `MatplotlibWriter`"
+        pattern = r"Loading not supported for 'MatplotlibWriter'"
         with pytest.raises(DataSetError, match=pattern):
             plot_writer.load()
 

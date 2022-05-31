@@ -79,7 +79,7 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert outputs["ds3"]["data"] == 42
 
     def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
-        pattern = "Saving `None` to a `DataSet` is not allowed"
+        pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 

@@ -106,7 +106,7 @@ class TestCliCommands:
 
     def test_info_contains_plugin_versions(self, entry_point):
         entry_point.dist.version = "1.0.2"
-        entry_point.module_name = "bob.fred"
+        entry_point.module = "bob.fred"
 
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0
@@ -117,7 +117,6 @@ class TestCliCommands:
 
         entry_point.load.assert_not_called()
 
-    @mark.usefixtures("entry_points")
     def test_info_no_plugins(self):
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0

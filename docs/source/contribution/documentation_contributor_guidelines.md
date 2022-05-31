@@ -2,7 +2,7 @@
 
 You are welcome to contribute to the Kedro documentation if you find something incorrect or missing, or have other improvement suggestions.
 
-You can tell us what we should change or by make a PR to change it yourself.
+You can tell us what we should change or make a PR to change it yourself.
 
 Before you contribute any documentation changes, please read this page so you are familiar with the [Kedro documentation style guidelines](#kedro-documentation-style-guide).
 

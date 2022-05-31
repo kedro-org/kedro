@@ -22,11 +22,15 @@
 
 ## Major features and improvements
 * Added `abfss` to list of cloud protocols, enabling abfss paths.
+* Kedro now uses the [https://github.com/Textualize/rich](Rich) library to format terminal logs.
+* The file `conf/base/logging.yml` is now optional. See [our documentation](https://kedro.readthedocs.io/en/0.18.2/logging/logging.html) for details.
 
 ## Bug fixes and other changes
 * Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
 * Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
 * Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.
+* Kedro's framework-side logging configuration no longer performs file-based logging. Hence superfluous `info.log`/`errors.log` files are no longer created in your project root, and running Kedro on read-only file systems such as Databricks Repos is now possible.
+* The `root` logger is now set to the Python default level of `WARNING` rather than `INFO`. Kedro's logger is still set to emit `INFO` level messages.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.

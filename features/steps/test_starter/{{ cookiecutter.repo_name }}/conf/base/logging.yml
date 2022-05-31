@@ -33,6 +33,9 @@ handlers:
     encoding: utf8
     delay: True
 
+  rich:
+    class: rich.logging.RichHandler
+
 loggers:
   kedro:
     level: INFO
@@ -41,4 +44,4 @@ loggers:
     level: INFO
 
 root:
-  handlers: [console, info_file_handler, error_file_handler]
+  handlers: [rich, info_file_handler, error_file_handler]

@@ -192,7 +192,7 @@ class TestTensorFlowModelDataset:
             r"Sequential model. It does not work for subclassed models, because such models are "
             r"defined via the body of a Python method, which isn\'t safely serializable. Consider "
             r"saving to the Tensorflow SavedModel format \(by setting save_format=\"tf\"\) "
-            r"or using 'save_weights'."
+            r"or using `save_weights`."
         )
         with pytest.raises(DataSetError, match=pattern):
             hdf5_data_set.save(dummy_tf_subclassed_model)
@@ -310,7 +310,7 @@ class TestTensorFlowModelDatasetVersioned:
         corresponding file for a given save version already exists."""
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         pattern = (
-            r"Save path \`.+\` for TensorFlowModelDataset\(.+\) must "
+            r"Save path \'.+\' for TensorFlowModelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -331,7 +331,7 @@ class TestTensorFlowModelDatasetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version `{load_version}` "
+            rf"Save version '{save_version}' did not match load version '{load_version}' "
             rf"for TensorFlowModelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):

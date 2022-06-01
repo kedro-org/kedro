@@ -603,7 +603,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
             _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"
             raise DataSetError(
-                f"Cannot save versioned dataset `{self._filepath.name}` to "
+                f"Cannot save versioned dataset '{self._filepath.name}' to "
                 f"'{self._filepath.parent.as_posix()}' because a file with the same "
                 f"name already exists in the directory. This is likely because "
                 f"versioning was enabled on a dataset already saved previously. Either "

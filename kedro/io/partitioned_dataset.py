@@ -190,7 +190,7 @@ class PartitionedDataSet(AbstractDataSet):
         self._filepath_arg = filepath_arg
         if self._filepath_arg in self._dataset_config:
             warn(
-                f"`{self._filepath_arg}` key must not be specified in the dataset "
+                f"'{self._filepath_arg}' key must not be specified in the dataset "
                 f"definition as it will be overwritten by partition path"
             )
 

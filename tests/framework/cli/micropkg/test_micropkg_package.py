@@ -42,11 +42,11 @@ class TestMicropkgPackageCommand:
     @pytest.mark.parametrize(
         "options,package_name,success_message",
         [
-            ([], PIPELINE_NAME, f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged!"),
+            ([], PIPELINE_NAME, f"'dummy_package.pipelines.{PIPELINE_NAME}' packaged!"),
             (
                 ["--alias", "alternative"],
                 "alternative",
-                f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged as `alternative`!",
+                f"'dummy_package.pipelines.{PIPELINE_NAME}' packaged as 'alternative'!",
             ),
         ],
     )
@@ -157,7 +157,7 @@ class TestMicropkgPackageCommand:
 
         assert result.exit_code == 0
         success_message = (
-            f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged! "
+            f"'dummy_package.pipelines.{PIPELINE_NAME}' packaged! "
             f"Location: {destination}"
         )
         assert success_message in result.output
@@ -191,7 +191,7 @@ class TestMicropkgPackageCommand:
 
         warning_message = f"Package file {sdist_file} will be overwritten!"
         success_message = (
-            f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged! "
+            f"'dummy_package.pipelines.{PIPELINE_NAME}' packaged! "
             f"Location: {destination}"
         )
         assert warning_message in result.output
@@ -246,7 +246,7 @@ class TestMicropkgPackageCommand:
         )
 
         assert result.exit_code == 0
-        assert f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged!" in result.output
+        assert f"'dummy_package.pipelines.{PIPELINE_NAME}' packaged!" in result.output
 
         sdist_location = fake_repo_path / "dist"
         assert f"Location: {sdist_location}" in result.output
@@ -551,7 +551,7 @@ class TestMicropkgPackageFromManifest:
 
         assert result.exit_code == 0
         expected_message = (
-            "Nothing to package. Please update the `pyproject.toml` "
+            "Nothing to package. Please update the 'pyproject.toml' "
             "package manifest section."
         )
         assert expected_message in result.output
@@ -576,6 +576,6 @@ class TestMicropkgPackageFromManifest:
         assert result.exit_code
         expected_message = (
             "Please specify a micro-package name or add '--all' to package all micro-packages in "
-            "the `pyproject.toml` package manifest section."
+            "the 'pyproject.toml' package manifest section."
         )
         assert expected_message in result.output

@@ -187,7 +187,7 @@ class TestHDFDataSetVersioned:
         corresponding hdf file for a given save version already exists."""
         versioned_hdf_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for HDFDataSet\(.+\) must "
+            r"Save path \'.+\' for HDFDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -205,8 +205,8 @@ class TestHDFDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for HDFDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for HDFDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hdf_data_set.save(dummy_dataframe)

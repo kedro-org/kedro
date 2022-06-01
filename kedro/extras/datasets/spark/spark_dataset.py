@@ -288,7 +288,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         elif fs_prefix == "hdfs://" and version:
             warn(
                 f"HDFS filesystem support for versioned {self.__class__.__name__} is "
-                f"in beta and uses `hdfs.client.InsecureClient`, please use with "
+                f"in beta and uses 'hdfs.client.InsecureClient', please use with "
                 f"caution"
             )
 

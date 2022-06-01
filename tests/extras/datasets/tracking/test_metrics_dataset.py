@@ -160,7 +160,7 @@ class TestMetricsDataSet:
         corresponding json file for a given save version already exists."""
         explicit_versioned_metrics_dataset.save(dummy_data)
         pattern = (
-            r"Save path \`.+\` for MetricsDataSet\(.+\) must "
+            r"Save path \'.+\' for MetricsDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -178,8 +178,8 @@ class TestMetricsDataSet:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            f"Save version `{save_version}` did not match "
-            f"load version `{load_version}` for "
+            f"Save version '{save_version}' did not match "
+            f"load version '{load_version}' for "
             r"MetricsDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):

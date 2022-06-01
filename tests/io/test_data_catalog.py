@@ -578,7 +578,7 @@ class TestDataCatalogVersioned:
         sane_config["catalog"]["boats"]["versioned"] = True
         version = generate_timestamp()
         load_version = {"non-boart": version}
-        pattern = r"\`load_versions\` keys \[non-boart\] are not found in the catalog\."
+        pattern = r"\'load_versions\' keys \[non-boart\] are not found in the catalog\."
         with pytest.raises(DataSetNotFoundError, match=pattern):
             DataCatalog.from_config(**sane_config, load_versions=load_version)
 

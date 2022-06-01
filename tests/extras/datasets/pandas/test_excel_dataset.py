@@ -114,8 +114,8 @@ class TestExcelDataSet:
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
-            f"Dropping `storage_options` for {filepath}, "
-            f"please specify them under `fs_args` or `credentials`."
+            f"Dropping 'storage_options' for {filepath}, "
+            f"please specify them under 'fs_args' or 'credentials'."
         )
         assert records[0].getMessage() == expected_log_message
         assert "storage_options" not in ds._save_args
@@ -228,7 +228,7 @@ class TestExcelDataSetVersioned:
         corresponding Excel file for a given save version already exists."""
         versioned_excel_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for ExcelDataSet\(.+\) must "
+            r"Save path \'.+\' for ExcelDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -246,8 +246,8 @@ class TestExcelDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for ExcelDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for ExcelDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_excel_data_set.save(dummy_dataframe)

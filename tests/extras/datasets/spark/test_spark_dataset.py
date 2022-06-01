@@ -486,8 +486,8 @@ class TestSparkDataSetVersionedLocal:
         )
 
         pattern = (
-            r"Save version `{ev.save}` did not match load version "
-            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
+            r"Save version '{ev.save}' did not match load version "
+            r"'{ev.load}' for SparkDataSet\(.+\)".format(ev=exact_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_local.save(sample_spark_df)
@@ -749,8 +749,8 @@ class TestSparkDataSetVersionedS3:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save version `{ev.save}` did not match load version "
-            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
+            r"Save version '{ev.save}' did not match load version "
+            r"'{ev.load}' for SparkDataSet\(.+\)".format(ev=exact_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
@@ -882,8 +882,8 @@ class TestSparkDataSetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save version `{ev.save}` did not match load version "
-            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
+            r"Save version '{ev.save}' did not match load version "
+            r"'{ev.load}' for SparkDataSet\(.+\)".format(ev=exact_version)
         )
 
         with pytest.warns(UserWarning, match=pattern):
@@ -921,7 +921,7 @@ class TestSparkDataSetVersionedHdfs:
     def test_hdfs_warning(self, version):
         pattern = (
             "HDFS filesystem support for versioned SparkDataSet is in beta "
-            "and uses `hdfs.client.InsecureClient`, please use with caution"
+            "and uses 'hdfs.client.InsecureClient', please use with caution"
         )
         with pytest.warns(UserWarning, match=pattern):
             SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)

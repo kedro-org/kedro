@@ -138,9 +138,9 @@ class MatplotlibWriter(AbstractVersionedDataSet):
 
         if overwrite and version is not None:
             warn(
-                "Setting `overwrite=True` is ineffective if versioning "
+                "Setting 'overwrite=True' is ineffective if versioning "
                 "is enabled, since the versioned path must not already "
-                "exist; overriding flag with `overwrite=False` instead."
+                "exist; overriding flag with 'overwrite=False' instead."
             )
             overwrite = False
         self._overwrite = overwrite

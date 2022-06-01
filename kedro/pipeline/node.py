@@ -181,9 +181,9 @@ class Node:
         name = _get_readable_func_name(self._func)
         if name == "<partial>":
             warn(
-                f"The node producing outputs `{self.outputs}` is made from a `partial` function. "
-                f"Partial functions do not have a `__name__` attribute: consider using "
-                f"`functools.update_wrapper` for better log messages."
+                f"The node producing outputs '{self.outputs}' is made from a 'partial' function. "
+                f"Partial functions do not have a '__name__' attribute: consider using "
+                f"'functools.update_wrapper' for better log messages."
             )
         return name
 

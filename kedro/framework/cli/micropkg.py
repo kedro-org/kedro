@@ -274,7 +274,7 @@ def package_micropkg(
 
     as_alias = f" as `{alias}`" if alias else ""
     message = (
-        f"`{metadata.package_name}.{module_path}` packaged{as_alias}! "
+        f"'{metadata.package_name}.{module_path}' packaged{as_alias}! "
         f"Location: {result_path}"
     )
     click.secho(message, fg="green")

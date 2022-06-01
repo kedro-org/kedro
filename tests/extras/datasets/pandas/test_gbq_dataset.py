@@ -110,9 +110,9 @@ class TestGBQDataSet:
     @pytest.mark.parametrize("save_args", [{"location": "l2"}], indirect=True)
     def test_invalid_location(self, save_args, load_args):
         """Check the error when initializing instance if save_args and load_args
-        `location` are different."""
+    '`location' are different."""
         pattern = (
-            r"`load_args\['location'\]` is different from `save_args\['location'\]`."
+            r""" "load_args\['location'\]" is different from "save_args\['location'\]"."""
         )
         with pytest.raises(DataSetError, match=pattern):
             GBQTableDataSet(

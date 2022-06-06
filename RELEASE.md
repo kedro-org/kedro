@@ -18,6 +18,7 @@
 * Added `abfss` to list of cloud protocols, enabling abfss paths.
 * Kedro now uses the [https://github.com/Textualize/rich](Rich) library to format terminal logs.
 * The file `conf/base/logging.yml` is now optional. See [our documentation](https://kedro.readthedocs.io/en/0.18.2/logging/logging.html) for details.
+* Enable plugins top extend starter aliases with `kedro starter list` and `kedro new`.
 
 ## Bug fixes and other changes
 * Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.

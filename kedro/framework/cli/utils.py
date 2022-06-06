@@ -32,6 +32,7 @@ ENTRY_POINT_GROUPS = {
     "line_magic": "kedro.line_magic",
     "hooks": "kedro.hooks",
     "cli_hooks": "kedro.cli_hooks",
+    "starters": "kedro.starters",
 }
 
 logger = logging.getLogger(__name__)

@@ -60,6 +60,8 @@ class PaginatedAPIDataSet(APIDataSet):
             raise DataSetError("Failed to fetch data", exc) from exc
         except OSError as exc:
             raise DataSetError("Failed to connect to the remote server") from exc
+        finally:
+            self._session.close()
         return response
 
     def _load(self) -> Iterator[requests.Response]:  # type: ignore
@@ -76,7 +78,6 @@ class PaginatedAPIDataSet(APIDataSet):
             # params are only needed for first request
             self._request_args.pop("params", None)
 
-        # TODO: An exception can be raised earlier, so the connection might not be closed
         self._session.close()
         # restore original state
         self._request_args = request_args

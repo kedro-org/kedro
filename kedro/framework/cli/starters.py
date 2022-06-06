@@ -58,13 +58,19 @@ _STARTERS_ALIASES = [
         "template_path": _STARTERS_REPO,
         "directory": "astro-airflow-iris",
     },
-    {"name": "mini-kedro", "template_path": _STARTERS_REPO, "directory": "mini-kedro"},
+    {
+        "name": "standalone-datacatalog",
+        "template_path": _STARTERS_REPO,
+        "directory": "standalone-datacatalog",
+    },
     {
         "name": "pandas-iris",
         "template_path": _STARTERS_REPO,
         "directory": "pandas-iris",
     },
-    {"name": "pyspark", "template_path": _STARTERS_REPO, "directory": "pyspark"},
+    {"name": "pyspark",
+     "template_path": _STARTERS_REPO,
+      "directory": "pyspark"},
     {
         "name": "pyspark-iris",
         "template_path": _STARTERS_REPO,

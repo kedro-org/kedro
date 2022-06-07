@@ -272,7 +272,7 @@ def package_micropkg(
         module_path, metadata, alias=alias, destination=destination, env=env
     )
 
-    as_alias = f" as `{alias}`" if alias else ""
+    as_alias = f" as '{alias}'" if alias else ""
     message = (
         f"'{metadata.package_name}.{module_path}' packaged{as_alias}! "
         f"Location: {result_path}"

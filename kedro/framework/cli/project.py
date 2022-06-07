@@ -276,7 +276,7 @@ def activate_nbstripout(
             stderr=subprocess.PIPE,
         )
         if res.returncode:
-            raise KedroCliError("Not a git repository. Run'git init' first.")
+            raise KedroCliError("Not a git repository. Run 'git init' first.")
     except FileNotFoundError as exc:
         raise KedroCliError("Git executable not found. Install Git first.") from exc
 

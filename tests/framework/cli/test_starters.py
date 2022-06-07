@@ -86,7 +86,6 @@ def _assert_template_ok(
             "template_path": "valid_starter",
             "directory": "optional",
         },
-        ["invalid_type"],
     ],
 )
 def test_valid_starter_entrypoint_config(config):

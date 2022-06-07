@@ -228,19 +228,12 @@ class DaskRunner(AbstractRunner):
 
 ### Update CLI implementation
 
-You're nearly there! Before being able to use the new runner, update the `run()` function in your `cli.py` file to make sure the runner class is instantiated correctly:
+Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../extend_kedro/common_use_cases.md#use-case-3-how-to-add-or-modify-cli-commands). Add the following `run()` function to your `cli.py` file to make sure the runner class is instantiated correctly:
 
 ```python
-def run(tag, env, parallel, ...):
+def run(tag, env, ...):
     """Run the pipeline."""
-    if parallel and runner:
-        raise KedroCliError(
-            "Both --parallel and --runner options cannot be used together. "
-            "Please use either --parallel or --runner."
-        )
     runner = runner or "SequentialRunner"
-    if parallel:
-        runner = "ParallelRunner"
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names

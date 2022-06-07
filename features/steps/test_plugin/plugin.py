@@ -15,4 +15,10 @@ class MyPluginHook:
         logger.info("Reached after_catalog_created hook")
 
 
+starters = [
+    {"name": "test_plugin_starter", "template_path": "https://github.com/kedro-org/kedro-starters/tree/main/", "directory": "pandas-iris"},
+    {"name": "test_plugin_starter", "template_path": "https://github.com/kedro-org/kedro-starters/tree/main/", "directory": "pandas-iris"},
+]
+
+
 hooks = MyPluginHook()

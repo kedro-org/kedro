@@ -242,6 +242,25 @@ def create_project_with_starter(context):
     assert res.returncode == OK_EXIT_CODE, res
 
 
+@given("I have run a non-interactive kedro new with custom plugin starter")
+@when("I run a non-interactive kedro new with custom plugin starter")
+def create_project_with_starter(context):
+    """Behave step to run kedro new given the config I previously created."""
+    res = run(
+        [
+            context.kedro,
+            "new",
+            "-c",
+            str(context.config_file),
+            "--starter",
+            "test_plugin_starter",
+        ],
+        env=context.env,
+        cwd=context.temp_dir,
+    )
+    assert res.returncode == OK_EXIT_CODE, res
+
+
 @given("I have run a non-interactive kedro new without starter")
 @when("I run a non-interactive kedro new without starter")
 def create_project_without_starter(context):

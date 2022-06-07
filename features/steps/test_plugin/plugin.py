@@ -11,7 +11,7 @@ class MyPluginHook:
     @hook_impl
     def after_catalog_created(
         self, catalog
-    ):  # pylint: disable=unused-argument,no-self-use
+    ):  # pylint: disable=unused-argument
         logger.info("Reached after_catalog_created hook")
 
 

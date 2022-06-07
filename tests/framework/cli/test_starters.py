@@ -12,7 +12,11 @@ from click.testing import CliRunner
 from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
-from kedro.framework.cli.starters import _OFFICIAL_STARTER_ALIASES, TEMPLATE_PATH
+from kedro.framework.cli.starters import (
+    _OFFICIAL_STARTER_ALIASES,
+    TEMPLATE_PATH,
+    _is_valid_starter_entrypoint_config,
+)
 
 FILES_IN_TEMPLATE = 32
 
@@ -71,6 +75,38 @@ def _assert_template_ok(
         encoding="utf-8"
     )
     assert (full_path / "src" / python_package / "__init__.py").is_file()
+
+
+@pytest.mark.parametrize(
+    "config",
+    [
+        {"name": "valid_starter", "template_path": "valid_starter"},
+        {
+            "name": "valid_starter",
+            "template_path": "valid_starter",
+            "directory": "optional",
+        },
+        ["invalid_type"],
+    ],
+)
+def test_valid_starter_entrypoint_config(config):
+    assert _is_valid_starter_entrypoint_config("mock", config)
+
+
+@pytest.mark.parametrize(
+    "config",
+    [
+        {"name": "invalid_starter"},
+        {
+            "name": "invalid_starter",
+            "template_path": "invalid_start",
+            "invalid_key": "invalid_key",
+        },
+        ["invalid_type"],
+    ],
+)
+def test_invalid_starter_entrypoint_config(config):
+    assert not _is_valid_starter_entrypoint_config("mock", config)
 
 
 def test_starter_list(fake_kedro_cli):

@@ -106,10 +106,6 @@ Kedro-Viz aims to help users communicate different aspects of their workflow thr
 We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
 
 
-```{note}
-Kedro's Plotly integration only supports [Plotly Express](https://plotly.com/python/plotly-express/) charts.
-```
-
 You need to update `requirements.txt` in your Kedro project and add the following datasets to enable plotly for your project.
 
 `kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.1`
@@ -117,8 +113,11 @@ You need to update `requirements.txt` in your Kedro project and add the followin
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
 
-There are two types of plotly datasets in Kedro :
-- [plotly.PlotlyDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet) - To use this dataset you need to configure your plot in the `catalog.yml`.
+There are two types of Plotly datasets in Kedro, the `plotly.PlotlyDataSet` and `plotly.JSONDataSet`.
+
+### [`plotly.PlotlyDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet)
+
+To use this dataset you need to configure your plot in the `catalog.yml`. This dataset only supports [Plotly Express](https://plotly.com/python/plotly-express).
 
 Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyDataSet`
 
@@ -164,10 +163,12 @@ shuttle_passenger_capacity_plot:
 ```
 
 
-- [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet) - To use this dataset you need to configure your plot using plotly-express python library in your kedro node.
+### [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet)
+
+To use this dataset you need to configure your plot in your Kedro node. This dataset supports [Plotly Express](https://plotly.com/python/plotly-express) and [Plotly Graph Objects](https://plotly.com/python/graph-objects/).
 
 
-Below is an example of how to visualise plots on Kedro-Viz using `plotly.JSONDataSet`
+Below is an example of how to visualise plots using [Plotly Express](https://plotly.com/python/plotly-express) and [Plotly Graph Objects](https://plotly.com/python/graph-objects/) on Kedro-Viz using the `plotly.JSONDataSet`.
 
 The below functions can be added to the nodes.py and pipeline.py files respectively.
 
@@ -175,12 +176,26 @@ The below functions can be added to the nodes.py and pipeline.py files respectiv
 import plotly.express as px
 import pandas as pd
 
-
+# the below function uses plotly.express
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     fig = px.bar(
         data_frame=preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index(),
         x="shuttle_type",
         y="passenger_capacity",
+    )
+    return fig
+
+
+# the below function uses plotly.graph_objects
+def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
+    data_frame = preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
+    fig = go.Figure(
+        [
+            go.Bar(
+                x=data_frame["shuttle_type"],
+                y=data_frame["passenger_capacity"],
+            )
+        ]
     )
     return fig
 
@@ -205,6 +220,8 @@ shuttle_passenger_capacity_plot:
   type: plotly.JSONDataSet
   filepath: data/08_reporting/shuttle_passenger_capacity_plot.json
 ```
+
+
 
 Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Once you click on the node, you can see a small preview of your Plotly chart in the metadata panel.
 

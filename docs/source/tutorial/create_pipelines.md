@@ -169,8 +169,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipeline.
 
     Returns:
-    A mapping from a pipeline name to a ``Pipeline`` object.
-
+        A mapping from a pipeline name to a ``Pipeline`` object.
     """
     data_processing_pipeline = dp.create_pipeline()
 
@@ -461,19 +460,6 @@ model_options:
 
 These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../kedro_project_setup/configuration.md#parameters) is available in later documentation for advanced usage. Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
 
-### Register the dataset
-
-The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
-
-```yaml
-regressor:
-  type: pickle.PickleDataSet
-  filepath: data/06_models/regressor.pickle
-  versioned: true
-```
-
-Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning](../data/kedro_io.md#versioning) section.
-
 ### Assemble the data science pipeline
 
 To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
@@ -508,6 +494,19 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
+
+### Register the dataset
+
+The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
+
+```yaml
+regressor:
+  type: pickle.PickleDataSet
+  filepath: data/06_models/regressor.pickle
+  versioned: true
+```
+
+Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning](../data/kedro_io.md#versioning) section.
 
 ### Update the project pipeline
 

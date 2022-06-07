@@ -106,7 +106,7 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     func(path)
 
 
-def _is_starter_entrypoint_config_valid(module_name: str, config: Dict[str, str]) -> bool:
+def _is_valid_starter_entrypoint_config(module_name: str, config: Dict[str, str]) -> bool:
     if not isinstance(config, dict):
         warn(
             f"The starter configuration loaded from module {module_name} should be a 'dict', got '{type(config)}' instead"
@@ -153,10 +153,10 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
     for starter_entry_point in importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS["starters"]):
         module_name = starter_entry_point.module.split('.')[0]
         for starter_config in starter_entry_point.load():
-            config_status = _is_starter_entrypoint_config_valid(
+            is_valid_config_status = _is_valid_starter_entrypoint_config(
                 module_name, starter_config
             )
-            if config_status is False:
+            if not is_valid_config_status:
                 click.secho(
                     f"Starter alias `{starter_config['name']}` from `{module_name}` has been ignored as the config is invalid and cannot be loaded",
                     fg="yellow",

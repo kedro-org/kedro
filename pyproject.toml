@@ -19,7 +19,6 @@ unsafe-load-any-extension = false
 [tool.pylint.messages_control]
 disable = [
     "ungrouped-imports",
-    "bad-continuation",
     "duplicate-code"
 ]
 enable = ["useless-suppression"]

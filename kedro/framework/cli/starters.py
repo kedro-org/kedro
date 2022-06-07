@@ -46,7 +46,7 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external) documentation
 # and tutorials still refer to `astro-iris`. We create an alias to check if a user has
 # entered old `astro-iris` as the starter name and changes it to `astro-airflow-iris`.
-_STARTERS_ALIASES = [
+_OFFICIAL_STARTERS_ALIASES = [
     {
         "name": "astro-airflow-iris",
         "template_path": _STARTERS_REPO,
@@ -148,7 +148,7 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
     """
 
     # add an extra key to indicate from where the plugin come from
-    starters_aliases = [{**config, "origin": "kedro"} for config in _STARTERS_ALIASES]
+    starters_aliases = [{**config, "origin": "kedro"} for config in _OFFICIAL_STARTERS_ALIASES]
 
     existing_names: Dict[str, str] = {}  # dict {name: module_name}
     for starter_entry_point in pkg_resources.iter_entry_points(
@@ -423,7 +423,7 @@ def _get_cookiecutter_dir(
                 f" Specified tag {checkout}. The following tags are available: "
                 + ", ".join(_get_available_tags(template_path))
             )
-        official_starters = sorted(_STARTERS_ALIASES, key=itemgetter("name"))
+        official_starters = sorted(_OFFICIAL_STARTERS_ALIASES, key=itemgetter("name"))
         raise KedroCliError(
             f"{error_message}. The aliases for the official Kedro starters are: \n"
             f"{yaml.safe_dump(official_starters)}"

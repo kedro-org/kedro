@@ -68,9 +68,7 @@ _OFFICIAL_STARTERS_ALIASES = [
         "template_path": _STARTERS_REPO,
         "directory": "pandas-iris",
     },
-    {"name": "pyspark",
-     "template_path": _STARTERS_REPO,
-      "directory": "pyspark"},
+    {"name": "pyspark", "template_path": _STARTERS_REPO, "directory": "pyspark"},
     {
         "name": "pyspark-iris",
         "template_path": _STARTERS_REPO,
@@ -148,7 +146,9 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
     """
 
     # add an extra key to indicate from where the plugin come from
-    starters_aliases = [{**config, "origin": "kedro"} for config in _OFFICIAL_STARTERS_ALIASES]
+    starters_aliases = [
+        {**config, "origin": "kedro"} for config in _OFFICIAL_STARTERS_ALIASES
+    ]
 
     existing_names: Dict[str, str] = {}  # dict {name: module_name}
     for starter_entry_point in pkg_resources.iter_entry_points(

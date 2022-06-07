@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from warnings import warn
 
 import click
-import pkg_resources
+import importlib_metadata
 import yaml
 
 import kedro
@@ -151,10 +151,10 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
     ]
 
     existing_names: Dict[str, str] = {}  # dict {name: module_name}
-    for starter_entry_point in pkg_resources.iter_entry_points(
-        group=ENTRY_POINT_GROUPS["starters"]
-    ):
-        module_name = starter_entry_point.module_name.split(".")[0]
+    entry_points = importlib_metadata.entry_points()
+    entry_points = entry_points.select(group=ENTRY_POINT_GROUPS["starters"])
+    for starter_entry_point in entry_points:
+        module_name = starter_entry_point.module
         for starter_config in starter_entry_point.load():
             config_status = _check_starter_entrypoint_config(
                 module_name, starter_config

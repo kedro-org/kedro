@@ -33,7 +33,7 @@ from kedro.framework.cli.utils import (
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
-_STARTER_ALIASES = {
+_OFFICIAL_STARTER_ALIASES = {
     "astro-airflow-iris",
     "standalone-datacatalog",
     "pandas-iris",
@@ -46,7 +46,7 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external) documentation
 # and tutorials still refer to `astro-iris`. We create an alias to check if a user has
 # entered old `astro-iris` as the starter name and changes it to `astro-airflow-iris`.
-_OFFICIAL_STARTERS_ALIASES = [
+_OFFICIAL_STARTERS_CONFIG = [
     {
         "name": "astro-airflow-iris",
         "template_path": _STARTERS_REPO,
@@ -106,7 +106,9 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     func(path)
 
 
-def _is_valid_starter_entrypoint_config(module_name: str, config: Dict[str, str]) -> bool:
+def _is_valid_starter_entrypoint_config(
+    module_name: str, config: Dict[str, str]
+) -> bool:
     if not isinstance(config, dict):
         warn(
             f"The starter configuration loaded from module {module_name} should be a 'dict', got '{type(config)}' instead"
@@ -143,15 +145,16 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
         {"name": "my-awesome-starter", "template_path": ..., "directory": ..., "origin": "my-awesome-plugin"}
     ]
     """
-
     # add an extra key to indicate from where the plugin come from
     starters_aliases = [
-        {**config, "origin": "kedro"} for config in _OFFICIAL_STARTERS_ALIASES
+        {**config, "origin": "kedro"} for config in _OFFICIAL_STARTERS_CONFIG
     ]
 
     existing_names: Dict[str, str] = {}  # dict {name: module_name}
-    for starter_entry_point in importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS["starters"]):
-        module_name = starter_entry_point.module.split('.')[0]
+    for starter_entry_point in importlib_metadata.entry_points().select(
+        group=ENTRY_POINT_GROUPS["starters"]
+    ):
+        module_name = starter_entry_point.module.split(".")[0]
         for starter_config in starter_entry_point.load():
             is_valid_config_status = _is_valid_starter_entrypoint_config(
                 module_name, starter_config
@@ -420,7 +423,7 @@ def _get_cookiecutter_dir(
                 f" Specified tag {checkout}. The following tags are available: "
                 + ", ".join(_get_available_tags(template_path))
             )
-        official_starters = sorted(_OFFICIAL_STARTERS_ALIASES, key=itemgetter("name"))
+        official_starters = sorted(_OFFICIAL_STARTERS_CONFIG, key=itemgetter("name"))
         raise KedroCliError(
             f"{error_message}. The aliases for the official Kedro starters are: \n"
             f"{yaml.safe_dump(official_starters)}"

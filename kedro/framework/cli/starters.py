@@ -423,7 +423,7 @@ def _get_cookiecutter_dir(
                 f" Specified tag {checkout}. The following tags are available: "
                 + ", ".join(_get_available_tags(template_path))
             )
-        official_starters = sorted(_STARTERS_ALIASES)
+        official_starters = sorted(_STARTERS_ALIASES, key=itemgetter("name"))
         raise KedroCliError(
             f"{error_message}. The aliases for the official Kedro starters are: \n"
             f"{yaml.safe_dump(official_starters)}"

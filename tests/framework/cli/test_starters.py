@@ -12,7 +12,7 @@ from click.testing import CliRunner
 from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
-from kedro.framework.cli.starters import _STARTER_ALIASES, TEMPLATE_PATH
+from kedro.framework.cli.starters import _OFFICIAL_STARTER_ALIASES, TEMPLATE_PATH
 
 FILES_IN_TEMPLATE = 32
 
@@ -78,8 +78,49 @@ def test_starter_list(fake_kedro_cli):
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
 
     assert result.exit_code == 0, result.output
-    for alias in _STARTER_ALIASES:
+    for alias in _OFFICIAL_STARTER_ALIASES:
         assert alias in result.output
+
+
+def test_starter_list_with_starter_plugin(fake_kedro_cli, entry_point):
+    """Check that `kedro starter list` prints out the plugin starters."""
+    entry_point.load.return_value = [
+        {"name": "valid_starter", "template_path": "valid_path"}
+    ]
+    entry_point.module = "valid_starter"
+    result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
+    assert result.exit_code == 0, result.output
+    assert "valid_starter" in result.output
+
+
+@pytest.mark.parametrize(
+    "fake_starters_config,expected",
+    [
+        (
+            [
+                {"name": "valid_starter", "template_path": "valid_path"},
+                {"name": "valid_starter", "template_path": "valid_path"},
+            ],
+            "has been ignored as it is already defined by",
+        ),
+        (
+            [
+                {"name": "valid_starter", "invalid_key": "valid_path"},
+            ],
+            "has been ignored as the config is invalid and cannot be loaded",
+        ),
+    ],
+)
+def test_starter_list_with_invalid_starter_plugin(
+    fake_kedro_cli, entry_point, fake_starters_config, expected
+):
+    """Check that `kedro starter list` skip the invalid starters."""
+    entry_point.load.return_value = fake_starters_config
+    entry_point.module = "invalid_starter"
+    result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
+    print(result.output)
+    assert result.exit_code == 0, result.output
+    assert expected in result.output
 
 
 def test_cookiecutter_json_matches_prompts_yml():

@@ -244,7 +244,7 @@ def create_project_with_starter(context):
 
 @given("I have run a non-interactive kedro new with custom plugin starter")
 @when("I run a non-interactive kedro new with custom plugin starter")
-def create_project_with_starter(context):
+def create_project_with_plugin_starter(context):
     """Behave step to run kedro new given the config I previously created."""
     res = run(
         [

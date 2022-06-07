@@ -33,7 +33,7 @@ class _IsSubclassValidator(Validator):
             setting_value = getattr(settings, name)
             if not issubclass(setting_value, default_class):
                 raise ValidationError(
-                    f"Invalid value'{setting_value.__module__}.{setting_value.__qualname__}' "
+                    f"Invalid value '{setting_value.__module__}.{setting_value.__qualname__}' "
                     f"received for setting '{name}'. It must be a subclass of "
                     f"'{default_class.__module__}.{default_class.__qualname__}'."
                 )

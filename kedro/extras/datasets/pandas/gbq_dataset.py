@@ -164,7 +164,7 @@ class GBQTableDataSet(AbstractDataSet):
 
         if save_location != load_location:
             raise DataSetError(
-                """ "load_args['location']" is different from "save_args['location']". """
+                """"load_args['location']" is different from "save_args['location']". """
                 "The 'location' defines where BigQuery data is stored, therefore has "
                 "to be the same for save and load args. "
                 "Details: https://cloud.google.com/bigquery/docs/locations"

@@ -106,13 +106,12 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     func(path)
 
 
-def _check_starter_entrypoint_config(module_name: str, config: Dict[str, str]) -> bool:
-    flag_config_ok = True
+def _is_starter_entrypoint_config_valid(module_name: str, config: Dict[str, str]) -> bool:
     if not isinstance(config, dict):
         warn(
             f"The starter configuration loaded from module {module_name} should be a 'dict', got '{type(config)}' instead"
         )
-        flag_config_ok = False
+        return False
     mandatory_keys = {"name", "template_path"}
     optional_keys = {"directory"}
     provided_keys = set(config.keys())
@@ -122,16 +121,16 @@ def _check_starter_entrypoint_config(module_name: str, config: Dict[str, str]) -
         warn(
             f"Entrypoint kedro.starters from {module_name} must have the following keys, which are currently missing: '{missing_keys}'"
         )
-        flag_config_ok = False
+        return False
 
     extra_keys = provided_keys - mandatory_keys - optional_keys  # optional keys
     if extra_keys:  # mandatory keys
         warn(
             f"Entrypoint kedro.starters from {module_name} has keys '{extra_keys}' which are not allowed"
         )
-        flag_config_ok = False
+        return False
 
-    return flag_config_ok
+    return True
 
 
 def _get_starters_aliases() -> List[Dict[str, str]]:
@@ -151,12 +150,10 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
     ]
 
     existing_names: Dict[str, str] = {}  # dict {name: module_name}
-    entry_points = importlib_metadata.entry_points()
-    entry_points = entry_points.select(group=ENTRY_POINT_GROUPS["starters"])
-    for starter_entry_point in entry_points:
-        module_name = starter_entry_point.module
+    for starter_entry_point in importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS["starters"]):
+        module_name = starter_entry_point.module.split('.')[0]
         for starter_config in starter_entry_point.load():
-            config_status = _check_starter_entrypoint_config(
+            config_status = _is_starter_entrypoint_config_valid(
                 module_name, starter_config
             )
             if config_status is False:

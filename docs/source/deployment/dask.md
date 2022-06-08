@@ -228,7 +228,7 @@ class DaskRunner(AbstractRunner):
 
 ### Update CLI implementation
 
-You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../extend_kedro/common_use_cases.md#use-case-3-how-to-add-or-modify-cli-commands). Add the following `run()` function to your `cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../development/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
 
 ```python
 def run(tag, env, ...):

@@ -494,8 +494,8 @@ class TestBeforeNodeRunHookWithInputUpdates:
         catalog.save("boats", dummy_dataframe)
 
         pattern = (
-            "`before_node_run` must return either None or a dictionary "
-            "mapping dataset names to updated values, got `MockDatasetReplacement`"
+            "'before_node_run' must return either None or a dictionary "
+            "mapping dataset names to updated values, got 'MockDatasetReplacement'"
         )
         with pytest.raises(TypeError, match=re.escape(pattern)):
             mock_session_with_broken_before_node_run_hooks.run()
@@ -510,8 +510,8 @@ class TestBeforeNodeRunHookWithInputUpdates:
         catalog.save("boats", dummy_dataframe)
 
         pattern = (
-            "`before_node_run` must return either None or a dictionary "
-            "mapping dataset names to updated values, got `MockDatasetReplacement`"
+            "'before_node_run' must return either None or a dictionary "
+            "mapping dataset names to updated values, got 'MockDatasetReplacement'"
         )
         with pytest.raises(TypeError, match=re.escape(pattern)):
             mock_session_with_broken_before_node_run_hooks.run(runner=ParallelRunner())

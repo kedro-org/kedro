@@ -92,7 +92,7 @@ class TestCachedDataset:
     def test_bad_argument(self):
         with pytest.raises(
             ValueError,
-            match=r"The argument type of `dataset` "
+            match=r"The argument type of 'dataset' "
             r"should be either a dict/YAML representation "
             r"of the dataset, or the actual dataset object",
         ):
@@ -108,7 +108,7 @@ class TestCachedDataset:
         with pytest.raises(
             DataSetError,
             match=r"Cached datasets should specify that they are "
-            r"versioned in the `CachedDataSet`, not in the "
+            r"versioned in the 'CachedDataSet', not in the "
             r"wrapped dataset",
         ):
             _ = DataCatalog.from_config(config, load_versions={"test_ds": "42"})

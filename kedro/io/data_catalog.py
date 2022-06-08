@@ -263,7 +263,7 @@ class DataCatalog:
         missing_keys = load_versions.keys() - catalog.keys()
         if missing_keys:
             raise DataSetNotFoundError(
-                f"`load_versions` keys [{', '.join(sorted(missing_keys))}] "
+                f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
             )
 
@@ -341,7 +341,7 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from `%s` (%s)...", name, type(dataset).__name__
+            "Loading data from '%s' (%s)...", name, type(dataset).__name__
         )
 
         result = dataset.load()
@@ -379,7 +379,7 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to `%s` (%s)...", name, type(dataset).__name__)
+        self._logger.info("Saving data to '%s' (%s)...", name, type(dataset).__name__)
 
         dataset.save(data)
 
@@ -561,7 +561,7 @@ class DataCatalog:
 
         except re.error as exc:
             raise SyntaxError(
-                f"Invalid regular expression provided: `{regex_search}`"
+                f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
         return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 

@@ -20,7 +20,7 @@ class TestBaseStore:
         assert store._session_id == FAKE_SESSION_ID
 
         expected_debug_messages = [
-            "`read()` not implemented for `BaseSessionStore`. Assuming empty store."
+            "'read()' not implemented for 'BaseSessionStore'. Assuming empty store."
         ]
         actual_debug_messages = [
             rec.getMessage()
@@ -38,8 +38,8 @@ class TestBaseStore:
         assert store == {}
 
         expected_debug_messages = [
-            "`read()` not implemented for `BaseSessionStore`. Assuming empty store.",
-            "`save()` not implemented for `BaseSessionStore`. Skipping the step.",
+            "'read()' not implemented for 'BaseSessionStore'. Assuming empty store.",
+            "'save()' not implemented for 'BaseSessionStore'. Skipping the step.",
         ]
         actual_debug_messages = [
             rec.getMessage()

@@ -81,9 +81,9 @@ class TestIsAsync:
     def test_thread_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
         pattern = (
-            "`ThreadRunner` doesn't support loading and saving the "
+            "'ThreadRunner' doesn't support loading and saving the "
             "node inputs and outputs asynchronously with threads. "
-            "Setting `is_async` to False."
+            "Setting 'is_async' to False."
         )
         with pytest.warns(UserWarning, match=pattern):
             result = ThreadRunner(is_async=True).run(fan_out_fan_in, catalog)
@@ -101,7 +101,7 @@ class TestInvalidThreadRunner:
     def test_node_returning_none(self):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        pattern = "Saving `None` to a `DataSet` is not allowed"
+        pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             ThreadRunner().run(pipeline, catalog)
 

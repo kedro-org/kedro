@@ -125,8 +125,8 @@ class JSONDataSet(AbstractVersionedDataSet):
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(
-                "Dropping `storage_options` for %s, "
-                "please specify them under `fs_args` or `credentials`.",
+                "Dropping 'storage_options' for %s, "
+                "please specify them under 'fs_args' or 'credentials'.",
                 self._filepath,
             )
             self._save_args.pop("storage_options", None)

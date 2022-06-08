@@ -56,7 +56,7 @@ class CachedDataSet(AbstractDataSet):
             self._dataset = dataset
         else:
             raise ValueError(
-                "The argument type of `dataset` should be either a dict/YAML "
+                "The argument type of 'dataset' should be either a dict/YAML "
                 "representation of the dataset, or the actual dataset object."
             )
         self._cache = MemoryDataSet(copy_mode=copy_mode)
@@ -70,7 +70,7 @@ class CachedDataSet(AbstractDataSet):
         if VERSIONED_FLAG_KEY in config:
             raise ValueError(
                 "Cached datasets should specify that they are versioned in the "
-                "`CachedDataSet`, not in the wrapped dataset."
+                "'CachedDataSet', not in the wrapped dataset."
             )
         if version:
             config[VERSIONED_FLAG_KEY] = True

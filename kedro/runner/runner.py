@@ -241,8 +241,8 @@ def _collect_inputs_from_hook(
             if response is not None and not isinstance(response, dict):
                 response_type = type(response).__name__
                 raise TypeError(
-                    f"`before_node_run` must return either None or a dictionary mapping "
-                    f"dataset names to updated values, got `{response_type}` instead."
+                    f"'before_node_run' must return either None or a dictionary mapping "
+                    f"dataset names to updated values, got '{response_type}' instead."
                 )
             response = response or {}
             additional_inputs.update(response)

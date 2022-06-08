@@ -6,4 +6,4 @@ Feature: IPython target in new project
     When I execute the kedro command "ipython"
     Then I should get a message including "An enhanced Interactive Python"
     And I should get a message including "Kedro project project-dummy"
-    And I should get a message including "Defined global variable `context`, `session`, `catalog` and `pipelines`"
+    And I should get a message including "Defined global variable `'context', 'session', 'catalog' and `'pipelines'"

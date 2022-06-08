@@ -112,7 +112,7 @@ def create_pipeline(
 
     click.secho(
         f"To be able to run the pipeline '{name}', you will need to add it "
-        f"""to 'register_pipelines()' in "{package_dir / 'pipeline_registry.py'}".""",
+        f"""to 'register_pipelines()' in '{package_dir / "pipeline_registry.py"}'.""",
         fg="yellow",
     )
 

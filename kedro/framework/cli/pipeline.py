@@ -174,7 +174,7 @@ def delete_pipeline(
     click.secho(f"\nPipeline '{name}' was successfully deleted.", fg="green")
     click.secho(
         f"\nIf you added the pipeline '{name}' to 'register_pipelines()' in"
-        f""" "{package_dir / 'pipeline_registry.py'}", you will need to remove it.""",
+        f""" '{package_dir / "pipeline_registry.py"}', you will need to remove it.""",
         fg="yellow",
     )
 

@@ -157,7 +157,7 @@ class TestYAMLDataSetVersioned:
         corresponding yaml file for a given save version already exists."""
         versioned_yaml_data_set.save(dummy_data)
         pattern = (
-            r"Save path \`.+\` for YAMLDataSet\(.+\) must "
+            r"Save path \'.+\' for YAMLDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -175,8 +175,8 @@ class TestYAMLDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for YAMLDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for YAMLDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_yaml_data_set.save(dummy_data)

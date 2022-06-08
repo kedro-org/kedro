@@ -100,11 +100,11 @@ class SparkHiveDataSet(AbstractDataSet):
         if write_mode not in _write_modes:
             valid_modes = ", ".join(_write_modes)
             raise DataSetError(
-                f"Invalid `write_mode` provided: {write_mode}. "
-                f"`write_mode` must be one of: {valid_modes}"
+                f"Invalid 'write_mode' provided: {write_mode}. "
+                f"'write_mode' must be one of: {valid_modes}"
             )
         if write_mode == "upsert" and not table_pk:
-            raise DataSetError("`table_pk` must be set to utilise `upsert` read mode")
+            raise DataSetError("'table_pk' must be set to utilise 'upsert' read mode")
 
         self._write_mode = write_mode
         self._table_pk = table_pk or []

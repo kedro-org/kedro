@@ -255,10 +255,10 @@ def duplicate_output_list_node():
 @pytest.mark.parametrize(
     "func, expected",
     [
-        (bad_input_type_node, r"`inputs` type must be one of "),
-        (bad_output_type_node, r"`outputs` type must be one of "),
+        (bad_input_type_node, r"'inputs' type must be one of "),
+        (bad_output_type_node, r"'outputs' type must be one of "),
         (bad_function_type_node, r"first argument must be a function"),
-        (no_input_or_output_node, r"it must have some `inputs` or `outputs`"),
+        (no_input_or_output_node, r"it must have some 'inputs' or 'outputs'"),
         (
             input_same_as_output_node,
             r"A node cannot have the same inputs and outputs: {\'A\'}",

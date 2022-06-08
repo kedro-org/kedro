@@ -172,7 +172,7 @@ class TestEmailMessageDataSetVersioned:
         corresponding text file for a given save version already exists."""
         versioned_message_data_set.save(dummy_msg)
         pattern = (
-            r"Save path \`.+\` for EmailMessageDataSet\(.+\) must "
+            r"Save path \'.+\' for EmailMessageDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -190,8 +190,8 @@ class TestEmailMessageDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            f"Save version `{save_version}` did not match "
-            f"load version `{load_version}` for "
+            f"Save version '{save_version}' did not match "
+            f"load version '{load_version}' for "
             r"EmailMessageDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):

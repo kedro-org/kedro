@@ -57,7 +57,7 @@ def _get_config_from_patterns(
 
     if not patterns:
         raise ValueError(
-            "`patterns` must contain at least one glob "
+            "'patterns' must contain at least one glob "
             "pattern to match config filenames against."
         )
 
@@ -82,7 +82,7 @@ def _get_config_from_patterns(
         if common_keys:
             sorted_keys = ", ".join(sorted(common_keys))
             msg = (
-                "Config from path `%s` will override the following "
+                "Config from path '%s' will override the following "
                 "existing top-level config keys: %s"
             )
             _config_logger.info(msg, conf_path, sorted_keys)

@@ -110,10 +110,8 @@ class TestGBQDataSet:
     @pytest.mark.parametrize("save_args", [{"location": "l2"}], indirect=True)
     def test_invalid_location(self, save_args, load_args):
         """Check the error when initializing instance if save_args and load_args
-        `location` are different."""
-        pattern = (
-            r"`load_args\['location'\]` is different from `save_args\['location'\]`."
-        )
+        'location' are different."""
+        pattern = r""""load_args\['location'\]" is different from "save_args\['location'\]"."""
         with pytest.raises(DataSetError, match=pattern):
             GBQTableDataSet(
                 dataset=DATASET,
@@ -216,7 +214,7 @@ class TestGBQQueryDataSet:
     def test_empty_query_error(self):
         """Check the error when instantiating with empty query or file"""
         pattern = (
-            r"`sql` and `filepath` arguments cannot both be empty\."
+            r"'sql' and 'filepath' arguments cannot both be empty\."
             r"Please provide a sql query or path to a sql query file\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -285,7 +283,7 @@ class TestGBQQueryDataSet:
 
     def test_save_error(self, gbq_sql_dataset, dummy_dataframe):
         """Check the error when trying to save to the data set"""
-        pattern = r"`save` is not supported on GBQQueryDataSet"
+        pattern = r"'save' is not supported on GBQQueryDataSet"
         with pytest.raises(DataSetError, match=pattern):
             gbq_sql_dataset.save(dummy_dataframe)
 
@@ -310,7 +308,7 @@ class TestGBQQueryDataSet:
     def test_sql_and_filepath_args(self, sql_file):
         """Test that an error is raised when both `sql` and `filepath` args are given."""
         pattern = (
-            r"`sql` and `filepath` arguments cannot both be provided."
+            r"'sql' and 'filepath' arguments cannot both be provided."
             r"Please only provide one."
         )
         with pytest.raises(DataSetError, match=pattern):

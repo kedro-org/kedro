@@ -74,8 +74,8 @@ class TestFeatherDataSet:
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
-            f"Dropping `storage_options` for {filepath}, "
-            f"please specify them under `fs_args` or `credentials`."
+            f"Dropping 'storage_options' for {filepath}, "
+            f"please specify them under 'fs_args' or 'credentials'."
         )
         assert records[0].getMessage() == expected_log_message
         assert "storage_options" not in ds._save_args
@@ -167,7 +167,7 @@ class TestFeatherDataSetVersioned:
         corresponding feather file for a given save version already exists."""
         versioned_feather_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for FeatherDataSet\(.+\) must "
+            r"Save path \'.+\' for FeatherDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -185,8 +185,8 @@ class TestFeatherDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for FeatherDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for FeatherDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_feather_data_set.save(dummy_dataframe)

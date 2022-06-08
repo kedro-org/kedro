@@ -30,7 +30,7 @@ class BaseSessionStore(UserDict):
             A mapping containing the session store data.
         """
         self._logger.debug(
-            "`read()` not implemented for `%s`. Assuming empty store.",
+            "'read()' not implemented for '%s'. Assuming empty store.",
             self.__class__.__name__,
         )
         return {}
@@ -38,7 +38,7 @@ class BaseSessionStore(UserDict):
     def save(self):
         """Persist the session store"""
         self._logger.debug(
-            "`save()` not implemented for `%s`. Skipping the step.",
+            "'save()' not implemented for '%s'. Skipping the step.",
             self.__class__.__name__,
         )
 

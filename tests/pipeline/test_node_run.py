@@ -125,7 +125,7 @@ class TestNodeRunInvalidOutput:
     def test_node_not_list_output(self, mocked_dataset):
         pattern = r"The node definition contains a list of outputs "
         pattern += r"\['B', 'C'\], whereas the node function returned "
-        pattern += r"a `LambdaDataSet`"
+        pattern += r"a 'LambdaDataSet'"
         with pytest.raises(ValueError, match=pattern):
             node(one_in_one_out, "ds1", ["B", "C"]).run(dict(ds1=mocked_dataset))
 

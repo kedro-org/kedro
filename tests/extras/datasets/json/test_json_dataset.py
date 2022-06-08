@@ -146,7 +146,7 @@ class TestJSONDataSetVersioned:
         corresponding json file for a given save version already exists."""
         versioned_json_data_set.save(dummy_data)
         pattern = (
-            r"Save path \`.+\` for JSONDataSet\(.+\) must "
+            r"Save path \'.+\' for JSONDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -164,8 +164,8 @@ class TestJSONDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            f"Save version `{save_version}` did not match "
-            f"load version `{load_version}` for "
+            f"Save version '{save_version}' did not match "
+            f"load version '{load_version}' for "
             r"JSONDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):

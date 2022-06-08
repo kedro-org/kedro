@@ -292,7 +292,7 @@ class TestPipelineDeleteCommand:
         assert f"Pipeline '{PIPELINE_NAME}' was successfully deleted." in result.output
         assert (
             f"If you added the pipeline '{PIPELINE_NAME}' to 'register_pipelines()' in "
-            f""""{fake_package_path / 'pipeline_registry.py'}", you will need to remove it."""
+            f"""'{fake_package_path / "pipeline_registry.py"}', you will need to remove it."""
         ) in result.output
 
         assert not source_path.exists()
@@ -328,7 +328,7 @@ class TestPipelineDeleteCommand:
         assert f"Pipeline '{PIPELINE_NAME}' was successfully deleted." in result.output
         assert (
             f"If you added the pipeline '{PIPELINE_NAME}' to 'register_pipelines()' in "
-            f""""{fake_package_path / 'pipeline_registry.py'}", you will need to remove it."""
+            f"""'{fake_package_path / "pipeline_registry.py"}', you will need to remove it."""
         ) in result.output
 
         assert not source_path.exists()

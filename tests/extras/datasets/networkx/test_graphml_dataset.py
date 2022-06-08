@@ -124,7 +124,7 @@ class TestGraphMLDataSetVersioned:
         version."""
         versioned_graphml_data_set.save(dummy_graph_data)
         pattern = (
-            r"Save path \`.+\` for GraphMLDataSet\(.+\) must not "
+            r"Save path \'.+\' for GraphMLDataSet\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -142,8 +142,8 @@ class TestGraphMLDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match "
-            rf"load version `{load_version}` for GraphMLDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match "
+            rf"load version '{load_version}' for GraphMLDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_graphml_data_set.save(dummy_graph_data)

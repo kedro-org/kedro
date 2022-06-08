@@ -62,7 +62,7 @@ class TestRegistryDescribeCommand:
 
         assert result.exit_code
         expected_output = (
-            "Error: `missing` pipeline not found. Existing pipelines: "
+            "Error: 'missing' pipeline not found. Existing pipelines: "
             "[__default__, de, dp, ds]\n"
         )
         assert expected_output in result.output

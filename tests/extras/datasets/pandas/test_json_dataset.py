@@ -86,8 +86,8 @@ class TestJSONDataSet:
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
-            f"Dropping `storage_options` for {filepath}, "
-            f"please specify them under `fs_args` or `credentials`."
+            f"Dropping 'storage_options' for {filepath}, "
+            f"please specify them under 'fs_args' or 'credentials'."
         )
         assert records[0].getMessage() == expected_log_message
         assert "storage_options" not in ds._save_args
@@ -188,7 +188,7 @@ class TestJSONDataSetVersioned:
         corresponding hdf file for a given save version already exists."""
         versioned_json_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for JSONDataSet\(.+\) must "
+            r"Save path \'.+\' for JSONDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -206,8 +206,8 @@ class TestJSONDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for JSONDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for JSONDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_data_set.save(dummy_dataframe)

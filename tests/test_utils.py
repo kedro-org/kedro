@@ -21,7 +21,7 @@ class TestExtractObject:
 
     def test_load_obj_invalid_attribute(self):
         with pytest.raises(
-            AttributeError, match=r"Object `InvalidClass` cannot be loaded"
+            AttributeError, match=r"Object 'InvalidClass' cannot be loaded"
         ):
             load_obj("InvalidClass", "tests.test_utils")
 

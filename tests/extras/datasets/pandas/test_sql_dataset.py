@@ -70,7 +70,7 @@ class TestSQLTableDataSet:
 
     def test_empty_table_name(self):
         """Check the error when instantiating with an empty table"""
-        pattern = r"`table\_name` argument cannot be empty\."
+        pattern = r"'table\_name' argument cannot be empty\."
         with pytest.raises(DataSetError, match=pattern):
             SQLTableDataSet(table_name="", credentials=dict(con=CONNECTION))
 
@@ -78,7 +78,7 @@ class TestSQLTableDataSet:
         """Check the error when instantiating with an empty
         connection string"""
         pattern = (
-            r"`con` argument cannot be empty\. "
+            r"'con' argument cannot be empty\. "
             r"Please provide a SQLAlchemy connection string\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -252,7 +252,7 @@ class TestSQLQueryDataSet:
     def test_empty_query_error(self):
         """Check the error when instantiating with empty query or file"""
         pattern = (
-            r"`sql` and `filepath` arguments cannot both be empty\."
+            r"'sql' and 'filepath' arguments cannot both be empty\."
             r"Please provide a sql query or path to a sql query file\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -261,7 +261,7 @@ class TestSQLQueryDataSet:
     def test_empty_con_error(self):
         """Check the error when instantiating with empty connection string"""
         pattern = (
-            r"`con` argument cannot be empty\. Please provide "
+            r"'con' argument cannot be empty\. Please provide "
             r"a SQLAlchemy connection string"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -324,7 +324,7 @@ class TestSQLQueryDataSet:
 
     def test_save_error(self, query_data_set, dummy_dataframe):
         """Check the error when trying to save to the data set"""
-        pattern = r"`save` is not supported on SQLQueryDataSet"
+        pattern = r"'save' is not supported on SQLQueryDataSet"
         with pytest.raises(DataSetError, match=pattern):
             query_data_set.save(dummy_dataframe)
 
@@ -351,7 +351,7 @@ class TestSQLQueryDataSet:
     def test_sql_and_filepath_args(self, sql_file):
         """Test that an error is raised when both `sql` and `filepath` args are given."""
         pattern = (
-            r"`sql` and `filepath` arguments cannot both be provided."
+            r"'sql' and 'filepath' arguments cannot both be provided."
             r"Please only provide one."
         )
         with pytest.raises(DataSetError, match=pattern):

@@ -38,7 +38,7 @@ def describe_registered_pipeline(
         all_pipeline_names = pipelines.keys()
         existing_pipelines = ", ".join(sorted(all_pipeline_names))
         raise KedroCliError(
-            f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
+            f"'{name}' pipeline not found. Existing pipelines: [{existing_pipelines}]"
         )
 
     nodes = []

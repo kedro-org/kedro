@@ -111,7 +111,8 @@ def _is_valid_starter_entrypoint_config(
 ) -> bool:
     if not isinstance(config, dict):
         warn(
-            f"The starter configuration loaded from module {module_name} should be a 'dict', got '{type(config)}' instead"
+            f"The starter configuration loaded from module {module_name}"
+            f"should be a 'dict', got '{type(config)}' instead"
         )
         return False
     mandatory_keys = {"name", "template_path"}
@@ -121,14 +122,16 @@ def _is_valid_starter_entrypoint_config(
     missing_keys = mandatory_keys - provided_keys
     if missing_keys:  # mandatory keys
         warn(
-            f"Entrypoint kedro.starters from {module_name} must have the following keys, which are currently missing: '{missing_keys}'"
+            f"Entrypoint kedro.starters from {module_name} must have the "
+            f"following keys, which are currently missing: '{missing_keys}'"
         )
         return False
 
     extra_keys = provided_keys - mandatory_keys - optional_keys  # optional keys
     if extra_keys:  # mandatory keys
         warn(
-            f"Entrypoint kedro.starters from {module_name} has keys '{extra_keys}' which are not allowed"
+            f"Entrypoint kedro.starters from {module_name} has keys '{extra_keys}' "
+            f"which are not allowed."
         )
         return False
 
@@ -140,9 +143,15 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
     the core repo and in plugins entry points.
     The output looks like:
     [
-        {"name": "astro-airflow-iris", "template_path": ..., "directory": ..., "origin": "kedro"},
+        {"name": "astro-airflow-iris",
+         "template_path": ...,
+         "directory": ...,
+         "origin": "kedro"},
         ...,
-        {"name": "my-awesome-starter", "template_path": ..., "directory": ..., "origin": "my-awesome-plugin"}
+        {"name": "my-awesome-starter",
+        "template_path": ...,
+        "directory": ...,
+        "origin": "my-awesome-plugin"}
     ]
     """
     # add an extra key to indicate from where the plugin come from
@@ -161,12 +170,15 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
             )
             if not is_valid_config_status:
                 click.secho(
-                    f"Starter alias `{starter_config['name']}` from `{module_name}` has been ignored as the config is invalid and cannot be loaded",
+                    f"Starter alias `{starter_config['name']}` from `{module_name}` "
+                    f"has been ignored as the config is invalid and cannot be loaded",
                     fg="yellow",
                 )
             elif starter_config["name"] in existing_names:
                 click.secho(
-                    f"Starter alias `{starter_config['name']}` from `{module_name}` has been ignored as it is already defined by `{existing_names[starter_config['name']]}`",
+                    f"Starter alias `{starter_config['name']}` from `{module_name}` "
+                    f"has been ignored as it is already defined by"
+                    f"`{existing_names[starter_config['name']]}`",
                     fg="yellow",
                 )
             else:
@@ -207,9 +219,13 @@ def new(
 
     starters_aliases = _get_starters_aliases()
 
-    # see https://www.geeksforgeeks.org/group-list-of-dictionary-data-by-particular-key-in-python/
-    # this returns a nested dictionary {name1: {template_path: xxx, directory: xxx}, name2: {template_path: xxx, directory: xxx}, ...}
-    # and we know that each starter has only one config, so we can convert take the first item of the list
+    # See https://www.geeksforgeeks.org/group-list-of-dictionary-data-by-particular-key-in-python/
+    # this returns a nested dictionary
+    # {name1: {template_path: xxx, directory: xxx},
+    #  name2: {template_path: xxx, directory: xxx},
+    #  ...}
+    # and we know that each starter has only one config, so we can convert take the
+    # first item of the list.
     starters_aliases_by_name = {
         name: list(config)[0]
         for name, config in groupby(starters_aliases, key=itemgetter("name"))
@@ -221,7 +237,8 @@ def new(
                 "Cannot use the --directory flag with a --starter alias."
             )
         template_path = starters_aliases_by_name[starter_name]["template_path"]
-        # "directory" is an optional key for starters from plugins, so if the key is not present we will use "None".
+        # "directory" is an optional key for starters from plugins, so if the key is
+        # not present we will use "None".
         directory = starters_aliases_by_name[starter_name].get("directory")
         checkout = checkout or version
     elif starter_name is not None:

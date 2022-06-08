@@ -1,4 +1,5 @@
 anyconfig~=0.10.0
+attrs~=21.3
 cachetools~=4.1
 click<9.0
 cookiecutter~=1.7.0

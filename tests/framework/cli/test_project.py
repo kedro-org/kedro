@@ -278,8 +278,8 @@ class TestIpythonCommand:
 
         assert result.exit_code
         error = (
-            "Module `IPython` not found. Make sure to install required project "
-            "dependencies by running the `pip install -r src/requirements.txt` command first."
+            "Module 'IPython' not found. Make sure to install required project "
+            "dependencies by running the 'pip install -r src/requirements.txt' command first."
         )
         assert error in result.output
 
@@ -476,4 +476,4 @@ class TestBuildReqsCommand:
         result = CliRunner().invoke(fake_project_cli, ["build-reqs"], obj=fake_metadata)
         assert result.exit_code  # Error expected
         assert isinstance(result.exception, FileNotFoundError)
-        assert f"File `{requirements_txt}` not found" in str(result.exception)
+        assert f"File '{requirements_txt}' not found" in str(result.exception)

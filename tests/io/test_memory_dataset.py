@@ -149,7 +149,7 @@ class TestMemoryDataSet:
     def test_saving_none(self):
         """Check the error when attempting to save the data set without
         providing the data"""
-        pattern = r"Saving `None` to a `DataSet` is not allowed"
+        pattern = r"Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             MemoryDataSet().save(None)
 

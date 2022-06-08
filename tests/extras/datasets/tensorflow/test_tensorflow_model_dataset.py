@@ -310,7 +310,7 @@ class TestTensorFlowModelDatasetVersioned:
         corresponding file for a given save version already exists."""
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         pattern = (
-            r"Save path \`.+\` for TensorFlowModelDataset\(.+\) must "
+            r"Save path \'.+\' for TensorFlowModelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -331,7 +331,7 @@ class TestTensorFlowModelDatasetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version `{load_version}` "
+            rf"Save version '{save_version}' did not match load version '{load_version}' "
             rf"for TensorFlowModelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):

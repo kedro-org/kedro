@@ -125,7 +125,7 @@ class PickleDataSet(AbstractDataSet):
         ):
             raise ValueError(
                 f"Selected backend '{backend}' should satisfy the pickle interface. "
-                "Missing one of `loads` and `dumps` on the backend."
+                "Missing one of 'loads' and 'dumps' on the backend."
             )
 
         self._backend = backend

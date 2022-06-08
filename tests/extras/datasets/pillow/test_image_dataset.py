@@ -178,7 +178,7 @@ class TestImageDataSetVersioned:
         corresponding image file for a given save version already exists."""
         versioned_image_dataset.save(image_object)
         pattern = (
-            r"Save path \`.+\` for ImageDataSet\(.+\) must "
+            r"Save path \'.+\' for ImageDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -196,8 +196,8 @@ class TestImageDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for ImageDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for ImageDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_image_dataset.save(image_object)

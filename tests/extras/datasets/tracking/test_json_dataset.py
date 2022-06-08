@@ -62,7 +62,7 @@ class TestJSONDataSet:
 
     def test_load_fail(self, json_dataset, dummy_data):
         json_dataset.save(dummy_data)
-        pattern = r"Loading not supported for `JSONDataSet`"
+        pattern = r"Loading not supported for 'JSONDataSet'"
         with pytest.raises(DataSetError, match=pattern):
             json_dataset.load()
 
@@ -147,7 +147,7 @@ class TestJSONDataSet:
         corresponding json file for a given save version already exists."""
         explicit_versioned_json_dataset.save(dummy_data)
         pattern = (
-            r"Save path \`.+\` for JSONDataSet\(.+\) must "
+            r"Save path \'.+\' for JSONDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -169,8 +169,8 @@ class TestJSONDataSet:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            f"Save version `{save_version}` did not match "
-            f"load version `{load_version}` for "
+            f"Save version '{save_version}' did not match "
+            f"load version '{load_version}' for "
             r"JSONDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):

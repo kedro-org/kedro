@@ -129,7 +129,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         """
         if nodes is None:
             raise ValueError(
-                "`nodes` argument of `Pipeline` is None. It must be an "
+                "'nodes' argument of 'Pipeline' is None. It must be an "
                 "iterable of nodes and/or pipelines instead."
             )
         nodes = list(nodes)  # in case it's a generator
@@ -407,7 +407,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         ]
         if not nodes:
             raise ValueError(
-                f"Pipeline does not contain nodes with namespace `{node_namespace}`"
+                f"Pipeline does not contain nodes with namespace '{node_namespace}'"
             )
         return Pipeline(nodes)
 
@@ -818,7 +818,7 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Union[Node, Pipeline]]):
         raise ValueError(
             f"Pipeline nodes must have unique names. The following node names "
             f"appear more than once:\n\n{duplicates_info}\nYou can name your "
-            f"nodes using the last argument of `node()`."
+            f"nodes using the last argument of 'node()'."
         )
 
 

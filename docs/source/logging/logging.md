@@ -50,6 +50,20 @@ To use plain rather than rich logging, swap the `rich` handler for the `console`
 +  handlers: [console, info_file_handler, error_file_handler]
 ```
 
+### Rich logging in a dumb terminal
+
+Rich [detects whether your terminal is capable](https://rich.readthedocs.io/en/stable/console.html#terminal-detection) of displaying richly formatted messages. If your terminal is "dumb" then formatting is automatically stripped out so that the logs are just plain text. This is likely to happen if you perform `kedro run` on CI (e.g. GitHub Actions or CircleCI).
+
+If you find that the default wrapping of the log messages is too narrow but do not wish to switch to using the `console` logger on CI then the simplest way to control the log message wrapping is through altering the `COLUMNS` and `LINES` environment variables. For example:
+
+```bash
+export COLUMNS=120 LINES=25
+```
+
+```{note}
+You must provide a value for both `COLUMNS` and `LINES` even if you only wish to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINE=25`.
+```
+
 ## Perform logging in your project
 
 To perform logging in your own code (e.g. in a node), you are advised to do as follows:

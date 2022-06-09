@@ -35,6 +35,7 @@ handlers:
 
   rich:
     class: rich.logging.RichHandler
+    rich_tracebacks: True
 
 loggers:
   kedro:

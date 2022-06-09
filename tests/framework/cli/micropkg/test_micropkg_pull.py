@@ -813,7 +813,7 @@ class TestMicropkgPullFromManifest:
 
         assert result.exit_code == 0
         expected_message = (
-            "Nothing to pull. Please update the `pyproject.toml` package "
+            "Nothing to pull. Please update the 'pyproject.toml' package "
             "manifest section."
         )
         assert expected_message in result.output
@@ -838,6 +838,6 @@ class TestMicropkgPullFromManifest:
         assert result.exit_code
         expected_message = (
             "Please specify a package path or add '--all' to pull all micro-packages in the"
-            " `pyproject.toml` package manifest section."
+            " 'pyproject.toml' package manifest section."
         )
         assert expected_message in result.output

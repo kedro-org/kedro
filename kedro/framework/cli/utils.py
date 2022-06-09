@@ -214,7 +214,7 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     """
     reqs_path = Path(reqs_path).absolute()
     if not reqs_path.is_file():
-        raise KedroCliError(f"Given path `{reqs_path}` is not a regular file.")
+        raise KedroCliError(f"Given path '{reqs_path}' is not a regular file.")
 
     pattern = re.compile(package_name + r"([^\w]|$)")
     with reqs_path.open("r", encoding="utf-8") as reqs_file:
@@ -223,7 +223,7 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
             if pattern.search(req_line):
                 return req_line
 
-    raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
+    raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
 def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
@@ -314,8 +314,8 @@ def _check_module_importable(module_name: str) -> None:
         import_module(module_name)
     except ImportError as exc:
         raise KedroCliError(
-            f"Module `{module_name}` not found. Make sure to install required project "
-            f"dependencies by running the `pip install -r src/requirements.txt` command first."
+            f"Module '{module_name}' not found. Make sure to install required project "
+            f"dependencies by running the 'pip install -r src/requirements.txt' command first."
         ) from exc
 
 
@@ -379,8 +379,8 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:
             raise KedroCliError(
-                f"Expected the form of `load_version` to be "
-                f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                f"Expected the form of 'load_version' to be "
+                f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
                 f"found {load_version} instead"
             )
         load_versions_dict[load_version_list[0]] = load_version_list[1]

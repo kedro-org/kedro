@@ -34,7 +34,7 @@ class MetricsDataSet(JSONDataSet):
     versioned = True
 
     def _load(self) -> Dict:
-        raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
+        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(self, data: Dict[str, float]) -> None:
         """Converts all values in the data from a ``MetricsDataSet`` to float to make sure

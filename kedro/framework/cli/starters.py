@@ -410,7 +410,7 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running ``pip install -r src/requirements.txt`` to install "
+        "a virtual environment before running 'pip install -r src/requirements.txt' to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )
@@ -540,7 +540,7 @@ class _Prompt:
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
         if self.regexp and not re.match(self.regexp, user_input):
-            click.secho(f"`{user_input}` is an invalid value.", fg="red", err=True)
+            click.secho(f"'{user_input}' is an invalid value.", fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
             raise ValueError(user_input)
 
@@ -585,6 +585,6 @@ def _validate_config_file(config: Dict[str, str], prompts: Dict[str, Any]):
 
     if "output_dir" in config and not Path(config["output_dir"]).exists():
         raise KedroCliError(
-            f"`{config['output_dir']}` is not a valid output directory. "
+            f"'{config['output_dir']}' is not a valid output directory. "
             "It must be a relative or absolute path to an existing directory."
         )

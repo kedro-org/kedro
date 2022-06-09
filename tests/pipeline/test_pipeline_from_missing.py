@@ -150,7 +150,7 @@ class TestPipelineMissing:
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "`exists()` not implemented for `LambdaDataSet`" in log_record.getMessage()
+            "'exists()' not implemented for 'LambdaDataSet'" in log_record.getMessage()
         )
 
     def test_all_no_exists_method(self, branched_pipeline, caplog, hook_manager):
@@ -160,7 +160,7 @@ class TestPipelineMissing:
 
         log_msgs = [record.getMessage() for record in caplog.records]
         expected_msg = (
-            "`exists()` not implemented for `LambdaDataSet`. "
+            "'exists()' not implemented for 'LambdaDataSet'. "
             "Assuming output does not exist."
         )
         assert expected_msg in log_msgs

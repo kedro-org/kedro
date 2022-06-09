@@ -156,7 +156,7 @@ class TestInvalidParallelRunner:
     def test_node_returning_none(self, is_async):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        pattern = "Saving `None` to a `DataSet` is not allowed"
+        pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 

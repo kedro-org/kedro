@@ -50,7 +50,7 @@ def _assert_pkg_name_ok(pkg_name: str):
         KedroCliError: If package name violates the requirements.
     """
 
-    base_message = f"`{pkg_name}` is not a valid Python package name."
+    base_message = f"'{pkg_name}' is not a valid Python package name."
     if not re.match(r"^[a-zA-Z_]", pkg_name):
         message = base_message + " It must start with a letter or underscore."
         raise KedroCliError(message)
@@ -101,18 +101,18 @@ def create_pipeline(
     env = env or "base"
     if not skip_config and not (project_conf_path / env).exists():
         raise KedroCliError(
-            f"Unable to locate environment `{env}`. "
+            f"Unable to locate environment '{env}'. "
             f"Make sure it exists in the project configuration."
         )
 
     result_path = _create_pipeline(name, package_dir / "pipelines")
     _copy_pipeline_tests(name, result_path, package_dir)
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
-    click.secho(f"\nPipeline `{name}` was successfully created.\n", fg="green")
+    click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
 
     click.secho(
-        f"To be able to run the pipeline `{name}`, you will need to add it "
-        f"to `register_pipelines()` in `{package_dir / 'pipeline_registry.py'}`.",
+        f"To be able to run the pipeline '{name}', you will need to add it "
+        f"""to 'register_pipelines()' in '{package_dir / "pipeline_registry.py"}'.""",
         fg="yellow",
     )
 
@@ -120,7 +120,7 @@ def create_pipeline(
 @command_with_verbosity(pipeline, "delete")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @env_option(
-    help="Environment to delete pipeline configuration from. Defaults to `base`."
+    help="Environment to delete pipeline configuration from. Defaults to 'base'."
 )
 @click.option(
     "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
@@ -137,7 +137,7 @@ def delete_pipeline(
     env = env or "base"
     if not (project_conf_path / env).exists():
         raise KedroCliError(
-            f"Unable to locate environment `{env}`. "
+            f"Unable to locate environment '{env}'. "
             f"Make sure it exists in the project configuration."
         )
 
@@ -155,7 +155,7 @@ def delete_pipeline(
     ]
 
     if not files_to_delete and not dirs_to_delete:
-        raise KedroCliError(f"Pipeline `{name}` not found.")
+        raise KedroCliError(f"Pipeline '{name}' not found.")
 
     if not yes:
         _echo_deletion_warning(
@@ -164,17 +164,17 @@ def delete_pipeline(
             files=files_to_delete,
         )
         click.echo()
-        yes = click.confirm(f"Are you sure you want to delete pipeline `{name}`?")
+        yes = click.confirm(f"Are you sure you want to delete pipeline '{name}'?")
         click.echo()
 
     if not yes:
         raise KedroCliError("Deletion aborted!")
 
     _delete_artifacts(*files_to_delete, *dirs_to_delete)
-    click.secho(f"\nPipeline `{name}` was successfully deleted.", fg="green")
+    click.secho(f"\nPipeline '{name}' was successfully deleted.", fg="green")
     click.secho(
-        f"\nIf you added the pipeline `{name}` to `register_pipelines()` in "
-        f"`{package_dir / 'pipeline_registry.py'}`, you will need to remove it.",
+        f"\nIf you added the pipeline '{name}' to 'register_pipelines()' in"
+        f""" '{package_dir / "pipeline_registry.py"}', you will need to remove it.""",
         fg="yellow",
     )
 
@@ -199,7 +199,7 @@ def _create_pipeline(name: str, output_dir: Path) -> Path:
     template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
 
-    click.echo(f"Creating the pipeline `{name}`: ", nl=False)
+    click.echo(f"Creating the pipeline '{name}': ", nl=False)
 
     try:
         result_path = cookiecutter(
@@ -215,7 +215,7 @@ def _create_pipeline(name: str, output_dir: Path) -> Path:
 
     click.secho("OK", fg="green")
     result_path = Path(result_path)
-    message = indent(f"Location: `{result_path.resolve()}`", " " * 2)
+    message = indent(f"Location: '{result_path.resolve()}'", " " * 2)
     click.secho(message, bold=True)
 
     _clean_pycache(result_path)
@@ -254,7 +254,7 @@ def _sync_dirs(source: Path, target: Path, prefix: str = "", overwrite: bool = F
     for source_path in content:
         source_name = source_path.name
         target_path = target / source_name
-        click.echo(indent(f"Creating `{target_path}`: ", prefix), nl=False)
+        click.echo(indent(f"Creating '{target_path}': ", prefix), nl=False)
 
         if (  # rule #1
             not overwrite
@@ -323,7 +323,7 @@ def _copy_pipeline_configs(
 
 def _delete_artifacts(*artifacts: Path):
     for artifact in artifacts:
-        click.echo(f"Deleting `{artifact}`: ", nl=False)
+        click.echo(f"Deleting '{artifact}': ", nl=False)
         try:
             if artifact.is_dir():
                 shutil.rmtree(artifact)

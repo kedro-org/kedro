@@ -356,7 +356,7 @@ class TestPipelineHelper:
             ]
         )
 
-        pattern = r"Parameters should be specified in the `parameters` argument"
+        pattern = r"Parameters should be specified in the 'parameters' argument"
         with pytest.raises(ModularPipelineError, match=pattern):
             pipeline(raw_pipeline, inputs={"params:alpha": "params:beta"})
 

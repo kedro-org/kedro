@@ -192,7 +192,7 @@ class TestSparkHiveDataSet:
     def test_upsert_config_err(self):
         # no pk provided should prompt config error
         with pytest.raises(
-            DataSetError, match="`table_pk` must be set to utilise `upsert` read mode"
+            DataSetError, match="'table_pk' must be set to utilise 'upsert' read mode"
         ):
             SparkHiveDataSet(database="default_1", table="table_1", write_mode="upsert")
 
@@ -248,8 +248,8 @@ class TestSparkHiveDataSet:
 
     def test_invalid_write_mode_provided(self):
         pattern = (
-            "Invalid `write_mode` provided: not_a_write_mode. "
-            "`write_mode` must be one of: "
+            "Invalid 'write_mode' provided: not_a_write_mode. "
+            "'write_mode' must be one of: "
             "append, error, errorifexists, upsert, overwrite"
         )
         with pytest.raises(DataSetError, match=re.escape(pattern)):

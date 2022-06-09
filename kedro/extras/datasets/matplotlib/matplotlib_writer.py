@@ -138,9 +138,9 @@ class MatplotlibWriter(AbstractVersionedDataSet):
 
         if overwrite and version is not None:
             warn(
-                "Setting `overwrite=True` is ineffective if versioning "
+                "Setting 'overwrite=True' is ineffective if versioning "
                 "is enabled, since the versioned path must not already "
-                "exist; overriding flag with `overwrite=False` instead."
+                "exist; overriding flag with 'overwrite=False' instead."
             )
             overwrite = False
         self._overwrite = overwrite
@@ -154,7 +154,7 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         )
 
     def _load(self) -> None:
-        raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
+        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(
         self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]

@@ -241,14 +241,14 @@ class TestIncrementalDataSetLocal:
         [
             (
                 {"versioned": True},
-                "`IncrementalDataSet` does not support versioning "
-                "of the checkpoint. Please remove `versioned` key from the "
+                "'IncrementalDataSet' does not support versioning "
+                "of the checkpoint. Please remove 'versioned' key from the "
                 "checkpoint definition.",
             ),
             (
                 {"version": None},
-                "`IncrementalDataSet` does not support versioning "
-                "of the checkpoint. Please remove `version` key from the "
+                "'IncrementalDataSet' does not support versioning "
+                "of the checkpoint. Please remove 'version' key from the "
                 "checkpoint definition.",
             ),
         ],

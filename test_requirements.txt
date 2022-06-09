@@ -52,11 +52,4 @@ tables~=3.6.0; platform_system == "Windows" and python_version<'3.9'
 tables~=3.6; platform_system != "Windows"
 tensorflow~=2.0
 trufflehog~=2.1
-types-cachetools
-types-filelock
-types-PyYAML
-types-redis
-types-requests
-types-setuptools
-types-toml
 xlsxwriter~=1.0

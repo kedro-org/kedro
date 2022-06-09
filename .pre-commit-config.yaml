@@ -39,6 +39,14 @@ repos:
                   ^docs/|
                   ^features/steps/test_starter/
                 )
+            additional_dependencies:
+            - types-cachetools
+            - types-filelock
+            - types-PyYAML
+            - types-redis
+            - types-requests
+            - types-setuptools
+            - types-toml
 
     - repo: https://github.com/asottile/blacken-docs
       rev: v1.9.2

@@ -10,7 +10,6 @@ import stat
 import tempfile
 from collections import OrderedDict
 from itertools import groupby
-from operator import itemgetter
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from warnings import warn
@@ -48,17 +47,21 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 @define(order=True)
 class KedroStarterSpec:
     """Specification of custom kedro starter template.
-    name: name of the starter (name of the directory)
-    template_path: the path to git repository
-    directory: by default it will look for `name`, optionally override with custom directory.
-    origin: preserved field used by kedro internally to determine where does the starter come from, user do not need to provide this field.
 
-    For example:
-    KedroStarterSpec(
-        name="astro-airflow-iris",
-        template_path="git+https://github.com/kedro-org/kedro-starters.git",
-        directory=None,
-    )
+    Args:
+        name: name of the starter (name of the directory)
+        template_path: the path to git repository
+        directory: by default it will look for `name`, optionally override with custom directory.
+        origin: preserved field used by kedro internally to determine where does the starter
+        come from, user do not need to provide this field.
+
+    Example:
+    ::
+        >>> spec = KedroStarterSpec(
+                        name="astro-airflow-iris",
+                        template_path="git+https://github.com/kedro-org/kedro-starters.git",
+                        directory=None
+                                   )
     """
 
     name: str
@@ -70,8 +73,36 @@ class KedroStarterSpec:
         if not self.directory:
             self.directory = self.name  # By default they are the same unless specified.
 
+    def format(self) -> Dict:
+        """Format a `KedroStarterSpec` to a nicely structured dictionary for printing.
 
-_OFFICIAL_STARTERS_CONFIG = [
+        Returns:
+            Dict: A formtted dictionary
+
+        Examples:
+        ::
+            >>> spec = KedroStarterSpec("astro-airflow-iris",
+                                    "git+https://github.com/kedro-org/kedro-starters.git")
+            >>> spec.format()
+                {
+                    "astro-airflow-iris": {
+                        "name": "astro-airflow-iris",
+                        "template_path": "git+https://github.com/kedro-org/kedro-starters.git",
+                                          }
+                }
+        """
+
+        fields = (
+            "name",
+            "template_path",
+        )
+        format_dict = {
+            self.name: asdict(self, filter=lambda key, value: key.name in fields)
+        }
+        return format_dict
+
+
+_OFFICIAL_STARTERS_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO),
     # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external)
     # documentation and tutorials still refer to `astro-iris`. We create an alias to
@@ -84,8 +115,8 @@ _OFFICIAL_STARTERS_CONFIG = [
     KedroStarterSpec("spaceflights", _STARTERS_REPO),
 ]
 # Set the origin for official starters
-for starter in _OFFICIAL_STARTERS_CONFIG:
-    starter.origin = "kedro"
+for spec in _OFFICIAL_STARTERS_SPECS:
+    spec.origin = "kedro"
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,
@@ -123,7 +154,7 @@ def _is_valid_starter_entrypoint_config(
     return True
 
 
-def _get_starters_aliases() -> List[Dict[str, str]]:
+def _get_starters_aliases() -> List[KedroStarterSpec]:
     """This functions lists all the starters aliases declared in
     the core repo and in plugins entry points.
     The output looks like:
@@ -143,7 +174,7 @@ def _get_starters_aliases() -> List[Dict[str, str]]:
     ]
     """
     # add an extra key to indicate from where the plugin come from
-    starters_aliases = _OFFICIAL_STARTERS_CONFIG
+    starters_aliases = _OFFICIAL_STARTERS_SPECS
 
     existing_names: Dict[str, str] = {}  # dict {name: module_name}
     for starter_entry_point in importlib_metadata.entry_points().select(
@@ -214,11 +245,11 @@ def new(
             raise KedroCliError(
                 "Cannot use the --directory flag with a --starter alias."
             )
-        starter = starters_aliases_by_name[starter_name]
-        template_path = starter.template_path
+        starter_spec = starters_aliases_by_name[starter_name]
+        template_path = starter_spec.template_path
         # "directory" is an optional key for starters from plugins, so if the key is
         # not present we will use "None".
-        directory = starter.directory
+        directory = starter_spec.directory
         checkout = checkout or version
     elif starter_name is not None:
         template_path = starter_name
@@ -275,10 +306,10 @@ def list_starters():
     )
 
     for starters_list in [official_starters, unofficial_starters]:
-        for i, starter in enumerate(starters_list):
+        for i, starter_spec in enumerate(starters_list):
             if i == 0:
-                click.secho(f"\nStarters from {starter.origin}\n", fg="yellow")
-            click.echo(yaml.dump({starter.name: asdict(starter)}, sort_keys=False))
+                click.secho(f"\nStarters from {starter_spec.origin}\n", fg="yellow")
+            click.echo(yaml.safe_dump(starter_spec.format(), sort_keys=False))
 
 
 def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
@@ -413,12 +444,12 @@ def _get_cookiecutter_dir(
                 f" Specified tag {checkout}. The following tags are available: "
                 + ", ".join(_get_available_tags(template_path))
             )
-        official_starters = sorted(_OFFICIAL_STARTERS_CONFIG)
-        print("*****")
-        print(official_starters)
+        official_starters = sorted(_OFFICIAL_STARTERS_SPECS)
         raise KedroCliError(
             f"{error_message}. The aliases for the official Kedro starters are: \n"
-            f"{yaml.safe_dump([asdict(starter) for starter in official_starters], sort_keys=False)}"
+            f"""{yaml.safe_dump(
+                [starter.format() for starter in official_starters],
+                sort_keys=False)}"""
         ) from exc
 
     return Path(cookiecutter_dir)

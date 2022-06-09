@@ -464,7 +464,7 @@ def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
     info_log = context.root_project_dir / "logs" / "info.log"
     stdout = context.result.stdout
-    assert node in stdout, (
+    assert expected_log_line in stdout, (
         "Expected the following message segment to be printed on stdout: "
         f"{expected_log_line},\nbut got {stdout}"
     )

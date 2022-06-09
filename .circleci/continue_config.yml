@@ -193,6 +193,9 @@ jobs:
     executor:
       name: docker
       python_version: <<parameters.python_version>>
+    environment:
+      COLUMNS: 120
+      LINES: 25
     steps:
       - setup
       - run:
@@ -206,6 +209,8 @@ jobs:
     executor: win/default
     environment:
       PIP_DISABLE_PIP_VERSION_CHECK: 1
+      COLUMNS: 120
+      LINES: 25
     steps:
       - checkout
       - win_setup_conda:

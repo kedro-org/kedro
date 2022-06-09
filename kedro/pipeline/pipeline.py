@@ -870,7 +870,7 @@ def _validate_transcoded_inputs_outputs(nodes: List[Node]) -> None:
         )
 
 
-def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
+def _topologically_sorted(node_dependencies) -> List[List[Node]]:
     """Topologically group and sort (order) nodes such that no node depends on
     a node that appears in the same or a later group.
 
@@ -894,7 +894,11 @@ def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
         return f"Circular dependencies exist among these items: {circular}"
 
     try:
-        return list(toposort(node_dependencies))
+        result = []
+        for dependencies in toposort(node_dependencies):
+            # Make sure it is sorted to have consistent execution order when run with SequentialRunner
+            result.append(sorted(dependencies))
+        return result
     except ToposortCircleError as exc:
         message = _circle_error_message(exc.data)
         raise CircularDependencyError(message) from exc

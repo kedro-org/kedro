@@ -12,7 +12,7 @@ Feature: New Kedro project
     Then the expected project directories and files should be created
     And the pipeline should contain nodes
 
-  Scenario: Plugins are installed and Create a new kedro project with custom plugin starter
+  Scenario: Plugins are installed and create a new kedro project with custom plugin starter
     Given I have installed the test plugin
     When I run a non-interactive kedro new with custom plugin starter
     Then the expected project directories and files should be created

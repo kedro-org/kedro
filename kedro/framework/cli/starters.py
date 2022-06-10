@@ -52,8 +52,8 @@ class KedroStarterSpec:
         name: name of the starter (name of the directory)
         template_path: the path to git repository
         directory: by default it will look for `name`, optionally override with custom directory.
-        origin: preserved field used by kedro internally to determine where does the starter
-        come from, user do not need to provide this field.
+        origin: preserved field used by kedro internally to determine where the starter
+        comes from, users do not need to provide this field.
 
     Example:
     ::

@@ -67,7 +67,7 @@ class KedroStarterSpec:
     name: str
     template_path: str
     directory: Optional[str] = None
-    origin: Optional[str] = field(init=False, default=None)
+    origin: Optional[str] = field(init=False, default="kedro")
 
     def __attrs_post_init__(self):
         if not self.directory:
@@ -77,7 +77,7 @@ class KedroStarterSpec:
         """Format a `KedroStarterSpec` to a nicely structured dictionary for printing.
 
         Returns:
-            Dict: A formtted dictionary
+            Dict: A formatted dictionary
 
         Examples:
         ::

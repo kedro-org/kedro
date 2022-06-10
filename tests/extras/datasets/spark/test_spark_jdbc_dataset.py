@@ -37,8 +37,8 @@ def spark_jdbc_args_save_load(spark_jdbc_args):
 
 def test_missing_url():
     error_message = (
-        "`url` argument cannot be empty. Please provide a JDBC"
-        " URL of the form ``jdbc:subprotocol:subname``."
+        "'url' argument cannot be empty. Please provide a JDBC"
+        " URL of the form 'jdbc:subprotocol:subname'."
     )
     with pytest.raises(DataSetError, match=error_message):
         SparkJDBCDataSet(url=None, table="dummy_table")
@@ -46,7 +46,7 @@ def test_missing_url():
 
 def test_missing_table():
     error_message = (
-        "`table` argument cannot be empty. Please provide"
+        "'table' argument cannot be empty. Please provide"
         " the name of the table to load or save data to."
     )
     with pytest.raises(DataSetError, match=error_message):
@@ -82,7 +82,7 @@ def test_save_args(spark_jdbc_args_save_load):
 
 
 def test_except_bad_credentials(spark_jdbc_args_credentials_with_none_password):
-    pattern = r"Credential property `password` cannot be None(.+)"
+    pattern = r"Credential property 'password' cannot be None(.+)"
     with pytest.raises(DataSetError, match=pattern):
         mock_save(spark_jdbc_args_credentials_with_none_password)
 

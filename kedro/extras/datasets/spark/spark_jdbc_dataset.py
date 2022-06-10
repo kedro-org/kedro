@@ -101,14 +101,14 @@ class SparkJDBCDataSet(AbstractDataSet):
 
         if not url:
             raise DataSetError(
-                "`url` argument cannot be empty. Please "
+                "'url' argument cannot be empty. Please "
                 "provide a JDBC URL of the form "
-                "``jdbc:subprotocol:subname``."
+                "'jdbc:subprotocol:subname'."
             )
 
         if not table:
             raise DataSetError(
-                "`table` argument cannot be empty. Please "
+                "'table' argument cannot be empty. Please "
                 "provide the name of the table to load or save "
                 "data to."
             )
@@ -131,7 +131,7 @@ class SparkJDBCDataSet(AbstractDataSet):
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:
                     raise DataSetError(
-                        f"Credential property `{cred_key}` cannot be None. "
+                        f"Credential property '{cred_key}' cannot be None. "
                         f"Please provide a value."
                     )
 

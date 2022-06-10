@@ -107,7 +107,7 @@ class HoloviewsWriter(AbstractVersionedDataSet):
         )
 
     def _load(self) -> str:
-        raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
+        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(self, data: HoloViews) -> None:
         bytes_buffer = io.BytesIO()

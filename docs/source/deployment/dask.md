@@ -128,8 +128,8 @@ class DaskRunner(AbstractRunner):
         depends on. When ``dependencies`` are futures, Dask ensures that
         the upstream node futures are completed before running ``node``.
 
-        A `PluginManager` instance is created on each worker because the
-        `PluginManager` can't be serialised.
+        A ``PluginManager`` instance is created on each worker because the
+        ``PluginManager`` can't be serialised.
 
         Args:
             node: The ``Node`` to run.

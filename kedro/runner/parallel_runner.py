@@ -101,8 +101,8 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
-    A `PluginManager` instance is created in each subprocess because the
-    `PluginManager` can't be serialised.
+    A ``PluginManager`` instance is created in each subprocess because the
+    ``PluginManager`` can't be serialised.
 
     Args:
         node: The ``Node`` to run.

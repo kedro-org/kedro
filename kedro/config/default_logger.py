@@ -5,9 +5,8 @@ for setting up the logging
 import logging.config
 import os
 
-import yaml
 import click
-
+import yaml
 from rich.traceback import install
 
 CURRENT_DIR = os.path.dirname(__file__)

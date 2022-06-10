@@ -38,7 +38,7 @@ def dummy_object():
 
 @pytest.fixture
 def serialised_dummy_object(backend, dummy_object, save_args):
-    """Serialize test data."""
+    """Serialise test data."""
     imported_backend = importlib.import_module(backend)
     save_args = save_args or {}
     return imported_backend.dumps(dummy_object, **save_args)

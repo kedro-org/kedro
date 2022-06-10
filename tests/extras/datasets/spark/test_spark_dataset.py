@@ -282,7 +282,7 @@ class TestSparkDataSet:
 
         pattern = (
             f"Contents of 'schema.filepath' ({schemapath}) are invalid. Please"
-            f"provide a valid JSON serialised 'pyspark.sql.types.StructType'."
+            f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
         )
 
         with pytest.raises(DataSetError, match=re.escape(pattern)):
@@ -297,7 +297,7 @@ class TestSparkDataSet:
 
         pattern = (
             "Schema load argument does not specify a 'filepath' attribute. Please"
-            "include a path to a JSON serialised 'pyspark.sql.types.StructType'."
+            "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
         )
 
         with pytest.raises(DataSetError, match=pattern):

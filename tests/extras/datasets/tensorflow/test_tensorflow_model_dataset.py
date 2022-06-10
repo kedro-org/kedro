@@ -87,7 +87,7 @@ def dummy_tf_base_model(dummy_x_train, dummy_y_train, tf):
     model = tf.keras.Model(inputs=inputs, outputs=outputs, name="1_layer_dummy")
     model.compile("rmsprop", "mse")
     model.fit(dummy_x_train, dummy_y_train, batch_size=64, epochs=1)
-    # from https://www.tensorflow.org/guide/keras/save_and_serialise
+    # from https://www.tensorflow.org/guide/keras/save_and_serialize
     # Reset metrics before saving so that loaded model has same state,
     # since metric states are not preserved by Model.save_weights
     model.reset_metrics()

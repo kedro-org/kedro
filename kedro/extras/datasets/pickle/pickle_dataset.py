@@ -158,7 +158,7 @@ class PickleDataSet(AbstractVersionedDataSet):
         ):
             raise ValueError(
                 f"Selected backend '{backend}' should satisfy the pickle interface. "
-                "Missing one of `load` and `dump` on the backend."
+                "Missing one of 'load' and 'dump' on the backend."
             )
 
         _fs_args = deepcopy(fs_args) or {}

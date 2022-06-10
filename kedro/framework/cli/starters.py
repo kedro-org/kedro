@@ -102,7 +102,7 @@ class KedroStarterSpec:
         return format_dict
 
 
-_OFFICIAL_STARTERS_SPECS = [
+_OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO),
     # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external)
     # documentation and tutorials still refer to `astro-iris`. We create an alias to
@@ -143,10 +143,10 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
 
 
 def _is_valid_starter_entrypoint_config(
-    module_name: str, config: KedroStarterSpec
+    module_name: str, spec: KedroStarterSpec
 ) -> bool:
     if not isinstance(config, KedroStarterSpec):
-        warn(
+        click.echo(
             f"The starter configuration loaded from module {module_name}"
             f"should be a 'KedroStarterSpec', got '{type(config)}' instead"
         )
@@ -155,7 +155,7 @@ def _is_valid_starter_entrypoint_config(
 
 
 def _get_starters_aliases() -> List[KedroStarterSpec]:
-    """This functions lists all the starters aliases declared in
+    """This functions lists all the starter aliases declared in
     the core repo and in plugins entry points.
     The output looks like:
     [
@@ -173,7 +173,6 @@ def _get_starters_aliases() -> List[KedroStarterSpec]:
         ),
     ]
     """
-    # add an extra key to indicate from where the plugin come from
     starters_aliases = _OFFICIAL_STARTERS_SPECS
 
     existing_names: Dict[str, str] = {}  # dict {name: module_name}

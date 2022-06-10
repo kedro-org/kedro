@@ -100,8 +100,9 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     conf_logging: Optional[Dict[str, Any]] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
-    A `PluginManager` `hook_manager` instance is created in every subprocess because
-    the `PluginManager` can't be serialised.
+
+    A `PluginManager` instance is created in each subprocess because the
+    `PluginManager` can't be serialised.
 
     Args:
         node: The ``Node`` to run.
@@ -274,6 +275,7 @@ class ParallelRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         Raises:

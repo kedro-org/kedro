@@ -165,7 +165,11 @@ class AWSBatchRunner(ThreadRunner):
         return super()._get_required_workers_count(pipeline)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, session_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         nodes = pipeline.nodes
         node_dependencies = pipeline.node_dependencies

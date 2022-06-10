@@ -38,10 +38,17 @@ from itertools import chain
 from typing import Any, Dict
 
 from distributed import Client, as_completed, worker_client
+from kedro.framework.hooks.manager import (
+    _create_hook_manager,
+    _register_hooks,
+    _register_hooks_setuptools,
+)
+from kedro.framework.project import settings
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import AbstractRunner, run_node
+from pluggy import PluginManager
 
 
 class _DaskDataSet(AbstractDataSet):
@@ -121,6 +128,9 @@ class DaskRunner(AbstractRunner):
         depends on. When ``dependencies`` are futures, Dask ensures that
         the upstream node futures are completed before running ``node``.
 
+        A `PluginManager` instance is created on each worker because the
+        `PluginManager` can't be serialised.
+
         Args:
             node: The ``Node`` to run.
             catalog: A ``DataCatalog`` containing the node's inputs and outputs.
@@ -133,10 +143,18 @@ class DaskRunner(AbstractRunner):
         Returns:
             The node argument.
         """
-        return run_node(node, catalog, is_async, session_id)
+        hook_manager = _create_hook_manager()
+        _register_hooks(hook_manager, settings.HOOKS)
+        _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+        return run_node(node, catalog, hook_manager, is_async, session_id)
 
     def _run(
-        self, pipeline: Pipeline, catalog: DataCatalog, session_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         nodes = pipeline.nodes
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))

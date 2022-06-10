@@ -115,7 +115,7 @@ _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("spaceflights", _STARTERS_REPO),
 ]
 # Set the origin for official starters
-for spec in _OFFICIAL_STARTERS_SPECS:
+for spec in _OFFICIAL_STARTER_SPECS:
     spec.origin = "kedro"
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
@@ -173,7 +173,7 @@ def _get_starters_aliases() -> List[KedroStarterSpec]:
         ),
     ]
     """
-    starters_aliases = _OFFICIAL_STARTERS_SPECS
+    starter_specs = _OFFICIAL_STARTER_SPECS
 
     existing_names: Dict[str, str] = {}  # dict {name: module_name}
     for starter_entry_point in importlib_metadata.entry_points().select(
@@ -199,9 +199,9 @@ def _get_starters_aliases() -> List[KedroStarterSpec]:
                 )
             else:
                 starter_config.origin = module_name
-                starters_aliases.append(starter_config)
+                starter_specs.append(starter_config)
                 existing_names[starter_config.name] = module_name
-    return starters_aliases
+    return starter_specs
 
 
 # pylint: disable=missing-function-docstring
@@ -443,7 +443,7 @@ def _get_cookiecutter_dir(
                 f" Specified tag {checkout}. The following tags are available: "
                 + ", ".join(_get_available_tags(template_path))
             )
-        official_starters = sorted(_OFFICIAL_STARTERS_SPECS)
+        official_starters = sorted(_OFFICIAL_STARTER_SPECS)
         raise KedroCliError(
             f"{error_message}. The aliases for the official Kedro starters are: \n"
             f"""{yaml.safe_dump(

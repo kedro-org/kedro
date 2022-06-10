@@ -37,7 +37,7 @@ def dummy_object():
 
 
 @pytest.fixture
-def serialized_dummy_object(backend, dummy_object, save_args):
+def serialised_dummy_object(backend, dummy_object, save_args):
     """Serialize test data."""
     imported_backend = importlib.import_module(backend)
     save_args = save_args or {}
@@ -73,20 +73,20 @@ class TestPickleDataSet:
         pickle_data_set,
         mocker,
         dummy_object,
-        serialized_dummy_object,
+        serialised_dummy_object,
         key,
     ):
         """Test saving and reloading the data set."""
         set_mocker = mocker.patch("redis.StrictRedis.set")
         get_mocker = mocker.patch(
-            "redis.StrictRedis.get", return_value=serialized_dummy_object
+            "redis.StrictRedis.get", return_value=serialised_dummy_object
         )
         pickle_data_set.save(dummy_object)
         mocker.patch("redis.StrictRedis.exists", return_value=True)
         loaded_dummy_object = pickle_data_set.load()
         set_mocker.assert_called_once_with(
             key,
-            serialized_dummy_object,
+            serialised_dummy_object,
         )
         get_mocker.assert_called_once_with(key)
         assert_frame_equal(loaded_dummy_object, dummy_object)
@@ -133,9 +133,9 @@ class TestPickleDataSet:
         with pytest.raises(DataSetError, match=pattern):
             pickle_data_set.load()
 
-    def test_unserializable_data(self, pickle_data_set, dummy_object, mocker):
+    def test_unserialisable_data(self, pickle_data_set, dummy_object, mocker):
         mocker.patch("pickle.dumps", side_effect=pickle.PickleError)
-        pattern = r".+ was not serialized due to:.*"
+        pattern = r".+ was not serialised due to:.*"
 
         with pytest.raises(DataSetError, match=pattern):
             pickle_data_set.save(dummy_object)

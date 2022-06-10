@@ -47,7 +47,7 @@ class _SharedMemoryDataSet:
         self.shared_memory_dataset = manager.MemoryDataSet()  # type: ignore
 
     def __getattr__(self, name):
-        # This if condition prevents recursive call when deserializing
+        # This if condition prevents recursive call when deserialising
         if name == "__setstate__":
             raise AttributeError()
         return getattr(self.shared_memory_dataset, name)
@@ -62,8 +62,8 @@ class _SharedMemoryDataSet:
                 pickle.dumps(data)
             except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
                 raise DataSetError(
-                    f"{str(data.__class__)} cannot be serialized. ParallelRunner "
-                    "implicit memory datasets can only be used with serializable data"
+                    f"{str(data.__class__)} cannot be serialised. ParallelRunner "
+                    "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
             else:
                 raise exc
@@ -185,19 +185,19 @@ class ParallelRunner(AbstractRunner):
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
-        """Ensure all tasks are serializable."""
-        unserializable = []
+        """Ensure all tasks are serialisable."""
+        unserialisable = []
         for node in nodes:
             try:
                 ForkingPickler.dumps(node)
             except (AttributeError, PicklingError):
-                unserializable.append(node)
+                unserialisable.append(node)
 
-        if unserializable:
+        if unserialisable:
             raise AttributeError(
-                f"The following nodes cannot be serialized: {sorted(unserializable)}\n"
+                f"The following nodes cannot be serialised: {sorted(unserialisable)}\n"
                 f"In order to utilize multiprocessing you need to make sure all nodes "
-                f"are serializable, i.e. nodes should not include lambda "
+                f"are serialisable, i.e. nodes should not include lambda "
                 f"functions, nested functions, closures, etc.\nIf you "
                 f"are using custom decorators ensure they are correctly decorated using "
                 f"functools.wraps()."
@@ -205,28 +205,28 @@ class ParallelRunner(AbstractRunner):
 
     @classmethod
     def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline):
-        """Ensure that all data sets are serializable and that we do not have
+        """Ensure that all data sets are serialisable and that we do not have
         any non proxied memory data sets being used as outputs as their content
         will not be synchronized across threads.
         """
 
         data_sets = catalog._data_sets  # pylint: disable=protected-access
 
-        unserializable = []
+        unserialisable = []
         for name, data_set in data_sets.items():
             if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
-                unserializable.append(name)
+                unserialisable.append(name)
                 continue
             try:
                 ForkingPickler.dumps(data_set)
             except (AttributeError, PicklingError):
-                unserializable.append(name)
+                unserialisable.append(name)
 
-        if unserializable:
+        if unserialisable:
             raise AttributeError(
                 f"The following data sets cannot be used with multiprocessing: "
-                f"{sorted(unserializable)}\nIn order to utilize multiprocessing you "
-                f"need to make sure all data sets are serializable, i.e. data sets "
+                f"{sorted(unserialisable)}\nIn order to utilize multiprocessing you "
+                f"need to make sure all data sets are serialisable, i.e. data sets "
                 f"should not make use of lambda functions, nested functions, closures "
                 f"etc.\nIf you are using custom decorators ensure they are correctly "
                 f"decorated using functools.wraps()."

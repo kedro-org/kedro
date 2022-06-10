@@ -128,9 +128,9 @@ class TestPickleDataSet:
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
-    def test_unserializable_data(self, pickle_data_set, dummy_dataframe, mocker):
+    def test_unserialisable_data(self, pickle_data_set, dummy_dataframe, mocker):
         mocker.patch("pickle.dump", side_effect=pickle.PickleError)
-        pattern = r".+ was not serialized due to:.*"
+        pattern = r".+ was not serialised due to:.*"
 
         with pytest.raises(DataSetError, match=pattern):
             pickle_data_set.save(dummy_dataframe)

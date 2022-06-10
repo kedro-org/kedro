@@ -87,7 +87,7 @@ def dummy_tf_base_model(dummy_x_train, dummy_y_train, tf):
     model = tf.keras.Model(inputs=inputs, outputs=outputs, name="1_layer_dummy")
     model.compile("rmsprop", "mse")
     model.fit(dummy_x_train, dummy_y_train, batch_size=64, epochs=1)
-    # from https://www.tensorflow.org/guide/keras/save_and_serialize
+    # from https://www.tensorflow.org/guide/keras/save_and_serialise
     # Reset metrics before saving so that loaded model has same state,
     # since metric states are not preserved by Model.save_weights
     model.reset_metrics()
@@ -190,7 +190,7 @@ class TestTensorFlowModelDataset:
         pattern = (
             r"Saving the model to HDF5 format requires the model to be a Functional model or a "
             r"Sequential model. It does not work for subclassed models, because such models are "
-            r"defined via the body of a Python method, which isn\'t safely serializable. Consider "
+            r"defined via the body of a Python method, which isn\'t safely serialisable. Consider "
             r"saving to the Tensorflow SavedModel format \(by setting save_format=\"tf\"\) "
             r"or using `save_weights`."
         )

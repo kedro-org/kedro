@@ -68,8 +68,8 @@ class PickleDataSet(AbstractDataSet):
         redis_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of `PickleDataSet`. This loads/saves data from/to
-        a Redis database while deserializing/serializing. Supports custom backends to
-        serialize/deserialize objects.
+        a Redis database while deserialising/serialising. Supports custom backends to
+        serialise/deserialise objects.
 
         Example backends that are compatible (non-exhaustive):
             * `pickle`
@@ -172,7 +172,7 @@ class PickleDataSet(AbstractDataSet):
             )
         except Exception as exc:
             raise DataSetError(
-                f"{data.__class__} was not serialized due to: {exc}"
+                f"{data.__class__} was not serialised due to: {exc}"
             ) from exc
 
     def _exists(self) -> bool:

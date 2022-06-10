@@ -282,7 +282,7 @@ class TestSparkDataSet:
 
         pattern = (
             f"Contents of 'schema.filepath' ({schemapath}) are invalid. Please"
-            f"provide a valid JSON serialized 'pyspark.sql.types.StructType'."
+            f"provide a valid JSON serialised 'pyspark.sql.types.StructType'."
         )
 
         with pytest.raises(DataSetError, match=re.escape(pattern)):
@@ -297,7 +297,7 @@ class TestSparkDataSet:
 
         pattern = (
             "Schema load argument does not specify a 'filepath' attribute. Please"
-            "include a path to a JSON serialized 'pyspark.sql.types.StructType'."
+            "include a path to a JSON serialised 'pyspark.sql.types.StructType'."
         )
 
         with pytest.raises(DataSetError, match=pattern):
@@ -964,7 +964,7 @@ class TestDataFlowSequentialRunner:
     def test_spark_pickle(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> PickleDataSet (save)"""
         pipeline = Pipeline([node(identity, "spark_in", "pickle_ds")])
-        pattern = ".* was not serialized due to.*"
+        pattern = ".* was not serialised due to.*"
         with pytest.raises(DataSetError, match=pattern):
             SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 

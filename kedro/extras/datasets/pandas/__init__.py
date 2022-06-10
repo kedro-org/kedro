@@ -6,7 +6,6 @@ __all__ = [
     "FeatherDataSet",
     "GBQTableDataSet",
     "GBQQueryDataSet",
-    "ExcelDataSet",
     "HDFDataSet",
     "JSONDataSet",
     "ParquetDataSet",

@@ -12,7 +12,6 @@ from collections import OrderedDict
 from itertools import groupby
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from warnings import warn
 
 import click
 import importlib_metadata
@@ -67,11 +66,7 @@ class KedroStarterSpec:
     name: str
     template_path: str
     directory: Optional[str] = None
-    origin: Optional[str] = field(init=False, default="kedro")
-
-    def __attrs_post_init__(self):
-        if not self.directory:
-            self.directory = self.name  # By default they are the same unless specified.
+    origin: Optional[str] = field(init=False)
 
     def format(self) -> Dict:
         """Format a `KedroStarterSpec` to a nicely structured dictionary for printing.
@@ -103,16 +98,18 @@ class KedroStarterSpec:
 
 
 _OFFICIAL_STARTER_SPECS = [
-    KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO),
+    KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external)
     # documentation and tutorials still refer to `astro-iris`. We create an alias to
     # check if a user has entered old `astro-iris` as the starter name and changes it
     # to `astro-airflow-iris`.
     KedroStarterSpec("astro-iris", _STARTERS_REPO, "astro-airflow-iris"),
-    KedroStarterSpec("standalone-datacatalog", _STARTERS_REPO),
-    KedroStarterSpec("pyspark", _STARTERS_REPO),
-    KedroStarterSpec("pyspark-iris", _STARTERS_REPO),
-    KedroStarterSpec("spaceflights", _STARTERS_REPO),
+    KedroStarterSpec(
+        "standalone-datacatalog", _STARTERS_REPO, "standalone-datacatalog"
+    ),
+    KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
+    KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
+    KedroStarterSpec("spaceflights", _STARTERS_REPO, "spaceflights"),
 ]
 # Set the origin for official starters
 for spec in _OFFICIAL_STARTER_SPECS:
@@ -142,18 +139,6 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     func(path)
 
 
-def _is_valid_starter_entrypoint_config(
-    module_name: str, spec: KedroStarterSpec
-) -> bool:
-    if not isinstance(config, KedroStarterSpec):
-        click.echo(
-            f"The starter configuration loaded from module {module_name}"
-            f"should be a 'KedroStarterSpec', got '{type(config)}' instead"
-        )
-        return False
-    return True
-
-
 def _get_starters_aliases() -> List[KedroStarterSpec]:
     """This functions lists all the starter aliases declared in
     the core repo and in plugins entry points.
@@ -180,27 +165,24 @@ def _get_starters_aliases() -> List[KedroStarterSpec]:
         group=ENTRY_POINT_GROUPS["starters"]
     ):
         module_name = starter_entry_point.module.split(".")[0]
-        for starter_config in starter_entry_point.load():
-            is_valid_config_status = _is_valid_starter_entrypoint_config(
-                module_name, starter_config
-            )
-            if not is_valid_config_status:
-                click.secho(
-                    f"Starter alias `{starter_config.name}` from `{module_name}` "
-                    f"has been ignored as the config is invalid and cannot be loaded",
-                    fg="yellow",
+        for spec in starter_entry_point.load():  # pylint: disable=redefined-outer-name
+            if not isinstance(spec, KedroStarterSpec):
+                click.echo(
+                    f"The starter configuration loaded from module {module_name}"
+                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead"
                 )
-            elif starter_config.name in existing_names:
+
+            elif spec.name in existing_names:
                 click.secho(
-                    f"Starter alias `{starter_config.name}` from `{module_name}` "
+                    f"Starter alias `{spec.name}` from `{module_name}` "
                     f"has been ignored as it is already defined by"
-                    f"`{existing_names[starter_config.name]}`",
+                    f"`{existing_names[spec.name]}`",
                     fg="yellow",
                 )
             else:
-                starter_config.origin = module_name
-                starter_specs.append(starter_config)
-                existing_names[starter_config.name] = module_name
+                spec.origin = module_name
+                starter_specs.append(spec)
+                existing_names[spec.name] = module_name
     return starter_specs
 
 
@@ -297,11 +279,9 @@ def list_starters():
     starters_aliases = _get_starters_aliases()
 
     # ensure kedro starters are listed first
-    official_starters = sorted(
-        list(filter(lambda x: x.origin == "kedro", starters_aliases))
-    )
+    official_starters = sorted(alias for alias in starters_aliases if alias == "kedro")
     unofficial_starters = sorted(
-        list(filter(lambda x: x.origin != "kedro", starters_aliases))
+        alias for alias in starters_aliases if alias != "kedro"
     )
 
     for starters_list in [official_starters, unofficial_starters]:

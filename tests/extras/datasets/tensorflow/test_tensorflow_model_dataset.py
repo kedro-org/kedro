@@ -190,7 +190,7 @@ class TestTensorFlowModelDataset:
         pattern = (
             r"Saving the model to HDF5 format requires the model to be a Functional model or a "
             r"Sequential model. It does not work for subclassed models, because such models are "
-            r"defined via the body of a Python method, which isn\'t safely serialisable. Consider "
+            r"defined via the body of a Python method, which isn\'t safely serializable. Consider "
             r"saving to the Tensorflow SavedModel format \(by setting save_format=\"tf\"\) "
             r"or using `save_weights`."
         )

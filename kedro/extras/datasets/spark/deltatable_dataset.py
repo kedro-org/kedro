@@ -15,7 +15,7 @@ from kedro.extras.datasets.spark.spark_dataset import (
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class DeltaTableDataSet(AbstractDataSet):
+class DeltaTableDataSet(AbstractDataSet[Any, DeltaTable]):
     """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
         Example adding a catalog entry with

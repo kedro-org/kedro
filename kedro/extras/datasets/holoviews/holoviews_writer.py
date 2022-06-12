@@ -21,7 +21,7 @@ from kedro.io.core import (
 HoloViews = TypeVar("HoloViews")
 
 
-class HoloviewsWriter(AbstractVersionedDataSet):
+class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, str]):
     """``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying
     filesystem (e.g. local, S3, GCS).
 

@@ -21,7 +21,7 @@ from kedro.io.core import (
 )
 
 
-class GBQTableDataSet(AbstractDataSet):
+class GBQTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
 

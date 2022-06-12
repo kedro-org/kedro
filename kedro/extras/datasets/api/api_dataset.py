@@ -9,7 +9,7 @@ from requests.auth import AuthBase
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class APIDataSet(AbstractDataSet):
+class APIDataSet(AbstractDataSet[Any, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/master/
 

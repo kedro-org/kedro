@@ -10,7 +10,7 @@ import fsspec
 from kedro.io.core import AbstractDataSet, get_protocol_and_path
 
 
-class ParquetDataSet(AbstractDataSet):
+class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     """``ParquetDataSet`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html

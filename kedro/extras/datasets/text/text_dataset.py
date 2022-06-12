@@ -16,7 +16,7 @@ from kedro.io.core import (
 )
 
 
-class TextDataSet(AbstractVersionedDataSet):
+class TextDataSet(AbstractVersionedDataSet[str, str]):
     """``TextDataSet`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 

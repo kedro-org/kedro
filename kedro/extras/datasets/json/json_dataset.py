@@ -17,7 +17,7 @@ from kedro.io.core import (
 )
 
 
-class JSONDataSet(AbstractVersionedDataSet):
+class JSONDataSet(AbstractVersionedDataSet[Dict, Dict]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 

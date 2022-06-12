@@ -22,7 +22,7 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class JSONDataSet(AbstractVersionedDataSet):
+class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, Any]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 

@@ -17,7 +17,7 @@ from kedro.io.core import (
 )
 
 
-class ImageDataSet(AbstractVersionedDataSet):
+class ImageDataSet(AbstractVersionedDataSet[Image, Image]):
     """``ImageDataSet`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 

@@ -19,7 +19,11 @@ from kedro.io.core import (
 )
 
 
-class MatplotlibWriter(AbstractVersionedDataSet[Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], None]):
+class MatplotlibWriter(
+    AbstractVersionedDataSet[
+        Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], None
+    ]
+):
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
@@ -156,7 +160,9 @@ class MatplotlibWriter(AbstractVersionedDataSet[Union[plt.figure, List[plt.figur
     def _load(self) -> None:
         raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
-    def _save(self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]) -> None:
+    def _save(
+        self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]
+    ) -> None:
         save_path = self._get_save_path()
 
         if isinstance(data, (list, dict)) and self._overwrite and self._exists():

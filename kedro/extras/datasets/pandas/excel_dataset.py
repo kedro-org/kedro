@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class ExcelDataSet(
     AbstractVersionedDataSet[
         Union[pd.DataFrame, Dict[str, pd.DataFrame]],
-        Union[pd.DataFrame, Dict[str, pd.DataFrame]]
+        Union[pd.DataFrame, Dict[str, pd.DataFrame]],
     ]
 ):
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying

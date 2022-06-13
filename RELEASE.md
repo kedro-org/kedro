@@ -16,7 +16,7 @@
 
 ## Major features and improvements
 * Added `abfss` to list of cloud protocols, enabling abfss paths.
-* Kedro now uses the [https://github.com/Textualize/rich](Rich) library to format terminal logs.
+* Kedro now uses the [Rich](https://github.com/Textualize/rich) library to format terminal logs.
 * The file `conf/base/logging.yml` is now optional. See [our documentation](https://kedro.readthedocs.io/en/0.18.2/logging/logging.html) for details.
 
 ## Bug fixes and other changes

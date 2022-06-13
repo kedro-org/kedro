@@ -39,7 +39,7 @@ def run(
         cmd, input="", stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
     )
     result.stdout = result.stdout.decode("utf-8")
-    result.stderr = result.stderr.decode("utf-8")
+    result.stderr = result.stderr.decode("utf-8", "ignore")
     if print_output:
         print(result.stdout)
     return result

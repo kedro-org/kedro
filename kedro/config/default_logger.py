@@ -4,6 +4,7 @@ for setting up the logging
 
 import logging.config
 import os
+import shutil
 
 import click
 import yaml
@@ -16,4 +17,4 @@ with open(os.path.join(CURRENT_DIR, "logging.yml"), encoding="utf-8") as conf_fi
     logging.config.dictConfig(LOGGING_CONFIG)
     logging.captureWarnings(True)
 
-install(show_locals=True, suppress=[click])
+install(show_locals=True, suppress=[click, shutil.which("kedro")])

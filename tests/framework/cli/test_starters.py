@@ -13,7 +13,7 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (
-    _OFFICIAL_STARTER_ALIASES,
+    _OFFICIAL_STARTER_SPECS,
     TEMPLATE_PATH,
     KedroStarterSpec,
 )
@@ -113,7 +113,7 @@ def test_starter_list(fake_kedro_cli):
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
 
     assert result.exit_code == 0, result.output
-    for alias in _OFFICIAL_STARTER_ALIASES:
+    for alias in _OFFICIAL_STARTER_SPECS:
         assert alias in result.output
 
 

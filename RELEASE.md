@@ -26,6 +26,7 @@
 * Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.
 * Kedro's framework-side logging configuration no longer performs file-based logging. Hence superfluous `info.log`/`errors.log` files are no longer created in your project root, and running Kedro on read-only file systems such as Databricks Repos is now possible.
 * The `root` logger is now set to the Python default level of `WARNING` rather than `INFO`. Kedro's logger is still set to emit `INFO` level messages.
+* Required `cookiecutter>=2.1.1` to address a [known command injection vulnerability](https://security.snyk.io/vuln/SNYK-PYTHON-COOKIECUTTER-2414281).
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.
@@ -699,7 +700,7 @@ Check your source directory. If you defined a different source directory (`sourc
     * `register_pipelines()`, to replace `_get_pipelines()`
     * `register_config_loader()`, to replace `_create_config_loader()`
     * `register_catalog()`, to replace `_create_catalog()`
-These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` (or `pyproject.toml`). The order of execution is: plugin hooks, `.kedro.yml` hooks, hooks in `ProjectContext.hooks`.
+These can be defined in `src/<python_package>/hooks.py` and added to `.kedro.yml` (or `pyproject.toml`). The order of execution is: plugin hooks, `.kedro.yml` hooks, hooks in `ProjectContext.hooks`.
 * Added ability to disable auto-registered Hooks using `.kedro.yml` (or `pyproject.toml`) configuration file.
 
 ## Bug fixes and other changes
@@ -1308,7 +1309,7 @@ The breaking changes were introduced in the following project template files:
 - `<project-name>/.ipython/profile_default/startup/00-kedro-init.py`
 - `<project-name>/kedro_cli.py`
 - `<project-name>/src/tests/test_run.py`
-- `<project-name>/src/<package-name>/run.py`
+- `<project-name>/src/<python_package>/run.py`
 - `<project-name>/.kedro.yml` (new file)
 
 The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to create a new project (by using `kedro new`) and move code and files bit by bit as suggested in the detailed guide below:

@@ -128,18 +128,16 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
     ):
         module_name = starter_entry_point.module.split(".")[0]
         for spec in starter_entry_point.load():  # pylint: disable=redefined-outer-name
-            alias = spec.name
             if not isinstance(spec, KedroStarterSpec):
                 click.echo(
                     f"The starter configuration loaded from module {module_name}"
                     f"should be a 'KedroStarterSpec', got '{type(spec)}' instead"
                 )
-
-            elif alias in starter_specs:
+            elif spec.name in starter_specs:
                 click.secho(
-                    f"Starter alias `{alias}` from `{module_name}` "
+                    f"Starter alias `{spec.name}` from `{module_name}` "
                     f"has been ignored as it is already defined by"
-                    f"`{starter_specs[alias].origin}`",
+                    f"`{starter_specs[spec.name].origin}`",
                     fg="yellow",
                 )
             else:

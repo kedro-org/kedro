@@ -12,8 +12,8 @@ from kedro.pipeline.pipeline import (
     _strip_transcoding,
     _transcode_split,
 )
-
-
+from kedro.pipeline.node import Node
+import random
 class TestTranscodeHelpers:
     def test_split_no_transcode_part(self):
         assert _transcode_split("abc") == ("abc", "")
@@ -587,6 +587,52 @@ class TestPipelineOperators:
         assert len(pipeline.nodes) == 1 + len(nodes)
         assert len(pipeline.inputs()) == 1
         assert len(pipeline.outputs()) == 1
+
+    def test_pipeline_consistent_nodes_order(self, mocker):
+        """
+            Pipeline that have multiple possible execution orders should have consistent
+            solutions
+            Possible Solutions:
+            1. A -> B -> C -> D -> E -> F
+            2. B -> A -> C -> D -> E -> F
+            3 ... Any permutation as long as F is executed last.
+
+            Although we are not sure which permutation it is, but it should always output
+            the same permutation.
+
+            A-- \
+            B--- \
+            C---- F
+            D--- /
+            E-- /
+        """
+        def multiconcat(*args):
+            return sum(args)
+
+        mock_hash = mocker.patch(f"{__name__}.Node.__hash__")
+        expected_sorted_nodes = None
+
+        # Repeat 10 times so we can be sure it is not purely by chance
+        for i in range(1, 11):
+            mock_hash.return_value = random.randint(1, 1E20)
+
+            inverted_fork_dags = Pipeline(
+                [
+                    node(constant_output, None, "A"),
+                    node(constant_output, None, "B"),
+                    node(constant_output, None, "C"),
+                    node(constant_output, None, "D"),
+                    node(constant_output, None, "E"),
+                    node(multiconcat, ["A", "B", "C", "D", "E"], "F"),
+                ]
+            )
+            if not expected_sorted_nodes:
+                expected_sorted_nodes = inverted_fork_dags.nodes
+
+            else:
+
+                assert expected_sorted_nodes == inverted_fork_dags.nodes
+
 
 
 class TestPipelineDescribe:

@@ -97,7 +97,8 @@ def jupyter_lab(
 
 
 def _create_kernel(kernel_name: str, display_name: str) -> None:
-    """Creates an IPython kernel for the kedro project, if one does not already exist.
+    """Creates an IPython kernel for the kedro project. If one with the same kernel_name
+    exists already it will be replaced.
 
     Installs the default IPython kernel (which points towards `sys.executable`)
     and customises it to make the launch command load the kedro extension.
@@ -136,18 +137,12 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
     # checked are importable, so we don't run _check_module_importable on them.
     # pylint: disable=import-outside-toplevel
     from ipykernel.kernelspec import install
-    from jupyter_client.kernelspec import find_kernel_specs
 
     try:
-        if kernel_name in find_kernel_specs():
-            secho(
-                f"Jupyter kernel {kernel_name} already exists and will be used.",
-                fg="green",
-            )
-            return
-
         # Install with user=True rather than system-wide to minimise footprint and
-        # ensure that we have permissions to write there.
+        # ensure that we have permissions to write there. Under the hood this calls
+        # jupyter_client.KernelSpecManager.install_kernel_spec, which automatically
+        # removes an old kernel spec if it already exists.
         kernel_path = install(
             user=True,
             kernel_name=kernel_name,

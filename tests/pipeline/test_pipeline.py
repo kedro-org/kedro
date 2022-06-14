@@ -1,10 +1,13 @@
+import random
 import re
 from itertools import chain
+from typing import List
 
 import pytest
 
 import kedro
 from kedro.pipeline import Pipeline, node
+from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
@@ -12,8 +15,8 @@ from kedro.pipeline.pipeline import (
     _strip_transcoding,
     _transcode_split,
 )
-from kedro.pipeline.node import Node
-import random
+
+
 class TestTranscodeHelpers:
     def test_split_no_transcode_part(self):
         assert _transcode_split("abc") == ("abc", "")
@@ -253,8 +256,9 @@ class TestValidPipeline:
         grouped = pipeline.grouped_nodes
         # Flatten a list of grouped nodes
         assert pipeline.nodes == list(chain.from_iterable(grouped))
-        # Check each grouped node matches with expected group
-        assert all(g == e for g, e in zip(grouped, expected))
+        # Check each grouped node matches with the expected group, the order is
+        # non-deterministic, so we are only checking they have the same set of nodes.
+        assert all(set(g) == e for g, e in zip(grouped, expected))
 
     def test_free_input(self, input_data):
         nodes = input_data["nodes"]
@@ -606,15 +610,16 @@ class TestPipelineOperators:
             D--- /
             E-- /
         """
+
         def multiconcat(*args):
             return sum(args)
 
         mock_hash = mocker.patch(f"{__name__}.Node.__hash__")
-        expected_sorted_nodes = None
+        expected_sorted_nodes: List[List[Node]] = None
 
         # Repeat 10 times so we can be sure it is not purely by chance
-        for i in range(1, 11):
-            mock_hash.return_value = random.randint(1, 1E20)
+        for _ in range(10):
+            mock_hash.return_value = random.randint(1, 1e20)
 
             inverted_fork_dags = Pipeline(
                 [
@@ -632,7 +637,6 @@ class TestPipelineOperators:
             else:
 
                 assert expected_sorted_nodes == inverted_fork_dags.nodes
-
 
 
 class TestPipelineDescribe:

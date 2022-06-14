@@ -352,7 +352,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return list(chain.from_iterable(self._topo_sorted_nodes))
 
     @property
-    def grouped_nodes(self) -> List[Set[Node]]:
+    def grouped_nodes(self) -> List[List[Node]]:
         """Return a list of the pipeline nodes in topologically ordered groups,
         i.e. if node A needs to be run before node B, it will appear in an
         earlier group.
@@ -896,7 +896,7 @@ def _topologically_sorted(node_dependencies) -> List[List[Node]]:
     try:
         result = []
         for dependencies in toposort(node_dependencies):
-            # Make sure it is sorted to have consistent execution order when run with SequentialRunner
+            # Sort it so it has consistent order when run with SequentialRunner
             result.append(sorted(dependencies))
         return result
     except ToposortCircleError as exc:

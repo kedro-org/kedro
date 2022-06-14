@@ -102,14 +102,12 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
         KedroStarterSpec(
             name="astro-airflow-iris",
             template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory=None,
-            origin="kedro",
+            directory=None
         ),
         KedroStarterSpec(
             name="astro-iris",
             template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris",
-            origin="kedro",
+            directory="astro-airflow-iris"
         ),
     ]
     """

@@ -76,38 +76,6 @@ def _assert_template_ok(
     )
     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
-
-# @pytest.mark.parametrize(
-#     "config",
-#     [
-#         {"name": "valid_starter", "template_path": "valid_starter"},
-#         {
-#             "name": "valid_starter",
-#             "template_path": "valid_starter",
-#             "directory": "optional",
-#         },
-#     ],
-# )
-# def test_valid_starter_entrypoint_config(config):
-#     assert _is_valid_starter_entrypoint_config("mock", KedroStarterSpec(**config))
-
-
-# @pytest.mark.parametrize(
-#     "config",
-#     [
-#         {"name": "invalid_starter"},
-#         {
-#             "name": "invalid_starter",
-#             "template_path": "invalid_start",
-#             "invalid_key": "invalid_key",
-#         },
-#         ["invalid_type"],
-#     ],
-# )
-# def test_invalid_starter_entrypoint_config(config):
-#     assert not _is_valid_starter_entrypoint_config("mock", config)
-
-
 def test_starter_list(fake_kedro_cli):
     """Check that `kedro starter list` prints out all starter aliases."""
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])

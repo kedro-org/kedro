@@ -243,7 +243,7 @@ def starter():
 
 
 @starter.command("list")
-def starters():
+def list_starters():
     """List all official project starters available."""
     starters_dict = _get_starters_dict()
 
@@ -263,6 +263,8 @@ def starters():
     }
 
     for starters_dict in [official_starters_dict, unofficial_starters_dict]:
+        if not starters_dict:
+            continue
         _, first_spec = next(iter(starters_dict.items()))
         click.secho(f"\nStarters from {first_spec.origin}\n", fg="yellow")
         click.echo(

@@ -34,7 +34,7 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 
 
 @define(order=True)
-class KedroStarterSpec:
+class KedroStarterSpec:  # pylint: disable=too-few-public-methods
     """Specification of custom kedro starter template
     Args:
         name: name of the starter (name of the directory)
@@ -127,7 +127,7 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
         group=ENTRY_POINT_GROUPS["starters"]
     ):
         module_name = starter_entry_point.module.split(".")[0]
-        for spec in starter_entry_point.load():  # pylint: disable=redefined-outer-name
+        for spec in starter_entry_point.load():
             if not isinstance(spec, KedroStarterSpec):
                 click.echo(
                     f"The starter configuration loaded from module {module_name}"
@@ -178,7 +178,7 @@ def create_cli():  # pragma: no cover
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 def new(
     config_path, starter_name, checkout, directory, **kwargs
-):  # pylint: disable=unused-argument
+):
     """Create a new kedro project."""
     if checkout and not starter_name:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")

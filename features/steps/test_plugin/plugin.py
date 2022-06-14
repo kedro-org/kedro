@@ -1,8 +1,8 @@
 """Dummy plugin with simple hook implementations."""
 import logging
 
-from kedro.framework.hooks import hook_impl
 from kedro.framework.cli.starters import KedroStarterSpec
+from kedro.framework.hooks import hook_impl
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

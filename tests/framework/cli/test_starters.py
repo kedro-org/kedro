@@ -76,6 +76,7 @@ def _assert_template_ok(
     )
     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
+
 def test_starter_list(fake_kedro_cli):
     """Check that `kedro starter list` prints out all starter aliases."""
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])

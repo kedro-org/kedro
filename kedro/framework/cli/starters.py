@@ -42,14 +42,6 @@ class KedroStarterSpec:  # pylint: disable=too-few-public-methods
         directory: by default it will look for `name`, optionally override with custom directory.
         origin: preserved field used by kedro internally to determine where the starter
         comes from, users do not need to provide this field.
-
-    Example:
-    ::
-        >>> spec = KedroStarterSpec(
-                        name="astro-airflow-iris",
-                        template_path="git+https://github.com/kedro-org/kedro-starters.git",
-                        directory=None
-                                   )
     """
 
     name: str
@@ -176,9 +168,7 @@ def create_cli():  # pragma: no cover
 @click.option("--starter", "-s", "starter_name", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-def new(
-    config_path, starter_name, checkout, directory, **kwargs
-):
+def new(config_path, starter_name, checkout, directory, **kwargs):
     """Create a new kedro project."""
     if checkout and not starter_name:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")

@@ -19,7 +19,8 @@ from kedro.framework.project import (
     _ProjectSettings,
 )
 from kedro.framework.session import KedroSession
-from kedro.framework.session.store import BaseSessionStore, ShelveStore
+from kedro.framework.session.shelvestore import ShelveStore
+from kedro.framework.session.store import BaseSessionStore
 
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"

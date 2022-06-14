@@ -2,6 +2,7 @@
 import logging
 
 from kedro.framework.hooks import hook_impl
+from kedro.framework.cli.starters import KedroStarterSpec
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -16,12 +17,11 @@ class MyPluginHook:
 
 
 starters = [
-    {
-        "name": "test_plugin_starter",
-        "template_path": "https://github.com/kedro-org/kedro-starters/",
-        "directory": "pandas-iris",
-    },
+    KedroStarterSpec(
+        name="test_plugin_starter",
+        template_path="https://github.com/kedro-org/kedro-starters/",
+        directory="pandas-iris",
+    )
 ]
-
 
 hooks = MyPluginHook()

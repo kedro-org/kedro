@@ -44,6 +44,28 @@ Once the plugin is installed, you can run it as follows:
 kedro to_json
 ```
 
+## Extending Starters Template
+You can extend `kedro starter list` and `kedro new` by introducing your own `cookiecutter` template.
+
+You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
+
+```python
+starters = [
+    KedroStarterSpec(
+        name="test_plugin_starter",
+        template_path="https://github.com/kedro-org/kedro-starters/",
+        directory="pandas-iris",
+    )
+]
+```
+
+In your `setup.py`, you need to register the specifications to `kedro.starters`.
+
+```python
+setup(entry_points={"kedro.starters": ["starter =  plugin:starters"]},
+)
+```
+
 ## Working with `click`
 
 Commands must be provided as [`click` `Groups`](https://click.palletsprojects.com/en/7.x/api/#click.Group)

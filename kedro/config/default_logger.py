@@ -17,4 +17,7 @@ with open(os.path.join(CURRENT_DIR, "logging.yml"), encoding="utf-8") as conf_fi
     logging.config.dictConfig(LOGGING_CONFIG)
     logging.captureWarnings(True)
 
+# We suppress click here to hide tracebacks related to it conversely,
+# kedro is not suppressed to show its tracebacks for easier debugging.
+# shutil is used to get the kedro executable path to hide the top level traceback.
 install(show_locals=True, suppress=[click, shutil.which("kedro")])

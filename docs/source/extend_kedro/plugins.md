@@ -52,7 +52,7 @@ You need to extend the starters by providing a list of  `KedroStarterSpec`, in t
 ```python
 starters = [
     KedroStarterSpec(
-        name="test_plugin_starter",
+        alias="test_plugin_starter",
         template_path="https://github.com/kedro-org/kedro-starters/",
         directory="pandas-iris",
     )
@@ -62,7 +62,8 @@ starters = [
 In your `setup.py`, you need to register the specifications to `kedro.starters`.
 
 ```python
-setup(entry_points={"kedro.starters": ["starter =  plugin:starters"]},
+setup(
+    entry_points={"kedro.starters": ["starter =  plugin:starters"]},
 )
 ```
 

@@ -319,6 +319,27 @@ def _check_module_importable(module_name: str) -> None:
         ) from exc
 
 
+def get_entry_points(name: str) -> importlib_metadata.EntryPoints:
+    """Get all kedro related entry points"""
+    return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
+
+
+def _load_entry_point(entry_point, safe=True):
+    """Load entrypoint safely, if fails it will just skip the entrypoint."""
+    if not safe:
+        return entry_point.load()
+    try:
+        return entry_point.load()
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning(
+            "Failed to load %s commands from %s. Full exception: %s",
+            entry_point.module,
+            entry_point,
+            exc,
+        )
+        return
+
+
 def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     """Load package entry point commands.
 
@@ -332,20 +353,16 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    entry_points = importlib_metadata.entry_points()
-    entry_points = entry_points.select(group=ENTRY_POINT_GROUPS[name])
 
     entry_point_commands = []
-    for entry_point in entry_points:
-        try:
-            entry_point_commands.append(entry_point.load())
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.warning(
-                "Failed to load %s commands from %s. Full exception: %s",
-                name,
-                entry_point,
-                exc,
-            )
+    for entry_point in get_entry_points(name):
+        if name in ["hooks", "cli_hooks", "starters"]:
+            # These need to be loaded safely due to plugin entry points.
+            loaded_entry_point = _load_entry_point(entry_point, safe=True)
+        else:
+            loaded_entry_point = _load_entry_point(entry_point, safe=False)
+        if loaded_entry_point:
+            entry_point_commands.append(loaded_entry_point)
     return entry_point_commands
 
 

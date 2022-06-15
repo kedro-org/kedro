@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import click
-import importlib_metadata
 import yaml
 from attrs import define, field
 
@@ -21,11 +20,12 @@ import kedro
 from kedro import __version__ as version
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
-    ENTRY_POINT_GROUPS,
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
+    _load_entry_point,
     command_with_verbosity,
+    get_entry_points,
 )
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -37,38 +37,38 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 class KedroStarterSpec:  # pylint: disable=too-few-public-methods
     """Specification of custom kedro starter template
     Args:
-        name: name of the starter (name of the directory)
+        spec: alias of the starter which shows up on `kedro starter list` and `kedro new`
         template_path: the path to git repository
         directory: by default it will look for `name`, optionally override with custom directory.
         origin: preserved field used by kedro internally to determine where the starter
         comes from, users do not need to provide this field.
     """
 
-    name: str
+    alias: str
     template_path: str
     directory: Optional[str] = None
     origin: Optional[str] = field(init=False)
 
 
-_OFFICIAL_STARTER_SPECS = {
-    "astro-airflow-iris": KedroStarterSpec(
-        "astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"
-    ),
+_OFFICIAL_STARTER_SPECS = [
+    KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
     # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external)
     # documentation and tutorials still refer to `astro-iris`. We create an alias to
     # check if a user has entered old `astro-iris` as the starter name and changes it
     # to `astro-airflow-iris`.
-    "astro-iris": KedroStarterSpec("astro-iris", _STARTERS_REPO, "astro-airflow-iris"),
-    "standalone-datacatalog": KedroStarterSpec(
+    KedroStarterSpec("astro-iris", _STARTERS_REPO, "astro-airflow-iris"),
+    KedroStarterSpec(
         "standalone-datacatalog", _STARTERS_REPO, "standalone-datacatalog"
     ),
-    "pyspark": KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
-    "pyspark-iris": KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
-    "spaceflights": KedroStarterSpec("spaceflights", _STARTERS_REPO, "spaceflights"),
-}
+    KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
+    KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
+    KedroStarterSpec("spaceflights", _STARTERS_REPO, "spaceflights"),
+]
 # Set the origin for official starters
-for starter_alias, starter_spec in _OFFICIAL_STARTER_SPECS.items():
+for starter_spec in _OFFICIAL_STARTER_SPECS:
     starter_spec.origin = "kedro"
+_OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
+
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,
@@ -98,50 +98,52 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
     """This functions lists all the starter aliases declared in
     the core repo and in plugins entry points.
     The output looks like:
-    [
+    {"astro-airflow-iris":
         KedroStarterSpec(
             name="astro-airflow-iris",
             template_path="git+https://github.com/kedro-org/kedro-starters.git",
             directory=None
         ),
+    "astro-iris":
         KedroStarterSpec(
             name="astro-iris",
             template_path="git+https://github.com/kedro-org/kedro-starters.git",
             directory="astro-airflow-iris"
         ),
-    ]
+    }
     """
     starter_specs = _OFFICIAL_STARTER_SPECS
 
-    for starter_entry_point in importlib_metadata.entry_points().select(
-        group=ENTRY_POINT_GROUPS["starters"]
-    ):
-        module_name = starter_entry_point.module.split(".")[0]
-        for spec in starter_entry_point.load():
+    for starter_entry_point in get_entry_points(name="starters"):
+        origin = starter_entry_point.module.split(".")[0]
+        specs = _load_entry_point(starter_entry_point)
+        if not specs:  # Could be empty if it fails to load
+            continue
+        for spec in specs:
             if not isinstance(spec, KedroStarterSpec):
                 click.echo(
-                    f"The starter configuration loaded from module {module_name}"
+                    f"The starter configuration loaded from module {origin}"
                     f"should be a 'KedroStarterSpec', got '{type(spec)}' instead"
                 )
-            elif spec.name in starter_specs:
+            elif spec.alias in starter_specs:
                 click.secho(
-                    f"Starter alias `{spec.name}` from `{module_name}` "
+                    f"Starter alias `{spec.alias}` from `{origin}` "
                     f"has been ignored as it is already defined by"
-                    f"`{starter_specs[spec.name].origin}`",
+                    f"`{starter_specs[spec.alias].origin}`",
                     fg="yellow",
                 )
             else:
-                spec.origin = module_name
-                starter_specs[spec.name] = spec
+                spec.origin = origin
+                starter_specs[spec.alias] = spec
     return starter_specs
 
 
 def _starter_spec_to_dict(
-    starters_dict: Dict[str, KedroStarterSpec]
+    starter_specs: Dict[str, KedroStarterSpec]
 ) -> Dict[str, Dict[str, str]]:
     """Convert a dictionary of starter spec to a nicely formatted dictionary"""
     format_dict: Dict[str, Dict[str, str]] = {}
-    for alias, spec in starters_dict.items():
+    for alias, spec in starter_specs.items():
         format_dict[alias] = {}  #  Each dictionary represent 1 starter
         format_dict[alias]["template_path"] = spec.template_path
         if spec.directory:
@@ -253,7 +255,7 @@ def list_starters():
     for starters_dict in [official_starters_dict, unofficial_starters_dict]:
         if not starters_dict:
             continue
-        _, first_spec = next(iter(starters_dict.items()))
+        first_spec = next(iter(starters_dict.values()))
         click.secho(f"\nStarters from {first_spec.origin}\n", fg="yellow")
         click.echo(
             yaml.safe_dump(_starter_spec_to_dict(starters_dict), sort_keys=False)

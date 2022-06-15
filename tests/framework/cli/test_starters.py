@@ -88,9 +88,7 @@ def test_starter_list(fake_kedro_cli):
 
 def test_starter_list_with_starter_plugin(fake_kedro_cli, entry_point):
     """Check that `kedro starter list` prints out the plugin starters."""
-    entry_point.load.return_value = [
-        KedroStarterSpec(**{"name": "valid_starter", "template_path": "valid_path"})
-    ]
+    entry_point.load.return_value = [KedroStarterSpec("valid_starter", "valid_path")]
     entry_point.module = "valid_starter"
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
     assert result.exit_code == 0, result.output
@@ -101,7 +99,7 @@ def test_starter_list_with_starter_plugin(fake_kedro_cli, entry_point):
     "specs,expected",
     [
         (
-            [{"name": "valid_starter", "template_path": "valid_path"}],
+            [{"alias": "valid_starter", "template_path": "valid_path"}],
             "should be a 'KedroStarterSpec'",
         ),
         (

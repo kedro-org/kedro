@@ -19,5 +19,5 @@ with open(os.path.join(CURRENT_DIR, "logging.yml"), encoding="utf-8") as conf_fi
 
 # We suppress click here to hide tracebacks related to it conversely,
 # kedro is not suppressed to show its tracebacks for easier debugging.
-# sys.executable is used to get the kedro executable path and hide the top level traceback.
+# sys.executable is used to get the kedro executable path to hide the top level traceback.
 install(show_locals=True, suppress=[click, os.path.dirname(sys.executable)])

@@ -135,6 +135,8 @@ type_targets = {
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
         "pluggy._manager.PluginManager",
+        "_DI",
+        "_DO",
     ),
     "py:data": (
         "typing.Any",

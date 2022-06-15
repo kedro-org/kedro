@@ -342,7 +342,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         if not filepath:
             raise DataSetError(
                 "Schema load argument does not specify a 'filepath' attribute. Please"
-                "include a path to a JSON serialized 'pyspark.sql.types.StructType'."
+                "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
             )
 
         credentials = deepcopy(schema.get("credentials")) or {}
@@ -359,7 +359,7 @@ class SparkDataSet(AbstractVersionedDataSet):
             except Exception as exc:
                 raise DataSetError(
                     f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please"
-                    f"provide a valid JSON serialized 'pyspark.sql.types.StructType'."
+                    f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
                 ) from exc
 
     def _describe(self) -> Dict[str, Any]:

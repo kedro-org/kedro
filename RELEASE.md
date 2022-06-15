@@ -16,16 +16,17 @@
 
 ## Major features and improvements
 * Added `abfss` to list of cloud protocols, enabling abfss paths.
-* Kedro now uses the [https://github.com/Textualize/rich](Rich) library to format terminal logs.
+* Kedro now uses the [Rich](https://github.com/Textualize/rich) library to format terminal logs and tracebacks.
 * The file `conf/base/logging.yml` is now optional. See [our documentation](https://kedro.readthedocs.io/en/0.18.2/logging/logging.html) for details.
 * Introduced a `kedro.starters` entry point. This enables plugins to create custom starter aliases used by `kedro starter list` and `kedro new`.
 
 ## Bug fixes and other changes
-* Bumped `pyyaml` upper-bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
+* Bumped `pyyaml` upper bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
 * Updated project template's Sphinx configuration to use `myst_parser` instead of `recommonmark`.
 * Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.
 * Kedro's framework-side logging configuration no longer performs file-based logging. Hence superfluous `info.log`/`errors.log` files are no longer created in your project root, and running Kedro on read-only file systems such as Databricks Repos is now possible.
 * The `root` logger is now set to the Python default level of `WARNING` rather than `INFO`. Kedro's logger is still set to emit `INFO` level messages.
+* Bumped the upper bound for the Flake8 dependency to <5.0.
 * `kedro jupyter notebook/lab` no longer reuses a Jupyter kernel.
 * Required `cookiecutter>=2.1.1` to address a [known command injection vulnerability](https://security.snyk.io/vuln/SNYK-PYTHON-COOKIECUTTER-2414281).
 

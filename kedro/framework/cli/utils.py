@@ -324,9 +324,9 @@ def get_entry_points(name: str) -> importlib_metadata.EntryPoints:
     return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
 
 
-def _safe_load_entry_point(
+def _safe_load_entry_point(  # pylint: disable=inconsistent-return-statements
     entry_point,
-):  # pylint: disable=inconsistent-return-statements
+):
     """Load entrypoint safely, if fails it will just skip the entrypoint."""
     try:
         return entry_point.load()

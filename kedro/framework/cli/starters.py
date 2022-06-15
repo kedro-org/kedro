@@ -389,9 +389,7 @@ def _get_cookiecutter_dir(
         official_starters = sorted(_OFFICIAL_STARTER_SPECS)
         raise KedroCliError(
             f"{error_message}. The aliases for the official Kedro starters are: \n"
-            f"""{yaml.safe_dump(
-                [starter.format() for starter in official_starters],
-                sort_keys=False)}"""
+            f"{yaml.safe_dump(official_starters, sort_keys=False)}"
         ) from exc
 
     return Path(cookiecutter_dir)

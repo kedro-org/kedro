@@ -324,10 +324,10 @@ def get_entry_points(name: str) -> importlib_metadata.EntryPoints:
     return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
 
 
-def _load_entry_point(entry_point, safe=True):
+def _safe_load_entry_point(
+    entry_point,
+):  # pylint: disable=inconsistent-return-statements
     """Load entrypoint safely, if fails it will just skip the entrypoint."""
-    if not safe:
-        return entry_point.load()
     try:
         return entry_point.load()
     except Exception as exc:  # pylint: disable=broad-except
@@ -356,11 +356,7 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
 
     entry_point_commands = []
     for entry_point in get_entry_points(name):
-        if name in ["hooks", "cli_hooks", "starters"]:
-            # These need to be loaded safely due to plugin entry points.
-            loaded_entry_point = _load_entry_point(entry_point, safe=True)
-        else:
-            loaded_entry_point = _load_entry_point(entry_point, safe=False)
+        loaded_entry_point = _safe_load_entry_point(entry_point)
         if loaded_entry_point:
             entry_point_commands.append(loaded_entry_point)
     return entry_point_commands

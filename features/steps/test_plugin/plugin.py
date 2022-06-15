@@ -18,7 +18,7 @@ class MyPluginHook:
 
 starters = [
     KedroStarterSpec(
-        name="test_plugin_starter",
+        "test_plugin_starter",
         template_path="https://github.com/kedro-org/kedro-starters/",
         directory="pandas-iris",
     )

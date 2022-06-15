@@ -211,6 +211,7 @@ jobs:
       PIP_DISABLE_PIP_VERSION_CHECK: 1
       COLUMNS: 120
       LINES: 25
+      PYTHONIOENCODING: utf-8
     steps:
       - checkout
       - win_setup_conda:

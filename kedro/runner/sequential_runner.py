@@ -54,6 +54,7 @@ class SequentialRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         Raises:

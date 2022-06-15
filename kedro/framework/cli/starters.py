@@ -9,6 +9,7 @@ import shutil
 import stat
 import tempfile
 from collections import OrderedDict
+from itertools import groupby
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -23,7 +24,7 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
-    _load_entry_point,
+    _safe_load_entry_point,
     command_with_verbosity,
     get_entry_points,
 )
@@ -37,7 +38,7 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 class KedroStarterSpec:  # pylint: disable=too-few-public-methods
     """Specification of custom kedro starter template
     Args:
-        spec: alias of the starter which shows up on `kedro starter list` and `kedro new`
+        alias: alias of the starter which shows up on `kedro starter list` and `kedro new`
         template_path: the path to git repository
         directory: by default it will look for `name`, optionally override with custom directory.
         origin: preserved field used by kedro internally to determine where the starter
@@ -116,9 +117,7 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
 
     for starter_entry_point in get_entry_points(name="starters"):
         origin = starter_entry_point.module.split(".")[0]
-        specs = _load_entry_point(starter_entry_point)
-        if not specs:  # Could be empty if it fails to load
-            continue
+        specs = _safe_load_entry_point(starter_entry_point) or []
         for spec in specs:
             if not isinstance(spec, KedroStarterSpec):
                 click.echo(
@@ -141,10 +140,10 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
 def _starter_spec_to_dict(
     starter_specs: Dict[str, KedroStarterSpec]
 ) -> Dict[str, Dict[str, str]]:
-    """Convert a dictionary of starter spec to a nicely formatted dictionary"""
+    """Convert a dictionary of starters spec to a nicely formatted dictionary"""
     format_dict: Dict[str, Dict[str, str]] = {}
     for alias, spec in starter_specs.items():
-        format_dict[alias] = {}  #  Each dictionary represent 1 starter
+        format_dict[alias] = {}  # Each dictionary represent 1 starter
         format_dict[alias]["template_path"] = spec.template_path
         if spec.directory:
             format_dict[alias]["directory"] = spec.directory
@@ -237,28 +236,21 @@ def list_starters():
     """List all official project starters available."""
     starters_dict = _get_starters_dict()
 
+    # Group all specs by origin as nested dict and sort it.
+    starters_dict: Dict[str, Dict[str, KedroStarterSpec]] = {
+        origin: dict(sorted(starters_dict_by_origin))
+        for origin, starters_dict_by_origin in groupby(
+            starters_dict.items(), lambda item: item[1].origin
+        )
+    }
+
     # ensure kedro starters are listed first
-    official_starters_aliases = sorted(
-        alias for alias, spec in starters_dict.items() if spec.origin == "kedro"
-    )
-    official_starters_dict = {
-        alias: starters_dict[alias] for alias in official_starters_aliases
-    }
+    starters_dict = dict(sorted(starters_dict.items(), key=lambda x: x == "kedro"))
 
-    unofficial_starters_aliases = sorted(
-        alias for alias, spec in starters_dict.items() if spec.origin != "kedro"
-    )
-    unofficial_starters_dict = {
-        alias: starters_dict[alias] for alias in unofficial_starters_aliases
-    }
-
-    for starters_dict in [official_starters_dict, unofficial_starters_dict]:
-        if not starters_dict:
-            continue
-        first_spec = next(iter(starters_dict.values()))
-        click.secho(f"\nStarters from {first_spec.origin}\n", fg="yellow")
+    for origin, starters_spec in starters_dict.items():
+        click.secho(f"\nStarters from {origin}\n", fg="yellow")
         click.echo(
-            yaml.safe_dump(_starter_spec_to_dict(starters_dict), sort_keys=False)
+            yaml.safe_dump(_starter_spec_to_dict(starters_spec), sort_keys=False)
         )
 
 

@@ -352,7 +352,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return list(chain.from_iterable(self._topo_sorted_nodes))
 
     @property
-    def grouped_nodes(self) -> List[Set[Node]]:
+    def grouped_nodes(self) -> List[List[Node]]:
         """Return a list of the pipeline nodes in topologically ordered groups,
         i.e. if node A needs to be run before node B, it will appear in an
         earlier group.
@@ -870,7 +870,7 @@ def _validate_transcoded_inputs_outputs(nodes: List[Node]) -> None:
         )
 
 
-def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
+def _topologically_sorted(node_dependencies) -> List[List[Node]]:
     """Topologically group and sort (order) nodes such that no node depends on
     a node that appears in the same or a later group.
 
@@ -894,7 +894,9 @@ def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
         return f"Circular dependencies exist among these items: {circular}"
 
     try:
-        return list(toposort(node_dependencies))
+        # Sort it so it has consistent order when run with SequentialRunner
+        result = [sorted(dependencies) for dependencies in toposort(node_dependencies)]
+        return result
     except ToposortCircleError as exc:
         message = _circle_error_message(exc.data)
         raise CircularDependencyError(message) from exc

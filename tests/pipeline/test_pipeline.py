@@ -1,13 +1,10 @@
-import random
 import re
 from itertools import chain
-from typing import List
 
 import pytest
 
 import kedro
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,

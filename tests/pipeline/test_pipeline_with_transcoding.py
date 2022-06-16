@@ -121,7 +121,7 @@ class TestValidPipeline:
         # Flatten a list of grouped nodes
         assert pipeline.nodes == list(chain.from_iterable(grouped))
         # Check each grouped node matches with expected group
-        assert all(g == e for g, e in zip(grouped, expected))
+        assert all(set(g) == e for g, e in zip(grouped, expected))
 
     def test_free_input(self, input_data):
         nodes = input_data["nodes"]

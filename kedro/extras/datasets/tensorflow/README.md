@@ -1,7 +1,7 @@
 # TensorFlowModelDataset
 
 ``TensorflowModelDataset`` loads and saves TensorFlow models.
-The underlying functionality is supported by, and passes input arguments to TensorFlow 2.X load_model and save_model methods. Only TF2 is currently supported for saving and loading, V1 requires HDF5 and serializes differently.
+The underlying functionality is supported by, and passes input arguments to TensorFlow 2.X load_model and save_model methods. Only TF2 is currently supported for saving and loading, V1 requires HDF5 and serialises differently.
 
 #### Example use:
 ```python

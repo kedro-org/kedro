@@ -98,7 +98,7 @@ class TestGenericSasDataSet:
 
     def test_save_fail(self, sas_data_set, dummy_dataframe):
         pattern = (
-            "Unable to retrieve `pandas.DataFrame.to_sas` method, please ensure that your "
+            "Unable to retrieve 'pandas.DataFrame.to_sas' method, please ensure that your "
             "'file_format' parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
         )
@@ -284,7 +284,7 @@ class TestGenericCSVDataSetVersioned:
         corresponding Generic (csv) file for a given save version already exists."""
         versioned_csv_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for GenericDataSet\(.+\) must "
+            r"Save path \'.+\' for GenericDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -302,8 +302,8 @@ class TestGenericCSVDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for GenericDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for GenericDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_csv_data_set.save(dummy_dataframe)
@@ -341,7 +341,7 @@ class TestBadGenericDataSet:
         ds = GenericDataSet(filepath="test.kedro", file_format="kedro")
 
         pattern = (
-            "Unable to retrieve `pandas.read_kedro` method, please ensure that your 'file_format' "
+            "Unable to retrieve 'pandas.read_kedro' method, please ensure that your 'file_format' "
             "parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/io.html"
         )
@@ -350,7 +350,7 @@ class TestBadGenericDataSet:
             _ = ds.load()
 
         pattern2 = (
-            "Unable to retrieve `pandas.DataFrame.to_kedro` method, please ensure that your 'file_format' "
+            "Unable to retrieve 'pandas.DataFrame.to_kedro' method, please ensure that your 'file_format' "
             "parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
         )
@@ -370,7 +370,7 @@ class TestBadGenericDataSet:
     def test_generic_no_filepaths(self, file_format):
         error = (
             "Cannot create a dataset of file_format "
-            f"`{file_format}` as it does not support a filepath target/source"
+            f"'{file_format}' as it does not support a filepath target/source"
         )
 
         with pytest.raises(DataSetError, match=error):

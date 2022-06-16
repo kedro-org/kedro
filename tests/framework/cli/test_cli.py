@@ -734,8 +734,8 @@ class TestRunCommand:
         assert result.exit_code, result.output
 
         expected_output = (
-            f"Error: Expected the form of `load_version` to be "
-            f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+            f"Error: Expected the form of 'load_version' to be "
+            f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
             f"found {load_version} instead\n"
         )
         assert expected_output in result.output

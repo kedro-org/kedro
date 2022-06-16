@@ -69,8 +69,8 @@ class TestJupyterNotebookCommand:
 
         assert result.exit_code
         error = (
-            "Module `notebook` not found. Make sure to install required project "
-            "dependencies by running the `pip install -r src/requirements.txt` command first."
+            "Module 'notebook' not found. Make sure to install required project "
+            "dependencies by running the 'pip install -r src/requirements.txt' command first."
         )
         assert error in result.output
 
@@ -119,8 +119,8 @@ class TestJupyterLabCommand:
 
         assert result.exit_code
         error = (
-            "Module `jupyterlab` not found. Make sure to install required project "
-            "dependencies by running the `pip install -r src/requirements.txt` command first."
+            "Module 'jupyterlab' not found. Make sure to install required project "
+            "dependencies by running the 'pip install -r src/requirements.txt' command first."
         )
         assert error in result.output
 
@@ -143,11 +143,11 @@ class TestCreateKernel:
         kernel_files = {file.name for file in Path(kernel_spec.resource_dir).iterdir()}
         assert kernel_files == {"logo-32x32.png", "logo-64x64.png", "kernel.json"}
 
-    def test_kernel_installs_once(self, mocker):
-        _create_kernel("my_kernel_name", "My display name")
-        install_mock = mocker.patch("ipykernel.kernelspec.install")
-        _create_kernel("my_kernel_name", "My display name")
-        install_mock.assert_not_called()
+    def test_kernel_install_replaces(self):
+        _create_kernel("my_kernel_name", "My display name 1")
+        _create_kernel("my_kernel_name", "My display name 2")
+        kernel_spec = get_kernel_spec("my_kernel_name")
+        assert kernel_spec.display_name == "My display name 2"
 
     def test_error(self, mocker):
         mocker.patch("ipykernel.kernelspec.install", side_effect=ValueError)

@@ -220,7 +220,7 @@ class TestConfigLoader:
     def test_empty_patterns(self, tmp_path):
         """Check the error if no config patterns were specified"""
         pattern = (
-            r"`patterns` must contain at least one glob pattern "
+            r"'patterns' must contain at least one glob pattern "
             r"to match config filenames against"
         )
         with pytest.raises(ValueError, match=pattern):

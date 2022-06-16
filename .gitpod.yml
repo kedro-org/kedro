@@ -22,7 +22,7 @@ tasks:
       export PIP_USER=no
       cd /workspace
       pip install -e /workspace/kedro --no-deps
-      yes project | kedro new -s pandas-iris
+      yes project | kedro new -s pandas-iris --checkout main
     command: |
       pip install -e /workspace/kedro --no-deps
       cd /workspace/project

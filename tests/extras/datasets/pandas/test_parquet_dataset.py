@@ -112,8 +112,8 @@ class TestParquetDataSet:
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
-            f"Dropping `storage_options` for {filepath}, "
-            f"please specify them under `fs_args` or `credentials`."
+            f"Dropping 'storage_options' for {filepath}, "
+            f"please specify them under 'fs_args' or 'credentials'."
         )
         assert records[0].getMessage() == expected_log_message
         assert "storage_options" not in ds._save_args
@@ -219,7 +219,7 @@ class TestParquetDataSet:
             filepath=(tmp_path / FILENAME).as_posix(),
             save_args={"partition_cols": ["col2"]},
         )
-        pattern = "does not support save argument `partition_cols`"
+        pattern = "does not support save argument 'partition_cols'"
 
         with pytest.raises(DataSetError, match=pattern):
             data_set.save(dummy_dataframe)
@@ -282,7 +282,7 @@ class TestParquetDataSetVersioned:
         )
         versioned_parquet_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for ParquetDataSet\(.+\) must "
+            r"Save path \'.+\' for ParquetDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -305,8 +305,8 @@ class TestParquetDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for ParquetDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for ParquetDataSet\(.+\)"
         )
         mocker.patch(
             "pyarrow.fs._ensure_filesystem",

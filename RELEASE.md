@@ -25,9 +25,11 @@
 * Reduced number of log lines by changing the logging level from `INFO` to `DEBUG` for low priority messages.
 * Kedro's framework-side logging configuration no longer performs file-based logging. Hence superfluous `info.log`/`errors.log` files are no longer created in your project root, and running Kedro on read-only file systems such as Databricks Repos is now possible.
 * The `root` logger is now set to the Python default level of `WARNING` rather than `INFO`. Kedro's logger is still set to emit `INFO` level messages.
+* `SequentialRunner` now has consistent execution order across multiple runs with sorted nodes.
 * Bumped the upper bound for the Flake8 dependency to <5.0.
 * `kedro jupyter notebook/lab` no longer reuses a Jupyter kernel.
 * Required `cookiecutter>=2.1.1` to address a [known command injection vulnerability](https://security.snyk.io/vuln/SNYK-PYTHON-COOKIECUTTER-2414281).
+
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.

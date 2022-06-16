@@ -40,7 +40,7 @@ class KedroStarterSpec:  # pylint: disable=too-few-public-methods
     Args:
         alias: alias of the starter which shows up on `kedro starter list` and `kedro new`
         template_path: the path to git repository
-        directory: by default it will look for `name`, optionally override with custom directory.
+        directory: by default it will look for `alias`, optionally override with custom directory.
         origin: preserved field used by kedro internally to determine where the starter
         comes from, users do not need to provide this field.
     """
@@ -96,20 +96,23 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
 
 
 def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
-    """This functions lists all the starter aliases declared in
+    """This function lists all the starter aliases declared in
     the core repo and in plugins entry points.
-    The output looks like:
+
+    For example, the output for official kedro starters looks like:
     {"astro-airflow-iris":
         KedroStarterSpec(
             name="astro-airflow-iris",
             template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory=None
+            directory="astro-airflow-iris",
+            origin="kedro"
         ),
     "astro-iris":
         KedroStarterSpec(
             name="astro-iris",
             template_path="git+https://github.com/kedro-org/kedro-starters.git",
-            directory="astro-airflow-iris"
+            directory="astro-airflow-iris",
+            origin="kedro"
         ),
     }
     """
@@ -134,6 +137,7 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
             else:
                 spec.origin = origin
                 starter_specs[spec.alias] = spec
+    print(starter_specs)
     return starter_specs
 
 
@@ -237,7 +241,7 @@ def list_starters():
     starters_dict = _get_starters_dict()
 
     # Group all specs by origin as nested dict and sort it.
-    starters_dict: Dict[str, Dict[str, KedroStarterSpec]] = {
+    sorted_starters_dict: Dict[str, Dict[str, KedroStarterSpec]] = {
         origin: dict(sorted(starters_dict_by_origin))
         for origin, starters_dict_by_origin in groupby(
             starters_dict.items(), lambda item: item[1].origin
@@ -245,9 +249,11 @@ def list_starters():
     }
 
     # ensure kedro starters are listed first
-    starters_dict = dict(sorted(starters_dict.items(), key=lambda x: x == "kedro"))
+    sorted_starters_dict = dict(
+        sorted(sorted_starters_dict.items(), key=lambda x: x == "kedro")
+    )
 
-    for origin, starters_spec in starters_dict.items():
+    for origin, starters_spec in sorted_starters_dict.items():
         click.secho(f"\nStarters from {origin}\n", fg="yellow")
         click.echo(
             yaml.safe_dump(_starter_spec_to_dict(starters_spec), sort_keys=False)

@@ -57,6 +57,9 @@ starters = [
         directory="pandas-iris",
     )
 ]
+
+The `directory` argument is optional, it is useful when you have multiple templates like [kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. You can take the [pandas-iris](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) example for reference.
+
 ```
 
 In your `setup.py`, you need to register the specifications to `kedro.starters`.

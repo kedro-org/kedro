@@ -894,10 +894,8 @@ def _topologically_sorted(node_dependencies) -> List[List[Node]]:
         return f"Circular dependencies exist among these items: {circular}"
 
     try:
-        result = []
-        for dependencies in toposort(node_dependencies):
-            # Sort it so it has consistent order when run with SequentialRunner
-            result.append(sorted(dependencies))
+        # Sort it so it has consistent order when run with SequentialRunner
+        result = [sorted(dependencies) for dependencies in toposort(node_dependencies)]
         return result
     except ToposortCircleError as exc:
         message = _circle_error_message(exc.data)

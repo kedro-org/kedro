@@ -3,7 +3,7 @@
 import copy
 import re
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, NoReturn
 
 import fsspec
 import pandas as pd
@@ -257,7 +257,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         return exists
 
 
-class SQLQueryDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
+class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     """``SQLQueryDataSet`` loads data from a provided SQL query. It
     uses ``pandas.DataFrame`` internally, so it supports all allowed
     pandas options on ``read_sql_query``. Since Pandas uses SQLAlchemy behind
@@ -429,5 +429,5 @@ class SQLQueryDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
         return pd.read_sql_query(con=engine, **load_args)
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: None) -> NoReturn:
         raise DataSetError("'save' is not supported on SQLQueryDataSet")

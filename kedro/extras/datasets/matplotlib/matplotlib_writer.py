@@ -4,7 +4,7 @@ files to an underlying filesystem (e.g. local, S3, GCS)."""
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, NoReturn
 from warnings import warn
 
 import fsspec
@@ -21,7 +21,7 @@ from kedro.io.core import (
 
 class MatplotlibWriter(
     AbstractVersionedDataSet[
-        Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], None
+        Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
     ]
 ):
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
@@ -157,7 +157,7 @@ class MatplotlibWriter(
             version=self._version,
         )
 
-    def _load(self) -> None:
+    def _load(self) -> NoReturn:
         raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(

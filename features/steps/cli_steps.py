@@ -222,11 +222,13 @@ def add_test_jupyter_nb(context):
         test_nb_fh.write(TEST_JUPYTER_ORG)
 
 
-@given("I have run a non-interactive kedro new with starter")
-@when("I run a non-interactive kedro new with starter")
-def create_project_with_starter(context):
+@given('I have run a non-interactive kedro new with starter "{starter}"')
+@when('I run a non-interactive kedro new with starter "{starter}"')
+def create_project_with_starter(context, starter):
     """Behave step to run kedro new given the config I previously created."""
-    starter_dir = Path(__file__).parent / "test_starter"
+    if starter == "default":
+        starter = Path(__file__).parent / "test_starter"
+
     res = run(
         [
             context.kedro,
@@ -234,26 +236,7 @@ def create_project_with_starter(context):
             "-c",
             str(context.config_file),
             "--starter",
-            str(starter_dir),
-        ],
-        env=context.env,
-        cwd=context.temp_dir,
-    )
-    assert res.returncode == OK_EXIT_CODE, res
-
-
-@given("I have run a non-interactive kedro new with custom plugin starter")
-@when("I run a non-interactive kedro new with custom plugin starter")
-def create_project_with_plugin_starter(context):
-    """Behave step to run kedro new given the config I previously created."""
-    res = run(
-        [
-            context.kedro,
-            "new",
-            "-c",
-            str(context.config_file),
-            "--starter",
-            "test_plugin_starter",
+            str(starter),
         ],
         env=context.env,
         cwd=context.temp_dir,

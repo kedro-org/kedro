@@ -45,7 +45,7 @@ kedro to_json
 ```
 
 ## Extend starter aliases
-It is possible to extend the list of starter aliases built into Kedro. This means that a [custom Kedro starter](create_kedro_starters.md) can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`. 
+It is possible to extend the list of starter aliases built into Kedro. This means that a [custom Kedro starter](create_kedro_starters.md) can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`.
 
 You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
 

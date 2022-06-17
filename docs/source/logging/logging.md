@@ -12,7 +12,7 @@ Framework-side and project-side logging configuration are loaded through subsequ
 
 ## Default framework-side logging configuration
 
-Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/config/logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io/en/stable/logging.html) to format messages and handle exceptions.
+Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/config/logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io/en/stable/logging.html) to format messages. We also use the [Rich traceback handler](https://rich.readthedocs.io/en/stable/traceback.html) to render exceptions.
 
 By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`.
 

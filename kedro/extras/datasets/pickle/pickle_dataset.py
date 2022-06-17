@@ -87,7 +87,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     ) -> None:
         """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
         file on a specific filesystem. ``PickleDataSet`` supports custom backends to
-        serialize/deserialize objects.
+        serialise/deserialise objects.
 
         Example backends that are compatible (non-exhaustive):
             * `pickle`
@@ -220,7 +220,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 imported_backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
                 raise DataSetError(
-                    f"{data.__class__} was not serialized due to: {exc}"
+                    f"{data.__class__} was not serialised due to: {exc}"
                 ) from exc
 
         self._invalidate_cache()

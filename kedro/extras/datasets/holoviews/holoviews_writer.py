@@ -4,7 +4,7 @@ filesystem (e.g. local, S3, GCS)."""
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, TypeVar, NoReturn
+from typing import Any, Dict, NoReturn, TypeVar
 
 import fsspec
 import holoviews as hv

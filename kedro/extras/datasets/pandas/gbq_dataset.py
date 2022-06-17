@@ -4,7 +4,7 @@ to read and write from/to BigQuery table.
 
 import copy
 from pathlib import PurePosixPath
-from typing import Any, Dict, Union, NoReturn
+from typing import Any, Dict, NoReturn, Union
 
 import fsspec
 import pandas as pd

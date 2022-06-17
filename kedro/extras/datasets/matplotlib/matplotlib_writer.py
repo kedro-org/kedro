@@ -4,7 +4,7 @@ files to an underlying filesystem (e.g. local, S3, GCS)."""
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Union, NoReturn
+from typing import Any, Dict, List, NoReturn, Union
 from warnings import warn
 
 import fsspec

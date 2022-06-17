@@ -2,7 +2,7 @@
 ``delta-spark``
 """
 from pathlib import PurePosixPath
-from typing import Any, NoReturn
+from typing import NoReturn
 
 from delta.tables import DeltaTable
 from pyspark.sql import SparkSession

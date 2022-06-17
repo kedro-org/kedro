@@ -3,7 +3,7 @@
 import copy
 import re
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional, NoReturn
+from typing import Any, Dict, NoReturn, Optional
 
 import fsspec
 import pandas as pd

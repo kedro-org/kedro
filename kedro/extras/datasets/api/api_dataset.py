@@ -1,7 +1,7 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
-from typing import Any, Dict, Iterable, List, Union, NoReturn
+from typing import Any, Dict, Iterable, List, NoReturn, Union
 
 import requests
 from requests.auth import AuthBase

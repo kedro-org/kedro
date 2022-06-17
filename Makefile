@@ -20,7 +20,7 @@ test-no-spark:
 	pytest tests --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
 
 e2e-tests:
-	behave --no-capture
+	behave
 
 pip-compile:
 	pip-compile -q -o -

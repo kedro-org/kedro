@@ -128,7 +128,7 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
                 click.secho(
                     f"The starter configuration loaded from module {origin}"
                     f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
-                    fg="red"
+                    fg="red",
                 )
             elif spec.alias in starter_specs:
                 click.secho(

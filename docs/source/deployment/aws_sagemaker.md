@@ -346,4 +346,4 @@ Now you know how to run serverless machine learning jobs using SageMaker right f
 
 ## Cleanup
 
-To cleanup the resources, [delete the S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html) and, optionally, the [IAM role you've created earlier]((#create-sagemaker-execution-role)) (IAM resources are free). The job details of an already completed SageMaker training job cannot be deleted, but such jobs don't incur any costs.
+To cleanup the resources, [delete the S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html) and, optionally, the [IAM role you've created earlier](#create-sagemaker-execution-role) (IAM resources are free). The job details of an already completed SageMaker training job cannot be deleted, but such jobs don't incur any costs.

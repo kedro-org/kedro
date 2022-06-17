@@ -170,7 +170,7 @@ def create_cli():  # pragma: no cover
     type=click.Path(exists=True),
     help=CONFIG_ARG_HELP,
 )
-@click.option("--starter", "-s", "starter_name", help=STARTER_ARG_HELP)
+@click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 def new(config_path, starter_alias, checkout, directory, **kwargs):

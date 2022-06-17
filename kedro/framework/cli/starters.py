@@ -125,21 +125,21 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
         specs = _safe_load_entry_point(starter_entry_point) or []
         for spec in specs:
             if not isinstance(spec, KedroStarterSpec):
-                click.echo(
+                click.secho(
                     f"The starter configuration loaded from module {origin}"
-                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead"
+                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
+                    fg="red"
                 )
             elif spec.alias in starter_specs:
                 click.secho(
                     f"Starter alias `{spec.alias}` from `{origin}` "
                     f"has been ignored as it is already defined by"
                     f"`{starter_specs[spec.alias].origin}`",
-                    fg="yellow",
+                    fg="red",
                 )
             else:
                 spec.origin = origin
                 starter_specs[spec.alias] = spec
-    print(starter_specs)
     return starter_specs
 
 

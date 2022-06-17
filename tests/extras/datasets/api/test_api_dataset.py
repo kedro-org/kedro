@@ -20,6 +20,8 @@ TEST_URL_WITH_PARAMS = TEST_URL + "?param=value"
 
 TEST_HEADERS = {"key": "value"}
 
+TEST_LOAD_ARGS = {"allow_redirects": False}
+
 
 @pytest.mark.parametrize("method", POSSIBLE_METHODS)
 class TestAPIDataSet:
@@ -30,13 +32,14 @@ class TestAPIDataSet:
 
     def test_successfully_load_with_response(self, requests_mocker, method):
         api_data_set = APIDataSet(
-            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+            url=TEST_URL, method=method, load_args={**TEST_LOAD_ARGS, "params": TEST_PARAMS, "headers": TEST_HEADERS}
         )
         requests_mocker.register_uri(
             method,
             TEST_URL_WITH_PARAMS,
             headers=TEST_HEADERS,
             text=TEST_TEXT_RESPONSE_DATA,
+            **TEST_LOAD_ARGS,
         )
 
         response = api_data_set.load()
@@ -47,8 +50,7 @@ class TestAPIDataSet:
         api_data_set = APIDataSet(
             url=TEST_URL,
             method=method,
-            json=TEST_JSON_RESPONSE_DATA,
-            headers=TEST_HEADERS,
+            load_args={"json": TEST_JSON_RESPONSE_DATA, "headers": TEST_HEADERS}
         )
         requests_mocker.register_uri(
             method,
@@ -63,7 +65,7 @@ class TestAPIDataSet:
 
     def test_http_error(self, requests_mocker, method):
         api_data_set = APIDataSet(
-            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+            url=TEST_URL, method=method, load_args={"params": TEST_PARAMS, "headers": TEST_HEADERS}
         )
         requests_mocker.register_uri(
             method,
@@ -78,7 +80,7 @@ class TestAPIDataSet:
 
     def test_socket_error(self, requests_mocker, method):
         api_data_set = APIDataSet(
-            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+            url=TEST_URL, method=method, load_args={"params": TEST_PARAMS, "headers": TEST_HEADERS}
         )
         requests_mocker.register_uri(method, TEST_URL_WITH_PARAMS, exc=socket.error)
 
@@ -99,7 +101,7 @@ class TestAPIDataSet:
         ``exists()`` should not silently catch it.
         """
         api_data_set = APIDataSet(
-            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+            url=TEST_URL, method=method, load_args={"params": TEST_PARAMS, "headers": TEST_HEADERS }
         )
         requests_mocker.register_uri(
             method,
@@ -117,7 +119,7 @@ class TestAPIDataSet:
         ``exists()`` should return True
         """
         api_data_set = APIDataSet(
-            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+            url=TEST_URL, method=method, load_args={"params": TEST_PARAMS, "headers": TEST_HEADERS}
         )
         requests_mocker.register_uri(
             method,
@@ -127,14 +129,6 @@ class TestAPIDataSet:
         )
 
         assert api_data_set.exists()
-
-    def test_credentials_auth_error(self, method):
-        """
-        If ``auth`` and ``credentials`` are both provided,
-        the constructor should raise a ValueError.
-        """
-        with pytest.raises(ValueError, match="both auth and credentials"):
-            APIDataSet(url=TEST_URL, method=method, auth=[], credentials=[])
 
     @pytest.mark.parametrize("auth_kwarg", ["auth", "credentials"])
     @pytest.mark.parametrize(

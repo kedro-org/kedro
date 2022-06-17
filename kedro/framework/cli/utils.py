@@ -319,7 +319,7 @@ def _check_module_importable(module_name: str) -> None:
         ) from exc
 
 
-def get_entry_points(name: str) -> importlib_metadata.EntryPoints:
+def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
     """Get all kedro related entry points"""
     return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
 
@@ -355,7 +355,7 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     """
 
     entry_point_commands = []
-    for entry_point in get_entry_points(name):
+    for entry_point in _get_entry_points(name):
         loaded_entry_point = _safe_load_entry_point(entry_point)
         if loaded_entry_point:
             entry_point_commands.append(loaded_entry_point)

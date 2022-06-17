@@ -44,8 +44,8 @@ Once the plugin is installed, you can run it as follows:
 kedro to_json
 ```
 
-## Extending Starters Template
-You can extend `kedro starter list` and `kedro new` by introducing your own `cookiecutter` template.
+## Extend starter aliases
+It is possible to extend the list of starter aliases built into Kedro. This means that a [custom Kedro starter](create_kedro_starters.md) can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`. 
 
 You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
 
@@ -58,8 +58,7 @@ starters = [
     )
 ]
 
-The `directory` argument is optional, it is useful when you have multiple templates like [kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. You can take the [pandas-iris](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) example for reference.
-
+The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. You can take the [pandas-iris](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) example for reference.
 ```
 
 In your `setup.py`, you need to register the specifications to `kedro.starters`.

@@ -26,7 +26,7 @@ from kedro.framework.cli.utils import (
     _filter_deprecation_warnings,
     _safe_load_entry_point,
     command_with_verbosity,
-    get_entry_points,
+    _get_entry_points,
 )
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -38,10 +38,11 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 class KedroStarterSpec:  # pylint: disable=too-few-public-methods
     """Specification of custom kedro starter template
     Args:
-        alias: alias of the starter which shows up on `kedro starter list` and `kedro new`
-        template_path: the path to git repository
-        directory: by default it will look for `alias`, optionally override with custom directory.
-        origin: preserved field used by kedro internally to determine where the starter
+        alias: alias of the starter which shows up on `kedro starter list` and is used by the starter argument of
+        `kedro new`
+        template_path: path to a directory or a URL to a remote VCS repository supported by `cookiecutter`
+        directory: optional directory inside the repository where the starter resides.
+        origin: reserved field used by kedro internally to determine where the starter
         comes from, users do not need to provide this field.
     """
 
@@ -118,7 +119,7 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
     """
     starter_specs = _OFFICIAL_STARTER_SPECS
 
-    for starter_entry_point in get_entry_points(name="starters"):
+    for starter_entry_point in _get_entry_points(name="starters"):
         origin = starter_entry_point.module.split(".")[0]
         specs = _safe_load_entry_point(starter_entry_point) or []
         for spec in specs:
@@ -171,31 +172,31 @@ def create_cli():  # pragma: no cover
 @click.option("--starter", "-s", "starter_name", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-def new(config_path, starter_name, checkout, directory, **kwargs):
+def new(config_path, starter_alias, checkout, directory, **kwargs):
     """Create a new kedro project."""
-    if checkout and not starter_name:
+    if checkout and not starter_alias:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
-    if directory and not starter_name:
+    if directory and not starter_alias:
         raise KedroCliError(
             "Cannot use the --directory flag without a --starter value."
         )
 
     starters_dict = _get_starters_dict()
 
-    if starter_name in starters_dict:
+    if starter_alias in starters_dict:
         if directory:
             raise KedroCliError(
                 "Cannot use the --directory flag with a --starter alias."
             )
-        spec = starters_dict[starter_name]
+        spec = starters_dict[starter_alias]
         template_path = spec.template_path
         # "directory" is an optional key for starters from plugins, so if the key is
         # not present we will use "None".
         directory = spec.directory
         checkout = checkout or version
-    elif starter_name is not None:
-        template_path = starter_name
+    elif starter_alias is not None:
+        template_path = starter_alias
         checkout = checkout or version
     else:
         template_path = str(TEMPLATE_PATH)

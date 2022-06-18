@@ -2,6 +2,7 @@
 It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
 import copy
+import logging
 from typing import Any, Dict, Iterable, Iterator, List, Union
 
 import jmespath
@@ -10,6 +11,12 @@ from requests.auth import AuthBase
 
 from kedro.extras.datasets.api import APIDataSet
 from kedro.io.core import DataSetError
+
+logger = logging.getLogger(__name__)
+
+
+def log_url(response: requests.Response, *args, **kwargs):
+    logger.debug("Response URL: %s", response.url)
 
 
 class PaginatedAPIDataSet(APIDataSet):
@@ -44,17 +51,33 @@ class PaginatedAPIDataSet(APIDataSet):
 
         # init session
         self._session = requests.Session()
-        self._session.auth = self._request_args.pop("auth", None)
-        headers = self._request_args.pop("headers", None)
-        if headers:
-            self._session.headers.update(headers)
+        self._session.auth = self._request_args["auth"]
+        self._session.hooks["response"].append(log_url)
+
+        # update session headers with provided headers
+        # requests' default headers:
+        # {'User-Agent': 'python-requests/2.27.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive'}
+        if self._request_args["headers"]:
+            self._session.headers.update(self._request_args["headers"])
+
+        self._initial_request_args = {
+            # used in every request
+            "timeout": timeout,
+            # used in initial request
+            "url": url,
+            "method": method,
+            "params": params,
+            "data": data,
+            "json": json,
+        }
+        self._current_request_args = copy.deepcopy(self._initial_request_args)
 
     def _get_next_page(self, response: requests.Response) -> Union[str, None]:
         raise NotImplementedError
 
     def _execute_request(self) -> requests.Response:
         try:
-            response = self._session.request(**self._request_args)
+            response = self._session.request(**self._current_request_args)
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
             raise DataSetError("Failed to fetch data", exc) from exc
@@ -64,23 +87,43 @@ class PaginatedAPIDataSet(APIDataSet):
             self._session.close()
         return response
 
-    def _load(self) -> Iterator[requests.Response]:  # type: ignore
-        # TODO: method overrides super class method, returns other type: iterator
+    def _execute_paginated_requests(self) -> Iterator[requests.Response]:  # type: ignore
 
-        # make a copy of the request arguments from init
-        request_args = copy.deepcopy(self._request_args)
+        # to be able to call .load() multiple times
+        # otherwise iterator is exhausted after first call
+        self._current_request_args = copy.deepcopy(self._initial_request_args)
 
-        while self._request_args["url"]:
+        # execute initial request
+        response = self._execute_request()
+        yield response
+
+        # there might be:
+        # a) only a single page -> no next url link found
+        # b) a wrong path_to_next_page -> no next url link found
+        url = self._get_next_page(response)
+        if url is None:
+            logger.debug(
+                "No next page link found with path_to_next_page %s",
+                self.path_to_next_page,
+            )
+
+        # remove keys from requests args, that are only needed for initial request
+        # TODO: "method"
+        # Is it possible to "post" multiple times to follow pagination?
+        # Possible 1 POST query request, followed by a series of "GET" requests
+        for key in ("url", "params", "data", "json"):
+            self._current_request_args.pop(key)
+
+        # handle pagination
+        self._current_request_args["url"] = url
+        while self._current_request_args["url"]:
             response = self._execute_request()
             yield response
-            self._request_args["url"] = self._get_next_page(response)
-
-            # params are only needed for first request
-            self._request_args.pop("params", None)
-
+            self._current_request_args["url"] = self._get_next_page(response)
         self._session.close()
-        # restore original state
-        self._request_args = request_args
+
+    def _load(self) -> Iterator[requests.Response]:  # type: ignore
+        return self._execute_paginated_requests()
 
 
 class PaginatedJSONAPIDataSet(PaginatedAPIDataSet):
@@ -100,8 +143,8 @@ class PaginatedJSONAPIDataSet(PaginatedAPIDataSet):
         >>>         "limit": 500
         >>>     }
         >>> )
-        >>> for r in data_set.load()
-        >>>     print(r)
+        >>> for response in data_set.load()
+        >>>     print(response)
 
     """
 

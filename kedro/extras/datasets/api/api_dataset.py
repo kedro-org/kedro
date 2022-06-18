@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 import requests
 
-from kedro.extras.datasets.api.BaseAuthFactory import BaseAuthFactory
+from kedro.extras.datasets.api.auth_factory import create_authenticator
 from kedro.io.core import AbstractDataSet, DataSetError
 
 _DEFAULT_CREDENTIALS = {}
@@ -33,7 +33,8 @@ class APIDataSet(AbstractDataSet):
         >>>             "agg_level_desc": "STATE",
         >>>             "year": 2000
         >>>         }
-        >>>     }
+        >>>     },
+        >>>     credentials={"username": "John", "password": "Doe"}
         >>> )
         >>> data = data_set.load()
     """
@@ -42,8 +43,8 @@ class APIDataSet(AbstractDataSet):
         self,
         url: str,
         method: str = "GET",
+        auth_type: str = 'requests.auth.HTTPBasicAuth',
         load_args: Dict[str, Any] = None,
-        auth: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
@@ -53,7 +54,7 @@ class APIDataSet(AbstractDataSet):
             method: The Method of the request, GET, POST, PUT, DELETE, HEAD, etc...
             load_args: Additional parameters to be fed to requests.request.
                 https://docs.python-requests.org/en/latest/api/
-            auth: provide arguments to construct a Requests `BaseAuth` object.
+            auth_type: provide type to construct a Requests `BaseAuth` object.
             credentials: Allows specifying secrets in credentials.yml.
         """
         super().__init__()
@@ -63,18 +64,14 @@ class APIDataSet(AbstractDataSet):
             self._credentials.update(credentials)
 
         self._auth = None
-
-        if auth is not None:
-            if 'type' not in auth:
-                raise DataSetError("'type' is missing from Authenticator configuration")
-            auth_type = auth.pop('type')
-            self._auth = BaseAuthFactory.create(auth_type, **auth, **credentials)
+        if credentials is not None:
+            self._auth = create_authenticator(class_type=auth_type, **credentials)
 
         self._request_args: Dict[str, Any] = {
+            **(load_args or {}),
             "url": url,
             "method": method,
-            "auth": self._auth,
-            **load_args
+            "auth": self._auth
         }
 
     def _describe(self) -> Dict[str, Any]:

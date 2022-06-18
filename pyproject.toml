@@ -3,7 +3,6 @@ exclude = "/templates/|^features/steps/test_starter"
 
 [tool.isort]
 profile = "black"
-known_first_party = ["features", "kedro", "tests", "tools"]
 
 [tool.pylint]
 [tool.pylint.master]

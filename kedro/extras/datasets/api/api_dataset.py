@@ -9,7 +9,7 @@ import requests
 from kedro.extras.datasets.api.auth_factory import create_authenticator
 from kedro.io.core import AbstractDataSet, DataSetError
 
-_DEFAULT_CREDENTIALS = {}
+_DEFAULT_CREDENTIALS: Dict[str, Any] = {}
 
 
 class APIDataSet(AbstractDataSet):
@@ -39,13 +39,14 @@ class APIDataSet(AbstractDataSet):
         >>> data = data_set.load()
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         url: str,
         method: str = "GET",
-        auth_type: str = 'requests.auth.HTTPBasicAuth',
+        auth_type: str = "requests.auth.HTTPBasicAuth",
         load_args: Dict[str, Any] = None,
-        credentials: Dict[str, Any] = None
+        credentials: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -71,7 +72,7 @@ class APIDataSet(AbstractDataSet):
             **(load_args or {}),
             "url": url,
             "method": method,
-            "auth": self._auth
+            "auth": self._auth,
         }
 
     def _describe(self) -> Dict[str, Any]:

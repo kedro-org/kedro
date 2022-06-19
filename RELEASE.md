@@ -35,7 +35,7 @@
 * Bumped the upper bound for the Flake8 dependency to <5.0.
 * `kedro jupyter notebook/lab` no longer reuses a Jupyter kernel.
 * Required `cookiecutter>=2.1.1` to address a [known command injection vulnerability](https://security.snyk.io/vuln/SNYK-PYTHON-COOKIECUTTER-2414281).
-
+* Reduced constructor arguments for `APIDataSet`, and made it consistent w.r.t. requests API, automatically enabling the full configuration domain: stream, certificates, proxies, and more.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.

@@ -1,6 +1,8 @@
+import base64
+
 import pytest
 import requests
-from requests.auth import AuthBase, _basic_auth_str
+from requests.auth import AuthBase
 
 from kedro.extras.datasets.api import APIDataSet
 from tests.extras.datasets.api.test_api_dataset import TEST_URL, TEST_METHOD, TEST_HEADERS, TEST_TEXT_RESPONSE_DATA
@@ -19,15 +21,23 @@ class AccessTokenAuth(AuthBase):
         return r
 
 
+def _basic_auth(username, password):
+    encoded = base64.b64encode(f"{username}:{password}".encode('latin-1'))
+    return f"Basic {encoded.decode('latin-1')}"
+
+
 class TestApiAuth:
 
     @pytest.mark.parametrize("auth_type,auth_cred,auth_header_key, auth_header_value", [
-        ("requests.auth.HTTPBasicAuth", { "username": "john", "password": "doe" }, "Authorization", _basic_auth_str('john', 'doe')),
-        ("requests.auth.HTTPProxyAuth", { "username": "john", "password": "doe" }, "Proxy-Authorization", _basic_auth_str('john', 'doe')),
+        ("requests.auth.HTTPBasicAuth", { "username": "john", "password": "doe" }, "Authorization", _basic_auth('john', 'doe')),
+        ("requests.auth.HTTPProxyAuth", { "username": "john", "password": "doe" }, "Proxy-Authorization", _basic_auth('john', 'doe')),
         ("tests.extras.datasets.api.test_api_auth.AccessTokenAuth", { "token": "abc" }, "Authorization", "access_token abc"),
     ])
     def test_auth_sequence(self, requests_mocker, auth_cred, auth_type, auth_header_key, auth_header_value):
-
+        """
+            Tests to make sure request Authenticator instances can be created and configured with the right credentials.
+            The created authenticator is passed in with a request and headers are tested for the correct value.
+        """
         api_data_set = APIDataSet(
             url=TEST_URL,
             method=TEST_METHOD,

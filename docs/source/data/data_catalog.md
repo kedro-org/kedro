@@ -265,12 +265,12 @@ us_corn_yield_data:
     year: 2000
 ```
 
-Note that `usda_credientials` will be passed as the `auth` argument in the `requests` library. Specify the username and password as a list in your `credentials.yml` as follows:
+Note that `usda_credientials` will be passed as the `auth` argument in the `requests` library. Specify the username and password as a Dict in your `credentials.yml` as follows:
 
 ```yaml
 usda_credentials:
-  - username
-  - password
+  username: John
+  password: Doe
 ```
 
 Example 14: Loading data from Minio (S3 API Compatible Storage)

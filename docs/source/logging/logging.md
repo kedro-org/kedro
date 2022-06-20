@@ -64,6 +64,10 @@ export COLUMNS=120 LINES=25
 You must provide a value for both `COLUMNS` and `LINES` even if you only wish to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINE=25`.
 ```
 
+### Rich logging in Jupyter
+
+Rich also formats the logs in JupyterLab and Jupyter Notebook. The size of the output console does not adapt to your window but can be controlled through the `JUPYTER_COLUMNS` and `JUPYTER_LINES` environment variables. The default values (115 and 100 respectively) should be suitable for most users, but if you require a different output console size then you should alter the values of `JUPYTER_COLUMNS` and `JUPYTER_LINES`.
+
 ## Perform logging in your project
 
 To perform logging in your own code (e.g. in a node), you are advised to do as follows:

@@ -31,7 +31,7 @@ class APIDataSet(AbstractDataSet):
         >>>             "year": 2000
         >>>         }
         >>>     },
-        >>>     credentials={"username": "John", "password": "Doe"}
+        >>>     credentials=("username", "password")
         >>> )
         >>> data = data_set.load()
     """

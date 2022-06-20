@@ -13,9 +13,9 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
 from kedro.framework.cli.starters import (
-    _OFFICIAL_STARTER_ALIASES,
+    _OFFICIAL_STARTER_SPECS,
     TEMPLATE_PATH,
-    _is_valid_starter_entrypoint_config,
+    KedroStarterSpec,
 )
 
 FILES_IN_TEMPLATE = 32
@@ -77,83 +77,47 @@ def _assert_template_ok(
     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
 
-@pytest.mark.parametrize(
-    "config",
-    [
-        {"name": "valid_starter", "template_path": "valid_starter"},
-        {
-            "name": "valid_starter",
-            "template_path": "valid_starter",
-            "directory": "optional",
-        },
-    ],
-)
-def test_valid_starter_entrypoint_config(config):
-    assert _is_valid_starter_entrypoint_config("mock", config)
-
-
-@pytest.mark.parametrize(
-    "config",
-    [
-        {"name": "invalid_starter"},
-        {
-            "name": "invalid_starter",
-            "template_path": "invalid_start",
-            "invalid_key": "invalid_key",
-        },
-        ["invalid_type"],
-    ],
-)
-def test_invalid_starter_entrypoint_config(config):
-    assert not _is_valid_starter_entrypoint_config("mock", config)
-
-
 def test_starter_list(fake_kedro_cli):
     """Check that `kedro starter list` prints out all starter aliases."""
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
 
     assert result.exit_code == 0, result.output
-    for alias in _OFFICIAL_STARTER_ALIASES:
+    for alias in _OFFICIAL_STARTER_SPECS:
         assert alias in result.output
 
 
 def test_starter_list_with_starter_plugin(fake_kedro_cli, entry_point):
     """Check that `kedro starter list` prints out the plugin starters."""
-    entry_point.load.return_value = [
-        {"name": "valid_starter", "template_path": "valid_path"}
-    ]
-    entry_point.module = "valid_starter"
+    entry_point.load.return_value = [KedroStarterSpec("valid_starter", "valid_path")]
+    entry_point.module = "valid_starter_module"
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
     assert result.exit_code == 0, result.output
-    assert "valid_starter" in result.output
+    assert "valid_starter_module" in result.output
 
 
 @pytest.mark.parametrize(
-    "fake_starters_config,expected",
+    "specs,expected",
     [
         (
-            [
-                {"name": "valid_starter", "template_path": "valid_path"},
-                {"name": "valid_starter", "template_path": "valid_path"},
-            ],
-            "has been ignored as it is already defined by",
+            [{"alias": "valid_starter", "template_path": "valid_path"}],
+            "should be a 'KedroStarterSpec'",
         ),
         (
             [
-                {"name": "valid_starter", "invalid_key": "valid_path"},
+                KedroStarterSpec("duplicate", "duplicate"),
+                KedroStarterSpec("duplicate", "duplicate"),
             ],
-            "has been ignored as the config is invalid and cannot be loaded",
+            "has been ignored as it is already defined by",
         ),
     ],
 )
 def test_starter_list_with_invalid_starter_plugin(
-    fake_kedro_cli, entry_point, fake_starters_config, expected
+    fake_kedro_cli, entry_point, specs, expected
 ):
-    """Check that `kedro starter list` skip the invalid starters."""
-    entry_point.load.return_value = fake_starters_config
+    """Check that `kedro starter list` prints out the plugin starters."""
+    entry_point.load.return_value = specs
     entry_point.module = "invalid_starter"
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
-    print(result.output)
     assert result.exit_code == 0, result.output
     assert expected in result.output
 

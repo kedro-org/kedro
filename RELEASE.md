@@ -6,6 +6,11 @@
 
 ## Breaking changes to the API
 
+### DataSets
+* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`.
+This makes it more consistent w.r.t. requests API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+
+
 ### CLI
 * Removed deprecated `kedro docs` command.
 
@@ -13,6 +18,10 @@
 * Removed deprecated `kedro.extras.ColorHandler`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+
+### DataSets
+
+* if you use `APIDataSet`, make sure to move all `requests` specific arguments, except for `url` and `method`, under the field `load_args`.
 
 ## Major features and improvements
 
@@ -35,7 +44,6 @@
 * Bumped the upper bound for the Flake8 dependency to <5.0.
 * `kedro jupyter notebook/lab` no longer reuses a Jupyter kernel.
 * Required `cookiecutter>=2.1.1` to address a [known command injection vulnerability](https://security.snyk.io/vuln/SNYK-PYTHON-COOKIECUTTER-2414281).
-* Reduced constructor arguments for `APIDataSet`, and made it consistent w.r.t. requests API, automatically enabling the full configuration domain: stream, certificates, proxies, and more.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.

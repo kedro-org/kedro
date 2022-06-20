@@ -1,6 +1,7 @@
 """Dummy plugin with simple hook implementations."""
 import logging
 
+from kedro.framework.cli.starters import KedroStarterSpec
 from kedro.framework.hooks import hook_impl
 
 logger = logging.getLogger(__name__)
@@ -16,17 +17,11 @@ class MyPluginHook:
 
 
 starters = [
-    {
-        "name": "test_plugin_starter",
-        "template_path": "https://github.com/kedro-org/kedro-starters/",
-        "directory": "pandas-iris",
-    },
-    {
-        "name": "test_plugin_starter",
-        "template_path": "https://github.com/kedro-org/kedro-starters/",
-        "directory": "pandas-iris",
-    },
+    KedroStarterSpec(
+        "test_plugin_starter",
+        template_path="https://github.com/kedro-org/kedro-starters/",
+        directory="pandas-iris",
+    )
 ]
-
 
 hooks = MyPluginHook()

@@ -55,7 +55,7 @@ When you create an Iris dataset example project by calling `kedro new`, you supp
 
 **project_name**
 
-The human-readable `project-name` variable is used in the [README.md](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris/README.md) for the new project.
+The human-readable `project_name` variable is used in the [README.md](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris/README.md) for the new project.
 
 **repo_name**
 

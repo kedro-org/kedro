@@ -80,8 +80,8 @@ class TestLambdaDataSetLoad:
 
     def test_load_not_callable(self):
         pattern = (
-            r"`load` function for LambdaDataSet must be a Callable\. "
-            r"Object of type `str` provided instead\."
+            r"'load' function for LambdaDataSet must be a Callable\. "
+            r"Object of type 'str' provided instead\."
         )
         with pytest.raises(DataSetError, match=pattern):
             LambdaDataSet("load", None)
@@ -113,15 +113,15 @@ class TestLambdaDataSetSave:
 
     def test_save_none(self, mocked_save, mocked_data_set):
         """Check the error when passing None to `save` call"""
-        pattern = "Saving `None` to a `DataSet` is not allowed"
+        pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             mocked_data_set.save(None)
         assert mocked_save.called == 0
 
     def test_save_not_callable(self):
         pattern = (
-            r"`save` function for LambdaDataSet must be a Callable\. "
-            r"Object of type `str` provided instead\."
+            r"'save' function for LambdaDataSet must be a Callable\. "
+            r"Object of type 'str' provided instead\."
         )
         with pytest.raises(DataSetError, match=pattern):
             LambdaDataSet(None, "save")
@@ -154,8 +154,8 @@ class TestLambdaDataSetExists:
 
     def test_exists_not_callable(self):
         pattern = (
-            r"`exists` function for LambdaDataSet must be a Callable\. "
-            r"Object of type `str` provided instead\."
+            r"'exists' function for LambdaDataSet must be a Callable\. "
+            r"Object of type 'str' provided instead\."
         )
         with pytest.raises(DataSetError, match=pattern):
             LambdaDataSet(None, None, "exists")
@@ -187,8 +187,8 @@ class TestLambdaDataSetRelease:
 
     def test_release_not_callable(self):
         pattern = (
-            r"`release` function for LambdaDataSet must be a Callable\. "
-            r"Object of type `str` provided instead\."
+            r"'release' function for LambdaDataSet must be a Callable\. "
+            r"Object of type 'str' provided instead\."
         )
         with pytest.raises(DataSetError, match=pattern):
             LambdaDataSet(None, None, None, "release")

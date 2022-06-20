@@ -24,7 +24,7 @@ from tests.runner.conftest import (
     exception_fn,
     identity,
     return_none,
-    return_not_serializable,
+    return_not_serialisable,
     sink,
     source,
 )
@@ -132,7 +132,7 @@ class TestMaxWorkers:
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
     def test_task_validation(self, is_async, fan_out_fan_in, catalog):
-        """ParallelRunner cannot serialize the lambda function."""
+        """ParallelRunner cannot serialise the lambda function."""
         catalog.add_feed_dict(dict(A=42))
         pipeline = Pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
@@ -156,12 +156,12 @@ class TestInvalidParallelRunner:
     def test_node_returning_none(self, is_async):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        pattern = "Saving `None` to a `DataSet` is not allowed"
+        pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_data_set_not_serializable(self, is_async, fan_out_fan_in):
-        """Data set A cannot be serializable because _load and _save are not
+    def test_data_set_not_serialisable(self, is_async, fan_out_fan_in):
+        """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """
 
@@ -171,21 +171,21 @@ class TestInvalidParallelRunner:
         def _save(arg):
             assert arg == 0  # pragma: no cover
 
-        # Data set A cannot be serialized
+        # Data set A cannot be serialised
         catalog = DataCatalog({"A": LambdaDataSet(load=_load, save=_save)})
 
         pipeline = Pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_memory_dataset_not_serializable(self, is_async, catalog):
-        """Memory dataset cannot be serializable because of data it stores."""
-        data = return_not_serializable(None)
-        pipeline = Pipeline([node(return_not_serializable, "A", "B")])
+    def test_memory_dataset_not_serialisable(self, is_async, catalog):
+        """Memory dataset cannot be serialisable because of data it stores."""
+        data = return_not_serialisable(None)
+        pipeline = Pipeline([node(return_not_serialisable, "A", "B")])
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pattern = (
-            rf"{str(data.__class__)} cannot be serialized. ParallelRunner implicit "
-            rf"memory datasets can only be used with serializable data"
+            rf"{str(data.__class__)} cannot be serialised. ParallelRunner implicit "
+            rf"memory datasets can only be used with serialisable data"
         )
 
         with pytest.raises(DataSetError, match=pattern):

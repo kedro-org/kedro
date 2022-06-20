@@ -66,7 +66,7 @@ class TestCatalogListCommand:
 
         assert result.exit_code
         expected_output = (
-            "Error: `fake` pipeline not found! Existing pipelines: pipeline, second"
+            "Error: 'fake' pipeline not found! Existing pipelines: pipeline, second"
         )
         assert expected_output in result.output
 
@@ -182,7 +182,7 @@ class TestCatalogCreateCommand:
 
         existing_pipelines = ", ".join(sorted(mock_pipelines.keys()))
         expected_output = (
-            f"Error: `fake` pipeline not found! Existing "
+            f"Error: 'fake' pipeline not found! Existing "
             f"pipelines: {existing_pipelines}\n"
         )
         assert expected_output in result.output

@@ -66,7 +66,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         else:
             existing_pls = ", ".join(sorted(pipelines.keys()))
             raise KedroCliError(
-                f"`{pipe}` pipeline not found! Existing pipelines: {existing_pls}"
+                f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
             )
 
         unused_ds = catalog_ds - pipeline_ds
@@ -129,7 +129,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     if not pipeline:
         existing_pipelines = ", ".join(sorted(pipelines.keys()))
         raise KedroCliError(
-            f"`{pipeline_name}` pipeline not found! Existing pipelines: {existing_pipelines}"
+            f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
         )
 
     pipe_datasets = {

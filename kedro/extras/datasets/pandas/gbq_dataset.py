@@ -164,8 +164,8 @@ class GBQTableDataSet(AbstractDataSet):
 
         if save_location != load_location:
             raise DataSetError(
-                "`load_args['location']` is different from `save_args['location']`. "
-                "The `location` defines where BigQuery data is stored, therefore has "
+                """"load_args['location']" is different from "save_args['location']". """
+                "The 'location' defines where BigQuery data is stored, therefore has "
                 "to be the same for save and load args. "
                 "Details: https://cloud.google.com/bigquery/docs/locations"
             )
@@ -242,13 +242,13 @@ class GBQQueryDataSet(AbstractDataSet):
         """
         if sql and filepath:
             raise DataSetError(
-                "`sql` and `filepath` arguments cannot both be provided."
+                "'sql' and 'filepath' arguments cannot both be provided."
                 "Please only provide one."
             )
 
         if not (sql or filepath):
             raise DataSetError(
-                "`sql` and `filepath` arguments cannot both be empty."
+                "'sql' and 'filepath' arguments cannot both be empty."
                 "Please provide a sql query or path to a sql query file."
             )
 
@@ -307,4 +307,4 @@ class GBQQueryDataSet(AbstractDataSet):
         )
 
     def _save(self, data: pd.DataFrame) -> None:
-        raise DataSetError("`save` is not supported on GBQQueryDataSet")
+        raise DataSetError("'save' is not supported on GBQQueryDataSet")

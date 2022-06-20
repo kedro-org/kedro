@@ -80,7 +80,7 @@ CONTEXT_CLASS = CustomContext
 
 ## Use Kedro's built-in Spark datasets to load and save raw data
 
-We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis), as well as to write them back to storage. Some of our built-in Spark datasets include:
+We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
 * [spark.DeltaTableDataSet](/kedro.extras.datasets.spark.DeltaTableDataSet)
 * [spark.SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)

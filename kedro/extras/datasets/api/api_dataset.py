@@ -8,8 +8,6 @@ from requests import Session, sessions
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
-_DEFAULT_CREDENTIALS: Dict[str, Any] = {}
-
 
 class APIDataSet(AbstractDataSet):
     """``APIDataSet`` loads the data from HTTP(S) APIs.

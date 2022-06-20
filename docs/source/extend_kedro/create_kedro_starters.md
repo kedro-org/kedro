@@ -89,5 +89,5 @@ Here is the layout of the project as a Cookiecutter template:
 ```
 
 ```{note}
-You can [add an alias by creating a plugin using `kedro.starters` entry point](./plugin.md#extend-starter-aliases), which will allows you to do `kedro new --starter=your_starters` and shows up on shows up on `kedro starter list`.
+You can [add an alias by creating a plugin using `kedro.starters` entry point](./plugins.md#extend-starter-aliases), which will allows you to do `kedro new --starter=your_starters` and shows up on shows up on `kedro starter list`.
 ```

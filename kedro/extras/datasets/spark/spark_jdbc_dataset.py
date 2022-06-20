@@ -88,11 +88,11 @@ class SparkJDBCDataSet(AbstractDataSet):
             load_args: Provided to underlying PySpark ``jdbc`` function along
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
             save_args: Provided to underlying PySpark ``jdbc`` function along
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
 
         Raises:
             DataSetError: When either ``url`` or ``table`` is empty or

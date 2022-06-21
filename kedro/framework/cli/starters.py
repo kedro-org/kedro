@@ -123,7 +123,7 @@ def new(
     # Ideally we would want to be able to use tempfile.TemporaryDirectory() context manager
     # but it causes an issue with readonly files on windows
     # see: https://bugs.python.org/issue26660.
-    # So onerror, we will attempt to clear the readonly bits and re-attempt the cleanup
+    # So on error, we will attempt to clear the readonly bits and re-attempt the cleanup
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
@@ -248,15 +248,23 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
         ) from exc
 
     _clean_pycache(Path(result_path))
+    project_name = cookiecutter_args.get("extra_context", {}).get("project_name")
+    python_package = cookiecutter_args.get("extra_context", {}).get("python_package")
     click.secho(
-        f"\nChange directory to the project generated in {result_path}",
-        fg="green",
+        f"\nThe project name '{project_name}' has been applied to: "
+        f"\n- The project title in {result_path}/README.md "
+        f"\n- The folder created for your project in {result_path} "
+        f"\n- The project's python package in {result_path}/src/{python_package}"
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
         "a virtual environment before running 'pip install -r src/requirements.txt' to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
+    )
+    click.secho(
+        f"\nChange directory to the project generated in {result_path} by entering 'cd {result_path}'",
+        fg="green",
     )
 
 
@@ -347,6 +355,16 @@ def _fetch_config_from_user_prompts(
         if user_input:
             prompt.validate(user_input)
             config[variable_name] = user_input
+
+    for variable_name in ["repo_name", "python_package"]:
+        cookiecutter_variable = render_variable(
+            env=StrictEnvironment(context=cookiecutter_context),
+            raw=cookiecutter_context[variable_name],
+            cookiecutter_dict=config,
+        )
+
+        config[variable_name] = cookiecutter_variable
+
     return config
 
 

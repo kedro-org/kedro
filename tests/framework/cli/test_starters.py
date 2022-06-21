@@ -130,6 +130,31 @@ class TestNewFromUserPromptsValid:
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         _assert_template_ok(result)
 
+    def test_custom_prompt_valid_input(self, fake_kedro_cli):
+        shutil.copytree(TEMPLATE_PATH, "template")
+        _write_yaml(
+            Path("template") / "prompts.yml",
+            {
+                "project_name": {"title": "Project Name"},
+                "custom_value": {
+                    "title": "Custom Value",
+                    "regex_validator": "^\\w+(-*\\w+)*$",
+                },
+            },
+        )
+        custom_input = "\n".join(["my-project", "My Project"])
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--starter", "template"],
+            input=custom_input,
+        )
+        _assert_template_ok(
+            result,
+            project_name="My Project",
+            repo_name="my-project",
+            python_package="my_project",
+        )
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromUserPromptsInvalid:
@@ -158,6 +183,27 @@ class TestNewFromUserPromptsInvalid:
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         assert result.exit_code != 0
         assert "Failed to generate project: could not load prompts.yml" in result.output
+
+    def test_custom_prompt_invalid_input(self, fake_kedro_cli):
+        shutil.copytree(TEMPLATE_PATH, "template")
+        _write_yaml(
+            Path("template") / "prompts.yml",
+            {
+                "project_name": {"title": "Project Name"},
+                "custom_value": {
+                    "title": "Custom Value",
+                    "regex_validator": "^\\w+(-*\\w+)*$",
+                },
+            },
+        )
+        custom_input = "\n".join(["My Project", "My Project"])
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--starter", "template"],
+            input=custom_input,
+        )
+        assert result.exit_code != 0
+        assert "'My Project' is an invalid value" in result.output
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

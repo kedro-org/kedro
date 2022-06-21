@@ -79,9 +79,7 @@ def create_cli():  # pragma: no cover
 @click.option("--starter", "-s", "starter_name", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-def new(
-    config_path, starter_name, checkout, directory, **kwargs
-):  # pylint: disable=unused-argument
+def new(config_path, starter_name, checkout, directory, **kwargs):
     """Create a new kedro project."""
     if checkout and not starter_name:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
@@ -248,8 +246,9 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
         ) from exc
 
     _clean_pycache(Path(result_path))
-    project_name = cookiecutter_args.get("extra_context", {}).get("project_name")
-    python_package = cookiecutter_args.get("extra_context", {}).get("python_package")
+    extra_context = cookiecutter_args.get("extra_context", {})
+    project_name = extra_context.get("project_name", "")
+    python_package = extra_context.get("python_package", "")
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "
         f"\n- The project title in {result_path}/README.md "
@@ -263,7 +262,8 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
         "https://kedro.readthedocs.io/"
     )
     click.secho(
-        f"\nChange directory to the project generated in {result_path} by entering 'cd {result_path}'",
+        f"\nChange directory to the project generated in {result_path} by "
+        f"entering 'cd {result_path}'",
         fg="green",
     )
 
@@ -346,7 +346,7 @@ def _fetch_config_from_user_prompts(
         # render the variable on the command line
         cookiecutter_variable = render_variable(
             env=StrictEnvironment(context=cookiecutter_context),
-            raw=cookiecutter_context[variable_name],
+            raw=cookiecutter_context.get(variable_name),
             cookiecutter_dict=config,
         )
 
@@ -359,7 +359,7 @@ def _fetch_config_from_user_prompts(
     for variable_name in ["repo_name", "python_package"]:
         cookiecutter_variable = render_variable(
             env=StrictEnvironment(context=cookiecutter_context),
-            raw=cookiecutter_context[variable_name],
+            raw=cookiecutter_context.get(variable_name),
             cookiecutter_dict=config,
         )
 

@@ -23,9 +23,12 @@ You then need to decide which are:
 
 By default, when you create a new project using a Kedro starter, `kedro new` launches in interactive mode. The user is then prompted for the variables that have been set in `prompts.yml`.
 
-The most basic and empty starter triggered by `kedro new` is set up with the following three variables:
+The most basic and empty starter triggered by `kedro new` is set up with the following variable:
 
 * `project_name` - A human readable name for the new project
+
+Kedro will then automatically create the following two variables from the `project_name`:
+
 * `repo_name` - A name for the directory that holds the project repository
 * `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
 

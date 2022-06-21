@@ -116,10 +116,17 @@ Welcome to Kedro's documentation!
    :caption: Extend Kedro
 
    extend_kedro/common_use_cases
-   extend_kedro/hooks
    extend_kedro/custom_datasets
    extend_kedro/plugins
    extend_kedro/create_kedro_starters
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Hooks
+
+   hooks/hooks
+   hooks/common_use_cases
+   hooks/hooks_examples
 
 
 .. toctree::

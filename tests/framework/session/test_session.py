@@ -496,6 +496,27 @@ class TestKedroSession:
         ]
         assert actual_log_messages == expected_log_messages
 
+    def test_get_username_error(
+        self, fake_project, mock_package_name, mocker, caplog
+    ):
+        """Test that username information is not added to the session store
+        if call to getuser() fails
+        """
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
+        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
+        mocker.patch("getpass.getuser", side_effect=FakeException)
+        session = KedroSession.create(mock_package_name, fake_project)
+        assert "username" not in session.store
+
+        expected_log_message = "Unable to get username."
+        actual_log_messages = [
+            rec.getMessage()
+            for rec in caplog.records
+            if rec.name == SESSION_LOGGER_NAME and rec.levelno == logging.DEBUG
+        ]
+        assert expected_log_message in actual_log_messages
+    
     @pytest.mark.usefixtures("mock_settings")
     def test_log_error(self, fake_project, mock_package_name):
         """Test logging the error by the session"""

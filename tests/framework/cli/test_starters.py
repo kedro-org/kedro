@@ -15,8 +15,8 @@ from kedro import __version__ as version
 from kedro.framework.cli.starters import (
     _OFFICIAL_STARTER_SPECS,
     TEMPLATE_PATH,
-    KedroStarterSpec,
 )
+from kedro.framework import KedroStarterSpec
 
 FILES_IN_TEMPLATE = 32
 

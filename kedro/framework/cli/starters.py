@@ -15,10 +15,10 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import click
 import yaml
-from attrs import define, field
 
 import kedro
 from kedro import __version__ as version
+from kedro.framework import KedroStarterSpec
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     KedroCliError,
@@ -32,26 +32,6 @@ from kedro.framework.cli.utils import (
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
-
-
-@define(order=True)
-class KedroStarterSpec:  # pylint: disable=too-few-public-methods
-    """Specification of custom kedro starter template
-    Args:
-        alias: alias of the starter which shows up on `kedro starter list` and is used
-        by the starter argument of `kedro new`
-        template_path: path to a directory or a URL to a remote VCS repository supported
-        by `cookiecutter`
-        directory: optional directory inside the repository where the starter resides.
-        origin: reserved field used by kedro internally to determine where the starter
-        comes from, users do not need to provide this field.
-    """
-
-    alias: str
-    template_path: str
-    directory: Optional[str] = None
-    origin: Optional[str] = field(init=False)
-
 
 _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),

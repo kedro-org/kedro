@@ -359,14 +359,14 @@ class TestRunNodeSynchronisationHelper:
     def mock_configure_project(self, mocker):
         return mocker.patch("kedro.framework.project.configure_project")
 
-    @pytest.mark.parametrize("conf_logging", [{"fake_logging_config": True}, {}])
+    @pytest.mark.parametrize("logging_config", [{"fake_logging_config": True}, {}])
     def test_package_name_and_logging_provided(
         self,
         mock_logging,
         mock_run_node,
         mock_configure_project,
         is_async,
-        conf_logging,
+        logging_config,
         mocker,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
@@ -381,10 +381,10 @@ class TestRunNodeSynchronisationHelper:
             is_async,
             session_id,
             package_name=package_name,
-            conf_logging=conf_logging,
+            logging_config=logging_config,
         )
         mock_run_node.assert_called_once()
-        mock_logging.assert_called_once_with(conf_logging)
+        mock_logging.assert_called_once_with(logging_config)
         mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_provided(

@@ -56,8 +56,8 @@ class ConfigLoader(AbstractConfigLoader):
         >>> conf_path = str(project_path / settings.CONF_SOURCE)
         >>> conf_loader = ConfigLoader(conf_source=conf_path, env="local")
         >>>
-        >>> logging_config = conf_loader.get('logging*')
-        >>> logging.config.dictConfig(logging_config)  # set logging conf
+        >>> conf_logging = conf_loader.get('logging*')
+        >>> logging.config.dictConfig(conf_logging)  # set logging conf
         >>>
         >>> conf_catalog = conf_loader.get('catalog*', 'catalog*/**')
         >>> conf_params = conf_loader.get('**/parameters.yml')

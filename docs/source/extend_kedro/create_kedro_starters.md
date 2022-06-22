@@ -27,7 +27,7 @@ The most basic and empty starter triggered by `kedro new` is set up with the fol
 
 * `project_name` - A human readable name for the new project
 
-Kedro will then automatically create the following two variables from the `project_name`:
+Kedro will then automatically generate the following two variables from the `project_name`:
 
 * `repo_name` - A name for the directory that holds the project repository
 * `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
@@ -48,7 +48,7 @@ At the very least, the prompt `title` must be defined for the prompt to be valid
 
 If the input to the prompts needs to be **validated**, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. For more complex validation, have a look at [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/1.7.2/advanced/hooks.html#using-pre-post-generate-hooks-0-7-0).
 
-If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See the default starter [`cookiecutter.json`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/cookiecutter.json) as example.
+If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See [the default starter `cookiecutter.json`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/cookiecutter.json) as example.
 
 ### Example Kedro starter
 

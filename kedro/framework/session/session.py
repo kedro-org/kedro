@@ -165,7 +165,7 @@ class KedroSession:
 
         try:
             session_data["username"] = getpass.getuser()
-        except:  # pylint: disable=broad-except
+        except:  # pylint: disable=bare-except
             logging.getLogger(__name__).debug("Unable to get username.")
 
         session._store.update(session_data)

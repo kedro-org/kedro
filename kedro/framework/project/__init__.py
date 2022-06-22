@@ -180,7 +180,7 @@ class _ProjectPipelines(MutableMapping):
 
 
 PACKAGE_NAME = None
-LOGGING = None
+LOGGING_CONFIG = None
 
 settings = _ProjectSettings()
 
@@ -206,10 +206,12 @@ def configure_project(package_name: str):
 
 
 def configure_logging(logging_config: Dict[str, Any]) -> None:
-    """Configure logging to make it available as a global variable."""
+    """Configure logging and make it available as a global variable."""
     logging.config.dictConfig(logging_config)
-    global LOGGING
-    LOGGING = logging_config
+    logging.captureWarnings(True)
+
+    global LOGGING_CONFIG
+    LOGGING_CONFIG = logging_config
 
 
 def validate_settings():

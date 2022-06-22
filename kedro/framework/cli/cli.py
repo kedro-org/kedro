@@ -3,7 +3,6 @@
 This module implements commands available from the kedro CLI.
 """
 import importlib
-import logging
 import sys
 import webbrowser
 from collections import defaultdict
@@ -13,9 +12,8 @@ from typing import Sequence
 import click
 import importlib_metadata
 
-# pylint: disable=unused-import
-import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
+from kedro.config.default_logger import configure_default_logging
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
 from kedro.framework.cli.jupyter import jupyter_cli
@@ -41,8 +39,6 @@ LOGO = rf"""
 |_|\_\___|\__,_|_|  \___/
 v{version}
 """
-
-logger = logging.getLogger(__name__)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
@@ -210,6 +206,7 @@ def main():  # pragma: no cover
     """Main entry point. Look for a ``cli.py``, and, if found, add its
     commands to `kedro`'s before invoking the CLI.
     """
+    configure_default_logging()
     _init_plugins()
     cli_collection = KedroCLI(project_path=Path.cwd())
     cli_collection()

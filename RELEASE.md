@@ -8,6 +8,7 @@
 
 ### CLI
 * Removed deprecated `kedro docs` command.
+* Reduced the `kedro new` prompts to just one question asking for the project name.
 
 ### Other
 * Removed deprecated `kedro.extras.ColorHandler`.

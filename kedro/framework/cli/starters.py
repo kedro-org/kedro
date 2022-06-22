@@ -221,7 +221,7 @@ def _make_cookiecutter_args(
     return cookiecutter_args
 
 
-def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
+def _create_project(template_path: str, cookiecutter_args: Dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
     Args:
@@ -335,8 +335,7 @@ def _fetch_config_from_user_prompts(
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
     # pylint: disable=import-outside-toplevel
-    from cookiecutter.environment import StrictEnvironment
-    from cookiecutter.prompt import read_user_variable, render_variable
+    from cookiecutter.prompt import read_user_variable
 
     config: Dict[str, str] = {}
 
@@ -344,10 +343,8 @@ def _fetch_config_from_user_prompts(
         prompt = _Prompt(**prompt_dict)
 
         # render the variable on the command line
-        cookiecutter_variable = render_variable(
-            env=StrictEnvironment(context=cookiecutter_context),
-            raw=cookiecutter_context.get(variable_name),
-            cookiecutter_dict=config,
+        cookiecutter_variable = _render_variable_default(
+            cookiecutter_context, variable_name, config
         )
 
         # read the user's input for the variable
@@ -357,15 +354,25 @@ def _fetch_config_from_user_prompts(
             config[variable_name] = user_input
 
     for variable_name in ["repo_name", "python_package"]:
-        cookiecutter_variable = render_variable(
-            env=StrictEnvironment(context=cookiecutter_context),
-            raw=cookiecutter_context.get(variable_name),
-            cookiecutter_dict=config,
+        config[variable_name] = _render_variable_default(
+            cookiecutter_context, variable_name, config
         )
 
-        config[variable_name] = cookiecutter_variable
-
     return config
+
+
+def _render_variable_default(cookiecutter_context, variable_name, config):
+    # pylint: disable=import-outside-toplevel
+    """Render the variable on the command line and fill with default from cookiecutter template"""
+
+    from cookiecutter.environment import StrictEnvironment
+    from cookiecutter.prompt import render_variable
+
+    return render_variable(
+        env=StrictEnvironment(context=cookiecutter_context),
+        raw=cookiecutter_context.get(variable_name),
+        cookiecutter_dict=config,
+    )
 
 
 def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):

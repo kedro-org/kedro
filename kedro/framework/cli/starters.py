@@ -248,7 +248,7 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, Any]):
     _clean_pycache(Path(result_path))
     extra_context = cookiecutter_args.get("extra_context", {})
     project_name = extra_context.get("project_name", "")
-    python_package = extra_context.get("python_package", "")
+    python_package = extra_context.get("python_package", project_name.lower().replace(" ", "_"))
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "
         f"\n- The project title in {result_path}/README.md "
@@ -335,7 +335,8 @@ def _fetch_config_from_user_prompts(
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
     # pylint: disable=import-outside-toplevel
-    from cookiecutter.prompt import read_user_variable
+    from cookiecutter.environment import StrictEnvironment
+    from cookiecutter.prompt import read_user_variable, render_variable
 
     config: Dict[str, str] = {}
 
@@ -343,8 +344,10 @@ def _fetch_config_from_user_prompts(
         prompt = _Prompt(**prompt_dict)
 
         # render the variable on the command line
-        cookiecutter_variable = _render_variable_default(
-            cookiecutter_context, variable_name, config
+        cookiecutter_variable = render_variable(
+            env=StrictEnvironment(context=cookiecutter_context),
+            raw=cookiecutter_context.get(variable_name),
+            cookiecutter_dict=config,
         )
 
         # read the user's input for the variable
@@ -352,27 +355,7 @@ def _fetch_config_from_user_prompts(
         if user_input:
             prompt.validate(user_input)
             config[variable_name] = user_input
-
-    for variable_name in ["repo_name", "python_package"]:
-        config[variable_name] = _render_variable_default(
-            cookiecutter_context, variable_name, config
-        )
-
     return config
-
-
-def _render_variable_default(cookiecutter_context, variable_name, config):
-    # pylint: disable=import-outside-toplevel
-    """Render the variable on the command line and fill with default from cookiecutter template"""
-
-    from cookiecutter.environment import StrictEnvironment
-    from cookiecutter.prompt import render_variable
-
-    return render_variable(
-        env=StrictEnvironment(context=cookiecutter_context),
-        raw=cookiecutter_context.get(variable_name),
-        cookiecutter_dict=config,
-    )
 
 
 def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):

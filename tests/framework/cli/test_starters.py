@@ -155,6 +155,31 @@ class TestNewFromUserPromptsValid:
             python_package="my_project",
         )
 
+    def test_custom_prompt_for_essential_variable(self, fake_kedro_cli):
+        shutil.copytree(TEMPLATE_PATH, "template")
+        _write_yaml(
+            Path("template") / "prompts.yml",
+            {
+                "project_name": {"title": "Project Name"},
+                "repo_name": {
+                    "title": "Custom Repo Name",
+                    "regex_validator": "^[a-zA-Z_]\\w{1,}$",
+                },
+            },
+        )
+        custom_input = "\n".join(["My Project", "my_custom_repo"])
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--starter", "template"],
+            input=custom_input,
+        )
+        _assert_template_ok(
+            result,
+            project_name="My Project",
+            repo_name="my_custom_repo",
+            python_package="my_project",
+        )
+
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromUserPromptsInvalid:

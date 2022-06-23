@@ -516,7 +516,7 @@ class TestKedroSession:
             for rec in caplog.records
             if rec.name == SESSION_LOGGER_NAME and rec.levelno == logging.DEBUG
         ]
-        assert expected_log_messages == actual_log_messages
+        assert actual_log_messages == expected_log_messages
 
     @pytest.mark.usefixtures("mock_settings")
     def test_log_error(self, fake_project, mock_package_name):

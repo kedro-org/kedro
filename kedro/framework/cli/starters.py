@@ -248,7 +248,9 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, Any]):
     _clean_pycache(Path(result_path))
     extra_context = cookiecutter_args.get("extra_context", {})
     project_name = extra_context.get("project_name", "")
-    python_package = extra_context.get("python_package", project_name.lower().replace(" ", "_"))
+    python_package = extra_context.get(
+        "python_package", project_name.lower().replace(" ", "_")
+    )
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "
         f"\n- The project title in {result_path}/README.md "

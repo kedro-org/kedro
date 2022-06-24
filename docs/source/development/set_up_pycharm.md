@@ -120,7 +120,7 @@ Click **OK** and then select **Remote Run** from the toolbar and click **Run** t
 
 ![](../meta/images/pycharm_remote_run.png)
 
-To remotely debug, click the debugger button as [described above](#debugging).
+[To remotely debug, click the debugger button as described above](#debugging).
 
 
 ## Advanced: Docker interpreter
@@ -173,4 +173,4 @@ Add the following file path pattern to the mapping: `conf/**/*catalog*`.
 
 ![](../meta/images/pycharm_catalog_schema_mapping.png)
 
-> Different schemas for different Kedro versions can be found [here](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).
+> [Different schemas for different Kedro versions can be found in the Kedro repository](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).

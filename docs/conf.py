@@ -206,7 +206,7 @@ linkcheck_ignore = [
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf",
-    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/config/logging.yml",
+    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/config/default_logging.yml",
 ]
 
 # retry before render a link broken (fix for "too many requests")

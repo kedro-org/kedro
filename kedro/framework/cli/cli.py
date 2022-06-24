@@ -13,7 +13,8 @@ import click
 import importlib_metadata
 
 from kedro import __version__ as version
-from kedro.framework.project import LOGGING_CONFIG
+# pylint: disable=unused-import
+from kedro.framework.project import LOGGING_CONFIG  # noqa
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
 from kedro.framework.cli.jupyter import jupyter_cli

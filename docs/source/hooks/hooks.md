@@ -30,6 +30,7 @@ Kedro defines Hook specifications for particular execution points where users ca
 * `after_dataset_loaded`
 * `before_dataset_saved`
 * `after_dataset_saved`
+* `after_context_created`
 
 The naming convention for non-error Hooks is `<before/after>_<noun>_<past_participle>`, in which:
 

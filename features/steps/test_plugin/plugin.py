@@ -3,8 +3,6 @@ import logging
 
 from kedro.framework.hooks import hook_impl
 
-from kedro.framework.cli.starters import _STARTERS_REPO
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 

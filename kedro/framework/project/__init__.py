@@ -206,7 +206,7 @@ class _ProjectLogging(UserDict):
 
 
 PACKAGE_NAME = None
-LOGGING_CONFIG = _ProjectLogging()
+LOGGING = _ProjectLogging()
 
 settings = _ProjectSettings()
 
@@ -233,7 +233,7 @@ def configure_project(package_name: str):
 
 def configure_logging(logging_config: Dict[str, Any]) -> None:
     """Configure logging according to `logging_config` dictionary."""
-    LOGGING_CONFIG.configure(logging_config)
+    LOGGING.configure(logging_config)
 
 
 def validate_settings():

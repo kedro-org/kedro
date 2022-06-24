@@ -13,7 +13,7 @@ import click
 import importlib_metadata
 
 from kedro import __version__ as version
-from kedro.config.default_logger import configure_default_logging
+from kedro.framework.project import LOGGING_CONFIG
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
 from kedro.framework.cli.jupyter import jupyter_cli
@@ -206,7 +206,6 @@ def main():  # pragma: no cover
     """Main entry point. Look for a ``cli.py``, and, if found, add its
     commands to `kedro`'s before invoking the CLI.
     """
-    configure_default_logging()
     _init_plugins()
     cli_collection = KedroCLI(project_path=Path.cwd())
     cli_collection()

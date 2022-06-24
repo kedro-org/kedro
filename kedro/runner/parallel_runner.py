@@ -11,7 +11,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Dict, Iterable, Optional, Set
+from typing import Any, Dict, Iterable, Set
 
 from pluggy import PluginManager
 
@@ -79,15 +79,12 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
-def _bootstrap_subprocess(
-    package_name: str, logging_config: Optional[Dict[str, Any]] = None
-):
+def _bootstrap_subprocess(package_name: str, logging_config: Dict[str, Any]):
     # pylint: disable=import-outside-toplevel,cyclic-import
     from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
-    if logging_config is not None:
-        configure_logging(logging_config)
+    configure_logging(logging_config)
 
 
 def _run_node_synchronization(  # pylint: disable=too-many-arguments
@@ -96,7 +93,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     is_async: bool = False,
     session_id: str = None,
     package_name: str = None,
-    logging_config: Optional[Dict[str, Any]] = None,
+    logging_config: Dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -299,7 +296,7 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
-        from kedro.framework.project import LOGGING_CONFIG, PACKAGE_NAME
+        from kedro.framework.project import PACKAGE_NAME, LOGGING_CONFIG
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:

@@ -1,10 +1,18 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
+import sys
+from collections import UserDict
+
+import click
+from pathlib import Path
+
 import importlib
 import logging.config
 import operator
+import yaml
 from collections.abc import MutableMapping
+from rich.traceback import install as rich_traceback_install
 from typing import Any, Dict, Optional
 
 from dynaconf import LazySettings
@@ -179,8 +187,26 @@ class _ProjectPipelines(MutableMapping):
     __str__ = _load_data_wrapper(str)
 
 
+class _ProjectLogging(UserDict):
+    def __init__(self):
+        default_logging = (Path(__file__).parent / "default_logging.yml").read_text()
+        self.configure(yaml.safe_load(default_logging))
+
+        # We suppress click here to hide tracebacks related to it conversely,
+        # kedro is not suppressed to show its tracebacks for easier debugging.
+        # sys.executable is used to get the kedro executable path to hide the top level traceback.
+        rich_traceback_install(
+            show_locals=True, suppress=[click, str(Path(sys.executable).parent)]
+        )
+        logging.captureWarnings(True)
+
+    def configure(self, logging_config: Dict[str, Any]) -> None:
+        logging.config.dictConfig(logging_config)
+        self.data = logging_config
+
+
 PACKAGE_NAME = None
-LOGGING_CONFIG = None
+LOGGING_CONFIG = _ProjectLogging()
 
 settings = _ProjectSettings()
 
@@ -206,12 +232,8 @@ def configure_project(package_name: str):
 
 
 def configure_logging(logging_config: Dict[str, Any]) -> None:
-    """Configure logging and make it available as a global variable."""
-    logging.config.dictConfig(logging_config)
-    logging.captureWarnings(True)
-
-    global LOGGING_CONFIG
-    LOGGING_CONFIG = logging_config
+    """Configure logging according to `logging_config` dictionary."""
+    LOGGING_CONFIG.configure(logging_config)
 
 
 def validate_settings():

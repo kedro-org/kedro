@@ -29,6 +29,7 @@
 * Bumped the upper bound for the Flake8 dependency to <5.0.
 * `kedro jupyter notebook/lab` no longer reuses a Jupyter kernel.
 * Required `cookiecutter>=2.1.1` to address a [known command injection vulnerability](https://security.snyk.io/vuln/SNYK-PYTHON-COOKIECUTTER-2414281).
+* The session store no longer fails if a username cannot be found with `getpass.getuser`.
 
 
 ## Upcoming deprecations for Kedro 0.19.0

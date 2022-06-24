@@ -113,8 +113,8 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
         The node argument.
 
     """
-    if multiprocessing.get_start_method() == "spawn" and package_name:  # type: ignore
-        _bootstrap_subprocess(package_name, logging_config)
+    if multiprocessing.get_start_method() == "spawn" and package_name:
+        _bootstrap_subprocess(package_name, logging_config)  # type: ignore
 
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
@@ -311,7 +311,7 @@ class ParallelRunner(AbstractRunner):
                             self._is_async,
                             session_id,
                             package_name=PACKAGE_NAME,
-                            logging_config=LOGGING,
+                            logging_config=LOGGING,  # type: ignore
                         )
                     )
                 if not futures:

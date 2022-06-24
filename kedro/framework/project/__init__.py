@@ -1,22 +1,20 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
-import sys
-from collections import UserDict
-
-import click
-from pathlib import Path
-
 import importlib
 import logging.config
 import operator
-import yaml
+import sys
+from collections import UserDict
 from collections.abc import MutableMapping
-from rich.traceback import install as rich_traceback_install
-from typing import Any, Dict, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional, cast
 
+import click
+import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
+from rich.traceback import install as rich_traceback_install
 
 from kedro.pipeline import Pipeline
 

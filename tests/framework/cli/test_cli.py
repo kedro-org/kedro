@@ -8,6 +8,7 @@ import anyconfig
 import click
 from click.testing import CliRunner
 from pytest import fixture, mark, raises
+
 from kedro import __version__ as version
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli

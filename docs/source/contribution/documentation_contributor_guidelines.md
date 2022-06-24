@@ -72,7 +72,7 @@ If you are unsure of our preferred style, just do what you can in your documenta
 ```
 
 ### Language
-* Use UK English
+* Use American English, except for names spelt using UK English. McKinsey uses the spelling in Merriam Webster as a guide.
 
 ### Formatting
 * Use Markdown formatting

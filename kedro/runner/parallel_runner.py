@@ -296,7 +296,7 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
-        from kedro.framework.project import PACKAGE_NAME, LOGGING_CONFIG
+        from kedro.framework.project import LOGGING, PACKAGE_NAME
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:
@@ -311,7 +311,7 @@ class ParallelRunner(AbstractRunner):
                             self._is_async,
                             session_id,
                             package_name=PACKAGE_NAME,
-                            logging_config=LOGGING_CONFIG,
+                            logging_config=LOGGING,
                         )
                     )
                 if not futures:

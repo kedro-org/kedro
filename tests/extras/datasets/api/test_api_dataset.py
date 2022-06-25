@@ -22,15 +22,10 @@ TEST_HEADERS = {"key": "value"}
 
 
 class TestAPIDataSet:
-
     @pytest.mark.parametrize("method", POSSIBLE_METHODS)
     def test_request_method(self, requests_mock, method):
-        api_data_set = APIDataSet(
-            url=TEST_URL, method=method
-        )
-        requests_mock.register_uri(
-            method, TEST_URL, text=TEST_TEXT_RESPONSE_DATA
-        )
+        api_data_set = APIDataSet(url=TEST_URL, method=method)
+        requests_mock.register_uri(method, TEST_URL, text=TEST_TEXT_RESPONSE_DATA)
 
         response = api_data_set.load()
         assert response.text == TEST_TEXT_RESPONSE_DATA
@@ -40,7 +35,7 @@ class TestAPIDataSet:
         [
             ({"param": "value"}, "?param=value"),
             (bytes("a=1", "latin-1"), "?a=1"),
-        ]
+        ],
     )
     def test_params_in_request(self, requests_mock, parameters_in, url_postfix):
         api_data_set = APIDataSet(
@@ -60,10 +55,7 @@ class TestAPIDataSet:
             method=TEST_METHOD,
             load_args={"json": TEST_JSON_REQUEST_DATA},
         )
-        requests_mock.register_uri(
-            TEST_METHOD,
-            TEST_URL
-        )
+        requests_mock.register_uri(TEST_METHOD, TEST_URL)
 
         response = api_data_set.load()
         assert response.request.json() == TEST_JSON_REQUEST_DATA
@@ -134,7 +126,7 @@ class TestAPIDataSet:
             (1, 1),
             ((1, 2), (1, 2)),
             ([1, 2], (1, 2)),
-        ]
+        ],
     )
     def test_api_timeout(self, requests_mock, timeout_in, timeout_out):
         api_data_set = APIDataSet(
@@ -181,13 +173,12 @@ class TestAPIDataSet:
             (["cert.pem", "privkey.pem"], ("cert.pem", "privkey.pem")),
             ("some/path/to/file.pem", "some/path/to/file.pem"),
             (None, None),
-        ])
+        ],
+    )
     def test_certs(self, requests_mock, cert_in, cert_out):
 
         api_data_set = APIDataSet(
-            url=TEST_URL,
-            method=TEST_METHOD,
-            load_args={"cert": cert_in }
+            url=TEST_URL, method=TEST_METHOD, load_args={"cert": cert_in}
         )
         requests_mock.register_uri(TEST_METHOD, TEST_URL)
 

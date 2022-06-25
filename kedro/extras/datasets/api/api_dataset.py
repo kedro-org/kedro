@@ -79,9 +79,9 @@ class APIDataSet(AbstractDataSet):
     @staticmethod
     def _convert_type(value: Any):
         """
-            From the Catalog, iterations are provided as lists.
-            However, for some Parameters in the python Requests library,
-            only Tuples are allowed.
+        From the Catalog, iterations are provided as lists.
+        However, for some Parameters in the python Requests library,
+        only Tuples are allowed.
         """
         if isinstance(value, List):
             return tuple(value)

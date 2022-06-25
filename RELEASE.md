@@ -7,8 +7,7 @@
 ## Breaking changes to the API
 
 ### DataSets
-* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`.
-This makes it more consistent w.r.t. requests API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
 
 
 ### CLI
@@ -21,7 +20,7 @@ This makes it more consistent w.r.t. requests API, and automatically enables the
 
 ### DataSets
 
-* if you use `APIDataSet`, make sure to move all `requests` specific arguments, except for `url` and `method`, under the field `load_args`.
+* If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`. If you specify credentials using an `AuthBase` object then use `auth` under `load_args`; if you specify credentials using Kedro's credentials.yml file then use `credentials`.
 
 ## Major features and improvements
 

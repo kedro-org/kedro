@@ -41,7 +41,6 @@ def reload_kedro(
     Setting the path will also make it default for subsequent calls.
     """
 
-    import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import configure_project, pipelines
     from kedro.framework.session import KedroSession

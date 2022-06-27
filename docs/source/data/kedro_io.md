@@ -469,7 +469,7 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 ```
 
 ```{note}
-When using lazy saving the dataset will be written _after_ the `after_node_run` [hook](../hooks/hooks).
+When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../hooks/hooks).
 ```
 
 ### Incremental loads with `IncrementalDataSet`

@@ -324,4 +324,4 @@ In the example above, the `before_node_run` hook implementation must return data
 ```
 
 
-To apply the changes once you have implemented a new hook, you need to register it, as described in [the hooks documentation](hooks.md#registering-your-hook-implementations-with-kedro), and then run Kedro.
+To apply the changes once you have implemented a new hook, you must register it, as described in [the hooks documentation](hooks.md#registering-your-hook-implementations-with-kedro), and then run Kedro.

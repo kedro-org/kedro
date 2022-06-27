@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Hooks are a mechanism to add extra behaviour to Kedro's main execution in an easy and consistent manner. Some examples may include:
+Hooks are a mechanism to add extra behaviour to Kedro's main execution in an easy and consistent manner. Some examples might include:
 
 * Adding a log statement after the data catalog is loaded
 * Adding data validation to the inputs before a node runs, and to the outputs after a node has run. This makes it possible to integrate with other tools like [Great-Expectations](https://docs.greatexpectations.io/en/latest/)
@@ -10,7 +10,7 @@ Hooks are a mechanism to add extra behaviour to Kedro's main execution in an eas
 
 ## Concepts
 
-A Hook is comprised of a Hook specification and Hook implementation. To add Hooks to your project you will need to:
+A Hook consists of a Hook specification, and Hook implementation. To add Hooks to your project, you must:
 
 * Create or modify the file `<your_project>/src/<package_name>/hooks.py` to define a Hook implementation for an existing Kedro-defined Hook specification
 * Register your Hook implementation in the [`src/<your_project>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key

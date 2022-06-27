@@ -12,8 +12,11 @@ from click.testing import CliRunner
 from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
-from kedro.framework import KedroStarterSpec
-from kedro.framework.cli.starters import _OFFICIAL_STARTER_SPECS, TEMPLATE_PATH
+from kedro.framework.cli.starters import (
+    _OFFICIAL_STARTER_SPECS,
+    TEMPLATE_PATH,
+    KedroStarterSpec,
+)
 
 FILES_IN_TEMPLATE = 32
 

@@ -1,18 +1,29 @@
 import logging
+import pytest
+
 from kedro.framework.project import (
     LOGGING,
     configure_logging,
 )  # noqa # pylint:disable=unused-import
 
 
+default_logging_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"rich": {"class": "rich.logging.RichHandler"}},
+    "loggers": {"kedro": {"level": "INFO"}},
+    "root": {"handlers": ["rich"]},
+}
+
+
+@pytest.fixture(autouse=True)
+def reset_logging():
+    yield
+    configure_logging(default_logging_config)
+
+
 def test_default_logging_config():
-    assert LOGGING.data == {
-        "disable_existing_loggers": False,
-        "handlers": {"rich": {"class": "rich.logging.RichHandler"}},
-        "loggers": {"kedro": {"level": "INFO"}},
-        "root": {"handlers": ["rich"]},
-        "version": 1,
-    }
+    assert LOGGING.data == default_logging_config
     assert "rich" in {handler.name for handler in logging.getLogger().handlers}
     assert logging.getLogger("kedro").level == logging.INFO
 

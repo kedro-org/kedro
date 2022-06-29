@@ -205,7 +205,6 @@ linkcheck_ignore = [
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
-    "https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf",
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
 ]
 

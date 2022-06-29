@@ -8,7 +8,7 @@ import sys
 from collections import UserDict
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional
 
 import click
 import yaml

@@ -105,17 +105,17 @@ class TestNewFromUserPromptsValid:
             python_package="my_project",
         )
 
-    def test_custom_project_name_with_hyphen(self, fake_kedro_cli):
+    def test_custom_project_name_with_hyphen_and_underscore(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
-            input=_make_cli_prompt_input(project_name="My-Project"),
+            input=_make_cli_prompt_input(project_name="My-Project_"),
         )
         _assert_template_ok(
             result,
-            project_name="My-Project",
-            repo_name="my-project",
-            python_package="my_project",
+            project_name="My-Project_",
+            repo_name="my-project_",
+            python_package="my_project_",
         )
 
     def test_no_prompts(self, fake_kedro_cli):
@@ -208,6 +208,18 @@ class TestNewFromUserPromptsInvalid:
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         assert result.exit_code != 0
         assert "Failed to generate project: could not load prompts.yml" in result.output
+
+    def test_invalid_project_name(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(project_name="My $Project!"),
+        )
+        assert result.exit_code != 0
+        assert (
+            "is an invalid value.\nIt must contain only alphanumeric symbols"
+            in result.output
+        )
 
     def test_custom_prompt_invalid_input(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")

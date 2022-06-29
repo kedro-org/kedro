@@ -177,27 +177,27 @@ class KedroSession:
         return session
 
     def _get_logging_config(self) -> Dict[str, Any]:
-        conf_logging = self._get_config_loader().get(
+        logging_config = self._get_config_loader().get(
             "logging*", "logging*/**", "**/logging*"
         )
         # turn relative paths in logging config into absolute path
         # before initialising loggers
-        conf_logging = _convert_paths_to_absolute_posix(
-            project_path=self._project_path, conf_dictionary=conf_logging
+        logging_config = _convert_paths_to_absolute_posix(
+            project_path=self._project_path, conf_dictionary=logging_config
         )
-        return conf_logging
+        return logging_config
 
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
         try:
-            conf_logging = self._get_logging_config()
+            logging_config = self._get_logging_config()
         except MissingConfigException:
             self._logger.debug(
                 "No project logging configuration loaded; "
                 "Kedro's default logging configuration will be used."
             )
         else:
-            configure_logging(conf_logging)
+            configure_logging(logging_config)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS

@@ -79,9 +79,7 @@ def create_cli():  # pragma: no cover
 @click.option("--starter", "-s", "starter_name", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-def new(
-    config_path, starter_name, checkout, directory, **kwargs
-):  # pylint: disable=unused-argument
+def new(config_path, starter_name, checkout, directory, **kwargs):
     """Create a new kedro project."""
     if checkout and not starter_name:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")

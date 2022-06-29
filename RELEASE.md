@@ -20,7 +20,7 @@
 
 ### DataSets
 
-* If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`. If you specify credentials using an `AuthBase` object then use `auth` under `load_args`; if you specify credentials using Kedro's credentials.yml file then use `credentials`.
+* If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 
 ## Major features and improvements
 

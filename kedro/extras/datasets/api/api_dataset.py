@@ -64,15 +64,17 @@ class APIDataSet(AbstractDataSet):
             raise ValueError("Cannot specify both auth and credentials.")
 
         self._auth = credentials or self._load_args_auth
-        self._cert = self._load_args.pop("cert", None)
-        self._timeout = self._load_args.pop("timeout", None)
+
+        if "cert" in self._load_args:
+            self._load_args["cert"] = self._convert_type(self._load_args["cert"])
+
+        if "timeout" in self._load_args:
+            self._load_args["timeout"] = self._convert_type(self._load_args["timeout"])
 
         self._request_args: Dict[str, Any] = {
             "url": url,
             "method": method,
             "auth": self._convert_type(self._auth),
-            "cert": self._convert_type(self._cert),
-            "timeout": self._convert_type(self._timeout),
             **self._load_args,
         }
 

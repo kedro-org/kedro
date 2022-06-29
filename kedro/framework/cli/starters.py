@@ -9,11 +9,13 @@ import shutil
 import stat
 import tempfile
 from collections import OrderedDict
+from itertools import groupby
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import click
 import yaml
+from attrs import define, field
 
 import kedro
 from kedro import __version__ as version
@@ -22,21 +24,54 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
+    _get_entry_points,
+    _safe_load_entry_point,
     command_with_verbosity,
 )
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
-
-_STARTER_ALIASES = {
-    "astro-airflow-iris",
-    "standalone-datacatalog",
-    "pandas-iris",
-    "pyspark",
-    "pyspark-iris",
-    "spaceflights",
-}
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+
+
+@define(order=True)
+class KedroStarterSpec:  # pylint: disable=too-few-public-methods
+    """Specification of custom kedro starter template
+    Args:
+        alias: alias of the starter which shows up on `kedro starter list` and is used
+        by the starter argument of `kedro new`
+        template_path: path to a directory or a URL to a remote VCS repository supported
+        by `cookiecutter`
+        directory: optional directory inside the repository where the starter resides.
+        origin: reserved field used by kedro internally to determine where the starter
+        comes from, users do not need to provide this field.
+    """
+
+    alias: str
+    template_path: str
+    directory: Optional[str] = None
+    origin: Optional[str] = field(init=False)
+
+
+_OFFICIAL_STARTER_SPECS = [
+    KedroStarterSpec("astro-airflow-iris", _STARTERS_REPO, "astro-airflow-iris"),
+    # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external)
+    # documentation and tutorials still refer to `astro-iris`. We create an alias to
+    # check if a user has entered old `astro-iris` as the starter name and changes it
+    # to `astro-airflow-iris`.
+    KedroStarterSpec("astro-iris", _STARTERS_REPO, "astro-airflow-iris"),
+    KedroStarterSpec(
+        "standalone-datacatalog", _STARTERS_REPO, "standalone-datacatalog"
+    ),
+    KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
+    KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
+    KedroStarterSpec("spaceflights", _STARTERS_REPO, "spaceflights"),
+]
+# Set the origin for official starters
+for starter_spec in _OFFICIAL_STARTER_SPECS:
+    starter_spec.origin = "kedro"
+_OFFICIAL_STARTER_SPECS = {spec.alias: spec for spec in _OFFICIAL_STARTER_SPECS}
+
 
 CONFIG_ARG_HELP = """Non-interactive mode, using a configuration yaml file. This file
 must supply  the keys required by the template's prompts.yml. When not using a starter,
@@ -62,6 +97,65 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     func(path)
 
 
+def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
+    """This function lists all the starter aliases declared in
+    the core repo and in plugins entry points.
+
+    For example, the output for official kedro starters looks like:
+    {"astro-airflow-iris":
+        KedroStarterSpec(
+            name="astro-airflow-iris",
+            template_path="git+https://github.com/kedro-org/kedro-starters.git",
+            directory="astro-airflow-iris",
+            origin="kedro"
+        ),
+    "astro-iris":
+        KedroStarterSpec(
+            name="astro-iris",
+            template_path="git+https://github.com/kedro-org/kedro-starters.git",
+            directory="astro-airflow-iris",
+            origin="kedro"
+        ),
+    }
+    """
+    starter_specs = _OFFICIAL_STARTER_SPECS
+
+    for starter_entry_point in _get_entry_points(name="starters"):
+        origin = starter_entry_point.module.split(".")[0]
+        specs = _safe_load_entry_point(starter_entry_point) or []
+        for spec in specs:
+            if not isinstance(spec, KedroStarterSpec):
+                click.secho(
+                    f"The starter configuration loaded from module {origin}"
+                    f"should be a 'KedroStarterSpec', got '{type(spec)}' instead",
+                    fg="red",
+                )
+            elif spec.alias in starter_specs:
+                click.secho(
+                    f"Starter alias `{spec.alias}` from `{origin}` "
+                    f"has been ignored as it is already defined by"
+                    f"`{starter_specs[spec.alias].origin}`",
+                    fg="red",
+                )
+            else:
+                spec.origin = origin
+                starter_specs[spec.alias] = spec
+    return starter_specs
+
+
+def _starter_spec_to_dict(
+    starter_specs: Dict[str, KedroStarterSpec]
+) -> Dict[str, Dict[str, str]]:
+    """Convert a dictionary of starters spec to a nicely formatted dictionary"""
+    format_dict: Dict[str, Dict[str, str]] = {}
+    for alias, spec in starter_specs.items():
+        format_dict[alias] = {}  # Each dictionary represent 1 starter
+        format_dict[alias]["template_path"] = spec.template_path
+        if spec.directory:
+            format_dict[alias]["directory"] = spec.directory
+    return format_dict
+
+
 # pylint: disable=missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
@@ -76,35 +170,34 @@ def create_cli():  # pragma: no cover
     type=click.Path(exists=True),
     help=CONFIG_ARG_HELP,
 )
-@click.option("--starter", "-s", "starter_name", help=STARTER_ARG_HELP)
+@click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-def new(config_path, starter_name, checkout, directory, **kwargs):
+def new(config_path, starter_alias, checkout, directory, **kwargs):
     """Create a new kedro project."""
-    if checkout and not starter_name:
+    if checkout and not starter_alias:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
-    if directory and not starter_name:
+    if directory and not starter_alias:
         raise KedroCliError(
             "Cannot use the --directory flag without a --starter value."
         )
 
-    # The `astro-iris` was renamed to `astro-airflow-iris`, but old (external) documentation
-    # and tutorials still refer to `astro-iris`. The below line checks if a user has entered old
-    # `astro-iris` as the starter name and changes it to `astro-airflow-iris`.
-    starter_name = (
-        "astro-airflow-iris" if starter_name == "astro-iris" else starter_name
-    )
-    if starter_name in _STARTER_ALIASES:
+    starters_dict = _get_starters_dict()
+
+    if starter_alias in starters_dict:
         if directory:
             raise KedroCliError(
                 "Cannot use the --directory flag with a --starter alias."
             )
-        template_path = _STARTERS_REPO
-        directory = starter_name
+        spec = starters_dict[starter_alias]
+        template_path = spec.template_path
+        # "directory" is an optional key for starters from plugins, so if the key is
+        # not present we will use "None".
+        directory = spec.directory
         checkout = checkout or version
-    elif starter_name is not None:
-        template_path = starter_name
+    elif starter_alias is not None:
+        template_path = starter_alias
         checkout = checkout or version
     else:
         template_path = str(TEMPLATE_PATH)
@@ -147,11 +240,26 @@ def starter():
 @starter.command("list")
 def list_starters():
     """List all official project starters available."""
-    repo_url = _STARTERS_REPO.replace("git+", "").replace(".git", "/tree/main/{alias}")
-    output = [
-        {alias: repo_url.format(alias=alias)} for alias in sorted(_STARTER_ALIASES)
-    ]
-    click.echo(yaml.safe_dump(output))
+    starters_dict = _get_starters_dict()
+
+    # Group all specs by origin as nested dict and sort it.
+    sorted_starters_dict: Dict[str, Dict[str, KedroStarterSpec]] = {
+        origin: dict(sorted(starters_dict_by_origin))
+        for origin, starters_dict_by_origin in groupby(
+            starters_dict.items(), lambda item: item[1].origin
+        )
+    }
+
+    # ensure kedro starters are listed first
+    sorted_starters_dict = dict(
+        sorted(sorted_starters_dict.items(), key=lambda x: x == "kedro")
+    )
+
+    for origin, starters_spec in sorted_starters_dict.items():
+        click.secho(f"\nStarters from {origin}\n", fg="yellow")
+        click.echo(
+            yaml.safe_dump(_starter_spec_to_dict(starters_spec), sort_keys=False)
+        )
 
 
 def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
@@ -286,11 +394,10 @@ def _get_cookiecutter_dir(
                 f" Specified tag {checkout}. The following tags are available: "
                 + ", ".join(_get_available_tags(template_path))
             )
-        official_starters = sorted(_STARTER_ALIASES)
-
+        official_starters = sorted(_OFFICIAL_STARTER_SPECS)
         raise KedroCliError(
             f"{error_message}. The aliases for the official Kedro starters are: \n"
-            f"{yaml.safe_dump(official_starters)}"
+            f"{yaml.safe_dump(official_starters, sort_keys=False)}"
         ) from exc
 
     return Path(cookiecutter_dir)

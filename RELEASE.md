@@ -24,6 +24,7 @@
 * Added `abfss` to list of cloud protocols, enabling abfss paths.
 * Kedro now uses the [Rich](https://github.com/Textualize/rich) library to format terminal logs and tracebacks.
 * The file `conf/base/logging.yml` is now optional. See [our documentation](https://kedro.readthedocs.io/en/0.18.2/logging/logging.html) for details.
+* Introduced a `kedro.starters` entry point. This enables plugins to create custom starter aliases used by `kedro starter list` and `kedro new`.
 
 ## Bug fixes and other changes
 * Bumped `pyyaml` upper bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
@@ -39,6 +40,7 @@
 
 ## Minor breaking changes to the API
 * The module `kedro.config.default_logger` no longer exists; default logging configuration is now set automatically through `kedro.framework.project.LOGGING`. Unless you explicitly import `kedro.config.default_logger` you do not need to make any changes.
+
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.

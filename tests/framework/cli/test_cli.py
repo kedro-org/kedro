@@ -97,7 +97,7 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0
         assert (
-            "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project)"
+            "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project,starters)"
             in result.output
         )
 
@@ -290,6 +290,7 @@ class TestEntryPoints:
 
     def test_project_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
+        entry_point.module = "project"
         load_entry_points("project")
         assert "Failed to load project commands" in caplog.text
         entry_points.return_value.select.assert_called_once_with(
@@ -306,6 +307,7 @@ class TestEntryPoints:
 
     def test_global_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
+        entry_point.module = "global"
         load_entry_points("global")
         assert "Failed to load global commands" in caplog.text
         entry_points.return_value.select.assert_called_once_with(

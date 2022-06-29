@@ -12,8 +12,8 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 To use AWS Batch, make sure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
-- A `name` attribute is set for each Kedro [node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node <node_name>`.
-- All node input/output `DataSets` must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api)). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
+- A `name` attribute is set for each [Kedro node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node <node_name>`.
+- [All node input/output `DataSets` must be configured in `catalog.yml`](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -353,4 +353,4 @@ kedro run --env aws_batch --runner kedro_tutorial.runner.AWSBatchRunner
 
 You should start seeing jobs appearing on your Jobs dashboard, under the `Runnable` tab - meaning they're ready to start as soon as the resources are provisioned in the compute environment.
 
-AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on the Batch job in the [Jobs](https://console.aws.amazon.com/batch/home/jobs) tab and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.
+AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on [the Batch job in the Jobs tab](https://console.aws.amazon.com/batch/home/jobs) and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.

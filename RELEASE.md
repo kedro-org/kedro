@@ -33,7 +33,8 @@
 * The session store no longer fails if a username cannot be found with `getpass.getuser`.
 
 ## Minor breaking changes to the API
-* The module `kedro.config.default_logger` no longer exists.
+* The module `kedro.config.default_logger` no longer exists; default logging configuration is now set automatically through `kedro.framework.project.LOGGING`. Unless you explicitly import `kedro.config.default_logger` you do not need to make any changes.
+
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.

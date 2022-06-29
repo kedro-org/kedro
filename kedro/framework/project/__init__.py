@@ -8,7 +8,7 @@ import sys
 from collections import UserDict
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional
 
 import click
 import yaml
@@ -186,9 +186,15 @@ class _ProjectPipelines(MutableMapping):
 
 
 class _ProjectLogging(UserDict):
+    # pylint: disable=super-init-not-called
     def __init__(self):
-        default_logging = (Path(__file__).parent / "default_logging.yml").read_text()
+        """Initialise project logging with default configuration. Also enable
+        rich tracebacks."""
+        default_logging = (Path(__file__).parent / "default_logging.yml").read_text(
+            encoding="utf-8"
+        )
         self.configure(yaml.safe_load(default_logging))
+        logging.captureWarnings(True)
 
         # We suppress click here to hide tracebacks related to it conversely,
         # kedro is not suppressed to show its tracebacks for easier debugging.
@@ -196,9 +202,12 @@ class _ProjectLogging(UserDict):
         rich_traceback_install(
             show_locals=True, suppress=[click, str(Path(sys.executable).parent)]
         )
-        logging.captureWarnings(True)
 
     def configure(self, logging_config: Dict[str, Any]) -> None:
+        """Configure project logging using `logging_config` (e.g. from project
+        logging.yml). We store this in the UserDict data so that it can be reconfigured
+        in _bootstrap_subprocess.
+        """
         logging.config.dictConfig(logging_config)
         self.data = logging_config
 

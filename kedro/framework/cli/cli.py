@@ -28,7 +28,7 @@ from kedro.framework.cli.utils import (
     _get_entry_points,
     load_entry_points,
 )
-from kedro.framework.project import LOGGING  # noqa
+from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
 from kedro.framework.startup import _is_project, bootstrap_project
 
 LOGO = rf"""

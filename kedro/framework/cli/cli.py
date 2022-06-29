@@ -3,7 +3,6 @@
 This module implements commands available from the kedro CLI.
 """
 import importlib
-import logging
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -12,8 +11,6 @@ from typing import Sequence
 import click
 import importlib_metadata
 
-# pylint: disable=unused-import
-import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
@@ -30,6 +27,7 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     load_entry_points,
 )
+from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
 from kedro.framework.startup import _is_project, bootstrap_project
 
 LOGO = rf"""
@@ -40,8 +38,6 @@ LOGO = rf"""
 |_|\_\___|\__,_|_|  \___/
 v{version}
 """
-
-logger = logging.getLogger(__name__)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")

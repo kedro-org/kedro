@@ -1,5 +1,5 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
-It uses the python requests library: https://requests.readthedocs.io/en/master/
+It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 from typing import Any, Dict, List, Tuple, Union
 
@@ -11,7 +11,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 
 class APIDataSet(AbstractDataSet):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
-    It uses the python requests library: https://requests.readthedocs.io/en/master/
+    It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
     Example:
     ::

@@ -2,4 +2,7 @@ project_name:
   title: "Project Name:"
   text: |
     Please enter a human readable name for your new project.
-    Spaces and punctuation are allowed.
+    Spaces, hyphens, and underscores are allowed.
+  regex_validator: "^[A-Za-z0-9 _-]*$"
+  error_message: |
+    It must contain only alphanumeric symbols and/or underscores and/or hyphens.

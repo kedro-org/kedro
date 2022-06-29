@@ -62,7 +62,7 @@ def micropkg_cli():  # pragma: no cover
 
 
 @micropkg_cli.group()
-def anmicropkg():
+def micropkg():
     """Commands for working with micro-packages."""
 
 

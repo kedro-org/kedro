@@ -40,8 +40,8 @@ def reload_kedro(
     """Line magic which reloads all Kedro default variables.
     Setting the path will also make it default for subsequent calls.
     """
-
     from kedro.framework.cli import load_entry_points
+    from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
     from kedro.framework.project import configure_project, pipelines
     from kedro.framework.session import KedroSession
     from kedro.framework.startup import bootstrap_project

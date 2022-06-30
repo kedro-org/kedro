@@ -1,7 +1,6 @@
 """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
-import logging.config
 import multiprocessing
 import os
 import pickle
@@ -12,7 +11,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Dict, Iterable, Optional, Set
+from typing import Any, Dict, Iterable, Set
 
 from pluggy import PluginManager
 
@@ -80,15 +79,12 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
-def _bootstrap_subprocess(
-    package_name: str, conf_logging: Optional[Dict[str, Any]] = None
-):
+def _bootstrap_subprocess(package_name: str, logging_config: Dict[str, Any]):
     # pylint: disable=import-outside-toplevel,cyclic-import
-    from kedro.framework.project import configure_project
+    from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
-    if conf_logging is not None:
-        logging.config.dictConfig(conf_logging)
+    configure_logging(logging_config)
 
 
 def _run_node_synchronization(  # pylint: disable=too-many-arguments
@@ -97,7 +93,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     is_async: bool = False,
     session_id: str = None,
     package_name: str = None,
-    conf_logging: Optional[Dict[str, Any]] = None,
+    logging_config: Dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -111,14 +107,14 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
             asynchronously with threads. Defaults to False.
         session_id: The session id of the pipeline run.
         package_name: The name of the project Python package.
-        conf_logging: A dictionary containing logging configuration.
+        logging_config: A dictionary containing logging configuration.
 
     Returns:
         The node argument.
 
     """
-    if multiprocessing.get_start_method() == "spawn" and package_name:  # type: ignore
-        _bootstrap_subprocess(package_name, conf_logging)
+    if multiprocessing.get_start_method() == "spawn" and package_name:
+        _bootstrap_subprocess(package_name, logging_config)  # type: ignore
 
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
@@ -315,7 +311,7 @@ class ParallelRunner(AbstractRunner):
                             self._is_async,
                             session_id,
                             package_name=PACKAGE_NAME,
-                            conf_logging=LOGGING,
+                            logging_config=LOGGING,  # type: ignore
                         )
                     )
                 if not futures:

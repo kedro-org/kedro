@@ -3,7 +3,6 @@
 This module implements commands available from the kedro CLI.
 """
 import importlib
-import logging
 import sys
 import webbrowser
 from collections import defaultdict
@@ -11,10 +10,7 @@ from pathlib import Path
 from typing import Sequence
 
 import click
-import importlib_metadata
 
-# pylint: disable=unused-import
-import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.hooks import get_cli_hook_manager
@@ -29,8 +25,10 @@ from kedro.framework.cli.utils import (
     ENTRY_POINT_GROUPS,
     CommandCollection,
     KedroCliError,
+    _get_entry_points,
     load_entry_points,
 )
+from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
 from kedro.framework.startup import _is_project, bootstrap_project
 
 LOGO = rf"""
@@ -41,8 +39,6 @@ LOGO = rf"""
 |_|\_\___|\__,_|_|  \___/
 v{version}
 """
-
-logger = logging.getLogger(__name__)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
@@ -67,8 +63,8 @@ def info():
 
     plugin_versions = {}
     plugin_entry_points = defaultdict(set)
-    for plugin_entry_point, group in ENTRY_POINT_GROUPS.items():
-        for entry_point in importlib_metadata.entry_points().select(group=group):
+    for plugin_entry_point in ENTRY_POINT_GROUPS:
+        for entry_point in _get_entry_points(plugin_entry_point):
             module_name = entry_point.module.split(".")[0]
             plugin_versions[module_name] = entry_point.dist.version
             plugin_entry_points[module_name].add(plugin_entry_point)

@@ -47,6 +47,7 @@ repos:
             - types-requests
             - types-setuptools
             - types-toml
+            - attrs
 
     - repo: https://github.com/asottile/blacken-docs
       rev: v1.12.1

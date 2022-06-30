@@ -124,9 +124,9 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Hooks
 
-   hooks/hooks
+   hooks/introduction
    hooks/common_use_cases
-   hooks/hooks_examples
+   hooks/examples
 
 
 .. toctree::

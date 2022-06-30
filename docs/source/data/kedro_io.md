@@ -31,9 +31,9 @@ If you have a dataset called `parts`, you can make direct calls to it like so:
 parts_df = parts.load()
 ```
 
-However, we recommend using a `DataCatalog` instead (for more details, see [the `DataCatalog` documentation](../data/data_catalog.md)) as it has been designed to make all datasets available to project members.
+We recommend using a `DataCatalog` instead (for more details, see [the `DataCatalog` documentation](../data/data_catalog.md)) as it has been designed to make all datasets available to project members.
 
-For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`. For a complete guide, please read [the section on custom datasets](../extend_kedro/custom_datasets.md).
+For contributors, if you would like to submit a new dataset, you must extend the `AbstractDataSet`. For a complete guide, please read [the section on custom datasets](../extend_kedro/custom_datasets.md).
 
 
 ## Versioning
@@ -331,8 +331,8 @@ Requires you to only specify a class of the underlying dataset either as a strin
 
 Full notation allows you to specify a dictionary with the full underlying dataset definition _except_ the following arguments:
 * The argument that receives the partition path (`filepath` by default) - if specified, a `UserWarning` will be emitted stating that this value will be overridden by individual partition paths
-* `credentials` key - specifying it will result in `DataSetError` being raised; dataset credentials should be passed into `credentials` argument of the `PartitionedDataSet` rather than underlying dataset definition - see [the section below on partitioned dataset credentials](#partitioned-dataset-credentials) for details
-* `versioned` flag - specifying it will result in `DataSetError` being raised; versioning cannot be enabled for the underlying datasets
+* `credentials` key - specifying it will result in a `DataSetError` being raised; dataset credentials should be passed into the `credentials` argument of the `PartitionedDataSet` rather than the underlying dataset definition - see the section below on [partitioned dataset credentials](#partitioned-dataset-credentials) for details
+* `versioned` flag - specifying it will result in a `DataSetError` being raised; versioning cannot be enabled for the underlying datasets
 
 #### Partitioned dataset credentials
 
@@ -476,7 +476,7 @@ When using lazy saving the dataset will be written _after_ the `after_node_run` 
 
 [IncrementalDataSet](/kedro.io.IncrementalDataSet) is a subclass of `PartitionedDataSet`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataSet` addresses the use case when partitions have to be processed incrementally, i.e. each subsequent pipeline run should only process the partitions which were not processed by the previous runs.
 
-This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataSet` instantiated with path `s3://my-bucket-name/path/to/folder` the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
+This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataSet` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
 
 The checkpoint file is only created _after_ [the partitioned dataset is explicitly confirmed](#incremental-dataset-confirm).
 
@@ -488,7 +488,7 @@ Loading `IncrementalDataSet` works similarly to [`PartitionedDataSet`](#partitio
 
 #### Incremental dataset save
 
-`IncrementalDataSet` save operation is identical to the [save operation of the `PartitionedDataSet`](#partitioned-dataset-save).
+The `IncrementalDataSet` save operation is identical to the [save operation of the `PartitionedDataSet`](#partitioned-dataset-save).
 
 #### Incremental dataset confirm
 

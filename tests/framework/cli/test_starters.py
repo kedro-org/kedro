@@ -121,17 +121,6 @@ def test_starter_list_with_invalid_starter_plugin(
     assert expected in result.output
 
 
-def test_cookiecutter_json_matches_prompts_yml():
-    """Validate the contents of the default config file."""
-    cookiecutter_json = json.loads(
-        (TEMPLATE_PATH / "cookiecutter.json").read_text(encoding="utf-8")
-    )
-    prompts_yml = yaml.safe_load(
-        (TEMPLATE_PATH / "prompts.yml").read_text(encoding="utf-8")
-    )
-    assert set(cookiecutter_json) == set(prompts_yml) | {"kedro_version"}
-
-
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromUserPromptsValid:
     """Tests for running `kedro new` interactively."""

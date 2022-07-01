@@ -251,14 +251,14 @@ class SparkDataSet(AbstractVersionedDataSet):
                 It is dependent on the selected file format. You can find
                 a list of read options for each supported format
                 in Spark DataFrame read documentation:
-                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis
+                https://spark.apache.org/docs/latest/api/python/getting_started/quickstart_df.html
             save_args: Save args passed to Spark DataFrame write options.
                 Similar to load_args this is dependent on the selected file
                 format. You can pass ``mode`` and ``partitionBy`` to specify
                 your overwrite mode and partitioning respectively. You can find
                 a list of options for each format in Spark DataFrame
                 write documentation:
-                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis
+                https://spark.apache.org/docs/latest/api/python/getting_started/quickstart_df.html
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -342,7 +342,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         if not filepath:
             raise DataSetError(
                 "Schema load argument does not specify a 'filepath' attribute. Please"
-                "include a path to a JSON serialized 'pyspark.sql.types.StructType'."
+                "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
             )
 
         credentials = deepcopy(schema.get("credentials")) or {}
@@ -359,7 +359,7 @@ class SparkDataSet(AbstractVersionedDataSet):
             except Exception as exc:
                 raise DataSetError(
                     f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please"
-                    f"provide a valid JSON serialized 'pyspark.sql.types.StructType'."
+                    f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
                 ) from exc
 
     def _describe(self) -> Dict[str, Any]:

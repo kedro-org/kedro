@@ -31,7 +31,7 @@ def return_none(arg):
     return arg
 
 
-def return_not_serializable(arg):  # pylint: disable=unused-argument
+def return_not_serialisable(arg):  # pylint: disable=unused-argument
     return lambda x: x
 
 

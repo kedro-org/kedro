@@ -24,7 +24,7 @@ The generic project template bundles some typical dependencies, in `src/requirem
 
 ```text
 black==22.1.0 # Used for formatting code with `kedro lint`
-flake8>=3.7.9, <4.0 # Used for linting code with `kedro lint`
+flake8>=3.7.9, <5.0 # Used for linting code with `kedro lint`
 ipython==7.0 # Used for an IPython session with `kedro ipython`
 isort~=5.0 # Used for linting code with `kedro lint`
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab

@@ -55,7 +55,7 @@ When you create an Iris dataset example project by calling `kedro new`, you supp
 
 **project_name**
 
-The human-readable `project-name` variable is used in the [README.md](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris/README.md) for the new project.
+The human-readable `project_name` variable is used in the [README.md](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris/README.md) for the new project.
 
 **repo_name**
 
@@ -86,4 +86,8 @@ Here is the layout of the project as a Cookiecutter template:
     ├── requirements.txt
     ├── setup.py
     └── tests
+```
+
+```{note}
+You can [add an alias by creating a plugin using `kedro.starters` entry point](./plugins.md#extend-starter-aliases), which will allows you to do `kedro new --starter=your_starters` and shows up on shows up on `kedro starter list`.
 ```

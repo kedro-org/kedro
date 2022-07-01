@@ -14,7 +14,7 @@ def mean(xs, n):
 
 
 def mean_sos(xs, n):
-    return sum(x ** 2 for x in xs) / n
+    return sum(x**2 for x in xs) / n
 
 
 def variance(m, m2):

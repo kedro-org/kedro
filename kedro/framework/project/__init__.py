@@ -4,11 +4,17 @@ configure a Kedro project and access its settings."""
 import importlib
 import logging.config
 import operator
+import sys
+from collections import UserDict
 from collections.abc import MutableMapping
+from pathlib import Path
 from typing import Any, Dict, Optional
 
+import click
+import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
+from rich.traceback import install as rich_traceback_install
 
 from kedro.pipeline import Pipeline
 
@@ -179,8 +185,35 @@ class _ProjectPipelines(MutableMapping):
     __str__ = _load_data_wrapper(str)
 
 
+class _ProjectLogging(UserDict):
+    # pylint: disable=super-init-not-called
+    def __init__(self):
+        """Initialise project logging with default configuration. Also enable
+        rich tracebacks."""
+        default_logging = (Path(__file__).parent / "default_logging.yml").read_text(
+            encoding="utf-8"
+        )
+        self.configure(yaml.safe_load(default_logging))
+        logging.captureWarnings(True)
+
+        # We suppress click here to hide tracebacks related to it conversely,
+        # kedro is not suppressed to show its tracebacks for easier debugging.
+        # sys.executable is used to get the kedro executable path to hide the top level traceback.
+        rich_traceback_install(
+            show_locals=True, suppress=[click, str(Path(sys.executable).parent)]
+        )
+
+    def configure(self, logging_config: Dict[str, Any]) -> None:
+        """Configure project logging using `logging_config` (e.g. from project
+        logging.yml). We store this in the UserDict data so that it can be reconfigured
+        in _bootstrap_subprocess.
+        """
+        logging.config.dictConfig(logging_config)
+        self.data = logging_config
+
+
 PACKAGE_NAME = None
-LOGGING = None
+LOGGING = _ProjectLogging()
 
 settings = _ProjectSettings()
 
@@ -206,10 +239,8 @@ def configure_project(package_name: str):
 
 
 def configure_logging(logging_config: Dict[str, Any]) -> None:
-    """Configure logging to make it available as a global variable."""
-    logging.config.dictConfig(logging_config)
-    global LOGGING
-    LOGGING = logging_config
+    """Configure logging according to `logging_config` dictionary."""
+    LOGGING.configure(logging_config)
 
 
 def validate_settings():

@@ -66,6 +66,10 @@ Edit the new Run configuration as follows:
 
 Replace **Script path** with path obtained above and **Working directory** with the path of your project directory and then click **OK**.
 
+```{note}
+**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/logging.md#default-framework-side-logging-configuration).
+```
+
 To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar (if that toolbar is not visible, you can enable it by going to **View > Toolbar**). Click the green triangle:
 
 ![](../meta/images/pycharm_conf_run_button.png)
@@ -116,7 +120,7 @@ Click **OK** and then select **Remote Run** from the toolbar and click **Run** t
 
 ![](../meta/images/pycharm_remote_run.png)
 
-To remotely debug, click the debugger button as [described above](#debugging).
+[To remotely debug, click the debugger button as described above](#debugging).
 
 
 ## Advanced: Docker interpreter
@@ -169,4 +173,4 @@ Add the following file path pattern to the mapping: `conf/**/*catalog*`.
 
 ![](../meta/images/pycharm_catalog_schema_mapping.png)
 
-> Different schemas for different Kedro versions can be found [here](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).
+> [Different schemas for different Kedro versions can be found in the Kedro repository](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).

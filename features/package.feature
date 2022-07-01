@@ -2,7 +2,7 @@ Feature: Package target in new project
 
   Background:
     Given I have prepared a config file
-    And I have run a non-interactive kedro new with starter
+    And I have run a non-interactive kedro new with starter "default"
     And I have installed the project dependencies
 
   @fresh_venv

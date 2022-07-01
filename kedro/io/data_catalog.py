@@ -341,7 +341,7 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from '%s' (%s)...", name, type(dataset).__name__
+            "Loading data from [dark_orange]%s[/dark_orange] (%s)...", name, type(dataset).__name__, extra={"markup": True}
         )
 
         result = dataset.load()
@@ -379,7 +379,7 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to '%s' (%s)...", name, type(dataset).__name__)
+        self._logger.info("Saving data to [dark_orange]%s[/dark_orange] (%s)...", name, type(dataset).__name__, extra={"markup": True})
 
         dataset.save(data)
 
@@ -585,7 +585,7 @@ class DataCatalog:
             DataSetError: When the dataset does not have `confirm` method.
 
         """
-        self._logger.info("Confirming DataSet '%s'", name)
+        self._logger.info("Confirming DataSet [dark_orange]%s[/dark_orange]", name, extra={"markup":True})
         data_set = self._get_dataset(name)
 
         if hasattr(data_set, "confirm"):

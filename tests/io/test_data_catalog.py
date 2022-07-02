@@ -309,12 +309,13 @@ class TestDataCatalog:
 
     def test_confirm(self, mocker, caplog):
         """Confirm the dataset"""
+        caplog.set_level(logging.INFO)
         mock_ds = mocker.Mock()
         data_catalog = DataCatalog(data_sets={"mocked": mock_ds})
         data_catalog.confirm("mocked")
         mock_ds.confirm.assert_called_once_with()
         assert caplog.record_tuples == [
-            ("kedro.io.data_catalog", logging.INFO, "Confirming DataSet 'mocked'")
+            ("kedro.io.data_catalog", logging.INFO, "Confirming DataSet [dark_orange]mocked[/dark_orange]")
         ]
 
     @pytest.mark.parametrize(
@@ -494,12 +495,13 @@ class TestDataCatalogFromConfig:
             }
         }
         data_catalog = DataCatalog.from_config(catalog=catalog)
+        caplog.set_level(logging.INFO)
         data_catalog.confirm("ds_to_confirm")
         assert caplog.record_tuples == [
             (
                 "kedro.io.data_catalog",
                 logging.INFO,
-                "Confirming DataSet 'ds_to_confirm'",
+                "Confirming DataSet [dark_orange]ds_to_confirm[/dark_orange]",
             )
         ]
         mock_confirm.assert_called_once_with()

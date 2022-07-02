@@ -444,7 +444,7 @@ class DataCatalog:
         """
         if data_set_name in self._data_sets:
             if replace:
-                self._logger.warning("Replacing DataSet '%s'", data_set_name)
+                self._logger.warning("Replacing DataSet [dark_orange]%s[/dark_orange]", data_set_name, extra={"markup": True})
             else:
                 raise DataSetAlreadyExistsError(
                     f"DataSet '{data_set_name}' has already been registered"

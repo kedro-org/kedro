@@ -349,7 +349,7 @@ class Node:
 
         # purposely catch all exceptions
         except Exception as exc:
-            self._logger.error("Node '%s' failed with error: \n%s", str(self), str(exc))
+            self._logger.error("Node %s failed with error: \n%s", str(self), str(exc), extra={"markup": True})
             raise exc
 
     def _run_with_no_inputs(self, inputs: Dict[str, Any]):

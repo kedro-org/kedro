@@ -32,6 +32,7 @@ ENTRY_POINT_GROUPS = {
     "line_magic": "kedro.line_magic",
     "hooks": "kedro.hooks",
     "cli_hooks": "kedro.cli_hooks",
+    "starters": "kedro.starters",
 }
 
 logger = logging.getLogger(__name__)
@@ -318,6 +319,27 @@ def _check_module_importable(module_name: str) -> None:
         ) from exc
 
 
+def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
+    """Get all kedro related entry points"""
+    return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
+
+
+def _safe_load_entry_point(  # pylint: disable=inconsistent-return-statements
+    entry_point,
+):
+    """Load entrypoint safely, if fails it will just skip the entrypoint."""
+    try:
+        return entry_point.load()
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning(
+            "Failed to load %s commands from %s. Full exception: %s",
+            entry_point.module,
+            entry_point,
+            exc,
+        )
+        return
+
+
 def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     """Load package entry point commands.
 
@@ -331,20 +353,12 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    entry_points = importlib_metadata.entry_points()
-    entry_points = entry_points.select(group=ENTRY_POINT_GROUPS[name])
 
     entry_point_commands = []
-    for entry_point in entry_points:
-        try:
-            entry_point_commands.append(entry_point.load())
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.warning(
-                "Failed to load %s commands from %s. Full exception: %s",
-                name,
-                entry_point,
-                exc,
-            )
+    for entry_point in _get_entry_points(name):
+        loaded_entry_point = _safe_load_entry_point(entry_point)
+        if loaded_entry_point:
+            entry_point_commands.append(loaded_entry_point)
     return entry_point_commands
 
 

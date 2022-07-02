@@ -1,7 +1,7 @@
 # Logging
 
 Kedro uses [Python's `logging` library](https://docs.python.org/3/library/logging.html). Configuration is provided as a dictionary according to the [Python logging configuration schema](https://docs.python.org/3/library/logging.config.html#logging-config-dictschema) in two places:
-1. [Default configuration built into the Kedro framework](https://github.com/kedro-org/kedro/blob/main/kedro/config/logging.yml). This cannot be altered.
+1. [Default configuration built into the Kedro framework](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml). This cannot be altered.
 2. Your project-side logging configuration. Every project generated using Kedro's CLI `kedro new` command includes a file `conf/base/logging.yml`. You can alter this configuration and provide different configurations for different run environment according to the [standard Kedro mechanism for handling configuration](../kedro_project_setup/configuration.md).
 
 ```{note}
@@ -12,7 +12,7 @@ Framework-side and project-side logging configuration are loaded through subsequ
 
 ## Default framework-side logging configuration
 
-Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/config/logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io/en/stable/logging.html) to format messages and handle exceptions.
+Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io/en/stable/logging.html) to format messages. We also use the [Rich traceback handler](https://rich.readthedocs.io/en/stable/traceback.html) to render exceptions.
 
 By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`.
 
@@ -49,6 +49,24 @@ To use plain rather than rich logging, swap the `rich` handler for the `console`
 -  handlers: [rich, info_file_handler, error_file_handler]
 +  handlers: [console, info_file_handler, error_file_handler]
 ```
+
+### Rich logging in a dumb terminal
+
+Rich [detects whether your terminal is capable](https://rich.readthedocs.io/en/stable/console.html#terminal-detection) of displaying richly formatted messages. If your terminal is "dumb" then formatting is automatically stripped out so that the logs are just plain text. This is likely to happen if you perform `kedro run` on CI (e.g. GitHub Actions or CircleCI).
+
+If you find that the default wrapping of the log messages is too narrow but do not wish to switch to using the `console` logger on CI then the simplest way to control the log message wrapping is through altering the `COLUMNS` and `LINES` environment variables. For example:
+
+```bash
+export COLUMNS=120 LINES=25
+```
+
+```{note}
+You must provide a value for both `COLUMNS` and `LINES` even if you only wish to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINE=25`.
+```
+
+### Rich logging in Jupyter
+
+Rich also formats the logs in JupyterLab and Jupyter Notebook. The size of the output console does not adapt to your window but can be controlled through the `JUPYTER_COLUMNS` and `JUPYTER_LINES` environment variables. The default values (115 and 100 respectively) should be suitable for most users, but if you require a different output console size then you should alter the values of `JUPYTER_COLUMNS` and `JUPYTER_LINES`.
 
 ## Perform logging in your project
 

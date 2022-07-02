@@ -134,6 +134,7 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
         raise BadConfigException(f"Couldn't load config file: {config_file}") from exc
 
     except ParserError as exc:
+        assert exc.problem_mark is not None
         line = exc.problem_mark.line
         cursor = exc.problem_mark.column
         raise ParserError(

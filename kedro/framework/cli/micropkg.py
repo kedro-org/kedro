@@ -255,7 +255,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 @click.pass_obj  # this will pass the metadata as first argument
 def package_micropkg(
     metadata: ProjectMetadata, module_path, env, alias, destination, all_flag
-):  # pylint: disable=too-many-arguments
+):
     """Package up a modular pipeline or micro-package as a Python source distribution."""
     if not module_path and not all_flag:
         click.secho(

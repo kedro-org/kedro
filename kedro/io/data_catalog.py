@@ -341,7 +341,10 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from [dark_orange]%s[/dark_orange] (%s)...", name, type(dataset).__name__, extra={"markup": True}
+            "Loading data from [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
         )
 
         result = dataset.load()
@@ -379,7 +382,12 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to [dark_orange]%s[/dark_orange] (%s)...", name, type(dataset).__name__, extra={"markup": True})
+        self._logger.info(
+            "Saving data to [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
 
         dataset.save(data)
 
@@ -444,7 +452,11 @@ class DataCatalog:
         """
         if data_set_name in self._data_sets:
             if replace:
-                self._logger.warning("Replacing DataSet [dark_orange]%s[/dark_orange]", data_set_name, extra={"markup": True})
+                self._logger.warning(
+                    "Replacing DataSet [dark_orange]%s[/dark_orange]",
+                    data_set_name,
+                    extra={"markup": True},
+                )
             else:
                 raise DataSetAlreadyExistsError(
                     f"DataSet '{data_set_name}' has already been registered"
@@ -585,7 +597,11 @@ class DataCatalog:
             DataSetError: When the dataset does not have `confirm` method.
 
         """
-        self._logger.info("Confirming DataSet [dark_orange]%s[/dark_orange]", name, extra={"markup":True})
+        self._logger.info(
+            "Confirming DataSet [dark_orange]%s[/dark_orange]",
+            name,
+            extra={"markup": True},
+        )
         data_set = self._get_dataset(name)
 
         if hasattr(data_set, "confirm"):

@@ -82,8 +82,8 @@ def _get_config_from_patterns(
         if common_keys:
             sorted_keys = ", ".join(sorted(common_keys))
             msg = (
-                "Config from path [not italic magenta]%s[/not italic magenta] will override the following "
-                "existing top-level config keys: '%s'"
+                "Config from path [not italic magenta]%s[/not italic magenta] will override the "
+                "following existing top-level config keys: '%s'"
             )
             _config_logger.info(msg, conf_path, sorted_keys, extra={"markup": True})
 
@@ -120,7 +120,11 @@ def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str,
     try:
         # Default to UTF-8, which is Python 3 default encoding, to decode the file
         with open(config_file, encoding="utf8") as yml:
-            _config_logger.debug("Loading config file: [bright magenta]%s[/bright magenta]", config_file, extra={"markup": True})
+            _config_logger.debug(
+                "Loading config file: [bright magenta]%s[/bright magenta]",
+                config_file,
+                extra={"markup": True},
+            )
             return {
                 k: v
                 for k, v in anyconfig.load(yml, ac_template=ac_template).items()

@@ -315,7 +315,11 @@ class TestDataCatalog:
         data_catalog.confirm("mocked")
         mock_ds.confirm.assert_called_once_with()
         assert caplog.record_tuples == [
-            ("kedro.io.data_catalog", logging.INFO, "Confirming DataSet [dark_orange]mocked[/dark_orange]")
+            (
+                "kedro.io.data_catalog",
+                logging.INFO,
+                "Confirming DataSet [dark_orange]mocked[/dark_orange]",
+            )
         ]
 
     @pytest.mark.parametrize(

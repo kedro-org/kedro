@@ -309,7 +309,6 @@ class TestDataCatalog:
 
     def test_confirm(self, mocker, caplog):
         """Confirm the dataset"""
-        caplog.set_level(logging.INFO)
         mock_ds = mocker.Mock()
         data_catalog = DataCatalog(data_sets={"mocked": mock_ds})
         data_catalog.confirm("mocked")
@@ -499,7 +498,6 @@ class TestDataCatalogFromConfig:
             }
         }
         data_catalog = DataCatalog.from_config(catalog=catalog)
-        caplog.set_level(logging.INFO)
         data_catalog.confirm("ds_to_confirm")
         assert caplog.record_tuples == [
             (

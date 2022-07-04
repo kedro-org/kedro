@@ -2,7 +2,7 @@
 filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 The ``JSONDataSet`` is part of Kedro Experiment Tracking. The dataset is versioned by default.
 """
-from typing import Dict
+from typing import NoReturn
 
 from kedro.extras.datasets.json import JSONDataSet as JDS
 from kedro.io.core import DataSetError
@@ -31,5 +31,5 @@ class JSONDataSet(JDS):
 
     versioned = True
 
-    def _load(self) -> Dict:
+    def _load(self) -> NoReturn:
         raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")

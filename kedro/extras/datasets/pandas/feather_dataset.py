@@ -22,7 +22,7 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class FeatherDataSet(AbstractVersionedDataSet):
+class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``FeatherDataSet`` loads and saves data to a feather file using an
     underlying filesystem (e.g.: local, S3, GCS). The underlying functionality
     is supported by pandas, so it supports all allowed pandas options

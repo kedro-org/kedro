@@ -9,7 +9,7 @@ In this tutorial, we illustrate the typical Kedro workflow and the steps necessa
 In the text, we assume that you create an empty project and follow the flow of the tutorial by copying and pasting the example code into the project as we describe. This tutorial will take approximately two hours, during which time you will learn each step of the Kedro project development workflow, by working on an example to construct nodes and pipelines for the price-prediction model.
 
 ```{note}
-You might prefer to get up and running more swiftly, so we provide the full spaceflights example project as a [Kedro starter](../get_started/starters.md). To create the project, run `kedro new --starter=spaceflights`. When prompted for a project name, enter `Kedro Tutorial`. Subsequently, click enter to accept the default suggestions for `repo_name` and `python_package`. This will generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) so you can follow the tutorial without having to copy or paste.
+You might prefer to get up and running more swiftly, so we provide the full spaceflights example project as a [Kedro starter](../get_started/starters.md). To create the project, run `kedro new --starter=spaceflights`. When prompted for a project name, enter `Kedro Tutorial`. Subsequently, press enter to accept the default suggestions for `repo_name` and `python_package`. This will generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) so you can follow the tutorial without having to copy or paste.
 ```
 
 ## Kedro project development workflow

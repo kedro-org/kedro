@@ -13,7 +13,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, Type, TypeVar
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -66,7 +66,11 @@ class VersionNotFoundError(DataSetError):
     pass
 
 
-class AbstractDataSet(abc.ABC):
+_DI = TypeVar("_DI")
+_DO = TypeVar("_DO")
+
+
+class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
     """``AbstractDataSet`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
@@ -81,7 +85,7 @@ class AbstractDataSet(abc.ABC):
         >>> from kedro.io import AbstractDataSet
         >>>
         >>>
-        >>> class MyOwnDataSet(AbstractDataSet):
+        >>> class MyOwnDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         >>>     def __init__(self, filepath, param1, param2=True):
         >>>         self._filepath = PurePosixPath(filepath)
         >>>         self._param1 = param1
@@ -165,7 +169,7 @@ class AbstractDataSet(abc.ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    def load(self) -> Any:
+    def load(self) -> _DO:
         """Loads data by delegation to the provided load method.
 
         Returns:
@@ -190,7 +194,7 @@ class AbstractDataSet(abc.ABC):
             )
             raise DataSetError(message) from exc
 
-    def save(self, data: Any) -> None:
+    def save(self, data: _DI) -> None:
         """Saves data by delegation to the provided save method.
 
         Args:
@@ -244,14 +248,14 @@ class AbstractDataSet(abc.ABC):
         return f"{type(self).__name__}({_to_str(self._describe(), True)})"
 
     @abc.abstractmethod
-    def _load(self) -> Any:
+    def _load(self) -> _DO:
         raise NotImplementedError(
             f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
             f"it must implement the '_load' method"
         )
 
     @abc.abstractmethod
-    def _save(self, data: Any) -> None:
+    def _save(self, data: _DI) -> None:
         raise NotImplementedError(
             f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
             f"it must implement the '_save' method"
@@ -450,7 +454,7 @@ def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
-class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
+class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     """
     ``AbstractVersionedDataSet`` is the base class for all versioned data set
     implementations. All data sets that implement versioning should extend this
@@ -590,11 +594,11 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> Any:
+    def load(self) -> _DO:
         self.resolve_load_version()  # Make sure last load version is set
         return super().load()
 
-    def save(self, data: Any) -> None:
+    def save(self, data: _DI) -> None:
         self._version_cache.clear()
         save_version = self.resolve_save_version()  # Make sure last save version is set
         try:

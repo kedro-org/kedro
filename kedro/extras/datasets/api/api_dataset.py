@@ -1,7 +1,7 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, NoReturn, Union
 
 import requests
 from requests.auth import AuthBase
@@ -9,7 +9,7 @@ from requests.auth import AuthBase
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class APIDataSet(AbstractDataSet):
+class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
@@ -109,7 +109,7 @@ class APIDataSet(AbstractDataSet):
     def _load(self) -> requests.Response:
         return self._execute_request()
 
-    def _save(self, data: Any) -> None:
+    def _save(self, data: None) -> NoReturn:
         raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
 
     def _exists(self) -> bool:

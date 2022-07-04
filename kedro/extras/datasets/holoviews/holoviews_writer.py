@@ -4,7 +4,7 @@ filesystem (e.g. local, S3, GCS)."""
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, TypeVar
+from typing import Any, Dict, NoReturn, TypeVar
 
 import fsspec
 import holoviews as hv
@@ -21,7 +21,7 @@ from kedro.io.core import (
 HoloViews = TypeVar("HoloViews")
 
 
-class HoloviewsWriter(AbstractVersionedDataSet):
+class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, NoReturn]):
     """``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying
     filesystem (e.g. local, S3, GCS).
 
@@ -106,7 +106,7 @@ class HoloviewsWriter(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> str:
+    def _load(self) -> NoReturn:
         raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(self, data: HoloViews) -> None:

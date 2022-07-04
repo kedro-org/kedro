@@ -6,13 +6,6 @@
 
 ## Breaking changes to the API
 
-### CLI
-* Removed deprecated `kedro docs` command.
-* Reduced the `kedro new` prompts to just one question asking for the project name.
-
-### Other
-* Removed deprecated `kedro.extras.ColorHandler`.
-
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
 ## Major features and improvements
@@ -26,6 +19,7 @@
 * Kedro now uses the [Rich](https://github.com/Textualize/rich) library to format terminal logs and tracebacks.
 * The file `conf/base/logging.yml` is now optional. See [our documentation](https://kedro.readthedocs.io/en/0.18.2/logging/logging.html) for details.
 * Introduced a `kedro.starters` entry point. This enables plugins to create custom starter aliases used by `kedro starter list` and `kedro new`.
+* Reduced the `kedro new` prompts to just one question asking for the project name.
 
 ## Bug fixes and other changes
 * Bumped `pyyaml` upper bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
@@ -58,7 +52,6 @@
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
-* `KedroContext` is now an `attrs`'s frozen class and `config_loader` is available as public attribute.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Updated [Databricks documentation](https://kedro.readthedocs.io/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.
@@ -71,10 +64,6 @@
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.
-
-## Upcoming deprecations for Kedro 0.19.0
-* `kedro docs` will be removed in 0.19.0.
-
 
 # Release 0.18.0
 

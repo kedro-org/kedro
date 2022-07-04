@@ -40,7 +40,7 @@ min-public-methods = 1
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["kedro/templates/*", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*", "kedro/extras/datasets/holoviews/*", "tests/*"]
+omit = ["kedro/templates/*", "kedro/extras/logging/color_logger.py", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*", "kedro/extras/datasets/holoviews/*", "tests/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]

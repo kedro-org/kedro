@@ -53,6 +53,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 * Global Kedro commands
   * [`kedro --help`](#get-help-on-kedro-commands)
   * [`kedro --version`](#confirm-the-kedro-version)
+  * [`kedro docs`](#open-the-kedro-documentation-in-your-browser)
   * [`kedro info`](#confirm-kedro-information)
   * [`kedro new`](#create-a-new-kedro-project)
 
@@ -128,6 +129,12 @@ kedro_viz: 4.4.0 (hooks:global,line_magic)
 
 ```bash
 kedro new
+```
+
+### Open the Kedro documentation in your browser
+
+```bash
+kedro docs
 ```
 
 ## Customise or Override Project-specific Kedro commands

@@ -2,7 +2,10 @@ import logging
 
 import pytest
 
-from kedro.framework.project import LOGGING, configure_logging  # noqa
+from kedro.framework.project import (  # noqa # pylint:disable=unused-import
+    LOGGING,
+    configure_logging,
+)
 
 default_logging_config = {
     "version": 1,

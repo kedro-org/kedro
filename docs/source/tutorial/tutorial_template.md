@@ -14,13 +14,13 @@ Navigate to your chosen working directory and run the following to [create a new
 kedro new
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. Subsequently, accept the default suggestions for `repo_name` and `python_package` by pressing enter. Then navigate to the root directory of the project, `kedro-tutorial`.
+When prompted for a project name, enter `Kedro Tutorial`. Subsequently, press enter to accept the default suggestions for `repo_name` and `python_package`. Then navigate to the root directory of the project, `kedro-tutorial`.
 
 ## Install dependencies
 
-Up to this point, we haven't discussed project dependencies, so now is a good time to examine them. We use a `requirements.txt` file to specify a project's dependencies and make it easier for others to run your project. This avoids version conflicts by ensuring that you use same Python packages and versions.
+Up to this point, we have not discussed project dependencies, so now is a good time to examine them. We use a `requirements.txt` file to specify a project's dependencies and make it easier for others to run your project. This avoids version conflicts by ensuring that you use same Python packages and versions.
 
-The generic project template bundles some typical dependencies, in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers are slightly different depending on the version of Kedro that you are using:
+The generic project template bundles some typical dependencies in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers differ slightly depending on your version of Kedro:
 
 ```text
 black==22.1.0 # Used for formatting code with `kedro lint`
@@ -40,9 +40,9 @@ pytest~=6.2 # Testing framework for Python code
 If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
 ```
 
-The dependencies above may be sufficient for some projects, but for this tutorial you need to add some extra requirements. These will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.
+The dependencies above might be sufficient for some projects, but for this tutorial you must add some extra requirements. These requirements will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.
 
-Edit your `src/requirements.txt` file to include the following lines:
+Add the following lines to your `src/requirements.txt` file:
 
 ```text
 kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.1   # Specify optional Kedro dependencies
@@ -61,6 +61,6 @@ You can find out more about [how to work with project dependencies](../kedro_pro
 
 ## Configure the project
 
-You may optionally add in any credentials to `conf/local/credentials.yml` that you would need to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials. Additional information can be found in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
+You may optionally add in any credentials to the `conf/local/credentials.yml` file that are required to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials. You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
 
-At this stage of the workflow, you may also want to [set up logging](../logging/logging.md), but we do not use it in this tutorial.
+At this stage of the workflow, you might also want to [set up logging](../logging/logging.md), but we do not use it in this tutorial.

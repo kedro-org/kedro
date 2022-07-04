@@ -10,9 +10,9 @@ The general strategy to deploy a Kedro pipeline on Apache Airflow is to run ever
 
 ## Prerequisites
 
-To follow along with this tutorial, make sure you have the following:
+To follow this tutorial, ensure you have the following:
 
-*  An Airflow cluster: you can follow [Astronomer's quickstart guide](https://docs.astronomer.io/astro/#get-started) to set one up.
+* An Airflow cluster: you can follow [Astronomer's quickstart guide](https://docs.astronomer.io/astro/#get-started) to set one up.
 * The [Astro CLI installed](https://docs.astronomer.io/astro/install-cli)
 * `kedro>=0.17` installed
 

@@ -1,12 +1,12 @@
 # Iris dataset example project
 
-In this chapter we describe the directory structure of a typical Kedro project. We will use an example based on the familiar [Iris dataset](https://www.kaggle.com/uciml/iris).
+In this chapter, we describe the directory structure of a typical Kedro project. We will use an example based on the familiar [Iris dataset](https://www.kaggle.com/uciml/iris).
 
-The dataset was generated in 1936 by the British statistician and biologist Ronald Fisher. It contains 150 samples in total, comprising 50 samples of 3 different species of Iris plant (Iris Setosa, Iris Versicolour and Iris Virginica). For each sample, the flower measurements are recorded for the sepal length, sepal width, petal length and petal width, as illustrated in the following graphic.
+The dataset was generated in 1936 by the British statistician and biologist Ronald Fisher. The dataset contains 150 samples in total, comprising 50 samples of 3 different species of Iris plant (Iris Setosa, Iris Versicolour and Iris Virginica). For each sample, the flower measurements are recorded for the sepal length, sepal width, petal length and petal width:
 
 ![](../meta/images/iris_measurements.png)
 
-The Iris dataset can be used by a machine learning model to illustrate classification (a method used to determine the type of an object by comparison with similar objects that have previously been categorised). Once trained on known data, the machine learning model can make a predictive classification by comparing a test object to the output of its training data.
+A machine learning model can use the Iris dataset to illustrate classification (a method used to determine the type of an object by comparison with similar objects previously been categorised). Once trained on known data, the machine learning model can make a predictive classification by comparing a test object to the output of its training data.
 
 ## Create the example project
 
@@ -18,7 +18,7 @@ kedro new --starter=pandas-iris
 
 ### Project directory structure
 
-This example project illustrates a convenient starting point and some best-practices. It follows the default Kedro project template and uses folders to store datasets, notebooks, configuration and source code. When you create your own projects, you can adapt the folder structure if you need to.
+This example project illustrates a convenient starting point and some best practices. The project follows the default Kedro project template and uses folders to store datasets, notebooks, configuration and source code. When you create your own projects, you can adapt the folder structure if you need to.
 
 The example project directory is set out as follows:
 
@@ -45,11 +45,11 @@ get-started
 
 #### `conf/`
 
-Within the `conf` folder, there are two subfolders for storing configuration information: `base` and `local`.
+The `conf` folder contains two subfolders for storing configuration information: `base` and `local`.
 
 ##### `conf/base/`
 
-For project-specific settings to share across different installations (for example, with different users) you should use the `base` subfolder of `conf`.
+For project-specific settings to share across different installations (for example, with different users), you should use the `base` subfolder of `conf`.
 
 The folder contains three files for the example, but you can add others as you require:
 
@@ -69,25 +69,25 @@ The example project has a single file, `iris.csv`, that contains the Iris datase
 
 #### `src`
 
-This subfolder contains the project's source code. It contains 2 subfolders:
+This subfolder contains the project's source code. The `src` folder contains two subfolders:
 
 -   `get_started/` This is the Python package for your project
 -   `tests/` The subfolder for unit tests for your project. Projects are preconfigured to run tests using `pytest` when you call `kedro test` from the project's root directory
 
 ### What best practice should I follow to avoid leaking confidential data?
 
-* Avoid committing data to version control.
-* Avoid committing notebook output cells (data can easily sneak into notebooks when you don't delete output cells).
-* Avoid committing credentials in `conf/`. Only the `conf/local/` folder should be used for sensitive information like access credentials.
+* Do not commit data to version control.
+* Do not commit notebook output cells (data can easily sneak into notebooks when you don't delete output cells).
+* Do not commit credentials in `conf/`. Use only the `conf/local/` folder for sensitive information like access credentials.
 
 ```{note}
-By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore`.
+By default any file inside the `conf/` folder (and its subfolders) that contains `credentials` in its name will be ignored via `.gitignore`.
 ```
 
 
 ## Run the example project
 
-Once you have created the project, to run project-specific Kedro commands, you need to navigate to the directory in which it has been created.
+Once you have created the project, to run project-specific Kedro commands, you must navigate to the directory in which it has been created.
 
 Call `pip install -r src/requirements.txt` to install the project's dependencies. Next, call `kedro run`:
 

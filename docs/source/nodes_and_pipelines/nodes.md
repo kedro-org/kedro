@@ -1,10 +1,10 @@
 # Nodes
 
-In this section we introduce the concept of a node, for which the relevant API documentation is [kedro.pipeline.node](/kedro.pipeline.node).
+In this section, we introduce the concept of a node, for which the relevant API documentation is [kedro.pipeline.node](/kedro.pipeline.node).
 
-Nodes are the building blocks of pipelines and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end (E2E) production workflows.
+Nodes are the building blocks of pipelines, and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end (E2E) production workflows.
 
-You will first need to import libraries from Kedro and other standard tools to run the code snippets demonstrated below.
+You must first import libraries from Kedro and other standard tools to run the code snippets demonstrated below.
 
 ```python
 from kedro.pipeline import *
@@ -39,7 +39,7 @@ Here is the output:
 Out[1]: Node(add, ['a', 'b'], 'sum', None)
 ```
 
-You can also add labels to nodes which will be used to describe them in logs:
+You can also add labels to nodes, which will be used to describe them in logs:
 
 ```python
 adder_node = node(func=add, inputs=["a", "b"], outputs="sum")
@@ -49,7 +49,7 @@ adder_node = node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and
 print(str(adder_node))
 ```
 
-Gives the following output:
+This gives the following output:
 
 ```console
 add([a,b]) -> [sum]
@@ -65,7 +65,7 @@ Let's break down the node definition:
 
 ### Node definition syntax
 
-There is a syntax to describe function inputs and outputs. This allows different Python functions to be reused in nodes and supports dependency resolution in pipelines.
+A syntax describes function inputs and outputs. This syntax allows different Python functions to be reused in nodes, and supports dependency resolution in pipelines.
 
 ### Syntax for input variables
 
@@ -85,11 +85,11 @@ There is a syntax to describe function inputs and outputs. This allows different
 | `['a', 'b']`               | List output       | `return [a, b]`                     |
 | `dict(key1='a', key2='b')` | Dictionary output | `return dict(key1=a, key2=b)`       |
 
-Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
+Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output must be provided).
 
 ## `**kwargs`-only node functions
 
-Sometimes, when creating reporting nodes for instance, you need to know the names of the datasets that your node receives, but you may not have this information in advance. This can be solved by defining a `**kwargs`-only function, like so:
+Sometimes, when creating reporting nodes for instance, you need to know the names of the datasets that your node receives, but you might not have this information in advance. This can be solved by defining a `**kwargs`-only function:
 
 ```python
 def reporting(**kwargs):
@@ -145,9 +145,9 @@ Alternatively, you can also make use of a helper function that creates the mappi
 
 ## How to tag a node
 
-Tags may be useful to run part of a pipeline without changing the code. For instance, `kedro run --tag=ds` will only run nodes that have a `ds` tag attached.
+Tags might be useful to run part of a pipeline without changing the code. For instance, `kedro run --tag=ds` will only run nodes that have a `ds` tag attached.
 
-To tag a node, you can simply specify the `tags` argument, as follows:
+To tag a node, you can simply specify the `tags` argument:
 
 ```python
 node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tags="node_tag")
@@ -161,12 +161,12 @@ To run a pipeline using a tag:
 kedro run --tag=pipeline_tag
 ```
 
-This will run only the nodes found within the pipeline tagged with `pipeline_tag`
+This will run only the nodes found within the pipeline tagged with `pipeline_tag`.
 
 
 ## How to run a node
 
-To run a node, you need to instantiate its inputs. In this case, the node expects two inputs:
+To run a node, you must instantiate its inputs. In this case, the node expects two inputs:
 
 ```python
 adder_node.run(dict(a=2, b=3))
@@ -179,5 +179,5 @@ Out[2]: {'sum': 5}
 ```
 
 ```{note}
-It is also possible to call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
+You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
 ```

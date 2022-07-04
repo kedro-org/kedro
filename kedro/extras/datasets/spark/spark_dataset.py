@@ -157,7 +157,7 @@ class KedroHdfsInsecureClient(InsecureClient):
         return sorted(matched)
 
 
-class SparkDataSet(AbstractVersionedDataSet):
+class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     """``SparkDataSet`` loads and saves Spark dataframes.
 
     Example adding a catalog entry with

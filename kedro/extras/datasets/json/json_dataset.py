@@ -17,7 +17,7 @@ from kedro.io.core import (
 )
 
 
-class JSONDataSet(AbstractVersionedDataSet):
+class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 
@@ -129,13 +129,13 @@ class JSONDataSet(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> Dict:
+    def _load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return json.load(fs_file)
 
-    def _save(self, data: Dict) -> None:
+    def _save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:

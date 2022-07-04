@@ -247,7 +247,7 @@ scooters_query:
     index_col: [name]
 ```
 
-When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing an [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
 Example 13: Load data from an API endpoint, example US corn yield data from USDA
 

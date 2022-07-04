@@ -249,7 +249,7 @@ class TestNewFromUserPromptsInvalid:
         assert result.exit_code != 0
         assert "Failed to generate project: could not load prompts.yml" in result.output
 
-    def test_invalid_project_name(self, fake_kedro_cli):
+    def test_invalid_project_name_special_characters(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
@@ -257,7 +257,19 @@ class TestNewFromUserPromptsInvalid:
         )
         assert result.exit_code != 0
         assert (
-            "is an invalid value.\nIt must contain only alphanumeric symbols"
+            "is an invalid value for Project Name.\nIt must contain only alphanumeric symbols"
+            in result.output
+        )
+
+    def test_invalid_project_name_too_short(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(project_name="P"),
+        )
+        assert result.exit_code != 0
+        assert (
+            "is an invalid value for Project Name.\nIt must contain only alphanumeric symbols"
             in result.output
         )
 

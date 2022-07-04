@@ -500,9 +500,10 @@ class _Prompt:
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
         if self.regexp and not re.match(self.regexp, user_input):
-            click.secho(f"'{user_input}' is an invalid value.", fg="red", err=True)
+            message = f"'{user_input}' is an invalid value for {self.title}."
+            click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
-            raise ValueError(user_input)
+            raise ValueError(message, self.error_message)
 
 
 def _get_available_tags(template_path: str) -> List:

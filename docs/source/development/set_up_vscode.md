@@ -107,7 +107,7 @@ PYTHONPATH=/path/to/project/src:$PYTHONPATH
 PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
 ```
 
-[You can find more information about setting up environmental variables in the VSCode documentation](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
+You can find [more information about setting up environmental variables in the VSCode documentation](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
 
 Go to **Debug > Add Configurations**.
 
@@ -242,7 +242,7 @@ Go to the **Debugging** section in VS Code and select the newly created remote d
 
 ![](../meta/images/vscode_remote_debugger.png)
 
-You will need to [set a breakpoint in VS Code as described in the debugging section above](#debugging) and start the debugger by clicking the green play triangle:
+You must [set a breakpoint in VS Code as described in the debugging section above](#debugging) and start the debugger by clicking the green play triangle:
 
 [Find more information on debugging in VS Code](https://code.visualstudio.com/docs/python/debugging).
 

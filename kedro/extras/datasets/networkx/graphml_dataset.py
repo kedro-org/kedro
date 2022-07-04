@@ -17,7 +17,7 @@ from kedro.io.core import (
 )
 
 
-class GraphMLDataSet(AbstractVersionedDataSet):
+class GraphMLDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
     """``GraphMLDataSet`` loads and saves graphs to a GraphML file using an
     underlying filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to
     create GraphML data.
@@ -108,8 +108,7 @@ class GraphMLDataSet(AbstractVersionedDataSet):
     def _load(self) -> networkx.Graph:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            data = networkx.read_graphml(fs_file, **self._load_args)
-        return data
+            return networkx.read_graphml(fs_file, **self._load_args)
 
     def _save(self, data: networkx.Graph) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

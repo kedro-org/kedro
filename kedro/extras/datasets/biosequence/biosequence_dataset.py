@@ -11,7 +11,7 @@ from Bio import SeqIO
 from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_path
 
 
-class BioSequenceDataSet(AbstractDataSet):
+class BioSequenceDataSet(AbstractDataSet[List, List]):
     r"""``BioSequenceDataSet`` loads and saves data to a sequence file.
 
     Example:

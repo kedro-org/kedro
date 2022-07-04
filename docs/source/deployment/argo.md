@@ -169,7 +169,7 @@ spec:
 The Argo Workflows is defined as the dependencies between tasks using a directed-acyclic graph (DAG).
 ```
 
-For the purpose of this walk-through, we will use an AWS S3 bucket for DataSets - therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example [Kubernetes Secrets spec is given below](#submit-argo-workflows-spec-to-kubernetes)).
+For the purpose of this walk-through, we will use an AWS S3 bucket for DataSets; therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example [Kubernetes Secrets spec is given below](#submit-argo-workflows-spec-to-kubernetes)).
 
 The spec template is written with the [Jinja templating language](https://jinja.palletsprojects.com/en/2.11.x/), so you must install the Jinja Python package:
 

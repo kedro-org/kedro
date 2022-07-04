@@ -2,7 +2,7 @@
 ``delta-spark``
 """
 from pathlib import PurePosixPath
-from typing import Any
+from typing import NoReturn
 
 from delta.tables import DeltaTable
 from pyspark.sql import SparkSession
@@ -15,7 +15,7 @@ from kedro.extras.datasets.spark.spark_dataset import (
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class DeltaTableDataSet(AbstractDataSet):
+class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
     """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
         Example adding a catalog entry with
@@ -85,7 +85,7 @@ class DeltaTableDataSet(AbstractDataSet):
         load_path = self._fs_prefix + str(self._filepath)
         return DeltaTable.forPath(self._get_spark(), load_path)
 
-    def _save(self, data: Any) -> None:
+    def _save(self, data: None) -> NoReturn:
         raise DataSetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def _exists(self) -> bool:

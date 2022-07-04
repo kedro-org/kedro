@@ -82,7 +82,7 @@ def _get_config_from_patterns(
         if common_keys:
             sorted_keys = ", ".join(sorted(common_keys))
             msg = (
-                "Config from path [not italic magenta]%s[/not italic magenta] will override the "
+                "Config from path [magenta]%s[/magenta] will override the "
                 "following existing top-level config keys: '%s'"
             )
             _config_logger.info(msg, conf_path, sorted_keys, extra={"markup": True})

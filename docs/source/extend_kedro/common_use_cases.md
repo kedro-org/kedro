@@ -6,9 +6,9 @@ Kedro has a few built-in mechanisms for you to extend its behaviour. This docume
 
 The execution timeline of a Kedro pipeline can be thought of as a sequence of actions performed by various Kedro library components, such as the [DataSets](/kedro.extras.datasets), [DataCatalog](/kedro.io.DataCatalog), [Pipeline](/kedro.pipeline.Pipeline), [Node](/kedro.pipeline.node.Node) and [KedroContext](/kedro.framework.context.KedroContext).
 
-At different points in the lifecycle of these components, you may want to add extra behaviour. For example, you could add extra computation for profiling purposes _before_ and _after_ a node runs or _before_ and _after_ the I/O actions of a dataset, namely the `load` and `save` actions.
+At different points in the lifecycle of these components, you might want to add extra behaviour: for example, you could add extra computation for profiling purposes _before_ and _after_ a node runs, or _before_ and _after_ the I/O actions of a dataset, namely the `load` and `save` actions.
 
-This can now achieved by using [Hooks](./hooks.md), to define the extra behaviour and at which point in the execution timeline it should be injected.
+This can now achieved by using [Hooks](../hooks/introduction.md), to define the extra behaviour and when in the execution timeline it should be introduced.
 
 ## Use Case 2: How to integrate Kedro with additional data sources
 

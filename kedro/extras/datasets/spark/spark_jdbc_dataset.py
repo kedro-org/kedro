@@ -10,7 +10,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 __all__ = ["SparkJDBCDataSet"]
 
 
-class SparkJDBCDataSet(AbstractDataSet):
+class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     """``SparkJDBCDataSet`` loads data from a database table accessible
     via JDBC URL url and connection properties and saves the content of
     a PySpark DataFrame to an external database table via JDBC.  It uses

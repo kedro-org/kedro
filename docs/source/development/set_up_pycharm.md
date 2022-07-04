@@ -120,7 +120,7 @@ Click **OK** and then select **Remote Run** from the toolbar and click **Run** t
 
 ![](../meta/images/pycharm_remote_run.png)
 
-[To remotely debug, click the debugger button as described above](#debugging).
+[To debug remotely, click the debugger button as described above](#debugging).
 
 
 ## Advanced: Docker interpreter

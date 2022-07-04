@@ -8,11 +8,11 @@ All supported data connectors are available in [`kedro.extras.datasets`](/kedro.
 
 Kedro uses configuration to make your code reproducible when it has to reference datasets in different locations and/or in different environments.
 
-You can copy this file and reference additional locations for the same datasets. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production while copying and updating a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets that you are using for prototyping your data pipeline(s).
+You can copy this file and reference additional locations for the same datasets. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while copying and updating a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets that you are using for prototyping your data pipeline(s).
 
 There is built-in functionality for `conf/local/` to overwrite `conf/base/` [described in the documentation about configuration](../kedro_project_setup/configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
 
-The Data Catalog also works with the `credentials.yml` in `conf/local/`, allowing you to specify usernames and passwords that are required to load certain datasets.
+The Data Catalog also works with the `credentials.yml` in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
 
 The are two ways of defining a Data Catalog through the use of YAML configuration, or programmatically using an API. Both methods allow you to specify:
 
@@ -247,7 +247,7 @@ scooters_query:
     index_col: [name]
 ```
 
-When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
 Example 13: Load data from an API endpoint, example US corn yield data from USDA
 
@@ -337,9 +337,9 @@ The list of all available parameters is given in the [Paramiko documentation](ht
 
 ## Creating a Data Catalog YAML configuration file via CLI
 
-You can use [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
+You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
 
-It creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
+This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
 
 ```yaml
 # <conf_root>/<env>/catalog/<pipeline_name>.yml
@@ -356,7 +356,7 @@ You can [configure parameters](../kedro_project_setup/configuration.md#load-para
 
 ## Feeding in credentials
 
-Before instantiating the `DataCatalog` Kedro will first attempt [to read the credentials from the project configuration](../kedro_project_setup/configuration.md#aws-credentials). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
+Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../kedro_project_setup/configuration.md#aws-credentials). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 
@@ -386,7 +386,7 @@ CSVDataSet(
 
 ## Loading multiple datasets that have similar configuration
 
-You may encounter situations where your datasets use the same file format, load and save arguments, and are stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets so that you do not have to spend time copying and pasting dataset configurations in `catalog.yml`.
+Different datasets might use the same file format, load and save arguments, and be stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets so that you need not spend time copying and pasting dataset configurations in `catalog.yml`.
 
 You can see this in the following example:
 

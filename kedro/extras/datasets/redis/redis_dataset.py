@@ -12,7 +12,7 @@ import redis
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class PickleDataSet(AbstractDataSet):
+class PickleDataSet(AbstractDataSet[Any, Any]):
     """``PickleDataSet`` loads/saves data from/to a Redis database. The
     underlying functionality is supported by the redis library, so it supports
     all allowed options for instantiating the redis app ``from_url`` and setting

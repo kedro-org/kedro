@@ -29,7 +29,7 @@ NON_FILE_SYSTEM_TARGETS = [
 ]
 
 
-class GenericDataSet(AbstractVersionedDataSet):
+class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """`pandas.GenericDataSet` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
@@ -180,7 +180,7 @@ class GenericDataSet(AbstractVersionedDataSet):
                 f"does not support a filepath target/source."
             )
 
-    def _load(self) -> Any:
+    def _load(self) -> pd.DataFrame:
 
         self._ensure_file_system_target()
 

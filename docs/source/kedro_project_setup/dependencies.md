@@ -3,19 +3,19 @@
 ## Project-specific dependencies
 When we introduced Kedro, we touched briefly on how to specify a project's dependencies to make it easier for others to run your project and avoid version conflicts downstream.
 
-You can add or remove dependencies. For a new project, edit `src/requirements.txt` and then run the following:
+You can add or remove dependencies. For a new project, edit the `src/requirements.txt` file, then run the following:
 
 ```bash
 kedro build-reqs
 ```
 
-The `build-reqs` command will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in `src/requirements.txt` into a `src/requirements.lock` that specifies a list of pinned project dependencies (those with a strict version).
+The `build-reqs` command will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in the `src/requirements.txt` file into a `src/requirements.lock` that specifies a list of pinned project dependencies (those with a strict version).
 
 ```{note}
-`src/requirements.txt` contains "source" requirements, while `src/requirements.lock` contains the compiled version of those and requires no manual updates.
+The `src/requirements.txt` file contains "source" requirements, while `src/requirements.lock` contains the compiled version of those and requires no manual updates.
 ```
 
-To further update the project requirements, you should modify `src/requirements.txt` (not `src/requirements.lock`) and re-run `kedro build-reqs`.
+To further update the project requirements, modify the `src/requirements.txt` file (not `src/requirements.lock`) and re-run `kedro build-reqs`.
 
 
 ## Install project-specific dependencies
@@ -28,7 +28,7 @@ pip install -r src/requirements.txt
 
 ## Workflow dependencies
 
-To install all of the dependencies recorded in Kedro's [`setup.py`](https://github.com/kedro-org/kedro/blob/develop/setup.py) run:
+To install all of the dependencies recorded in Kedro's [`setup.py`](https://github.com/kedro-org/kedro/blob/develop/setup.py), run:
 
 ```bash
 pip install "kedro[all]"
@@ -56,4 +56,4 @@ To limit installation to dependencies specific to a data type:
 pip install "kedro[<group>.<dataset>]"
 ```
 
-For example, your workflow may require use of the `pandas.ExcelDataSet`, so to install its dependencies, run `pip install "kedro[pandas.ExcelDataSet]"`.
+For example, your workflow might require use of the `pandas.ExcelDataSet`, so to install its dependencies, run `pip install "kedro[pandas.ExcelDataSet]"`.

@@ -4,19 +4,19 @@
 
 - To work with Kedro, we highly recommend that you [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version).
 
-- If you are using PySpark, you will also need to [install Java](https://www.oracle.com/java/technologies/javase-downloads.html). If you are a Windows user, you will need admin rights to complete the installation.
+- If you use PySpark, you must also [install Java](https://www.oracle.com/java/technologies/javase-downloads.html). If you are a Windows user, you will need admin rights to complete the installation.
 
 ## Virtual environments
 
-The main purpose of Python virtual environments is to create an isolated environment for a Python project to have its own dependencies, regardless of other projects. We recommend that you create a new virtual environment for *each* new Kedro project you create.
+The main purpose of Python virtual environments is to create an isolated environment for a Python project to have its own dependencies, regardless of other projects. We recommend you create a new virtual environment for *each* new Kedro project you create.
 
 > [Read more about Python Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/).
 
-Depending on your preferred Python installation, you can create virtual environments for working with Kedro as follows:
+Depending on your preferred Python installation, you can create virtual environments to work with Kedro as follows:
 
 - With [`conda`](#conda), a package and environment manager program bundled with Anaconda
 
-- Without Anaconda using [`venv`](#venv-instead-of-conda) or [`pipenv`](#pipenv-instead-of-conda)
+- Without Anaconda, using [`venv`](#venv-instead-of-conda) or [`pipenv`](#pipenv-instead-of-conda)
 
 ### `conda`
 
@@ -46,13 +46,13 @@ The `conda` virtual environment is not dependent on your current working directo
 
 ### `venv` (instead of `conda`)
 
-If you are using Python 3, you should already have the `venv` module installed with the standard library. Create a directory for working with Kedro within your virtual environment:
+If you use Python 3, you should already have the `venv` module installed with the standard library. Create a directory for working with Kedro within your virtual environment:
 
 ```bash
 mkdir kedro-environment && cd kedro-environment
 ```
 
-This will create a `kedro-environment` directory in your current working directory. Then you should create a new virtual environment in this directory by running:
+This will create a `kedro-environment` directory in your current working directory. Next, to create a new virtual environment in this directory, run:
 
 ```bash
 python -m venv env/kedro-environment  # macOS / Linux
@@ -74,7 +74,7 @@ deactivate
 
 ### `pipenv` (instead of `conda`)
 
-You will need to install `pipenv` as follows:
+Install `pipenv` as follows:
 
 ```bash
 pip install pipenv

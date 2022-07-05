@@ -20,9 +20,12 @@ import sys
 from distutils.dir_util import copy_tree
 from inspect import getmembers, isclass, isfunction
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from click import secho, style
+from docutils import nodes
+from sphinx.application import Sphinx
+from sphinxcontrib.mermaid import mermaid
 
 from kedro import __version__ as release
 
@@ -518,6 +521,17 @@ def _add_jinja_filters(app):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
+def install_mermaid(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: Dict,
+    doctree: Optional[nodes.document],
+) -> None:
+    if doctree and doctree.next_node(mermaid):
+        app.add_js_file("https://unpkg.com/mermaid/dist/mermaid.js")
+
+
 def setup(app):
     app.connect("config-inited", _prepare_build_dir)
     app.connect("builder-inited", _add_jinja_filters)
@@ -526,6 +540,7 @@ def setup(app):
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
     app.add_css_file("css/theme-overrides.css")
+    app.connect("html-page-context", install_mermaid)
 
 
 # (regex, restructuredText link replacement, object) list
@@ -553,3 +568,5 @@ except Exception as e:
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
 
 myst_heading_anchors = 5
+
+mermaid_version = ""

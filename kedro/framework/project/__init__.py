@@ -14,6 +14,7 @@ import click
 import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
+from rich.pretty import install as rich_pretty_install
 from rich.traceback import install as rich_traceback_install
 
 from kedro.pipeline import Pipeline
@@ -202,6 +203,7 @@ class _ProjectLogging(UserDict):
         rich_traceback_install(
             show_locals=True, suppress=[click, str(Path(sys.executable).parent)]
         )
+        rich_pretty_install()
 
     def configure(self, logging_config: Dict[str, Any]) -> None:
         """Configure project logging using `logging_config` (e.g. from project

@@ -17,6 +17,8 @@ Currently, the core Kedro team consists of
 [Ahdra Merali](https://github.com/AhdraMeraliQB),
 Andrew Mackay,
 [Antony Milne](https://github.com/AntonyMilneQB),
+[Cvetanka Nechevska](https://github.com/cvetankanechevska),
+[Deepyaman Datta](https://github.com/deepyaman),
 [Gabriel Comym](https://github.com/GabrielComymQB),
 [Ivan Danov](https://github.com/idanov),
 [Joel Schwarzmann](https://github.com/datajoely),
@@ -26,7 +28,6 @@ Andrew Mackay,
 [Nok Lam Chan](https://github.com/noklam),
 [Rashida Kanchwala](https://github.com/rashidakanchwala),
 [Sajid Alam](https://github.com/SajidAlamQB),
-[Susanna Wong](https://github.com/studioswong),
 [Tynan DeBold](https://github.com/tynandebold) and
 [Yetunde Dada](https://github.com/yetudada).
 
@@ -44,7 +45,8 @@ Former core team members with significant contributions include:
 [Liam Brummitt](https://github.com/bru5),
 [Lorena Bălan](https://github.com/lorenabalan),
 [Nasef Khan](https://github.com/nakhan98),
-[Richard Westenra](https://github.com/richardwestenra) and
+[Richard Westenra](https://github.com/richardwestenra),
+[Susanna Wong](https://github.com/studioswong) and
 [Zain Patel](https://github.com/mzjp2).
 
 And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/kedro-org/kedro/blob/main/RELEASE.md).

@@ -12,11 +12,11 @@ The following discusses how to run the Kedro pipeline from the [spaceflights tut
 
 ## Strategy
 
-The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration purpose. This approach mirrors the principles of running Kedro in a [distributed](distributed) environment.
+The general strategy to deploy a Kedro pipeline on AWS Step Functions is to run every Kedro node as an [AWS Lambda](https://aws.amazon.com/lambda/) function. The whole pipeline is converted into an [AWS Step Functions State Machine](https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html) for orchestration. This approach mirrors the principles of running Kedro in a [distributed environment](distributed).
 
 ## Prerequisites
 
-To use AWS Step Functions, make sure you have the following:
+To use AWS Step Functions, ensure you have the following:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 - [Configured AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) on your local machine
@@ -108,10 +108,10 @@ y_test:
 
 ### Step 2. Package the Kedro pipeline as an AWS Lambda-compliant Docker image
 
-In December 2020, AWS [announced](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) that an AWS Lambda function can now use a container image up to **10 GB in size** as its deployment package, besides the original zip method. As it has a few [requirements](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs) for the container image to work properly, you will need to build your own custom Docker container image to both contain the Kedro pipeline and to comply with Lambda's requirements.
+In December 2020, [AWS announced that an AWS Lambda function can now use a container image up to **10 GB in size**](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) as its deployment package, besides the original zip method. As it has a few [requirements for the container image to work properly](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs), you must build your own custom Docker container image, both to contain the Kedro pipeline and to comply with Lambda's requirements.
 
 ```{note}
-All of the following steps should be done in the Kedro project's root directory.
+All the following steps should be done in the Kedro project's root directory.
 ```
 
 * **Step 2.1**: Package the Kedro pipeline as a Python package so you can install it into the container later on:
@@ -383,8 +383,8 @@ If you go into the state machine and click on `Start Execution`, you will be abl
 
 ## Limitations
 
-Generally speaking, the [limitations](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) on AWS Lambda have improved dramatically in recent years. However, it's still worth noting that each Lambda function has a 15-minute timeout, 10GB maximum memory limit and 10GB container image code package size limit. This means, for example, if you have a node that takes longer than 15 minutes to run, you should switch to some other AWS services, such as [AWS Batch](aws_batch) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.
+Generally speaking, the [limitations on AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) have improved dramatically in recent years. However, it's still worth noting that each Lambda function has a 15-minute timeout, 10GB maximum memory limit and 10GB container image code package size limit. This means, for example, if you have a node that takes longer than 15 minutes to run, you should switch to some other AWS services, such as [AWS Batch](aws_batch) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.
 
 ## Final thought
 
-One major benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider. For example, AWS has recently announced a [Feature Store for SageMaker](https://aws.amazon.com/sagemaker/feature-store/). We could easily use it as the Features layer in Kedro's [Data Engineering convention](../faq/faq.md#what-is-data-engineering-convention).
+One major benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider. For example, AWS has recently announced a [Feature Store for SageMaker](https://aws.amazon.com/sagemaker/feature-store/). We could easily use it as the Features layer in [Kedro's Data Engineering convention](../faq/faq.md#what-is-data-engineering-convention).

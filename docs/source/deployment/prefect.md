@@ -10,12 +10,12 @@ Prefect Server ships out-of-the-box with a fully featured user interface.
 
 ## Prerequisites
 
-To use Prefect Core and Prefect Server, make sure you have the following prerequisites in place:
+To use Prefect Core and Prefect Server, ensure you have the following prerequisites in place:
 
-- Prefect Core is [installed](https://docs.prefect.io/core/getting_started/install.html) on your machine
+- [Prefect Core is installed](https://docs.prefect.io/core/getting_started/install.html) on your machine
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are installed and Docker Engine is running
-- Prefect Server is [up and running](https://docs.prefect.io/orchestration/Server/deploy-local.html)
-- `PREFECT__LOGGING__EXTRA_LOGGERS` environment variable is set (it is required to get Kedro logs emitted):
+- [Prefect Server is up and running](https://docs.prefect.io/orchestration/Server/deploy-local.html)
+- `PREFECT__LOGGING__EXTRA_LOGGERS` environment variable is set (this is required to get Kedro logs published):
 
 ```console
 export PREFECT__LOGGING__EXTRA_LOGGERS="['kedro']"
@@ -25,7 +25,7 @@ export PREFECT__LOGGING__EXTRA_LOGGERS="['kedro']"
 
 ### Convert your Kedro pipeline to Prefect flow
 
-To build a Prefect [flow](https://docs.prefect.io/core/concepts/flows.html) for your Kedro pipeline programmatically and register it with the Prefect API, use the following Python script, which should be stored in your project’s root directory:
+To build a [Prefect flow](https://docs.prefect.io/core/concepts/flows.html) for your Kedro pipeline programmatically and register it with the Prefect API, use the following Python script, which should be stored in your project’s root directory:
 
 ```python
 # <project_root>/register_prefect_flow.py

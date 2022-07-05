@@ -335,9 +335,9 @@ class TestKedroSession:
 
     def test_broken_config_loader(self, mock_settings_file_bad_config_loader_class):
         pattern = (
-            "Invalid value `tests.framework.session.test_session.BadConfigLoader` received "
-            "for setting `CONFIG_LOADER_CLASS`. "
-            "It must be a subclass of `kedro.config.abstract_config.AbstractConfigLoader`."
+            "Invalid value 'tests.framework.session.test_session.BadConfigLoader' received "
+            "for setting 'CONFIG_LOADER_CLASS'. "
+            "It must be a subclass of 'kedro.config.abstract_config.AbstractConfigLoader'."
         )
         mock_settings = _ProjectSettings(
             settings_file=str(mock_settings_file_bad_config_loader_class)
@@ -376,8 +376,8 @@ class TestKedroSession:
         assert session._store._session_id == fake_session_id
         session.close()
         expected_log_messages = [
-            "`read()` not implemented for `BaseSessionStore`. Assuming empty store.",
-            "`save()` not implemented for `BaseSessionStore`. Skipping the step.",
+            "'read()' not implemented for 'BaseSessionStore'. Assuming empty store.",
+            "'save()' not implemented for 'BaseSessionStore'. Skipping the step.",
         ]
         actual_log_messages = [
             rec.getMessage()
@@ -410,9 +410,9 @@ class TestKedroSession:
 
     def test_wrong_store_type(self, mock_settings_file_bad_session_store_class):
         pattern = (
-            "Invalid value `tests.framework.session.test_session.BadStore` received "
-            "for setting `SESSION_STORE_CLASS`. "
-            "It must be a subclass of `kedro.framework.session.store.BaseSessionStore`."
+            "Invalid value 'tests.framework.session.test_session.BadStore' received "
+            "for setting 'SESSION_STORE_CLASS'. "
+            "It must be a subclass of 'kedro.framework.session.store.BaseSessionStore'."
         )
         mock_settings = _ProjectSettings(
             settings_file=str(mock_settings_file_bad_session_store_class)
@@ -426,7 +426,7 @@ class TestKedroSession:
         classpath = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
         pattern = (
             f"Store config must only contain arguments valid for "
-            f"the constructor of `{classpath}`."
+            f"the constructor of '{classpath}'."
         )
         with pytest.raises(ValueError, match=re.escape(pattern)):
             KedroSession.create(mock_package_name, fake_project)
@@ -439,7 +439,7 @@ class TestKedroSession:
         mock_package_name,
     ):
         classpath = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
-        pattern = f"Failed to instantiate session store of type `{classpath}`."
+        pattern = f"Failed to instantiate session store of type '{classpath}'."
         with pytest.raises(ValueError, match=re.escape(pattern)):
             KedroSession.create(mock_package_name, fake_project)
 
@@ -489,6 +489,28 @@ class TestKedroSession:
         assert "git" not in session.store
 
         expected_log_messages = [f"Unable to git describe {fake_project}"]
+        actual_log_messages = [
+            rec.getMessage()
+            for rec in caplog.records
+            if rec.name == SESSION_LOGGER_NAME and rec.levelno == logging.DEBUG
+        ]
+        assert actual_log_messages == expected_log_messages
+
+    def test_get_username_error(self, fake_project, mock_package_name, mocker, caplog):
+        """Test that username information is not added to the session store
+        if call to getuser() fails
+        """
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
+        mocker.patch("subprocess.check_output")
+        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
+        mocker.patch("getpass.getuser", side_effect=FakeException("getuser error"))
+        session = KedroSession.create(mock_package_name, fake_project)
+        assert "username" not in session.store
+
+        expected_log_messages = [
+            "Unable to get username. Full exception: getuser error"
+        ]
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records

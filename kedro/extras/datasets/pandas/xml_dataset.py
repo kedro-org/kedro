@@ -22,7 +22,7 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class XMLDataSet(AbstractVersionedDataSet):
+class XMLDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``XMLDataSet`` loads/saves data from/to a XML file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 
@@ -109,8 +109,8 @@ class XMLDataSet(AbstractVersionedDataSet):
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(
-                "Dropping `storage_options` for %s, "
-                "please specify them under `fs_args` or `credentials`.",
+                "Dropping 'storage_options' for %s, "
+                "please specify them under 'fs_args' or 'credentials'.",
                 self._filepath,
             )
             self._save_args.pop("storage_options", None)

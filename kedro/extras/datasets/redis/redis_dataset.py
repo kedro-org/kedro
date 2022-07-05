@@ -12,7 +12,7 @@ import redis
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class PickleDataSet(AbstractDataSet):
+class PickleDataSet(AbstractDataSet[Any, Any]):
     """``PickleDataSet`` loads/saves data from/to a Redis database. The
     underlying functionality is supported by the redis library, so it supports
     all allowed options for instantiating the redis app ``from_url`` and setting
@@ -67,9 +67,9 @@ class PickleDataSet(AbstractDataSet):
         credentials: Dict[str, Any] = None,
         redis_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of `PickleDataSet`. This loads/saves data from/to
-        a Redis database while deserializing/serializing. Supports custom backends to
-        serialize/deserialize objects.
+        """Creates a new instance of ``PickleDataSet``. This loads/saves data from/to
+        a Redis database while deserialising/serialising. Supports custom backends to
+        serialise/deserialise objects.
 
         Example backends that are compatible (non-exhaustive):
             * `pickle`
@@ -125,7 +125,7 @@ class PickleDataSet(AbstractDataSet):
         ):
             raise ValueError(
                 f"Selected backend '{backend}' should satisfy the pickle interface. "
-                "Missing one of `loads` and `dumps` on the backend."
+                "Missing one of 'loads' and 'dumps' on the backend."
             )
 
         self._backend = backend
@@ -172,7 +172,7 @@ class PickleDataSet(AbstractDataSet):
             )
         except Exception as exc:
             raise DataSetError(
-                f"{data.__class__} was not serialized due to: {exc}"
+                f"{data.__class__} was not serialised due to: {exc}"
             ) from exc
 
     def _exists(self) -> bool:

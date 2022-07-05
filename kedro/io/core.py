@@ -13,7 +13,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, Type, TypeVar
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -66,7 +66,11 @@ class VersionNotFoundError(DataSetError):
     pass
 
 
-class AbstractDataSet(abc.ABC):
+_DI = TypeVar("_DI")
+_DO = TypeVar("_DO")
+
+
+class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
     """``AbstractDataSet`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
@@ -81,7 +85,7 @@ class AbstractDataSet(abc.ABC):
         >>> from kedro.io import AbstractDataSet
         >>>
         >>>
-        >>> class MyOwnDataSet(AbstractDataSet):
+        >>> class MyOwnDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         >>>     def __init__(self, filepath, param1, param2=True):
         >>>         self._filepath = PurePosixPath(filepath)
         >>>         self._param1 = param1
@@ -144,7 +148,7 @@ class AbstractDataSet(abc.ABC):
         except Exception as exc:
             raise DataSetError(
                 f"An exception occurred when parsing config "
-                f"for DataSet `{name}`:\n{str(exc)}"
+                f"for DataSet '{name}':\n{str(exc)}"
             ) from exc
 
         try:
@@ -152,12 +156,12 @@ class AbstractDataSet(abc.ABC):
         except TypeError as err:
             raise DataSetError(
                 f"\n{err}.\nDataSet '{name}' must only contain arguments valid for the "
-                f"constructor of `{class_obj.__module__}.{class_obj.__qualname__}`."
+                f"constructor of '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
         except Exception as err:
             raise DataSetError(
                 f"\n{err}.\nFailed to instantiate DataSet '{name}' "
-                f"of type `{class_obj.__module__}.{class_obj.__qualname__}`."
+                f"of type '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
         return data_set
 
@@ -165,7 +169,7 @@ class AbstractDataSet(abc.ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    def load(self) -> Any:
+    def load(self) -> _DO:
         """Loads data by delegation to the provided load method.
 
         Returns:
@@ -190,7 +194,7 @@ class AbstractDataSet(abc.ABC):
             )
             raise DataSetError(message) from exc
 
-    def save(self, data: Any) -> None:
+    def save(self, data: _DI) -> None:
         """Saves data by delegation to the provided save method.
 
         Args:
@@ -203,7 +207,7 @@ class AbstractDataSet(abc.ABC):
         """
 
         if data is None:
-            raise DataSetError("Saving `None` to a `DataSet` is not allowed")
+            raise DataSetError("Saving 'None' to a 'DataSet' is not allowed")
 
         try:
             self._logger.debug("Saving %s", str(self))
@@ -244,24 +248,24 @@ class AbstractDataSet(abc.ABC):
         return f"{type(self).__name__}({_to_str(self._describe(), True)})"
 
     @abc.abstractmethod
-    def _load(self) -> Any:
+    def _load(self) -> _DO:
         raise NotImplementedError(
-            f"`{self.__class__.__name__}` is a subclass of AbstractDataSet and "
-            f"it must implement the `_load` method"
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"it must implement the '_load' method"
         )
 
     @abc.abstractmethod
-    def _save(self, data: Any) -> None:
+    def _save(self, data: _DI) -> None:
         raise NotImplementedError(
-            f"`{self.__class__.__name__}` is a subclass of AbstractDataSet and "
-            f"it must implement the `_save` method"
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"it must implement the '_save' method"
         )
 
     @abc.abstractmethod
     def _describe(self) -> Dict[str, Any]:
         raise NotImplementedError(
-            f"`{self.__class__.__name__}` is a subclass of AbstractDataSet and "
-            f"it must implement the `_describe` method"
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"it must implement the '_describe' method"
         )
 
     def exists(self) -> bool:
@@ -286,7 +290,7 @@ class AbstractDataSet(abc.ABC):
 
     def _exists(self) -> bool:
         self._logger.warning(
-            "`exists()` not implemented for `%s`. Assuming output does not exist.",
+            "'exists()' not implemented for '%s'. Assuming output does not exist.",
             self.__class__.__name__,
         )
         return False
@@ -337,9 +341,9 @@ class Version(namedtuple("Version", ["load", "save"])):
 
 
 _CONSISTENCY_WARNING = (
-    "Save version `{}` did not match load version `{}` for {}. This is strongly "
-    "discouraged due to inconsistencies it may cause between `save` and "
-    "`load` operations. Please refrain from setting exact load version for "
+    "Save version '{}' did not match load version '{}' for {}. This is strongly "
+    "discouraged due to inconsistencies it may cause between 'save' and "
+    "'load' operations. Please refrain from setting exact load version for "
     "intermediate data sets where possible to avoid this warning."
 )
 
@@ -371,13 +375,13 @@ def parse_dataset_definition(
     config = copy.deepcopy(config)
 
     if "type" not in config:
-        raise DataSetError("`type` is missing from DataSet catalog configuration")
+        raise DataSetError("'type' is missing from DataSet catalog configuration")
 
     class_obj = config.pop("type")
     if isinstance(class_obj, str):
         if len(class_obj.strip(".")) != len(class_obj):
             raise DataSetError(
-                "`type` class path does not support relative "
+                "'type' class path does not support relative "
                 "paths or paths ending with a dot."
             )
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
@@ -387,21 +391,21 @@ def parse_dataset_definition(
             class_obj = next(obj for obj in trials if obj is not None)
         except StopIteration as exc:
             raise DataSetError(
-                f"Class `{class_obj}` not found or one of its dependencies "
+                f"Class '{class_obj}' not found or one of its dependencies "
                 f"has not been installed."
             ) from exc
 
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
-            f"DataSet type `{class_obj.__module__}.{class_obj.__qualname__}` "
-            f"is invalid: all data set types must extend `AbstractDataSet`."
+            f"DataSet type '{class_obj.__module__}.{class_obj.__qualname__}' "
+            f"is invalid: all data set types must extend 'AbstractDataSet'."
         )
 
     if VERSION_KEY in config:
         # remove "version" key so that it's not passed
         # to the "unversioned" data set constructor
         message = (
-            "`%s` attribute removed from data set configuration since it is a "
+            "'%s' attribute removed from data set configuration since it is a "
             "reserved word and cannot be directly specified"
         )
         logging.getLogger(__name__).warning(message, VERSION_KEY)
@@ -450,7 +454,7 @@ def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
-class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
+class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     """
     ``AbstractVersionedDataSet`` is the base class for all versioned data set
     implementations. All data sets that implement versioning should extend this
@@ -581,7 +585,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
 
         if self._exists_function(str(versioned_path)):
             raise DataSetError(
-                f"Save path `{versioned_path}` for {str(self)} must not exist if "
+                f"Save path '{versioned_path}' for {str(self)} must not exist if "
                 f"versioning is enabled."
             )
 
@@ -590,11 +594,11 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> Any:
+    def load(self) -> _DO:
         self.resolve_load_version()  # Make sure last load version is set
         return super().load()
 
-    def save(self, data: Any) -> None:
+    def save(self, data: _DI) -> None:
         self._version_cache.clear()
         save_version = self.resolve_save_version()  # Make sure last save version is set
         try:
@@ -603,15 +607,15 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
             _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"
             raise DataSetError(
-                f"Cannot save versioned dataset `{self._filepath.name}` to "
-                f"`{self._filepath.parent.as_posix()}` because a file with the same "
+                f"Cannot save versioned dataset '{self._filepath.name}' to "
+                f"'{self._filepath.parent.as_posix()}' because a file with the same "
                 f"name already exists in the directory. This is likely because "
                 f"versioning was enabled on a dataset already saved previously. Either "
-                f"remove `{self._filepath.name}` from the directory or manually "
+                f"remove '{self._filepath.name}' from the directory or manually "
                 f"convert it into a versioned dataset by placing it in a versioned "
                 f"directory (e.g. with default versioning format "
-                f"`{self._filepath.as_posix()}/{_default_version}/{self._filepath.name}"
-                f"`)."
+                f"'{self._filepath.as_posix()}/{_default_version}/{self._filepath.name}"
+                f"')."
             ) from err
 
         load_version = self.resolve_load_version()
@@ -735,5 +739,5 @@ def validate_on_forbidden_chars(**kwargs):
     for key, value in kwargs.items():
         if " " in value or ";" in value:
             raise DataSetError(
-                f"Neither white-space nor semicolon are allowed in `{key}`."
+                f"Neither white-space nor semicolon are allowed in '{key}'."
             )

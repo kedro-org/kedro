@@ -4,7 +4,7 @@ files to an underlying filesystem (e.g. local, S3, GCS)."""
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, NoReturn, Union
 from warnings import warn
 
 import fsspec
@@ -19,7 +19,11 @@ from kedro.io.core import (
 )
 
 
-class MatplotlibWriter(AbstractVersionedDataSet):
+class MatplotlibWriter(
+    AbstractVersionedDataSet[
+        Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
+    ]
+):
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
@@ -138,9 +142,9 @@ class MatplotlibWriter(AbstractVersionedDataSet):
 
         if overwrite and version is not None:
             warn(
-                "Setting `overwrite=True` is ineffective if versioning "
+                "Setting 'overwrite=True' is ineffective if versioning "
                 "is enabled, since the versioned path must not already "
-                "exist; overriding flag with `overwrite=False` instead."
+                "exist; overriding flag with 'overwrite=False' instead."
             )
             overwrite = False
         self._overwrite = overwrite
@@ -153,8 +157,8 @@ class MatplotlibWriter(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> None:
-        raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
+    def _load(self) -> NoReturn:
+        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(
         self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]

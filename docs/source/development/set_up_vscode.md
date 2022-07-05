@@ -107,7 +107,7 @@ PYTHONPATH=/path/to/project/src:$PYTHONPATH
 PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
 ```
 
-You can find more information about setting up environmental variables [here](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
+You can find [more information about setting up environmental variables in the VSCode documentation](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
 
 Go to **Debug > Add Configurations**.
 
@@ -164,7 +164,7 @@ First install the `ptvsd` Python library on both the local and remote computer u
 python -m pip install --upgrade ptvsd
 ```
 
-Go to the Debugger Configurations as described [above](#debugging). Add the following to the `configurations` array in `launch.json`:
+[Go to the Debugger Configurations as described in the debugging section above](#debugging). Add the following to the `configurations` array in `launch.json`:
 
 ```
 {
@@ -242,7 +242,7 @@ Go to the **Debugging** section in VS Code and select the newly created remote d
 
 ![](../meta/images/vscode_remote_debugger.png)
 
-You will need to set a breakpoint in VS Code as described [above](#debugging) and start the debugger by clicking the green play triangle:
+You must [set a breakpoint in VS Code as described in the debugging section above](#debugging) and start the debugger by clicking the green play triangle:
 
 [Find more information on debugging in VS Code](https://code.visualstudio.com/docs/python/debugging).
 
@@ -262,4 +262,4 @@ Enter the following in your `settings.json` file:
 
 and start editing your `catalog` files.
 
-> Different schemas for different Kedro versions can be found [here](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).
+> [Different schemas for different Kedro versions can be found in the Kedro repository](https://github.com/kedro-org/kedro/tree/main/static/jsonschema).

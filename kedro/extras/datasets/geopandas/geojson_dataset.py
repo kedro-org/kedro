@@ -18,7 +18,11 @@ from kedro.io.core import (
 )
 
 
-class GeoJSONDataSet(AbstractVersionedDataSet):
+class GeoJSONDataSet(
+    AbstractVersionedDataSet[
+        gpd.GeoDataFrame, Union[gpd.GeoDataFrame, Dict[str, gpd.GeoDataFrame]]
+    ]
+):
     """``GeoJSONDataSet`` loads/saves data to a GeoJSON file using an underlying filesystem
     (eg: local, S3, GCS).
     The underlying functionality is supported by geopandas, so it supports all

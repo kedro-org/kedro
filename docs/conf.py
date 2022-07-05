@@ -136,6 +136,8 @@ type_targets = {
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
         "pluggy._manager.PluginManager",
+        "_DI",
+        "_DO",
     ),
     "py:data": (
         "typing.Any",
@@ -206,7 +208,7 @@ linkcheck_ignore = [
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
-    "https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf",
+    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -260,9 +262,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, "Kedro.tex", "Kedro Documentation", "Kedro", "manual")
-]
+latex_documents = [(master_doc, "Kedro.tex", "Kedro Documentation", "Kedro", "manual")]
 
 # -- Options for manual page output ------------------------------------------
 
@@ -379,7 +379,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
             # first do plural only for classes
             replacements += [
                 (
-                    fr"``{obj}``s",
+                    rf"``{obj}``s",
                     f":{what}:`~{module}.{obj}`\\\\s",
                     obj,
                 )
@@ -388,7 +388,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # singular
         replacements += [
-            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj) for obj in objects
+            (rf"``{obj}``", f":{what}:`~{module}.{obj}`", obj) for obj in objects
         ]
 
         # Look for recognised class names/function names which are NOT
@@ -397,13 +397,13 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             suggestions += [
-                (fr"(?<!\w|`){obj}s(?!\w|`{{2}})", f"``{obj}``s", obj)
+                (rf"(?<!\w|`){obj}s(?!\w|`{{2}})", f"``{obj}``s", obj)
                 for obj in objects
             ]
 
         # then singular
         suggestions += [
-            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj) for obj in objects
+            (rf"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj) for obj in objects
         ]
 
     return replacements, suggestions
@@ -425,7 +425,7 @@ def log_suggestions(lines: List[str], name: str):
             continue
 
         for existing, replacement, obj in suggestions:
-            new = re.sub(existing, fr"{replacement}", lines[i])
+            new = re.sub(existing, rf"{replacement}", lines[i])
             if new == lines[i]:
                 continue
             if ":rtype:" in lines[i] or ":type " in lines[i]:
@@ -458,7 +458,7 @@ def autolink_classes_and_methods(lines):
             continue
 
         for existing, replacement, obj in replacements:
-            lines[i] = re.sub(existing, fr"{replacement}", lines[i])
+            lines[i] = re.sub(existing, rf"{replacement}", lines[i])
 
 
 def autodoc_process_docstring(app, what, name, obj, options, lines):

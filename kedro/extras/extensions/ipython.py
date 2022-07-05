@@ -40,9 +40,8 @@ def reload_kedro(
     """Line magic which reloads all Kedro default variables.
     Setting the path will also make it default for subsequent calls.
     """
-
-    import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
+    from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
     from kedro.framework.project import configure_project, pipelines
     from kedro.framework.session import KedroSession
     from kedro.framework.startup import bootstrap_project
@@ -78,12 +77,12 @@ def reload_kedro(
 
     logger.info("Kedro project %s", str(metadata.project_name))
     logger.info(
-        "Defined global variable `context`, `session`, `catalog` and `pipelines`"
+        "Defined global variable 'context', 'session', 'catalog' and 'pipelines'"
     )
 
     for line_magic in load_entry_points("line_magic"):
         register_line_magic(needs_local_scope(line_magic))
-        logger.info("Registered line magic `%s`", line_magic.__name__)  # type: ignore
+        logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
 
 
 def load_ipython_extension(ipython):
@@ -102,5 +101,5 @@ def load_ipython_extension(ipython):
     except Exception:  # pylint: disable=broad-except
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
-            "Make sure you run `%reload_kedro <path_to_kedro_project>`."
+            "Make sure you run '%reload_kedro <path_to_kedro_project>'."
         )

@@ -22,7 +22,12 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class ExcelDataSet(AbstractVersionedDataSet):
+class ExcelDataSet(
+    AbstractVersionedDataSet[
+        Union[pd.DataFrame, Dict[str, pd.DataFrame]],
+        Union[pd.DataFrame, Dict[str, pd.DataFrame]],
+    ]
+):
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 
@@ -143,13 +148,13 @@ class ExcelDataSet(AbstractVersionedDataSet):
 
         if version and self._writer_args.get("mode") == "a":  # type: ignore
             raise DataSetError(
-                "`ExcelDataSet` doesn't support versioning in append mode."
+                "'ExcelDataSet' doesn't support versioning in append mode."
             )
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(
-                "Dropping `storage_options` for %s, "
-                "please specify them under `fs_args` or `credentials`.",
+                "Dropping 'storage_options' for %s, "
+                "please specify them under 'fs_args' or 'credentials'.",
                 self._filepath,
             )
             self._save_args.pop("storage_options", None)

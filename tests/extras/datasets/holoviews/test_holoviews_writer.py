@@ -68,7 +68,7 @@ class TestHoloviewsWriter:
         assert writer._fs_open_args_save == fs_args["open_args_save"]
 
     def test_load_fail(self, hv_writer):
-        pattern = r"Loading not supported for `HoloviewsWriter`"
+        pattern = r"Loading not supported for 'HoloviewsWriter'"
         with pytest.raises(DataSetError, match=pattern):
             hv_writer.load()
 
@@ -142,7 +142,7 @@ class TestHoloviewsWriterVersioned:
         corresponding file for a given save version already exists."""
         versioned_hv_writer.save(dummy_hv_object)
         pattern = (
-            r"Save path \`.+\` for HoloviewsWriter\(.+\) must "
+            r"Save path \'.+\' for HoloviewsWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -160,8 +160,8 @@ class TestHoloviewsWriterVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version "
-            rf"`{load_version}` for HoloviewsWriter\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for HoloviewsWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)

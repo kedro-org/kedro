@@ -303,7 +303,7 @@ Call the `run()` method of the `KedroSession` defined in `kedro.framework.sessio
 kedro run
 ```
 
-`KedroContext` can be extended in `run.py` (`src/project-name/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../faq/architecture_overview.md#kedro-project) configuration file.
+`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../faq/architecture_overview.md#kedro-project) configuration file.
 
 #### Modifying a `kedro run`
 
@@ -341,7 +341,7 @@ The following packages your application as one `.egg` file  and one `.whl` file 
 kedro package
 ```
 
-See the Python documentation for [further information about packaging](https://packaging.python.org/overview/).
+See [the Python documentation for further information about packaging](https://packaging.python.org/overview/).
 
 ### Pull a micro-package
 Since Kedro 0.17.7 you can pull a micro-package into your Kedro project as follows:
@@ -416,7 +416,7 @@ The following command pulls all the files related to a micro-package, e.g. a mod
 kedro micropkg pull <package_name> (or path to a sdist file)
 ```
 
-Further information is available in the [micro-packaging](../nodes_and_pipelines/micro_packaging.md) documentation.
+Further information is available in [the micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
 
 ##### Delete a modular pipeline
 The following command deletes all the files related to a modular pipeline in your Kedro project.
@@ -425,7 +425,7 @@ The following command deletes all the files related to a modular pipeline in you
 kedro pipeline delete <pipeline_name>
 ```
 
-Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
+Further information is available in [the micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
 
 #### Registered pipelines
 
@@ -505,7 +505,7 @@ If you get an error message `Module ``<module_name>`` not found. Make sure to in
 2. Run [`pip install -r src/requirements.txt`](#install-all-package-dependencies) command from your terminal
 
 ##### Copy tagged cells
-To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
+To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
 kedro jupyter convert --all

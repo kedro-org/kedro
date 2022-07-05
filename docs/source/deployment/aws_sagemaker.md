@@ -22,7 +22,7 @@ To use Amazon SageMaker, make sure you have the following prerequisites in place
 
 ### Install SageMaker package dependencies
 
-First, you should add extra package dependencies that are required to communicate with SageMaker via its [Python SDK](https://sagemaker.readthedocs.io/en/stable/).
+First, you should add extra package dependencies that are required [to communicate with SageMaker via its Python SDK](https://sagemaker.readthedocs.io/en/stable/).
 
 Add the dependencies by modifying `src/requirements.txt`. Open the corresponding file with a text editor and add the following lines at the end of the file:
 
@@ -87,7 +87,7 @@ y_train:
   filepath: ${s3.train_path}/y_train.pickle
 ```
 
-> *Node:* `@pickle` and `@path` in the dataset names above correspond to the [dataset transcoding](../data/data_catalog.md#transcoding-datasets) feature of Kedro. This allows to pass S3 path to the `X_train` dataset instead of the actual data itself to the `train_model_sagemaker` node that you will create shortly.
+> *Node:* `@pickle` and `@path` in the dataset names above correspond to the [dataset transcoding feature of Kedro](../data/data_catalog.md#transcoding-datasets). This allows to pass S3 path to the `X_train` dataset instead of the actual data itself to the `train_model_sagemaker` node that you will create shortly.
 
 * `parameters.yml` - contains the configuration for [SageMaker Scikit Learn Estimator](https://sagemaker.readthedocs.io/en/stable/frameworks/sklearn/sagemaker.sklearn.html#scikit-learn-estimator):
 
@@ -346,4 +346,4 @@ Now you know how to run serverless machine learning jobs using SageMaker right f
 
 ## Cleanup
 
-To cleanup the resources, simply delete the [S3 bucket](#create-s3-bucket) and, optionally, the [IAM role](#create-sagemaker-execution-role) you've created earlier (IAM resources are free). The job details of an already completed SageMaker training job cannot be deleted, but such jobs don't incur any costs.
+To cleanup the resources, [delete the S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html) and, optionally, the [IAM role you've created earlier](#create-sagemaker-execution-role) (IAM resources are free). The job details of an already completed SageMaker training job cannot be deleted, but such jobs incur no costs.

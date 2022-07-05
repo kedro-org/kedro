@@ -1,7 +1,6 @@
 """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
-import logging.config
 import multiprocessing
 import os
 import pickle
@@ -12,7 +11,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Dict, Iterable, Optional, Set
+from typing import Any, Dict, Iterable, Set
 
 from pluggy import PluginManager
 
@@ -47,7 +46,7 @@ class _SharedMemoryDataSet:
         self.shared_memory_dataset = manager.MemoryDataSet()  # type: ignore
 
     def __getattr__(self, name):
-        # This if condition prevents recursive call when deserializing
+        # This if condition prevents recursive call when deserialising
         if name == "__setstate__":
             raise AttributeError()
         return getattr(self.shared_memory_dataset, name)
@@ -62,8 +61,8 @@ class _SharedMemoryDataSet:
                 pickle.dumps(data)
             except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
                 raise DataSetError(
-                    f"{str(data.__class__)} cannot be serialized. ParallelRunner "
-                    "implicit memory datasets can only be used with serializable data"
+                    f"{str(data.__class__)} cannot be serialised. ParallelRunner "
+                    "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
             else:
                 raise exc
@@ -80,15 +79,12 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
-def _bootstrap_subprocess(
-    package_name: str, conf_logging: Optional[Dict[str, Any]] = None
-):
+def _bootstrap_subprocess(package_name: str, logging_config: Dict[str, Any]):
     # pylint: disable=import-outside-toplevel,cyclic-import
-    from kedro.framework.project import configure_project
+    from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
-    if conf_logging is not None:
-        logging.config.dictConfig(conf_logging)
+    configure_logging(logging_config)
 
 
 def _run_node_synchronization(  # pylint: disable=too-many-arguments
@@ -97,11 +93,12 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     is_async: bool = False,
     session_id: str = None,
     package_name: str = None,
-    conf_logging: Optional[Dict[str, Any]] = None,
+    logging_config: Dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
-    A `PluginManager` `hook_manager` instance is created in every subprocess because
-    the `PluginManager` can't be serialised.
+
+    A ``PluginManager`` instance is created in each subprocess because the
+    ``PluginManager`` can't be serialised.
 
     Args:
         node: The ``Node`` to run.
@@ -110,14 +107,14 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
             asynchronously with threads. Defaults to False.
         session_id: The session id of the pipeline run.
         package_name: The name of the project Python package.
-        conf_logging: A dictionary containing logging configuration.
+        logging_config: A dictionary containing logging configuration.
 
     Returns:
         The node argument.
 
     """
-    if multiprocessing.get_start_method() == "spawn" and package_name:  # type: ignore
-        _bootstrap_subprocess(package_name, conf_logging)
+    if multiprocessing.get_start_method() == "spawn" and package_name:
+        _bootstrap_subprocess(package_name, logging_config)  # type: ignore
 
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
@@ -184,19 +181,19 @@ class ParallelRunner(AbstractRunner):
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
-        """Ensure all tasks are serializable."""
-        unserializable = []
+        """Ensure all tasks are serialisable."""
+        unserialisable = []
         for node in nodes:
             try:
                 ForkingPickler.dumps(node)
             except (AttributeError, PicklingError):
-                unserializable.append(node)
+                unserialisable.append(node)
 
-        if unserializable:
+        if unserialisable:
             raise AttributeError(
-                f"The following nodes cannot be serialized: {sorted(unserializable)}\n"
+                f"The following nodes cannot be serialised: {sorted(unserialisable)}\n"
                 f"In order to utilize multiprocessing you need to make sure all nodes "
-                f"are serializable, i.e. nodes should not include lambda "
+                f"are serialisable, i.e. nodes should not include lambda "
                 f"functions, nested functions, closures, etc.\nIf you "
                 f"are using custom decorators ensure they are correctly decorated using "
                 f"functools.wraps()."
@@ -204,28 +201,28 @@ class ParallelRunner(AbstractRunner):
 
     @classmethod
     def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline):
-        """Ensure that all data sets are serializable and that we do not have
+        """Ensure that all data sets are serialisable and that we do not have
         any non proxied memory data sets being used as outputs as their content
         will not be synchronized across threads.
         """
 
         data_sets = catalog._data_sets  # pylint: disable=protected-access
 
-        unserializable = []
+        unserialisable = []
         for name, data_set in data_sets.items():
             if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
-                unserializable.append(name)
+                unserialisable.append(name)
                 continue
             try:
                 ForkingPickler.dumps(data_set)
             except (AttributeError, PicklingError):
-                unserializable.append(name)
+                unserialisable.append(name)
 
-        if unserializable:
+        if unserialisable:
             raise AttributeError(
                 f"The following data sets cannot be used with multiprocessing: "
-                f"{sorted(unserializable)}\nIn order to utilize multiprocessing you "
-                f"need to make sure all data sets are serializable, i.e. data sets "
+                f"{sorted(unserialisable)}\nIn order to utilize multiprocessing you "
+                f"need to make sure all data sets are serialisable, i.e. data sets "
                 f"should not make use of lambda functions, nested functions, closures "
                 f"etc.\nIf you are using custom decorators ensure they are correctly "
                 f"decorated using functools.wraps()."
@@ -274,6 +271,7 @@ class ParallelRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         Raises:
@@ -313,7 +311,7 @@ class ParallelRunner(AbstractRunner):
                             self._is_async,
                             session_id,
                             package_name=PACKAGE_NAME,
-                            conf_logging=LOGGING,
+                            logging_config=LOGGING,  # type: ignore
                         )
                     )
                 if not futures:

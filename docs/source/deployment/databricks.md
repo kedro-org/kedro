@@ -10,9 +10,9 @@ If you are using [Databricks Repos](https://docs.databricks.com/repos/index.html
 
 * New or existing [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/) with administrative privileges
 * Active [Databricks deployment](https://docs.databricks.com/getting-started/account-setup.html) on AWS (Databricks Community Edition won't suffice as it doesn't allow you to provision personal tokens)
-* [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) installed on your local machine
+* [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine
 * An account on [GitHub](https://github.com/) (free tier or above)
-* [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) installed on your local machine
+* [Git installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your local machine
 
 
 ## Running Kedro project from a Databricks notebook
@@ -61,9 +61,9 @@ You should get a similar output:
 ```
 ### 3. Create a Databricks cluster
 
-If you already have an active cluster with runtime version `7.1`, you can skip this step. Here is [how to find clusters](https://docs.databricks.com/clusters/clusters-manage.html) in your Databricks workspace.
+If you already have an active cluster with runtime version `7.1`, you can skip this step. Here is [how to find clusters in your Databricks workspace](https://docs.databricks.com/clusters/clusters-manage.html).
 
-Follow the [Databricks official guide](https://docs.databricks.com/clusters/create.html) to create a new cluster. For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
+Follow the [Databricks official guide to create a new cluster](https://docs.databricks.com/clusters/create.html). For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
 * Runtime: `7.1 (Scala 2.12, Spark 3.0.0)`
 * Enable autoscaling: `off`
 * Terminate after 120 minutes of inactivity: `on`
@@ -80,7 +80,7 @@ As a result you should have:
 
 ### 4. Create GitHub personal access token
 
-To synchronise the project between the local development environment and Databricks we will use a private GitHub repository that you will create in the next step. For authentication we will need a GitHub personal access token, so go ahead and [create such token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) in your GitHub developer settings.
+To synchronise the project between the local development environment and Databricks, we will use a private GitHub repository, which you will create in the next step. For authentication, we will need a GitHub personal access token, so go ahead and [create this token in your GitHub developer settings](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token).
 
 ```{note}
 Make sure that `repo` scopes are enabled for your token.
@@ -92,7 +92,7 @@ Now you should [create a new repository in GitHub](https://docs.github.com/en/gi
 
 To connect to the newly created repository you can use one of 2 options:
 
-* **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys) configured for GitHub
+* **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key configured for GitHub](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys)
 * **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#4-create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
 
 ### 6. Push Kedro project to the GitHub repository
@@ -160,7 +160,7 @@ Congratulations, you are now ready to run your Kedro project from the Databricks
 
 [Create your Databricks notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and remember to [attach it to the cluster](https://docs.databricks.com/notebooks/notebooks-manage.html#attach) you have just configured.
 
-In your newly created notebook put each code snippet from below into a separate cell and then [run all cells](https://docs.databricks.com/notebooks/notebooks-use.html#run-all-cells):
+In your newly created notebook put each code snippet from below into a separate cell and then [run all notebook cells](https://docs.databricks.com/notebooks/notebooks-use.html#run-all-cells):
 
 * Clone your project from GitHub
 

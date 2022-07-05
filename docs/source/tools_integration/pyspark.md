@@ -19,7 +19,7 @@ Optimal configuration for Spark depends on the setup of your Spark cluster.
 
 Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) in your custom project context class, which is the entrypoint for your Kedro project. This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
 
-Below is an example implementation to initialise the `SparkSession` in `<project-name>/src/<package-name>/<custom_context>.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
+Below is an example implementation to initialise the `SparkSession` in `<project-name>/src/<python_package>/custom_context.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
 
 ```python
 from typing import Any, Dict, Union
@@ -70,17 +70,17 @@ Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere 
 
 We don't recommend storing Spark session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
 
-Now, you need to configure Kedro to use `CustomContext`. All you need to do is just set `CONTEXT_CLASS` in `<project-name>/src/<package-name>/settings.py` as follow:
+Now, you need to configure Kedro to use `CustomContext`. Set `CONTEXT_CLASS` in `<project-name>/src/<python_package>/settings.py` as follows:
 
 ```python
-from <package-name>.<custom_context> import CustomContext
+from <python_package>.custom_context import CustomContext
 
 CONTEXT_CLASS = CustomContext
 ```
 
 ## Use Kedro's built-in Spark datasets to load and save raw data
 
-We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis), as well as to write them back to storage. Some of our built-in Spark datasets include:
+We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
 * [spark.DeltaTableDataSet](/kedro.extras.datasets.spark.DeltaTableDataSet)
 * [spark.SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)

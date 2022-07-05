@@ -44,7 +44,7 @@ def _validate_inputs_outputs(
 
     if any(_is_parameter(i) for i in inputs):
         raise ModularPipelineError(
-            "Parameters should be specified in the `parameters` argument"
+            "Parameters should be specified in the 'parameters' argument"
         )
 
     free_inputs = {_strip_transcoding(i) for i in pipe.inputs()}

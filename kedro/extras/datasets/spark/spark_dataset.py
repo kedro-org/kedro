@@ -157,7 +157,7 @@ class KedroHdfsInsecureClient(InsecureClient):
         return sorted(matched)
 
 
-class SparkDataSet(AbstractVersionedDataSet):
+class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     """``SparkDataSet`` loads and saves Spark dataframes.
 
     Example adding a catalog entry with
@@ -251,14 +251,14 @@ class SparkDataSet(AbstractVersionedDataSet):
                 It is dependent on the selected file format. You can find
                 a list of read options for each supported format
                 in Spark DataFrame read documentation:
-                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis
+                https://spark.apache.org/docs/latest/api/python/getting_started/quickstart_df.html
             save_args: Save args passed to Spark DataFrame write options.
                 Similar to load_args this is dependent on the selected file
                 format. You can pass ``mode`` and ``partitionBy`` to specify
                 your overwrite mode and partitioning respectively. You can find
                 a list of options for each format in Spark DataFrame
                 write documentation:
-                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis
+                https://spark.apache.org/docs/latest/api/python/getting_started/quickstart_df.html
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -276,8 +276,8 @@ class SparkDataSet(AbstractVersionedDataSet):
         if fs_prefix in ("s3a://", "s3n://"):
             if fs_prefix == "s3n://":
                 warn(
-                    "`s3n` filesystem has now been deprecated by Spark, "
-                    "please consider switching to `s3a`",
+                    "'s3n' filesystem has now been deprecated by Spark, "
+                    "please consider switching to 's3a'",
                     DeprecationWarning,
                 )
             _s3 = S3FileSystem(**credentials)
@@ -288,7 +288,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         elif fs_prefix == "hdfs://" and version:
             warn(
                 f"HDFS filesystem support for versioned {self.__class__.__name__} is "
-                f"in beta and uses `hdfs.client.InsecureClient`, please use with "
+                f"in beta and uses 'hdfs.client.InsecureClient', please use with "
                 f"caution"
             )
 
@@ -341,8 +341,8 @@ class SparkDataSet(AbstractVersionedDataSet):
         filepath = schema.get("filepath")
         if not filepath:
             raise DataSetError(
-                "Schema load argument does not specify a `filepath` attribute. Please"
-                "include a path to a JSON serialized `pyspark.sql.types.StructType`."
+                "Schema load argument does not specify a 'filepath' attribute. Please"
+                "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
             )
 
         credentials = deepcopy(schema.get("credentials")) or {}
@@ -358,8 +358,8 @@ class SparkDataSet(AbstractVersionedDataSet):
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:
                 raise DataSetError(
-                    f"Contents of `schema.filepath` ({schema_path}) are invalid. Please"
-                    f"provide a valid JSON serialized `pyspark.sql.types.StructType`."
+                    f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please"
+                    f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
                 ) from exc
 
     def _describe(self) -> Dict[str, Any]:
@@ -412,7 +412,7 @@ class SparkDataSet(AbstractVersionedDataSet):
             and write_mode not in supported_modes
         ):
             raise DataSetError(
-                f"It is not possible to perform `save()` for file format `delta` "
-                f"with mode `{write_mode}` on `SparkDataSet`. "
-                f"Please use `spark.DeltaTableDataSet` instead."
+                f"It is not possible to perform 'save()' for file format 'delta' "
+                f"with mode '{write_mode}' on 'SparkDataSet'. "
+                f"Please use 'spark.DeltaTableDataSet' instead."
             )

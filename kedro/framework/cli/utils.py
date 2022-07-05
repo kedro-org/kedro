@@ -32,6 +32,7 @@ ENTRY_POINT_GROUPS = {
     "line_magic": "kedro.line_magic",
     "hooks": "kedro.hooks",
     "cli_hooks": "kedro.cli_hooks",
+    "starters": "kedro.starters",
 }
 
 logger = logging.getLogger(__name__)
@@ -213,7 +214,7 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     """
     reqs_path = Path(reqs_path).absolute()
     if not reqs_path.is_file():
-        raise KedroCliError(f"Given path `{reqs_path}` is not a regular file.")
+        raise KedroCliError(f"Given path '{reqs_path}' is not a regular file.")
 
     pattern = re.compile(package_name + r"([^\w]|$)")
     with reqs_path.open("r", encoding="utf-8") as reqs_file:
@@ -222,7 +223,7 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
             if pattern.search(req_line):
                 return req_line
 
-    raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
+    raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
 def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
@@ -313,9 +314,30 @@ def _check_module_importable(module_name: str) -> None:
         import_module(module_name)
     except ImportError as exc:
         raise KedroCliError(
-            f"Module `{module_name}` not found. Make sure to install required project "
-            f"dependencies by running the `pip install -r src/requirements.txt` command first."
+            f"Module '{module_name}' not found. Make sure to install required project "
+            f"dependencies by running the 'pip install -r src/requirements.txt' command first."
         ) from exc
+
+
+def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
+    """Get all kedro related entry points"""
+    return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
+
+
+def _safe_load_entry_point(  # pylint: disable=inconsistent-return-statements
+    entry_point,
+):
+    """Load entrypoint safely, if fails it will just skip the entrypoint."""
+    try:
+        return entry_point.load()
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning(
+            "Failed to load %s commands from %s. Full exception: %s",
+            entry_point.module,
+            entry_point,
+            exc,
+        )
+        return
 
 
 def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
@@ -331,20 +353,12 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    entry_points = importlib_metadata.entry_points()
-    entry_points = entry_points.select(group=ENTRY_POINT_GROUPS[name])
 
     entry_point_commands = []
-    for entry_point in entry_points:
-        try:
-            entry_point_commands.append(entry_point.load())
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.warning(
-                "Failed to load %s commands from %s. Full exception: %s",
-                name,
-                entry_point,
-                exc,
-            )
+    for entry_point in _get_entry_points(name):
+        loaded_entry_point = _safe_load_entry_point(entry_point)
+        if loaded_entry_point:
+            entry_point_commands.append(loaded_entry_point)
     return entry_point_commands
 
 
@@ -378,8 +392,8 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:
             raise KedroCliError(
-                f"Expected the form of `load_version` to be "
-                f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                f"Expected the form of 'load_version' to be "
+                f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
                 f"found {load_version} instead"
             )
         load_versions_dict[load_version_list[0]] = load_version_list[1]

@@ -13,12 +13,12 @@ Here are the main reasons to use Kubeflow Pipelines:
 
 ## Prerequisites
 
-To use Kubeflow Pipelines, make sure you have the following prerequisites in place:
+To use Kubeflow Pipelines, ensure you have the following prerequisites in place:
 
-- Kubeflow Pipelines is [installed](https://www.kubeflow.org/docs/started/getting-started/) on your Kubernetes cluster
-- Kubeflow Pipelines SDK is [installed](https://www.kubeflow.org/docs/pipelines/sdk/install-sdk/) locally
-- A `name` attribute is set for each Kedro [node](/kedro.pipeline.node) since it is used to trigger runs
-- All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` in your workflow
+- [Kubeflow Pipelines is installed](https://www.kubeflow.org/docs/started/getting-started/) on your Kubernetes cluster
+- [Kubeflow Pipelines SDK is installed](https://www.kubeflow.org/docs/pipelines/sdk/install-sdk/) locally
+- A `name` attribute is set for each [Kedro node](/kedro.pipeline.node), since it is used to trigger runs
+- [All node input/output DataSets must be configured in `catalog.yml`](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3); you cannot use the `MemoryDataSet` in your workflow
 
 ```{note}
 Each node runs in its own container.
@@ -139,7 +139,7 @@ You can also specify two optional arguments:
 - `--pipeline`: pipeline name for which you want to build a workflow spec
 - `--env`: Kedro configuration environment name, defaults to `local`
 
-For the purpose of this walk-through, we are going to use AWS S3 bucket for DataSets therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example Kubernetes Secrets spec is given [below](#authenticate-kubeflow-pipelines)).
+For the purpose of this walk-through, we will use AWS S3 bucket for datasets, therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) ([an example Kubernetes Secrets spec is given below](#authenticate-kubeflow-pipelines)).
 
 
 Finally, run the helper script from project's directory to build the workflow spec (the spec will be saved to `<project_root>/<project_name>.yaml` file).
@@ -207,4 +207,4 @@ A Kubernetes Secrets can be removed with the following command.
 kubectl delete secrets aws-secrets -n kubeflow
 ```
 
-You can find more information about Kubeflow Pipelines in [their documentation](https://www.kubeflow.org/docs/pipelines/).
+[You can find more information about Kubeflow Pipelines in the official documentation](https://www.kubeflow.org/docs/pipelines/).

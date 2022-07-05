@@ -50,7 +50,7 @@ class LambdaDataSet(AbstractDataSet):
     def _save(self, data: Any) -> None:
         if not self.__save:
             raise DataSetError(
-                "Cannot save to data set. No `save` function "
+                "Cannot save to data set. No 'save' function "
                 "provided when LambdaDataSet was created."
             )
         self.__save(data)
@@ -58,7 +58,7 @@ class LambdaDataSet(AbstractDataSet):
     def _load(self) -> Any:
         if not self.__load:
             raise DataSetError(
-                "Cannot load data set. No `load` function "
+                "Cannot load data set. No 'load' function "
                 "provided when LambdaDataSet was created."
             )
         return self.__load()
@@ -103,8 +103,8 @@ class LambdaDataSet(AbstractDataSet):
         ]:
             if value is not None and not callable(value):
                 raise DataSetError(
-                    f"`{name}` function for LambdaDataSet must be a Callable. "
-                    f"Object of type `{value.__class__.__name__}` provided instead."
+                    f"'{name}' function for LambdaDataSet must be a Callable. "
+                    f"Object of type '{value.__class__.__name__}' provided instead."
                 )
 
         self.__load = load

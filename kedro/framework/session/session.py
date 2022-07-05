@@ -163,7 +163,12 @@ class KedroSession:
         if extra_params:
             session_data["extra_params"] = extra_params
 
-        session_data["username"] = getpass.getuser()
+        try:
+            session_data["username"] = getpass.getuser()
+        except Exception as exc:  # pylint: disable=broad-except
+            logging.getLogger(__name__).debug(
+                "Unable to get username. Full exception: %s", exc
+            )
 
         session._store.update(session_data)
 
@@ -172,27 +177,27 @@ class KedroSession:
         return session
 
     def _get_logging_config(self) -> Dict[str, Any]:
-        conf_logging = self._get_config_loader().get(
+        logging_config = self._get_config_loader().get(
             "logging*", "logging*/**", "**/logging*"
         )
         # turn relative paths in logging config into absolute path
         # before initialising loggers
-        conf_logging = _convert_paths_to_absolute_posix(
-            project_path=self._project_path, conf_dictionary=conf_logging
+        logging_config = _convert_paths_to_absolute_posix(
+            project_path=self._project_path, conf_dictionary=logging_config
         )
-        return conf_logging
+        return logging_config
 
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
         try:
-            conf_logging = self._get_logging_config()
+            logging_config = self._get_logging_config()
         except MissingConfigException:
             self._logger.debug(
                 "No project logging configuration loaded; "
                 "Kedro's default logging configuration will be used."
             )
         else:
-            configure_logging(conf_logging)
+            configure_logging(logging_config)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS
@@ -206,11 +211,11 @@ class KedroSession:
         except TypeError as err:
             raise ValueError(
                 f"\n{err}.\nStore config must only contain arguments valid "
-                f"for the constructor of `{classpath}`."
+                f"for the constructor of '{classpath}'."
             ) from err
         except Exception as err:
             raise ValueError(
-                f"\n{err}.\nFailed to instantiate session store of type `{classpath}`."
+                f"\n{err}.\nFailed to instantiate session store of type '{classpath}'."
             ) from err
 
     def _log_exception(self, exc_type, exc_value, exc_tb):

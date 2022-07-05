@@ -3,7 +3,7 @@
 import copy
 import re
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional
+from typing import Any, Dict, NoReturn, Optional
 
 import fsspec
 import pandas as pd
@@ -87,7 +87,7 @@ def _get_sql_alchemy_missing_error() -> DataSetError:
     )
 
 
-class SQLTableDataSet(AbstractDataSet):
+class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     """``SQLTableDataSet`` loads data from a SQL table and saves a pandas
     dataframe to a table. It uses ``pandas.DataFrame`` internally,
     so it supports all allowed pandas options on ``read_sql_table`` and
@@ -191,11 +191,11 @@ class SQLTableDataSet(AbstractDataSet):
         """
 
         if not table_name:
-            raise DataSetError("`table_name` argument cannot be empty.")
+            raise DataSetError("'table_name' argument cannot be empty.")
 
         if not (credentials and "con" in credentials and credentials["con"]):
             raise DataSetError(
-                "`con` argument cannot be empty. Please "
+                "'con' argument cannot be empty. Please "
                 "provide a SQLAlchemy connection string."
             )
 
@@ -257,7 +257,7 @@ class SQLTableDataSet(AbstractDataSet):
         return exists
 
 
-class SQLQueryDataSet(AbstractDataSet):
+class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     """``SQLQueryDataSet`` loads data from a provided SQL query. It
     uses ``pandas.DataFrame`` internally, so it supports all allowed
     pandas options on ``read_sql_query``. Since Pandas uses SQLAlchemy behind
@@ -352,19 +352,19 @@ class SQLQueryDataSet(AbstractDataSet):
         """
         if sql and filepath:
             raise DataSetError(
-                "`sql` and `filepath` arguments cannot both be provided."
+                "'sql' and 'filepath' arguments cannot both be provided."
                 "Please only provide one."
             )
 
         if not (sql or filepath):
             raise DataSetError(
-                "`sql` and `filepath` arguments cannot both be empty."
+                "'sql' and 'filepath' arguments cannot both be empty."
                 "Please provide a sql query or path to a sql query file."
             )
 
         if not (credentials and "con" in credentials and credentials["con"]):
             raise DataSetError(
-                "`con` argument cannot be empty. Please "
+                "'con' argument cannot be empty. Please "
                 "provide a SQLAlchemy connection string."
             )
 
@@ -429,5 +429,5 @@ class SQLQueryDataSet(AbstractDataSet):
 
         return pd.read_sql_query(con=engine, **load_args)
 
-    def _save(self, data: pd.DataFrame) -> None:
-        raise DataSetError("`save` is not supported on SQLQueryDataSet")
+    def _save(self, data: None) -> NoReturn:
+        raise DataSetError("'save' is not supported on SQLQueryDataSet")

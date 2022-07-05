@@ -222,11 +222,13 @@ def add_test_jupyter_nb(context):
         test_nb_fh.write(TEST_JUPYTER_ORG)
 
 
-@given("I have run a non-interactive kedro new with starter")
-@when("I run a non-interactive kedro new with starter")
-def create_project_with_starter(context):
+@given('I have run a non-interactive kedro new with starter "{starter}"')
+@when('I run a non-interactive kedro new with starter "{starter}"')
+def create_project_with_starter(context, starter):
     """Behave step to run kedro new given the config I previously created."""
-    starter_dir = Path(__file__).parent / "test_starter"
+    if starter == "default":
+        starter = Path(__file__).parent / "test_starter"
+
     res = run(
         [
             context.kedro,
@@ -234,7 +236,7 @@ def create_project_with_starter(context):
             "-c",
             str(context.config_file),
             "--starter",
-            str(starter_dir),
+            str(starter),
         ],
         env=context.env,
         cwd=context.temp_dir,
@@ -464,11 +466,11 @@ def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
     info_log = context.root_project_dir / "logs" / "info.log"
     stdout = context.result.stdout
-    assert node in stdout, (
+    assert expected_log_line in stdout, (
         "Expected the following message segment to be printed on stdout: "
         f"{expected_log_line},\nbut got {stdout}"
     )
-    assert expected_log_line in info_log.read_text()
+    assert expected_log_line in info_log.read_text(), info_log.read_text()
 
 
 @then("I should get a successful exit code")

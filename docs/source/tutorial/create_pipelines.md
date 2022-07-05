@@ -11,13 +11,13 @@ You previously registered the raw datasets for your Kedro project, so you can no
 
 ### Generate a new pipeline template
 
-In the terminal run the following command:
+In the terminal, run the following command:
 
 ```bash
 kedro pipeline create data_processing
 ```
 
-This generates all the files you need to start writing a `data_processing` pipeline:
+This command generates all the files you need to start to write a `data_processing` pipeline:
 * `nodes.py` and `pipeline.py` in the `src/kedro_tutorial/pipelines/data_processing` folder for the main node functions that form your pipeline
 * `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
 * `src/tests/pipelines/data_processing` for tests for your pipeline

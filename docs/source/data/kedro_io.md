@@ -388,7 +388,7 @@ def concat_partitions(partitioned_input: Dict[str, Callable[[], Any]]) -> pd.Dat
     return result
 ```
 
-As you can see from the above ecample, on load `PartitionedDataSet` _does not_ automatically load the data from the located partitions. Instead, `PartitionedDataSet` returns a dictionary with partition IDs as keys and the corresponding load functions as values. It allows the node that consumes the `PartitionedDataSet` to implement the logic that defines what partitions need to be loaded, and how this data is going to be processed.
+As you can see from the above example, on load `PartitionedDataSet` _does not_ automatically load the data from the located partitions. Instead, `PartitionedDataSet` returns a dictionary with partition IDs as keys and the corresponding load functions as values. It allows the node that consumes the `PartitionedDataSet` to implement the logic that defines what partitions need to be loaded, and how this data is going to be processed.
 
 Partition ID _does not_ represent the whole partition path, but only a part of it that is unique for a given partition _and_ filename suffix:
 
@@ -446,7 +446,7 @@ def create_partitions() -> Dict[str, Any]:
 Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a `PartitionedDataSet`. The simplest safety mechanism could be to use partition IDs with a high chance of uniqueness: for example, the current timestamp.
 ```
 
-`PartitionedDataSet` also supports lazy saving, where the partition's data is not materialized until it is time to write.
+`PartitionedDataSet` also supports lazy saving, where the partition's data is not materialised until it is time to write.
 To use this, simply return `Callable` types in the dictionary:
 
 ```python

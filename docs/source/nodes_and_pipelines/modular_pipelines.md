@@ -4,7 +4,7 @@
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test and maintain, and are portable so they can be copied and reused between projects.
 
-Modular pipelines allow you to instantiate pipelines multiple times whilst allowing the user to override inputs/outputs/parameters. They are reusable within the same codebase and shareable across projects via [micro-packaging](micro_packaging.md). This is the modern way to use Kedro and will change the way you think about your pipelines.
+Modular pipelines allow you to instantiate pipelines multiple times, while allowing the user to override inputs/outputs/parameters. They are reusable within the same codebase, and shareable across projects via [micro-packaging](micro_packaging.md). This is the modern way to use Kedro, and will change the way you think about your pipelines.
 
 ```{note}
 The Kedro project visualised below is representative of one that might be seen in the real world. It takes full advantage of modular pipelines for `Data Ingestion`, `Feature Engineering`, `Reporting` and `Train Evaluation` (which even includes nested instances).
@@ -12,7 +12,7 @@ The Kedro project visualised below is representative of one that might be seen i
 
 ### Key concepts
 
-In this section you will learn about how to take advantage of modular pipelines, the key points have been listed below:
+In this section, you will learn about how to take advantage of modular pipelines. The key points are listed below:
 
 1. **A modular pipeline is defined by its folder structure**
 
@@ -49,7 +49,7 @@ For the full list of available CLI options, you can always run `kedro pipeline c
 
 ### What does the ``kedro pipeline create`` do?
 
-Running the `kedro pipeline create` command adds boilerplate pipeline folders and files for the created pipeline to your project. For your convenience Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters and appropriate `tests` structure. You also don't have to add those pesky `__init__.py` files yourself, which is handy 😅. You can see the generated folder structure below:
+Running the `kedro pipeline create` command adds boilerplate pipeline folders and files for the created pipeline to your project. For your convenience, Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters and appropriate `tests` structure. You also don't have to add those pesky `__init__.py` files yourself, which is handy 😅. You can see the generated folder structure below:
 
 <details>
 <summary><b>Click to see the generated folder structure</b></summary>
@@ -86,18 +86,18 @@ If you want to do the reverse and remove a modular pipeline, you can use ``kedro
 
 ### Ensuring portability
 
-Modular pipelines are shareable between Kedro codebases via [micro-packaging](micro_packaging.md), but you need to follow a couple of rules to ensure portability:
+Modular pipelines are shareable between Kedro codebases via [micro-packaging](micro_packaging.md), but you must follow a couple of rules to ensure portability:
 
-* Modular pipelines should **not** depend on the main Python package as this would break portability to another project.
-* Catalog references are not packaged when sharing/consuming modular pipelines i.e. the `catalog.yml` file is not packaged.
+* Modular pipelines should **not** depend on the main Python package, as this would break portability to another project.
+* Catalog references are not packaged when sharing/consuming modular pipelines, i.e. the `catalog.yml` file is not packaged.
 * Kedro will only look for top-level configuration in `conf/`; placing a configuration folder within the pipeline folder will have no effect.
-* It is recommended that you document the configuration required (parameters and catalog) in the local `README.md` file for any downstream consumers.
+* We recommend that you document the configuration required (parameters and catalog) in the local `README.md` file for any downstream consumers.
 
 ### Providing modular pipeline specific dependencies
 
-* A modular pipeline **may** have external dependencies specified in a local `requirements.txt` file.
+* A modular pipeline **might** have external dependencies specified in a local `requirements.txt` file.
 * Pipeline specific dependencies are scooped up during the [micro-packaging](micro_packaging.md) process.
-* These dependencies are _not_ currently installed by the [`kedro install`](../development/commands_reference.md#install-all-package-dependencies) command and will have to be manually installed.
+* These dependencies are _not_ currently installed by the [`kedro install`](../development/commands_reference.md#install-all-package-dependencies) command, and must be manually installed.
 
 ## Using the modular `pipeline()` wrapper to provide overrides
 
@@ -105,7 +105,7 @@ This wrapper really unlocks the power of modular pipelines.
 
 * It allows you to start instantiating the same pipeline multiple times.
 * These will be static in terms of structure, but dynamic in terms of `inputs`/`outputs`/`parameters`.
-* It also allows you to simplify both your mental models and Kedro-Viz visualisations via `namespaces`.
+* It also allows you to simplify both your mental models, and Kedro-Viz visualisations via `namespaces`.
 
 ```python
 from kedro.pipeline.modular_pipeline import pipeline
@@ -123,12 +123,12 @@ The `pipeline()` wrapper method takes the following arguments:
 
 ## Combining disconnected pipelines
 
-Sometimes two pipelines need to be connected, but do not share any catalog dependencies. The wrapper can be used to solve that.
+Sometimes two pipelines must be connected, but do not share any catalog dependencies. The wrapper can be used to solve that.
 
 <details>
 <summary>Click here to see a worked example</summary>
 
-In this example, there is a `lunch_pipeline` which makes us lunch. The 'verbs', `defrost` and `eat`, are Python functions and the inputs/outputs are food at different points of the process (`frozen`, `thawed` and `food`).
+In this example, there is a `lunch_pipeline`, which makes us lunch. The 'verbs', `defrost` and `eat`, are Python functions and the inputs/outputs are food at different points of the process (`frozen`, `thawed` and `food`).
 
 ```python
 cook_pipeline = pipeline(
@@ -200,7 +200,7 @@ cook_pipeline + eat_breakfast_pipeline + eat_lunch_pipeline
 If we visualise the snippet above, we see a disjointed pipeline:
 
 * We need to "defrost" two different types of food via different pipelines.
-* We can't use the `cook_pipeline` twice because the internal dataset names will conflict.
+* We cannot use the `cook_pipeline` twice because the internal dataset names will conflict.
 * Mapping all datasets via the `pipeline()`  wrapper will also cause conflicts.
 
 ![cook no namespace](../meta/images/cook_no_namespace.png)

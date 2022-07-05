@@ -35,7 +35,7 @@ When you build a Kedro project, you will typically follow a standard development
 ### 3. Create the pipeline
 
 * Create the data transformation steps as Python functions
-* Add you functions as nodes, to construct the pipeline
+* Add your functions as nodes, to construct the pipeline
 * Choose how to run the pipeline: sequentially or in parallel
 
 ### 4. Package the project

@@ -11,7 +11,7 @@ Enabling experiment tracking features on Kedro-Viz relies on:
 
 This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project outlined in [this tutorial](../tutorial/spaceflights_tutorial.md) and build on previously discussed topics such as [namespacing](../tutorial/namespace_pipelines.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
 
-You can also access a more detailed [demo].(https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
+You can also access a more detailed [demo](https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
 
 ## Set up a project
 
@@ -109,7 +109,7 @@ node(
 )
 ```
 
-Repeat the same steps to set up the `companies_column` dataset. For this dataset, log the column that contains the list of companies as outlined in the `companies.csv` file under the `/data/01_raw` heading. Modify the `preprocess_companies` node under the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`) to return the data under a key value pair, as shown below:
+Repeat the same steps to set up the `companies_column` dataset. For this dataset, log the column that contains the list of companies as outlined in the `companies.csv` file under the `/data/01_raw` directory. Modify the `preprocess_companies` node under the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`) to return the data under a key value pair, as shown below:
 
 ```python
 from typing import Tuple, Dict
@@ -140,7 +140,7 @@ node(
 )
 ```
 
-Having set up both datasets, youcan now generate your first set of experiment tracking data!
+Having set up both datasets, you can now generate your first set of experiment tracking data!
 
 ## Generate the Run data
 

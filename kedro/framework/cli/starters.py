@@ -63,6 +63,7 @@ _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec(
         "standalone-datacatalog", _STARTERS_REPO, "standalone-datacatalog"
     ),
+    KedroStarterSpec("pandas-iris", _STARTERS_REPO, "pandas-iris"),
     KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
     KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
     KedroStarterSpec("spaceflights", _STARTERS_REPO, "spaceflights"),

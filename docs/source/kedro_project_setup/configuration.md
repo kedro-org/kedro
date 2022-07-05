@@ -241,7 +241,7 @@ step_size: 1
 learning_rate: 0.01
 ```
 
- You can now using the `params:` prefix to reference these parameters in the `node` definition:
+ You can now use the `params:` prefix to reference these parameters in the `node` definition:
 
 ```python
 def increase_volume(volume, step):
@@ -305,7 +305,7 @@ You can use `add_feed_dict()` to inject any other entries into your `DataCatalog
 
 ## Credentials
 
-For security reasons, we strongly recommend you *not* commit any credentials or other secrets to the Version Control System. Hence, by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
+For security reasons, we strongly recommend you to *not* commit any credentials or other secrets to the Version Control System. Hence, by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
 
 Credentials configuration can be loaded the same way as any other project configuration using the `ConfigLoader` class:
 

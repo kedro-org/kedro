@@ -4,7 +4,7 @@
 
 To make it easier to share a Jupyter notebook with others, avoid the use of hard-coded file paths to load or save data. One way to explore data within a shareable Jupyter notebook is to use Kedro's [`DataCatalog`](../data/data_catalog.md), but in the early phases of a project, you might not want to use any other Kedro features.
 
-The Kedro starter with alias `standalone-datacatalog` (formerly known as `mini-kedro`) provides this minimal functionality. You can use a YAML API to specify the sources required to load and save data: for example,
+The Kedro starter with alias `standalone-datacatalog` (formerly known as `mini-kedro`) provides this minimal functionality. You can use a YAML API to specify the sources required to load and save data, for example,
 
  ```yaml
 # conf/base/catalog.yml

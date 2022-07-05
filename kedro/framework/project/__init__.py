@@ -11,11 +11,11 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import click
+import rich.pretty
+import rich.traceback
 import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
-from rich.pretty import install as rich_pretty_install
-from rich.traceback import install as rich_traceback_install
 
 from kedro.pipeline import Pipeline
 
@@ -200,10 +200,10 @@ class _ProjectLogging(UserDict):
         # We suppress click here to hide tracebacks related to it conversely,
         # kedro is not suppressed to show its tracebacks for easier debugging.
         # sys.executable is used to get the kedro executable path to hide the top level traceback.
-        rich_traceback_install(
+        rich.traceback.install(
             show_locals=True, suppress=[click, str(Path(sys.executable).parent)]
         )
-        rich_pretty_install()
+        rich.pretty.install()
 
     def configure(self, logging_config: Dict[str, Any]) -> None:
         """Configure project logging using `logging_config` (e.g. from project

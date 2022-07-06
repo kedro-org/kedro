@@ -9,7 +9,7 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 
 ## Prerequisites
 
-To use AWS Batch, make sure you have the following prerequisites in place:
+To use AWS Batch, ensure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
 - A `name` attribute is set for each [Kedro node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node <node_name>`.

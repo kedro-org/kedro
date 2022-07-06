@@ -124,7 +124,7 @@ There are two special considerations when contributing a dataset:
 
 ## Create a pull request
 
-Create your pull request with a descriptive title. Before you submit it, consider the following:
+Create your pull request with [a descriptive title](#pull-request-title-conventions). Before you submit it, consider the following:
 
 * You should aim for cross-platform compatibility on Windows, macOS and Linux
 * We use [SemVer](https://semver.org/) for versioning
@@ -150,6 +150,17 @@ If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack
 ```{note}
 We place [conftest.py](https://docs.pytest.org/en/latest/reference/fixtures.html) files in some test directories to make fixtures reusable by any tests in that directory. If you need to see which test fixtures are available and where they come from, you can issue the following command `pytest --fixtures path/to/the/test/location.py`.
 ```
+
+### Pull request title conventions
+
+The Kedro repository requires that you [squash and merge your pull request commits](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#squash-and-merge-your-pull-request-commits), and, in most cases, the [merge message for a squash merge](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#merge-message-for-a-squash-merge) then defaults to the pull request title.
+
+For clarity, your pull request title should be descriptive, and we ask you to follow some guidelines suggested by [Chris Beams](https://github.com/cbeams) in his post [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/#seven-rules). In particular, for your pull request title, we suggest that you:
+
+* [Limit the length to 50 characters](https://chris.beams.io/posts/git-commit/#limit-50)
+* [Capitalise the first letter of the first word](https://chris.beams.io/posts/git-commit/#capitalize)
+* [Omit the period at the end](https://chris.beams.io/posts/git-commit/#end)
+* [Use the imperative tense](https://chris.beams.io/posts/git-commit/#imperative)
 
 ### Hints on `pre-commit` usage
 [`pre-commit`](https://pre-commit.com) hooks run checks automatically on all the changed files on each commit but can be skipped with the `--no-verify` or `-n` flag:
@@ -182,7 +193,7 @@ git commit -s -m "This is my commit message"
 
 To avoid needing to remember the `-s` flag on every commit, you might like to set up a [git alias](https://git-scm.com/book/en/v2/Git-Basics-Git-Aliases) for `git commit -s`. Alternatively, run `make sign-off` to setup a [`commit-msg` Git hook](https://git-scm.com/docs/githooks#_commit_msg) that automatically signs off all commits (including merge commits) you make while working on the Kedro repository.
 
-If your PR is blocked due to unsigned commits then you will need to follow the instructions under "Rebase the branch" on the GitHub Checks page for your PR. This will retroactively add the sign-off to all unsigned commits and allow the DCO check to pass.
+If your PR is blocked due to unsigned commits, then you must follow the instructions under "Rebase the branch" on the GitHub Checks page for your PR. This will retroactively add the sign-off to all unsigned commits and allow the DCO check to pass.
 
 ## Need help?
 

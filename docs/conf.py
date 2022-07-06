@@ -29,6 +29,8 @@ from sphinxcontrib.mermaid import mermaid
 
 from kedro import __version__ as release
 
+MERMAID_JS_URL = "https://unpkg.com/mermaid/dist/mermaid.min.js"
+
 # -- Project information -----------------------------------------------------
 
 project = "Kedro"
@@ -521,15 +523,23 @@ def _add_jinja_filters(app):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
-def install_mermaid(
+def remove_unused_mermaid_script_file(
     app: Sphinx,
     pagename: str,
     templatename: str,
     context: Dict,
     doctree: Optional[nodes.document],
 ) -> None:
-    if doctree and doctree.next_node(mermaid):
-        app.add_js_file("https://unpkg.com/mermaid/dist/mermaid.js")
+    if (
+        doctree  # doctree is None when not created from reST documents.
+        and not doctree.next_node(mermaid)  # No Mermaid diagram on page
+        and MERMAID_JS_URL in context["script_files"]
+    ):
+        # Create a copy of `context["script_files"]`; modifying the list
+        # in place affects all pages, because they all use the same ref.
+        context["script_files"] = [
+            x for x in context["script_files"] if x != MERMAID_JS_URL
+        ]
 
 
 def setup(app):
@@ -540,7 +550,8 @@ def setup(app):
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
     app.add_css_file("css/theme-overrides.css")
-    app.connect("html-page-context", install_mermaid)
+    app.add_js_file(MERMAID_JS_URL)
+    app.connect("html-page-context", remove_unused_mermaid_script_file)
 
 
 # (regex, restructuredText link replacement, object) list
@@ -569,4 +580,4 @@ user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99
 
 myst_heading_anchors = 5
 
-mermaid_version = ""
+mermaid_version = ""  # We add a minified Mermaid script file ourselves.

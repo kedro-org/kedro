@@ -18,7 +18,7 @@ To use Kubeflow Pipelines, ensure you have the following prerequisites in place:
 - [Kubeflow Pipelines is installed](https://www.kubeflow.org/docs/started/getting-started/) on your Kubernetes cluster
 - [Kubeflow Pipelines SDK is installed](https://www.kubeflow.org/docs/pipelines/sdk/install-sdk/) locally
 - A `name` attribute is set for each [Kedro node](/kedro.pipeline.node), since it is used to trigger runs
-- [All node input/output DataSets must be configured in `catalog.yml`](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3); you cannot use the `MemoryDataSet` in your workflow
+- [All node input/output DataSets must be configured in `catalog.yml`](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3); you cannot use the `MemoryDataSet` in your workflow
 
 ```{note}
 Each node runs in its own container.

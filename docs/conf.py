@@ -530,16 +530,20 @@ def remove_unused_mermaid_script_file(
     context: Dict,
     doctree: Optional[nodes.document],
 ) -> None:
-    if (
-        doctree  # doctree is None when not created from reST documents.
-        and not doctree.next_node(mermaid)  # No Mermaid diagram on page
-        and MERMAID_JS_URL in context["script_files"]
-    ):
+    # The `doctree` arg is `None` when not created from a reST document.
+    if not doctree:
+        return
+
+    # Remove the Mermaid JavaScript from pages without Mermaid diagrams.
+    if not doctree.next_node(mermaid):
         # Create a copy of `context["script_files"]`; modifying the list
         # in place affects all pages, because they all use the same ref.
         context["script_files"] = [
             x for x in context["script_files"] if x != MERMAID_JS_URL
         ]
+
+    # Remove "None" entries added when `mermaid_version` is set to `""`.
+    context["script_files"] = [x for x in context["script_files"] if x != "None"]
 
 
 def setup(app):

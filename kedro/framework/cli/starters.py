@@ -355,8 +355,8 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, Any]):
         ) from exc
 
     _clean_pycache(Path(result_path))
-    extra_context = cookiecutter_args.get("extra_context", {})
-    project_name = extra_context.get("project_name", "")
+    extra_context = cookiecutter_args["extra_context"]
+    project_name = extra_context.get("project_name", "New Kedro Project")
     python_package = extra_context.get(
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )

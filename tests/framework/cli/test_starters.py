@@ -156,7 +156,7 @@ class TestNewFromUserPromptsValid:
         _assert_template_ok(
             result,
             project_name="My-Project_ 1",
-            repo_name="my-project_-1",
+            repo_name="my-project--1",
             python_package="my_project__1",
         )
 

@@ -93,7 +93,7 @@ src/kedro_pokemon/extras
 
 ## Implement the `_load` method with `fsspec`
 
-Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](../data/data_catalog.md#specifying-the-location-of-the-dataset). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
+Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](../data/data_catalog.md#specify-the-location-of-the-dataset). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
 
 Here is the implementation of the `_load` method using `fsspec` and `Pillow` to read the data of a single image into a `numpy` array:
 
@@ -562,7 +562,7 @@ class ImageDataSet(AbstractVersionedDataSet):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)'s implementation.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)'s implementation.
 
 
 ## How to contribute a custom dataset implementation

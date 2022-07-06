@@ -12,7 +12,7 @@ Create a new project in your current working directory:
 kedro new
 ```
 
-You will be asked to enter each of the following variables in turn. Once you have entered text for the first option (the project's name), you will be offered a default choice for the other options:
+You will be asked to enter the `project_name`. The `project_name` must be at least two characters long, and only contain alphanumeric symbols, spaces, underscores and hyphens. The `project_name` is used to automatically generate the `repo_name` and `python_package`.
 
 | Option           | Example       | Description                                                               |
 | ---------------- | ------------- | ------------------------------------------------------------------------- |

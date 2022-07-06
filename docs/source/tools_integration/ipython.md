@@ -98,7 +98,7 @@ Out[3]:
 ```
 
 ```{note}
-If you enable [versioning](../data/data_catalog.md#versioning-datasets-and-ml-models) then you can load a particular version of a dataset, e.g. `catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
+If you enable [versioning](../data/data_catalog.md#version-datasets-and-ml-models) then you can load a particular version of a dataset, e.g. `catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
 ```
 
 ### `context`

@@ -215,7 +215,7 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
     # Ideally we would want to be able to use tempfile.TemporaryDirectory() context manager
     # but it causes an issue with readonly files on windows
     # see: https://bugs.python.org/issue26660.
-    # So onerror, we will attempt to clear the readonly bits and re-attempt the cleanup
+    # So on error, we will attempt to clear the readonly bits and re-attempt the cleanup
     shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
@@ -330,7 +330,7 @@ def _make_cookiecutter_args(
     return cookiecutter_args
 
 
-def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
+def _create_project(template_path: str, cookiecutter_args: Dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
     Args:
@@ -355,15 +355,27 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
         ) from exc
 
     _clean_pycache(Path(result_path))
+    extra_context = cookiecutter_args["extra_context"]
+    project_name = extra_context.get("project_name", "New Kedro Project")
+    python_package = extra_context.get(
+        "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
+    )
     click.secho(
-        f"\nChange directory to the project generated in {result_path}",
-        fg="green",
+        f"\nThe project name '{project_name}' has been applied to: "
+        f"\n- The project title in {result_path}/README.md "
+        f"\n- The folder created for your project in {result_path} "
+        f"\n- The project's python package in {result_path}/src/{python_package}"
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
         "a virtual environment before running 'pip install -r src/requirements.txt' to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
+    )
+    click.secho(
+        f"\nChange directory to the project generated in {result_path} by "
+        f"entering 'cd {result_path}'",
+        fg="green",
     )
 
 
@@ -444,7 +456,7 @@ def _fetch_config_from_user_prompts(
         # render the variable on the command line
         cookiecutter_variable = render_variable(
             env=StrictEnvironment(context=cookiecutter_context),
-            raw=cookiecutter_context[variable_name],
+            raw=cookiecutter_context.get(variable_name),
             cookiecutter_dict=config,
         )
 
@@ -489,9 +501,10 @@ class _Prompt:
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
         if self.regexp and not re.match(self.regexp, user_input):
-            click.secho(f"'{user_input}' is an invalid value.", fg="red", err=True)
+            message = f"'{user_input}' is an invalid value for {self.title}."
+            click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
-            raise ValueError(user_input)
+            raise ValueError(message, self.error_message)
 
 
 def _get_available_tags(template_path: str) -> List:

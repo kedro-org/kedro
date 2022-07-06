@@ -4,28 +4,28 @@ This section introduces `catalog.yml`, the project-shareable Data Catalog. The f
 
 All supported data connectors are available in [`kedro.extras.datasets`](/kedro.extras.datasets).
 
-## Using the Data Catalog within Kedro configuration
+## Use the Data Catalog within Kedro configuration
 
 Kedro uses configuration to make your code reproducible when it has to reference datasets in different locations and/or in different environments.
 
 You can copy this file and reference additional locations for the same datasets. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while copying and updating a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets that you are using for prototyping your data pipeline(s).
 
-There is built-in functionality for `conf/local/` to overwrite `conf/base/` [described in the documentation about configuration](../kedro_project_setup/configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
+Built-in functionality for `conf/local/` to overwrite `conf/base/` is [described in the documentation about configuration](../kedro_project_setup/configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
 
-The Data Catalog also works with the `credentials.yml` in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
+The Data Catalog also works with the `credentials.yml` file in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
 
-The are two ways of defining a Data Catalog through the use of YAML configuration, or programmatically using an API. Both methods allow you to specify:
+You can define a Data Catalog in two ways - through YAML configuration, or programmatically using an API. Both methods allow you to specify:
 
  - Dataset name
  - Dataset type
  - Location of the dataset using `fsspec`, detailed in the next section
- - Credentials needed in order to access the dataset
+ - Credentials needed to access the dataset
  - Load and saving arguments
- - Whether or not you want a [dataset or ML model to be versioned](kedro_io.md#versioning) when you run your data pipeline
+ - Whether you want a [dataset or ML model to be versioned](kedro_io.md#versioning) when you run your data pipeline
 
-## Specifying the location of the dataset
+## Specify the location of the dataset
 
-Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) for reading and saving data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, you should provide a URL using the general form `protocol://path/to/data`.  If no protocol is provided, the local file system is assumed (same as ``file://``).
+Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, you should provide a URL using the general form `protocol://path/to/data`.  If no protocol is provided, the local file system is assumed (same as ``file://``).
 
 The following prepends are available:
 
@@ -85,7 +85,7 @@ test_dataset:
     encoding: "utf-8"
 ```
 
-## Using the Data Catalog with the YAML API
+## Use the Data Catalog with the YAML API
 
 The YAML API allows you to configure your datasets in a YAML configuration file, `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
@@ -164,7 +164,7 @@ rockets:
     sheet_name: Sheet1
 ```
 
-Example 7: Save an image created with Matplotlib on Google Cloud Storage
+Example 7: Saves an image created with Matplotlib on Google Cloud Storage
 
 ```yaml
 results_plot:
@@ -206,7 +206,7 @@ trucks:
     partition_on: [name]
 ```
 
-Example 10: Load / saves a Spark table on S3, using specified load and save arguments
+Example 10: Loads / saves a Spark table on S3, using specified load and save arguments
 
 ```yaml
 weather:
@@ -236,7 +236,7 @@ scooters:
     if_exists: replace
 ```
 
-Example 12: Load a SQL table with credentials, a database connection, and applies a SQL query to the table
+Example 12: Loads an SQL table with credentials, a database connection, and applies a SQL query to the table
 
 ```yaml
 scooters_query:
@@ -247,9 +247,9 @@ scooters_query:
     index_col: [name]
 ```
 
-When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+When you use [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
-Example 13: Load data from an API endpoint, example US corn yield data from USDA
+Example 13: Loads data from an API endpoint, example US corn yield data from USDA
 
 ```yaml
 us_corn_yield_data:
@@ -265,7 +265,7 @@ us_corn_yield_data:
     year: 2000
 ```
 
-Note that `usda_credientials` will be passed as the `auth` argument in the `requests` library. Specify the username and password as a list in your `credentials.yml` as follows:
+Note that `usda_credientials` will be passed as the `auth` argument in the `requests` library. Specify the username and password as a list in your `credentials.yml` file as follows:
 
 ```yaml
 usda_credentials:
@@ -273,7 +273,7 @@ usda_credentials:
   - password
 ```
 
-Example 14: Loading data from Minio (S3 API Compatible Storage)
+Example 14: Loads data from Minio (S3 API Compatible Storage)
 
 ```yaml
 test:
@@ -292,12 +292,12 @@ dev_minio:
 ```
 
 ```{note}
-The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
+The easiest way to setup MinIO is to run a Docker image. After the following command, you can access the Minio server with `http://localhost:9000` and create a bucket and add files as if it is on S3.
 ```
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
-Example 15: Loading a model saved as a pickle from Azure Blob Storage
+Example 15: Loads a model saved as a pickle from Azure Blob Storage
 
 ```yaml
 ml_model:
@@ -306,14 +306,14 @@ ml_model:
   versioned: True
   credentials: dev_abs
 ```
-In `credentials.yml`, define the `account_name` and `account_key` as follows:
+In the `credentials.yml` file, define the `account_name` and `account_key`:
 
 ```yaml
 dev_abs:
   account_name: accountname
   account_key: key
 ```
-Example 16: Loading a CSV file stored in a remote location through SSH
+Example 16: Loads a CSV file stored in a remote location through SSH
 
 ```{note}
 This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).
@@ -324,7 +324,7 @@ cool_dataset:
   filepath: "sftp:///path/to/remote_cluster/cool_data.csv"
   credentials: cluster_credentials
 ```
-All parameters required to establish the SFTP connection can be defined through `fs_args` or in `credentials.yml` as follows:
+All parameters required to establish the SFTP connection can be defined through `fs_args` or in the `credentials.yml` file as follows:
 
 ```yaml
 cluster_credentials:
@@ -335,7 +335,7 @@ cluster_credentials:
 ```
 The list of all available parameters is given in the [Paramiko documentation](https://docs.paramiko.org/en/2.4/api/client.html#paramiko.client.SSHClient.connect).
 
-## Creating a Data Catalog YAML configuration file via CLI
+## Create a Data Catalog YAML configuration file via CLI
 
 You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
 
@@ -351,7 +351,7 @@ scooters:
 
 ## Adding parameters
 
-You can [configure parameters](../kedro_project_setup/configuration.md#load-parameters) for your project and [reference them](../kedro_project_setup/configuration.md#use-parameters) in your nodes. Do this using the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
+You can [configure parameters](../kedro_project_setup/configuration.md#load-parameters) for your project and [reference them](../kedro_project_setup/configuration.md#use-parameters) in your nodes. To do this, use the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry or metadata you wish on the `DataCatalog`.
 
 
 ## Feeding in credentials
@@ -373,7 +373,7 @@ my_gcp_credentials:
   id_token: key
 ```
 
-In the example above `catalog.yml` contains references to credentials keys `dev_s3` and `scooters_credentials`. It means that when instantiating `motorbikes` dataset, for example, the `DataCatalog` will attempt to read top-level key `dev_s3` from the received `credentials` dictionary, and then will pass its values into the dataset `__init__` as `credentials` argument. This is essentially equivalent to calling this:
+In the example above, the `catalog.yml` file contains references to credentials keys `dev_s3` and `scooters_credentials`. This means that when it instantiates the `motorbikes` dataset, for example, the `DataCatalog` will attempt to read top-level key `dev_s3` from the received `credentials` dictionary, and then will pass its values into the dataset `__init__` as a `credentials` argument. This is essentially equivalent to calling this:
 
 ```python
 CSVDataSet(
@@ -384,9 +384,9 @@ CSVDataSet(
 ```
 
 
-## Loading multiple datasets that have similar configuration
+## Load multiple datasets with similar configuration
 
-Different datasets might use the same file format, load and save arguments, and be stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets so that you need not spend time copying and pasting dataset configurations in `catalog.yml`.
+Different datasets might use the same file format, load and save arguments, and be stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets, so that you need not spend time copying and pasting dataset configurations in the `catalog.yml` file.
 
 You can see this in the following example:
 
@@ -439,12 +439,12 @@ airplanes:
     sep: ;
 ```
 
-In this example the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally that would replace the whole dictionary. In order to extend `load_args` the defaults for that block are then re-inserted.
+In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
 
-## Transcoding datasets
+## Transcode datasets
 
-You may come across a situation where you would like to read the same file using two different dataset implementations. Use transcoding when you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations.
+You might come across a situation where you would like to read the same file using two different dataset implementations. Use transcoding when you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations.
 
 ### A typical example of transcoding
 
@@ -482,7 +482,7 @@ In the pipeline, Kedro uses the `spark.SparkDataSet` implementation for saving a
 for loading, so the first node should output a `pyspark.sql.DataFrame`, while the second node would receive a `pandas.Dataframe`.
 
 
-## Versioning datasets and ML models
+## Version datasets and ML models
 
 Making a simple addition to your Data Catalog allows you to perform versioning of datasets and machine learning models.
 
@@ -506,14 +506,14 @@ where `--load-version` is dataset name and version timestamp separated by `:`.
 
 This section shows just the very basics of versioning, which is described further in [the documentation about Kedro IO](../data/kedro_io.md#versioning).
 
-## Using the Data Catalog with the Code API
+## Use the Data Catalog with the Code API
 
 The code API allows you to:
 
 * configure data sources in code
 * operate the IO module within notebooks
 
-### Configuring a Data Catalog
+### Configure a Data Catalog
 
 In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using a number of pre-built data loaders documented in the [API reference documentation](/kedro.extras.datasets).
 
@@ -544,7 +544,7 @@ io = DataCatalog(
 
 When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` is to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
-### Loading datasets
+### Load datasets
 
 You can access each dataset by its name.
 
@@ -562,7 +562,7 @@ The following steps happened behind the scenes when `load` was called:
 - The `load` method of this dataset was called
 - This `load` method delegated the loading to the underlying pandas `read_csv` function
 
-### Viewing the available data sources
+### View the available data sources
 
 If you forget what data was assigned, you can always review the `DataCatalog`.
 
@@ -570,7 +570,7 @@ If you forget what data was assigned, you can always review the `DataCatalog`.
 io.list()
 ```
 
-### Saving data
+### Save data
 
 You can save data using an API similar to that used to load data.
 
@@ -578,7 +578,7 @@ You can save data using an API similar to that used to load data.
 This use is not recommended unless you are prototyping in notebooks.
 ```
 
-#### Saving data to memory
+#### Save data to memory
 
 ```python
 from kedro.io import MemoryDataSet
@@ -589,9 +589,9 @@ io.save("cars_cache", "Memory can store anything.")
 io.load("car_cache")
 ```
 
-#### Saving data to a SQL database for querying
+#### Save data to a SQL database for querying
 
-At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
+We might now want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
 
 ```python
 import os
@@ -606,9 +606,9 @@ io.save("cars_table", cars)
 ranked = io.load("scooters_query")[["brand", "mpg"]]
 ```
 
-#### Saving data in Parquet
+#### Save data in Parquet
 
-Finally we can save the processed data in Parquet format.
+Finally, we can save the processed data in Parquet format.
 
 ```python
 io.save("ranked", ranked)

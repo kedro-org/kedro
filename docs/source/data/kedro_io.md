@@ -132,7 +132,7 @@ The last row in the example above would attempt to load a CSV file from `data/01
 The `DataCatalog` does not re-generate save versions between instantiations. Therefore, if you call `catalog.save('cars', some_data)` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling `%reload_kedro` line magic. This limitation does not apply to `load` operation.
 ```
 
-### Version using the Code API
+### Versioning using the Code API
 
 Although we recommend enabling versioning using the `catalog.yml` config file as described in the section above, you might require more control over load and save versions of a specific dataset. To achieve this, you can instantiate `Version` and pass it as a parameter to the dataset initialisation:
 

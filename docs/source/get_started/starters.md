@@ -67,9 +67,12 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 ## Use a starter in interactive mode
 
-By default, when you create a new project using a starter, `kedro new` launches [by asking a few questions](./new_project.md#create-a-new-project-interactively). You will be prompted to provide the following variables:
+By default, when you create a new project using a starter, `kedro new` launches [by asking you to enter the `project_name`](./new_project.md#create-a-new-project-interactively).
 
 * `project_name` - A human readable name for your new project
+
+Kedro will then automatically generate the following two variables from the entered `project_name`:
+
 * `repo_name` - A name for the directory that holds your project repository
 * `python_package` - A Python package name for your project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
 

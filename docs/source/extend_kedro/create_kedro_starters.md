@@ -23,9 +23,12 @@ You then need to decide which are:
 
 By default, when you create a new project using a Kedro starter, `kedro new` launches in interactive mode. The user is then prompted for the variables that have been set in `prompts.yml`.
 
-The most basic and empty starter triggered by `kedro new` is set up with the following three variables:
+The most basic and empty starter triggered by `kedro new` is set up with the following variable:
 
 * `project_name` - A human readable name for the new project
+
+Kedro will then automatically generate the following two variables from the entered `project_name`:
+
 * `repo_name` - A name for the directory that holds the project repository
 * `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
 
@@ -35,7 +38,7 @@ As the creator of the Kedro starter you can customise the prompts triggered by `
 
 ```yaml
 custom_prompt:
-    title: "Prompt title:"
+    title: "Prompt title"
     text: |
       Prompt description that explains to the user what
       information they should provide.
@@ -45,13 +48,13 @@ At the very least, the prompt `title` must be defined for the prompt to be valid
 
 If the input to the prompts needs to be **validated**, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. For more complex validation, have a look at [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/1.7.2/advanced/hooks.html#using-pre-post-generate-hooks-0-7-0).
 
-If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See the default starter [`cookiecutter.json`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/cookiecutter.json) as example.
+If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See [the default starter `cookiecutter.json`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/cookiecutter.json) as example.
 
 ### Example Kedro starter
 
 To review an example Kedro starter, clone [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) from Github.
 
-When you create an Iris dataset example project by calling `kedro new`, you supply three configuration variables as the documentation in [Create a new project](../get_started/new_project.md) describes. These variables are `project_name`, `repo_name` and `python_package` and they are supplied interactively or by means of a configuration file. You can see how these variables are used by inspecting the template:
+When you create an Iris dataset example project by calling `kedro new`, you supply configuration variables as the documentation in [Create a new project](../get_started/new_project.md) describes. When you go through the interactive flow you must supply the `project_name` variable, which is then used to generate the `repo_name` and `python_package` variables. If you use a configuration file, you must supply all three variables in the file. You can see how these variables are used by inspecting the template:
 
 **project_name**
 

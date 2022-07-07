@@ -69,6 +69,8 @@ setup(
 )
 ```
 
+After that you can use this starter with `kedro new --starter=test_plugin_starter --checkout=main`.
+
 ## Working with `click`
 
 Commands must be provided as [`click` `Groups`](https://click.palletsprojects.com/en/7.x/api/#click.Group)

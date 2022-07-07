@@ -20,11 +20,16 @@ import sys
 from distutils.dir_util import copy_tree
 from inspect import getmembers, isclass, isfunction
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from click import secho, style
+from docutils import nodes
+from sphinx.application import Sphinx
+from sphinxcontrib.mermaid import mermaid
 
 from kedro import __version__ as release
+
+MERMAID_JS_URL = "https://unpkg.com/mermaid/dist/mermaid.min.js"
 
 # -- Project information -----------------------------------------------------
 
@@ -56,6 +61,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "nbsphinx",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
     "myst_parser",
 ]
 
@@ -517,6 +523,29 @@ def _add_jinja_filters(app):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
+def remove_unused_mermaid_script_file(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: Dict,
+    doctree: Optional[nodes.document],
+) -> None:
+    # The `doctree` arg is `None` when not created from a reST document.
+    if not doctree:
+        return
+
+    # Remove the Mermaid JavaScript from pages without Mermaid diagrams.
+    if not doctree.next_node(mermaid):
+        # Create a copy of `context["script_files"]`; modifying the list
+        # in place affects all pages, because they all use the same ref.
+        context["script_files"] = [
+            x for x in context["script_files"] if x != MERMAID_JS_URL
+        ]
+
+    # Remove "None" entries added when `mermaid_version` is set to `""`.
+    context["script_files"] = [x for x in context["script_files"] if x != "None"]
+
+
 def setup(app):
     app.connect("config-inited", _prepare_build_dir)
     app.connect("builder-inited", _add_jinja_filters)
@@ -525,6 +554,8 @@ def setup(app):
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
     app.add_css_file("css/theme-overrides.css")
+    app.add_js_file(MERMAID_JS_URL)
+    app.connect("html-page-context", remove_unused_mermaid_script_file)
 
 
 # (regex, restructuredText link replacement, object) list
@@ -552,3 +583,5 @@ except Exception as e:
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
 
 myst_heading_anchors = 5
+
+mermaid_version = ""  # We add a minified Mermaid script file ourselves.

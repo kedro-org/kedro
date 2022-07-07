@@ -19,6 +19,8 @@ authors:
   given-names: Rashida
 - family-names: Klein
   given-names: Jiri
+- family-names: Merali
+  given-names: Ahdra
 - family-names: Milne
   given-names: Antony
 - family-names: Schwarzmann
@@ -28,6 +30,6 @@ authors:
 - family-names: Wong
   given-names: Susanna
 title: Kedro
-version: 0.18.1
-date-released: 2022-05-09
+version: 0.18.2
+date-released: 2022-06-07
 url: https://github.com/kedro-org/kedro

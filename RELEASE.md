@@ -14,7 +14,14 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+
+# Upcoming Release 0.18.3
+
 ## Major features and improvements
+
+## Bug fixes and other changes
+
+## Upcoming deprecations for Kedro 0.19.0
 
 # Release 0.18.2
 

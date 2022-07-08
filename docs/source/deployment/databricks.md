@@ -34,7 +34,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.18.0"
+pip install "kedro~=0.18.2"
 # name your project Iris Databricks when prompted for it
 kedro new --starter pyspark-iris
 ```

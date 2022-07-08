@@ -12,8 +12,6 @@
 
 # Release 0.18.2
 
-# Upcoming Release 0.18.2
-
 ## Major features and improvements
 * Added `abfss` to list of cloud protocols, enabling abfss paths.
 * Kedro now uses the [Rich](https://github.com/Textualize/rich) library to format terminal logs and tracebacks.

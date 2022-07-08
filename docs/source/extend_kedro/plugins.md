@@ -72,7 +72,7 @@ starters = [
 ]
 ```
 
-The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. You can take the [pandas-iris starter example](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) for reference.
+The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. For an example, see the [pandas-iris starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris).
 
 In your `setup.py`, you need to register the specifications to `kedro.starters`.
 

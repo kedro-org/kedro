@@ -449,6 +449,9 @@ jobs:
     executor:
       name: docker
       python_version: <<parameters.python_version>>
+    environment:
+      COLUMNS: 120
+      LINES: 25
     steps:
       - setup
       - run:

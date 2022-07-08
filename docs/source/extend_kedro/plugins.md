@@ -49,7 +49,20 @@ It is possible to extend the list of starter aliases built into Kedro. This mean
 
 You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
 
+Example for a non-git repository starter:
 ```python
+# plugin.py
+starters = [
+    KedroStarterSpec(
+        alias="test_plugin_starter",
+        template_path="your_local_directory/starter_folder",
+    )
+]
+```
+
+Example for a git repository starter:
+```python
+# plugin.py
 starters = [
     KedroStarterSpec(
         alias="test_plugin_starter",
@@ -67,6 +80,12 @@ In your `setup.py`, you need to register the specifications to `kedro.starters`.
 setup(
     entry_points={"kedro.starters": ["starter =  plugin:starters"]},
 )
+```
+
+After that you can use this starter with `kedro new --starter=test_plugin_starter`.
+
+```{note}
+If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.2.`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
 ```
 
 ## Working with `click`

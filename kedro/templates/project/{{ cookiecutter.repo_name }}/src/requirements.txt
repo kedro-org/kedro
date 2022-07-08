@@ -4,7 +4,7 @@ ipython>=7.31.1, <8.0
 isort~=5.0
 jupyter~=1.0
 jupyterlab~=3.0
-kedro=={{ cookiecutter.kedro_version }}
+kedro~={{ cookiecutter.kedro_version }}
 kedro-telemetry~=0.2.0
 nbstripout~=0.4
 pytest-cov~=3.0

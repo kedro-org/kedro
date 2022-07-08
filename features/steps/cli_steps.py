@@ -238,9 +238,6 @@ def create_project_with_starter(context, starter):
         "--starter",
         str(starter),
     ]
-    if starter != "default":
-        args.append("--checkout")
-        args.append("main")
 
     res = run(
         args,

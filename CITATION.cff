@@ -3,8 +3,6 @@ message: If you use this software, please cite it as below.
 authors:
 - family-names: Alam
   given-names: Sajid
-- family-names: Bălan
-  given-names: Lorena
 - family-names: Chan
   given-names: Nok Lam
 - family-names: Comym
@@ -21,8 +19,6 @@ authors:
   given-names: Lim
 - family-names: Kanchwala
   given-names: Rashida
-- family-names: Klein
-  given-names: Jiri
 - family-names: Mackay
   given-names: Andrew
 - family-names: Merali
@@ -39,8 +35,6 @@ authors:
   given-names: Joel
 - family-names: Theisen
   given-names: Merel
-- family-names: Wong
-  given-names: Susanna
 title: Kedro
 version: 0.18.2
 date-released: 2022-06-07

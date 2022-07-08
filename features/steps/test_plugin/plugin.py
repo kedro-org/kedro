@@ -1,6 +1,5 @@
 """Dummy plugin with simple hook implementations."""
 import logging
-
 from pathlib import Path
 
 from kedro.framework.cli.starters import KedroStarterSpec

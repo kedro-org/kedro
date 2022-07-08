@@ -21,7 +21,7 @@ class MyPluginHook:
 starters = [
     KedroStarterSpec(
         "test_plugin_starter",
-        template_path=str((Path("../") / "test_starter").resolve()),
+        template_path=str((Path(__file__).parents[1] / "test_starter").resolve()),
     )
 ]
 

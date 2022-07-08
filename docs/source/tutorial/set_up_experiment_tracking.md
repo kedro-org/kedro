@@ -9,7 +9,7 @@ Enabling experiment tracking features on Kedro-Viz relies on:
 * [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets)
 * [modifying your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
 
-This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the spaceflights starter project outlined in [the spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and build on previously discussed topics such as [namespacing](../tutorial/namespace_pipelines.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
+This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the starter outlined in the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and build on previously discussed topics such as [namespacing](../tutorial/namespace_pipelines.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
 
 You can also access a more detailed [Kedro-Viz live demo](https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
 

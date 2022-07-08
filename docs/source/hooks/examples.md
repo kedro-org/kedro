@@ -164,7 +164,7 @@ class DataValidationHooks:
             )
 ```
 
-* Register Hooks implementation, as described in [the hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
+* Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
 
 `Great Expectations` example report:
 
@@ -214,7 +214,7 @@ class PipelineMonitoringHooks:
         self._client.incr("run")
 ```
 
-* Register Hooks implementation, as described in [the hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
+* Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
 
 `Grafana` example page:
 
@@ -281,7 +281,7 @@ class ModelTrackingHooks:
         mlflow.end_run()
 ```
 
-* Register Hooks implementation, as described in [the hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
+* Register Hooks implementation, as described in the [hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro) and run Kedro.
 
 `MLflow` example page:
 
@@ -324,4 +324,4 @@ In the example above, the `before_node_run` hook implementation must return data
 ```
 
 
-To apply the changes once you have implemented a new hook, you must register it, as described in [the hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro), and then run Kedro.
+To apply the changes once you have implemented a new hook, you must register it, as described in the [hooks documentation](introduction.md#registering-your-hook-implementations-with-kedro), and then run Kedro.

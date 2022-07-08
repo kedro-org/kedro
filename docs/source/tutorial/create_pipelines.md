@@ -506,7 +506,7 @@ regressor:
   versioned: true
 ```
 
-Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning](../data/kedro_io.md#versioning) section.
+Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning section](../data/kedro_io.md#versioning).
 
 ### Update the project pipeline
 

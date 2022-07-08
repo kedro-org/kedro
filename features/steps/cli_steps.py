@@ -226,18 +226,21 @@ def add_test_jupyter_nb(context):
 @when('I run a non-interactive kedro new with starter "{starter}"')
 def create_project_with_starter(context, starter):
     """Behave step to run kedro new given the config I previously created."""
+
     if starter == "default":
         starter = Path(__file__).parent / "test_starter"
 
+    args = [
+        context.kedro,
+        "new",
+        "-c",
+        str(context.config_file),
+        "--starter",
+        str(starter),
+    ]
+
     res = run(
-        [
-            context.kedro,
-            "new",
-            "-c",
-            str(context.config_file),
-            "--starter",
-            str(starter),
-        ],
+        args,
         env=context.env,
         cwd=context.temp_dir,
     )

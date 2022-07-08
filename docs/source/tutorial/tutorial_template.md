@@ -29,7 +29,7 @@ ipython==7.0 # Used for an IPython session with `kedro ipython`
 isort~=5.0 # Used for linting code with `kedro lint`
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab~=3.0 # Used to open a Kedro-session in Jupyter Lab
-kedro==0.18.1
+kedro~=0.18.2
 nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov~=3.0 # Produces test coverage reports
 pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with pytest
@@ -45,7 +45,7 @@ The dependencies above might be sufficient for some projects, but for this tutor
 Add the following lines to your `src/requirements.txt` file:
 
 ```text
-kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.1   # Specify optional Kedro dependencies
+kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.2   # Specify optional Kedro dependencies
 kedro-viz~=4.0                                                                 # Visualise your pipelines
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```

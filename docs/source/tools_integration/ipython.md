@@ -56,7 +56,7 @@ The Kedro IPython extension makes the following variables available in your IPyt
 * `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
-We will now give some examples of how these variables can be used in the [Iris example project](../get_started/example_project.md). To explore the full range of attributes and methods available, you might like to consult the relevant [API documentation](/kedro) or use [the Python `dir` function](https://docs.python.org/3/library/functions.html#dir) (e.g. `dir(catalog)`).
+We will now give some examples of how these variables can be used in the [Iris example project](../get_started/example_project.md). To explore the full range of attributes and methods available, you might like to consult the relevant [API documentation](/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir) (e.g. `dir(catalog)`).
 
 ### `catalog`
 

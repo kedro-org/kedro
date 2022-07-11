@@ -40,4 +40,4 @@ We encourage you to play with different ways of parameterising your runs as you 
 
 ## 4. (Optional) Create starters
 
-This is an optional step, but it may speed up your work in the long term. If you find yourself having to deploy in a similar environment or to a similar platform fairly often, you may want to build your own [Kedro starter](../get_started/starters.md). That way you will be able to re-use any deployment scripts written as part of step 2.
+This is an optional step, but it may speed up your work in the long term. If you find yourself having to deploy in a similar environment or to a similar platform fairly often, you may want to [build your own Kedro starter](../get_started/starters.md). That way you will be able to re-use any deployment scripts written as part of step 2.

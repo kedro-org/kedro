@@ -133,7 +133,7 @@ git push --set-upstream origin main
 
 ### 7. Configure the Databricks cluster
 
-The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#4-create-github-personal-access-token).
+The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure the [personal access token you generated in Step 2](#4-create-github-personal-access-token).
 
 [Log into your Databricks workspace](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) and then:
 1. Open `Clusters` tab

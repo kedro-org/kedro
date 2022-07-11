@@ -296,7 +296,7 @@ Call the `run()` method of the `KedroSession` defined in `kedro.framework.sessio
 kedro run
 ```
 
-`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../faq/architecture_overview.md#kedro-project) configuration file.
+`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext`, you need to set `context_path` in the [`pyproject.toml` configuration file](../faq/architecture_overview.md#kedro-project).
 
 #### Modifying a `kedro run`
 
@@ -400,7 +400,7 @@ The following command packages all the files related to a micro-package, e.g. a 
 kedro micropkg package <package_module_path>
 ```
 
-Further information is available in the [micro-packaging](../nodes_and_pipelines/micro_packaging.md) documentation.
+Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
 
 ##### Pull a micro-package in your project
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [Pypi](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).

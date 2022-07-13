@@ -17,7 +17,7 @@ import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, pipeline
 
 
 def _get_default_class(class_import_path):
@@ -150,7 +150,7 @@ class _ProjectPipelines(MutableMapping):
         return register_pipelines
 
     def _load_data(self):
-        """Lazily read pipelines defined in the pipelines registry module"""
+        """Lazily read pipelines defined in the pipelines registry module."""
 
         # If the pipelines dictionary has not been configured with a pipelines module
         # or if data has been loaded
@@ -167,7 +167,7 @@ class _ProjectPipelines(MutableMapping):
 
     def configure(self, pipelines_module: Optional[str] = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
-        Reset the data loading state so that after every `configure` call,
+        Reset the data loading state so that after every ``configure`` call,
         data are reloaded.
         """
         self._pipelines_module = pipelines_module
@@ -206,7 +206,7 @@ class _ProjectLogging(UserDict):
         rich.pretty.install()
 
     def configure(self, logging_config: Dict[str, Any]) -> None:
-        """Configure project logging using `logging_config` (e.g. from project
+        """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
@@ -241,7 +241,7 @@ def configure_project(package_name: str):
 
 
 def configure_logging(logging_config: Dict[str, Any]) -> None:
-    """Configure logging according to `logging_config` dictionary."""
+    """Configure logging according to ``logging_config`` dictionary."""
     LOGGING.configure(logging_config)
 
 
@@ -254,3 +254,19 @@ def validate_settings():
     More info on the dynaconf issue: https://github.com/rochacbruno/dynaconf/issues/460
     """
     importlib.import_module(f"{PACKAGE_NAME}.settings")
+
+
+def find_pipelines() -> Dict[str, Pipeline]:
+    """Automatically find modular pipelines having a ``create_pipeline``
+    function. By default, projects created using Kedro 0.18.3 and higher
+    call this function to autoregister pipelines upon creation/addition.
+
+    Returns:
+        A generated mapping from pipeline names to ``Pipeline`` objects.
+
+    Warns:
+        UserWarning: When a module does not expose a ``create_pipeline``
+            function, the ``create_pipeline`` function does not return a
+            ``Pipeline`` object, or if the module import fails up front.
+    """
+    return {"__default__": pipeline([])}

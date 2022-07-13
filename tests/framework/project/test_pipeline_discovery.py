@@ -5,7 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from kedro.framework.project import configure_project, find_pipelines
+from kedro.framework.project import configure_project, find_pipelines, pipelines
+
+
+def test_pipelines_without_configure_project_is_empty():
+    assert pipelines == {}
 
 
 @pytest.fixture

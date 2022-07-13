@@ -283,5 +283,15 @@ def find_pipelines() -> Dict[str, Pipeline]:
                 f"defined therein will be returned by 'find_pipelines'."
             )
             continue
-        pipelines_dict[pipeline_name] = getattr(pipeline_module, "create_pipeline")()
+        obj = getattr(pipeline_module, "create_pipeline")()
+        if not isinstance(obj, Pipeline):
+            warnings.warn(
+                f"Expected the 'create_pipeline' function in the "
+                f"'{pipeline_module.__name__}' module to return a "
+                f"'Pipeline' object, got '{type(obj).__name__}' "
+                f"instead. Nothing defined therein will be returned by "
+                f"'find_pipelines'."
+            )
+            continue
+        pipelines_dict[pipeline_name] = obj
     return pipelines_dict

@@ -5,7 +5,7 @@ In this section, we discuss the data set-up phase, which is the second part of t
 * Add datasets to your `data/` folder, according to [data engineering convention](../faq/faq.md#what-is-data-engineering-convention)
 * Register the datasets with the Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
 
-You can find further information about [the Data Catalog](../data/data_catalog.md) in specific documentation covering advanced usage.
+You can find further information about the [Data Catalog](../data/data_catalog.md) in specific documentation covering advanced usage.
 
 
 ## Add your datasets to `data`

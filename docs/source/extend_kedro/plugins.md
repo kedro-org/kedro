@@ -49,7 +49,20 @@ It is possible to extend the list of starter aliases built into Kedro. This mean
 
 You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
 
+Example for a non-git repository starter:
 ```python
+# plugin.py
+starters = [
+    KedroStarterSpec(
+        alias="test_plugin_starter",
+        template_path="your_local_directory/starter_folder",
+    )
+]
+```
+
+Example for a git repository starter:
+```python
+# plugin.py
 starters = [
     KedroStarterSpec(
         alias="test_plugin_starter",
@@ -59,7 +72,7 @@ starters = [
 ]
 ```
 
-The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. You can take the [pandas-iris](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) example for reference.
+The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. For an example, see the [pandas-iris starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris).
 
 In your `setup.py`, you need to register the specifications to `kedro.starters`.
 
@@ -67,6 +80,12 @@ In your `setup.py`, you need to register the specifications to `kedro.starters`.
 setup(
     entry_points={"kedro.starters": ["starter =  plugin:starters"]},
 )
+```
+
+After that you can use this starter with `kedro new --starter=test_plugin_starter`.
+
+```{note}
+If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.2.`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
 ```
 
 ## Working with `click`
@@ -200,7 +219,7 @@ Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.
 - [Kedro-Accelerator](https://github.com/deepyaman/kedro-accelerator), by [Deepyaman Datta](https://github.com/deepyaman), speeds up pipelines by parallelizing I/O in the background
 - [kedro-dataframe-dropin](https://github.com/mzjp2/kedro-dataframe-dropin), by [Zain Patel](https://github.com/mzjp2), lets you swap out pandas datasets for modin or RAPIDs equivalents for specialised use to speed up your workflows (e.g on GPUs)
 - [kedro-kubeflow](https://github.com/getindata/kedro-kubeflow), by [Mateusz Pytel](https://github.com/em-pe) and [Mariusz Strzelecki](https://github.com/szczeles), lets you run and schedule pipelines on Kubernetes clusters using [Kubeflow Pipelines](https://www.kubeflow.org/docs/components/pipelines/overview/)
-- [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei) and [Takieddine Kadiri](https://github.com/takikadiri), facilitates [MLflow](https://www.mlflow.org/) integration inside Kedro projects while enforcing [Kedro's principles](../faq/faq.md#what-are-the-primary-advantages-of-kedro). Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronization between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial). You can find more information in [the documentation](https://kedro-mlflow.readthedocs.io/en/stable/).
-- [kedro-neptune](https://github.com/neptune-ai/kedro-neptune), by [Jakub Czakon](https://github.com/jakubczakon) and [Rafał Jankowski](https://github.com/Raalsky), lets you have all the benefits of a nicely organized Kedro pipeline with Neptune: a powerful user interface built for ML metadata management. It lets you browse and filter pipeline executions, compare nodes and pipelines on metrics and parameters, and visualize pipeline metadata like learning curves, node outputs, and charts. For more information, tutorials and videos, go to [the documentation](https://docs.neptune.ai/integrations-and-supported-tools/automation-pipelines/kedro).
+- [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei) and [Takieddine Kadiri](https://github.com/takikadiri), facilitates [MLflow](https://www.mlflow.org/) integration inside Kedro projects while enforcing [Kedro's principles](../faq/faq.md#what-are-the-primary-advantages-of-kedro). Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronization between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial). You can find more information in the [kedro-mlflow documentation](https://kedro-mlflow.readthedocs.io/en/stable/).
+- [Kedro-Neptune](https://github.com/neptune-ai/kedro-neptune), by [Jakub Czakon](https://github.com/jakubczakon) and [Rafał Jankowski](https://github.com/Raalsky), lets you have all the benefits of a nicely organized Kedro pipeline with Neptune: a powerful user interface built for ML metadata management. It lets you browse and filter pipeline executions, compare nodes and pipelines on metrics and parameters, and visualize pipeline metadata like learning curves, node outputs, and charts. For more information, tutorials and videos, go to the [Kedro-Neptune documentation](https://docs.neptune.ai/integrations-and-supported-tools/automation-pipelines/kedro).
 - [kedro-dolt](https://www.dolthub.com/blog/2021-06-16-kedro-dolt-plugin/), by [Max Hoffman](https://github.com/max-hoffman) and [Oscar Batori](https://github.com/oscarbatori), allows you to expand the data versioning abilities of data scientists and engineers
 - [kedro-airflow-k8s](https://github.com/getindata/kedro-airflow-k8s), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Airflow on a Kubernetes cluster

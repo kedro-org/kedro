@@ -34,7 +34,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.18.0"
+pip install "kedro~=0.18.2"
 # name your project Iris Databricks when prompted for it
 kedro new --starter pyspark-iris
 ```
@@ -133,7 +133,7 @@ git push --set-upstream origin main
 
 ### 7. Configure the Databricks cluster
 
-The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#4-create-github-personal-access-token).
+The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure the [personal access token you generated in Step 2](#4-create-github-personal-access-token).
 
 [Log into your Databricks workspace](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) and then:
 1. Open `Clusters` tab
@@ -168,10 +168,10 @@ In your newly created notebook put each code snippet from below into a separate 
 %sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch main https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
 ```
 
-* Install the latest version of Kedro compatible with version `0.18.1`
+* Install the latest version of Kedro compatible with version `0.18.2`
 
 ```console
-%pip install "kedro[spark.SparkDataSet]~=0.18.1"
+%pip install "kedro[spark.SparkDataSet]~=0.18.2"
 ```
 
 * Copy input data into DBFS

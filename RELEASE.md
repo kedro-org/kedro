@@ -8,11 +8,16 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+
+# Upcoming Release 0.18.3
+
 ## Major features and improvements
 
-# Release 0.18.2
+## Bug fixes and other changes
 
-# Upcoming Release 0.18.2
+## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.2
 
 ## Major features and improvements
 * Added `abfss` to list of cloud protocols, enabling abfss paths.

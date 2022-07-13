@@ -16,7 +16,7 @@ You can use [DataSets](/kedro.extras.datasets) to interface with various differe
 
 ## Use Case 3: How to add or modify CLI commands
 
-If you want to customise a built-in Kedro command, such as `kedro run`, for a specific project, add a `cli.py` file that defines a custom `run()` function. You should add the `cli.py` file at the same level as `settings.py`, which is usually the `src/PROJECT_NAME` directory. A template for the `cli.py` file can be found [here](../development/commands_reference.md#customise-or-override-project-specific-kedro-commands).
+If you want to customise a built-in Kedro command, such as `kedro run`, for a specific project, add a `cli.py` file that defines a custom `run()` function. You should add the `cli.py` file at the same level as `settings.py`, which is usually the `src/PROJECT_NAME` directory. See the [template for the `cli.py` file](../development/commands_reference.md#customise-or-override-project-specific-kedro-commands).
 
 
 If you want to customise a Kedro command from a command group, such as `kedro pipeline` or `kedro jupyter`, you need to import the corresponding click command group from the Kedro framework `cli`. For `kedro pipeline` commands this would be `from kedro.framework.cli.pipeline import pipeline`, and for `kedro jupyter` commands `from kedro.framework.cli.jupyter import jupyter`. Note that you must still add the `cli` click group from the snippet above, even if you don't modify it.
@@ -31,7 +31,7 @@ def notebook_run(...):
     == ADD YOUR CUSTOM NOTEBOOK COMMAND CODE HERE ==
 ```
 
-To inject additional CLI commands intended to be reused across projects, please refer to our [plugins](./plugins.md) system. An example of one such command is the `kedro viz` command introduced by the official [Kedro-Viz](https://github.com/kedro-org/kedro-viz) plugin. This command is intended to work on every Kedro project and therefore must be a standalone plugin.
+To inject additional CLI commands intended to be reused across projects, please refer to [our plugin system](./plugins.md). An example of one such command is the `kedro viz` command introduced by the [Kedro-Viz plugin](https://github.com/kedro-org/kedro-viz). This command is intended to work on every Kedro project and therefore must be a standalone plugin.
 
 ```{note}
 Your plugin's implementation can take advantage of other extension mechanisms such as Hooks.
@@ -39,4 +39,4 @@ Your plugin's implementation can take advantage of other extension mechanisms su
 
 ## Use Case 4: How to customise the initial boilerplate of your project
 
-Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, please visit our guide to [create Kedro starters](./create_kedro_starters.md) to solve this extension requirement.
+Sometimes you might want to tailor the starting boilerplate of a Kedro project to your specific needs. For example, your organisation might have a standard CI script that you want to include in every new Kedro project. To this end, please visit our [guide to create Kedro starters](./create_kedro_starters.md) to solve this extension requirement.

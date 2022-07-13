@@ -52,7 +52,7 @@ If you want `cookiecutter` to provide sensible **defaults** in case a user doesn
 
 ### Example Kedro starter
 
-To review an example Kedro starter, clone [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) from Github.
+To review an example Kedro starter, check out the [`pandas-iris` starter on GitHub](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris).
 
 When you create an Iris dataset example project by calling `kedro new`, you supply configuration variables as the documentation in [Create a new project](../get_started/new_project.md) describes. When you go through the interactive flow you must supply the `project_name` variable, which is then used to generate the `repo_name` and `python_package` variables. If you use a configuration file, you must supply all three variables in the file. You can see how these variables are used by inspecting the template:
 

@@ -273,9 +273,20 @@ def find_pipelines() -> Dict[str, Pipeline]:
     """
     pipelines_dict = {"__default__": pipeline([])}
     for pipeline_name in importlib.resources.contents(f"{PACKAGE_NAME}.pipelines"):
-        pipeline_module = importlib.import_module(
-            f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
-        )
+        try:
+            pipeline_module = importlib.import_module(
+                f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+            )
+        except ModuleNotFoundError:
+            continue
+        except:  # pylint: disable=bare-except  # noqa: E722
+            warnings.warn(
+                f"An error occurred while importing the "
+                f"'{PACKAGE_NAME}.pipelines.{pipeline_name}' module. "
+                f"Nothing defined therein will be returned by "
+                f"'find_pipelines'."
+            )
+            continue
         if not hasattr(pipeline_module, "create_pipeline"):
             warnings.warn(
                 f"The '{pipeline_module.__name__}' module does not "

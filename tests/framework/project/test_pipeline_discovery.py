@@ -1,5 +1,6 @@
 import sys
 import textwrap
+import warnings
 from pathlib import Path
 
 import pytest
@@ -109,9 +110,55 @@ def test_find_pipelines_skips_modules_with_unexpected_return_value_type(
     with pytest.warns(
         UserWarning,
         match=(
-            r"Expected the 'create_pipeline' function in the \S+ "
+            r"Expected the 'create_pipeline' function in the '\S+' "
             r"module to return a 'Pipeline' object, got 'dict' instead."
         ),
+    ):
+        pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
+    indirect=True,
+)
+def test_find_pipelines_skips_regular_files_within_the_pipelines_folder(
+    mock_package_name_with_pipelines,  # pylint: disable=unused-argument
+    pipeline_names,
+):
+    # Create a regular file (not a subdirectory) in the `pipelines` dir.
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    (pipelines_dir / "not_my_pipeline.py").touch()
+
+    configure_project(mock_package_name_with_pipelines)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", category=UserWarning)
+        pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
+    indirect=True,
+)
+def test_find_pipelines_skips_modules_that_cause_exceptions_upon_import(
+    mock_package_name_with_pipelines,  # pylint: disable=unused-argument
+    pipeline_names,
+):
+    # Create a module that will result in errors when we try to load it.
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    pipeline_dir = pipelines_dir / "boulevard_of_broken_pipelines"
+    pipeline_dir.mkdir()
+    (pipeline_dir / "__init__.py").write_text("I walk a lonely road...")
+
+    configure_project(mock_package_name_with_pipelines)
+    with pytest.warns(
+        UserWarning,
+        match=r"An error occurred while importing the '\S+' module.",
     ):
         pipelines = find_pipelines()
     assert set(pipelines) == pipeline_names | {"__default__"}

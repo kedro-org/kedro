@@ -174,4 +174,8 @@ You can now access, compare and pin your runs by toggling the `Compare runs` but
 
 ![](../meta/images/experiment-tracking_demo.gif)
 
+Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab ![](../meta/images/pipeline_visualisation_icon.png). Clicking on any [MetricsDataset](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.tracking.MetricsDataSet.html) node will open a side panel displaying how the metric value has changed over time.
+
+![](../meta/images/pipeline_show_metrics.gif)
+
 Keep an eye out on the [Kedro-Viz release page](https://github.com/kedro-org/kedro-viz/releases) for the upcoming releases on this experiment tracking functionality.

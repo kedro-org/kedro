@@ -6,6 +6,7 @@ import importlib.resources
 import logging.config
 import operator
 import sys
+import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from pathlib import Path
@@ -272,6 +273,15 @@ def find_pipelines() -> Dict[str, Pipeline]:
     """
     pipelines_dict = {"__default__": pipeline([])}
     for pipeline_name in importlib.resources.contents(f"{PACKAGE_NAME}.pipelines"):
-        importlib.import_module(f"{PACKAGE_NAME}.pipelines", pipeline_name)
-        pipelines_dict[pipeline_name] = pipeline([])
+        pipeline_module = importlib.import_module(
+            f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+        )
+        if not hasattr(pipeline_module, "create_pipeline"):
+            warnings.warn(
+                f"The '{pipeline_module.__name__}' module does not "
+                f"expose a 'create_pipeline' function, so no pipelines "
+                f"defined therein will be returned by 'find_pipelines'."
+            )
+            continue
+        pipelines_dict[pipeline_name] = getattr(pipeline_module, "create_pipeline")()
     return pipelines_dict

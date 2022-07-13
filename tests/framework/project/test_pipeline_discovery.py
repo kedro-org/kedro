@@ -1,5 +1,6 @@
 import sys
 import textwrap
+from pathlib import Path
 
 import pytest
 
@@ -40,11 +41,35 @@ def pipeline_names(request):
     [(x, x) for x in [set(), {"my_pipeline"}]],
     indirect=True,
 )
-def test_pipelines_without_configure_project_is_empty(
+def test_find_pipelines(
     mock_package_name_with_pipelines,  # pylint: disable=unused-argument
     pipeline_names,
 ):
     configure_project(mock_package_name_with_pipelines)
     pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"good_pipeline"}]],
+    indirect=True,
+)
+def test_find_pipelines_skips_modules_without_create_pipelines_function(
+    mock_package_name_with_pipelines,  # pylint: disable=unused-argument
+    pipeline_names,
+):
+    # Create a module without `create_pipelines` in the `pipelines` dir.
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    pipeline_dir = pipelines_dir / "bad_pipeline"
+    pipeline_dir.mkdir()
+    (pipeline_dir / "__init__.py").touch()
+
+    configure_project(mock_package_name_with_pipelines)
+    with pytest.warns(
+        UserWarning, match="module does not expose a 'create_pipeline' function"
+    ):
+        pipelines = find_pipelines()
     assert set(pipelines) == pipeline_names | {"__default__"}
     assert sum(pipelines.values()).outputs() == pipeline_names

@@ -25,6 +25,10 @@ def mock_package_name_with_pipelines_file(tmpdir):
     sys.path.pop(0)
 
 
+def test_pipelines_without_configure_project_is_empty():
+    assert pipelines == {}
+
+
 @pytest.fixture
 def mock_package_name_with_unimportable_pipelines_file(tmpdir):
     pipelines_file_path = tmpdir.mkdir("test_broken_package") / "pipeline_registry.py"

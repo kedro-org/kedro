@@ -2,6 +2,7 @@
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
 import importlib
+import importlib.resources
 import logging.config
 import operator
 import sys
@@ -269,4 +270,8 @@ def find_pipelines() -> Dict[str, Pipeline]:
             function, the ``create_pipeline`` function does not return a
             ``Pipeline`` object, or if the module import fails up front.
     """
-    return {"__default__": pipeline([])}
+    pipelines = {"__default__": pipeline([])}
+    for pipeline_name in importlib.resources.contents(f"{PACKAGE_NAME}.pipelines"):
+        importlib.import_module(f"{PACKAGE_NAME}.pipelines", pipeline_name)
+        pipelines[pipeline_name] = pipeline([])
+    return pipelines

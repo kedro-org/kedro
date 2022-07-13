@@ -3,12 +3,13 @@ import textwrap
 
 import pytest
 
-from kedro.framework.project import find_pipelines
+from kedro.framework.project import configure_project, find_pipelines
 
 
 @pytest.fixture
-def mock_package_with_pipelines(tmp_path, request):
-    pipelines_dir = tmp_path / "test_package" / "pipelines"
+def mock_package_name_with_pipelines(tmp_path, request):
+    package_name = "test_package"
+    pipelines_dir = tmp_path / package_name / "pipelines"
     pipelines_dir.mkdir(parents=True)
     for pipeline_name in request.param:
         pipeline_dir = pipelines_dir / pipeline_name
@@ -25,7 +26,7 @@ def mock_package_with_pipelines(tmp_path, request):
             )
         )
     sys.path.insert(0, str(tmp_path))
-    yield
+    yield package_name
     sys.path.pop(0)
 
 
@@ -35,14 +36,15 @@ def pipeline_names(request):
 
 
 @pytest.mark.parametrize(
-    "mock_package_with_pipelines,pipeline_names",
-    [(x, x) for x in [set()]],
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
     indirect=True,
 )
 def test_pipelines_without_configure_project_is_empty(
-    mock_package_with_pipelines,  # pylint: disable=unused-argument
+    mock_package_name_with_pipelines,  # pylint: disable=unused-argument
     pipeline_names,
 ):
+    configure_project(mock_package_name_with_pipelines)
     pipelines = find_pipelines()
     assert set(pipelines) == pipeline_names | {"__default__"}
     assert sum(pipelines.values()).outputs() == pipeline_names

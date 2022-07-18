@@ -51,15 +51,15 @@ class PartitionedDataSet(AbstractDataSet):
         >>>   path: data/04_cv/
         >>>   filename_suffix: ".csv"
         >>>
-        >>>   downloaded_data: # example with data available in multiple partitions
-        >>>     type: PartitionedDataSet
-        >>>     path: demo/01_raw/downloaded_station_data
-        >>>     dataset:
-        >>>       type: pandas.CSVDataSet
-        >>>       load_args:
-        >>>         sep: ','
-        >>>         index_col: 0
-        >>>     filename_suffix: '.csv'
+        >>> downloaded_data: # example with data available in multiple partitions
+        >>>   type: PartitionedDataSet
+        >>>   path: demo/01_raw/downloaded_station_data
+        >>>   dataset:
+        >>>     type: pandas.CSVDataSet
+        >>>     load_args:
+        >>>       sep: ','
+        >>>       index_col: 0
+        >>>   filename_suffix: '.csv'
 
 
     Example using Python API:

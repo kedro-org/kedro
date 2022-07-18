@@ -36,6 +36,10 @@ class PartitionedDataSet(AbstractDataSet):
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
+    It also support advanced features like
+    `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
+    kedro_io.html#partitioned-dataset-lazy-saving>`
+
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
         data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
@@ -50,7 +54,7 @@ class PartitionedDataSet(AbstractDataSet):
         >>>       index: False
         >>>   path: data/04_cv/
         >>>   filename_suffix: ".csv"
-        >>>
+
         >>> downloaded_data: # example with data available in multiple partitions
         >>>   type: PartitionedDataSet
         >>>   path: demo/01_raw/downloaded_station_data

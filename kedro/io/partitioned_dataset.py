@@ -64,6 +64,41 @@ class PartitionedDataSet(AbstractDataSet):
 
     Example using Python API:
     ::
+        >>> import pandas as pd
+        >>> from kedro.io import PartitionedDataSet
+
+        # Create a fake pandas dataframe with 10 rows of data
+        >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
+
+        # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
+        >>> dict_df = dict(tuple(df.groupby("DAY_OF_MONTH")))
+
+        # Save it as small paritions with DAY_OF_MONTH as the partition key
+        >>> data_set = PartitionedDataSet(
+            path="df_with_partition",
+            dataset="pandas.CSVDataSet",
+            filename_suffix=".csv"
+
+        )
+        # This will create a folder `df_with_partition` and save multiple files
+        # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
+        >>> data_set.save(dict_df)
+
+        # This create lazy load functions instead of loading data into memory immediately.
+        >>> loaded = data_set.load()
+
+        # Load all the partitions
+        >>> for partition_id, partition_load_func in loaded.items():
+            # The actual function that loads the data
+            partition_data = partition_load_func()
+
+            # Add the processing logic for individual partition HERE
+            print(partition_data)
+
+
+    In reality, you may load multiple parittions from a remote storage and combine them
+    like this:
+    ::
 
         >>> import pandas as pd
         >>> from kedro.io import PartitionedDataSet

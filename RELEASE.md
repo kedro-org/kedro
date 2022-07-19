@@ -15,6 +15,9 @@
 
 ## Bug fixes and other changes
 
+## Minor breaking changes to the API
+* Removed `kedro.io.core.CLOUD_PROTOCOLS`, which was previously used to patch `fsspec.utils.infer_storage_options`. In recent `fsspec` versions this patching is no longer required. 
+
 ## Upcoming deprecations for Kedro 0.19.0
 
 # Release 0.18.2

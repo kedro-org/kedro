@@ -1,11 +1,12 @@
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import PurePosixPath
-from typing import Any, List
+from typing import Any, List, re
+from urllib.parse import urlsplit
 
 import pytest
 
-from kedro.io.core import AbstractDataSet, _parse_filepath, get_filepath_str
+from kedro.io.core import AbstractDataSet, get_filepath_str
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
 # Excludes None, as None values are not shown in the str representation.
@@ -93,4 +94,6 @@ class TestCoreFunctions:
         ],
     )
     def test_parse_filepath(self, filepath, expected_result):
-        assert _parse_filepath(filepath) == expected_result
+        from fsspec.utils import infer_storage_options
+
+        assert infer_storage_options(filepath).items() >= expected_result.items()

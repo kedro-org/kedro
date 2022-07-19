@@ -12,6 +12,7 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
+* Added `gdrive` to list of cloud protocols, enabling Google Drive paths for datasets.
 
 ## Bug fixes and other changes
 

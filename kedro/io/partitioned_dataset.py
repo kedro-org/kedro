@@ -39,7 +39,7 @@ class PartitionedDataSet(AbstractDataSet):
     It also supports advanced features like
     `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
     kedro_io.html#partitioned-dataset-lazy-saving>`_
-
+    
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
         data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
@@ -68,6 +68,7 @@ class PartitionedDataSet(AbstractDataSet):
 
     Example using Python API:
     ::
+
         >>> import pandas as pd
         >>> from kedro.io import PartitionedDataSet
         >>>
@@ -96,10 +97,9 @@ class PartitionedDataSet(AbstractDataSet):
         >>> for partition_id, partition_load_func in loaded.items():
             # The actual function that loads the data
             partition_data = partition_load_func()
-
+        
             # Add the processing logic for individual partition HERE
             print(partition_data)
-
 
     In reality, you may load multiple parittions from a remote storage and combine them
     like this:
@@ -132,6 +132,7 @@ class PartitionedDataSet(AbstractDataSet):
         >>> # creates "s3://bucket-name/path/to/folder/new/partition.csv"
         >>> data_set.save({"new/partition.csv": new_data})
         >>>
+
     """
 
     def __init__(  # pylint: disable=too-many-arguments

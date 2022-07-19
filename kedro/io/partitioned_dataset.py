@@ -36,9 +36,9 @@ class PartitionedDataSet(AbstractDataSet):
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
-    It also support advanced features like
+    It also supports advanced features like
     `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
-    kedro_io.html#partitioned-dataset-lazy-saving>`
+    kedro_io.html#partitioned-dataset-lazy-saving>`_
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
@@ -75,7 +75,8 @@ class PartitionedDataSet(AbstractDataSet):
         >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
 
         # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
-        >>> dict_df = dict(tuple(df.groupby("DAY_OF_MONTH")))
+        >>> dict_df = {day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
+                       for day_of_month in df['DAY_OF_MONTH']}
 
         # Save it as small paritions with DAY_OF_MONTH as the partition key
         >>> data_set = PartitionedDataSet(

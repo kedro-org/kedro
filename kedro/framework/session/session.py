@@ -82,10 +82,13 @@ class KedroSession:
     ::
 
         >>> from kedro.framework.session import KedroSession
-        >>>
+        >>> from kedro.framework.startup import bootstrap_project
+        >>> from pathlib import Path
+
+        >>> metadata = bootstrap_project(<your-pyproject.toml-directory>)
         >>> with KedroSession.create("<your-kedro-project-package-name>") as session:
         >>>     session.run()
-        >>>
+
     """
 
     def __init__(

@@ -70,19 +70,19 @@ class PartitionedDataSet(AbstractDataSet):
     ::
         >>> import pandas as pd
         >>> from kedro.io import PartitionedDataSet
-
+        >>>
         # Create a fake pandas dataframe with 10 rows of data
         >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
-
+        >>>
         # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
         >>> dict_df = {day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
                        for day_of_month in df['DAY_OF_MONTH']}
-
+        >>>
         # Save it as small paritions with DAY_OF_MONTH as the partition key
         >>> data_set = PartitionedDataSet(
-            path="df_with_partition",
-            dataset="pandas.CSVDataSet",
-            filename_suffix=".csv"
+        >>> path="df_with_partition",
+        >>> dataset="pandas.CSVDataSet",
+        >>> filename_suffix=".csv"
 
         )
         # This will create a folder `df_with_partition` and save multiple files

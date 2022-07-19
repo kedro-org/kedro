@@ -39,7 +39,7 @@ class PartitionedDataSet(AbstractDataSet):
     It also supports advanced features like
     `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
     kedro_io.html#partitioned-dataset-lazy-saving>`_
-    
+
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
         data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
@@ -97,7 +97,7 @@ class PartitionedDataSet(AbstractDataSet):
         >>> for partition_id, partition_load_func in loaded.items():
             # The actual function that loads the data
             partition_data = partition_load_func()
-        
+
             # Add the processing logic for individual partition HERE
             print(partition_data)
 

@@ -243,9 +243,10 @@ These days, distributed systems play an increasingly important role in ETL data 
 
 This is why Kedro provides a built-in [PartitionedDataSet](/kedro.io.PartitionedDataSet), with the following features:
 
-* `PartitionedDataSet` can recursively load all or specific files from a given location.
+* `PartitionedDataSet` can recursively load/save all or specific files from a given location.
 * It is platform agnostic, and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and many more.
 * It implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach, and does not attempt to load any partition data until a processing node explicitly requests it.
+* It supports lazy saving by using `Callable`
 
 ```{note}
 In this section, each individual file inside a given location is called a partition.
@@ -446,6 +447,7 @@ def create_partitions() -> Dict[str, Any]:
 Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a `PartitionedDataSet`. The simplest safety mechanism could be to use partition IDs with a high chance of uniqueness: for example, the current timestamp.
 ```
 
+### Partitioned dataset lazy saving
 `PartitionedDataSet` also supports lazy saving, where the partition's data is not materialised until it is time to write.
 To use this, simply return `Callable` types in the dictionary:
 

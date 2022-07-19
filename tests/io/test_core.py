@@ -94,6 +94,7 @@ class TestCoreFunctions:
         ],
     )
     def test_parse_filepath(self, filepath, expected_result):
+        # TODO: delete this test completely once it passes
         from fsspec.utils import infer_storage_options
 
         assert infer_storage_options(filepath).items() >= expected_result.items()

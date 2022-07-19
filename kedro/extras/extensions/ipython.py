@@ -58,7 +58,6 @@ def reload_kedro(
 
     _remove_cached_modules(metadata.package_name)
 
-    configure_project(metadata.package_name)
     session = KedroSession.create(
         metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )

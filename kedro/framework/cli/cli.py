@@ -2,14 +2,20 @@
 
 This module implements commands available from the kedro CLI.
 """
+
 import importlib
+import logging
 import sys
 import webbrowser
 from collections import defaultdict
 from pathlib import Path
-from typing import Sequence
+from typing import Optional, Sequence
 
 import click
+from black import find_project_root, find_pyproject_toml, find_user_pyproject_toml
+from click.core import Command, Context
+from rich.console import Console
+from rich.panel import Panel
 
 from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
@@ -30,6 +36,8 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
 from kedro.framework.startup import _is_project, bootstrap_project
+
+logger = logging.getLogger(__name__)
 
 LOGO = rf"""
  _            _
@@ -107,14 +115,49 @@ class KedroCLI(CommandCollection):
 
     def __init__(self, project_path: Path):
         self._metadata = None  # running in package mode
+        self._guessed_project_root = None
+
         if _is_project(project_path):
             self._metadata = bootstrap_project(project_path)
+        else:
+            guessed_project_root, _ = find_project_root(None)
+            if _is_project(guessed_project_root):
+                self._guessed_project_root = guessed_project_root
         self._cli_hook_manager = get_cli_hook_manager()
 
         super().__init__(
             ("Global commands", self.global_groups),
             ("Project specific commands", self.project_groups),
         )
+
+    def get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
+        """
+        Add more useful help message when command is not found. i.e. try to find where
+        the kedro project root is.
+        """
+        command = super().get_command(ctx, cmd_name)
+
+        if not command:
+            warn = "[orange1][b]You are not in a Kedro project[/]![/]"
+            result = "Project specific commands such as '[bright_cyan]run[/]' or \
+'[bright_cyan]jupyter[/]' are only available within a project directory."
+            if self._guessed_project_root:
+                solution = f"[bright_black][b]Hint:[/] [i]Kedro is looking for a file called \
+'[magenta]pyproject.toml[/]', Is this your working directory?[/]\
+\n{self._guessed_project_root}[/]"
+            else:
+                solution = "[bright_black][b]Hint:[/] [i]Kedro is looking for a file called \
+'[magenta]pyproject.toml[/]', is one present in your current working directory?[/][/]"
+            msg = f"{warn} {result}\n\n{solution}"
+            console = Console()
+            panel = Panel(
+                msg,
+                title=f"Command '{cmd_name}' not found",
+                expand=False,
+                border_style="dim",
+                title_align="left",
+            )
+            console.print("\n", panel, "\n")
 
     def main(
         self,

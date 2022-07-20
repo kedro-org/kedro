@@ -284,8 +284,6 @@ def find_pipelines() -> Dict[str, Pipeline]:
             pipeline_module = importlib.import_module(
                 f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
             )
-        except ModuleNotFoundError:
-            continue
         except:  # pylint: disable=bare-except  # noqa: E722
             warnings.warn(
                 f"An error occurred while importing the "

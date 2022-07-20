@@ -78,6 +78,8 @@ class KedroSession:
     - Use `KedroSession(session_id=<id>)` to instantiate an existing session with a given
     ID.
 
+
+
     Example:
     ::
 
@@ -85,7 +87,10 @@ class KedroSession:
         >>> from kedro.framework.startup import bootstrap_project
         >>> from pathlib import Path
 
-        >>> metadata = bootstrap_project(<your-pyproject.toml-directory>)
+        >>> # If you are creating session outside of a kedro project, i.e. not using
+        >>> # `kedro run` or `kedro jupyter`. You need to run `bootstrap_project` to
+        >>> # let Kedro find your configuration.
+        >>> bootstrap_project(<your-pyproject.toml-directory>)
         >>> with KedroSession.create("<your-kedro-project-package-name>") as session:
         >>>     session.run()
 

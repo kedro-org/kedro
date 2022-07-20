@@ -11,7 +11,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipelines.
 
     Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
+        A mapping from pipeline names to ``Pipeline`` objects.
     """
     data_engineering_pipeline = de.create_pipeline()
     data_processing_pipeline = pipeline(

@@ -13,6 +13,7 @@ def mock_package_name_with_pipelines(tmp_path, request):
     package_name = "test_package"
     pipelines_dir = tmp_path / package_name / "pipelines"
     pipelines_dir.mkdir(parents=True)
+    (pipelines_dir / "__init__.py").touch()
     for pipeline_name in request.param:
         pipeline_dir = pipelines_dir / pipeline_name
         pipeline_dir.mkdir()
@@ -30,6 +31,10 @@ def mock_package_name_with_pipelines(tmp_path, request):
     sys.path.insert(0, str(tmp_path))
     yield package_name
     sys.path.pop(0)
+
+    # Make sure that the `importlib_resources.files` in `find_pipelines`
+    # will point to the correct `test_package.pipelines` not from cache.
+    del sys.modules[f"{package_name}.pipelines"]
 
 
 @pytest.fixture

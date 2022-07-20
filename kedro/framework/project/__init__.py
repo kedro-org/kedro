@@ -2,7 +2,6 @@
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
 import importlib
-import importlib.resources
 import logging.config
 import operator
 import sys
@@ -13,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import click
+import importlib_resources
 import rich.pretty
 import rich.traceback
 import yaml
@@ -272,7 +272,14 @@ def find_pipelines() -> Dict[str, Pipeline]:
             ``Pipeline`` object, or if the module import fails up front.
     """
     pipelines_dict = {"__default__": pipeline([])}
-    for pipeline_name in importlib.resources.contents(f"{PACKAGE_NAME}.pipelines"):
+    for pipeline_dir in importlib_resources.files(
+        f"{PACKAGE_NAME}.pipelines"
+    ).iterdir():
+        if not pipeline_dir.is_dir():
+            continue
+        pipeline_name = pipeline_dir.name
+        if pipeline_name == "__pycache__":
+            continue
         try:
             pipeline_module = importlib.import_module(
                 f"{PACKAGE_NAME}.pipelines.{pipeline_name}"

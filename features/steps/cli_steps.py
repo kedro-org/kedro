@@ -428,34 +428,6 @@ def check_created_project_structure(context):
         assert is_created(path)
 
 
-@then("the pipeline should contain no nodes")
-def check_empty_pipeline_exists(context):
-    """Check if the created pipeline in
-    `pipeline_registry.py` contains no nodes.
-    """
-    pipeline_file = (
-        context.root_project_dir
-        / "src"
-        / context.project_name.replace("-", "_")
-        / "pipeline_registry.py"
-    )
-    assert '"__default__": pipeline([])' in pipeline_file.read_text("utf-8")
-
-
-@then("the pipeline should contain nodes")
-def check_pipeline_not_empty(context):
-    """Check if the created pipeline in
-    `pipeline_registry.py` contains nodes.
-    """
-    pipeline_file = (
-        context.root_project_dir
-        / "src"
-        / context.project_name.replace("-", "_")
-        / "pipeline_registry.py"
-    )
-    assert "pipeline = pipeline([])" not in pipeline_file.read_text("utf-8")
-
-
 @then("the logs should show that {number} nodes were run")
 def check_one_node_run(context, number):
     expected_log_line = f"Completed {number} out of {number} tasks"

@@ -7,6 +7,10 @@ from kedro.framework.project import configure_project, pipelines
 from kedro.pipeline import Pipeline
 
 
+def test_pipelines_without_configure_project_is_empty():
+    assert pipelines == {}
+
+
 @pytest.fixture
 def mock_package_name_with_pipelines_file(tmpdir):
     pipelines_file_path = tmpdir.mkdir("test_package") / "pipeline_registry.py"
@@ -23,10 +27,6 @@ def mock_package_name_with_pipelines_file(tmpdir):
     sys.path.insert(0, project_path)
     yield package_name
     sys.path.pop(0)
-
-
-def test_pipelines_without_configure_project_is_empty():
-    assert pipelines == {}
 
 
 @pytest.fixture

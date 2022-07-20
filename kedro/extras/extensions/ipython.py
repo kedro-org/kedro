@@ -42,7 +42,7 @@ def reload_kedro(
     """
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
-    from kedro.framework.project import configure_project, pipelines
+    from kedro.framework.project import pipelines
     from kedro.framework.session import KedroSession
     from kedro.framework.startup import bootstrap_project
 

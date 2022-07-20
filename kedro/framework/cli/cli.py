@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 import click
-from black import find_project_root, find_pyproject_toml, find_user_pyproject_toml
+from black import find_project_root
 from click.core import Command, Context
 from rich.console import Console
 from rich.panel import Panel

@@ -53,9 +53,10 @@ class TestLoadKedroObjects:
             "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
             return_value=my_register_pipeline,
         )
-        mocker.patch("kedro.framework.project.settings.configure")
-        mocker.patch("kedro.framework.session.session.validate_settings")
-        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
+        # mocker.patch("kedro.framework.project.settings.configure")
+        # mocker.patch("kedro.framework.session.session.validate_settings")
+        # mocker.patch("kedro.framework.session.KedroSession._setup_logging")
+        mocker.patch("kedro.framework.startup.configure_project")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
         )
@@ -67,16 +68,18 @@ class TestLoadKedroObjects:
         mock_register_line_magic = mocker.patch(
             "kedro.extras.extensions.ipython.register_line_magic"
         )
-        mock_context = mocker.patch("kedro.framework.session.KedroSession.load_context")
+        mock_session_create = mocker.patch(
+            "kedro.framework.session.KedroSession.create"
+        )
         mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
 
         reload_kedro(kedro_path)
 
         mock_ipython().push.assert_called_once_with(
             variables={
-                "context": mock_context(),
-                "catalog": mock_context().catalog,
-                "session": mocker.ANY,
+                "context": mock_session_create().load_context(),
+                "catalog": mock_session_create().load_context().catalog,
+                "session": mock_session_create(),
                 "pipelines": my_pipelines,
             }
         )

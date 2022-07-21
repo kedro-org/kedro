@@ -3,7 +3,7 @@ import textwrap
 
 import pytest
 
-from kedro.framework.project import configure_project
+from kedro.framework.project import configure_project, pipelines
 from kedro.pipeline import Pipeline
 
 
@@ -29,8 +29,6 @@ def test_pipelines_without_configure_project_is_empty(
     mock_package_name_with_pipelines_file,
 ):
     from kedro.framework.project import pipelines
-
-    raise Exception("IN test_pipelines_without_configure_project_is_empty")
 
     assert pipelines == {}
 

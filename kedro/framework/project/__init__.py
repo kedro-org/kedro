@@ -255,9 +255,9 @@ def validate_settings():
     """
     if PACKAGE_NAME is None:
         raise ValueError(
-            """Package name is not found, make sure you have set up the
-        project via ``bootstrap_project``, this should happens automatically if you
-        are using `kedro` command lines interface.
+            """Package name not found. Make sure you have configured the
+        project using 'bootstrap_project'. This should happen automatically if you
+        are using Kedro command line interface.
         """
         )
 

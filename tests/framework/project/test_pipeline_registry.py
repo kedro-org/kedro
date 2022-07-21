@@ -25,7 +25,9 @@ def mock_package_name_with_pipelines_file(tmpdir):
     sys.path.pop(0)
 
 
-def test_pipelines_without_configure_project_is_empty():
+def test_pipelines_without_configure_project_is_empty(
+    mock_package_name_with_pipelines_file,
+):
     assert pipelines == {}
 
 

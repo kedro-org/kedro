@@ -26,11 +26,12 @@ def mock_package_name_with_pipelines_file(tmpdir):
 
 
 def test_pipelines_without_configure_project_is_empty(
-    mock_package_name_with_pipelines_file,
+    mock_package_name_with_pipelines_file,  # pylint: disable=unused-argument
 ):
-    if "kedro.framework.project" in sys.modules:
-        print("CLEANED")
-        del sys.modules["kedro.framework.project"]
+    # Reimport `pipelines` from `kedro.framework.project` to ensure that
+    # it was not set by a pior call to the `configure_project` function.
+    del sys.modules["kedro.framework.project"]
+    # pylint: disable=reimported, import-outside-toplevel
     from kedro.framework.project import pipelines
 
     assert pipelines == {}
@@ -75,4 +76,4 @@ def test_configure_project_should_not_raise_for_unimportable_pipelines(
     with pytest.raises(
         ModuleNotFoundError, match="No module named 'this_is_not_a_real_thing'"
     ):
-        pipelines["new_pipeline"]
+        _ = pipelines["new_pipeline"]

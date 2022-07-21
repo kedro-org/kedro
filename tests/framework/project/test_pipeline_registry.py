@@ -1,4 +1,3 @@
-import importlib
 import sys
 import textwrap
 
@@ -29,7 +28,9 @@ def mock_package_name_with_pipelines_file(tmpdir):
 def test_pipelines_without_configure_project_is_empty(
     mock_package_name_with_pipelines_file,
 ):
-    importlib.reload(kedro.framework.project)
+    if "kedro.framework.project" in sys.modules:
+        print("CLEANED")
+        del sys.modules["kedro.framework.project"]
     from kedro.framework.project import pipelines
 
     assert pipelines == {}

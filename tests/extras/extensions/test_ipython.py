@@ -25,6 +25,11 @@ def pipeline_cleanup():
     pipelines.configure()
 
 
+PACKAGE_NAME = "fake_page_name"
+PROJECT_NAME = "fake_project_name"
+PROJECT_VERSION = "0.1"
+
+
 class TestLoadKedroObjects:
     @pytest.mark.usefixtures("pipeline_cleanup")
     def test_load_kedro_objects(
@@ -39,9 +44,9 @@ class TestLoadKedroObjects:
         fake_metadata = ProjectMetadata(
             source_dir=tmp_path / "src",  # default
             config_file=tmp_path / "pyproject.toml",
-            package_name="fake_package_name",
-            project_name="fake_project_name",
-            project_version="0.1",
+            package_name=PACKAGE_NAME,
+            project_name=PROJECT_NAME,
+            project_version=PROJECT_VERSION,
             project_path=tmp_path,
         )
         my_pipelines = {"ds": Pipeline([])}
@@ -53,9 +58,6 @@ class TestLoadKedroObjects:
             "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
             return_value=my_register_pipeline,
         )
-        # mocker.patch("kedro.framework.project.settings.configure")
-        # mocker.patch("kedro.framework.session.session.validate_settings")
-        # mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         mocker.patch("kedro.framework.startup.configure_project")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
@@ -75,6 +77,9 @@ class TestLoadKedroObjects:
 
         reload_kedro(kedro_path)
 
+        mock_session_create.assert_called_once_with(
+            PACKAGE_NAME, kedro_path, env=None, extra_params=None
+        )
         mock_ipython().push.assert_called_once_with(
             variables={
                 "context": mock_session_create().load_context(),
@@ -99,9 +104,9 @@ class TestLoadKedroObjects:
         fake_metadata = ProjectMetadata(
             source_dir=tmp_path / "src",  # default
             config_file=tmp_path / "pyproject.toml",
-            package_name="fake_package_name",
-            project_name="fake_project_name",
-            project_version="0.1",
+            package_name=PACKAGE_NAME,
+            project_name=PROJECT_NAME,
+            project_version=PROJECT_VERSION,
             project_path=tmp_path,
         )
         mocker.patch("kedro.framework.project.configure_project")
@@ -124,7 +129,7 @@ class TestLoadKedroObjects:
         reload_kedro(tmp_path, env="env1", extra_params={"key": "val"})
 
         mock_session_create.assert_called_once_with(
-            "fake_package_name", tmp_path, env="env1", extra_params={"key": "val"}
+            PACKAGE_NAME, tmp_path, env="env1", extra_params={"key": "val"}
         )
         mock_ipython().push.assert_called_once_with(
             variables={
@@ -156,9 +161,9 @@ class TestLoadKedroObjects:
         fake_metadata = ProjectMetadata(
             source_dir=tmp_path / "src",  # default
             config_file=tmp_path / "pyproject.toml",
-            package_name="fake_package_name",
-            project_name="fake_project_name",
-            project_version="0.1",
+            package_name=PACKAGE_NAME,
+            project_name=PROJECT_NAME,
+            project_version=PROJECT_VERSION,
             project_path=tmp_path,
         )
         my_pipelines = {"ds": Pipeline([])}

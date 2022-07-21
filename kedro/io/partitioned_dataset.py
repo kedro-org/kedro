@@ -90,7 +90,7 @@ class PartitionedDataSet(AbstractDataSet):
         # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
         >>> data_set.save(dict_df)
 
-        # This create lazy load functions instead of loading data into memory immediately.
+        # This will create lazy load functions instead of loading data into memory immediately.
         >>> loaded = data_set.load()
 
         # Load all the partitions

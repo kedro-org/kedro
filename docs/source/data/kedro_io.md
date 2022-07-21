@@ -246,7 +246,7 @@ This is why Kedro provides a built-in [PartitionedDataSet](/kedro.io.Partitioned
 * `PartitionedDataSet` can recursively load/save all or specific files from a given location.
 * It is platform agnostic, and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and many more.
 * It implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach, and does not attempt to load any partition data until a processing node explicitly requests it.
-* It supports lazy saving by using `Callable`
+* It supports lazy saving by using `Callable`s.
 
 ```{note}
 In this section, each individual file inside a given location is called a partition.

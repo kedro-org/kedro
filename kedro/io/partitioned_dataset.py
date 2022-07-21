@@ -101,7 +101,7 @@ class PartitionedDataSet(AbstractDataSet):
             # Add the processing logic for individual partition HERE
             print(partition_data)
 
-    In reality, you may load multiple parittions from a remote storage and combine them
+    In reality, you may load multiple partitions from a remote storage and combine them
     like this:
     ::
 

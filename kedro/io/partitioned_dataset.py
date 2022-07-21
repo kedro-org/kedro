@@ -38,7 +38,7 @@ class PartitionedDataSet(AbstractDataSet):
 
     It also supports advanced features like
     `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
-    kedro_io.html#partitioned-dataset-lazy-saving>`_
+    kedro_io.html#partitioned-dataset-lazy-saving>`_.
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\

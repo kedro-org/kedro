@@ -3,7 +3,7 @@ import textwrap
 
 import pytest
 
-from kedro.framework.project import configure_project, pipelines
+from kedro.framework.project import configure_project
 from kedro.pipeline import Pipeline
 
 
@@ -28,6 +28,10 @@ def mock_package_name_with_pipelines_file(tmpdir):
 def test_pipelines_without_configure_project_is_empty(
     mock_package_name_with_pipelines_file,
 ):
+    from kedro.framework.project import pipelines
+
+    raise Exception("IN test_pipelines_without_configure_project_is_empty")
+
     assert pipelines == {}
 
 
@@ -70,4 +74,4 @@ def test_configure_project_should_not_raise_for_unimportable_pipelines(
     with pytest.raises(
         ModuleNotFoundError, match="No module named 'this_is_not_a_real_thing'"
     ):
-        _ = pipelines["new_pipeline"]
+        pipelines["new_pipeline"]

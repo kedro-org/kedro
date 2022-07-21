@@ -228,6 +228,8 @@ def configure_project(package_name: str):
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py and pipeline_registry.py.
     """
+    raise Exception("IN configure_project")
+
     settings_module = f"{package_name}.settings"
     settings.configure(settings_module)
 

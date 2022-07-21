@@ -90,8 +90,8 @@ class KedroSession:
         >>> # If you are creating session outside of a kedro project, i.e. not using
         >>> # `kedro run` or `kedro jupyter`. You need to run `bootstrap_project` to
         >>> # let Kedro find your configuration.
-        >>> bootstrap_project(<your-pyproject.toml-directory>)
-        >>> with KedroSession.create("<your-kedro-project-package-name>") as session:
+        >>> metadata = bootstrap_project(Path("<project_root>"))
+        >>> with KedroSession.create(metadata.package_name) as session:
         >>>     session.run()
 
     """

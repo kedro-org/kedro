@@ -253,4 +253,11 @@ def validate_settings():
     error message ``Expected an instance of `ConfigLoader`, got `NoneType` instead``.
     More info on the dynaconf issue: https://github.com/rochacbruno/dynaconf/issues/460
     """
+    if PACKAGE_NAME is None:
+        raise ValueError(
+            """Package name not found. Make sure you have configured the
+project using 'bootstrap_project'. This should happen automatically if you are using
+Kedro command line interface. """
+        )
+
     importlib.import_module(f"{PACKAGE_NAME}.settings")

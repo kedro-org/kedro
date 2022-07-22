@@ -39,6 +39,8 @@ def reload_kedro(
 ):
     """Line magic which reloads all Kedro default variables.
     Setting the path will also make it default for subsequent calls.
+
+
     """
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
@@ -55,10 +57,9 @@ def reload_kedro(
         logger.info("No path argument was provided. Using: %s", default_project_path)
 
     metadata = bootstrap_project(default_project_path)
-
     _remove_cached_modules(metadata.package_name)
-
     configure_project(metadata.package_name)
+
     session = KedroSession.create(
         metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )

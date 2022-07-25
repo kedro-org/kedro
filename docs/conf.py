@@ -206,7 +206,6 @@ linkcheck_ignore = [
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
-    "https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog",  # temporary until 0.18
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
@@ -214,6 +213,7 @@ linkcheck_ignore = [
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving",  # Until 0.18.4
 ]
 
 # retry before render a link broken (fix for "too many requests")

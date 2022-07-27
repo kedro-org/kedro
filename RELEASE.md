@@ -20,6 +20,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

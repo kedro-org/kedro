@@ -12,6 +12,8 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
+* Make Kedro instantiate datasets from `kedro.datasets` with higher priority than `kedro.extras.datasets`. `kedro.datasets` is the namespace for the new `kedro-datasets` python package.
+
 
 ## Bug fixes and other changes
 * Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.

@@ -171,10 +171,14 @@ def package(metadata: ProjectMetadata):
 )
 @click.pass_obj  # this will pass the metadata as first argument
 def build_docs(metadata: ProjectMetadata, open_docs):
-    """Build the project documentation."""
+    """Build the project documentation. (DEPRECATED)"""
     source_path = metadata.source_dir
     package_name = metadata.package_name
-
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro build-docs' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
     python_call("pip", ["install", str(source_path / "[docs]")])
     python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])
     python_call("ipykernel", ["install", "--user", f"--name={package_name}"])
@@ -215,7 +219,13 @@ def build_reqs(
 ):  # pylint: disable=unused-argument
     """Run `pip-compile` on src/requirements.txt or the user defined input file and save
     the compiled requirements to src/requirements.lock or the user defined output file.
+    (DEPRECATED)
     """
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro build-reqs' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
 
     source_path = metadata.source_dir
     input_file = Path(input_file or source_path / "requirements.txt")
@@ -252,8 +262,13 @@ def build_reqs(
 def activate_nbstripout(
     metadata: ProjectMetadata, **kwargs
 ):  # pylint: disable=unused-argument
-    """Install the nbstripout git hook to automatically clean notebooks."""
+    """Install the nbstripout git hook to automatically clean notebooks. (DEPRECATED)"""
     source_path = metadata.source_dir
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro activate-nbstripout' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
     secho(
         (
             "Notebook output cells will be automatically cleared before committing"

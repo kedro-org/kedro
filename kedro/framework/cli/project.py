@@ -8,7 +8,6 @@ import webbrowser
 from pathlib import Path
 
 import click
-from click import secho
 
 from kedro.framework.cli.utils import (
     KedroCliError,
@@ -195,7 +194,7 @@ def build_docs(metadata: ProjectMetadata, open_docs):
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
     if open_docs:
         docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
-        secho(f"Opening {docs_page}")
+        click.secho(f"Opening {docs_page}")
         webbrowser.open(docs_page)
 
 
@@ -249,7 +248,7 @@ def build_reqs(
             "Please specify another input or create the file and try again."
         )
 
-    secho(
+    click.secho(
         f"Requirements built! Please update {input_file.name} "
         "if you'd like to make a change in your project's dependencies, "
         f"and re-run build-reqs to generate the new {output_file.name}.",
@@ -269,7 +268,7 @@ def activate_nbstripout(
         "will not be available from Kedro 0.19.0."
     )
     click.secho(deprecation_message, fg="red")
-    secho(
+    click.secho(
         (
             "Notebook output cells will be automatically cleared before committing"
             " to git."

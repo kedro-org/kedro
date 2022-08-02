@@ -186,8 +186,15 @@ def convert_notebook(
     *Note*: Make sure your notebooks have unique names!
     FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
     relative and absolute paths are accepted.
-    Should not be provided if --all flag is already present.
+    Should not be provided if --all flag is already present. (DEPRECATED)
     """
+
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro jupyter convert' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
+
     project_path = metadata.project_path
     source_path = metadata.source_dir
     package_name = metadata.package_name

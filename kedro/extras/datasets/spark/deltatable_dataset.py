@@ -20,7 +20,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
 
         Example adding a catalog entry with
         `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-            01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+            01_data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
         .. code-block:: yaml
 

@@ -8,7 +8,6 @@ import webbrowser
 from pathlib import Path
 
 import click
-from click import secho
 
 from kedro.framework.cli.utils import (
     KedroCliError,
@@ -171,10 +170,14 @@ def package(metadata: ProjectMetadata):
 )
 @click.pass_obj  # this will pass the metadata as first argument
 def build_docs(metadata: ProjectMetadata, open_docs):
-    """Build the project documentation."""
+    """Build the project documentation. (DEPRECATED)"""
     source_path = metadata.source_dir
     package_name = metadata.package_name
-
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro build-docs' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
     python_call("pip", ["install", str(source_path / "[docs]")])
     python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])
     python_call("ipykernel", ["install", "--user", f"--name={package_name}"])
@@ -191,7 +194,7 @@ def build_docs(metadata: ProjectMetadata, open_docs):
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
     if open_docs:
         docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
-        secho(f"Opening {docs_page}")
+        click.secho(f"Opening {docs_page}")
         webbrowser.open(docs_page)
 
 
@@ -215,7 +218,13 @@ def build_reqs(
 ):  # pylint: disable=unused-argument
     """Run `pip-compile` on src/requirements.txt or the user defined input file and save
     the compiled requirements to src/requirements.lock or the user defined output file.
+    (DEPRECATED)
     """
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro build-reqs' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
 
     source_path = metadata.source_dir
     input_file = Path(input_file or source_path / "requirements.txt")
@@ -239,7 +248,7 @@ def build_reqs(
             "Please specify another input or create the file and try again."
         )
 
-    secho(
+    click.secho(
         f"Requirements built! Please update {input_file.name} "
         "if you'd like to make a change in your project's dependencies, "
         f"and re-run build-reqs to generate the new {output_file.name}.",
@@ -252,9 +261,14 @@ def build_reqs(
 def activate_nbstripout(
     metadata: ProjectMetadata, **kwargs
 ):  # pylint: disable=unused-argument
-    """Install the nbstripout git hook to automatically clean notebooks."""
+    """Install the nbstripout git hook to automatically clean notebooks. (DEPRECATED)"""
     source_path = metadata.source_dir
-    secho(
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro activate-nbstripout' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
+    click.secho(
         (
             "Notebook output cells will be automatically cleared before committing"
             " to git."

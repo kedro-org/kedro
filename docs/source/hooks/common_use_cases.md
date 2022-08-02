@@ -16,7 +16,7 @@ def say_hello(node: Node):
 Then you can either add it to a single node based on the node's name:
 
 ```python
-# <your_project>/src/<your_project>/hooks.py
+# <project-name>/src/<project-name>/hooks.py
 
 from kedro.framework.hooks import hook_impl
 from kedro.pipeline.node import Node
@@ -34,7 +34,7 @@ Or add it to a group of nodes based on their tags:
 
 
 ```python
-# <your_project>/src/<your_project>/hooks.py
+# <project-name>/src/<project-name>/hooks.py
 
 from kedro.framework.hooks import hook_impl
 from kedro.pipeline.node import Node
@@ -50,7 +50,7 @@ class ProjectHooks:
 Or add it to all nodes in the entire pipeline:
 
 ```python
-# <your_project>/src/<your_project>/hooks.py
+# <project-name>/src/<project-name>/hooks.py
 
 from kedro.framework.hooks import hook_impl
 from kedro.pipeline.node import Node
@@ -77,7 +77,7 @@ def my_flaky_node_function():
 Or applying it in the `before_node_run` Hook as follows:
 
 ```python
-# <your_project>/src/<your_project>/hooks.py
+# <project-name>/src/<project-name>/hooks.py
 from tenacity import retry
 
 from kedro.framework.hooks import hook_impl

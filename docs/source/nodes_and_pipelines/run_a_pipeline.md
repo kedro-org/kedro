@@ -58,7 +58,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 <summary><b>Click to expand</b></summary>
 
 ```python
-# in <project-name>/src/<python_package>/runner.py
+# in <project-name>/src/<package_name>/runner.py
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
@@ -110,7 +110,7 @@ class DryRunner(AbstractRunner):
 And use it with `kedro run` through the `--runner` flag:
 
 ```console
-$ kedro run --runner=<python_package>.runner.DryRunner
+$ kedro run --runner=<package_name>.runner.DryRunner
 ```
 
 ## Load and save asynchronously
@@ -141,7 +141,7 @@ All the datasets used in the run have to be [thread-safe](https://www.quora.com/
 
 ## Run a pipeline by name
 
-To run the pipeline by its name, you need to add your new pipeline to `register_pipelines()` function `src/<python_package>/pipeline_registry.py` as below:
+To run the pipeline by its name, you need to add your new pipeline to `register_pipelines()` function `src/<package_name>/pipeline_registry.py` as below:
 
 <details>
 <summary><b>Click to expand</b></summary>

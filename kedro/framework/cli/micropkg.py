@@ -354,7 +354,7 @@ def _refactor_code_for_unpacking(
 
     to:
     <temp_dir>  # also the root of the Rope project
-    |__ <project_package>
+    |__ <project-name>
         |__ __init__.py
         |__ <path_to_micro_package>
             |__ __init__.py
@@ -620,7 +620,7 @@ def _refactor_code_for_package(
     """In order to refactor the imports properly, we need to recreate
     the same nested structure as in the project. Therefore, we create:
     <temp_dir>  # also the root of the Rope project
-    |__ <project_package>
+    |__ <project-name>
         |__ __init__.py
         |__ <path_to_micro_package>
             |__ __init__.py

@@ -267,7 +267,7 @@ class TestConvertNotebookCommand:
             "add '--all' to convert all notebooks.\n"
         )
         assert result.exit_code
-        assert result.stdout == expected_output
+        assert expected_output in result.stdout
 
     def test_non_unique_notebook_names_error(
         self, fake_project_cli, mocker, fake_metadata

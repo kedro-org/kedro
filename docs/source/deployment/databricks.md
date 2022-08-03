@@ -160,7 +160,7 @@ Congratulations, you are now ready to run your Kedro project from the Databricks
 
 [Create your Databricks notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and remember to [attach it to the cluster](https://docs.databricks.com/notebooks/notebooks-manage.html#attach) you have just configured.
 
-In your newly created notebook put each code snippet from below into a separate cell and then [run all notebook cells](https://docs.databricks.com/notebooks/notebooks-use.html#run-all-cells):
+In your newly created notebook put each code snippet from below into a separate cell and then [run all notebook cells](https://docs.databricks.com/notebooks/notebooks-use.html#run-notebooks):
 
 * Clone your project from GitHub
 

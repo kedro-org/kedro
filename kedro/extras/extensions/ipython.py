@@ -8,9 +8,6 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
-from IPython import get_ipython
-from IPython.core.magic import needs_local_scope, register_line_magic
-
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
 
@@ -39,16 +36,17 @@ def reload_kedro(
 ):
     """Line magic which reloads all Kedro default variables.
     Setting the path will also make it default for subsequent calls.
-
-
     """
+    # If a path is provided, set it as default for subsequent calls
+    from IPython import get_ipython
+    from IPython.core.magic import needs_local_scope, register_line_magic
+
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
     from kedro.framework.project import configure_project, pipelines
     from kedro.framework.session import KedroSession
     from kedro.framework.startup import bootstrap_project
 
-    # If a path is provided, set it as default for subsequent calls
     global default_project_path
     if path:
         default_project_path = Path(path).expanduser().resolve()
@@ -63,7 +61,6 @@ def reload_kedro(
     session = KedroSession.create(
         metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )
-    logger.debug("Loading the context from %s", default_project_path)
     context = session.load_context()
     catalog = context.catalog
 
@@ -95,12 +92,25 @@ def load_ipython_extension(ipython):
 
     default_project_path = _find_kedro_project(Path.cwd())
 
-    try:
-        reload_kedro(default_project_path)
-    except (ImportError, ModuleNotFoundError):
-        logger.error("Kedro appears not to be installed in your current environment.")
-    except Exception:  # pylint: disable=broad-except
+    if default_project_path is None:
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
             "Make sure you run '%reload_kedro <path_to_kedro_project>'."
         )
+        return
+
+    reload_kedro(default_project_path)
+
+
+# test to check import guard with no ipython
+
+# PROBLEMS:
+# 1. ImportError not right... but seems to work?
+# 2. Broad except not right. e.g. malformed catalog gives `WARNING  Kedro extension was registered but couldn't find a Kedro project. Make sure you run '%reload_kedro <path_to_kedro_project>'.
+# 3. Have particular value for not finding kedro project: should use it
+
+
+# Future: COULOD SEND MOCK EMPTY VARIABLES (but how would work with new line magics?) OR STARTUP_ERROR variable in future
+# Do kedro alias with
+# from .extras.extensions.ipython import load_ipython_extension in init.py
+# Needs careful tests to make sure it doesn't break if imports move

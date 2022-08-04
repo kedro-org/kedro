@@ -71,12 +71,9 @@ class KedroSessionError(Exception):
 
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
-    of a Kedro run.
-    - Use `KedroSession.create("<package_name>")` as
+    of a Kedro run. Use `KedroSession.create("<package_name>")` as
     a context manager to construct a new KedroSession with session data
     provided (see the example below).
-    - Use `KedroSession(session_id=<id>)` to instantiate an existing session with a given
-    ID.
 
 
 

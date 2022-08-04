@@ -12,8 +12,8 @@ Hooks are a mechanism to add extra behaviour to Kedro's main execution in an eas
 
 A Hook consists of a Hook specification, and Hook implementation. To add Hooks to your project, you must:
 
-* Create or modify the file `<project-name>/src/<package_name>/hooks.py` to define a Hook implementation for an existing Kedro-defined Hook specification
-* Register your Hook implementation in the [`src/<project-name>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key
+* Create or modify the file `src/<package_name>/hooks.py` to define a Hook implementation for an existing Kedro-defined Hook specification
+* Register your Hook implementation in the [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key
 
 ### Hook specification
 
@@ -77,7 +77,7 @@ def after_catalog_created(
 However, if you just want to use this Hook to list the contents of a data catalog after it is created, your Hook implementation can be as simple as:
 
 ```python
-# <project-name>/src/<project-name>/hooks.py
+# src/<package_name>/hooks.py
 import logging
 
 from kedro.framework.hooks import hook_impl
@@ -102,15 +102,15 @@ We recommend that you group related Hook implementations under a namespace, pref
 
 #### Registering your Hook implementations with Kedro
 
-Hook implementations should be registered with Kedro using the [`<project-name>/src/<package_name>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key.
+Hook implementations should be registered with Kedro using the [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key.
 
 You can register more than one implementation for the same specification. They will be called in LIFO (last-in, first-out) order.
 
 The following example sets up a Hook so that the `after_data_catalog_created` implementation is called every time after a data catalog is created.
 
 ```python
-# <project-name>/src/<project-name>/settings.py
-from <project-name>.hooks import ProjectHooks, DataCatalogHooks
+# src/<package_name>/settings.py
+from <package_name>.hooks import ProjectHooks, DataCatalogHooks
 
 HOOKS = (ProjectHooks(), DataCatalogHooks())
 ```
@@ -127,7 +127,7 @@ Auto-discovered Hooks will run *first*, followed by the ones specified in `setti
 Auto-registered plugins' Hooks can be disabled via `settings.py` as follows:
 
 ```python
-# <project-name>/src/<project-name>/settings.py
+# src/<package_name>/settings.py
 
 DISABLE_HOOKS_FOR_PLUGINS = ("<plugin_name>",)
 ```

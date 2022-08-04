@@ -58,7 +58,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 <summary><b>Click to expand</b></summary>
 
 ```python
-# in <project-name>/src/<package_name>/runner.py
+# in src/<package_name>/runner.py
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner

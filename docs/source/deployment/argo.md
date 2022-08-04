@@ -177,7 +177,7 @@ The spec template is written with the [Jinja templating language](https://jinja.
 $ pip install Jinja2
 ```
 
-Finally, run the helper script from project's directory to build the Argo Workflows spec (the spec will be saved to `<project_root>/templates/argo-<project-name>.yml` file).
+Finally, run the helper script from project's directory to build the Argo Workflows spec (the spec will be saved to `<project_root>/templates/argo-<project_name>.yml` file).
 
 ```console
 $ cd <project_root>
@@ -219,7 +219,7 @@ Now, you are ready to submit the Argo Workflows spec as follows:
 
 ```console
 $ cd <project_root>
-$ argo submit --watch templates/argo-<project-name>.yml
+$ argo submit --watch templates/argo-<project_name>.yml
 ```
 
 ```{note}

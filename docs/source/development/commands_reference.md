@@ -359,7 +359,7 @@ The above command will take the bundled `.tar.gz` file and do the following:
 `kedro micropkg pull` works with PyPI, local and cloud storage:
 
 * PyPI: `kedro micropkg pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro micropkg pull <project_root>/dist/<my-pipeline>-0.1.tar.gz`
+* Local storage: `kedro micropkg pull dist/<my-pipeline>-0.1.tar.gz`
 * Cloud storage: `kedro micropkg pull s3://<my-bucket>/<my-pipeline>-0.1.tar.gz`
 
 ### Project quality

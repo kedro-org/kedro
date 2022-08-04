@@ -106,7 +106,7 @@ pip install great-expectations
 * Implement `before_node_run` and `after_node_run` Hooks to validate inputs and outputs data respectively leveraging `Great Expectations`:
 
 ```python
-# <project-name>/src/<project-name>/hooks.py
+# src/<package_name>/hooks.py
 from typing import Any, Dict
 
 from kedro.framework.hooks import hook_impl
@@ -183,7 +183,7 @@ pip install statsd
 * Implement `before_node_run` and `after_node_run` Hooks to collect metrics (DataSet size and node execution time):
 
 ```python
-# <project-name>/src/<project-name>/hooks.py
+# src/<package_name>/hooks.py
 import sys
 from typing import Any, Dict
 
@@ -233,7 +233,7 @@ pip install mlflow
 * Implement `before_pipeline_run`, `after_pipeline_run` and `after_node_run` Hooks to collect metrics using `MLflow`:
 
 ```python
-# <project-name>/src/<project-name>/hooks.py
+# src/<package_name>/hooks.py
 from typing import Any, Dict
 
 import mlflow

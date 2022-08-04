@@ -19,7 +19,7 @@ Optimal configuration for Spark depends on the setup of your Spark cluster.
 
 Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) in your custom project context class, which is the entrypoint for your Kedro project. This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
 
-Below is an example implementation to initialise the `SparkSession` in `<project-name>/src/<package_name>/custom_context.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
+Below is an example implementation to initialise the `SparkSession` in `src/<package_name>/custom_context.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
 
 ```python
 from typing import Any, Dict, Union
@@ -70,7 +70,7 @@ Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere 
 
 We don't recommend storing Spark session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
 
-Now, you need to configure Kedro to use `CustomContext`. Set `CONTEXT_CLASS` in `<project-name>/src/<package_name>/settings.py` as follows:
+Now, you need to configure Kedro to use `CustomContext`. Set `CONTEXT_CLASS` in `src/<package_name>/settings.py` as follows:
 
 ```python
 from <package_name>.custom_context import CustomContext
@@ -87,7 +87,7 @@ We recommend using Kedro's built-in Spark datasets to load raw data into Spark's
 * [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)
 * [spark.SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
 
-The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `<project-name>/conf/base/catalog.yml`:
+The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
 
 ```yaml
 weather:

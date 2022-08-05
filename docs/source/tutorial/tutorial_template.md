@@ -2,9 +2,9 @@
 
 In this section, we discuss the project set-up phase, which is the first part of the [standard development workflow](./spaceflights_tutorial.md#kedro-project-development-workflow). The set-up steps are as follows:
 
-* Create a new project
-* Install dependencies
-* Configure the project
+- Create a new project
+- Install dependencies
+- Configure the project
 
 ## Create a new project
 
@@ -46,7 +46,7 @@ Add the following lines to your `src/requirements.txt` file:
 
 ```text
 kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.2   # Specify optional Kedro dependencies
-kedro-viz~=4.0                                                                 # Visualise your pipelines
+kedro-viz~=5.0                                                                 # Visualise your pipelines
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```
 
@@ -57,7 +57,6 @@ pip install -r src/requirements.txt
 ```
 
 You can find out more about [how to work with project dependencies](../kedro_project_setup/dependencies.md) in the Kedro project documentation.
-
 
 ## Configure the project
 

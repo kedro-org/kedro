@@ -1,4 +1,4 @@
-# pylint: disable=import-outside-toplevel,global-statement,invalid-name
+# pylint: disable=import-outside-toplevel,global-statement,invalid-name,too-many-locals
 """
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
@@ -100,17 +100,3 @@ def load_ipython_extension(ipython):
         return
 
     reload_kedro(default_project_path)
-
-
-# test to check import guard with no ipython
-
-# PROBLEMS:
-# 1. ImportError not right... but seems to work?
-# 2. Broad except not right. e.g. malformed catalog gives `WARNING  Kedro extension was registered but couldn't find a Kedro project. Make sure you run '%reload_kedro <path_to_kedro_project>'.
-# 3. Have particular value for not finding kedro project: should use it
-
-
-# Future: COULOD SEND MOCK EMPTY VARIABLES (but how would work with new line magics?) OR STARTUP_ERROR variable in future
-# Do kedro alias with
-# from .extras.extensions.ipython import load_ipython_extension in init.py
-# Needs careful tests to make sure it doesn't break if imports move

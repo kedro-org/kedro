@@ -498,7 +498,7 @@ The [Kedro IPython extension](../tools_integration/ipython.md) will make the fol
 * `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
-To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can be also used to see the error message if any of the variables above are undefined. 
+To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined. 
 
 ##### Copy tagged cells
 To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:

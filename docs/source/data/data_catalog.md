@@ -164,7 +164,7 @@ rockets:
     sheet_name: Sheet1
 ```
 
-Example 7: Loads a multisheet excel file from a local file system
+Example 7: Loads a multi-sheet excel file from a local file system
 
 ```yaml
 trains:

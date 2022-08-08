@@ -4,6 +4,7 @@ configure a Kedro project and access its settings."""
 import importlib
 import logging.config
 import operator
+import os
 import sys
 from collections import UserDict
 from collections.abc import MutableMapping
@@ -199,8 +200,9 @@ class _ProjectLogging(UserDict):
 
         # We suppress click here to hide tracebacks related to it conversely,
         # kedro is not suppressed to show its tracebacks for easier debugging.
-        # sys.executable is used to get the kedro executable path to hide the top level traceback.
-        rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
+        # sys.executable is used to get the kedro executable path to hide the top level traceback.   
+        if not self._is_databricks():
+            rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
         rich.pretty.install()
 
     def configure(self, logging_config: Dict[str, Any]) -> None:
@@ -210,6 +212,13 @@ class _ProjectLogging(UserDict):
         """
         logging.config.dictConfig(logging_config)
         self.data = logging_config
+        
+    def _is_databricks() -> bool:
+        try:
+            get_ipython
+        except NameError:
+            return False
+        return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
 PACKAGE_NAME = None

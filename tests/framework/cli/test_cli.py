@@ -647,8 +647,17 @@ class TestRunCommand:
             ("foo.nested:bar", {"foo": {"nested": "bar"}}),
             ("foo.nested:123.45", {"foo": {"nested": 123.45}}),
             (
-                "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
-                {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
+                "foo.nested_1.double_nested:123.45,foo.nested_2:1a",
+                {"foo": {"nested_1": {"double_nested": 123.45}, "nested_2": "1a"}},
+            ),
+            (
+                'foo.nested_1.double_nested:123.45,foo."nested_2.not_double_nested":1a',
+                {
+                    "foo": {
+                        "nested_1": {"double_nested": 123.45},
+                        "nested_2.not_double_nested": "1a",
+                    }
+                },
             ),
         ],
     )

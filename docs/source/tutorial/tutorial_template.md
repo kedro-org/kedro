@@ -46,7 +46,7 @@ Add the following lines to your `src/requirements.txt` file:
 
 ```text
 kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.2   # Specify optional Kedro dependencies
-kedro-viz~=4.0                                                                 # Visualise your pipelines
+kedro-viz~=5.0                                                                 # Visualise your pipelines
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```
 

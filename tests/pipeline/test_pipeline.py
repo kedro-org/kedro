@@ -790,16 +790,20 @@ class TestPipelineFilterHelpers:
         full = Pipeline(pipeline_list_with_lists["nodes"])
         with pytest.raises(ValueError, match=pattern):
             full.only_nodes(*target_node_names)
-    
+
     @pytest.mark.parametrize(
         "dummy_namespaced_nodes", ["node1", "node2", "node3", "node4", "node5", "node6"]
     )
-    def test_only_nodes_with_namespacing(self, pipeline_with_namespaces, dummy_namespaced_nodes):
-        pattern = r"Pipeline does not contain nodes named \[.*\]\. Did you mean: \[.*\]\?"
+    def test_only_nodes_with_namespacing(
+        self, pipeline_with_namespaces, dummy_namespaced_nodes
+    ):
+        pattern = (
+            r"Pipeline does not contain nodes named \[.*\]\. Did you mean: \[.*\]\?"
+        )
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
             full.only_nodes(*dummy_namespaced_nodes)
-    
+
     def test_from_inputs(self, complex_pipeline):
         """F and H are inputs of node1, node2 and node3."""
         new_pipeline = complex_pipeline.from_inputs("F", "H")

@@ -802,7 +802,7 @@ class TestPipelineFilterHelpers:
         )
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
-            full.only_nodes(*dummy_namespaced_nodes)
+            full.only_nodes(dummy_namespaced_nodes)
 
     def test_from_inputs(self, complex_pipeline):
         """F and H are inputs of node1, node2 and node3."""

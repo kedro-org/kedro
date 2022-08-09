@@ -5,6 +5,7 @@ produced outputs and execution order.
 """
 import copy
 import json
+import re
 from collections import Counter, defaultdict
 from itertools import chain
 from typing import Dict, Iterable, List, Set, Tuple, Union
@@ -382,7 +383,11 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         if unregistered_nodes:
             # check if unregistered nodes are available under namespace
             for name in node_names:
-                namespaces = [k for k, v in self._nodes_by_name.items() if name in k]
+                namespaces = [
+                    k
+                    for k, v in self._nodes_by_name.items()
+                    if re.match(rf"^.*\.{name}$", k)
+                ]
             if namespaces:
                 raise ValueError(
                     f"Pipeline does not contain nodes named {list(unregistered_nodes)}. "

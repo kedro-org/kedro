@@ -102,5 +102,5 @@ def load_ipython_extension(ipython):
     except Exception:  # pylint: disable=broad-except
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
-            "Make sure you run '%reload_kedro <path_to_kedro_project>'."
+            "Make sure you run '%reload_kedro <project_root>'."
         )

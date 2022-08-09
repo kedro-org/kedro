@@ -214,7 +214,7 @@ class TestLoadIPythonExtension:
             (
                 RuntimeError,
                 "Kedro extension was registered but couldn't find a Kedro project. "
-                "Make sure you run '%reload_kedro <path_to_kedro_project>'.",
+                "Make sure you run '%reload_kedro <project_root>'.",
                 "WARNING",
             ),
         ],

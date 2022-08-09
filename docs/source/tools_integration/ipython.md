@@ -33,13 +33,13 @@ In [1]: %load_ext kedro.extras.extensions.ipython
 
 If your IPython or Jupyter instance was launched from outside your Kedro project then you will need to run a second line magic to set the project path so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
 ```ipython
-In [2]: %reload_kedro <path_to_project_root>
+In [2]: %reload_kedro <project_root>
 ```
 The Kedro IPython extension remembers the project path so that subsequent calls to `%reload_kedro` do not need to specify it:
 
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython
-In [2]: %reload_kedro <path_to_project_root>
+In [2]: %reload_kedro <project_root>
 In [3]: %reload_kedro
 ```
 
@@ -183,7 +183,7 @@ You can also specify the following optional arguments for `session.run`:
 
 ## Kedro and Jupyter
 
-We recommend that you store your Jupyter Notebooks in the `notebooks` folder of your Kedro project. If you are using `kedro jupyter notebook` or `kedro jupyter lab` then you should use the default kernel selected for you, which is listed as `Kedro (<project_package_name>)`. This will run the Kedro IPython extension automatically when the kernel is started, so that the `catalog`, `context`, `pipelines` and `session` variables are available immediately to you.
+We recommend that you store your Jupyter Notebooks in the `notebooks` folder of your Kedro project. If you are using `kedro jupyter notebook` or `kedro jupyter lab` then you should use the default kernel selected for you, which is listed as `Kedro (<package_name>)`. This will run the Kedro IPython extension automatically when the kernel is started, so that the `catalog`, `context`, `pipelines` and `session` variables are available immediately to you.
 
 ```{note}
 Restarting the kernel will reload the Kedro IPython extension and hence refresh the `catalog`, `context`, `pipelines` and `session` variables.
@@ -200,10 +200,10 @@ If you are not able to execute `kedro jupyter notebook` or `kedro jupyter lab` t
 
 ### Manage Jupyter kernels
 
-Behind the scenes, the `kedro jupyter notebook` and `kedro jupyter lab` commands create a Jupyter kernel named `kedro_<project_package_name>`. This kernel is identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs) that automatically loads `kedro.extras.extensions.ipython` when the kernel is started. The kernel specification is installed at a user level rather than system-wide.
+Behind the scenes, the `kedro jupyter notebook` and `kedro jupyter lab` commands create a Jupyter kernel named `kedro_<package_name>`. This kernel is identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs) that automatically loads `kedro.extras.extensions.ipython` when the kernel is started. The kernel specification is installed at a user level rather than system-wide.
 
 ```{note}
-If a Jupyter kernel with the name `kedro_<project_package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook/lab` to replace the kernel specification with one that points to the new environment.
+If a Jupyter kernel with the name `kedro_<package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook/lab` to replace the kernel specification with one that points to the new environment.
 ```
 
 As each Kedro project has its own Jupyter kernel, you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel.

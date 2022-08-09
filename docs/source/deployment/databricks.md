@@ -249,7 +249,7 @@ You must explicitly upgrade your `pip` version by doing the below:
 %pip install -U pip
 ```
 
-After this, you can reload Kedro by running the line magic command `%reload_kedro <path_to_project_root>`.
+After this, you can reload Kedro by running the line magic command `%reload_kedro <project_root>`.
 
 ### 10. Running Kedro-Viz on Databricks
 

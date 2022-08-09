@@ -570,7 +570,6 @@ You should see output similar to the following:
 
 ```bash
 [08/09/22 16:56:00] INFO     Kedro project kedro-tutorial                                         session.py:346
-
                     INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]

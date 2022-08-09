@@ -65,6 +65,33 @@ class ExcelDataSet(
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
 
+    Example adding a catalog entry for multi-sheet excel file with the ``YAML API``:
+
+    .. code-block:: yaml
+
+        >>> trains:
+        >>>   type: pandas.ExcelDataSet
+        >>>   filepath: data/02_intermediate/company/trains.xlsx
+        >>>   load_args:
+        >>>     sheet_name: [Sheet1, Sheet2, Sheet3]
+
+    Example multi-sheet excel file using Python API:
+    ::
+
+        >>> from kedro.extras.datasets.pandas import ExcelDataSet
+        >>> import pandas as pd
+        >>>
+        >>> dataframe = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
+        >>>                      'col3': [5, 6]})
+        >>> another_dataframe = pd.DataFrame({"x":[10,20], "y":["hello", "world]})
+        >>> multisheet = {"Sheet1": dataframe, "Sheet2": another_dataframe}
+        >>>
+        >>> data_set = ExcelDataSet(filepath="test.xlsx", load_args = {"sheet_name": None})
+        >>> data_set.save(multisheet)
+        >>> reloaded = data_set.load()
+        >>> assert multisheet["Sheet1"].equals(reloaded["Sheet1"])
+        >>> assert multisheet["Sheet2"].equals(reloaded["Sheet2"])
+
     """
 
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}

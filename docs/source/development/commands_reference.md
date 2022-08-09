@@ -352,7 +352,7 @@ The above command will take the bundled `.tar.gz` file and do the following:
 `kedro micropkg pull` works with PyPI, local and cloud storage:
 
 * PyPI: `kedro micropkg pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro micropkg pull <path-to-your-project-root>/dist/<my-pipeline>-0.1.tar.gz`
+* Local storage: `kedro micropkg pull dist/<my-pipeline>-0.1.tar.gz`
 * Cloud storage: `kedro micropkg pull s3://<my-bucket>/<my-pipeline>-0.1.tar.gz`
 
 ### Project quality
@@ -484,7 +484,7 @@ To start an IPython shell:
 kedro ipython
 ```
 
-Every time you start or restart a notebook kernel, a startup script (`<project-root>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
+Every time you start or restart a notebook kernel, a startup script (`<project_root>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
 
 - `context`: An instance of `kedro.framework.context.KedroContext` class or custom context class extending `KedroContext` if one was set to `CONTEXT_CLASS` in `settings.py` file (further details of how to use `context` can be found [in the IPython documentation](../tools_integration/ipython.md))
 - `startup_error` (`Exception`)

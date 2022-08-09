@@ -358,7 +358,7 @@ You should see output similar to the following:
 [08/09/22 17:01:29] INFO     Completed 3 out of 3 tasks                                  sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                             runner.py:89
                     INFO     Loading data from 'model_input_table' (MemoryDataSet)...        data_catalog.py:343
-
+```
 ### Use `kedro viz --autoreload`
 
 Run the following command:

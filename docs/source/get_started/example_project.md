@@ -104,7 +104,6 @@ When the command completes, you should see a log message similar to the followin
                     INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
-
 ```
 
 ## Under the hood: Pipelines and nodes

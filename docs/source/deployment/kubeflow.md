@@ -76,12 +76,12 @@ def generate_kfp(image: str, pipeline_name: str, env: str) -> None:
 
     project_path = Path.cwd()
     metadata = bootstrap_project(project_path)
-    project_name = metadata.project_name
+    package_name = metadata.package_name
 
     pipeline_name = pipeline_name or "__default__"
     _PIPELINE = pipelines.get(pipeline_name)
 
-    Compiler().compile(convert_kedro_pipeline_to_kfp, project_name + ".yaml")
+    Compiler().compile(convert_kedro_pipeline_to_kfp, package_name + ".yaml")
 
 
 @dsl.pipeline(name="Kedro pipeline", description="Kubeflow pipeline for Kedro project")
@@ -142,7 +142,7 @@ You can also specify two optional arguments:
 For the purpose of this walk-through, we will use AWS S3 bucket for datasets, therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) ([an example Kubernetes Secrets spec is given below](#authenticate-kubeflow-pipelines)).
 
 
-Finally, run the helper script from project's directory to build the workflow spec (the spec will be saved to `<project_root>/<project_name>.yaml` file).
+Finally, run the helper script from project's directory to build the workflow spec (the spec will be saved to `<project_root>/<package_name>.yaml` file).
 
 ```console
 $ cd <project_root>
@@ -189,7 +189,7 @@ You can find more information about AWS configuration in [the Kubeflow Pipelines
 
 ### Upload workflow spec and execute runs
 
-Once a Kubernetes Secrets is deployed, upload the workflow spec `<project_name>.yaml` to Kubeflow. Below is the example of how to upload and execute the Kubeflow Pipelines through the UI (see [how to open the pipelines dashboard](https://www.kubeflow.org/docs/components/pipelines/pipelines-quickstart/#deploy-kubeflow-and-open-the-kubeflow-pipelines-ui)).
+Once a Kubernetes Secrets is deployed, upload the workflow spec `<package_name>.yaml` to Kubeflow. Below is the example of how to upload and execute the Kubeflow Pipelines through the UI (see [how to open the pipelines dashboard](https://www.kubeflow.org/docs/components/pipelines/pipelines-quickstart/#deploy-kubeflow-and-open-the-kubeflow-pipelines-ui)).
 
 First, go to "Pipelines" on the left panel, and click "Upload pipeline", and you will see the following page to upload your workflow spec.
 ![context input graphic](../meta/images/kubeflow_pipelines_upload_pipeline.png)

@@ -83,14 +83,13 @@ class ExcelDataSet(
         >>>
         >>> dataframe = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
-        >>> another_dataframe = pd.DataFrame({"x":[10,20], "y":["hello", "world]})
-        >>> multisheet = {"Sheet1": dataframe, "Sheet2": another_dataframe}
-        >>>
+        >>> another_dataframe = pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
+        >>> multiframe = {"Sheet1": dataframe, "Sheet2": another_dataframe}
         >>> data_set = ExcelDataSet(filepath="test.xlsx", load_args = {"sheet_name": None})
-        >>> data_set.save(multisheet)
+        >>> data_set.save(multiframe)
         >>> reloaded = data_set.load()
-        >>> assert multisheet["Sheet1"].equals(reloaded["Sheet1"])
-        >>> assert multisheet["Sheet2"].equals(reloaded["Sheet2"])
+        >>> assert multiframe["Sheet1"].equals(reloaded["Sheet1"])
+        >>> assert multiframe["Sheet2"].equals(reloaded["Sheet2"])
 
     """
 

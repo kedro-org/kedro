@@ -40,6 +40,7 @@
 * The session store no longer fails if a username cannot be found with `getpass.getuser`.
 * Added generic typing for `AbstractDataSet` and `AbstractVersionedDataSet` as well as typing to all datasets.
 * Rendered the deployment guide flowchart as a Mermaid diagram, and added Dask.
+* Updated Prefect deployment documentation to allow for reruns with saved versioned datasets.
 
 ## Minor breaking changes to the API
 * The module `kedro.config.default_logger` no longer exists; default logging configuration is now set automatically through `kedro.framework.project.LOGGING`. Unless you explicitly import `kedro.config.default_logger` you do not need to make any changes.

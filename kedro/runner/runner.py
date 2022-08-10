@@ -11,7 +11,7 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, List, Set
 
 from pluggy import PluginManager
 
@@ -184,29 +184,31 @@ class AbstractRunner(ABC):
         )
 
     def _find_first_persistent_ancestors(
-        self, pipeline: Pipeline, start: Node
-    ) -> Iterable[Node]:
+        self, pipeline: Pipeline, start: Node, catalog: DataCatalog
+    ) -> Set[Node]:
         """
         Depth-first search approach to finding the first ancestors
         """
-        stack, result = [start], set()
+        stack, first_persistent_ancestors = [start], set()
         while stack:
             current_node = stack.pop()
-            if self._output_is_persistent(current_node):
-                result.add(current_node)
+            if self._output_is_persistent(current_node, catalog):
+                first_persistent_ancestors.add(current_node)
                 continue
             for parent in self._enumerate_parents(current_node, pipeline):
                 stack.append(parent)
+        return first_persistent_ancestors
 
     def _enumerate_parents(
         self, pipeline: Pipeline, child: Node
-    ) -> Iterable[Node]:
+    ) -> List[Node]:
         """
         Returns the parents of a given node in a pipeline.
         """
-        pass
+        parent_pipeline = pipeline.only_nodes_with_outputs(*child.inputs)
+        return parent_pipeline.nodes
 
-    def _output_is_persistent(node: Node) -> bool:
+    def _output_is_persistent(node: Node, catalog: DataCatalog) -> bool:
         """
         Return true if the node has persistent output, false if not.
         """

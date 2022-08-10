@@ -74,6 +74,8 @@ class ExcelDataSet(
         >>>   filepath: data/02_intermediate/company/trains.xlsx
         >>>   load_args:
         >>>     sheet_name: [Sheet1, Sheet2, Sheet3]
+        >>>   # Note that save_args is not required to save a multi-sheet excel file.
+        >>>   # A dict of pd.DataFrame is saved as a multi-sheet excel file by default.
 
     Example multi-sheet excel file using Python API:
     ::

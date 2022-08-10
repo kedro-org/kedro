@@ -183,6 +183,34 @@ class AbstractRunner(ABC):
             postfix,
         )
 
+    def _find_first_persistent_ancestors(
+        self, pipeline: Pipeline, start: Node
+    ) -> Iterable[Node]:
+        """
+        Depth-first search approach to finding the first ancestors
+        """
+        stack, result = [start], set()
+        while stack:
+            current_node = stack.pop()
+            if self._output_is_persistent(current_node):
+                result.add(current_node)
+                continue
+            for parent in self._enumerate_parents(current_node, pipeline):
+                stack.append(parent)
+
+    def _enumerate_parents(
+        self, pipeline: Pipeline, child: Node
+    ) -> Iterable[Node]:
+        """
+        Returns the parents of a given node in a pipeline.
+        """
+        pass
+
+    def _output_is_persistent(node: Node) -> bool:
+        """
+        Return true if the node has persistent output, false if not.
+        """
+        pass
 
 def run_node(
     node: Node,

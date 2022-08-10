@@ -65,6 +65,9 @@ class ExcelDataSet(
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
 
+    Note that using ``save_args`` is not required when saving multi-sheet excel files.
+    A dict of ``pd.DataFrame`` is saved as a multi-sheet excel file by default.
+
     Example adding a catalog entry for multi-sheet excel file with the ``YAML API``:
 
     .. code-block:: yaml
@@ -74,8 +77,7 @@ class ExcelDataSet(
         >>>   filepath: data/02_intermediate/company/trains.xlsx
         >>>   load_args:
         >>>     sheet_name: [Sheet1, Sheet2, Sheet3]
-        >>>   # Note that save_args is not required to save a multi-sheet excel file.
-        >>>   # A dict of pd.DataFrame is saved as a multi-sheet excel file by default.
+
 
     Example multi-sheet excel file using Python API:
     ::

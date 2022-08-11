@@ -797,6 +797,9 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_namespacing(
         self, pipeline_with_namespaces, namespaced_node
     ):
+        # Tests that error message will supply correct namespaces.
+        # Example of expected error:
+        # Pipeline does not contain nodes named ['node1']. Did you mean: ['katie.node1']?
         pattern = (
             rf"Pipeline does not contain nodes named \['{namespaced_node}'\]\. "
             rf"Did you mean: \['.*\.{namespaced_node}'\]\?"
@@ -811,20 +814,26 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_namespacing_multiple_args(
         self, pipeline_with_namespaces, namespaced_nodes
     ):
-        # tests that error message will contain suggestions for all arguments
+        # Tests that error message will contain suggestions for all provided arguments.
+        # Example of expected error message:
+        # "Pipeline does not contain nodes named ['node1', 'node2'].
+        # Did you mean: ['katie.node1', 'lisa.node2']?"
         pattern = rf"('.*\.{namespaced_nodes[0]}')+.*('.*\.{namespaced_nodes[1]}')+"
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
             full.only_nodes(*namespaced_nodes)
 
     @pytest.mark.parametrize(
-        "namespaced_nodes", [("node1", "node7"), ("node8", "node2")]
+        "namespaced_nodes", [("node1", "invalid_node"), ("invalid_node", "node2")]
     )
-    def test_only_nodes_with_namespacing_some_correct_args(
+    def test_only_nodes_with_namespacing_and_invalid_args(
         self, pipeline_with_namespaces, namespaced_nodes
     ):
-        # tests error message will contain suggestions for correct arguments, regardless of order
-        # regex is non-specific due to unspecified order
+        # Tests error message will still contain namespace suggestions for correct arguments.
+        # regex is not specific to node names due to unspecified order
+        # Example of expected error message:
+        # "Pipeline does not contain nodes named ['node1', 'invalid_node'].
+        # Did you mean: ['katie.node1']?"
         pattern = (
             r"Pipeline does not contain nodes named \[.*\]\. Did you mean: \[.*\]\?"
         )

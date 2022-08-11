@@ -185,7 +185,7 @@ class TestLoadKedroObjects:
 
 
 class TestLoadIPythonExtension:
-    def test_load_extension_not_in_kedro_env_or_project(self, mocker):
+    def test_load_extension_missing_dependency(self, mocker):
         mocker.patch(
             "kedro.extras.extensions.ipython.reload_kedro", side_effect=ImportError
         )

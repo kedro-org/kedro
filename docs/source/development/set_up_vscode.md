@@ -199,7 +199,7 @@ ptvsd.wait_for_attach()
 Ensure both computers (the computer you are working on and the remote computer executing your code) have the same source code. For example, you can use `scp` to sync your code:
 
 ```console
-scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/
+scp -r <project_root> <your_username>@<remote_server>:projects/
 ```
 
 ❗The example above assumes there is a directory called `projects` in the home directory of the user account on the remote computer. This is where the project will be copied to. This can be set up as a deploy task as described above:
@@ -209,7 +209,7 @@ scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/
 {
     "label": "Deploy",
     "type": "shell",
-    "command": "scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/",
+    "command": "scp -r <project_root> <your_username>@<remote_server>:projects/",
 }
 ```
 

@@ -71,7 +71,7 @@ def prefect_deploy(pipeline_name, env, package_name):
 
         tasks[node._unique_key]["parent_tasks"] = parent_tasks
 
-    # Below task is used to instantiate a kedro session within the scope of a
+    # Below task is used to instantiate a KedroSession within the scope of a
     # Prefect flow
     init_task = KedroInitTask(
         pipeline_name=pipeline_name,
@@ -93,12 +93,12 @@ def prefect_deploy(pipeline_name, env, package_name):
 
 
 class KedroInitTask(Task):
-    """Task to initialize kedro session"""
+    """Task to initialize KedroSession"""
 
     def __init__(
         self,
         pipeline_name: str,
-        package_name: str = None,
+        package_name: str,
         project_path: Union[Path, str] = None,
         env: str = None,
         extra_params: Dict[str, Any] = None,
@@ -152,11 +152,11 @@ def instantiate_task(
     way we avoid duplicate instantiations of the same node task.
 
     Args:
-        node: kedro node for which a prefect task is being created.
+        node: Kedro node for which a Prefect task is being created.
         tasks: dictionary mapping node names to a dictionary containing
         node tasks and parent node tasks.
 
-    Returns: prefect task for the passed node and task dictionary.
+    Returns: Prefect task for the passed node and task dictionary.
 
     """
     if tasks.get(node._unique_key) is not None:
@@ -174,14 +174,14 @@ def generate_flow(
     tasks: Dict[str, Dict[str, Union[KedroTask, List[KedroTask]]]],
 ):
     """
-    Constructs a prefect flow given a task dictionary. Task dictionary
-    maps kedro node names to a dictionary containing a node task and its
+    Constructs a Prefect flow given a task dictionary. Task dictionary
+    maps Kedro node names to a dictionary containing a node task and its
     parents.
 
     Args:
-        init_task: Prefect initialisation tasks. Used to instantiate a kedro
-        session within the scope of a prefect flow.
-        tasks: dictionary mapping kedro node names to a dictionary
+        init_task: Prefect initialisation tasks. Used to instantiate a Kedro
+        session within the scope of a Prefect flow.
+        tasks: dictionary mapping Kedro node names to a dictionary
         containing a corresponding node task and its parents.
 
     Returns: None
@@ -199,7 +199,7 @@ def generate_flow(
 
 
 def instantiate_client(project_name: str):
-    """Initiates prefect client"""
+    """Initiates Prefect client"""
     client = Client()
     try:
         client.create_project(project_name=project_name)

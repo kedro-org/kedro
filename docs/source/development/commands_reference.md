@@ -359,7 +359,7 @@ The above command will take the bundled `.tar.gz` file and do the following:
 `kedro micropkg pull` works with PyPI, local and cloud storage:
 
 * PyPI: `kedro micropkg pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro micropkg pull <path-to-your-project-root>/dist/<my-pipeline>-0.1.tar.gz`
+* Local storage: `kedro micropkg pull dist/<my-pipeline>-0.1.tar.gz`
 * Cloud storage: `kedro micropkg pull s3://<my-bucket>/<my-pipeline>-0.1.tar.gz`
 
 ### Project quality
@@ -498,7 +498,7 @@ The [Kedro IPython extension](../tools_integration/ipython.md) will make the fol
 * `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
 * `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
-To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined. 
+To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined.
 
 ##### Copy tagged cells
 To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:

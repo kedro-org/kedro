@@ -16,6 +16,7 @@
 ## Bug fixes and other changes
 * Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
 * The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
+* Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.x.x
 
 ## Upcoming deprecations for Kedro 0.19.0
 

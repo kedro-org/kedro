@@ -37,7 +37,6 @@ def reload_kedro(
     """Line magic which reloads all Kedro default variables.
     Setting the path will also make it default for subsequent calls.
     """
-    # If a path is provided, set it as default for subsequent calls
     from IPython import get_ipython
     from IPython.core.magic import needs_local_scope, register_line_magic
 
@@ -47,6 +46,7 @@ def reload_kedro(
     from kedro.framework.session import KedroSession
     from kedro.framework.startup import bootstrap_project
 
+    # If a path is provided, set it as default for subsequent calls
     global default_project_path
     if path:
         default_project_path = Path(path).expanduser().resolve()

@@ -162,9 +162,9 @@ class AbstractRunner(ABC):
         pass
 
     def _suggest_resume_scenario(
-        self, pipeline: Pipeline, done_nodes: Iterable[Node]
+        self, pipeline: Pipeline, done_nodes: Iterable[Node], start: Node, catalog: DataCatalog
     ) -> None:
-        remaining_nodes = set(pipeline.nodes) - set(done_nodes)
+        """remaining_nodes = set(pipeline.nodes) - set(done_nodes)
 
         postfix = ""
         if done_nodes:
@@ -181,6 +181,15 @@ class AbstractRunner(ABC):
             "argument to your previous command:\n%s",
             len(remaining_nodes),
             postfix,
+        )"""
+        first_persistent_ancestors = self._find_first_persistent_ancestors(
+            pipeline,
+            start,
+            catalog
+        )
+        postfix = str(first_persistent_ancestors)
+        self._logger.warning(
+            f"first good node(s) is / are: {postfix}",
         )
 
     def _find_first_persistent_ancestors(
@@ -195,7 +204,7 @@ class AbstractRunner(ABC):
             if self._has_persistent_inputs(current_node, catalog):
                 first_persistent_ancestors.add(current_node)
                 continue
-            for parent in self._enumerate_parents(current_node, pipeline):
+            for parent in self._enumerate_parents(pipeline, current_node):
                 stack.append(parent)
         return first_persistent_ancestors
 
@@ -215,7 +224,7 @@ class AbstractRunner(ABC):
         Return true if the node has persistent output, false if not.
         """
         for node_input in node.inputs:
-            if type(catalog.DataSets[node_input]) == MemoryDataSet:
+            if type(catalog._data_sets[node_input]) == MemoryDataSet:
                 return False
         return True
 

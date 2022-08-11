@@ -15,7 +15,7 @@ There are reasons why you may want to use a Notebook, although in general, the p
 
 The recommended way to interact with Kedro in IPython and Jupyter is through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`. An [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/) is an importable Python module that has a couple of special functions to load and unload it.
 
-The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro`  [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
 The simplest way to make use of the Kedro IPython extension is through the following commands:
 * `kedro ipython`. This launches an IPython shell with the extension already loaded and is equivalent to the command `ipython --ext kedro.extras.extensions.ipython`.
@@ -23,6 +23,10 @@ The simplest way to make use of the Kedro IPython extension is through the follo
 * `kedro jupyter lab`. This creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected.
 
 Running any of the above from within your Kedro project will make the `catalog`, `context`, `pipelines` and `session` variables immediately accessible to you.
+
+```{note}
+If these variables are not available then Kedro has not been able to load your project. This could be, for example, due to a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro ipython`, `kedro jupyter notebook` or `kedro jupyter lab`. Alternatively, it can be accessed inside the IPython or Jupyter session directly with `%reload_kedro`.
+```
 
 ### Managed Jupyter instances
 

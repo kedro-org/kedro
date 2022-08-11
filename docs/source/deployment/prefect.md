@@ -112,7 +112,7 @@ class KedroInitTask(Task):
         super().__init__(name=f"{package_name}_initialization", *args, **kwargs)
 
     def run(self) -> Tuple[DataCatalog, KedroSession]:
-        """Initializes a kedro session and returns the data catalog and session"""
+        """Initializes a Kedro session and returns the DataCatalog and KedroSession"""
         # bootstrap project within task / flow scope
         bootstrap_project(self.project_path)
 

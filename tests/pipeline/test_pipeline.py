@@ -797,10 +797,40 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_namespacing(
         self, pipeline_with_namespaces, namespaced_node
     ):
-        pattern = rf"Pipeline does not contain nodes named \['{namespaced_node}'\]\. Did you mean: \['.*\.{namespaced_node}'\]\?"
+        pattern = (
+            rf"Pipeline does not contain nodes named \['{namespaced_node}'\]\. "
+            rf"Did you mean: \['.*\.{namespaced_node}'\]\?"
+        )
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
             full.only_nodes(namespaced_node)
+
+    @pytest.mark.parametrize(
+        "namespaced_nodes", [("node1", "node2"), ("node3", "node4"), ("node5", "node6")]
+    )
+    def test_only_nodes_with_namespacing_multiple_args(
+        self, pipeline_with_namespaces, namespaced_nodes
+    ):
+        # tests that error message will contain suggestions for all arguments
+        pattern = rf"('.*\.{namespaced_nodes[0]}')+.*('.*\.{namespaced_nodes[1]}')+"
+        full = pipeline_with_namespaces
+        with pytest.raises(ValueError, match=pattern):
+            full.only_nodes(*namespaced_nodes)
+
+    @pytest.mark.parametrize(
+        "namespaced_nodes", [("node1", "node7"), ("node8", "node2")]
+    )
+    def test_only_nodes_with_namespacing_some_correct_args(
+        self, pipeline_with_namespaces, namespaced_nodes
+    ):
+        # tests error message will contain suggestions for correct arguments, regardless of order
+        # regex is non-specific due to unspecified order
+        pattern = (
+            r"Pipeline does not contain nodes named \[.*\]\. Did you mean: \[.*\]\?"
+        )
+        full = pipeline_with_namespaces
+        with pytest.raises(ValueError, match=pattern):
+            full.only_nodes(*namespaced_nodes)
 
     def test_from_inputs(self, complex_pipeline):
         """F and H are inputs of node1, node2 and node3."""

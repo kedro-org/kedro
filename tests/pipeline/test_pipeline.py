@@ -797,9 +797,7 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_namespacing(
         self, pipeline_with_namespaces, namespaced_node
     ):
-        pattern = (
-            rf"Pipeline does not contain nodes named \['{namespaced_node}'\]\. Did you mean: \['.*\.{namespaced_node}'\]\?"
-        )
+        pattern = rf"Pipeline does not contain nodes named \['{namespaced_node}'\]\. Did you mean: \['.*\.{namespaced_node}'\]\?"
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
             full.only_nodes(namespaced_node)

@@ -16,7 +16,7 @@ from typing import Any, Dict, Iterable, List, Set
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataSet, DataCatalog
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -192,7 +192,7 @@ class AbstractRunner(ABC):
         stack, first_persistent_ancestors = [start], set()
         while stack:
             current_node = stack.pop()
-            if self._output_is_persistent(current_node, catalog):
+            if self._has_persistent_inputs(current_node, catalog):
                 first_persistent_ancestors.add(current_node)
                 continue
             for parent in self._enumerate_parents(current_node, pipeline):
@@ -208,11 +208,16 @@ class AbstractRunner(ABC):
         parent_pipeline = pipeline.only_nodes_with_outputs(*child.inputs)
         return parent_pipeline.nodes
 
-    def _output_is_persistent(node: Node, catalog: DataCatalog) -> bool:
+    def _has_persistent_inputs(
+            self, node: Node, catalog: DataCatalog
+    ) -> bool:
         """
         Return true if the node has persistent output, false if not.
         """
-        pass
+        for node_input in node.inputs:
+            if type(catalog.DataSets[node_input]) == MemoryDataSet:
+                return False
+        return True
 
 def run_node(
     node: Node,

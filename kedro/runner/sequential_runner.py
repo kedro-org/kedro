@@ -70,7 +70,7 @@ class SequentialRunner(AbstractRunner):
                 run_node(node, catalog, hook_manager, self._is_async, session_id)
                 done_nodes.add(node)
             except Exception:
-                self._suggest_resume_scenario(pipeline, done_nodes)
+                self._suggest_resume_scenario(pipeline, done_nodes, node, catalog)
                 raise
 
             # decrement load counts and release any data sets we've finished with

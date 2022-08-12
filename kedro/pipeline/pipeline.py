@@ -5,7 +5,6 @@ produced outputs and execution order.
 """
 import copy
 import json
-import re
 from collections import Counter, defaultdict
 from itertools import chain
 from typing import Dict, Iterable, List, Set, Tuple, Union
@@ -388,7 +387,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
                     [
                         node_name
                         for node_name in self._nodes_by_name.keys()
-                        if re.match(rf"^.*\.{name}$", node_name)
+                        if node_name.endswith(f".{name}")
                     ]
                 )
             if namespaces:

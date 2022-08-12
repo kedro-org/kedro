@@ -792,42 +792,48 @@ class TestPipelineFilterHelpers:
             full.only_nodes(*target_node_names)
 
     @pytest.mark.parametrize(
-        "namespaced_node", ["node1", "node2", "node3", "node4", "node5", "node6"]
+        "non_namespaced_node_name",
+        ["node1", "node2", "node3", "node4", "node5", "node6"],
     )
     def test_only_nodes_with_namespacing(
-        self, pipeline_with_namespaces, namespaced_node
+        self, pipeline_with_namespaces, non_namespaced_node_name
     ):
         # Tests that error message will supply correct namespaces.
         # Example of expected error:
         # Pipeline does not contain nodes named ['node1']. Did you mean: ['katie.node1']?
         pattern = (
-            rf"Pipeline does not contain nodes named \['{namespaced_node}'\]\. "
-            rf"Did you mean: \['.*\.{namespaced_node}'\]\?"
+            rf"Pipeline does not contain nodes named \['{non_namespaced_node_name}'\]\. "
+            rf"Did you mean: \['.*\.{non_namespaced_node_name}'\]\?"
         )
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
-            full.only_nodes(namespaced_node)
+            full.only_nodes(non_namespaced_node_name)
 
     @pytest.mark.parametrize(
-        "namespaced_nodes", [("node1", "node2"), ("node3", "node4"), ("node5", "node6")]
+        "non_namespaced_node_names",
+        [("node1", "node2"), ("node3", "node4"), ("node5", "node6")],
     )
     def test_only_nodes_with_namespacing_multiple_args(
-        self, pipeline_with_namespaces, namespaced_nodes
+        self, pipeline_with_namespaces, non_namespaced_node_names
     ):
         # Tests that error message will contain suggestions for all provided arguments.
         # Example of expected error message:
         # "Pipeline does not contain nodes named ['node1', 'node2'].
         # Did you mean: ['katie.node1', 'lisa.node2']?"
-        pattern = rf"('.*\.{namespaced_nodes[0]}')+.*('.*\.{namespaced_nodes[1]}')+"
+        pattern = (
+            rf"('.*\.{non_namespaced_node_names[0]}')+.*"
+            rf"('.*\.{non_namespaced_node_names[1]}')+"
+        )
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
-            full.only_nodes(*namespaced_nodes)
+            full.only_nodes(*non_namespaced_node_names)
 
     @pytest.mark.parametrize(
-        "namespaced_nodes", [("node1", "invalid_node"), ("invalid_node", "node2")]
+        "non_namespaced_node_names",
+        [("node1", "invalid_node"), ("invalid_node", "node2")],
     )
     def test_only_nodes_with_namespacing_and_invalid_args(
-        self, pipeline_with_namespaces, namespaced_nodes
+        self, pipeline_with_namespaces, non_namespaced_node_names
     ):
         # Tests error message will still contain namespace suggestions for correct arguments.
         # regex is not specific to node names due to unspecified order
@@ -839,7 +845,7 @@ class TestPipelineFilterHelpers:
         )
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
-            full.only_nodes(*namespaced_nodes)
+            full.only_nodes(*non_namespaced_node_names)
 
     def test_from_inputs(self, complex_pipeline):
         """F and H are inputs of node1, node2 and node3."""

@@ -19,15 +19,15 @@ from kedro.io.core import (
 )
 
 
-class PickleDataSet(AbstractVersionedDataSet):
+class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
     the specified backend library passed in (defaults to the ``pickle`` library), so it
     supports all allowed options for loading and saving pickle files.
 
     Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -87,7 +87,7 @@ class PickleDataSet(AbstractVersionedDataSet):
     ) -> None:
         """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
         file on a specific filesystem. ``PickleDataSet`` supports custom backends to
-        serialize/deserialize objects.
+        serialise/deserialise objects.
 
         Example backends that are compatible (non-exhaustive):
             * `pickle`
@@ -140,6 +140,11 @@ class PickleDataSet(AbstractVersionedDataSet):
             ValueError: If ``backend`` does not satisfy the `pickle` interface.
             ImportError: If the ``backend`` module could not be imported.
         """
+        # We do not store `imported_backend` as an attribute to be used in `load`/`save`
+        # as this would mean the dataset cannot be deepcopied (module objects cannot be
+        # pickled). The import here is purely to raise any errors as early as possible.
+        # Repeated imports in the `load` and `save` methods should not be a significant
+        # performance hit as Python caches imports.
         try:
             imported_backend = importlib.import_module(backend)
         except ImportError as exc:
@@ -153,7 +158,7 @@ class PickleDataSet(AbstractVersionedDataSet):
         ):
             raise ValueError(
                 f"Selected backend '{backend}' should satisfy the pickle interface. "
-                "Missing one of `load` and `dump` on the backend."
+                "Missing one of 'load' and 'dump' on the backend."
             )
 
         _fs_args = deepcopy(fs_args) or {}
@@ -175,7 +180,7 @@ class PickleDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        self._backend = imported_backend
+        self._backend = backend
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -203,17 +208,19 @@ class PickleDataSet(AbstractVersionedDataSet):
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return self._backend.load(fs_file, **self._load_args)  # type: ignore
+            imported_backend = importlib.import_module(self._backend)
+            return imported_backend.load(fs_file, **self._load_args)  # type: ignore
 
     def _save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
-                self._backend.dump(data, fs_file, **self._save_args)  # type: ignore
+                imported_backend = importlib.import_module(self._backend)
+                imported_backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
                 raise DataSetError(
-                    f"{data.__class__} was not serialized due to: {exc}"
+                    f"{data.__class__} was not serialised due to: {exc}"
                 ) from exc
 
         self._invalidate_cache()

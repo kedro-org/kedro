@@ -8,7 +8,9 @@ from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
 from typing import Set
 
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from pluggy import PluginManager
+
+from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
@@ -37,9 +39,9 @@ class ThreadRunner(AbstractRunner):
         """
         if is_async:
             warnings.warn(
-                "`ThreadRunner` doesn't support loading and saving the "
+                "'ThreadRunner' doesn't support loading and saving the "
                 "node inputs and outputs asynchronously with threads. "
-                "Setting `is_async` to False."
+                "Setting 'is_async' to False."
             )
         super().__init__(is_async=False)
 
@@ -48,15 +50,15 @@ class ThreadRunner(AbstractRunner):
 
         self._max_workers = max_workers
 
-    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
-        """Factory method for creating the default data set for the runner.
+    def create_default_data_set(self, ds_name: str) -> MemoryDataSet:  # type: ignore
+        """Factory method for creating the default dataset for the runner.
 
         Args:
-            ds_name: Name of the missing data set
+            ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of an implementation of AbstractDataSet to be used
-            for all unregistered data sets.
+            An instance of ``MemoryDataSet`` to be used for all
+            unregistered datasets.
 
         """
         return MemoryDataSet()
@@ -79,14 +81,19 @@ class ThreadRunner(AbstractRunner):
         )
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
-            run_id: The id of the run.
+            hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -107,7 +114,14 @@ class ThreadRunner(AbstractRunner):
                 todo_nodes -= ready
                 for node in ready:
                     futures.add(
-                        pool.submit(run_node, node, catalog, self._is_async, run_id)
+                        pool.submit(
+                            run_node,
+                            node,
+                            catalog,
+                            hook_manager,
+                            self._is_async,
+                            session_id,
+                        )
                     )
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
@@ -125,9 +139,8 @@ class ThreadRunner(AbstractRunner):
                         "Completed %d out of %d tasks", len(done_nodes), len(nodes)
                     )
 
-                    # decrement load counts and release any data sets we've finished
-                    # with this is particularly important for the shared datasets we
-                    # create above
+                    # Decrement load counts, and release any datasets we
+                    # have finished with.
                     for data_set in node.inputs:
                         load_counts[data_set] -= 1
                         if (

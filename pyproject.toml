@@ -1,25 +1,26 @@
+# PEP-518 https://peps.python.org/pep-0518/
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["setuptools>=38.0", "wheel"]  # PEP 518 specifications.
+
 [tool.black]
 exclude = "/templates/|^features/steps/test_starter"
 
 [tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-line_length = 88
-known_first_party = ["features", "kedro", "tests", "tools"]
-default_section = "THIRDPARTY"
+profile = "black"
 
 [tool.pylint]
 [tool.pylint.master]
 ignore = "CVS"
 ignore-patterns = "kedro/templates/*"
-load-plugins = "pylint.extensions.docparams"
+load-plugins = [
+    "pylint.extensions.docparams",
+    "pylint.extensions.no_self_use"
+]
 unsafe-load-any-extension = false
 [tool.pylint.messages_control]
 disable = [
     "ungrouped-imports",
-    "bad-continuation",
     "duplicate-code"
 ]
 enable = ["useless-suppression"]
@@ -39,7 +40,7 @@ min-public-methods = 1
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["kedro/templates/*", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*"]
+omit = ["kedro/templates/*", "kedro/extras/logging/color_logger.py", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*", "kedro/extras/datasets/holoviews/*", "tests/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
 [tool.pytest.ini_options]
@@ -69,12 +70,11 @@ layers = [
     "extras.datasets",
     "io",
     "pipeline",
-    "config",
-    "versioning"
+    "config"
 ]
 ignore_imports = [
     "kedro.runner.parallel_runner -> kedro.framework.project",
-    "kedro.runner.parallel_runner -> kedro.framework.session.session"
+    "kedro.framework.hooks.specs -> kedro.framework.context"
 ]
 
 [[tool.importlinter.contracts]]
@@ -112,5 +112,5 @@ forbidden_modules = [
 ]
 ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
-    "kedro.framework.hooks.specs -> kedro.config"
+    "kedro.framework.session.session -> kedro.config"
 ]

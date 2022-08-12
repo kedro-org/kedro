@@ -20,17 +20,21 @@ import sys
 from distutils.dir_util import copy_tree
 from inspect import getmembers, isclass, isfunction
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from click import secho, style
-from recommonmark.transform import AutoStructify
+from docutils import nodes
+from sphinx.application import Sphinx
+from sphinxcontrib.mermaid import mermaid
 
 from kedro import __version__ as release
+
+MERMAID_JS_URL = "https://unpkg.com/mermaid/dist/mermaid.min.js"
 
 # -- Project information -----------------------------------------------------
 
 project = "Kedro"
-author = "QuantumBlack"
+author = "Kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -56,8 +60,9 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "nbsphinx",
-    "recommonmark",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
+    "myst_parser",
 ]
 
 # enable autosummary plugin (table of contents for modules/classes/class
@@ -95,6 +100,7 @@ exclude_patterns = [
     "kedro_docs_style_guide.md",
 ]
 
+
 type_targets = {
     "py:class": (
         "object",
@@ -117,13 +123,11 @@ type_targets = {
         "kedro.io.core.DataSetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
-        "kedro.io.transformers.AbstractTransformer",
-        "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
-        "kedro.io.partitioned_data_set.PartitionedDataSet",
+        "kedro.io.memory_dataset.MemoryDataSet",
+        "kedro.io.partitioned_dataset.PartitionedDataSet",
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.runner.parallel_runner._SharedMemoryDataSet",
-        "kedro.versioning.journal.Journal",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",
@@ -132,10 +136,13 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "Exception",
-        "CONF_ROOT",
+        "CONF_SOURCE",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
+        "pluggy._manager.PluginManager",
+        "_DI",
+        "_DO",
     ),
     "py:data": (
         "typing.Any",
@@ -159,7 +166,6 @@ type_targets = {
         "ConfirmNotUniqueError",
     ),
 }
-
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
 nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
 
@@ -191,6 +197,7 @@ html_show_copyright = False
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [
+    "http://127.0.0.1:8787/status",  # Dask's diagnostics dashboard
     "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
     "https://console.aws.amazon.com/batch/home#/jobs",
@@ -205,6 +212,8 @@ linkcheck_ignore = [
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
+    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving",  # Until 0.18.4
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -213,7 +222,7 @@ linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/quantumblacklabs/kedro/tree/main/docs/source",
+    "github_url": "https://github.com/kedro-org/kedro/tree/main/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -258,9 +267,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, "Kedro.tex", "Kedro Documentation", "QuantumBlack", "manual")
-]
+latex_documents = [(master_doc, "Kedro.tex", "Kedro Documentation", "Kedro", "manual")]
 
 # -- Options for manual page output ------------------------------------------
 
@@ -280,7 +287,7 @@ texinfo_documents = [
         "Kedro Documentation",
         author,
         "Kedro",
-        "Kedro is a Data Science framework for QuantumBlack-led projects.",
+        "Kedro is a Python framework for creating reproducible, maintainable and modular data science code.",
         "Data-Science",
     )
 ]
@@ -301,7 +308,7 @@ nbsphinx_epilog = """
 .. note::
 
      Found a bug, or didn't find what you were looking for? 🙏 `Please file a
-     ticket <https://github.com/quantumblacklabs/kedro/issues/new/choose>`_
+     ticket <https://github.com/kedro-org/kedro/issues/new/choose>`_
 """
 
 # -- NBconvert kedro config -------------------------------------------------
@@ -315,8 +322,6 @@ KEDRO_MODULES = [
     "kedro.config",
     "kedro.extras.datasets",
     "kedro.extras.logging",
-    "kedro.extras.decorators",
-    "kedro.extras.transformers",
 ]
 
 
@@ -379,7 +384,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
             # first do plural only for classes
             replacements += [
                 (
-                    fr"``{obj}``s",
+                    rf"``{obj}``s",
                     f":{what}:`~{module}.{obj}`\\\\s",
                     obj,
                 )
@@ -388,8 +393,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # singular
         replacements += [
-            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj)
-            for obj in objects
+            (rf"``{obj}``", f":{what}:`~{module}.{obj}`", obj) for obj in objects
         ]
 
         # Look for recognised class names/function names which are NOT
@@ -398,14 +402,13 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             suggestions += [
-                (fr"(?<!\w|`){obj}s(?!\w|`{{2}})", f"``{obj}``s", obj)
+                (rf"(?<!\w|`){obj}s(?!\w|`{{2}})", f"``{obj}``s", obj)
                 for obj in objects
             ]
 
         # then singular
         suggestions += [
-            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj)
-            for obj in objects
+            (rf"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj) for obj in objects
         ]
 
     return replacements, suggestions
@@ -427,7 +430,7 @@ def log_suggestions(lines: List[str], name: str):
             continue
 
         for existing, replacement, obj in suggestions:
-            new = re.sub(existing, fr"{replacement}", lines[i])
+            new = re.sub(existing, rf"{replacement}", lines[i])
             if new == lines[i]:
                 continue
             if ":rtype:" in lines[i] or ":type " in lines[i]:
@@ -460,7 +463,7 @@ def autolink_classes_and_methods(lines):
             continue
 
         for existing, replacement, obj in replacements:
-            lines[i] = re.sub(existing, fr"{replacement}", lines[i])
+            lines[i] = re.sub(existing, rf"{replacement}", lines[i])
 
 
 def autodoc_process_docstring(app, what, name, obj, options, lines):
@@ -488,8 +491,8 @@ def _prepare_build_dir(app, config):
     build_root = Path(app.srcdir)
     build_out = Path(app.outdir)
     copy_tree(str(here / "source"), str(build_root))
-    copy_tree(str(build_root / "15_api_docs"), str(build_root))
-    shutil.rmtree(str(build_root / "15_api_docs"))
+    copy_tree(str(build_root / "api_docs"), str(build_root))
+    shutil.rmtree(str(build_root / "api_docs"))
     shutil.rmtree(str(build_out), ignore_errors=True)
     copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
     shutil.rmtree(str(build_root / "css"))
@@ -520,6 +523,29 @@ def _add_jinja_filters(app):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
+def remove_unused_mermaid_script_file(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: Dict,
+    doctree: Optional[nodes.document],
+) -> None:
+    # The `doctree` arg is `None` when not created from a reST document.
+    if not doctree:
+        return
+
+    # Remove the Mermaid JavaScript from pages without Mermaid diagrams.
+    if not doctree.next_node(mermaid):
+        # Create a copy of `context["script_files"]`; modifying the list
+        # in place affects all pages, because they all use the same ref.
+        context["script_files"] = [
+            x for x in context["script_files"] if x != MERMAID_JS_URL
+        ]
+
+    # Remove "None" entries added when `mermaid_version` is set to `""`.
+    context["script_files"] = [x for x in context["script_files"] if x != "None"]
+
+
 def setup(app):
     app.connect("config-inited", _prepare_build_dir)
     app.connect("builder-inited", _add_jinja_filters)
@@ -528,9 +554,8 @@ def setup(app):
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
     app.add_css_file("css/theme-overrides.css")
-    # enable rendering RST tables in Markdown
-    app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
-    app.add_transform(AutoStructify)
+    app.add_js_file(MERMAID_JS_URL)
+    app.connect("html-page-context", remove_unused_mermaid_script_file)
 
 
 # (regex, restructuredText link replacement, object) list
@@ -554,3 +579,9 @@ except Exception as e:
             fg="red",
         )
     )
+
+user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
+
+myst_heading_anchors = 5
+
+mermaid_version = ""  # We add a minified Mermaid script file ourselves.

@@ -4,7 +4,8 @@ files to an underlying filesystem (e.g. local, S3, GCS)."""
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, NoReturn, Union
+from warnings import warn
 
 import fsspec
 import matplotlib.pyplot as plt
@@ -18,7 +19,11 @@ from kedro.io.core import (
 )
 
 
-class MatplotlibWriter(AbstractVersionedDataSet):
+class MatplotlibWriter(
+    AbstractVersionedDataSet[
+        Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
+    ]
+):
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
@@ -29,12 +34,24 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
         >>> # Saving single plot
+        >>> fig = plt.figure()
         >>> plt.plot([1, 2, 3], [4, 5, 6])
         >>> single_plot_writer = MatplotlibWriter(
         >>>     filepath="matplot_lib_single_plot.png"
         >>> )
         >>> plt.close()
-        >>> single_plot_writer.save(plt)
+        >>> single_plot_writer.save(fig)
+        >>>
+        >>> # MatplotlibWriter can output other formats as well, such as PDF files.
+        >>> # For this, we need to specify the format:
+        >>> fig = plt.figure()
+        >>> plt.plot([1, 2, 3], [4, 5, 6])
+        >>> single_plot_writer = MatplotlibWriter(
+        >>>     filepath="matplot_lib_single_plot.pdf",
+        >>>     save_args={"format": "pdf"},
+        >>> )
+        >>> plt.close()
+        >>> single_plot_writer.save(fig)
         >>>
         >>> # Saving dictionary of plots
         >>> plots_dict = dict()
@@ -123,6 +140,13 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        if overwrite and version is not None:
+            warn(
+                "Setting 'overwrite=True' is ineffective if versioning "
+                "is enabled, since the versioned path must not already "
+                "exist; overriding flag with 'overwrite=False' instead."
+            )
+            overwrite = False
         self._overwrite = overwrite
 
     def _describe(self) -> Dict[str, Any]:
@@ -133,20 +157,16 @@ class MatplotlibWriter(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> None:
-        raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
+    def _load(self) -> NoReturn:
+        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(
         self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]
     ) -> None:
         save_path = self._get_save_path()
 
-        if (
-            isinstance(data, (list, dict))
-            and self._overwrite
-            and self._fs.exists(self._filepath)
-        ):
-            self._fs.rm(self._filepath, recursive=True)
+        if isinstance(data, (list, dict)) and self._overwrite and self._exists():
+            self._fs.rm(get_filepath_str(save_path, self._protocol), recursive=True)
 
         if isinstance(data, list):
             for index, plot in enumerate(data):

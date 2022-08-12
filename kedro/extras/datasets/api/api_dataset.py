@@ -1,7 +1,7 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
-It uses the python requests library: https://requests.readthedocs.io/en/master/
+It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, Iterable, List, NoReturn, Union
 
 import requests
 from requests.auth import AuthBase
@@ -9,9 +9,9 @@ from requests.auth import AuthBase
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class APIDataSet(AbstractDataSet):
+class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
-    It uses the python requests library: https://requests.readthedocs.io/en/master/
+    It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
     Example:
     ::
@@ -41,9 +41,10 @@ class APIDataSet(AbstractDataSet):
         data: Any = None,
         params: Dict[str, Any] = None,
         headers: Dict[str, Any] = None,
-        auth: Union[Tuple[str], AuthBase] = None,
+        auth: Union[Iterable[str], AuthBase] = None,
         json: Union[List, Dict[str, Any]] = None,
         timeout: int = 60,
+        credentials: Union[Iterable[str], AuthBase] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -51,21 +52,35 @@ class APIDataSet(AbstractDataSet):
             url: The API URL endpoint.
             method: The Method of the request, GET, POST, PUT, DELETE, HEAD, etc...
             data: The request payload, used for POST, PUT, etc requests
-                https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests
+                https://requests.readthedocs.io/en/latest/user/quickstart/#more-complicated-post-requests
             params: The url parameters of the API.
-                https://requests.readthedocs.io/en/master/user/quickstart/#passing-parameters-in-urls
+                https://requests.readthedocs.io/en/latest/user/quickstart/#passing-parameters-in-urls
             headers: The HTTP headers.
-                https://requests.readthedocs.io/en/master/user/quickstart/#custom-headers
+                https://requests.readthedocs.io/en/latest/user/quickstart/#custom-headers
             auth: Anything ``requests`` accepts. Normally it's either ``('login', 'password')``,
-                or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases.
+                or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases. Any
+                iterable will be cast to a tuple.
             json: The request payload, used for POST, PUT, etc requests, passed in
                 to the json kwarg in the requests object.
-                https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests
+                https://requests.readthedocs.io/en/latest/user/quickstart/#more-complicated-post-requests
             timeout: The wait time in seconds for a response, defaults to 1 minute.
-                https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
+                https://requests.readthedocs.io/en/latest/user/quickstart/#timeouts
+            credentials: same as ``auth``. Allows specifying ``auth`` secrets in
+                credentials.yml.
 
+        Raises:
+            ValueError: if both ``credentials`` and ``auth`` are specified.
         """
         super().__init__()
+
+        if credentials is not None and auth is not None:
+            raise ValueError("Cannot specify both auth and credentials.")
+
+        auth = credentials or auth
+
+        if isinstance(auth, Iterable):
+            auth = tuple(auth)
+
         self._request_args: Dict[str, Any] = {
             "url": url,
             "method": method,
@@ -94,7 +109,7 @@ class APIDataSet(AbstractDataSet):
     def _load(self) -> requests.Response:
         return self._execute_request()
 
-    def _save(self, data: Any) -> None:
+    def _save(self, data: None) -> NoReturn:
         raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
 
     def _exists(self) -> bool:

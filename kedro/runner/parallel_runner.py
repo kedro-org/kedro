@@ -1,7 +1,6 @@
 """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
-import logging.config
 import multiprocessing
 import os
 import pickle
@@ -14,6 +13,14 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
 
+from pluggy import PluginManager
+
+from kedro.framework.hooks.manager import (
+    _create_hook_manager,
+    _register_hooks,
+    _register_hooks_setuptools,
+)
+from kedro.framework.project import settings
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -24,7 +31,7 @@ _MAX_WINDOWS_WORKERS = 61
 
 
 class _SharedMemoryDataSet:
-    """``_SharedMemoryDataSet`` a wrapper class for a shared MemoryDataSet in SyncManager.
+    """``_SharedMemoryDataSet`` is a wrapper class for a shared MemoryDataSet in SyncManager.
     It is not inherited from AbstractDataSet class.
     """
 
@@ -39,7 +46,7 @@ class _SharedMemoryDataSet:
         self.shared_memory_dataset = manager.MemoryDataSet()  # type: ignore
 
     def __getattr__(self, name):
-        # This if condition prevents recursive call when deserializing
+        # This if condition prevents recursive call when deserialising
         if name == "__setstate__":
             raise AttributeError()
         return getattr(self.shared_memory_dataset, name)
@@ -52,11 +59,11 @@ class _SharedMemoryDataSet:
             # Checks if the error is due to serialisation or not
             try:
                 pickle.dumps(data)
-            except Exception as exc:  # SKIP_IF_NO_SPARK
+            except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
                 raise DataSetError(
-                    f"{str(data.__class__)} cannot be serialized. ParallelRunner "
-                    "implicit memory datasets can only be used with serializable data"
-                ) from exc
+                    f"{str(data.__class__)} cannot be serialised. ParallelRunner "
+                    "implicit memory datasets can only be used with serialisable data"
+                ) from serialisation_exc
             else:
                 raise exc
 
@@ -72,47 +79,48 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
-def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
+def _bootstrap_subprocess(package_name: str, logging_config: Dict[str, Any]):
     # pylint: disable=import-outside-toplevel,cyclic-import
-    from kedro.framework.project import configure_project
+    from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
-    logging.config.dictConfig(conf_logging)
+    configure_logging(logging_config)
 
 
 def _run_node_synchronization(  # pylint: disable=too-many-arguments
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,
-    run_id: str = None,
+    session_id: str = None,
     package_name: str = None,
-    conf_logging: Dict[str, Any] = None,
+    logging_config: Dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
-    `KedroSession` instance is activated in every subprocess because of Windows
-    (and latest OSX with Python 3.8) limitation.
-    Windows has no "fork", so every subprocess is a brand new process
-    created via "spawn", hence the need to a) setup the logging, b) register
-    the hooks, and c) activate `KedroSession` in every subprocess.
+
+    A ``PluginManager`` instance is created in each subprocess because the
+    ``PluginManager`` can't be serialised.
 
     Args:
         node: The ``Node`` to run.
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
-        run_id: The id of the pipeline run.
+        session_id: The session id of the pipeline run.
         package_name: The name of the project Python package.
-        conf_logging: A dictionary containing logging configuration.
+        logging_config: A dictionary containing logging configuration.
 
     Returns:
         The node argument.
 
     """
-    if multiprocessing.get_start_method() == "spawn" and package_name:  # type: ignore
-        conf_logging = conf_logging or {}
-        _bootstrap_subprocess(package_name, conf_logging)
+    if multiprocessing.get_start_method() == "spawn" and package_name:
+        _bootstrap_subprocess(package_name, logging_config)  # type: ignore
 
-    return run_node(node, catalog, is_async, run_id)
+    hook_manager = _create_hook_manager()
+    _register_hooks(hook_manager, settings.HOOKS)
+    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+    return run_node(node, catalog, hook_manager, is_async, session_id)
 
 
 class ParallelRunner(AbstractRunner):
@@ -159,80 +167,80 @@ class ParallelRunner(AbstractRunner):
     def create_default_data_set(  # type: ignore
         self, ds_name: str
     ) -> _SharedMemoryDataSet:
-        """Factory method for creating the default data set for the runner.
+        """Factory method for creating the default dataset for the runner.
 
         Args:
-            ds_name: Name of the missing data set
+            ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of an implementation of _SharedMemoryDataSet to be used
-            for all unregistered data sets.
+            An instance of ``_SharedMemoryDataSet`` to be used for all
+            unregistered datasets.
 
         """
         return _SharedMemoryDataSet(self._manager)
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
-        """Ensure all tasks are serializable."""
-        unserializable = []
+        """Ensure all tasks are serialisable."""
+        unserialisable = []
         for node in nodes:
             try:
                 ForkingPickler.dumps(node)
             except (AttributeError, PicklingError):
-                unserializable.append(node)
+                unserialisable.append(node)
 
-        if unserializable:
+        if unserialisable:
             raise AttributeError(
-                f"The following nodes cannot be serialized: {sorted(unserializable)}\n"
+                f"The following nodes cannot be serialised: {sorted(unserialisable)}\n"
                 f"In order to utilize multiprocessing you need to make sure all nodes "
-                f"are serializable, i.e. nodes should not include lambda "
+                f"are serialisable, i.e. nodes should not include lambda "
                 f"functions, nested functions, closures, etc.\nIf you "
-                f"are using custom decorators ensure they are correctly using "
+                f"are using custom decorators ensure they are correctly decorated using "
                 f"functools.wraps()."
             )
 
     @classmethod
     def _validate_catalog(cls, catalog: DataCatalog, pipeline: Pipeline):
-        """Ensure that all data sets are serializable and that we do not have
+        """Ensure that all data sets are serialisable and that we do not have
         any non proxied memory data sets being used as outputs as their content
         will not be synchronized across threads.
         """
 
         data_sets = catalog._data_sets  # pylint: disable=protected-access
 
-        unserializable = []
+        unserialisable = []
         for name, data_set in data_sets.items():
             if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
-                unserializable.append(name)
+                unserialisable.append(name)
                 continue
             try:
                 ForkingPickler.dumps(data_set)
             except (AttributeError, PicklingError):
-                unserializable.append(name)
+                unserialisable.append(name)
 
-        if unserializable:
+        if unserialisable:
             raise AttributeError(
                 f"The following data sets cannot be used with multiprocessing: "
-                f"{sorted(unserializable)}\nIn order to utilize multiprocessing you "
-                f"need to make sure all data sets are serializable, i.e. data sets "
+                f"{sorted(unserialisable)}\nIn order to utilize multiprocessing you "
+                f"need to make sure all data sets are serialisable, i.e. data sets "
                 f"should not make use of lambda functions, nested functions, closures "
                 f"etc.\nIf you are using custom decorators ensure they are correctly "
-                f"using functools.wraps()."
+                f"decorated using functools.wraps()."
             )
 
-        memory_data_sets = []
+        memory_datasets = []
         for name, data_set in data_sets.items():
             if (
                 name in pipeline.all_outputs()
                 and isinstance(data_set, MemoryDataSet)
                 and not isinstance(data_set, BaseProxy)
             ):
-                memory_data_sets.append(name)
+                memory_datasets.append(name)
 
-        if memory_data_sets:
+        if memory_datasets:
             raise AttributeError(
                 f"The following data sets are memory data sets: "
-                f"{sorted(memory_data_sets)}\n"
+                f"{sorted(memory_datasets)}\n"
                 f"ParallelRunner does not support output to externally created "
                 f"MemoryDataSets"
             )
@@ -252,14 +260,19 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
-            run_id: The id of the run.
+            hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
 
         Raises:
             AttributeError: When the provided pipeline is not suitable for
@@ -270,7 +283,6 @@ class ParallelRunner(AbstractRunner):
 
         """
         # pylint: disable=import-outside-toplevel,cyclic-import
-        from kedro.framework.session.session import get_current_session
 
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
@@ -284,11 +296,7 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
-        from kedro.framework.project import PACKAGE_NAME
-
-        session = get_current_session(silent=True)
-        # pylint: disable=protected-access
-        conf_logging = session._get_logging_config() if session else None
+        from kedro.framework.project import LOGGING, PACKAGE_NAME
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:
@@ -301,9 +309,9 @@ class ParallelRunner(AbstractRunner):
                             node,
                             catalog,
                             self._is_async,
-                            run_id,
+                            session_id,
                             package_name=PACKAGE_NAME,
-                            conf_logging=conf_logging,
+                            logging_config=LOGGING,  # type: ignore
                         )
                     )
                 if not futures:
@@ -331,8 +339,9 @@ class ParallelRunner(AbstractRunner):
                         raise
                     done_nodes.add(node)
 
-                    # decrement load counts and release any data sets we've finished with
-                    # this is particularly important for the shared datasets we create above
+                    # Decrement load counts, and release any datasets we
+                    # have finished with. This is particularly important
+                    # for the shared, default datasets we created above.
                     for data_set in node.inputs:
                         load_counts[data_set] -= 1
                         if (

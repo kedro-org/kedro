@@ -1,5 +1,6 @@
 """Utilities for use with click."""
 import difflib
+import logging
 import re
 import shlex
 import shutil
@@ -16,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
-import pkg_resources
+import importlib_metadata
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -31,7 +32,10 @@ ENTRY_POINT_GROUPS = {
     "line_magic": "kedro.line_magic",
     "hooks": "kedro.hooks",
     "cli_hooks": "kedro.cli_hooks",
+    "starters": "kedro.starters",
 }
+
+logger = logging.getLogger(__name__)
 
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
@@ -210,7 +214,7 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     """
     reqs_path = Path(reqs_path).absolute()
     if not reqs_path.is_file():
-        raise KedroCliError(f"Given path `{reqs_path}` is not a regular file.")
+        raise KedroCliError(f"Given path '{reqs_path}' is not a regular file.")
 
     pattern = re.compile(package_name + r"([^\w]|$)")
     with reqs_path.open("r", encoding="utf-8") as reqs_file:
@@ -219,7 +223,7 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
             if pattern.search(req_line):
                 return req_line
 
-    raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
+    raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
 def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
@@ -297,23 +301,6 @@ def env_option(func_=None, **kwargs):
     return opt(func_) if func_ else opt
 
 
-def ipython_message(all_kernels=True):
-    """Show a message saying how we have configured the IPython env."""
-    ipy_vars = ["startup_error", "context"]
-    click.secho("-" * 79, fg="cyan")
-    click.secho("Starting a Kedro session with the following variables in scope")
-    click.secho(", ".join(ipy_vars), fg="green")
-    line_magic = click.style("%reload_kedro", fg="green")
-    click.secho(f"Use the line magic {line_magic} to refresh them")
-    click.secho("or to see the error message if they are undefined")
-
-    if not all_kernels:
-        click.secho("The choice of kernels is limited to the default one.", fg="yellow")
-        click.secho("(restart with --all-kernels to get access to others)", fg="yellow")
-
-    click.secho("-" * 79, fg="cyan")
-
-
 @contextmanager
 def _filter_deprecation_warnings():
     """Temporarily suppress all DeprecationWarnings."""
@@ -327,9 +314,30 @@ def _check_module_importable(module_name: str) -> None:
         import_module(module_name)
     except ImportError as exc:
         raise KedroCliError(
-            f"Module `{module_name}` not found. Make sure to install required project "
-            f"dependencies by running the `kedro install` command first."
+            f"Module '{module_name}' not found. Make sure to install required project "
+            f"dependencies by running the 'pip install -r src/requirements.txt' command first."
         ) from exc
+
+
+def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
+    """Get all kedro related entry points"""
+    return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
+
+
+def _safe_load_entry_point(  # pylint: disable=inconsistent-return-statements
+    entry_point,
+):
+    """Load entrypoint safely, if fails it will just skip the entrypoint."""
+    try:
+        return entry_point.load()
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning(
+            "Failed to load %s commands from %s. Full exception: %s",
+            entry_point.module,
+            entry_point,
+            exc,
+        )
+        return
 
 
 def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
@@ -345,29 +353,13 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+
     entry_point_commands = []
-    for entry_point in entry_points:
-        try:
-            entry_point_commands.append(entry_point.load())
-        except Exception as exc:
-            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
+    for entry_point in _get_entry_points(name):
+        loaded_entry_point = _safe_load_entry_point(entry_point)
+        if loaded_entry_point:
+            entry_point_commands.append(loaded_entry_point)
     return entry_point_commands
-
-
-def _add_src_to_path(source_dir: Path, project_path: Path) -> None:  # pragma: no cover
-    # for backwards compatibility with ipython & deployment scripts
-    # pylint: disable=import-outside-toplevel
-    from kedro.framework.startup import _add_src_to_path as real_add_src_to_path
-
-    msg = (
-        "kedro.framework.utils._add_src_to_path is deprecated. "
-        "Please import from new location kedro.framework.startup "
-        "or use `bootstrap_project()` instead for setting up "
-        "the Kedro project."
-    )
-    warnings.warn(msg, FutureWarning)
-    real_add_src_to_path(source_dir, project_path)
 
 
 def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
@@ -400,8 +392,8 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:
             raise KedroCliError(
-                f"Expected the form of `load_version` to be "
-                f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                f"Expected the form of 'load_version' to be "
+                f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
                 f"found {load_version} instead"
             )
         load_versions_dict[load_version_list[0]] = load_version_list[1]
@@ -471,45 +463,6 @@ def _update_value_nested_dict(
         nested_dict.get(key, {}), value, walking_path
     )
     return nested_dict
-
-
-def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
-    """Get path to project level requirements.in, creating it if required.
-
-    Args:
-        source_path: Path to the project `src` folder.
-        create_empty: Whether an empty requirements.in file should be created if
-            requirements.in does not exist and there is also no requirements.txt to
-            copy requirements from.
-
-    Returns:
-        Path to requirements.in.
-
-    Raises:
-        FileNotFoundError: If neither requirements.in nor requirements.txt is found.
-
-    """
-    requirements_in = source_path / "requirements.in"
-    if requirements_in.is_file():
-        return requirements_in
-
-    requirements_txt = source_path / "requirements.txt"
-    if requirements_txt.is_file():
-        click.secho(
-            "No requirements.in found. Copying contents from requirements.txt..."
-        )
-        shutil.copyfile(str(requirements_txt), str(requirements_in))
-        return requirements_in
-
-    if create_empty:
-        click.secho("Creating empty requirements.in...")
-        requirements_in.touch()
-        return requirements_in
-
-    raise FileNotFoundError(
-        "No project requirements.in or requirements.txt found in `/src`. "
-        "Please create either and try again."
-    )
 
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:

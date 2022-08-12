@@ -1,22 +1,27 @@
 """Dummy plugin with simple hook implementations."""
 import logging
+from pathlib import Path
 
+from kedro.framework.cli.starters import KedroStarterSpec
 from kedro.framework.hooks import hook_impl
-from kedro.pipeline import Pipeline, node
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class MyPluginHook:
     @hook_impl
     def after_catalog_created(
         self, catalog
-    ):  # pylint: disable=unused-argument,no-self-use
-        logging.info("Reached after_catalog_created hook")
+    ):  # pylint: disable=unused-argument, no-self-use
+        logger.info("Reached after_catalog_created hook")
 
-    @hook_impl
-    def register_pipelines(self):  # pylint: disable=no-self-use
-        return {
-            "from_plugin": Pipeline([node(lambda: "sth", inputs=None, outputs="x")])
-        }
 
+starters = [
+    KedroStarterSpec(
+        "test_plugin_starter",
+        template_path=str((Path(__file__).parents[1] / "test_starter").resolve()),
+    )
+]
 
 hooks = MyPluginHook()

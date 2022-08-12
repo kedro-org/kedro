@@ -49,6 +49,18 @@ class FakeEntryPoint:
                     f"Before command `{' '.join(command_args)}` run for project {project_metadata}"
                 )
 
+            @cli_hook_impl
+            def after_command_run(
+                self,
+                project_metadata: ProjectMetadata,
+                command_args: List[str],
+                exit_code: int,
+            ):
+                print(
+                    f"After command `{' '.join(command_args)}` run for project {project_metadata} "
+                    f"(exit: {exit_code})"
+                )
+
         return FakeCLIHooks()
 
 
@@ -61,7 +73,7 @@ def fake_plugin_distribution(mocker):
         version="0.1",
     )
     mocker.patch(
-        "pluggy.manager.importlib_metadata.distributions",
+        "pluggy._manager.importlib_metadata.distributions",
         return_value=[fake_distribution],
     )
     return fake_distribution
@@ -69,20 +81,20 @@ def fake_plugin_distribution(mocker):
 
 class TestKedroCLIHooks:
     @pytest.mark.parametrize(
-        "command",
-        ["-V", "info", "pipeline list", "run --pipeline=test"],
+        "command, exit_code",
+        [("-V", 0), ("info", 2), ("pipeline list", 2), ("starter", 0)],
     )
     def test_kedro_cli_should_invoke_cli_hooks_from_plugin(
         self,
         caplog,
         command,
+        exit_code,
         mocker,
         fake_metadata,
         fake_plugin_distribution,
+        entry_points,  # pylint: disable=unused-argument
     ):
-        # Workaround to ensure that the log messages are picked up by caplog.
-        # https://github.com/pytest-dev/pytest/issues/3697
-        logging.getLogger("kedro.framework.cli.hooks.manager").propagate = True
+        caplog.set_level(logging.DEBUG, logger="kedro")
 
         Module = namedtuple("Module", ["cli"])
         mocker.patch(
@@ -108,3 +120,9 @@ class TestKedroCLIHooks:
             f"Before command `{command}` run for project {fake_metadata}"
             in result.output
         )
+
+        # 'pipeline list' and 'info' aren't actually in the click structure and
+        # return exit code 2 ('invalid usage of some shell built-in command')
+        assert (
+            f"After command `{command}` run for project {fake_metadata} (exit: {exit_code})"
+        ) in result.output

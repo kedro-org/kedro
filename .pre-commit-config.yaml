@@ -29,7 +29,7 @@ repos:
             exclude: "^kedro/templates/|^features/steps/test_starter/"
 
     - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v0.720
+      rev: v0.961
       hooks:
           - id: mypy
             args: [--allow-redefinition, --ignore-missing-imports]
@@ -39,12 +39,21 @@ repos:
                   ^docs/|
                   ^features/steps/test_starter/
                 )
+            additional_dependencies:
+            - types-cachetools
+            - types-filelock
+            - types-PyYAML
+            - types-redis
+            - types-requests
+            - types-setuptools
+            - types-toml
+            - attrs
 
     - repo: https://github.com/asottile/blacken-docs
-      rev: v1.9.2
+      rev: v1.12.1
       hooks:
           - id: blacken-docs
-            additional_dependencies: [black==21.5b1]
+            additional_dependencies: [black~=22.0]
             entry: blacken-docs --skip-errors
 
     - repo: https://github.com/asottile/pyupgrade

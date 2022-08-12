@@ -29,14 +29,14 @@ NON_FILE_SYSTEM_TARGETS = [
 ]
 
 
-class GenericDataSet(AbstractVersionedDataSet):
+class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """`pandas.GenericDataSet` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
 
     Example using `YAML API
-    <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -176,11 +176,11 @@ class GenericDataSet(AbstractVersionedDataSet):
         # Fail fast if provided a known non-filesystem target
         if self._file_format in NON_FILE_SYSTEM_TARGETS:
             raise DataSetError(
-                f"Cannot create a dataset of file_format `{self._file_format}` as it "
+                f"Cannot create a dataset of file_format '{self._file_format}' as it "
                 f"does not support a filepath target/source."
             )
 
-    def _load(self) -> Any:
+    def _load(self) -> pd.DataFrame:
 
         self._ensure_file_system_target()
 
@@ -190,7 +190,7 @@ class GenericDataSet(AbstractVersionedDataSet):
             with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
                 return load_method(fs_file, **self._load_args)
         raise DataSetError(
-            f"Unable to retrieve `pandas.read_{self._file_format}` method, please ensure that your "
+            f"Unable to retrieve 'pandas.read_{self._file_format}' method, please ensure that your "
             "'file_format' parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/io.html"
         )
@@ -208,7 +208,7 @@ class GenericDataSet(AbstractVersionedDataSet):
                 self._invalidate_cache()
         else:
             raise DataSetError(
-                f"Unable to retrieve `pandas.DataFrame.to_{self._file_format}` method, please "
+                f"Unable to retrieve 'pandas.DataFrame.to_{self._file_format}' method, please "
                 "ensure that your 'file_format' parameter has been defined correctly as "
                 "per the Pandas API "
                 "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"

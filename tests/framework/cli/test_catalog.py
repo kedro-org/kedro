@@ -17,13 +17,6 @@ def fake_load_context(mocker):
     )
 
 
-@pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
 PIPELINE_NAME = "pipeline"
 
 
@@ -73,7 +66,7 @@ class TestCatalogListCommand:
 
         assert result.exit_code
         expected_output = (
-            "Error: `fake` pipeline not found! Existing pipelines: pipeline, second"
+            "Error: 'fake' pipeline not found! Existing pipelines: pipeline, second"
         )
         assert expected_output in result.output
 
@@ -158,7 +151,7 @@ def identity(data):
     return data  # pragma: no cover
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestCatalogCreateCommand:
     PIPELINE_NAME = "de"
 
@@ -174,7 +167,7 @@ class TestCatalogCreateCommand:
     def test_pipeline_argument_is_required(self, fake_project_cli):
         result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
         assert result.exit_code
-        expected_output = "Error: Missing option '--pipeline'."
+        expected_output = "Error: Missing option '--pipeline' / '-p'."
         assert expected_output in result.output
 
     @pytest.mark.usefixtures("fake_load_context")
@@ -189,7 +182,7 @@ class TestCatalogCreateCommand:
 
         existing_pipelines = ", ".join(sorted(mock_pipelines.keys()))
         expected_output = (
-            f"Error: `fake` pipeline not found! Existing "
+            f"Error: 'fake' pipeline not found! Existing "
             f"pipelines: {existing_pipelines}\n"
         )
         assert expected_output in result.output

@@ -179,7 +179,7 @@ class TestGeoJSONDataSetVersioned:
         version."""
         versioned_geojson_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for GeoJSONDataSet\(.+\) must not "
+            r"Save path \'.+\' for GeoJSONDataSet\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -197,8 +197,8 @@ class TestGeoJSONDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for GeoJSONDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for GeoJSONDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_geojson_data_set.save(dummy_dataframe)

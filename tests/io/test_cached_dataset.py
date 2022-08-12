@@ -92,7 +92,7 @@ class TestCachedDataset:
     def test_bad_argument(self):
         with pytest.raises(
             ValueError,
-            match=r"The argument type of `dataset` "
+            match=r"The argument type of 'dataset' "
             r"should be either a dict/YAML representation "
             r"of the dataset, or the actual dataset object",
         ):
@@ -108,7 +108,7 @@ class TestCachedDataset:
         with pytest.raises(
             DataSetError,
             match=r"Cached datasets should specify that they are "
-            r"versioned in the `CachedDataSet`, not in the "
+            r"versioned in the 'CachedDataSet', not in the "
             r"wrapped dataset",
         ):
             _ = DataCatalog.from_config(config, load_versions={"test_ds": "42"})
@@ -137,6 +137,6 @@ class TestCachedDataset:
             _ = cached_ds.load()
 
     def test_copy_mode(self, mocker):
-        mocked_memory_data_set = mocker.patch("kedro.io.cached_dataset.MemoryDataSet")
+        mocked_memory_dataset = mocker.patch("kedro.io.cached_dataset.MemoryDataSet")
         CachedDataSet(MemoryDataSet(), copy_mode="assign")
-        mocked_memory_data_set.assert_called_once_with(copy_mode="assign")
+        mocked_memory_dataset.assert_called_once_with(copy_mode="assign")

@@ -3,53 +3,11 @@ from typing import Any, Dict
 
 import pytest
 
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.decorators import log_time
 from kedro.runner import ThreadRunner
-
-
-def source():
-    return "stuff"
-
-
-def identity(arg):
-    return arg
-
-
-def sink(arg):  # pylint: disable=unused-argument
-    pass
-
-
-def fan_in(*args):
-    return args
-
-
-def exception_fn(arg):
-    raise Exception("test exception")
-
-
-def return_none(arg):
-    arg = None
-    return arg
-
-
-@pytest.fixture
-def catalog():
-    return DataCatalog()
-
-
-@pytest.fixture
-def fan_out_fan_in():
-    return Pipeline(
-        [
-            node(identity, "A", "B"),
-            node(identity, "B", "C"),
-            node(identity, "B", "D"),
-            node(identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
+from tests.runner.conftest import exception_fn, identity, return_none, sink, source
 
 
 class TestValidThreadRunner:
@@ -63,7 +21,15 @@ class TestValidThreadRunner:
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
-    def test_memory_data_set_input(self, fan_out_fan_in):
+    def test_thread_run_with_plugin_manager(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = ThreadRunner().run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
+        assert "Z" in result
+        assert result["Z"] == (42, 42, 42)
+
+    def test_memory_dataset_input(self, fan_out_fan_in):
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
@@ -115,9 +81,9 @@ class TestIsAsync:
     def test_thread_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
         pattern = (
-            "`ThreadRunner` doesn't support loading and saving the "
+            "'ThreadRunner' doesn't support loading and saving the "
             "node inputs and outputs asynchronously with threads. "
-            "Setting `is_async` to False."
+            "Setting 'is_async' to False."
         )
         with pytest.warns(UserWarning, match=pattern):
             result = ThreadRunner(is_async=True).run(fan_out_fan_in, catalog)
@@ -135,43 +101,9 @@ class TestInvalidThreadRunner:
     def test_node_returning_none(self):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        pattern = "Saving `None` to a `DataSet` is not allowed"
+        pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             ThreadRunner().run(pipeline, catalog)
-
-
-@log_time
-def decorated_identity(*args, **kwargs):
-    return identity(*args, **kwargs)
-
-
-@pytest.fixture
-def decorated_fan_out_fan_in():
-    return Pipeline(
-        [
-            node(decorated_identity, "A", "B"),
-            node(decorated_identity, "B", "C"),
-            node(decorated_identity, "B", "D"),
-            node(decorated_identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
-
-
-class TestThreadRunnerDecorator:
-    def test_decorate_pipeline(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ThreadRunner().run(fan_out_fan_in.decorate(log_time), catalog)
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
-
-    def test_decorated_nodes(self, decorated_fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ThreadRunner().run(decorated_fan_out_fan_in, catalog)
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
 
 
 class LoggingDataSet(AbstractDataSet):

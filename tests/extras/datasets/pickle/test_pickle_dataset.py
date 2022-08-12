@@ -128,9 +128,9 @@ class TestPickleDataSet:
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
-    def test_unserializable_data(self, pickle_data_set, dummy_dataframe, mocker):
+    def test_unserialisable_data(self, pickle_data_set, dummy_dataframe, mocker):
         mocker.patch("pickle.dump", side_effect=pickle.PickleError)
-        pattern = r".+ was not serialized due to:.*"
+        pattern = r".+ was not serialised due to:.*"
 
         with pytest.raises(DataSetError, match=pattern):
             pickle_data_set.save(dummy_dataframe)
@@ -138,7 +138,7 @@ class TestPickleDataSet:
     def test_invalid_backend(self, mocker):
         pattern = (
             r"Selected backend 'invalid' should satisfy the pickle interface. "
-            r"Missing one of `load` and `dump` on the backend."
+            r"Missing one of 'load' and 'dump' on the backend."
         )
         mocker.patch(
             "kedro.extras.datasets.pickle.pickle_dataset.importlib.import_module",
@@ -158,6 +158,11 @@ class TestPickleDataSet:
         )
         with pytest.raises(ImportError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="fake.backend.does.not.exist")
+
+    def test_copy(self, pickle_data_set):
+        pickle_data_set_copy = pickle_data_set._copy()
+        assert pickle_data_set_copy is not pickle_data_set
+        assert pickle_data_set_copy._describe() == pickle_data_set._describe()
 
 
 class TestPickleDataSetVersioned:
@@ -206,7 +211,7 @@ class TestPickleDataSetVersioned:
         corresponding Pickle file for a given save version already exists."""
         versioned_pickle_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for PickleDataSet\(.+\) must "
+            r"Save path \'.+\' for PickleDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -224,8 +229,8 @@ class TestPickleDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for PickleDataSet\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for PickleDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_pickle_data_set.save(dummy_dataframe)
@@ -257,3 +262,8 @@ class TestPickleDataSetVersioned:
         Path(pickle_data_set._filepath.as_posix()).unlink()
         versioned_pickle_data_set.save(dummy_dataframe)
         assert versioned_pickle_data_set.exists()
+
+    def test_copy(self, versioned_pickle_data_set):
+        pickle_data_set_copy = versioned_pickle_data_set._copy()
+        assert pickle_data_set_copy is not versioned_pickle_data_set
+        assert pickle_data_set_copy._describe() == versioned_pickle_data_set._describe()

@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path, PurePosixPath
 
 import holoviews as hv
@@ -33,6 +34,10 @@ def versioned_hv_writer(filepath_png, load_version, save_version):
     return HoloviewsWriter(filepath_png, version=Version(load_version, save_version))
 
 
+@pytest.mark.skipif(
+    sys.version_info.minor == 10,
+    reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
+)
 class TestHoloviewsWriter:
     def test_save_data(self, tmp_path, dummy_hv_object, hv_writer):
         """Test saving Holoviews object."""
@@ -63,7 +68,7 @@ class TestHoloviewsWriter:
         assert writer._fs_open_args_save == fs_args["open_args_save"]
 
     def test_load_fail(self, hv_writer):
-        pattern = r"Loading not supported for `HoloviewsWriter`"
+        pattern = r"Loading not supported for 'HoloviewsWriter'"
         with pytest.raises(DataSetError, match=pattern):
             hv_writer.load()
 
@@ -112,6 +117,10 @@ class TestHoloviewsWriter:
         assert isinstance(data_set._filepath, PurePosixPath)
 
 
+@pytest.mark.skipif(
+    sys.version_info.minor == 10,
+    reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
+)
 class TestHoloviewsWriterVersioned:
     def test_version_str_repr(self, hv_writer, versioned_hv_writer):
         """Test that version is in string representation of the class instance
@@ -133,7 +142,7 @@ class TestHoloviewsWriterVersioned:
         corresponding file for a given save version already exists."""
         versioned_hv_writer.save(dummy_hv_object)
         pattern = (
-            r"Save path \`.+\` for HoloviewsWriter\(.+\) must "
+            r"Save path \'.+\' for HoloviewsWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -151,8 +160,8 @@ class TestHoloviewsWriterVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for HoloviewsWriter\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for HoloviewsWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)

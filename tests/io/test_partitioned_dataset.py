@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from pathlib import Path
 
@@ -12,7 +13,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import DataSetError, PartitionedDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
-from kedro.io.partitioned_data_set import KEY_PROPAGATION_WARNING
+from kedro.io.partitioned_dataset import KEY_PROPAGATION_WARNING
 
 
 @pytest.fixture
@@ -257,17 +258,17 @@ class TestPartitionedDataSetLocal:
     @pytest.mark.parametrize(
         "dataset_config,error_pattern",
         [
-            ("UndefinedDatasetType", "Class `UndefinedDatasetType` not found"),
+            ("UndefinedDatasetType", "Class 'UndefinedDatasetType' not found"),
             (
                 "missing.module.UndefinedDatasetType",
-                r"Class `missing\.module\.UndefinedDatasetType` not found",
+                r"Class 'missing\.module\.UndefinedDatasetType' not found",
             ),
             (
                 FakeDataSet,
-                r"DataSet type `tests\.io\.test_partitioned_dataset\.FakeDataSet` "
-                r"is invalid\: all data set types must extend `AbstractDataSet`",
+                r"DataSet type 'tests\.io\.test_partitioned_dataset\.FakeDataSet' "
+                r"is invalid\: all data set types must extend 'AbstractDataSet'",
             ),
-            ({}, "`type` is missing from DataSet catalog configuration"),
+            ({}, "'type' is missing from DataSet catalog configuration"),
         ],
     )
     def test_invalid_dataset_config(self, dataset_config, error_pattern):
@@ -283,8 +284,8 @@ class TestPartitionedDataSetLocal:
     )
     def test_versioned_dataset_not_allowed(self, dataset_config):
         pattern = (
-            "`PartitionedDataSet` does not support versioning of the underlying "
-            "dataset. Please remove `versioned` flag from the dataset definition."
+            "'PartitionedDataSet' does not support versioning of the underlying "
+            "dataset. Please remove 'versioned' flag from the dataset definition."
         )
         with pytest.raises(DataSetError, match=re.escape(pattern)):
             PartitionedDataSet(str(Path.cwd()), dataset_config)
@@ -292,7 +293,7 @@ class TestPartitionedDataSetLocal:
     def test_no_partitions(self, tmpdir):
         pds = PartitionedDataSet(str(tmpdir), "pandas.CSVDataSet")
 
-        pattern = re.escape(f"No partitions found in `{tmpdir}`")
+        pattern = re.escape(f"No partitions found in '{tmpdir}'")
         with pytest.raises(DataSetError, match=pattern):
             pds.load()
 
@@ -318,7 +319,7 @@ class TestPartitionedDataSetLocal:
     )
     def test_filepath_arg_warning(self, pds_config, filepath_arg):
         pattern = (
-            f"`{filepath_arg}` key must not be specified in the dataset definition as it "
+            f"'{filepath_arg}' key must not be specified in the dataset definition as it "
             f"will be overwritten by partition path"
         )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
@@ -416,6 +417,7 @@ def mocked_s3_bucket():
     with mock_s3():
         conn = boto3.client(
             "s3",
+            region_name="us-east-1",
             aws_access_key_id="fake_access_key",
             aws_secret_access_key="fake_secret_key",
         )
@@ -436,10 +438,8 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDataSetS3:
-    @pytest.fixture(autouse=True)
-    def fake_aws_creds(self, monkeypatch):
-        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
-        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_load(self, dataset, mocked_csvs_in_s3, partitioned_data_pandas):

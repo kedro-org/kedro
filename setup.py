@@ -9,8 +9,8 @@ from setuptools import find_packages, setup
 name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
-
-PANDAS = "pandas>=0.24"
+# at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
+PANDAS = "pandas~=1.3"
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -37,11 +37,6 @@ with open("test_requirements.txt", encoding="utf-8") as f:
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
-doc_html_files = [
-    name.replace("kedro/", "", 1)
-    for name in glob("kedro/framework/html/**/*", recursive=True)
-]
-
 template_files = []
 for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
     template_files.extend(
@@ -58,37 +53,37 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {
-    "dask.ParquetDataSet": [
-        "dask>=2021.10.0, <2022.01; python_version > '3.6'",
-        "dask[complete]~=2.6; python_version == '3.6'",
-    ]
-}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10"]}
 geopandas_require = {
-    "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj>=2.2.0, <3.0"]
+    "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
-    "pandas.ExcelDataSet": [PANDAS, "xlrd~=1.0", "xlsxwriter~=1.0"],
-    "pandas.AppendableExcelDataSet": [PANDAS, "openpyxl>=3.0.3, <4.0"],
+    "pandas.ExcelDataSet": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
-    "pandas.HDFDataSet": [PANDAS, "tables~=3.6"],
+    "pandas.HDFDataSet": [
+        PANDAS,
+        "tables~=3.6.0; platform_system == 'Windows'",
+        "tables~=3.6; platform_system != 'Windows'",
+    ],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=1.0, <7.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
+    "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }
-pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
+pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
 }
+redis_require = {"redis.PickleDataSet": ["redis~=4.1"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
@@ -98,11 +93,11 @@ spark_require = {
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
-        # V1 requires HDF5 and serializes differently
+        # V1 requires HDF5 and serialises differently
         "tensorflow~=2.0"
     ]
 }
-yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <6.0"]}
+yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <7.0"]}
 
 extras_require = {
     "api": _collect_requirements(api_require),
@@ -114,21 +109,20 @@ extras_require = {
         "sphinx_rtd_theme==0.4.1",
         "nbsphinx==0.8.1",
         "nbstripout~=0.4",
-        "recommonmark==0.7.1",
         "sphinx-autodoc-typehints==1.11.1",
         "sphinx_copybutton==0.3.1",
         "ipykernel>=5.3, <7.0",
+        "sphinxcontrib-mermaid~=0.7.1",
+        "myst-parser~=0.17.2",
     ],
     "geopandas": _collect_requirements(geopandas_require),
-    "ipython": ["ipython~=7.10"],
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
-    "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat~=4.4"],
     "pandas": _collect_requirements(pandas_require),
     "pillow": _collect_requirements(pillow_require),
     "plotly": _collect_requirements(plotly_require),
-    "profilers": ["memory_profiler>=0.50.0, <1.0"],
+    "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
     "tensorflow": _collect_requirements(tensorflow_required),
     "yaml": _collect_requirements(yaml_require),
@@ -156,24 +150,25 @@ setup(
     license="Apache Software License (Apache 2.0)",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/quantumblacklabs/kedro",
-    python_requires=">=3.6, <3.9",
+    url="https://github.com/kedro-org/kedro",
+    python_requires=">=3.7, <3.11",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,
     tests_require=test_requires,
     install_requires=requires,
-    author="QuantumBlack Labs",
+    author="Kedro",
     entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},
     package_data={
-        name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files
+        name: ["py.typed", "test_requirements.txt"] + template_files
     },
     zip_safe=False,
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     extras_require=extras_require,
 )

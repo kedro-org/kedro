@@ -11,7 +11,7 @@ from filelock import FileLock
 try:
     from pyspark.sql import SparkSession
 except ImportError:  # pragma: no cover
-    pass  # this is only for test discovery to succeed on Python 3.8
+    pass  # this is only for test discovery to succeed on Python 3.8, 3.9
 
 
 def _setup_spark_session():
@@ -27,7 +27,7 @@ def _setup_spark_session():
 
 
 @pytest.fixture(scope="module", autouse=True)
-def spark_session(tmp_path_factory):  # SKIP_IF_NO_SPARK
+def spark_session(tmp_path_factory):
     # When running these spark tests with pytest-xdist, we need to make sure
     # that the spark session setup on each test process don't interfere with each other.
     # Therefore, we block the process during the spark session setup.
@@ -35,7 +35,7 @@ def spark_session(tmp_path_factory):  # SKIP_IF_NO_SPARK
     # https://github.com/pytest-dev/pytest-xdist#making-session-scoped-fixtures-execute-only-once
     root_tmp_dir = tmp_path_factory.getbasetemp().parent
     lock = root_tmp_dir / "semaphore.lock"
-    with FileLock(lock):  # pylint: disable=abstract-class-instantiated
+    with FileLock(lock):
         spark = _setup_spark_session()
     yield spark
     spark.stop()

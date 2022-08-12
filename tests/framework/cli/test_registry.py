@@ -22,7 +22,7 @@ def pipelines_dict():
     return pipelines
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 def test_list_registered_pipelines(
     fake_project_cli, fake_metadata, yaml_dump_mock, pipelines_dict
 ):
@@ -34,7 +34,7 @@ def test_list_registered_pipelines(
     yaml_dump_mock.assert_called_once_with(sorted(pipelines_dict.keys()))
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestRegistryDescribeCommand:
     @pytest.mark.parametrize("pipeline_name", ["de", "ds", "dp", "__default__"])
     def test_describe_registered_pipeline(
@@ -62,7 +62,7 @@ class TestRegistryDescribeCommand:
 
         assert result.exit_code
         expected_output = (
-            "Error: `missing` pipeline not found. Existing pipelines: "
+            "Error: 'missing' pipeline not found. Existing pipelines: "
             "[__default__, de, dp, ds]\n"
         )
         assert expected_output in result.output

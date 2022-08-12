@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import Path
 from typing import Any, Dict
@@ -240,14 +241,14 @@ class TestIncrementalDataSetLocal:
         [
             (
                 {"versioned": True},
-                "`IncrementalDataSet` does not support versioning "
-                "of the checkpoint. Please remove `versioned` key from the "
+                "'IncrementalDataSet' does not support versioning "
+                "of the checkpoint. Please remove 'versioned' key from the "
                 "checkpoint definition.",
             ),
             (
                 {"version": None},
-                "`IncrementalDataSet` does not support versioning "
-                "of the checkpoint. Please remove `version` key from the "
+                "'IncrementalDataSet' does not support versioning "
+                "of the checkpoint. Please remove 'version' key from the "
                 "checkpoint definition.",
             ),
         ],
@@ -349,6 +350,7 @@ def mocked_s3_bucket():
     with mock_s3():
         conn = boto3.client(
             "s3",
+            region_name="us-east-1",
             aws_access_key_id="fake_access_key",
             aws_secret_access_key="fake_secret_key",
         )
@@ -369,10 +371,8 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
 
 
 class TestPartitionedDataSetS3:
-    @pytest.fixture(autouse=True)
-    def fake_aws_creds(self, monkeypatch):
-        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "FAKE_ACCESS_KEY")
-        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "FAKE_SECRET_KEY")
+    os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
     def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading

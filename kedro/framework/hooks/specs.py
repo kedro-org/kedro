@@ -2,14 +2,12 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
-# pylint: disable=too-many-arguments
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Optional
 
-from kedro.config import ConfigLoader
+from kedro.framework.context import KedroContext
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
-from kedro.versioning import Journal
 
 from .markers import hook_spec
 
@@ -18,7 +16,7 @@ class DataCatalogSpecs:
     """Namespace that defines all specifications for a data catalog's lifecycle hooks."""
 
     @hook_spec
-    def after_catalog_created(
+    def after_catalog_created(  # pylint: disable=too-many-arguments
         self,
         catalog: DataCatalog,
         conf_catalog: Dict[str, Any],
@@ -26,7 +24,6 @@ class DataCatalogSpecs:
         feed_dict: Dict[str, Any],
         save_version: str,
         load_versions: Dict[str, str],
-        run_id: str,
     ) -> None:
         """Hooks to be invoked after a data catalog is created.
         It receives the ``catalog`` as well as
@@ -41,7 +38,6 @@ class DataCatalogSpecs:
                 for all datasets in the catalog.
             load_versions: The load_versions used in ``load`` operations
                 for each dataset in the catalog.
-            run_id: The id of the run for which the catalog is loaded.
         """
         pass
 
@@ -50,13 +46,13 @@ class NodeSpecs:
     """Namespace that defines all specifications for a node's lifecycle hooks."""
 
     @hook_spec
-    def before_node_run(
+    def before_node_run(  # pylint: disable=too-many-arguments
         self,
         node: Node,
         catalog: DataCatalog,
         inputs: Dict[str, Any],
         is_async: bool,
-        run_id: str,
+        session_id: str,
     ) -> Optional[Dict[str, Any]]:
         """Hook to be invoked before a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
@@ -68,7 +64,7 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
-            run_id: The id of the run.
+            session_id: The id of the session.
 
         Returns:
             Either None or a dictionary mapping dataset name(s) to new value(s).
@@ -85,7 +81,7 @@ class NodeSpecs:
         inputs: Dict[str, Any],
         outputs: Dict[str, Any],
         is_async: bool,
-        run_id: str,
+        session_id: str,
     ) -> None:
         """Hook to be invoked after a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
@@ -101,19 +97,19 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual computed output data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
-            run_id: The id of the run.
+            session_id: The id of the session.
         """
         pass
 
     @hook_spec
-    def on_node_error(
+    def on_node_error(  # pylint: disable=too-many-arguments
         self,
         error: Exception,
         node: Node,
         catalog: DataCatalog,
         inputs: Dict[str, Any],
         is_async: bool,
-        run_id: str,
+        session_id: str,
     ):
         """Hook to be invoked if a node run throws an uncaught error.
         The signature of this error hook should match the signature of ``before_node_run``
@@ -127,7 +123,7 @@ class NodeSpecs:
                 The keys are dataset names and the values are the actual loaded input data,
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
-            run_id: The id of the run.
+            session_id: The id of the session.
         """
         pass
 
@@ -143,10 +139,10 @@ class PipelineSpecs:
 
         Args:
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+                Should have the following schema::
 
                    {
-                     "run_id": str
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -178,10 +174,10 @@ class PipelineSpecs:
 
         Args:
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+                Should have the following schema::
 
                    {
-                     "run_id": str
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -217,10 +213,10 @@ class PipelineSpecs:
         Args:
             error: The uncaught exception thrown during the pipeline run.
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+                Should have the following schema::
 
                    {
-                     "run_id": str
+                     "session_id": str
                      "project_path": str,
                      "env": str,
                      "kedro_version": str,
@@ -286,49 +282,17 @@ class DatasetSpecs:
         pass
 
 
-class RegistrationSpecs:
-    """Namespace that defines all specifications for hooks registering
-    library components with a Kedro project.
-    """
+class KedroContextSpecs:
+    """Namespace that defines all specifications for a Kedro context's lifecycle hooks."""
 
     @hook_spec
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        """Hook to be invoked to register a project's pipelines.
-
-        Returns:
-            A mapping from a pipeline name to a ``Pipeline`` object.
-
-        """
-        pass
-
-    @hook_spec(firstresult=True)
-    def register_config_loader(
-        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
-    ) -> ConfigLoader:
-        """Hook to be invoked to register a project's config loader.
-
-        Args:
-            conf_paths: the paths to the conf directory to be supplied to the config loader
-            env: the environment with which the config loader will be instantiated
-            extra_params: the extra parameters passed to a Kedro run
-
-        Returns:
-            An instance of a ``ConfigLoader``.
-        """
-        pass
-
-    @hook_spec(firstresult=True)
-    def register_catalog(
+    def after_context_created(
         self,
-        catalog: Optional[Dict[str, Dict[str, Any]]],
-        credentials: Dict[str, Dict[str, Any]],
-        load_versions: Dict[str, str],
-        save_version: str,
-        journal: Journal,
-    ) -> DataCatalog:
-        """Hook to be invoked to register a project's data catalog.
-
-        Returns:
-            An instance of a ``DataCatalog``.
+        context: KedroContext,
+    ) -> None:
+        """Hooks to be invoked after a `KedroContext` is created. This is the earliest
+        hook triggered within a Kedro run. The `KedroContext` stores useful information
+        such as `credentials`, `config_loader` and `env`.
+        Args:
+            context: The context that was created.
         """
-        pass

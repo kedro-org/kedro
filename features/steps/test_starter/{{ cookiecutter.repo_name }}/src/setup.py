@@ -13,7 +13,7 @@ with open("requirements.txt", encoding="utf-8") as f:
     requires = []
     for line in f:
         req = line.split("#", 1)[0].strip()
-        if req and not req.startswith("--"):
+        if req and not req.startswith("-r"):
             requires.append(req)
 
 setup(
@@ -29,10 +29,11 @@ setup(
             "sphinx_rtd_theme==0.5.1",
             "nbsphinx==0.8.1",
             "nbstripout~=0.4",
-            "recommonmark==0.7.1",
             "sphinx-autodoc-typehints==1.11.1",
             "sphinx_copybutton==0.3.1",
             "ipykernel>=5.3, <7.0",
+            "Jinja2<3.1.0",
+            "myst-parser~=0.17.2",
         ]
     },
 )

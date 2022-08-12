@@ -234,7 +234,7 @@ class TestMatplotlibWriter:
         assert plot_writer._fs_open_args_save == fs_args["open_args_save"]
 
     def test_load_fail(self, plot_writer):
-        pattern = r"Loading not supported for `MatplotlibWriter`"
+        pattern = r"Loading not supported for 'MatplotlibWriter'"
         with pytest.raises(DataSetError, match=pattern):
             plot_writer.load()
 
@@ -278,11 +278,25 @@ class TestMatplotlibWriterVersioned:
         corresponding matplotlib file for a given save version already exists."""
         versioned_plot_writer.save(mock_single_plot)
         pattern = (
-            r"Save path \`.+\` for MatplotlibWriter\(.+\) must "
+            r"Save path \'.+\' for MatplotlibWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
             versioned_plot_writer.save(mock_single_plot)
+
+    def test_ineffective_overwrite(self, load_version, save_version):
+        pattern = (
+            "Setting 'overwrite=True' is ineffective if versioning "
+            "is enabled, since the versioned path must not already "
+            "exist; overriding flag with 'overwrite=False' instead."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            versioned_plot_writer = MatplotlibWriter(
+                filepath="/tmp/file.txt",
+                version=Version(load_version, save_version),
+                overwrite=True,
+            )
+        assert not versioned_plot_writer._overwrite
 
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
@@ -296,8 +310,8 @@ class TestMatplotlibWriterVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for MatplotlibWriter\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for MatplotlibWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_plot_writer.save(mock_single_plot)

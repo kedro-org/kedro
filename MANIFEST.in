@@ -2,5 +2,6 @@ include README.md
 include LICENSE.md
 include requirements.txt
 include test_requirements.txt
-include kedro/config/logging.yml
+include kedro/framework/project/default_logging.yml
+include kedro/extras/extensions/*.png
 recursive-include templates *

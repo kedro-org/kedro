@@ -10,7 +10,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 __all__ = ["SparkJDBCDataSet"]
 
 
-class SparkJDBCDataSet(AbstractDataSet):
+class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     """``SparkJDBCDataSet`` loads data from a database table accessible
     via JDBC URL url and connection properties and saves the content of
     a PySpark DataFrame to an external database table via JDBC.  It uses
@@ -19,8 +19,8 @@ class SparkJDBCDataSet(AbstractDataSet):
 
 
     Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -88,11 +88,11 @@ class SparkJDBCDataSet(AbstractDataSet):
             load_args: Provided to underlying PySpark ``jdbc`` function along
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
             save_args: Provided to underlying PySpark ``jdbc`` function along
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
 
         Raises:
             DataSetError: When either ``url`` or ``table`` is empty or
@@ -101,14 +101,14 @@ class SparkJDBCDataSet(AbstractDataSet):
 
         if not url:
             raise DataSetError(
-                "`url` argument cannot be empty. Please "
+                "'url' argument cannot be empty. Please "
                 "provide a JDBC URL of the form "
-                "``jdbc:subprotocol:subname``."
+                "'jdbc:subprotocol:subname'."
             )
 
         if not table:
             raise DataSetError(
-                "`table` argument cannot be empty. Please "
+                "'table' argument cannot be empty. Please "
                 "provide the name of the table to load or save "
                 "data to."
             )
@@ -131,7 +131,7 @@ class SparkJDBCDataSet(AbstractDataSet):
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:
                     raise DataSetError(
-                        f"Credential property `{cred_key}` cannot be None. "
+                        f"Credential property '{cred_key}' cannot be None. "
                         f"Please provide a value."
                     )
 

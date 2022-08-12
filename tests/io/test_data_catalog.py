@@ -20,7 +20,6 @@ from kedro.io import (
     MemoryDataSet,
 )
 from kedro.io.core import VERSION_FORMAT, generate_timestamp
-from kedro.versioning import Journal
 
 
 @pytest.fixture
@@ -88,12 +87,11 @@ def data_set(filepath):
 
 
 @pytest.fixture
-def multi_catalog(mocker):
+def multi_catalog():
     csv = CSVDataSet(filepath="abc.csv")
     parq = ParquetDataSet(filepath="xyz.parq")
-    journal = mocker.Mock()
     layers = {"raw": {"abc.csv"}, "model": {"xyz.parq"}}
-    return DataCatalog({"abc": csv, "xyz": parq}, journal=journal, layers=layers)
+    return DataCatalog({"abc": csv, "xyz": parq}, layers=layers)
 
 
 @pytest.fixture
@@ -217,7 +215,7 @@ class TestDataCatalog:
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "`exists()` not implemented for `LambdaDataSet`. "
+            "'exists()' not implemented for 'LambdaDataSet'. "
             "Assuming output does not exist." in log_record.message
         )
         assert result is False
@@ -265,7 +263,7 @@ class TestDataCatalog:
     def test_multi_catalog_list_bad_regex(self, multi_catalog):
         """Test that bad regex is caught accordingly"""
         escaped_regex = r"\(\("
-        pattern = f"Invalid regular expression provided: `{escaped_regex}`"
+        pattern = f"Invalid regular expression provided: '{escaped_regex}'"
         with pytest.raises(SyntaxError, match=pattern):
             multi_catalog.list("((")
 
@@ -294,7 +292,7 @@ class TestDataCatalog:
     def test_add_feed_dict_should_grow_linearly(self, mocker, data_catalog_from_config):
         """Check number of calls to `_sub_nonword_chars` when adding feed dict
         should grow linearly with the number of keys in the dict.
-        Simulate this issue: https://github.com/quantumblacklabs/kedro/issues/951
+        Simulate this issue: https://github.com/kedro-org/kedro/issues/951
         """
         mock_sub_nonword_chars = mocker.patch(
             "kedro.io.data_catalog._sub_nonword_chars"
@@ -351,8 +349,8 @@ class TestDataCatalogFromConfig:
         in the config"""
         del sane_config["catalog"]["boats"]["type"]
         pattern = (
-            "An exception occurred when parsing config for DataSet `boats`:\n"
-            "`type` is missing from DataSet catalog configuration"
+            "An exception occurred when parsing config for DataSet 'boats':\n"
+            "'type' is missing from DataSet catalog configuration"
         )
         with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
@@ -363,7 +361,7 @@ class TestDataCatalogFromConfig:
             "type"
         ] = "kedro.invalid_module_name.io.CSVDataSet"
 
-        error_msg = "Class `kedro.invalid_module_name.io.CSVDataSet` not found"
+        error_msg = "Class 'kedro.invalid_module_name.io.CSVDataSet' not found"
         with pytest.raises(DataSetError, match=re.escape(error_msg)):
             DataCatalog.from_config(**sane_config)
 
@@ -371,7 +369,7 @@ class TestDataCatalogFromConfig:
         """Check the error if the type points to a relative import"""
         sane_config["catalog"]["boats"]["type"] = ".CSVDataSetInvalid"
 
-        pattern = "`type` class path does not support relative paths"
+        pattern = "'type' class path does not support relative paths"
         with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
@@ -385,8 +383,8 @@ class TestDataCatalogFromConfig:
         sane_config["catalog"]["boats"]["type"] = "kedro.io.CSVDataSetInvalid"
 
         pattern = (
-            "An exception occurred when parsing config for DataSet `boats`:\n"
-            "Class `kedro.io.CSVDataSetInvalid` not found"
+            "An exception occurred when parsing config for DataSet 'boats':\n"
+            "Class 'kedro.io.CSVDataSetInvalid' not found"
         )
         with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
@@ -395,9 +393,9 @@ class TestDataCatalogFromConfig:
         """Check the error if the type points to invalid class"""
         sane_config["catalog"]["boats"]["type"] = "DataCatalog"
         pattern = (
-            "An exception occurred when parsing config for DataSet `boats`:\n"
-            "DataSet type `kedro.io.data_catalog.DataCatalog` is invalid: "
-            "all data set types must extend `AbstractDataSet`"
+            "An exception occurred when parsing config for DataSet 'boats':\n"
+            "DataSet type 'kedro.io.data_catalog.DataCatalog' is invalid: "
+            "all data set types must extend 'AbstractDataSet'"
         )
         with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
@@ -407,7 +405,7 @@ class TestDataCatalogFromConfig:
         sane_config["catalog"]["boats"]["save_and_load_args"] = False
         pattern = (
             r"DataSet 'boats' must only contain arguments valid for "
-            r"the constructor of `.*CSVDataSet`"
+            r"the constructor of '.*CSVDataSet'"
         )
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(**sane_config)
@@ -481,7 +479,7 @@ class TestDataCatalogFromConfig:
 
     def test_error_dataset_init(self, bad_config):
         """Check the error when trying to instantiate erroneous data set"""
-        pattern = r"Failed to instantiate DataSet \'bad\' of type `.*BadDataSet`"
+        pattern = r"Failed to instantiate DataSet \'bad\' of type '.*BadDataSet'"
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(bad_config, None)
 
@@ -534,15 +532,11 @@ class TestDataCatalogVersioned:
         )
         version = fmt.format(d=current_ts, ms=current_ts.microsecond // 1000)
 
-        journal = Journal({"run_id": "fake-id", "project_path": "fake-path"})
         catalog = DataCatalog.from_config(
             **sane_config,
             load_versions={"boats": version},
             save_version=version,
-            journal=journal,
         )
-
-        assert catalog._journal == journal
 
         catalog.save("boats", dummy_dataframe)
         path = Path(sane_config["catalog"]["boats"]["filepath"])
@@ -574,7 +568,7 @@ class TestDataCatalogVersioned:
         DataCatalog.from_config(**sane_config)
         log_record = caplog.records[0]
         expected_log_message = (
-            "`version` attribute removed from data set configuration since it "
+            "'version' attribute removed from data set configuration since it "
             "is a reserved word and cannot be directly specified"
         )
         assert log_record.levelname == "WARNING"
@@ -584,7 +578,7 @@ class TestDataCatalogVersioned:
         sane_config["catalog"]["boats"]["versioned"] = True
         version = generate_timestamp()
         load_version = {"non-boart": version}
-        pattern = r"\`load_versions\` keys \[non-boart\] are not found in the catalog\."
+        pattern = r"\'load_versions\' keys \[non-boart\] are not found in the catalog\."
         with pytest.raises(DataSetNotFoundError, match=pattern):
             DataCatalog.from_config(**sane_config, load_versions=load_version)
 

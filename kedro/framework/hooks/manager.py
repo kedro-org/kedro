@@ -1,7 +1,6 @@
 """This module provides an utility function to retrieve the global hook_manager singleton
 in a Kedro's execution process.
 """
-# pylint: disable=global-statement,invalid-name
 import logging
 from typing import Any, Iterable
 
@@ -11,12 +10,10 @@ from .markers import HOOK_NAMESPACE
 from .specs import (
     DataCatalogSpecs,
     DatasetSpecs,
+    KedroContextSpecs,
     NodeSpecs,
     PipelineSpecs,
-    RegistrationSpecs,
 )
-
-_hook_manager = None
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
 
@@ -29,17 +26,9 @@ def _create_hook_manager() -> PluginManager:
     manager.add_hookspecs(NodeSpecs)
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)
-    manager.add_hookspecs(RegistrationSpecs)
     manager.add_hookspecs(DatasetSpecs)
+    manager.add_hookspecs(KedroContextSpecs)
     return manager
-
-
-def get_hook_manager():
-    """Create or return the global _hook_manager singleton instance."""
-    global _hook_manager
-    if _hook_manager is None:
-        _hook_manager = _create_hook_manager()
-    return _hook_manager
 
 
 def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:
@@ -90,14 +79,28 @@ def _register_hooks_setuptools(
             plugin_names.add(f"{dist.project_name}-{dist.version}")
 
     if disabled_plugin_names:
-        logger.info(
+        logger.debug(
             "Hooks are disabled for plugin(s): %s",
             ", ".join(sorted(disabled_plugin_names)),
         )
 
     if plugin_names:
-        logger.info(
+        logger.debug(
             "Registered hooks from %d installed plugin(s): %s",
             len(plugin_names),
             ", ".join(sorted(plugin_names)),
         )
+
+
+class _NullPluginManager:
+    """This class creates an empty ``hook_manager`` that will ignore all calls to hooks,
+    allowing the runner to function if no ``hook_manager`` has been instantiated."""
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __getattr__(self, name):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        pass

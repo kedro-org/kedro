@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 import pytest
 
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
@@ -12,7 +13,6 @@ from kedro.io import (
     MemoryDataSet,
 )
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.decorators import log_time
 from kedro.runner import ParallelRunner
 from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
@@ -20,66 +20,14 @@ from kedro.runner.parallel_runner import (
     _run_node_synchronization,
     _SharedMemoryDataSet,
 )
-
-
-def source():
-    return "stuff"
-
-
-def identity(arg):
-    return arg
-
-
-def sink(arg):  # pylint: disable=unused-argument
-    pass
-
-
-def fan_in(*args):
-    return args
-
-
-def exception_fn(arg):
-    raise Exception("test exception")
-
-
-def return_none(arg):
-    arg = None
-    return arg
-
-
-def return_not_serializable(arg):  # pylint: disable=unused-argument
-    return lambda x: x
-
-
-@pytest.fixture
-def catalog():
-    return DataCatalog()
-
-
-@pytest.fixture
-def fan_out_fan_in():
-    return Pipeline(
-        [
-            node(identity, "A", "B"),
-            node(identity, "B", "C"),
-            node(identity, "B", "D"),
-            node(identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
-
-
-@pytest.fixture(autouse=True)
-def mock_load_context(tmp_path, mocker):
-    # pylint: disable=too-few-public-methods
-    class DummyContext:
-        def __init__(self, project_path):
-            self.project_path = project_path
-
-    mocker.patch(
-        "kedro.framework.context.context.load_context",
-        return_value=DummyContext(str(tmp_path)),
-    )
+from tests.runner.conftest import (
+    exception_fn,
+    identity,
+    return_none,
+    return_not_serialisable,
+    sink,
+    source,
+)
 
 
 @pytest.mark.skipif(
@@ -100,7 +48,17 @@ class TestValidParallelRunner:
         assert result["Z"] == (42, 42, 42)
 
     @pytest.mark.parametrize("is_async", [False, True])
-    def test_memory_data_set_input(self, is_async, fan_out_fan_in):
+    def test_parallel_run_with_plugin_manager(self, is_async, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = ParallelRunner(is_async=is_async).run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
+        assert "Z" in result
+        assert len(result["Z"]) == 3
+        assert result["Z"] == (42, 42, 42)
+
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_memory_dataset_input(self, is_async, fan_out_fan_in):
         pipeline = Pipeline([fan_out_fan_in])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         result = ParallelRunner(is_async=is_async).run(pipeline, catalog)
@@ -174,7 +132,7 @@ class TestMaxWorkers:
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
     def test_task_validation(self, is_async, fan_out_fan_in, catalog):
-        """ParallelRunner cannot serialize the lambda function."""
+        """ParallelRunner cannot serialise the lambda function."""
         catalog.add_feed_dict(dict(A=42))
         pipeline = Pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
@@ -186,7 +144,7 @@ class TestInvalidParallelRunner:
         with pytest.raises(Exception, match="test exception"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_memory_data_set_output(self, is_async, fan_out_fan_in):
+    def test_memory_dataset_output(self, is_async, fan_out_fan_in):
         """ParallelRunner does not support output to externally
         created MemoryDataSets.
         """
@@ -198,12 +156,12 @@ class TestInvalidParallelRunner:
     def test_node_returning_none(self, is_async):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        pattern = "Saving `None` to a `DataSet` is not allowed"
+        pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_data_set_not_serializable(self, is_async, fan_out_fan_in):
-        """Data set A cannot be serializable because _load and _save are not
+    def test_data_set_not_serialisable(self, is_async, fan_out_fan_in):
+        """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """
 
@@ -213,21 +171,21 @@ class TestInvalidParallelRunner:
         def _save(arg):
             assert arg == 0  # pragma: no cover
 
-        # Data set A cannot be serialized
+        # Data set A cannot be serialised
         catalog = DataCatalog({"A": LambdaDataSet(load=_load, save=_save)})
 
         pipeline = Pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_memory_dataset_not_serializable(self, is_async, catalog):
-        """Memory dataset cannot be serializable because of data it stores."""
-        data = return_not_serializable(None)
-        pipeline = Pipeline([node(return_not_serializable, "A", "B")])
+    def test_memory_dataset_not_serialisable(self, is_async, catalog):
+        """Memory dataset cannot be serialisable because of data it stores."""
+        data = return_not_serialisable(None)
+        pipeline = Pipeline([node(return_not_serialisable, "A", "B")])
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pattern = (
-            fr"{str(data.__class__)} cannot be serialized. ParallelRunner implicit "
-            fr"memory datasets can only be used with serializable data"
+            rf"{str(data.__class__)} cannot be serialised. ParallelRunner implicit "
+            rf"memory datasets can only be used with serialisable data"
         )
 
         with pytest.raises(DataSetError, match=pattern):
@@ -256,48 +214,6 @@ class TestInvalidParallelRunner:
         pattern = "Unable to schedule new tasks although some nodes have not been run"
         with pytest.raises(RuntimeError, match=pattern):
             runner.run(fan_out_fan_in, catalog)
-
-
-@log_time
-def decorated_identity(*args, **kwargs):
-    return identity(*args, **kwargs)
-
-
-@pytest.fixture
-def decorated_fan_out_fan_in():
-    return Pipeline(
-        [
-            node(decorated_identity, "A", "B"),
-            node(decorated_identity, "B", "C"),
-            node(decorated_identity, "B", "D"),
-            node(decorated_identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
-
-
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
-@pytest.mark.parametrize("is_async", [False, True])
-class TestParallelRunnerDecorator:
-    def test_decorate_pipeline(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(is_async=is_async).run(
-            fan_out_fan_in.decorate(log_time), catalog
-        )
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
-
-    def test_decorated_nodes(self, is_async, decorated_fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(is_async=is_async).run(
-            decorated_fan_out_fan_in, catalog
-        )
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
 
 
 class LoggingDataSet(AbstractDataSet):
@@ -443,53 +359,30 @@ class TestRunNodeSynchronisationHelper:
     def mock_configure_project(self, mocker):
         return mocker.patch("kedro.framework.project.configure_project")
 
-    @pytest.mark.parametrize("conf_logging", [{"fake_logging_config": True}, {}])
     def test_package_name_and_logging_provided(
         self,
         mock_logging,
         mock_run_node,
         mock_configure_project,
         is_async,
-        conf_logging,
         mocker,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
         _run_node_synchronization(
             node_,
             catalog,
             is_async,
-            run_id,
+            session_id,
             package_name=package_name,
-            conf_logging=conf_logging,
+            logging_config={"fake_logging_config": True},
         )
-        mock_run_node.assert_called_once_with(node_, catalog, is_async, run_id)
-        mock_logging.assert_called_once_with(conf_logging)
-        mock_configure_project.assert_called_once_with(package_name)
-
-    def test_package_name_provided(
-        self,
-        mock_logging,
-        mock_run_node,
-        mock_configure_project,
-        is_async,
-        mocker,
-    ):
-        mocker.patch("multiprocessing.get_start_method", return_value="spawn")
-        node_ = mocker.sentinel.node
-        catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
-        package_name = mocker.sentinel.package_name
-
-        _run_node_synchronization(
-            node_, catalog, is_async, run_id, package_name=package_name
-        )
-        mock_run_node.assert_called_once_with(node_, catalog, is_async, run_id)
-        mock_logging.assert_called_once_with({})
+        mock_run_node.assert_called_once()
+        mock_logging.assert_called_once_with({"fake_logging_config": True})
         mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_not_provided(
@@ -498,11 +391,11 @@ class TestRunNodeSynchronisationHelper:
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
         node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
-        run_id = "fake_run_id"
+        session_id = "fake_session_id"
         package_name = mocker.sentinel.package_name
 
         _run_node_synchronization(
-            node_, catalog, is_async, run_id, package_name=package_name
+            node_, catalog, is_async, session_id, package_name=package_name
         )
-        mock_run_node.assert_called_once_with(node_, catalog, is_async, run_id)
+        mock_run_node.assert_called_once()
         mock_logging.assert_not_called()

@@ -1,9 +1,8 @@
-"""``AbstractVersionedDataSet`` implementation to access DeltaTables using
+"""``AbstractDataSet`` implementation to access DeltaTables using
 ``delta-spark``
 """
-from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import NoReturn
 
 from delta.tables import DeltaTable
 from pyspark.sql import SparkSession
@@ -16,12 +15,12 @@ from kedro.extras.datasets.spark.spark_dataset import (
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class DeltaTableDataSet(AbstractDataSet):
+class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
     """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
         Example adding a catalog entry with
         `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-            01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+            01_data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
         .. code-block:: yaml
 
@@ -64,7 +63,7 @@ class DeltaTableDataSet(AbstractDataSet):
     # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
-    def __init__(self, filepath: str, credentials: Dict[str, Any] = None) -> None:
+    def __init__(self, filepath: str) -> None:
         """Creates a new instance of ``DeltaTableDataSet``.
 
         Args:
@@ -72,12 +71,7 @@ class DeltaTableDataSet(AbstractDataSet):
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataSet``s
                 starting with ``/dbfs/mnt``.
-            credentials: Credentials to access the S3 bucket, such as
-                ``key``, ``secret``, if ``filepath`` prefix is ``s3a://`` or ``s3n://``.
-                Optional keyword arguments passed to ``hdfs.client.InsecureClient``
-                if ``filepath`` prefix is ``hdfs://``. Ignored otherwise.
         """
-        credentials = deepcopy(credentials) or {}  # do we need these anywhere??
         fs_prefix, filepath = _split_filepath(filepath)
 
         self._fs_prefix = fs_prefix
@@ -91,7 +85,7 @@ class DeltaTableDataSet(AbstractDataSet):
         load_path = self._fs_prefix + str(self._filepath)
         return DeltaTable.forPath(self._get_spark(), load_path)
 
-    def _save(self, data: Any) -> None:
+    def _save(self, data: None) -> NoReturn:
         raise DataSetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def _exists(self) -> bool:

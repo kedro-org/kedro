@@ -3,11 +3,19 @@ import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
+import boto3
 import pandas as pd
 import pytest
-from pyspark.sql import DataFrame, SparkSession
+from moto import mock_s3
+from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+from pyspark.sql.types import (
+    FloatType,
+    IntegerType,
+    StringType,
+    StructField,
+    StructType,
+)
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
@@ -26,6 +34,7 @@ from kedro.runner import ParallelRunner, SequentialRunner
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
+SCHEMA_FILE_NAME = "schema.json"
 AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
 HDFS_PREFIX = f"{FOLDER_NAME}/{FILENAME}"
@@ -100,6 +109,17 @@ def sample_spark_df():
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
 
 
+@pytest.fixture
+def sample_spark_df_schema() -> StructType:
+    return StructType(
+        [
+            StructField("name", StringType(), True),
+            StructField("age", IntegerType(), True),
+            StructField("height", FloatType(), True),
+        ]
+    )
+
+
 def identity(arg):
     return arg  # pragma: no cover
 
@@ -109,6 +129,31 @@ def spark_in(tmp_path, sample_spark_df):
     spark_in = SparkDataSet(filepath=(tmp_path / "input").as_posix())
     spark_in.save(sample_spark_df)
     return spark_in
+
+
+@pytest.fixture
+def mocked_s3_bucket():
+    """Create a bucket for testing using moto."""
+    with mock_s3():
+        conn = boto3.client(
+            "s3",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        yield conn
+
+
+@pytest.fixture
+def mocked_s3_schema(tmp_path, mocked_s3_bucket, sample_spark_df_schema: StructType):
+    """Creates schema file and adds it to mocked S3 bucket."""
+    temporary_path = tmp_path / SCHEMA_FILE_NAME
+    temporary_path.write_text(sample_spark_df_schema.json(), encoding="utf-8")
+
+    mocked_s3_bucket.put_object(
+        Bucket=BUCKET_NAME, Key=SCHEMA_FILE_NAME, Body=temporary_path.read_bytes()
+    )
+    return mocked_s3_bucket
 
 
 class FileInfo:
@@ -158,6 +203,109 @@ class TestSparkDataSet:
         )
         spark_df = spark_data_set.load()
         assert spark_df.filter(col("Name") == "Alex").count() == 1
+
+    def test_load_options_schema_ddl_string(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema": "name STRING, age INT, height FLOAT"},
+        )
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    def test_load_options_schema_obj(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema": sample_spark_df_schema},
+        )
+
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    def test_load_options_schema_path(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        schemapath = (tmp_path / SCHEMA_FILE_NAME).as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+        Path(schemapath).write_text(sample_spark_df_schema.json(), encoding="utf-8")
+
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema": {"filepath": schemapath}},
+        )
+
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    @pytest.mark.usefixtures("mocked_s3_schema")
+    def test_load_options_schema_path_with_credentials(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={
+                "header": True,
+                "schema": {
+                    "filepath": f"s3://{BUCKET_NAME}/{SCHEMA_FILE_NAME}",
+                    "credentials": AWS_CREDENTIALS,
+                },
+            },
+        )
+
+        spark_df = spark_data_set.load()
+        assert spark_df.schema == sample_spark_df_schema
+
+    def test_load_options_invalid_schema_file(self, tmp_path):
+        filepath = (tmp_path / "data").as_posix()
+        schemapath = (tmp_path / SCHEMA_FILE_NAME).as_posix()
+        Path(schemapath).write_text("dummy", encoding="utf-8")
+
+        pattern = (
+            f"Contents of 'schema.filepath' ({schemapath}) are invalid. Please"
+            f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
+        )
+
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            SparkDataSet(
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True, "schema": {"filepath": schemapath}},
+            )
+
+    def test_load_options_invalid_schema(self, tmp_path):
+        filepath = (tmp_path / "data").as_posix()
+
+        pattern = (
+            "Schema load argument does not specify a 'filepath' attribute. Please"
+            "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
+        )
+
+        with pytest.raises(DataSetError, match=pattern):
+            SparkDataSet(
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True, "schema": {}},
+            )
 
     def test_save_options_csv(self, tmp_path, sample_spark_df):
         # To cross check the correct Spark save operation we save to
@@ -211,42 +359,13 @@ class TestSparkDataSet:
         spark_data_set.save(sample_spark_df)
         spark_data_set.save(sample_spark_df)
 
-    @pytest.mark.parametrize(
-        "save_args,expected_options",
-        [
-            ({"mode": "overwrite"}, {}),
-            ({"mode": "overwrite", "dfwriter_options": {}}, {}),
-            ({"mode": "overwrite", "dfwriter_options": None}, {}),
-            (
-                {"mode": "overwrite", "dfwriter_options": {"versionAsOf": 0}},
-                {"versionAsOf": 0},
-            ),
-        ],
-    )
-    def test_save_dfwriter_options(
-        self, tmp_path, save_args, expected_options, sample_spark_df, mocker
-    ):
-        filepath = (tmp_path / "test_data").as_posix()
-        spark_data_set = SparkDataSet(
-            filepath=filepath, file_format="delta", save_args=save_args
-        )
-
-        assert spark_data_set._dfwriter_options == expected_options
-
-        mock_writer = mocker.patch.object(DataFrame, "write")
-        spark_data_set.save(sample_spark_df)
-        if expected_options:
-            mock_writer.options.assert_called_once_with(versionAsOf=0)
-        else:
-            mock_writer.options.assert_called_once_with()
-
     @pytest.mark.parametrize("mode", ["merge", "delete", "update"])
     def test_file_format_delta_and_unsupported_mode(self, tmp_path, mode):
         filepath = (tmp_path / "test_data").as_posix()
         pattern = (
-            f"It is not possible to perform `save()` for file format `delta` "
-            f"with mode `{mode}` on `SparkDataSet`. "
-            f"Please use `spark.DeltaTableDataSet` instead."
+            f"It is not possible to perform 'save()' for file format 'delta' "
+            f"with mode '{mode}' on 'SparkDataSet'. "
+            f"Please use 'spark.DeltaTableDataSet' instead."
         )
 
         with pytest.raises(DataSetError, match=re.escape(pattern)):
@@ -367,8 +486,8 @@ class TestSparkDataSetVersionedLocal:
         )
 
         pattern = (
-            r"Save version `{ev.save}` did not match load version "
-            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
+            r"Save version '{ev.save}' did not match load version "
+            r"'{ev.load}' for SparkDataSet\(.+\)".format(ev=exact_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_local.save(sample_spark_df)
@@ -383,7 +502,7 @@ class TestSparkDataSetVersionedLocal:
         versioned_local.save(sample_spark_df)
 
         pattern = (
-            r"Save path `.+` for SparkDataSet\(.+\) must not exist "
+            r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -596,7 +715,6 @@ class TestSparkDataSetVersionedS3:
         ds_s3 = SparkDataSet(
             filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
             version=Version(ts, None),
-            credentials=AWS_CREDENTIALS,
         )
         get_spark = mocker.patch.object(ds_s3, "_get_spark")
 
@@ -616,7 +734,7 @@ class TestSparkDataSetVersionedS3:
         )
 
         versioned_dataset_s3.save(mocked_spark_df)
-        mocked_spark_df.write.options().save.assert_called_once_with(
+        mocked_spark_df.write.save.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(b=BUCKET_NAME, f=FILENAME, v=version.save),
             "parquet",
         )
@@ -631,12 +749,12 @@ class TestSparkDataSetVersionedS3:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save version `{ev.save}` did not match load version "
-            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
+            r"Save version '{ev.save}' did not match load version "
+            r"'{ev.load}' for SparkDataSet\(.+\)".format(ev=exact_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
-        mocked_spark_df.write.options().save.assert_called_once_with(
+        mocked_spark_df.write.save.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(
                 b=BUCKET_NAME, f=FILENAME, v=exact_version.save
             ),
@@ -648,7 +766,7 @@ class TestSparkDataSetVersionedS3:
         mocker.patch.object(versioned_dataset_s3, "_exists_function", return_value=True)
 
         pattern = (
-            r"Save path `.+` for SparkDataSet\(.+\) must not exist "
+            r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -658,8 +776,8 @@ class TestSparkDataSetVersionedS3:
 
     def test_s3n_warning(self, version):
         pattern = (
-            "`s3n` filesystem has now been deprecated by Spark, "
-            "please consider switching to `s3a`"
+            "'s3n' filesystem has now been deprecated by Spark, "
+            "please consider switching to 's3a'"
         )
         with pytest.warns(DeprecationWarning, match=pattern):
             SparkDataSet(filepath=f"s3n://{BUCKET_NAME}/{FILENAME}", version=version)
@@ -748,7 +866,7 @@ class TestSparkDataSetVersionedHdfs:
             "{fn}/{f}/{v}/{f}".format(fn=FOLDER_NAME, v=version.save, f=FILENAME),
             strict=False,
         )
-        mocked_spark_df.write.options().save.assert_called_once_with(
+        mocked_spark_df.write.save.assert_called_once_with(
             "hdfs://{fn}/{f}/{v}/{f}".format(
                 fn=FOLDER_NAME, v=version.save, f=FILENAME
             ),
@@ -764,13 +882,13 @@ class TestSparkDataSetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save version `{ev.save}` did not match load version "
-            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
+            r"Save version '{ev.save}' did not match load version "
+            r"'{ev.load}' for SparkDataSet\(.+\)".format(ev=exact_version)
         )
 
         with pytest.warns(UserWarning, match=pattern):
             versioned_hdfs.save(mocked_spark_df)
-        mocked_spark_df.write.options().save.assert_called_once_with(
+        mocked_spark_df.write.save.assert_called_once_with(
             "hdfs://{fn}/{f}/{sv}/{f}".format(
                 fn=FOLDER_NAME, f=FILENAME, sv=exact_version.save
             ),
@@ -788,7 +906,7 @@ class TestSparkDataSetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save path `.+` for SparkDataSet\(.+\) must not exist "
+            r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -803,7 +921,7 @@ class TestSparkDataSetVersionedHdfs:
     def test_hdfs_warning(self, version):
         pattern = (
             "HDFS filesystem support for versioned SparkDataSet is in beta "
-            "and uses `hdfs.client.InsecureClient`, please use with caution"
+            "and uses 'hdfs.client.InsecureClient', please use with caution"
         )
         with pytest.warns(UserWarning, match=pattern):
             SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
@@ -846,7 +964,7 @@ class TestDataFlowSequentialRunner:
     def test_spark_pickle(self, is_async, data_catalog):
         """SparkDataSet(load) -> node -> PickleDataSet (save)"""
         pipeline = Pipeline([node(identity, "spark_in", "pickle_ds")])
-        pattern = ".* was not serialized due to.*"
+        pattern = ".* was not serialised due to.*"
         with pytest.raises(DataSetError, match=pattern):
             SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 

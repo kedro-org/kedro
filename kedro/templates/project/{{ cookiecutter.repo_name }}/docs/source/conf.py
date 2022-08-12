@@ -20,14 +20,13 @@
 import re
 
 from kedro.framework.cli.utils import find_stylesheets
-from recommonmark.transform import AutoStructify
 
 from {{ cookiecutter.python_package }} import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
 project = "{{ cookiecutter.python_package }}"
-author = "QuantumBlack"
+author = "Kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -53,7 +52,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "nbsphinx",
-    "recommonmark",
+    "myst_parser",
     "sphinx_copybutton",
 ]
 
@@ -150,7 +149,7 @@ latex_documents = [
         master_doc,
         "{{ cookiecutter.python_package }}.tex",
         "{{ cookiecutter.python_package }} Documentation",
-        "QuantumBlack",
+        "Kedro",
         "manual",
     )
 ]
@@ -223,6 +222,3 @@ def setup(app):
     # add Kedro stylesheets
     for stylesheet in find_stylesheets():
         app.add_css_file(stylesheet)
-    # enable rendering RST tables in Markdown
-    app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
-    app.add_transform(AutoStructify)

@@ -1,6 +1,5 @@
 from collections import namedtuple
 from itertools import cycle
-from os.path import join
 from pathlib import Path
 from unittest.mock import patch
 
@@ -10,10 +9,11 @@ from click.testing import CliRunner
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
-from kedro.framework.cli import get_project_context, load_entry_points
+from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.cli import KedroCLI, _init_plugins, cli
 from kedro.framework.cli.jupyter import jupyter_cli
+from kedro.framework.cli.micropkg import micropkg_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
 from kedro.framework.cli.registry import registry_cli
@@ -71,24 +71,6 @@ def fake_session(mocker):
     return mocked_session
 
 
-# pylint:disable=too-few-public-methods
-class DummyContext:
-    def __init__(self):
-        self.config_loader = "config_loader"
-
-    catalog = "catalog"
-    pipeline = "pipeline"
-    project_name = "dummy_name"
-    project_path = "dummy_path"
-
-
-@fixture
-def mocked_load_context(mocker):
-    return mocker.patch(
-        "kedro.framework.cli.cli.load_context", return_value=DummyContext()
-    )
-
-
 class TestCliCommands:
     def test_cli(self):
         """Run `kedro` without arguments."""
@@ -109,29 +91,19 @@ class TestCliCommands:
         assert result_abr.exit_code == 0
         assert version in result_abr.output
 
-    def test_info_contains_qb(self):
-        """Check that `kedro info` output contains
-        reference to QuantumBlack."""
-        result = CliRunner().invoke(cli, ["info"])
-
-        assert result.exit_code == 0
-        assert "QuantumBlack" in result.output
-
-    def test_info_contains_plugin_versions(self, entry_point, mocker):
-        get_distribution = mocker.patch("pkg_resources.get_distribution")
-        get_distribution().version = "1.0.2"
-        entry_point.module_name = "bob.fred"
+    def test_info_contains_plugin_versions(self, entry_point):
+        entry_point.dist.version = "1.0.2"
+        entry_point.module = "bob.fred"
 
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0
         assert (
-            "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project)"
+            "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project,starters)"
             in result.output
         )
 
         entry_point.load.assert_not_called()
 
-    @mark.usefixtures("entry_points")
     def test_info_no_plugins(self):
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0
@@ -154,13 +126,11 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["docs"])
 
         assert result.exit_code == 0
-        for each in ("Opening file", join("html", "index.html")):
-            assert each in result.output
+        expected = f"https://kedro.readthedocs.io/en/{version}"
 
         assert patched_browser.call_count == 1
         args, _ = patched_browser.call_args
-        for each in ("file://", join("kedro", "framework", "html", "index.html")):
-            assert each in args[0]
+        assert expected in args[0]
 
 
 class TestCommandCollection:
@@ -322,59 +292,51 @@ class TestCliUtils:
         assert actual == expected
 
 
-@mark.usefixtures("mocked_load_context")
-class TestGetProjectContext:
-    def test_get_context_without_project_path(self, mocked_load_context):
-        dummy_context = get_project_context("context")
-        mocked_load_context.assert_called_once_with(Path.cwd())
-        assert isinstance(dummy_context, DummyContext)
-
-    def test_get_context_with_project_path(self, tmpdir, mocked_load_context):
-        dummy_project_path = tmpdir.mkdir("dummy_project")
-        dummy_context = get_project_context("context", project_path=dummy_project_path)
-        mocked_load_context.assert_called_once_with(dummy_project_path)
-        assert isinstance(dummy_context, DummyContext)
-
-    def test_verbose(self):
-        assert not get_project_context("verbose")
-
-
 class TestEntryPoints:
     def test_project_groups(self, entry_points, entry_point):
         entry_point.load.return_value = "groups"
         groups = load_entry_points("project")
         assert groups == ["groups"]
-        entry_points.assert_called_once_with(group="kedro.project_commands")
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.project_commands"
+        )
 
-    def test_project_error_is_caught(self, entry_points, entry_point):
+    def test_project_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Loading project commands"):
-            load_entry_points("project")
-
-        entry_points.assert_called_once_with(group="kedro.project_commands")
+        entry_point.module = "project"
+        load_entry_points("project")
+        assert "Failed to load project commands" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.project_commands"
+        )
 
     def test_global_groups(self, entry_points, entry_point):
         entry_point.load.return_value = "groups"
         groups = load_entry_points("global")
         assert groups == ["groups"]
-        entry_points.assert_called_once_with(group="kedro.global_commands")
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.global_commands"
+        )
 
-    def test_global_error_is_caught(self, entry_points, entry_point):
+    def test_global_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Loading global commands from"):
-            load_entry_points("global")
-        entry_points.assert_called_once_with(group="kedro.global_commands")
+        entry_point.module = "global"
+        load_entry_points("global")
+        assert "Failed to load global commands" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.global_commands"
+        )
 
     def test_init(self, entry_points, entry_point):
         _init_plugins()
-        entry_points.assert_called_once_with(group="kedro.init")
+        entry_points.return_value.select.assert_called_once_with(group="kedro.init")
         entry_point.load().assert_called_once_with()
 
     def test_init_error_is_caught(self, entry_points, entry_point):
-        entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Initializing"):
+        entry_point.load.return_value.side_effect = Exception()
+        with raises(Exception):
             _init_plugins()
-        entry_points.assert_called_once_with(group="kedro.init")
+        entry_points.return_value.select.assert_called_once_with(group="kedro.init")
 
 
 class TestKedroCLI:
@@ -388,11 +350,13 @@ class TestKedroCLI:
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        assert len(kedro_cli.project_groups) == 5
+        print(kedro_cli.project_groups)
+        assert len(kedro_cli.project_groups) == 6
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
         ]
@@ -425,11 +389,12 @@ class TestKedroCLI:
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        assert len(kedro_cli.project_groups) == 6
+        assert len(kedro_cli.project_groups) == 7
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
             cli,
@@ -461,11 +426,12 @@ class TestKedroCLI:
 
         assert len(kedro_cli.global_groups) == 2
         assert kedro_cli.global_groups == [cli, create_cli]
-        assert len(kedro_cli.project_groups) == 6
+        assert len(kedro_cli.project_groups) == 7
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
             cli,
@@ -477,7 +443,7 @@ class TestKedroCLI:
         assert "Project specific commands from Kedro" in result.output
 
 
-@mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@mark.usefixtures("chdir_to_dummy_project")
 class TestRunCommand:
     @staticmethod
     @fixture(params=["run_config.yml", "run_config.json"])
@@ -496,7 +462,7 @@ class TestRunCommand:
         return config_path
 
     @staticmethod
-    @fixture()
+    @fixture
     def fake_run_config_with_params(fake_run_config, request):
         config = anyconfig.load(fake_run_config)
         config["run"].update(request.param)
@@ -552,22 +518,11 @@ class TestRunCommand:
         assert isinstance(runner, SequentialRunner)
         assert not runner._is_async
 
-    def test_with_sequential_runner_and_parallel_flag(
-        self, fake_project_cli, fake_session
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel", "--runner=SequentialRunner"]
-        )
-        assert result.exit_code
-        assert "Please use either --parallel or --runner" in result.stdout
-
-        fake_session.return_value.run.assert_not_called()
-
-    def test_run_successfully_parallel_via_flag(
+    def test_run_successfully_parallel(
         self, fake_project_cli, fake_metadata, fake_session, mocker
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel"], obj=fake_metadata
+            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
         )
         assert not result.exit_code
         fake_session.run.assert_called_once_with(
@@ -582,17 +537,6 @@ class TestRunCommand:
             pipeline_name=None,
         )
 
-        runner = fake_session.run.call_args_list[0][1]["runner"]
-        assert isinstance(runner, ParallelRunner)
-        assert not runner._is_async
-
-    def test_run_successfully_parallel_via_name(
-        self, fake_project_cli, fake_metadata, fake_session
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
-        )
-        assert not result.exit_code
         runner = fake_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, ParallelRunner)
         assert not runner._is_async
@@ -779,8 +723,8 @@ class TestRunCommand:
         assert result.exit_code, result.output
 
         expected_output = (
-            f"Error: Expected the form of `load_version` to be "
-            f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+            f"Error: Expected the form of 'load_version' to be "
+            f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
             f"found {load_version} instead\n"
         )
         assert expected_output in result.output

@@ -17,8 +17,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import re
-
-from recommonmark.transform import AutoStructify
 from {{cookiecutter.python_package}} import __version__ as release
 
 from kedro.framework.cli.utils import find_stylesheets
@@ -26,7 +24,7 @@ from kedro.framework.cli.utils import find_stylesheets
 # -- Project information -----------------------------------------------------
 
 project = "{{ cookiecutter.python_package }}"
-author = "QuantumBlack"
+author = "Kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -52,8 +50,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "nbsphinx",
-    "recommonmark",
     "sphinx_copybutton",
+    "myst_parser",
 ]
 
 # enable autosummary plugin (table of contents for modules/classes/class
@@ -149,7 +147,7 @@ latex_documents = [
         master_doc,
         "{{ cookiecutter.python_package }}.tex",
         "{{ cookiecutter.python_package }} Documentation",
-        "QuantumBlack",
+        "Kedro",
         "manual",
     )
 ]
@@ -222,6 +220,3 @@ def setup(app):
     # add Kedro stylesheets
     for stylesheet in find_stylesheets():
         app.add_css_file(stylesheet)
-    # enable rendering RST tables in Markdown
-    app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
-    app.add_transform(AutoStructify)

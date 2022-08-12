@@ -1,10 +1,9 @@
-# pylint: disable=unused-argument
-from random import random
 from typing import Any, Dict
 
 import pandas as pd
 import pytest
 
+from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
@@ -14,6 +13,7 @@ from kedro.io import (
 )
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
+from tests.runner.conftest import identity, sink, source
 
 
 @pytest.fixture
@@ -36,67 +36,31 @@ def conflicting_feed_dict(pandas_df_feed_dict):
     return {"ds1": ds1, "ds3": ds3}
 
 
-def source():
-    return "stuff"
-
-
-def identity(arg):
-    return arg
-
-
-def sink(arg):
-    pass
-
-
-def return_none(arg):
-    return None
-
-
 def multi_input_list_output(arg1, arg2):
     return [arg1, arg2]
 
 
-@pytest.fixture
-def branchless_no_input_pipeline():
-    """The pipeline runs in the order A->B->C->D->E."""
-    return Pipeline(
-        [
-            node(identity, "D", "E", name="node1"),
-            node(identity, "C", "D", name="node2"),
-            node(identity, "A", "B", name="node3"),
-            node(identity, "B", "C", name="node4"),
-            node(random, None, "A", name="node5"),
-        ]
-    )
+class TestValidSequentialRunner:
+    def test_run_with_plugin_manager(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = SequentialRunner().run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
+        assert "Z" in result
+        assert result["Z"] == (42, 42, 42)
 
-
-@pytest.fixture
-def branchless_pipeline():
-    return Pipeline(
-        [
-            node(identity, "ds1", "ds2", name="node1"),
-            node(identity, "ds2", "ds3", name="node2"),
-        ]
-    )
-
-
-@pytest.fixture
-def saving_result_pipeline():
-    return Pipeline([node(identity, "ds", "dsX")])
-
-
-@pytest.fixture
-def saving_none_pipeline():
-    return Pipeline(
-        [node(random, None, "A"), node(return_none, "A", "B"), node(identity, "B", "C")]
-    )
+    def test_run_without_plugin_manager(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        result = SequentialRunner().run(fan_out_fan_in, catalog)
+        assert "Z" in result
+        assert result["Z"] == (42, 42, 42)
 
 
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSeqentialRunnerBranchlessPipeline:
-    def test_no_input_seq(self, is_async, branchless_no_input_pipeline):
+    def test_no_input_seq(self, is_async, branchless_no_input_pipeline, catalog):
         outputs = SequentialRunner(is_async=is_async).run(
-            branchless_no_input_pipeline, DataCatalog()
+            branchless_no_input_pipeline, catalog
         )
         assert "E" in outputs
         assert len(outputs) == 1
@@ -114,10 +78,10 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert "ds3" in outputs
         assert outputs["ds3"]["data"] == 42
 
-    def test_node_returning_none(self, is_async, saving_none_pipeline):
-        pattern = "Saving `None` to a `DataSet` is not allowed"
+    def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
+        pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
-            SequentialRunner(is_async=is_async).run(saving_none_pipeline, DataCatalog())
+            SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
     def test_result_saved_not_returned(self, is_async, saving_result_pipeline):
         """The pipeline runs ds->dsX but save does not save the output."""
@@ -157,7 +121,11 @@ def unfinished_outputs_pipeline():
 @pytest.mark.parametrize("is_async", [False, True])
 class TestSeqentialRunnerBranchedPipeline:
     def test_input_seq(
-        self, is_async, memory_catalog, unfinished_outputs_pipeline, pandas_df_feed_dict
+        self,
+        is_async,
+        memory_catalog,
+        unfinished_outputs_pipeline,
+        pandas_df_feed_dict,
     ):
         memory_catalog.add_feed_dict(pandas_df_feed_dict, replace=True)
         outputs = SequentialRunner(is_async=is_async).run(
@@ -188,11 +156,11 @@ class TestSeqentialRunnerBranchedPipeline:
         assert outputs["ds8"]["data"] == 0
         assert isinstance(outputs["ds6"], pd.DataFrame)
 
-    def test_unsatisfied_inputs(self, is_async, unfinished_outputs_pipeline):
+    def test_unsatisfied_inputs(self, is_async, unfinished_outputs_pipeline, catalog):
         """ds1, ds2 and ds3 were not specified."""
         with pytest.raises(ValueError, match=r"not found in the DataCatalog"):
             SequentialRunner(is_async=is_async).run(
-                unfinished_outputs_pipeline, DataCatalog()
+                unfinished_outputs_pipeline, catalog
             )
 
 

@@ -282,9 +282,11 @@ def find_pipelines() -> Dict[str, Pipeline]:
     ).iterdir():
         if not pipeline_dir.is_dir():
             continue
+
         pipeline_name = pipeline_dir.name
         if pipeline_name == "__pycache__":
             continue
+
         try:
             pipeline_module = importlib.import_module(
                 f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
@@ -297,6 +299,7 @@ def find_pipelines() -> Dict[str, Pipeline]:
                 f"'find_pipelines'."
             )
             continue
+
         if not hasattr(pipeline_module, "create_pipeline"):
             warnings.warn(
                 f"The '{pipeline_module.__name__}' module does not "
@@ -304,6 +307,7 @@ def find_pipelines() -> Dict[str, Pipeline]:
                 f"defined therein will be returned by 'find_pipelines'."
             )
             continue
+
         obj = getattr(pipeline_module, "create_pipeline")()
         if not isinstance(obj, Pipeline):
             warnings.warn(
@@ -314,5 +318,6 @@ def find_pipelines() -> Dict[str, Pipeline]:
                 f"'find_pipelines'."
             )
             continue
+
         pipelines_dict[pipeline_name] = obj
     return pipelines_dict

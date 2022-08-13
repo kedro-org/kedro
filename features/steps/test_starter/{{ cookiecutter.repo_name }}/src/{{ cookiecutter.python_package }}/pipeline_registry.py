@@ -3,25 +3,17 @@ from typing import Dict
 
 from kedro.pipeline import Pipeline, pipeline
 
-from {{cookiecutter.python_package}}.pipelines import data_engineering as de
-from {{cookiecutter.python_package}}.pipelines import data_science as ds
-
 
 def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipelines.
 
+    Since Kedro 0.18.3, projects can use the ``find_pipelines`` function
+    to autodiscover pipelines. However, projects that require more fine-
+    grained control can still construct the pipeline mapping without it.
+
     Returns:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
-    data_engineering_pipeline = de.create_pipeline()
-    data_processing_pipeline = pipeline(
-        de.create_pipeline(), namespace="data_processing"
-    )
-    data_science_pipeline = ds.create_pipeline()
-
-    return {
-        "de": data_engineering_pipeline,
-        "ds": data_science_pipeline,
-        "dp": data_processing_pipeline,
-        "__default__": data_engineering_pipeline + data_science_pipeline,
-    }
+    pipelines = find_pipelines()
+    pipelines["__default__"] = sum(pipelines.values())
+    return pipelines

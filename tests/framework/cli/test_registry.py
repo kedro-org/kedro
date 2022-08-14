@@ -10,15 +10,15 @@ def yaml_dump_mock(mocker):
 @pytest.fixture
 def pipelines_dict():
     pipelines = {
-        "de": ["split_data (split_data)"],
-        "ds": [
+        "data_engineering": ["split_data (split_data)"],
+        "data_science": [
             "train_model (train_model)",
             "predict (predict)",
             "report_accuracy (report_accuracy)",
         ],
-        "dp": ["data_processing.split_data (split_data)"],
+        "data_processing": ["data_processing.split_data (split_data)"],
     }
-    pipelines["__default__"] = pipelines["de"] + pipelines["ds"]
+    pipelines["__default__"] = pipelines["data_engineering"] + pipelines["data_science"]
     return pipelines
 
 
@@ -36,7 +36,10 @@ def test_list_registered_pipelines(
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestRegistryDescribeCommand:
-    @pytest.mark.parametrize("pipeline_name", ["de", "ds", "dp", "__default__"])
+    @pytest.mark.parametrize(
+        "pipeline_name",
+        ["data_engineering", "data_science", "data_processing", "__default__"],
+    )
     def test_describe_registered_pipeline(
         self,
         fake_project_cli,
@@ -63,7 +66,7 @@ class TestRegistryDescribeCommand:
         assert result.exit_code
         expected_output = (
             "Error: 'missing' pipeline not found. Existing pipelines: "
-            "[__default__, de, dp, ds]\n"
+            "[__default__, data_engineering, data_processing, data_science]\n"
         )
         assert expected_output in result.output
 

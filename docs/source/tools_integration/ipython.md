@@ -15,7 +15,7 @@ There are reasons why you may want to use a Notebook, although in general, the p
 
 The recommended way to interact with Kedro in IPython and Jupyter is through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`. An [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/) is an importable Python module that has a couple of special functions to load and unload it.
 
-The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro`  [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
 The simplest way to make use of the Kedro IPython extension is through the following commands:
 * `kedro ipython`. This launches an IPython shell with the extension already loaded and is equivalent to the command `ipython --ext kedro.extras.extensions.ipython`.
@@ -23,6 +23,10 @@ The simplest way to make use of the Kedro IPython extension is through the follo
 * `kedro jupyter lab`. This creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected.
 
 Running any of the above from within your Kedro project will make the `catalog`, `context`, `pipelines` and `session` variables immediately accessible to you.
+
+```{note}
+If these variables are not available then Kedro has not been able to load your project. This could be, for example, due to a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro ipython`, `kedro jupyter notebook` or `kedro jupyter lab`. Alternatively, it can be accessed inside the IPython or Jupyter session directly with `%reload_kedro`.
+```
 
 ### Managed Jupyter instances
 
@@ -33,13 +37,13 @@ In [1]: %load_ext kedro.extras.extensions.ipython
 
 If your IPython or Jupyter instance was launched from outside your Kedro project then you will need to run a second line magic to set the project path so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
 ```ipython
-In [2]: %reload_kedro <path_to_project_root>
+In [2]: %reload_kedro <project_root>
 ```
 The Kedro IPython extension remembers the project path so that subsequent calls to `%reload_kedro` do not need to specify it:
 
 ```ipython
 In [1]: %load_ext kedro.extras.extensions.ipython
-In [2]: %reload_kedro <path_to_project_root>
+In [2]: %reload_kedro <project_root>
 In [3]: %reload_kedro
 ```
 
@@ -183,7 +187,7 @@ You can also specify the following optional arguments for `session.run`:
 
 ## Kedro and Jupyter
 
-We recommend that you store your Jupyter Notebooks in the `notebooks` folder of your Kedro project. If you are using `kedro jupyter notebook` or `kedro jupyter lab` then you should use the default kernel selected for you, which is listed as `Kedro (<project_package_name>)`. This will run the Kedro IPython extension automatically when the kernel is started, so that the `catalog`, `context`, `pipelines` and `session` variables are available immediately to you.
+We recommend that you store your Jupyter Notebooks in the `notebooks` folder of your Kedro project. If you are using `kedro jupyter notebook` or `kedro jupyter lab` then you should use the default kernel selected for you, which is listed as `Kedro (<package_name>)`. This will run the Kedro IPython extension automatically when the kernel is started, so that the `catalog`, `context`, `pipelines` and `session` variables are available immediately to you.
 
 ```{note}
 Restarting the kernel will reload the Kedro IPython extension and hence refresh the `catalog`, `context`, `pipelines` and `session` variables.
@@ -200,10 +204,10 @@ If you are not able to execute `kedro jupyter notebook` or `kedro jupyter lab` t
 
 ### Manage Jupyter kernels
 
-Behind the scenes, the `kedro jupyter notebook` and `kedro jupyter lab` commands create a Jupyter kernel named `kedro_<project_package_name>`. This kernel is identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs) that automatically loads `kedro.extras.extensions.ipython` when the kernel is started. The kernel specification is installed at a user level rather than system-wide.
+Behind the scenes, the `kedro jupyter notebook` and `kedro jupyter lab` commands create a Jupyter kernel named `kedro_<package_name>`. This kernel is identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs) that automatically loads `kedro.extras.extensions.ipython` when the kernel is started. The kernel specification is installed at a user level rather than system-wide.
 
 ```{note}
-If a Jupyter kernel with the name `kedro_<project_package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook/lab` to replace the kernel specification with one that points to the new environment.
+If a Jupyter kernel with the name `kedro_<package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook/lab` to replace the kernel specification with one that points to the new environment.
 ```
 
 As each Kedro project has its own Jupyter kernel, you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel.

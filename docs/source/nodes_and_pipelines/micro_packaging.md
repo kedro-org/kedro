@@ -28,7 +28,7 @@ When you package your micro-package, such as a modular pipeline for example, Ked
             └── {{pipeline_name}}    <-- Pipeline tests
 ```
 
-Kedro will also include any requirements found in `src/<python_package>/pipelines/<micropkg_name>/requirements.txt` in the micro-package tar file. These requirements will later be taken into account when pulling a micro-package via `kedro micropkg pull`.
+Kedro will also include any requirements found in `src/<package_name>/pipelines/<micropkg_name>/requirements.txt` in the micro-package tar file. These requirements will later be taken into account when pulling a micro-package via `kedro micropkg pull`.
 
 ```{note}
 Kedro will not package the catalog config files even if those are present in `conf/<env>/catalog/<micropkg_name>.yml`.
@@ -66,7 +66,7 @@ You can pull a micro-package from a tar file by executing `kedro micropkg pull <
 
 * The `<package_name>` must either be a package name on PyPI or a path to the tar file.
 * Kedro will unpack the tar file, and install the files in following locations in your Kedro project:
-  * All the micro-package code in `src/<python_package>/<micropkg_name>/`
+  * All the micro-package code in `src/<package_name>/<micropkg_name>/`
   * Configuration files in `conf/<env>/parameters/<micropkg_name>.yml`, where `<env>` defaults to `base`.
   * To place parameters from a different config environment, run `kedro micropkg pull <micropkg_name> --env <env_name>`
   * Unit tests in `src/tests/<micropkg_name>`
@@ -79,11 +79,11 @@ If a micro-package has embedded requirements and a project `requirements.in` fil
 
 You can pull a micro-package from different locations, including local storage, PyPI and the cloud:
 
-| Operation                      | Command                                                                               |
-| ------------------------------ | ------------------------------------------------------------------------------------- |
-| Pulling from a local directory | `kedro micropkg pull <project-root>/src/dist/<pipeline_name>-0.1-py3-none-any.tar.gz` |
-| Pull from cloud storage        | `kedro micropkg pull s3://my_bucket/<pipeline_name>-0.1-py3-none-any.tar.gz`          |
-| Pull from PyPI-like endpoint   | `kedro micropkg pull <pypi-package-name>`                                             |
+| Operation                      | Command                                                                              |
+| ------------------------------ |--------------------------------------------------------------------------------------|
+| Pulling from a local directory | `kedro micropkg pull dist/<pipeline_name>-0.1-py3-none-any.tar.gz` |
+| Pull from cloud storage        | `kedro micropkg pull s3://my_bucket/<pipeline_name>-0.1-py3-none-any.tar.gz`         |
+| Pull from PyPI-like endpoint   | `kedro micropkg pull <pypi_package_name>`                                            |
 
 ### Providing `fsspec` arguments
 

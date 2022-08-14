@@ -5,6 +5,7 @@ import importlib
 import logging.config
 import operator
 import sys
+import traceback
 import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
@@ -296,7 +297,7 @@ def find_pipelines() -> Dict[str, Pipeline]:
                 f"An error occurred while importing the "
                 f"'{PACKAGE_NAME}.pipelines.{pipeline_name}' module. "
                 f"Nothing defined therein will be returned by "
-                f"'find_pipelines'."
+                f"'find_pipelines'.\n\n{traceback.format_exc()}"
             )
             continue
 

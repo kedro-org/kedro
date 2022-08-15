@@ -201,6 +201,10 @@ API documentation
     :imported-members:
     :noindex:
 
+.. automodule:: kedro.runner.run_node
+    :imported-members:
+    :noindex:
+
 .. autosummary::
    :toctree:
    :caption: API documentation

@@ -3,8 +3,6 @@ kedro.extras.datasets
 
 .. rubric:: Description
 
-.. automodule:: kedro.extras.datasets
-
 .. rubric:: Classes
 
 .. autosummary::

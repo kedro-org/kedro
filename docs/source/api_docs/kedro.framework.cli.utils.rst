@@ -3,44 +3,43 @@ kedro.framework.cli.utils
 
 .. rubric:: Description
 
-.. automodule:: kedro.framework.cli.utils
 
 
 
-   .. rubric:: Functions
+.. rubric:: Functions
 
-   .. autosummary::
-      :toctree:
+.. autosummary::
+   :toctree:
 
-      command_with_verbosity
-      env_option
-      find_stylesheets
-      forward_command
-      get_pkg_version
-      python_call
-      split_string
-
-
-
-
-
-   .. rubric:: Classes
-
-   .. autosummary::
-      :toctree:
-      :template: autosummary/class.rst
-
-      CommandCollection
+   command_with_verbosity
+   env_option
+   find_stylesheets
+   forward_command
+   get_pkg_version
+   python_call
+   split_string
 
 
 
 
 
-   .. rubric:: Exceptions
+.. rubric:: Classes
 
-   .. autosummary::
-      :toctree::
-         kedro.framework.cli.utils
-      :template: autosummary/class.rst
+.. autosummary::
+   :toctree:
+   :template: autosummary/class.rst
 
-      KedroCliError
+   CommandCollection
+
+
+
+
+
+.. rubric:: Exceptions
+
+.. autosummary::
+   :toctree::
+      kedro.framework.cli.utils
+   :template: autosummary/class.rst
+
+   KedroCliError

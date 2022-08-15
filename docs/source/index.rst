@@ -193,6 +193,7 @@ Welcome to Kedro's documentation!
    contribution/backwards_compatibility
    contribution/documentation_contributor_guidelines
    contribution/technical_steering_committee
+   kedro/config
 
 API documentation
 =================
@@ -200,7 +201,6 @@ API documentation
 .. automodule:: kedro.config
     :members:
     :noindex:
-    :toctree:
 
 .. automodule:: kedro.runner
     :members:

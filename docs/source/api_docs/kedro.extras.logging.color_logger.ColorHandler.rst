@@ -6,3 +6,4 @@ kedro.extras.logging.color\_logger.ColorHandler
 .. autoclass:: ColorHandler
 
 .. toctree::
+    kedro.extras.logging.color_logger.ColorHandler

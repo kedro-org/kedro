@@ -206,6 +206,10 @@ API documentation
     :members:
     :noindex:
 
+.. automodule:: kedro.framework.cli.utils
+    :members:
+    :noindex:
+
 .. automodule:: kedro.runner
     :members:
     :noindex:

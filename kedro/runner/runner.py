@@ -162,9 +162,14 @@ class AbstractRunner(ABC):
         pass
 
     def _suggest_resume_scenario(
-        self, pipeline: Pipeline, done_nodes: Iterable[Node], start: Node, catalog: DataCatalog
+        self,
+        pipeline: Pipeline,
+        done_nodes: Iterable[Node],
+        start: Node,
+        catalog: DataCatalog,
     ) -> None:
-        """remaining_nodes = set(pipeline.nodes) - set(done_nodes)
+        ancestors_to_run = self._find_ancestor_nodes_to_run(pipeline, start, catalog)
+        remaining_nodes = (set(pipeline.nodes) - set(done_nodes)) | ancestors_to_run
 
         postfix = ""
         if done_nodes:
@@ -181,15 +186,6 @@ class AbstractRunner(ABC):
             "argument to your previous command:\n%s",
             len(remaining_nodes),
             postfix,
-        )"""
-        first_persistent_ancestors = self._find_first_persistent_ancestors(
-            pipeline,
-            start,
-            catalog
-        )
-        postfix = str(first_persistent_ancestors)
-        self._logger.warning(
-            f"first good node(s) is / are: {postfix}",
         )
 
     def _find_ancestor_nodes_to_run(
@@ -208,18 +204,14 @@ class AbstractRunner(ABC):
                 stack.append(parent)
         return ancestor_nodes_to_run
 
-    def _enumerate_parents(
-        self, pipeline: Pipeline, child: Node
-    ) -> List[Node]:
+    def _enumerate_parents(self, pipeline: Pipeline, child: Node) -> List[Node]:
         """
         Returns the parents of a given node in a pipeline.
         """
         parent_pipeline = pipeline.only_nodes_with_outputs(*child.inputs)
         return parent_pipeline.nodes
 
-    def _has_persistent_inputs(
-        self, node: Node, catalog: DataCatalog
-    ) -> bool:
+    def _has_persistent_inputs(self, node: Node, catalog: DataCatalog) -> bool:
         """
         Return true if the node has persistent output, false if not.
         """
@@ -227,6 +219,7 @@ class AbstractRunner(ABC):
             if type(catalog._data_sets[node_input]) == MemoryDataSet:
                 return False
         return True
+
 
 def run_node(
     node: Node,

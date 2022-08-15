@@ -198,7 +198,7 @@ API documentation
 =================
 
 .. automodule:: kedro.config
-    :imported-members:
+    :members:
     :noindex:
 
 .. automodule:: kedro.runner

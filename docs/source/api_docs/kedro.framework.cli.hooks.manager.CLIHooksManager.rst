@@ -6,4 +6,4 @@ kedro.framework.cli.hooks.manager.CLIHooksManager
 .. autoclass:: CLIHooksManager
 
 .. toctree::
-    kedro.framework.cli.cli.KedroCLI
+    kedro.framework.cli.hooks.manager.CLIHooksManager

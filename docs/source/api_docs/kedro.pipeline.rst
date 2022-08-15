@@ -3,8 +3,6 @@ kedro.pipeline
 
 .. rubric:: Description
 
-.. automodule:: kedro.pipeline
-
 .. rubric:: Functions
 
 .. autosummary::

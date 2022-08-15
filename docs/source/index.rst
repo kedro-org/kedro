@@ -197,16 +197,6 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
-.. automodule:: kedro.config
-    :members:
-    :noindex:
-
-.. autoclass:: kedro.config::ConfigLoader
-
-.. automodule:: kedro.runner
-    :members:
-    :noindex:
-
 .. autosummary::
    :toctree:
    :caption: API documentation
@@ -214,7 +204,9 @@ API documentation
    :recursive:
 
    kedro
+   kedro.config
    kedro.config.ConfigLoader
+   kedro.runner
 
 Indices and tables
 ==================

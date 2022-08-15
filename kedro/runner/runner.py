@@ -192,21 +192,21 @@ class AbstractRunner(ABC):
             f"first good node(s) is / are: {postfix}",
         )
 
-    def _find_first_persistent_ancestors(
+    def _find_ancestor_nodes_to_run(
         self, pipeline: Pipeline, start: Node, catalog: DataCatalog
     ) -> Set[Node]:
         """
         Depth-first search approach to finding the first ancestors
         """
-        stack, first_persistent_ancestors = [start], set()
+        stack, ancestor_nodes_to_run = [start], set()
         while stack:
             current_node = stack.pop()
+            ancestor_nodes_to_run.add(current_node)
             if self._has_persistent_inputs(current_node, catalog):
-                first_persistent_ancestors.add(current_node)
                 continue
             for parent in self._enumerate_parents(pipeline, current_node):
                 stack.append(parent)
-        return first_persistent_ancestors
+        return ancestor_nodes_to_run
 
     def _enumerate_parents(
         self, pipeline: Pipeline, child: Node
@@ -218,7 +218,7 @@ class AbstractRunner(ABC):
         return parent_pipeline.nodes
 
     def _has_persistent_inputs(
-            self, node: Node, catalog: DataCatalog
+        self, node: Node, catalog: DataCatalog
     ) -> bool:
         """
         Return true if the node has persistent output, false if not.

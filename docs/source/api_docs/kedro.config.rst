@@ -9,6 +9,7 @@ kedro.config
    :toctree:
    :template: autosummary/class.rst
 
+   kedro.config
    kedro.config.ConfigLoader
    kedro.config.TemplatedConfigLoader
 

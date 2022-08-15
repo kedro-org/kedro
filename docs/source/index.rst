@@ -193,7 +193,7 @@ Welcome to Kedro's documentation!
    contribution/backwards_compatibility
    contribution/documentation_contributor_guidelines
    contribution/technical_steering_committee
-   kedro/config
+   
 
 API documentation
 =================

@@ -200,6 +200,7 @@ API documentation
 .. automodule:: kedro.config
     :members:
     :noindex:
+    :toctree:
 
 .. automodule:: kedro.runner
     :members:

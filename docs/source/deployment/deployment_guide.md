@@ -10,7 +10,7 @@ If your pipeline is sizeable, you will want to run parts of it on separate machi
 
 We also provide information to help you deploy to the following:
 
-* to [Airflow](airflow_astronomer.md)
+<!-- * to [Airflow](airflow_astronomer.md) -->
 * to [Argo Workflows](argo.md)
 * to [Prefect](prefect.md)
 * to [Kubeflow Workflows](kubeflow.md)

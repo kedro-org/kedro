@@ -201,8 +201,8 @@ API documentation
     :imported-members:
     :noindex:
 
-.. automodule:: kedro.runner.run_node
-    :imported-members:
+.. automodule:: kedro.runner
+    :members:
     :noindex:
 
 .. autosummary::

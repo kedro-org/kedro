@@ -197,11 +197,11 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
-.. autoclass:: kedro.config::ConfigLoader
+.. automodule:: kedro.config
     :members:
     :noindex:
-
-.. automodule:: kedro.config
+    
+.. autoclass:: kedro.config::ConfigLoader
     :members:
     :noindex:
 

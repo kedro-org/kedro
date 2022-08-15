@@ -199,6 +199,7 @@ API documentation
 
 .. automodule:: kedro.config
     :imported-members:
+    :noindex:
 
 .. autosummary::
    :toctree:

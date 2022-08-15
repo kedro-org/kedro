@@ -204,7 +204,6 @@ API documentation
    :recursive:
 
    kedro
-   
 
 Indices and tables
 ==================

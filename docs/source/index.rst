@@ -214,6 +214,7 @@ API documentation
    :recursive:
 
    kedro
+   kedro.config.ConfigLoader
 
 Indices and tables
 ==================

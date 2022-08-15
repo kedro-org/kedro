@@ -197,12 +197,13 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
-.. automodule:: kedro.config
+.. automodule:: kedro.config.ConfigLoader
     :members:
     :noindex:
 
-.. automodule:: kedro.config.ConfigLoader
+.. automodule:: kedro.config
     :members:
+    :noindex:
 
 .. automodule:: kedro.runner
     :members:

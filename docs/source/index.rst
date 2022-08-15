@@ -197,6 +197,9 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
+.. automodule::
+    :members:
+
 .. autosummary::
    :toctree:
    :caption: API documentation

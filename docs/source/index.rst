@@ -202,6 +202,10 @@ API documentation
     :members:
     :noindex:
 
+.. automodule:: kedro.extras.datasets
+    :members:
+    :noindex:
+
 .. automodule:: kedro.runner
     :members:
     :noindex:

@@ -201,9 +201,8 @@ API documentation
     :members:
     :noindex:
 
-.. autoclass:: kedro.config.ConfigLoader
+.. automodule:: kedro.config.ConfigLoader
     :members:
-    :noindex:
 
 .. automodule:: kedro.runner
     :members:

@@ -382,12 +382,12 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         if unregistered_nodes:
             # check if unregistered nodes are available under namespace
             namespaces = []
-            for name in node_names:
+            for unregistered_node in unregistered_nodes:
                 namespaces.extend(
                     [
                         node_name
                         for node_name in self._nodes_by_name.keys()
-                        if node_name.endswith(f".{name}")
+                        if node_name.endswith(f".{unregistered_node}")
                     ]
                 )
             if namespaces:

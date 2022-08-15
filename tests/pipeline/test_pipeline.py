@@ -821,8 +821,11 @@ class TestPipelineFilterHelpers:
         # "Pipeline does not contain nodes named ['node1', 'node2'].
         # Did you mean: ['katie.node1', 'lisa.node2']?"
         pattern = (
-            rf"('.*\.{non_namespaced_node_names[0]}')+.*"
-            rf"('.*\.{non_namespaced_node_names[1]}')+"
+            rf"(('.*\.{non_namespaced_node_names[0]}')+.*"
+            rf"('.*\.{non_namespaced_node_names[1]}')+)"
+            rf"|"  # use OR operator because ordering is unspecified
+            rf"(('.*\.{non_namespaced_node_names[1]}')+.*"
+            rf"('.*\.{non_namespaced_node_names[0]}')+)"
         )
         full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):

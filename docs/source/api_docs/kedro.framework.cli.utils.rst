@@ -47,4 +47,4 @@ kedro.framework.cli.utils
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.framework.cli.utils::KedroCliError
+   kedro.framework.cli.utils.KedroCliError

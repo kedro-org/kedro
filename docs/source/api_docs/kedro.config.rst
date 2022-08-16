@@ -10,6 +10,7 @@ kedro.config
    :template: autosummary/class.rst
 
    kedro.config
+   kedro.config.AbstractConfigLoader
    kedro.config.ConfigLoader
    kedro.config.TemplatedConfigLoader
 

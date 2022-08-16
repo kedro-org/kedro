@@ -6,4 +6,4 @@ kedro.framework.session.store.BaseSessionStore
 .. autoclass:: BaseSessionStore
 
 .. toctree::
-    edro.framework.session.store.BaseSessionStore
+    kedro.framework.session.store.BaseSessionStore

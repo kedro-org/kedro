@@ -225,7 +225,6 @@ API documentation
     :noindex:
 
 .. autosummary::
-   :toctree:
    :caption: API documentation
    :template: autosummary/module.rst
    :recursive:

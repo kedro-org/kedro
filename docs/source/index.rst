@@ -210,6 +210,9 @@ API documentation
     :members:
     :noindex:
 
+.. automodule:: kedro.framework.cli.hooks
+    :members:
+
 .. automodule:: kedro.framework.hooks
     :members:
 

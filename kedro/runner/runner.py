@@ -168,16 +168,20 @@ class AbstractRunner(ABC):
         start: Node,
         catalog: DataCatalog,
     ) -> None:
-        ancestors_to_run = self._find_ancestor_nodes_to_run(pipeline, start, catalog)
-        remaining_nodes = (set(pipeline.nodes) - set(done_nodes)) | ancestors_to_run
+        remaining_nodes = set(pipeline.nodes) - set(done_nodes)
 
         postfix = ""
         if done_nodes:
             node_names = (n.name for n in remaining_nodes)
             resume_p = pipeline.only_nodes(*node_names)
-
             start_p = resume_p.only_nodes_with_inputs(*resume_p.inputs())
-            start_node_names = (n.name for n in start_p.nodes)
+
+            # find the nearest persistent ancestors of the nodes in start_p
+            start_p_persistent_ancestors = self._find_persistent_ancestors(
+                pipeline, start_p.nodes, catalog
+            )
+
+            start_node_names = (n.name for n in start_p_persistent_ancestors)
             postfix += f"  --from-nodes \"{','.join(start_node_names)}\""
 
         self._logger.warning(
@@ -188,20 +192,22 @@ class AbstractRunner(ABC):
             postfix,
         )
 
-    def _find_ancestor_nodes_to_run(
-        self, pipeline: Pipeline, start: Node, catalog: DataCatalog
+    def _find_persistent_ancestors(
+        self, pipeline: Pipeline, boundary_nodes: Iterable[Node], catalog: DataCatalog
     ) -> Set[Node]:
         """
         Depth-first search approach to finding the first ancestors
         """
-        stack, ancestor_nodes_to_run = [start], set()
-        while stack:
-            current_node = stack.pop()
-            ancestor_nodes_to_run.add(current_node)
-            if self._has_persistent_inputs(current_node, catalog):
-                continue
-            for parent in self._enumerate_parents(pipeline, current_node):
-                stack.append(parent)
+        ancestor_nodes_to_run = set()
+        for boundary_node in boundary_nodes:
+            stack = [boundary_node]
+            while stack:
+                current_node = stack.pop()
+                if self._has_persistent_inputs(current_node, catalog):
+                    ancestor_nodes_to_run.add(current_node)
+                    continue
+                for parent in self._enumerate_parents(pipeline, current_node):
+                    stack.append(parent)
         return ancestor_nodes_to_run
 
     def _enumerate_parents(self, pipeline: Pipeline, child: Node) -> List[Node]:

@@ -12,12 +12,12 @@ kedro.framework.cli.utils
    :toctree:
 
    kedro.framework.cli.utils.command_with_verbosity
-   env_option
-   find_stylesheets
-   forward_command
-   get_pkg_version
-   python_call
-   split_string
+   kedro.framework.cli.utils.env_option
+   kedro.framework.cli.utils.find_stylesheets
+   kedro.framework.cli.utils.forward_command
+   kedro.framework.cli.utils.get_pkg_version
+   kedro.framework.cli.utils.python_call
+   kedro.framework.cli.utils.split_string
 
 
 

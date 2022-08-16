@@ -7,8 +7,8 @@ In scope of this deployment, we are interested in [Prefect Server](https://docs.
 ```{note}
 Prefect Server ships out-of-the-box with a fully featured user interface.
 ```
-Please note that this deployment has been tested using of kedro 0.17.6, 0.17.7 and 0.18.2 and prefect version 1.1.0.
-The current implementation will not work for prefect 2.0.0.
+Please note that this deployment has been tested using kedro 0.17.6, 0.17.7 and 0.18.2 with prefect version 1.1.0.
+The current implementation has not been tested with prefect 2.0.0.
 ## Prerequisites
 
 To use Prefect Core and Prefect Server, ensure you have the following prerequisites in place:

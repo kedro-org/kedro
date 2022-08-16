@@ -1,5 +1,6 @@
 kedro
 =====
-:orphan:
+
+.. orphan::
 
 .. rubric:: Description

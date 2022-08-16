@@ -7,3 +7,11 @@ kedro.framework.hooks
    :toctree:
 
    kedro.framework.hooks
+
+.. rubric:: Classes
+
+.. autosummary::
+   :toctree:
+   :template: autosummary/class.rst
+
+   kedro.framework.hooks.specs.NodeSpecs

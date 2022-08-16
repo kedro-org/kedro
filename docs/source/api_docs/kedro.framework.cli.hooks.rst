@@ -1,5 +1,5 @@
 kedro.framework.cli.hooks
-=====================
+=========================
 
 .. rubric:: Description
 

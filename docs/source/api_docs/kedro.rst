@@ -1,5 +1,6 @@
 kedro
 =====
+.. currentmodule:: kedro
 
 .. rubric:: Description
 

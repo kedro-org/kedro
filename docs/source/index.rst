@@ -198,6 +198,10 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
+.. automodule:: kedro
+    :members:
+    :noindex:
+
 .. automodule:: kedro.config
     :members:
     :noindex:

@@ -29,7 +29,7 @@ kedro.framework.cli.utils
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.framework.cli.utils::CommandCollection
+   kedro.framework.cli.utils.CommandCollection
 
 
 

@@ -3,6 +3,9 @@ kedro.runner
 
 .. rubric:: Description
 
+.. toctree::
+    kedro.runner
+
 .. rubric:: Functions
 
 .. autosummary::

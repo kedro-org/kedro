@@ -3,6 +3,9 @@ kedro.pipeline
 
 .. rubric:: Description
 
+.. toctree::
+    kedro.pipeline
+
 .. rubric:: Functions
 
 .. autosummary::

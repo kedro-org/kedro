@@ -3,6 +3,10 @@ kedro.config
 
 .. rubric:: Description
 
+.. autosummary::
+
+   kedro.config
+
 .. rubric:: Classes
 
 .. autosummary::

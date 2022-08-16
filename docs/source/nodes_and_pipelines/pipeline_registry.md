@@ -1,6 +1,6 @@
 # The pipeline registry
 
-Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that return a mapping from pipeline names to [`Pipeline`](/kedro.pipeline.Pipeline) objects. For example, the pipeline registry in the [Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) could define the following `register_pipelines()` function that exposes the data processing pipeline, the data science pipeline, and a third, default pipeline that combines both of the aforementioned pipelines:
+Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<package_name>/pipeline_registry.py`. The `pipeline_registry` module must contain a top-level `register_pipelines()` function that returns a mapping from pipeline names to [`Pipeline`](/kedro.pipeline.Pipeline) objects. For example, the pipeline registry in the [Kedro starter for the completed spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) could define the following `register_pipelines()` function that exposes the data processing pipeline, the data science pipeline, and a third, default pipeline that combines both of the aforementioned pipelines:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:

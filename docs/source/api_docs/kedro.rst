@@ -1,7 +1,5 @@
 kedro
 =====
+:orphan:
 
 .. rubric:: Description
-
-.. toctree::
-   :orphan:

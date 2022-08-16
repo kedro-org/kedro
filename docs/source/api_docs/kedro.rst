@@ -5,3 +5,5 @@ kedro
 
 .. autosummary::
    :toctree:
+
+   contents

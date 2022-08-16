@@ -6,5 +6,3 @@ kedro
 
 .. autosummary::
    :toctree:
-
-   kedro

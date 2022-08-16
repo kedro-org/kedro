@@ -42,4 +42,4 @@ kedro.framework.cli.utils
       kedro.framework.cli.utils
    :template: autosummary/class.rst
 
-   KedroCliError
+   kedro.framework.cli.utils::KedroCliError

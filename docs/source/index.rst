@@ -227,7 +227,6 @@ API documentation
    :recursive:
 
    kedro
-   kedro.config
 
 Indices and tables
 ==================

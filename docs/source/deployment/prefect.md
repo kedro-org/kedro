@@ -7,7 +7,8 @@ In scope of this deployment, we are interested in [Prefect Server](https://docs.
 ```{note}
 Prefect Server ships out-of-the-box with a fully featured user interface.
 ```
-
+Please note that this deployment has been tested using of kedro 0.17.6, 0.17.7 and 0.18.2 and prefect version 1.1.0.
+The current implementation will not work for prefect 2.0.0.
 ## Prerequisites
 
 To use Prefect Core and Prefect Server, ensure you have the following prerequisites in place:
@@ -111,7 +112,7 @@ class KedroInitTask(Task):
         self.env = env
         super().__init__(name=f"{package_name}_initialization", *args, **kwargs)
 
-    def run(self) -> Tuple[DataCatalog, KedroSession]:
+    def run(self) -> Tuple[DataCatalog, str]:
         """Initializes a Kedro session and returns the DataCatalog and KedroSession"""
         # bootstrap project within task / flow scope
         bootstrap_project(self.project_path)
@@ -128,7 +129,7 @@ class KedroInitTask(Task):
         unregistered_ds = pipeline.data_sets() - set(catalog.list())  # type: ignore[union-attr]
         for ds_name in unregistered_ds:
             catalog.add(ds_name, MemoryDataSet())
-        return catalog, session
+        return catalog, session.session_id
 
 
 class KedroTask(Task):
@@ -138,8 +139,11 @@ class KedroTask(Task):
         self._node = node
         super().__init__(name=node.name, tags=node.tags)
 
-    def run(self, catalog, session):
-        run_node(self._node, catalog, _create_hook_manager(), session.session_id)
+    def run(self, argument_tuple: Tuple[DataCatalog, str]):
+        # argument_tuple definition: (data_catalog, session_id)
+        run_node(
+            self._node, argument_tuple[0], _create_hook_manager(), argument_tuple[1]
+        )
 
 
 def instantiate_task(
@@ -186,7 +190,7 @@ def generate_flow(
 
     Returns: None
     """
-    catalog, session = init_task
+    child_task_args = init_task
     for task in tasks.values():
         node_task = task["task"]
         if len(task["parent_tasks"]) == 0:
@@ -194,8 +198,10 @@ def generate_flow(
             parent_tasks = [init_task]
         else:
             parent_tasks = task["parent_tasks"]
-        # Set upstream tasks and bind required kwargs
-        node_task.bind(upstream_tasks=parent_tasks, catalog=catalog, session=session)  # type: ignore[union-attr]
+        # Set upstream tasks and bind required kwargs.
+        # Note: Unpacking the return from init tasks will generate two
+        # sub-tasks in the prefect graph. To avoid this we pass the init return on unpacked.
+        node_task.bind(upstream_tasks=parent_tasks, argument_tuple=child_task_args)
 
 
 def instantiate_client(project_name: str):

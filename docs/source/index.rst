@@ -226,7 +226,6 @@ API documentation
    :template: autosummary/module.rst
    :recursive:
 
-   kedro
 
 Indices and tables
 ==================

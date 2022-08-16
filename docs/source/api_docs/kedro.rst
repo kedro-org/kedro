@@ -3,7 +3,7 @@ kedro
 
 .. rubric:: Description
 
-.. autosummary::
-   :toctree:
+.. toctree::
+   :maxdepth: 1
 
-   contents
+   kedro

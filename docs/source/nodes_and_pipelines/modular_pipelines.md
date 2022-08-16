@@ -69,7 +69,7 @@ Running the `kedro pipeline create` command adds boilerplate pipeline folders an
     │   |       ├── __init__.py        <-- So that Python treats this pipeline as a module
     │   |       ├── nodes.py           <-- To declare your nodes
     │   |       └── pipeline.py        <-- To structure the pipeline itself
-    |   └──  pipeline_registry.py      <-- Does NOT automatically update the registry
+    |   └──  pipeline_registry.py      <-- By default, automatically discovers and registers pipelines
     └── tests
         ├── __init__.py
         └── pipelines

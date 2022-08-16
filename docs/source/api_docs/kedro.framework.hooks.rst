@@ -15,3 +15,4 @@ kedro.framework.hooks
    :template: autosummary/class.rst
 
    kedro.framework.hooks.specs.NodeSpecs
+   kedro.framework.hooks.specs.DataCatalogSpecs

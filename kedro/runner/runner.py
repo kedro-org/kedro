@@ -20,6 +20,7 @@ from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
+from collections import deque
 
 class AbstractRunner(ABC):
     """``AbstractRunner`` is the base class for all ``Pipeline`` runner
@@ -165,7 +166,6 @@ class AbstractRunner(ABC):
         self,
         pipeline: Pipeline,
         done_nodes: Iterable[Node],
-        start: Node,
         catalog: DataCatalog,
     ) -> None:
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
@@ -196,18 +196,19 @@ class AbstractRunner(ABC):
         self, pipeline: Pipeline, boundary_nodes: Iterable[Node], catalog: DataCatalog
     ) -> Set[Node]:
         """
-        Depth-first search approach to finding the first ancestors
+        Breadth-first search approach to finding the first ancestors
         """
         ancestor_nodes_to_run = set()
-        for boundary_node in boundary_nodes:
-            stack = [boundary_node]
-            while stack:
-                current_node = stack.pop()
-                if self._has_persistent_inputs(current_node, catalog):
-                    ancestor_nodes_to_run.add(current_node)
-                    continue
-                for parent in self._enumerate_parents(pipeline, current_node):
-                    stack.append(parent)
+        queue, visited = deque(boundary_nodes), set()
+        while queue:
+            current_node = queue.popleft()
+            visited.add(current_node)
+            if self._has_persistent_inputs(current_node, catalog):
+                ancestor_nodes_to_run.add(current_node)
+                continue
+            for parent in self._enumerate_parents(pipeline, current_node):
+                if parent not in visited:
+                    queue.append(parent)
         return ancestor_nodes_to_run
 
     def _enumerate_parents(self, pipeline: Pipeline, child: Node) -> List[Node]:

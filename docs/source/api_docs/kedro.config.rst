@@ -20,5 +20,5 @@ kedro.config
    kedro.config.MissingConfigException
 
 .. rubric:: Description
-   
+
 .. automodule:: kedro.config

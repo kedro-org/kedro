@@ -223,7 +223,8 @@ API documentation
    :toctree:
       :glob:
 
-      kedro*
+      kedro
+      kedro.config
 
 Indices and tables
 ==================

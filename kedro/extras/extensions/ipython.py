@@ -3,7 +3,6 @@
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
 """
-import json
 import logging
 import sys
 from pathlib import Path
@@ -94,12 +93,11 @@ def load_ipython_extension(ipython):
     When user use `kedro jupyter notebook` or `jupyter ipython`, this extension is
     loaded automatically.
     """
-
+    import json
     from IPython.core.magic import register_line_magic
     from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
     @magic_arguments()
-    # To enable positional/keyword argument for the same type
     @argument(
         "path",
         help=("Path to the project root directory."),
@@ -128,7 +126,6 @@ def load_ipython_extension(ipython):
         reload_kedro(args.path, args.env, args.extra_params)
 
     global default_project_path
-    # ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
 
     default_project_path = _find_kedro_project(Path.cwd())
 

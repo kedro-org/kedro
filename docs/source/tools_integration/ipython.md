@@ -48,7 +48,8 @@ In [3]: %reload_kedro
 ```
 
 ```{note}
-If you want to pass arguments to the `reload_kedro` line magic, e.g. to specify a configuration environment, you should call it as a normal Python function (`reload_kedro(env=env, extra_params=extra_params)`) rather than using `%reload_kedro` in a Notebook cell (`%reload_kedro(extra_params=extra_params)` wouldn't work). You might have to call `%automagic False` beforehand to make this work.
+If you want to pass arguments to the `reload_kedro` line magic, e.g. to specify a configuration environment. You can provide extra keyword arguments like this:
+`%reload_kedro <path_to_project_root> --env=<env>`
 ```
 
 ## Kedro variables: `catalog`, `context`, `pipelines` and `session`

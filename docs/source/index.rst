@@ -224,7 +224,6 @@ API documentation
       :glob:
 
       kedro
-      kedro.config
 
 Indices and tables
 ==================

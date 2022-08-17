@@ -22,3 +22,4 @@ kedro.config
 .. rubric:: Description
 
 .. automodule:: kedro.config
+   :toctree:

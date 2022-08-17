@@ -8,7 +8,7 @@ kedro.config
 .. rubric:: Classes
 
 .. autosummary::
-   :toctree:
+   :toctree: 
    :template: autosummary/class.rst
 
    kedro.config.ConfigLoader

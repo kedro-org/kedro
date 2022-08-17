@@ -21,7 +21,8 @@ kedro.config
 
 .. rubric:: Description
 
-.. automodule:: kedro.config
-   .. toctree::
+.. autosummary:: 
+   :toctree:
+   :template: autosummary/module.rst
 
-      kedro.config
+   kedro.config

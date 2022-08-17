@@ -217,12 +217,13 @@ API documentation
     :noindex:
 
 .. autosummary::
-   :toctree:
    :caption: API documentation
    :template: autosummary/module.rst
    :recursive:
+   :toctree:
+      :glob:
 
-   kedro
+      kedro*
 
 Indices and tables
 ==================

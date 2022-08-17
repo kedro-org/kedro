@@ -2,6 +2,8 @@
 
 .. rubric:: Description
 
+.. automodule:: {{ fullname }}
+
    {% block functions %}
    {% if functions %}
    .. rubric:: Functions

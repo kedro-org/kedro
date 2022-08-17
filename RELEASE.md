@@ -12,12 +12,13 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
+* The line magic `%reload_kedro` now accepts keywords arguments. i.e. `%reload_kedro . --env=base`.
+
 
 ## Bug fixes and other changes
 * Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
 * Update documentation for `rich` logging.
 * The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
-* The line magic `%reload_kedro` now accepts keywords arguments. i.e. `%reload_kedro . --env=base`.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

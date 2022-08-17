@@ -1,6 +1,9 @@
 kedro.config
 ============
 
+.. toctree::
+   self 
+
 .. rubric:: Classes
 
 .. autosummary::

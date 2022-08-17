@@ -18,11 +18,3 @@ kedro.config
    :template: autosummary/class.rst
 
    kedro.config.MissingConfigException
-
-.. rubric:: Description
-
-.. autosummary:: 
-   :toctree:
-   :template: autosummary/module.rst
-
-   kedro.config

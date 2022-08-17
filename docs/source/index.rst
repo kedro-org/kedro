@@ -198,6 +198,17 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
+.. autosummary::
+   :toctree:
+   :caption: API documentation
+   :template: autosummary/module.rst
+   :recursive:
+
+   kedro
+
+.. automodule:: kedro.config
+   :members:
+
 .. automodule:: kedro.extras.datasets
     :members:
     :noindex:
@@ -215,14 +226,6 @@ API documentation
 .. automodule:: kedro.runner
     :members:
     :noindex:
-
-.. autosummary::
-   :toctree:
-   :caption: API documentation
-   :template: autosummary/module.rst
-   :recursive:
-
-   kedro
 
 Indices and tables
 ==================

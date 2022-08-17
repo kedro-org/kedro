@@ -3,10 +3,6 @@ kedro.config
 
 .. rubric:: Description
 
-.. autosummary::
-
-   kedro.config
-
 .. rubric:: Classes
 
 .. autosummary::
@@ -24,3 +20,7 @@ kedro.config
    :template: autosummary/class.rst
 
    kedro.config.MissingConfigException
+
+.. automodule:: kedro.config
+    :members:
+    :noindex:

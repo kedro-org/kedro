@@ -68,7 +68,7 @@ extensions = [
 # enable autosummary plugin (table of contents for modules/classes/class
 # methods)
 autosummary_generate = True
-autosummary_generate_overwrite = True
+autosummary_generate_overwrite = False
 napoleon_include_init_with_doc = True
 
 # Add any paths that contain templates here, relative to this directory.

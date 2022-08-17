@@ -22,5 +22,3 @@ kedro.config
    kedro.config.MissingConfigException
 
 .. automodule:: kedro.config
-    :members:
-    :noindex:

@@ -1,8 +1,6 @@
 kedro.config
 ============
 
-.. rubric:: Description
-
 .. rubric:: Classes
 
 .. autosummary::
@@ -21,4 +19,6 @@ kedro.config
 
    kedro.config.MissingConfigException
 
+.. rubric:: Description
+   
 .. automodule:: kedro.config

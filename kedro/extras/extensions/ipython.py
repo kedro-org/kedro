@@ -99,47 +99,29 @@ def load_ipython_extension(ipython):
     loaded automatically.
     """
 
-    global default_project_path
-
     @magic_arguments()
     # To enable positional/keyword argument for the same type
     @argument(
         "path",
+        help=("Path to the project root directory."),
         nargs='?',
-        help=("Add an option here"),
-        default=None,
-    )
-    @argument(
-        "--path",
-        dest='path',
-        default=None,
-        help=("Add an option here"),
-    )
-    @argument(
-        "env",
-        nargs='?',
-        default=None,
-        help=("Add some style arguments"),
+        default=None
     )
     @argument(
         "--env",
         dest="env",
         default=None,
-        help=("Add some style arguments"),
-    )
-    @argument(
-        "extra_params",
-        nargs="?",
-        type=json.loads,
-        default=None,
-        help=("Add some style arguments"),
+        help=("Environment for the Kedro project."),
     )
     @argument(
         "--extra_params",
         dest="extra_params",
         type=json.loads,
         default=None,
-        help=("Add some style arguments"),
+        help=("""Optional dictionary containing extra project parameters
+                    for underlying KedroContext. If specified, will update (and therefore
+                    take precedence over) the parameters retrieved from the project
+                    configuration."""),
     )
     @register_line_magic("reload_kedro")  # Register the line magic's name as `reload_kedro`
     def reload_kedro_line_magic(line):
@@ -148,6 +130,7 @@ def load_ipython_extension(ipython):
         reload_kedro(args.path, args.env, args.extra_params)
 
 
+    global default_project_path
     # ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
 
     default_project_path = _find_kedro_project(Path.cwd())

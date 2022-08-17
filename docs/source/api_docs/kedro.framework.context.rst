@@ -3,6 +3,7 @@ kedro.framework.context
 
 .. rubric:: Description
 
+.. automodule:: kedro.framework.context
 
 .. rubric:: Classes
 
@@ -10,7 +11,6 @@ kedro.framework.context
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.framework.context
    kedro.framework.context.KedroContext
 
 .. rubric:: Exceptions

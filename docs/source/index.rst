@@ -194,7 +194,6 @@ Welcome to Kedro's documentation!
    contribution/documentation_contributor_guidelines
    contribution/technical_steering_committee
    
-
 API documentation
 =================
 
@@ -205,27 +204,6 @@ API documentation
    :recursive:
 
    kedro
-
-.. automodule:: kedro.config
-   :members:
-
-.. automodule:: kedro.extras.datasets
-    :members:
-    :noindex:
-
-.. automodule:: kedro.framework.cli.utils
-    :members:
-    :noindex:
-
-.. automodule:: kedro.framework.cli.hooks
-    :members:
-
-.. automodule:: kedro.framework.hooks
-    :members:
-
-.. automodule:: kedro.runner
-    :members:
-    :noindex:
 
 Indices and tables
 ==================

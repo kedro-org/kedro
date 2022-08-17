@@ -3,8 +3,7 @@ kedro.pipeline
 
 .. rubric:: Description
 
-.. toctree::
-    kedro.pipeline
+.. automodule:: kedro.pipeline
 
 .. rubric:: Functions
 

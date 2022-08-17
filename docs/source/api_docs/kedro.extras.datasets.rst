@@ -3,13 +3,14 @@ kedro.extras.datasets
 
 .. rubric:: Description
 
+.. automodule:: kedro.extras.datasets
+
 .. rubric:: Classes
 
 .. autosummary::
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.extras.datasets
    kedro.extras.datasets.api.APIDataSet
    kedro.extras.datasets.biosequence.BioSequenceDataSet
    kedro.extras.datasets.dask.ParquetDataSet

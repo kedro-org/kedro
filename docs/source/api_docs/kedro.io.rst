@@ -3,8 +3,7 @@ kedro.io
 
 .. rubric:: Description
 
-.. toctree::
-    kedro.io
+.. automodule:: kedro.io
 
 .. rubric:: Classes
 

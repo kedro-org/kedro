@@ -8,10 +8,6 @@ import logging
 import sys
 from pathlib import Path
 from typing import Any, Dict
-from IPython.core.magic_arguments import (argument, magic_arguments,
-                                        parse_argstring)
-from IPython.core.magic import register_line_magic
-
 
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
@@ -99,6 +95,9 @@ def load_ipython_extension(ipython):
     loaded automatically.
     """
 
+    from IPython.core.magic import register_line_magic
+    from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+
     @magic_arguments()
     # To enable positional/keyword argument for the same type
     @argument(
@@ -126,9 +125,7 @@ def load_ipython_extension(ipython):
     @register_line_magic("reload_kedro")  # Register the line magic's name as `reload_kedro`
     def reload_kedro_line_magic(line):
         args = parse_argstring(reload_kedro_line_magic, line)
-        print(args)
         reload_kedro(args.path, args.env, args.extra_params)
-
 
     global default_project_path
     # ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
@@ -143,4 +140,3 @@ def load_ipython_extension(ipython):
         return
 
     reload_kedro(default_project_path)
-

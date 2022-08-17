@@ -193,7 +193,12 @@ class TestLoadIPythonExtension:
             "kedro.extras.extensions.ipython._find_kedro_project",
             return_value=mocker.Mock(),
         )
+        mocker.patch("IPython.core.magic.register_line_magic")
+        mocker.patch("IPython.core.magic_arguments.magic_arguments")
+        mocker.patch("IPython.core.magic_arguments.argument")
         mock_ipython = mocker.patch("IPython.get_ipython")
+
+        # mocker.patch("IPython.core.magic.register_line_magic")
 
         with pytest.raises(ImportError):
             load_ipython_extension(mocker.Mock())
@@ -205,6 +210,9 @@ class TestLoadIPythonExtension:
         mocker.patch(
             "kedro.extras.extensions.ipython._find_kedro_project", return_value=None
         )
+        mocker.patch("IPython.core.magic.register_line_magic")
+        mocker.patch("IPython.core.magic_arguments.magic_arguments")
+        mocker.patch("IPython.core.magic_arguments.argument")
         mock_ipython = mocker.patch("IPython.get_ipython")
 
         load_ipython_extension(mocker.Mock())

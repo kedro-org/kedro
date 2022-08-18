@@ -22,7 +22,7 @@ def fan_in(*args):
     return args
 
 
-def exception_fn(arg):
+def exception_fn(*args):
     raise Exception("test exception")
 
 

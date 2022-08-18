@@ -177,6 +177,7 @@ class AbstractRunner(ABC):
             pipeline: the ``Pipeline`` of the run.
             done_nodes: the ``Node``s that executed successfully.
             catalog: the ``DataCatalog`` of the run.
+
         """
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
 
@@ -223,6 +224,7 @@ def _find_persistent_ancestors(
     Returns:
         A set containing first persistent ancestors of the given
         ``Node``s.
+
     """
     ancestor_nodes_to_run = set()
     queue, visited = deque(children), set()
@@ -248,6 +250,7 @@ def _enumerate_parents(pipeline: Pipeline, child: Node) -> List[Node]:
 
     Returns:
         A list of all ``Node``s that are direct parents of ``child``.
+
     """
     parent_pipeline = pipeline.only_nodes_with_outputs(*child.inputs)
     return parent_pipeline.nodes
@@ -264,9 +267,10 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
     Returns:
         True if the ``Node`` being checked exclusively has inputs that
         are not ``MemoryDataSet``, else False.
+
     """
     for node_input in node.inputs:
-        if type(catalog._data_sets[node_input]) == MemoryDataSet:
+        if isinstance(vars(catalog.datasets)[node_input], MemoryDataSet):
             return False
     return True
 

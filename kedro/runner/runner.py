@@ -184,13 +184,19 @@ class AbstractRunner(ABC):
             start_node_names = (n.name for n in start_p_persistent_ancestors)
             postfix += f"  --from-nodes \"{','.join(start_node_names)}\""
 
-        self._logger.warning(
-            "There are %d nodes that have not run.\n"
-            "You can resume the pipeline run by adding the following "
-            "argument to your previous command:\n%s",
-            len(remaining_nodes),
-            postfix,
-        )
+
+        if not postfix:
+            self._logger.warning(
+                "No nodes ran. Repeat the previous command to attempt a new run."
+            )
+        else:
+            self._logger.warning(
+                "There are %d nodes that have not run.\n"
+                "You can resume the pipeline run by adding the following "
+                "argument to your previous command:\n%s",
+                len(remaining_nodes),
+                postfix,
+            )
 
     def _find_persistent_ancestors(
         self, pipeline: Pipeline, boundary_nodes: Iterable[Node], catalog: DataCatalog

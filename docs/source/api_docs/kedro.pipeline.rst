@@ -17,13 +17,17 @@ kedro.pipeline
 .. rubric:: Classes
 
 .. autoclass:: Node
+   :members:
+   :template: autosummary/class.rst
+
+.. autoclass:: Pipeline
+   :members:
 
 .. autosummary::
    :toctree:
    :template: autosummary/class.rst
 
    Pipeline
-   Node
 
 .. rubric:: Modules
 

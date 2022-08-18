@@ -208,6 +208,9 @@ API documentation
    :recursive:
    
    config
+   config.AbstractConfigLoader
+   config.ConfigLoader
+   config.TemplatedConfigLoader
    extras.datasets
    extras.logging.color_logger.ColorHandler
    framework.cli.cli.KedroCLI

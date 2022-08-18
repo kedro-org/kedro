@@ -346,11 +346,10 @@ class TestSuggestResumeScenario:
             resume_scenario_pipeline += Pipeline(
                 [failing_node._copy(func=exception_fn)]
             )
-        try:
+        with pytest.raises(Exception):
             SequentialRunner().run(
                 resume_scenario_pipeline,
                 resume_scenario_catalog,
                 hook_manager=_create_hook_manager(),
             )
-        except Exception:
-            assert re.search(expected_pattern, caplog.text)
+        assert re.search(expected_pattern, caplog.text)

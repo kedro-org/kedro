@@ -16,6 +16,8 @@ kedro.pipeline
 
 .. rubric:: Classes
 
+.. autoclass:: Node
+
 .. autosummary::
    :toctree:
    :template: autosummary/class.rst

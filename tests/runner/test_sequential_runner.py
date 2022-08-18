@@ -1,7 +1,8 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pandas as pd
 import pytest
+import re
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
@@ -13,7 +14,7 @@ from kedro.io import (
 )
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
-from tests.runner.conftest import identity, sink, source
+from tests.runner.conftest import identity, sink, source, exception_fn
 
 
 @pytest.fixture
@@ -278,3 +279,76 @@ class TestSequentialRunnerRelease:
         catalog = DataCatalog(data_sets={"ds1": fake_dataset_instance})
         SequentialRunner(is_async=is_async).run(pipeline, catalog)
         fake_dataset_instance.confirm.assert_called_once_with()
+
+
+@pytest.fixture
+def resume_scenario_pipeline():
+    return Pipeline(
+        [
+            node(identity, "ds0_A", "ds1_A", name="node1_A"),
+            node(identity, "ds0_B", "ds1_B", name="node1_B"),
+            node(
+                multi_input_list_output,
+                ["ds1_A", "ds1_B"],
+                ["ds2_A", "ds2_B"],
+                name="node2",
+            ),
+            node(identity, "ds2_A", "ds3_A", name="node3_A"),
+            node(identity, "ds2_B", "ds3_B", name="node3_B"),
+            node(identity, "ds3_A", "ds4_A", name="node4_A"),
+            node(identity, "ds3_B", "ds4_B", name="node4_B"),
+        ]
+    )
+
+
+@pytest.fixture
+def resume_scenario_catalog():
+    def _load():
+        return 0
+
+    def _save(arg):
+        assert arg == 0
+
+    persistent_dataset = LambdaDataSet(load=_load, save=_save)
+    return DataCatalog(
+        {
+            "ds0_A": persistent_dataset,
+            "ds0_B": persistent_dataset,
+            "ds2_A": persistent_dataset,
+            "ds2_B": persistent_dataset,
+        }
+    )
+
+
+@pytest.mark.parametrize(
+    "failing_node_indexes,expected_pattern",
+    [
+        ([0], r"No nodes ran."),
+        ([2], r"(node1_A,node1_B|node1_B,node1_A)"),
+        ([3], r"(node3_A,node3_B|node3_B,node3_A)"),
+        ([5], r"(node3_A,node3_B|node3_B,node3_A)"),
+        ([3,5], r"(node3_A,node3_B|node3_B,node3_A)"),
+        ([2,5], r"(node1_A,node1_B|node1_B,node1_A)"),
+    ],
+)
+class TestSuggestResumeScenario:
+    def test_suggest_resume_scenario(
+        self,
+        caplog,
+        resume_scenario_catalog,
+        resume_scenario_pipeline,
+        failing_node_indexes,
+        expected_pattern,
+    ):
+        for idx in failing_node_indexes:
+            failing_node = resume_scenario_pipeline.nodes[idx]
+            resume_scenario_pipeline -= Pipeline([failing_node])
+            resume_scenario_pipeline += Pipeline([failing_node._copy(func=exception_fn)])
+        try:
+            SequentialRunner().run(
+                resume_scenario_pipeline,
+                resume_scenario_catalog,
+                hook_manager=_create_hook_manager(),
+            )
+        except:
+            assert re.search(expected_pattern, caplog.text)

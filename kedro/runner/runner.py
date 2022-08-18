@@ -158,7 +158,6 @@ class AbstractRunner(ABC):
         Returns:
             An instance of an implementation of ``AbstractDataSet`` to be
             used for all unregistered datasets.
-
         """
         pass
 
@@ -199,13 +198,23 @@ class AbstractRunner(ABC):
             )
 
     def _find_persistent_ancestors(
-        self, pipeline: Pipeline, boundary_nodes: Iterable[Node], catalog: DataCatalog
+        self, pipeline: Pipeline, children: Iterable[Node], catalog: DataCatalog
     ) -> Set[Node]:
-        """
-        Breadth-first search approach to finding the first ancestors
+        """Breadth-first search approach to finding the complete set of
+        persistent ancestors of an iterable of ``Node``s. Persistent
+        ancestors exclusively have persisted ``Dataset``s as inputs.
+
+        Args:
+            pipeline: the ``Pipeline`` to find ancestors in.
+            children: the iterable containing ``Node``s to find ancestors of.
+            catalog: the ``DataCatalog`` of the run.
+
+        Returns:
+            A set containing first persistent ancestors of the given
+            ``Node``s.
         """
         ancestor_nodes_to_run = set()
-        queue, visited = deque(boundary_nodes), set()
+        queue, visited = deque(children), set()
         while queue:
             current_node = queue.popleft()
             visited.add(current_node)
@@ -217,16 +226,33 @@ class AbstractRunner(ABC):
                     queue.append(parent)
         return ancestor_nodes_to_run
 
+    @staticmethod
     def _enumerate_parents(self, pipeline: Pipeline, child: Node) -> List[Node]:
-        """
-        Returns the parents of a given node in a pipeline.
+        """For a given ``Node``, returns a list containing the direct parents
+        of that ``Node`` in the given ``Pipeline``.
+
+        Args:
+            pipeline: the ``Pipeline`` to search for direct parents in.
+            child: the ``Node`` to find parents of.
+
+        Returns:
+            A list of all ``Node``s that are direct parents of ``child``.
         """
         parent_pipeline = pipeline.only_nodes_with_outputs(*child.inputs)
         return parent_pipeline.nodes
 
+    @staticmethod
     def _has_persistent_inputs(self, node: Node, catalog: DataCatalog) -> bool:
-        """
-        Return true if the node has persistent output, false if not.
+        """Check if a ``Node`` exclusively has persisted Datasets as inputs.
+        If at least one input is a ``MemoryDataSet``, return False.
+
+        Args:
+            node: the ``Node`` to check the inputs of.
+            catalog: the ``DataCatalog`` of the run.
+
+        Returns:
+            True if the ``Node`` being checked exclusively has inputs that
+            are not ``MemoryDataSet``, else False.
         """
         for node_input in node.inputs:
             if type(catalog._data_sets[node_input]) == MemoryDataSet:

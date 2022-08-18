@@ -22,6 +22,7 @@ from kedro.pipeline.node import Node
 
 from collections import deque
 
+
 class AbstractRunner(ABC):
     """``AbstractRunner`` is the base class for all ``Pipeline`` runner
     implementations.
@@ -167,6 +168,16 @@ class AbstractRunner(ABC):
         done_nodes: Iterable[Node],
         catalog: DataCatalog,
     ) -> None:
+        """
+        Suggest a command to the user to resume a run after it fails.
+        The run should be started from the point closest to the failure
+        for which persisted input exists.
+
+        Args:
+            pipeline: the ``Pipeline`` of the run.
+            done_nodes: the ``Node``s that executed successfully.
+            catalog: the ``DataCatalog`` of the run.
+        """
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
 
         postfix = ""
@@ -182,7 +193,6 @@ class AbstractRunner(ABC):
 
             start_node_names = (n.name for n in start_p_persistent_ancestors)
             postfix += f"  --from-nodes \"{','.join(start_node_names)}\""
-
 
         if not postfix:
             self._logger.warning(

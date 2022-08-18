@@ -1,4 +1,4 @@
-# pylint: disable=import-outside-toplevel,global-statement,invalid-name
+# pylint: disable=import-outside-toplevel,global-statement,invalid-name,too-many-locals
 """
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
@@ -7,9 +7,6 @@ import logging
 import sys
 from pathlib import Path
 from typing import Any, Dict
-
-from IPython import get_ipython
-from IPython.core.magic import needs_local_scope, register_line_magic
 
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
@@ -39,9 +36,10 @@ def reload_kedro(
 ):
     """Line magic which reloads all Kedro default variables.
     Setting the path will also make it default for subsequent calls.
-
-
     """
+    from IPython import get_ipython
+    from IPython.core.magic import needs_local_scope, register_line_magic
+
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
     from kedro.framework.project import configure_project, pipelines
@@ -63,7 +61,6 @@ def reload_kedro(
     session = KedroSession.create(
         metadata.package_name, default_project_path, env=env, extra_params=extra_params
     )
-    logger.debug("Loading the context from %s", default_project_path)
     context = session.load_context()
     catalog = context.catalog
 
@@ -95,12 +92,11 @@ def load_ipython_extension(ipython):
 
     default_project_path = _find_kedro_project(Path.cwd())
 
-    try:
-        reload_kedro(default_project_path)
-    except (ImportError, ModuleNotFoundError):
-        logger.error("Kedro appears not to be installed in your current environment.")
-    except Exception:  # pylint: disable=broad-except
+    if default_project_path is None:
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
             "Make sure you run '%reload_kedro <project_root>'."
         )
+        return
+
+    reload_kedro(default_project_path)

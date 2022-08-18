@@ -197,6 +197,8 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
+.. module:: kedro
+
 .. autosummary::
    :toctree:
    :caption: API documentation
@@ -204,6 +206,19 @@ API documentation
    :recursive:
 
    kedro
+   kedro.config
+   kedro.extras.datasets
+   kedro.extras.logging.color_logger.ColorHandler
+   kedro.framework.cli.cli.KedroCLI
+   kedro.framework.cli.hooks.manager.CLIHooksManager
+   kedro.framework.cli.utils.CommandCollection
+   kedro.framework.cli.utils
+   kedro.framework.context
+   kedro.framework.session.store.BaseSessionStore
+   kedro.framework.session.store.ShelveStore
+   kedro.io
+   kedro.pipeline
+   kedro.runner
 
 Indices and tables
 ==================

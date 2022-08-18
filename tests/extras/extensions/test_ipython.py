@@ -225,9 +225,11 @@ class TestLoadIPythonExtension:
         )
         assert expected_message in log_messages
 
-    def test_load_extension_register_line_magic(self):
+    def test_load_extension_register_line_magic(self, mocker):
         from IPython.testing.globalipapp import get_ipython
+
+        mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
 
         ipython = get_ipython()
         load_ipython_extension(ipython)
-        assert ipython.find_magic("reload_kedro")
+        ipython.magic("reload_kedro")

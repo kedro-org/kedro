@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import pandas as pd
 import pytest
@@ -352,5 +352,5 @@ class TestSuggestResumeScenario:
                 resume_scenario_catalog,
                 hook_manager=_create_hook_manager(),
             )
-        except:
+        except Exception:
             assert re.search(expected_pattern, caplog.text)

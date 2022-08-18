@@ -199,26 +199,27 @@ API documentation
 
 .. module:: kedro
 
+.. currentmodule:: kedro
+
 .. autosummary::
    :toctree:
    :caption: API documentation
    :template: autosummary/module.rst
    :recursive:
-
-   kedro
-   kedro.config
-   kedro.extras.datasets
-   kedro.extras.logging.color_logger.ColorHandler
-   kedro.framework.cli.cli.KedroCLI
-   kedro.framework.cli.hooks.manager.CLIHooksManager
-   kedro.framework.cli.utils.CommandCollection
-   kedro.framework.cli.utils
-   kedro.framework.context
-   kedro.framework.session.store.BaseSessionStore
-   kedro.framework.session.store.ShelveStore
-   kedro.io
-   kedro.pipeline
-   kedro.runner
+   
+   config
+   extras.datasets
+   extras.logging.color_logger.ColorHandler
+   framework.cli.cli.KedroCLI
+   framework.cli.hooks.manager.CLIHooksManager
+   framework.cli.utils.CommandCollection
+   framework.cli.utils
+   framework.context
+   framework.session.store.BaseSessionStore
+   framework.session.store.ShelveStore
+   io
+   pipeline
+   runner
 
 Indices and tables
 ==================

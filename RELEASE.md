@@ -12,6 +12,7 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
+* Aliased `%load_ext kedro.extras.extensions.ipython` -> `%load_ext kedro`.
 
 ## Bug fixes and other changes
 * Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.

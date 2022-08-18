@@ -34,9 +34,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
 import click
-from prefect import Client, Flow, Task
-from prefect.exceptions import ClientError
-
 from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
@@ -44,6 +41,8 @@ from kedro.framework.startup import bootstrap_project
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline.node import Node
 from kedro.runner import run_node
+from prefect import Client, Flow, Task
+from prefect.exceptions import ClientError
 
 
 @click.command()
@@ -62,7 +61,8 @@ def prefect_deploy(pipeline_name, env, package_name):
 
     tasks = {}
     for node, parent_nodes in pipeline.node_dependencies.items():
-        # Use a function for task instantiation which avoids duplication of tasks
+        # Use a function for task instantiation which avoids duplication of
+        # tasks
         _, tasks = instantiate_task(node, tasks)
 
         parent_tasks = []
@@ -110,26 +110,30 @@ class KedroInitTask(Task):
         self.extra_params = extra_params
         self.pipeline_name = pipeline_name
         self.env = env
-        super().__init__(name=f"{package_name}_initialization", *args, **kwargs)
+        super().__init__(name=f"{package_name}_init", *args, **kwargs)
 
-    def run(self) -> Tuple[DataCatalog, str]:
-        """Initializes a Kedro session and returns the DataCatalog and KedroSession"""
+    def run(self) -> Dict[str, Union[DataCatalog, str]]:
+        """
+        Initializes a Kedro session and returns the DataCatalog and
+        KedroSession
+        """
         # bootstrap project within task / flow scope
         bootstrap_project(self.project_path)
 
         session = KedroSession.create(
-            project_path=self.project_path, env=self.env, extra_params=self.extra_params
+            project_path=self.project_path,
+            env=self.env,
+            extra_params=self.extra_params,  # noqa: E501
         )
         # Note that for logging inside a Prefect task self.logger is used.
         self.logger.info("Session created with ID %s", session.session_id)
         pipeline = pipelines.get(self.pipeline_name)
         context = session.load_context()
         catalog = context.catalog
-
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())  # type: ignore[union-attr]
+        unregistered_ds = pipeline.data_sets() - set(catalog.list())  # NOQA
         for ds_name in unregistered_ds:
             catalog.add(ds_name, MemoryDataSet())
-        return catalog, session.session_id
+        return {"catalog": catalog, "sess_id": session.session_id}
 
 
 class KedroTask(Task):
@@ -139,10 +143,12 @@ class KedroTask(Task):
         self._node = node
         super().__init__(name=node.name, tags=node.tags)
 
-    def run(self, argument_tuple: Tuple[DataCatalog, str]):
-        # argument_tuple definition: (data_catalog, session_id)
+    def run(self, task_dict: Dict[str, Union[DataCatalog, str]]):
         run_node(
-            self._node, argument_tuple[0], _create_hook_manager(), argument_tuple[1]
+            self._node,
+            task_dict["catalog"],
+            _create_hook_manager(),
+            task_dict["sess_id"],
         )
 
 
@@ -151,9 +157,10 @@ def instantiate_task(
     tasks: Dict[str, Dict[str, Union[KedroTask, List[KedroTask]]]],
 ) -> Tuple[KedroTask, Dict[str, Dict[str, Union[KedroTask, List[KedroTask]]]]]:
     """
-    Function pulls node task from <tasks> dictionary. If node task not available
-    in <tasks> the function instantiates the tasks and adds it to <tasks>. In this
-    way we avoid duplicate instantiations of the same node task.
+    Function pulls node task from <tasks> dictionary. If node task not
+    available in <tasks> the function instantiates the tasks and adds
+    it to <tasks>. In this way we avoid duplicate instantiations of
+    the same node task.
 
     Args:
         node: Kedro node for which a Prefect task is being created.
@@ -190,18 +197,20 @@ def generate_flow(
 
     Returns: None
     """
-    child_task_args = init_task
+    child_task_dict = init_task
     for task in tasks.values():
         node_task = task["task"]
         if len(task["parent_tasks"]) == 0:
-            # When a task has no parent only the session init task should precede it.
+            # When a task has no parent only the session init task should
+            # precede it.
             parent_tasks = [init_task]
         else:
             parent_tasks = task["parent_tasks"]
         # Set upstream tasks and bind required kwargs.
         # Note: Unpacking the return from init tasks will generate two
-        # sub-tasks in the prefect graph. To avoid this we pass the init return on unpacked.
-        node_task.bind(upstream_tasks=parent_tasks, argument_tuple=child_task_args)
+        # sub-tasks in the prefect graph. To avoid this we pass the init
+        # return on unpacked.
+        node_task.bind(upstream_tasks=parent_tasks, task_dict=child_task_dict)
 
 
 def instantiate_client(project_name: str):

@@ -327,8 +327,8 @@ def resume_scenario_catalog():
         ([2], r"(node1_A,node1_B|node1_B,node1_A)"),
         ([3], r"(node3_A,node3_B|node3_B,node3_A)"),
         ([5], r"(node3_A,node3_B|node3_B,node3_A)"),
-        ([3,5], r"(node3_A,node3_B|node3_B,node3_A)"),
-        ([2,5], r"(node1_A,node1_B|node1_B,node1_A)"),
+        ([3, 5], r"(node3_A,node3_B|node3_B,node3_A)"),
+        ([2, 5], r"(node1_A,node1_B|node1_B,node1_A)"),
     ],
 )
 class TestSuggestResumeScenario:
@@ -343,7 +343,9 @@ class TestSuggestResumeScenario:
         for idx in failing_node_indexes:
             failing_node = resume_scenario_pipeline.nodes[idx]
             resume_scenario_pipeline -= Pipeline([failing_node])
-            resume_scenario_pipeline += Pipeline([failing_node._copy(func=exception_fn)])
+            resume_scenario_pipeline += Pipeline(
+                [failing_node._copy(func=exception_fn)]
+            )
         try:
             SequentialRunner().run(
                 resume_scenario_pipeline,

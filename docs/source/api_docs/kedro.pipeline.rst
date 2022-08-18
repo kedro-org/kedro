@@ -7,3 +7,4 @@ kedro.pipeline
    :members:
 
 .. automethod:: kedro.pipeline.node
+   :noindex:

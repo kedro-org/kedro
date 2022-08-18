@@ -6,5 +6,5 @@ kedro.pipeline
 .. automodule:: kedro.pipeline
    :members:
 
-.. autoclass:: Node
+.. autoclass:: kedro.pipeline::Node
    :noindex:

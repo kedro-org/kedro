@@ -1,8 +1,8 @@
+import re
 from typing import Any, Dict
 
 import pandas as pd
 import pytest
-import re
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
@@ -14,7 +14,7 @@ from kedro.io import (
 )
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
-from tests.runner.conftest import identity, sink, source, exception_fn
+from tests.runner.conftest import exception_fn, identity, sink, source
 
 
 @pytest.fixture

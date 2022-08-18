@@ -4,6 +4,7 @@ implementations.
 
 import logging
 from abc import ABC, abstractmethod
+from collections import deque
 from concurrent.futures import (
     ALL_COMPLETED,
     Future,
@@ -19,8 +20,6 @@ from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
-
-from collections import deque
 
 
 class AbstractRunner(ABC):

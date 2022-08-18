@@ -5,5 +5,3 @@ kedro.runner
 
 .. automodule:: kedro.runner
    :members:
-
-.. automethod:: kedro.runner.run_node

@@ -11,8 +11,8 @@ kedro.pipeline
    :toctree:
    :template: autosummary/base.rst
 
-   kedro.pipeline.node
-   kedro.pipeline.modular_pipeline.pipeline
+   node
+   modular_pipeline.pipeline
 
 .. rubric:: Classes
 
@@ -20,8 +20,8 @@ kedro.pipeline
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.pipeline.Pipeline
-   kedro.pipeline.node.Node
+   Pipeline
+   Node
 
 .. rubric:: Modules
 
@@ -31,4 +31,4 @@ kedro.pipeline
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.pipeline.modular_pipeline.ModularPipelineError
+   modular_pipeline.ModularPipelineError

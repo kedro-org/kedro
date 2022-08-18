@@ -198,8 +198,6 @@ class TestLoadIPythonExtension:
         mocker.patch("IPython.core.magic_arguments.argument")
         mock_ipython = mocker.patch("IPython.get_ipython")
 
-        # mocker.patch("IPython.core.magic.register_line_magic")
-
         with pytest.raises(ImportError):
             load_ipython_extension(mocker.Mock())
 
@@ -226,3 +224,10 @@ class TestLoadIPythonExtension:
             "Make sure you run '%reload_kedro <project_root>'."
         )
         assert expected_message in log_messages
+
+    def test_load_extension_register_line_magic(self):
+        from IPython.testing.globalipapp import get_ipython
+
+        ipython = get_ipython()
+        load_ipython_extension(ipython)
+        assert ipython.find_magic("reload_kedro")

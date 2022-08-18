@@ -83,7 +83,7 @@ def reload_kedro(
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
 
 
-def load_ipython_extension(ipython):
+def load_ipython_extension(ipython):  # pylint: unused-argument
     """
     Main entry point when %load_ext is executed.
     IPython will look for this function specificially.
@@ -94,15 +94,13 @@ def load_ipython_extension(ipython):
     loaded automatically.
     """
     import json
+
     from IPython.core.magic import register_line_magic
     from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
     @magic_arguments()
     @argument(
-        "path",
-        help=("Path to the project root directory."),
-        nargs='?',
-        default=None
+        "path", help=("Path to the project root directory."), nargs="?", default=None
     )
     @argument(
         "--env",
@@ -115,12 +113,15 @@ def load_ipython_extension(ipython):
         dest="extra_params",
         type=json.loads,
         default=None,
-        help=("""Optional dictionary containing extra project parameters
-                    for underlying KedroContext. If specified, will update (and therefore
-                    take precedence over) the parameters retrieved from the project
-                    configuration."""),
+        help=(
+            "Optional dictionary containing extra project parameters for underlying "
+            "KedroContext. If specified, will update (and therefore take precedence "
+            "over) the parameters retrieved from the project configuration."
+        ),
     )
-    @register_line_magic("reload_kedro")  # Register the line magic's name as `reload_kedro`
+    @register_line_magic(
+        "reload_kedro"
+    )  # Register the line magic's name as `reload_kedro`
     def reload_kedro_line_magic(line):
         args = parse_argstring(reload_kedro_line_magic, line)
         reload_kedro(args.path, args.env, args.extra_params)

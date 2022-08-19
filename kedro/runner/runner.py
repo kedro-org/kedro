@@ -201,7 +201,7 @@ class AbstractRunner(ABC):
         else:
             self._logger.warning(
                 "There are %d nodes that have not run.\n"
-                "You can resume the pipeline run from the nearest nodes with"
+                "You can resume the pipeline run from the nearest nodes with "
                 "persisted inputs by adding the following "
                 "argument to your previous command:\n%s",
                 len(remaining_nodes),

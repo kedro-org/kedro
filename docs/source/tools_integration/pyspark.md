@@ -33,7 +33,6 @@ from kedro.framework.context import KedroContext
 from pluggy import PluginManager
 
 
-
 class CustomContext(KedroContext):
     def __init__(
         self,

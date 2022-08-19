@@ -4,7 +4,7 @@ This section contains detailed information about configuration, for which the re
 
 ## Configuration root
 
-We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, point Kedro to any other directory and change the configuration paths by setting the `CONF_SOURCE` variable in [`src/<python_package>/settings.py`](settings.md) as follows:
+We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, point Kedro to any other directory and change the configuration paths by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](settings.md) as follows:
 ```python
 CONF_SOURCE = "new_conf"
 ```
@@ -47,7 +47,7 @@ kedro run --env=test
 
 If no `env` option is specified, this will default to using the `local` environment to overwrite `conf/base`.
 
-If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<python_package>/settings.py` under the `CONTEXT_CLASS` key.
+If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<package_name>/settings.py` under the `CONTEXT_CLASS` key.
 
 If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
 
@@ -61,7 +61,7 @@ If you both specify the `KEDRO_ENV` environment variable and provide the `--env`
 
 ## Template configuration
 
-Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your `src/<python_package>/settings.py`:
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your `src/<package_name>/settings.py`:
 
 ```python
 from kedro.config import TemplatedConfigLoader  # new import

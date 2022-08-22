@@ -13,12 +13,7 @@ def project_path(mocker, tmp_path):
 
 
 @pytest.fixture(autouse=True)
-def cleanup_session():
-    yield
-
-
-@pytest.fixture()
-def pipeline_cleanup():
+def cleanup_pipeline():
     yield
     from kedro.framework.project import pipelines
 
@@ -31,7 +26,6 @@ PROJECT_VERSION = "0.1"
 
 
 class TestLoadKedroObjects:
-    @pytest.mark.usefixtures("pipeline_cleanup")
     def test_load_kedro_objects(
         self, tmp_path, mocker, caplog
     ):  # pylint: disable=too-many-locals
@@ -62,18 +56,18 @@ class TestLoadKedroObjects:
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
         )
-        mock_line_magic = mocker.MagicMock()
+        mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
         mocker.patch(
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
         mock_register_line_magic = mocker.patch(
-            "kedro.extras.extensions.ipython.register_line_magic"
+            "IPython.core.magic.register_line_magic"
         )
         mock_session_create = mocker.patch(
             "kedro.framework.session.KedroSession.create"
         )
-        mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
+        mock_ipython = mocker.patch("IPython.get_ipython")
 
         reload_kedro(kedro_path)
 
@@ -113,18 +107,18 @@ class TestLoadKedroObjects:
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
         )
-        mock_line_magic = mocker.MagicMock()
+        mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
         mocker.patch(
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
         mock_register_line_magic = mocker.patch(
-            "kedro.extras.extensions.ipython.register_line_magic"
+            "IPython.core.magic.register_line_magic"
         )
         mock_session_create = mocker.patch(
             "kedro.framework.session.KedroSession.create"
         )
-        mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
+        mock_ipython = mocker.patch("IPython.get_ipython")
 
         reload_kedro(tmp_path, env="env1", extra_params={"key": "val"})
 
@@ -141,18 +135,6 @@ class TestLoadKedroObjects:
         )
         assert mock_register_line_magic.call_count == 1
 
-    def test_load_kedro_objects_not_in_kedro_project(self, tmp_path, mocker):
-        mocker.patch(
-            "kedro.framework.startup._get_project_metadata", side_effect=RuntimeError
-        )
-        mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
-
-        with pytest.raises(RuntimeError):
-            reload_kedro(tmp_path)
-        assert not mock_ipython().called
-        assert not mock_ipython().push.called
-
-    @pytest.mark.usefixtures("pipeline_cleanup")
     def test_load_kedro_objects_no_path(self, tmp_path, caplog, mocker):
         from kedro.extras.extensions.ipython import default_project_path
 
@@ -181,14 +163,14 @@ class TestLoadKedroObjects:
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
         )
-        mock_line_magic = mocker.MagicMock()
+        mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
         mocker.patch(
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
-        mocker.patch("kedro.extras.extensions.ipython.register_line_magic")
+        mocker.patch("IPython.core.magic.register_line_magic")
         mocker.patch("kedro.framework.session.KedroSession.load_context")
-        mocker.patch("kedro.extras.extensions.ipython.get_ipython")
+        mocker.patch("IPython.get_ipython")
 
         reload_kedro()
 
@@ -203,36 +185,36 @@ class TestLoadKedroObjects:
 
 
 class TestLoadIPythonExtension:
-    @pytest.mark.parametrize(
-        "error,expected_log_message,level",
-        [
-            (
-                ImportError,
-                "Kedro appears not to be installed in your current environment.",
-                "ERROR",
-            ),
-            (
-                RuntimeError,
-                "Kedro extension was registered but couldn't find a Kedro project. "
-                "Make sure you run '%reload_kedro <path_to_kedro_project>'.",
-                "WARNING",
-            ),
-        ],
-    )
-    def test_load_extension_not_in_kedro_env_or_project(
-        self, error, expected_log_message, level, mocker, caplog
-    ):
-        mocker.patch("kedro.framework.startup._get_project_metadata", side_effect=error)
-        mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
+    def test_load_extension_missing_dependency(self, mocker):
+        mocker.patch(
+            "kedro.extras.extensions.ipython.reload_kedro", side_effect=ImportError
+        )
+        mocker.patch(
+            "kedro.extras.extensions.ipython._find_kedro_project",
+            return_value=mocker.Mock(),
+        )
+        mock_ipython = mocker.patch("IPython.get_ipython")
 
-        load_ipython_extension(mocker.MagicMock())
+        with pytest.raises(ImportError):
+            load_ipython_extension(mocker.Mock())
 
         assert not mock_ipython().called
         assert not mock_ipython().push.called
 
-        log_messages = [
-            record.getMessage()
-            for record in caplog.records
-            if record.levelname == level
-        ]
-        assert log_messages == [expected_log_message]
+    def test_load_extension_not_in_kedro_project(self, mocker, caplog):
+        mocker.patch(
+            "kedro.extras.extensions.ipython._find_kedro_project", return_value=None
+        )
+        mock_ipython = mocker.patch("IPython.get_ipython")
+
+        load_ipython_extension(mocker.Mock())
+
+        assert not mock_ipython().called
+        assert not mock_ipython().push.called
+
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_message = (
+            "Kedro extension was registered but couldn't find a Kedro project. "
+            "Make sure you run '%reload_kedro <project_root>'."
+        )
+        assert expected_message in log_messages

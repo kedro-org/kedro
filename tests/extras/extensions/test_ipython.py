@@ -1,5 +1,7 @@
 # pylint: disable=import-outside-toplevel,reimported
 import pytest
+from IPython.core.error import UsageError
+from IPython.testing.globalipapp import get_ipython
 
 from kedro.extras.extensions.ipython import load_ipython_extension, reload_kedro
 from kedro.framework.startup import ProjectMetadata
@@ -18,6 +20,13 @@ def cleanup_pipeline():
     from kedro.framework.project import pipelines
 
     pipelines.configure()
+
+
+@pytest.fixture(scope="module")  # get_ipython() twice will result in None
+def ipython():
+    ipython = get_ipython()
+    load_ipython_extension(ipython)
+    return ipython
 
 
 PACKAGE_NAME = "fake_page_name"
@@ -225,11 +234,39 @@ class TestLoadIPythonExtension:
         )
         assert expected_message in log_messages
 
-    def test_load_extension_register_line_magic(self, mocker):
-        from IPython.testing.globalipapp import get_ipython
+    def test_load_extension_register_line_magic(self, mocker, ipython):
 
+        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
+        mock_reload_kedro = mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
+        load_ipython_extension(ipython)
+        mock_reload_kedro.assert_called_once()
+
+        # Calling the line magic to check if the line magic is available
+        ipython.magic("reload_kedro")
+        assert mock_reload_kedro.call_count == 2
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            "",
+            ".",
+            ". --env=base",
+            "--env=base",
+            '. --env=base --extra_params={"key":"dummy"}',
+        ],
+    )
+    def test_line_magic_with_valid_arguments(self, mocker, args, ipython):
+        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
         mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
 
-        ipython = get_ipython()
+        ipython.magic(f"reload_kedro {args}")
+
+    def test_line_magic_with_invalid_arguments(self, mocker, ipython):
+        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
+        mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
         load_ipython_extension(ipython)
-        ipython.magic("reload_kedro")
+
+        with pytest.raises(
+            UsageError, match=r"unrecognized arguments: --invalid_arg=dummy"
+        ):
+            ipython.magic("reload_kedro --invalid_arg=dummy")

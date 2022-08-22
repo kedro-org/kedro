@@ -104,13 +104,11 @@ def load_ipython_extension(ipython):  # pylint: disable=unused-argument
     )
     @argument(
         "--env",
-        dest="env",
         default=None,
         help=("Environment for the Kedro project."),
     )
     @argument(
         "--extra_params",
-        dest="extra_params",
         type=json.loads,
         default=None,
         help=(
@@ -123,6 +121,14 @@ def load_ipython_extension(ipython):  # pylint: disable=unused-argument
         "reload_kedro"
     )  # Register the line magic's name as `reload_kedro`
     def reload_kedro_line_magic(line):
+        """
+        The `%reload_kedro` IPython line magic.
+
+        To use it in a IPython shell or Jupyter Notebook:
+        %reload_kedro  # Default path
+        %reload kedro <path_to_project_root>
+        %reload_kedro <path_to_project_root> --env=<env> --extra_params=<extra_params_dict>
+        """
         args = parse_argstring(reload_kedro_line_magic, line)
         reload_kedro(args.path, args.env, args.extra_params)
 

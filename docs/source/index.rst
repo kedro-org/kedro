@@ -215,6 +215,7 @@ API documentation
    framework.cli.utils.CommandCollection
    framework.cli.utils
    framework.context
+   framework.hooks
    framework.session.store.BaseSessionStore
    framework.session.store.ShelveStore
    io

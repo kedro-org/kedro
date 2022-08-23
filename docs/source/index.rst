@@ -223,7 +223,7 @@ API documentation
    pipeline.node
    runner
 
-.. autoclass:: pipeline.Pipeline
+.. autoclass:: kedro.pipeline.Pipeline
 
 Indices and tables
 ==================

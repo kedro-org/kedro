@@ -5,3 +5,9 @@ kedro.runner
 
 .. automodule:: kedro.runner
    :members:
+
+.. autosummary::
+   :toctree:
+   :template: autosummary/class.rst
+
+   kedro.runner.SequentialRunner

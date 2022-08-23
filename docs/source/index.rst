@@ -211,6 +211,7 @@ API documentation
    extras.datasets
    extras.logging.color_logger.ColorHandler
    framework.cli.cli.KedroCLI
+   framework.cli.hooks
    framework.cli.hooks.manager.CLIHooksManager
    framework.cli.utils.CommandCollection
    framework.cli.utils

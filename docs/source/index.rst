@@ -201,8 +201,6 @@ API documentation
 
 .. currentmodule:: kedro
 
-.. autoclass:: kedro.pipeline.Pipeline
-
 .. autosummary::
    :toctree:
    :caption: API documentation
@@ -223,8 +221,8 @@ API documentation
    io
    pipeline
    pipeline.node
+   pipeline.Pipeline
    runner
-
 
 
 Indices and tables

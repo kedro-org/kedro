@@ -153,7 +153,7 @@ We place [conftest.py](https://docs.pytest.org/en/latest/reference/fixtures.html
 
 ### Pull request title conventions
 
-The Kedro repository requires that you [squash and merge your pull request commits](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#squash-and-merge-your-pull-request-commits), and, in most cases, the [merge message for a squash merge](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#merge-message-for-a-squash-merge) then defaults to the pull request title.
+The Kedro repository requires that you [squash and merge your pull request commits](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#squash-and-merge-your-commits), and, in most cases, the [merge message for a squash merge](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#merge-message-for-a-squash-merge) then defaults to the pull request title.
 
 For clarity, your pull request title should be descriptive, and we ask you to follow some guidelines suggested by [Chris Beams](https://github.com/cbeams) in his post [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/#seven-rules). In particular, for your pull request title, we suggest that you:
 

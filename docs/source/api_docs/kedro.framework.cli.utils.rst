@@ -11,7 +11,7 @@ kedro.framework.cli.utils
 
    .. autosummary::
       :toctree:
-      
+      :template: autosummary/module.rst
 
    .. rubric:: Classes
 
@@ -31,4 +31,3 @@ kedro.framework.cli.utils
       :toctree:
       :template: autosummary/class.rst
 
-      KedroCliError

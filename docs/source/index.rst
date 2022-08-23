@@ -219,6 +219,7 @@ API documentation
    framework.session.store.ShelveStore
    io
    pipeline
+   pipeline.node
    runner
 
 Indices and tables

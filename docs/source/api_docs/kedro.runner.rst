@@ -10,3 +10,4 @@ kedro.runner
    :template: autosummary/class.rst
 
    kedro.runner.SequentialRunner
+   kedro.runner.ParallelRunner

@@ -100,6 +100,7 @@ def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
     It is assumed that version paths are managed by Kedro.
     Broad `Exception` is present due to `dbutils.fs.ExecutionError` that
     cannot be imported directly.
+    
     Args:
         pattern: Filepath to search for.
         dbutils: dbutils instance to operate with DBFS.

@@ -221,8 +221,9 @@ API documentation
    io
    pipeline
    pipeline.node
-   pipeline::Pipeline
    runner
+
+.. autoclass:: pipeline.Pipeline
 
 Indices and tables
 ==================

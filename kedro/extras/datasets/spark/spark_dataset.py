@@ -117,7 +117,8 @@ def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
 
 class KedroHdfsInsecureClient(InsecureClient):
     """Subclasses ``hdfs.InsecureClient`` and implements ``hdfs_exists``
-    and ``hdfs_glob`` methods required by ``SparkDataSet``"""
+    and ``hdfs_glob`` methods required by ``SparkDataSet``
+    """
 
     def hdfs_exists(self, hdfs_path: str) -> bool:
         """Determines whether given ``hdfs_path`` exists in HDFS.

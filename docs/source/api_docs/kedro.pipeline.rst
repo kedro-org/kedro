@@ -10,3 +10,4 @@ kedro.pipeline
    :template: autosummary/class.rst
 
    kedro.pipeline.Pipeline
+   kedro.pipeline.Node

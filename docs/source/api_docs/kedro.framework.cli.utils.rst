@@ -12,7 +12,6 @@ kedro.framework.cli.utils
    .. autosummary::
       :toctree:
 
-      command_with_verbosity
       env_option
       find_stylesheets
       forward_command

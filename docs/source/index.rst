@@ -221,6 +221,7 @@ API documentation
    io
    pipeline
    pipeline.node
+   pipeline.Pipeline
    runner
 
 Indices and tables

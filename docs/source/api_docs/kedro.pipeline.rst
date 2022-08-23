@@ -5,7 +5,7 @@ kedro.pipeline
 
 .. automodule:: kedro.pipeline
 
-.. autoclass:: kedro.pipeline.Node
+.. autoclass:: kedro.pipeline.node.Node
 
 .. autosummary::
    :toctree:

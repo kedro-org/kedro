@@ -197,12 +197,12 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
-.. automodule:: kedro
+.. module:: kedro
 
 .. currentmodule:: kedro
 
 .. autosummary::
-   :toctree:
+   :toctree: kedro
    :caption: API documentation
    :template: autosummary/module.rst
    :recursive:

@@ -9,5 +9,6 @@ kedro.runner
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.runner.SequentialRunner
    kedro.runner.ParallelRunner
+   kedro.runner.SequentialRunner
+   kedro.runner.ThreadRunner

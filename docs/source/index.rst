@@ -197,7 +197,7 @@ Welcome to Kedro's documentation!
 API documentation
 =================
 
-.. module:: kedro
+.. automodule:: kedro
 
 .. currentmodule:: kedro
 

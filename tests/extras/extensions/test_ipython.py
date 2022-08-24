@@ -218,3 +218,24 @@ class TestLoadIPythonExtension:
             "Make sure you run '%reload_kedro <project_root>'."
         )
         assert expected_message in log_messages
+
+
+def test_ipython_alias_has_no_side_effect(mocker):
+
+    # __import__ = None
+    import builtins
+    spy = mocker.spy(builtins, "__import__")
+
+    import kedro
+    # Make sure import kedro has no side-effects
+    for call_args in spy.call_args_list:
+        assert "IPython" not in call_args
+        assert "kedro.framework.project" not in call_args
+
+    # import sys
+    # assert "IPython" not in sys.modules
+    # assert "kedro.framework.project"  # Make sure Logging is not initialized
+    # for module in sys.modules:
+    #     if module.startswith("kedro"):
+    #         print(module)
+    # raise

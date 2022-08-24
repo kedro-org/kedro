@@ -3,6 +3,7 @@
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
 """
+import json
 import logging
 import sys
 from pathlib import Path
@@ -38,7 +39,7 @@ def reload_kedro(
     Setting the path will also make it default for subsequent calls.
     """
     from IPython import get_ipython
-    from IPython.core.magic import needs_local_scope, register_line_magic
+    from IPython.core.magic import needs_local_scope
 
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
@@ -86,26 +87,31 @@ def reload_kedro(
 def load_ipython_extension(ipython):  # pylint: disable=unused-argument
     """
     Main entry point when %load_ext is executed.
-    IPython will look for this function specificially.
+    IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
 
     This function is called when users do `%load_ext kedro.extras.extensions.ipython`.
     When user use `kedro jupyter notebook` or `jupyter ipython`, this extension is
     loaded automatically.
     """
-    import json
 
     from IPython.core.magic import register_line_magic
     from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
     @magic_arguments()
     @argument(
-        "path", help=("Path to the project root directory."), nargs="?", default=None
+        "path",
+        type=str,
+        help="Path to the project root directory.",
+        nargs="?",
+        default=None,
     )
     @argument(
+        "-e",
         "--env",
+        type=str,
         default=None,
-        help=("Environment for the Kedro project."),
+        help="Kedro configuration environment name. Defaults to `local`.",
     )
     @argument(
         "--extra_params",

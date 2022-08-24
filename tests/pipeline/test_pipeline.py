@@ -805,9 +805,8 @@ class TestPipelineFilterHelpers:
             rf"Pipeline does not contain nodes named \['{non_namespaced_node_name}'\]\. "
             rf"Did you mean: \['.*\.{non_namespaced_node_name}'\]\?"
         )
-        full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
-            full.only_nodes(non_namespaced_node_name)
+            pipeline_with_namespaces.only_nodes(non_namespaced_node_name)
 
     @pytest.mark.parametrize(
         "non_namespaced_node_names",
@@ -827,9 +826,8 @@ class TestPipelineFilterHelpers:
             rf"(('.*\.{non_namespaced_node_names[1]}')+.*"
             rf"('.*\.{non_namespaced_node_names[0]}')+)"
         )
-        full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
-            full.only_nodes(*non_namespaced_node_names)
+            pipeline_with_namespaces.only_nodes(*non_namespaced_node_names)
 
     @pytest.mark.parametrize(
         "non_namespaced_node_names",
@@ -846,9 +844,8 @@ class TestPipelineFilterHelpers:
         pattern = (
             r"Pipeline does not contain nodes named \[.*\]\. Did you mean: \[.*\]\?"
         )
-        full = pipeline_with_namespaces
         with pytest.raises(ValueError, match=pattern):
-            full.only_nodes(*non_namespaced_node_names)
+            pipeline_with_namespaces.only_nodes(*non_namespaced_node_names)
 
     def test_from_inputs(self, complex_pipeline):
         """F and H are inputs of node1, node2 and node3."""

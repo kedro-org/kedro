@@ -30,6 +30,7 @@ from pyspark.sql import SparkSession
 
 from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
+from pluggy import PluginManager
 
 
 class CustomContext(KedroContext):

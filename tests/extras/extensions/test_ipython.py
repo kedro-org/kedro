@@ -252,6 +252,7 @@ class TestLoadIPythonExtension:
             ".",
             ". --env=base",
             "--env=base",
+            "-e base",
             '. --env=base --extra_params={"key":"dummy"}',
         ],
     )

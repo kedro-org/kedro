@@ -181,7 +181,6 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         """
 
         self._logger.debug("Loading %s", str(self))
-
         try:
             return self._load()
         except DataSetError:
@@ -535,13 +534,6 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         # version from the given path.
         pattern = str(self._get_versioned_path("*"))
         version_paths = sorted(self._glob_function(pattern), reverse=True)
-        if not version_paths:
-            try:
-                x = self._fs.info(self._filepath)
-            except PermissionError as err:
-                raise DataSetError(
-                    f"Cannot load versioned dataset '{self._filepath}' due to insufficient permission."
-                ) from err
 
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
@@ -603,6 +595,14 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         return self._filepath / version / self._filepath.name
 
     def load(self) -> _DO:
+        try:
+            self._fs.info(self._filepath)
+        except PermissionError as err:
+            raise DataSetError(
+                    f"Cannot load versioned dataset '{self._filepath}' due to insufficient permission."
+            ) from err
+        except Exception:
+            pass
         self.resolve_load_version()  # Make sure last load version is set
         return super().load()
 

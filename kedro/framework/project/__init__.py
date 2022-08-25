@@ -200,12 +200,14 @@ class _ProjectLogging(UserDict):
 
         # We suppress click here to hide tracebacks related to it conversely,
         # kedro is not suppressed to show its tracebacks for easier debugging.
-        # sys.executable is used to get the kedro executable path to hide the top level traceback.   
+        # sys.executable is used to get the kedro executable path to hide the
+        # top level traceback.
         # Rich traceback handling does not work on databricks. Hopefully this will be
         # fixed on their side at some point, but until then we disable it.
         # See https://github.com/Textualize/rich/issues/2455
-        if not self._is_databricks():
-            rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
+        # if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
+        #
+        # rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
         rich.pretty.install()
 
     def configure(self, logging_config: Dict[str, Any]) -> None:
@@ -215,9 +217,6 @@ class _ProjectLogging(UserDict):
         """
         logging.config.dictConfig(logging_config)
         self.data = logging_config
-        
-    def _is_databricks() -> bool:
-        return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
 PACKAGE_NAME = None
@@ -261,9 +260,9 @@ def validate_settings():
     """
     if PACKAGE_NAME is None:
         raise ValueError(
-            """Package name not found. Make sure you have configured the
-project using 'bootstrap_project'. This should happen automatically if you are using
-Kedro command line interface. """
+            "Package name not found. Make sure you have configured the project using "
+            "'bootstrap_project'. This should happen automatically if you are using "
+            "Kedro command line interface."
         )
 
     importlib.import_module(f"{PACKAGE_NAME}.settings")

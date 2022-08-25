@@ -10,6 +10,7 @@ If your pipeline is sizeable, you will want to run parts of it on separate machi
 
 We also provide information to help you deploy to the following:
 
+* to [Airflow](airflow_astronomer.md)
 * to [Argo Workflows](argo.md)
 * to [Prefect](prefect.md)
 * to [Kubeflow Workflows](kubeflow.md)
@@ -28,7 +29,7 @@ flowchart TD
     C -- YES --> D[Use a container-based approach];
     C -- NO --> E[Use the CLI or package mode];
     A -- NO --> F[Consult the distributed deployment guide];
-    F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Argo</li><li>Prefect</li><li>Kubeflow Pipelines</li><li>AWS Batch</li><li>Databricks</li><li>Dask</li>"];
+    F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Argo</li><li>Prefect</li><li>Kubeflow Pipelines</li><li>AWS Batch</li><li>Databricks</li><li>Dask</li>"];
     style G text-align:left
     H["Does (part of) your pipeline integrate with Amazon SageMaker?<br/><br/>Read the SageMaker integration guide"];
     style H text-align:left

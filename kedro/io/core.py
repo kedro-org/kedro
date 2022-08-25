@@ -596,13 +596,11 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
     def load(self) -> _DO:
         try:
-            self._fs.info(self._filepath)
+            self._fs.exists(self._filepath)
         except PermissionError as err:
             raise DataSetError(
-                    f"Cannot load versioned dataset '{self._filepath}' due to insufficient permission."
+                f"Cannot load versioned dataset '{self._filepath}' due to insufficient permission."
             ) from err
-        except Exception:
-            pass
         self.resolve_load_version()  # Make sure last load version is set
         return super().load()
 

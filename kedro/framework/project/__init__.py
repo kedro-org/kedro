@@ -201,7 +201,8 @@ class _ProjectLogging(UserDict):
         # We suppress click here to hide tracebacks related to it conversely,
         # kedro is not suppressed to show its tracebacks for easier debugging.
         # sys.executable is used to get the kedro executable path to hide the top level traceback.   
-        # Rich traceback handling does not work on databricks. 
+        # Rich traceback handling does not work on databricks. Hopefully this will be
+        # fixed on their side at some point, but until then we disable it.
         # See https://github.com/Textualize/rich/issues/2455
         if not self._is_databricks():
             rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])

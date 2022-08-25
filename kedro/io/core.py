@@ -181,6 +181,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         """
 
         self._logger.debug("Loading %s", str(self))
+
         try:
             return self._load()
         except DataSetError:
@@ -534,7 +535,6 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         # version from the given path.
         pattern = str(self._get_versioned_path("*"))
         version_paths = sorted(self._glob_function(pattern), reverse=True)
-
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
@@ -596,7 +596,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
     def load(self) -> _DO:
         try:
-            if self._fs:
+            if hasattr(self, "_fs"):
                 self._fs.exists(self._filepath)
         except PermissionError as err:
             raise DataSetError(

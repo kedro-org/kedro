@@ -15,6 +15,9 @@
 
 ## Bug fixes and other changes
 * Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
+* When using `kedro run -n [some_node]`, if `some_node` is missing a namespace the resulting error message will suggest the correct node name.
+* Update documentation for `rich` logging.
+* Updated Prefect deployment documentation to allow for reruns with saved versioned datasets.
 * The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
 
 ## Upcoming deprecations for Kedro 0.19.0
@@ -879,7 +882,7 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
 * Added `joblib` backend support to `pickle.PickleDataSet`.
 * Added versioning support to `MatplotlibWriter` dataset.
 * Added the ability to install dependencies for a given dataset with more granularity, e.g. `pip install "kedro[pandas.ParquetDataSet]"`.
-* Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/0.16.0/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
+* Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/0.16.0/04_user_guide/04_data_catalog.html#use-the-data-catalog-with-the-yaml-api).
 
 ### Other
 * Added `namespace` property on ``Node``, related to the modular pipeline where the node belongs.

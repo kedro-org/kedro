@@ -164,7 +164,17 @@ rockets:
     sheet_name: Sheet1
 ```
 
-### Example 7: Saves an image created with Matplotlib on Google Cloud Storage
+### Example 7: Loads a multi-sheet excel file from a local file system
+
+```yaml
+trains:
+  type: pandas.ExcelDataSet
+  filepath: data/02_intermediate/company/trains.xlsx
+  load_args:
+    sheet_name: [Sheet1, Sheet2, Sheet3]
+```
+
+### Example 8: Saves an image created with Matplotlib on Google Cloud Storage
 
 ```yaml
 results_plot:
@@ -175,7 +185,8 @@ results_plot:
   credentials: my_gcp_credentials
 ```
 
-### Example 8: Loads / saves an HDF file on local file system storage, using specified load and save arguments
+
+### Example 9: Loads / saves an HDF file on local file system storage, using specified load and save arguments
 
 ```yaml
 skateboards:
@@ -189,7 +200,7 @@ skateboards:
     dropna: True
 ```
 
-### Example 9: Loads / saves a parquet file on local file system storage, using specified load and save arguments
+### Example 10: Loads / saves a parquet file on local file system storage, using specified load and save arguments
 
 ```yaml
 trucks:
@@ -206,7 +217,8 @@ trucks:
     partition_on: [name]
 ```
 
-### Example 10: Loads / saves a Spark table on S3, using specified load and save arguments
+
+### Example 11: Loads / saves a Spark table on S3, using specified load and save arguments
 
 ```yaml
 weather:
@@ -222,7 +234,8 @@ weather:
     header: True
 ```
 
-### Example 11: Loads / saves a SQL table using credentials, a database connection, using specified load and save arguments
+
+### Example 12: Loads / saves a SQL table using credentials, a database connection, using specified load and save arguments
 
 ```yaml
 scooters:
@@ -236,7 +249,8 @@ scooters:
     if_exists: replace
 ```
 
-### Example 12: Loads an SQL table with credentials, a database connection, and applies a SQL query to the table
+### Example 13: Loads an SQL table with credentials, a database connection, and applies a SQL query to the table
+
 
 ```yaml
 scooters_query:
@@ -249,7 +263,8 @@ scooters_query:
 
 When you use [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
-### Example 13: Loads data from an API endpoint, example US corn yield data from USDA
+
+### Example 14: Loads data from an API endpoint, example US corn yield data from USDA
 
 ```yaml
 us_corn_yield_data:
@@ -273,7 +288,9 @@ usda_credentials:
   - password
 ```
 
-### Example 14: Loads data from Minio (S3 API Compatible Storage)
+
+### Example 15: Loads data from Minio (S3 API Compatible Storage)
+
 
 ```yaml
 test:
@@ -297,7 +314,8 @@ The easiest way to setup MinIO is to run a Docker image. After the following com
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
-### Example 15: Loads a model saved as a pickle from Azure Blob Storage
+
+### Example 16: Loads a model saved as a pickle from Azure Blob Storage
 
 ```yaml
 ml_model:
@@ -314,7 +332,8 @@ dev_abs:
   account_key: key
 ```
 
-### Example 16: Loads a CSV file stored in a remote location through SSH
+
+### Example 17: Loads a CSV file stored in a remote location through SSH
 
 ```{note}
 This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).

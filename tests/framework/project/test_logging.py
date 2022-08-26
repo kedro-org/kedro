@@ -1,4 +1,4 @@
-import importlib
+# pylint: disable=import-outside-toplevel,unused-import,reimported
 import logging
 import sys
 
@@ -41,7 +41,7 @@ def test_rich_traceback_enabled(mocker):
     rich_traceback_install = mocker.patch("rich.traceback.install")
     rich_pretty_install = mocker.patch("rich.pretty.install")
     del sys.modules["kedro.framework.project"]
-    from kedro.framework.project import LOGGING  # noqa  # pylint: disable=unused-import
+    from kedro.framework.project import LOGGING  # noqa
 
     rich_traceback_install.assert_called()
     rich_pretty_install.assert_called()
@@ -52,7 +52,7 @@ def test_rich_traceback_disabled_on_databricks(mocker, monkeypatch):
     rich_traceback_install = mocker.patch("rich.traceback.install")
     rich_pretty_install = mocker.patch("rich.pretty.install")
     del sys.modules["kedro.framework.project"]
-    from kedro.framework.project import LOGGING  # noqa  # pylint: disable=unused-import
+    from kedro.framework.project import LOGGING  # noqa
 
     rich_traceback_install.assert_not_called()
     rich_pretty_install.assert_called()

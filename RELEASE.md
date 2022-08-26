@@ -19,6 +19,7 @@
 * Update documentation for `rich` logging.
 * Updated Prefect deployment documentation to allow for reruns with saved versioned datasets.
 * The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
+* Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

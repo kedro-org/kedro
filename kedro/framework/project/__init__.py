@@ -216,6 +216,11 @@ class _ProjectLogging(UserDict):
         self.data = logging_config
         
     def _is_databricks() -> bool:
+        """Inspired by rich.console._is_jupyter."""
+        try:
+            get_ipython
+        except NameError:
+            return False
         return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 

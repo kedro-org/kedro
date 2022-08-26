@@ -12,9 +12,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import click
-
-# import rich.pretty
-# import rich.traceback
+import rich.pretty
+import rich.traceback
 import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -209,7 +208,7 @@ class _ProjectLogging(UserDict):
         # if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
         #
         # rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
-        # rich.pretty.install()
+        rich.pretty.install()
 
     def configure(self, logging_config: Dict[str, Any]) -> None:
         """Configure project logging using `logging_config` (e.g. from project

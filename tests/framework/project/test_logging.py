@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-from kedro.framework.project import LOGGING, configure_logging  # noqa
+from kedro.framework.project import LOGGING, configure_logging
 
 default_logging_config = {
     "version": 1,

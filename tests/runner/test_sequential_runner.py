@@ -5,40 +5,10 @@ import pandas as pd
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import (
-    AbstractDataSet,
-    DataCatalog,
-    DataSetError,
-    LambdaDataSet,
-    MemoryDataSet,
-)
+from kedro.io import AbstractDataSet, DataCatalog, DataSetError, LambdaDataSet
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
 from tests.runner.conftest import exception_fn, identity, sink, source
-
-
-@pytest.fixture
-def memory_catalog():
-    ds1 = MemoryDataSet({"data": 42})
-    ds2 = MemoryDataSet([1, 2, 3, 4, 5])
-    return DataCatalog({"ds1": ds1, "ds2": ds2})
-
-
-@pytest.fixture
-def pandas_df_feed_dict():
-    pandas_df = pd.DataFrame({"Name": ["Alex", "Bob"], "Age": [15, 25]})
-    return {"ds3": pandas_df}
-
-
-@pytest.fixture
-def conflicting_feed_dict(pandas_df_feed_dict):
-    ds1 = MemoryDataSet({"data": 0})
-    ds3 = pandas_df_feed_dict["ds3"]
-    return {"ds1": ds1, "ds3": ds3}
-
-
-def multi_input_list_output(arg1, arg2):
-    return [arg1, arg2]
 
 
 class TestValidSequentialRunner:
@@ -104,19 +74,6 @@ class TestSeqentialRunnerBranchlessPipeline:
         )
 
         assert output == {}
-
-
-@pytest.fixture
-def unfinished_outputs_pipeline():
-    return Pipeline(
-        [
-            node(identity, dict(arg="ds4"), "ds8", name="node1"),
-            node(sink, "ds7", None, name="node2"),
-            node(multi_input_list_output, ["ds3", "ds4"], ["ds6", "ds7"], name="node3"),
-            node(identity, "ds2", "ds5", name="node4"),
-            node(identity, "ds1", "ds4", name="node5"),
-        ]
-    )  # Outputs: ['ds8', 'ds5', 'ds6'] == ['ds1', 'ds2', 'ds3']
 
 
 @pytest.mark.parametrize("is_async", [False, True])
@@ -281,45 +238,6 @@ class TestSequentialRunnerRelease:
         fake_dataset_instance.confirm.assert_called_once_with()
 
 
-@pytest.fixture
-def resume_scenario_pipeline():
-    return Pipeline(
-        [
-            node(identity, "ds0_A", "ds1_A", name="node1_A"),
-            node(identity, "ds0_B", "ds1_B", name="node1_B"),
-            node(
-                multi_input_list_output,
-                ["ds1_A", "ds1_B"],
-                ["ds2_A", "ds2_B"],
-                name="node2",
-            ),
-            node(identity, "ds2_A", "ds3_A", name="node3_A"),
-            node(identity, "ds2_B", "ds3_B", name="node3_B"),
-            node(identity, "ds3_A", "ds4_A", name="node4_A"),
-            node(identity, "ds3_B", "ds4_B", name="node4_B"),
-        ]
-    )
-
-
-@pytest.fixture
-def resume_scenario_catalog():
-    def _load():
-        return 0
-
-    def _save(arg):
-        assert arg == 0
-
-    persistent_dataset = LambdaDataSet(load=_load, save=_save)
-    return DataCatalog(
-        {
-            "ds0_A": persistent_dataset,
-            "ds0_B": persistent_dataset,
-            "ds2_A": persistent_dataset,
-            "ds2_B": persistent_dataset,
-        }
-    )
-
-
 @pytest.mark.parametrize(
     "failing_node_indexes,expected_pattern",
     [
@@ -335,21 +253,21 @@ class TestSuggestResumeScenario:
     def test_suggest_resume_scenario(
         self,
         caplog,
-        resume_scenario_catalog,
-        resume_scenario_pipeline,
+        two_branches_crossed_pipeline,
+        persistent_dataset_catalog,
         failing_node_indexes,
         expected_pattern,
     ):
         for idx in failing_node_indexes:
-            failing_node = resume_scenario_pipeline.nodes[idx]
-            resume_scenario_pipeline -= Pipeline([failing_node])
-            resume_scenario_pipeline += Pipeline(
+            failing_node = two_branches_crossed_pipeline.nodes[idx]
+            two_branches_crossed_pipeline -= Pipeline([failing_node])
+            two_branches_crossed_pipeline += Pipeline(
                 [failing_node._copy(func=exception_fn)]
             )
         with pytest.raises(Exception):
             SequentialRunner().run(
-                resume_scenario_pipeline,
-                resume_scenario_catalog,
+                two_branches_crossed_pipeline,
+                persistent_dataset_catalog,
                 hook_manager=_create_hook_manager(),
             )
         assert re.search(expected_pattern, caplog.text)

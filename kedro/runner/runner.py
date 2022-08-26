@@ -227,16 +227,17 @@ def _find_persistent_ancestors(
 
     """
     ancestor_nodes_to_run = set()
-    queue, visited = deque(children), set()
+    queue, visited = deque(children), set(children)
     while queue:
         current_node = queue.popleft()
-        visited.add(current_node)
         if _has_persistent_inputs(current_node, catalog):
             ancestor_nodes_to_run.add(current_node)
             continue
         for parent in _enumerate_parents(pipeline, current_node):
-            if parent not in visited:
-                queue.append(parent)
+            if parent in visited:
+                continue
+            visited.add(parent)
+            queue.append(parent)
     return ancestor_nodes_to_run
 
 

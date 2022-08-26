@@ -1,4 +1,6 @@
+import importlib
 import logging
+import sys
 
 import pytest
 
@@ -30,3 +32,22 @@ def test_configure_logging():
     configure_logging(logging_config)
     assert LOGGING.data == logging_config
     assert logging.getLogger("kedro").level == logging.WARNING
+
+
+def test_rich_traceback_enabled(mocker):
+    """Note we need to force reload; just doing from kedro.framework.project import ...
+    will not call rich.traceback.install again."""
+    rich_traceback_install = mocker.patch("rich.traceback.install")
+    rich_pretty_install = mocker.patch("rich.pretty.install")
+    importlib.reload(sys.modules["kedro.framework.project"])
+    rich_traceback_install.assert_called()
+    rich_pretty_install.assert_called()
+
+
+def test_rich_traceback_disabled_on_databricks(mocker, monkeypatch):
+    monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "1")
+    rich_traceback_install = mocker.patch("rich.traceback.install")
+    rich_pretty_install = mocker.patch("rich.pretty.install")
+    importlib.reload(sys.modules["kedro.framework.project"])
+    rich_traceback_install.assert_not_called()
+    rich_pretty_install.assert_called()

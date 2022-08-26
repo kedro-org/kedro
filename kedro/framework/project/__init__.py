@@ -205,9 +205,8 @@ class _ProjectLogging(UserDict):
         # Rich traceback handling does not work on databricks. Hopefully this will be
         # fixed on their side at some point, but until then we disable it.
         # See https://github.com/Textualize/rich/issues/2455
-        # if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
-        #
-        # rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
+        if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
+            rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
         rich.pretty.install()
 
     def configure(self, logging_config: Dict[str, Any]) -> None:

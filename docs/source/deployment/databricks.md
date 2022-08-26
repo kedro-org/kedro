@@ -55,9 +55,10 @@ kedro run
 You should get a similar output:
 ```console
 ...
-2020-09-09 18:57:36,762 - iris_databricks.pipelines.data_science.nodes - INFO - Model accuracy: 100.00%
-2020-09-09 18:57:36,762 - kedro.runner.sequential_runner - INFO - Completed 5 out of 5 tasks
-2020-09-09 18:57:36,762 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+[08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
+                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
+                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 ### 3. Create a Databricks cluster
 
@@ -216,12 +217,10 @@ You should get a similar output:
 
 ```console
 ...
-2020-09-16 10:45:21,991 - kedro.io.data_catalog - INFO - Loading data from `example_predictions` (MemoryDataSet)...
-2020-09-16 10:45:21,991 - kedro.pipeline.node - INFO - Running node: report_accuracy([example_predictions]) -> None
-2020-09-16 10:45:23,128 - iris_databricks.pipelines.data_science.nodes - INFO - Model accuracy: 97.30%
-2020-09-16 10:45:23,144 - kedro.runner.sequential_runner - INFO - Completed 5 out of 5 tasks
-2020-09-16 10:45:23,145 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
-Out[12]: {}
+[08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
+                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
+                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 
 Your complete notebook should look similar to this (the results are hidden):
@@ -256,43 +255,7 @@ After this, you can reload Kedro by running the line magic command `%reload_kedr
 For Kedro-Viz to run with your Kedro project, you need to ensure that both the packages are installed in the same scope (notebook-scoped vs. cluster library). i.e. if you `%pip install kedro` from inside your notebook then you should also `%pip install kedro-viz` from inside your notebook.
 If your cluster comes with Kedro installed on it as a library already then you should also add Kedro-Viz as a [cluster library](https://docs.microsoft.com/en-us/azure/databricks/libraries/cluster-libraries).
 
-Currently, if you try to run `%run_viz` on Databricks it will only display the below instead of running the Kedro-Viz app in the notebook.
-
-```console
-<IPython.core.display.HTML object>
-```
-
-While we fix this issue, we have a temporary workaround which involves you setting up a R Shiny application to run Kedro-Viz on Databricks.
-
-To run Kedro-Viz, first ensure that you are in your Kedro project directory and then run the below command in your Databricks notebook:
-
-```bash
-%sh kedro viz --no-browser --host 0.0.0.0 --port 4141
-```
-
-```{note}
-The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below GIF on how to cancel.
-```
-
-![](../meta/images/databricks_cancel_command.gif)
-
-
-After this, you must try and run an example Shiny app using the below command:
-
-```bash
-%r
-library(shiny)
-runExample("01_hello")
-```
-
-![](../meta/images/databricks_shiny_command.png)
-
-When you click on the Shiny app link, it will open a browser with an example Shiny app running. Now edit the port at the end of the URL and change it to 4141.
-
-![](../meta/images/databricks_kedro_viz.gif)
-
-You will notice Kedro-Viz is blank at first, but if you click on the flowchart tab, Kedro-Viz will run as normal.
-
-```{note}
-Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
+Kedro-Viz can then be launched in a new browser tab with the `%run_viz` line magic:
+```ipython
+In [2]: %run_viz
 ```

@@ -71,7 +71,7 @@ def persistent_dataset_catalog():
         return 0
 
     def _save(arg):
-        assert arg == 0
+        pass
 
     persistent_dataset = LambdaDataSet(load=_load, save=_save)
     return DataCatalog(

@@ -77,7 +77,7 @@ class TestSeqentialRunnerBranchlessPipeline:
 
 
 @pytest.mark.parametrize("is_async", [False, True])
-class TestSeqentialRunnerBranchedPipeline:
+class TestSequentialRunnerBranchedPipeline:
     def test_input_seq(
         self,
         is_async,

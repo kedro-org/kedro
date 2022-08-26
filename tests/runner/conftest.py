@@ -148,7 +148,7 @@ def unfinished_outputs_pipeline():
 
 @pytest.fixture
 def two_branches_crossed_pipeline():
-    """A pipeline with an X-shape (two branches with one common node)"""
+    """A ``Pipeline`` with an X-shape (two branches with one common node)"""
     return Pipeline(
         [
             node(identity, "ds0_A", "ds1_A", name="node1_A"),

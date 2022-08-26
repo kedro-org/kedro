@@ -6,7 +6,7 @@ import pytest
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog, DataSetError, LambdaDataSet
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node, pipeline
 from kedro.runner import SequentialRunner
 from tests.runner.conftest import exception_fn, identity, sink, source
 
@@ -147,7 +147,7 @@ class LoggingDataSet(AbstractDataSet):
 class TestSequentialRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):
         log = []
-        pipeline = Pipeline(
+        test_pipeline = pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
         catalog = DataCatalog(
@@ -157,14 +157,14 @@ class TestSequentialRunnerRelease:
                 "out": LoggingDataSet(log, "out"),
             }
         )
-        SequentialRunner(is_async=is_async).run(pipeline, catalog)
+        SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we don't want to see release in or out in here
         assert log == [("load", "in"), ("load", "middle"), ("release", "middle")]
 
     def test_release_at_earliest_opportunity(self, is_async):
         log = []
-        pipeline = Pipeline(
+        test_pipeline = pipeline(
             [
                 node(source, None, "first"),
                 node(identity, "first", "second"),
@@ -177,7 +177,7 @@ class TestSequentialRunnerRelease:
                 "second": LoggingDataSet(log, "second"),
             }
         )
-        SequentialRunner(is_async=is_async).run(pipeline, catalog)
+        SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we want to see "release first" before "load second"
         assert log == [
@@ -189,7 +189,7 @@ class TestSequentialRunnerRelease:
 
     def test_count_multiple_loads(self, is_async):
         log = []
-        pipeline = Pipeline(
+        test_pipeline = pipeline(
             [
                 node(source, None, "dataset"),
                 node(sink, "dataset", None, name="bob"),
@@ -197,14 +197,14 @@ class TestSequentialRunnerRelease:
             ]
         )
         catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
-        SequentialRunner(is_async=is_async).run(pipeline, catalog)
+        SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we want to the release after both the loads
         assert log == [("load", "dataset"), ("load", "dataset"), ("release", "dataset")]
 
     def test_release_transcoded(self, is_async):
         log = []
-        pipeline = Pipeline(
+        test_pipeline = pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
         catalog = DataCatalog(
@@ -214,16 +214,16 @@ class TestSequentialRunnerRelease:
             }
         )
 
-        SequentialRunner(is_async=is_async).run(pipeline, catalog)
+        SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we want to see both datasets being released
         assert log == [("release", "save"), ("load", "load"), ("release", "load")]
 
     @pytest.mark.parametrize(
-        "pipeline",
+        "test_pipeline",
         [
-            Pipeline([node(identity, "ds1", "ds2", confirms="ds1")]),
-            Pipeline(
+            pipeline([node(identity, "ds1", "ds2", confirms="ds1")]),
+            pipeline(
                 [
                     node(identity, "ds1", "ds2"),
                     node(identity, "ds2", None, confirms="ds1"),
@@ -231,10 +231,10 @@ class TestSequentialRunnerRelease:
             ),
         ],
     )
-    def test_confirms(self, mocker, pipeline, is_async):
+    def test_confirms(self, mocker, test_pipeline, is_async):
         fake_dataset_instance = mocker.Mock()
         catalog = DataCatalog(data_sets={"ds1": fake_dataset_instance})
-        SequentialRunner(is_async=is_async).run(pipeline, catalog)
+        SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
         fake_dataset_instance.confirm.assert_called_once_with()
 
 
@@ -260,8 +260,8 @@ class TestSuggestResumeScenario:
     ):
         for idx in failing_node_indexes:
             failing_node = two_branches_crossed_pipeline.nodes[idx]
-            two_branches_crossed_pipeline -= Pipeline([failing_node])
-            two_branches_crossed_pipeline += Pipeline(
+            two_branches_crossed_pipeline -= pipeline([failing_node])
+            two_branches_crossed_pipeline += pipeline(
                 [failing_node._copy(func=exception_fn)]
             )
         with pytest.raises(Exception):

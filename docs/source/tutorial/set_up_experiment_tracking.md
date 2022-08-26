@@ -174,6 +174,21 @@ You can now access, compare and pin your runs by toggling the `Compare runs` but
 
 ![](../meta/images/experiment-tracking_demo.gif)
 
+Kedro-Viz also supports the [display and comparison of plots](../tutorial/visualise_pipeline.md#visualise-plotly-charts-in-kedro-viz). To include your plots in experiment tracking it is important to set the versioned flag to true within the project catalog.
+
+```
+# conf/base/catalog.yml
+
+reporting.confusion_matrix:
+  type: matplotlib.MatplotlibWriter
+  filepath: ${base_location}/08_reporting/confusion_matrix.png
+  versioned: true
+```
+
+Clicking on a plot will expand the image. If in comparison view, expanding a plot will show all the plots in comparison view for them to be compared side-by-side.
+
+<!-- Add gif of expanding plot in run list and then in comparison view -->
+
 Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab ![](../meta/images/pipeline_visualisation_icon.png). Clicking on any [MetricsDataset](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.tracking.MetricsDataSet.html) node will open a side panel displaying how the metric value has changed over time.
 
 ![](../meta/images/pipeline_show_metrics.gif)

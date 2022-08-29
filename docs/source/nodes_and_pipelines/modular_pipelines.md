@@ -47,9 +47,9 @@ kedro pipeline create <pipeline_name>
 For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
 ```
 
-### What does the ``kedro pipeline create`` do?
+### What does `kedro pipeline create` do?
 
-Running the `kedro pipeline create` command adds boilerplate pipeline folders and files for the created pipeline to your project. For your convenience, Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters and appropriate `tests` structure. You also don't have to add those pesky `__init__.py` files yourself, which is handy 😅. You can see the generated folder structure below:
+Running the `kedro pipeline create` command adds boilerplate folders and files for the designated pipeline to your project. For your convenience, Kedro gives you a pipeline-specific `nodes.py`, `pipeline.py`, parameters file and appropriate `tests` structure. It also adds the appropriate `__init__.py` files. You can see the generated folder structure below:
 
 <details>
 <summary><b>Click to see the generated folder structure</b></summary>
@@ -58,23 +58,22 @@ Running the `kedro pipeline create` command adds boilerplate pipeline folders an
 ├── conf
 │   └── base
 │       └── parameters
-│           └── {{pipeline_name}}.yml  <-- Pipeline specific parameters
+│           └── {{pipeline_name}}.yml  <-- Pipeline-specific parameters
 └── src
     ├── my_project
     │   ├── __init__.py
-    │   ├── pipelines
-    │   |   ├── __init__.py
-    │   |   └── {{pipeline_name}}      <-- This folder defines the modular pipeline
-    │   |       ├── README.md          <-- To store pipeline specific documentation
-    │   |       ├── __init__.py        <-- So that Python treats this pipeline as a module
-    │   |       ├── nodes.py           <-- To declare your nodes
-    │   |       └── pipeline.py        <-- To structure the pipeline itself
-    |   └──  pipeline_registry.py      <-- By default, automatically discovers and registers pipelines
+    │   └── pipelines
+    │       ├── __init__.py
+    │       └── {{pipeline_name}}      <-- This folder defines the modular pipeline
+    │           ├── README.md          <-- Pipeline-specific documentation
+    │           ├── __init__.py        <-- So that Python treats this pipeline as a module
+    │           ├── nodes.py           <-- To declare your nodes
+    │           └── pipeline.py        <-- To structure the pipeline itself
     └── tests
         ├── __init__.py
         └── pipelines
             ├── __init__.py
-            └── {{pipeline_name}}      <-- Pipeline specific tests
+            └── {{pipeline_name}}      <-- Pipeline-specific tests
                 ├── __init__.py
                 └── test_pipeline.py
 

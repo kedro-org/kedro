@@ -43,7 +43,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     return pipelines
 ```
 
-Under the hood, the `find_pipelines()` function traverses the `src/<package_name>/pipelines/` directory, returning a mapping from pipeline directory name to [`Pipeline`](/kedro.pipeline.Pipeline) object by:
+Under the hood, the `find_pipelines()` function traverses the `src/<package_name>/pipelines/` directory and returns a mapping from pipeline directory name to [`Pipeline`](/kedro.pipeline.Pipeline) object by:
 
 1. Importing the `<package_name>.pipelines.<pipeline_name>` module
 2. Calling the `create_pipeline()` function exposed by the `<package_name>.pipelines.<pipeline_name>` module

@@ -574,10 +574,10 @@ You can find out more about the runners Kedro provides, and how to create your o
 
 ## Slice a pipeline
 
-In some cases you may want to run just part of a pipeline. For example, you may need to only run the data science pipeline to tune the hyperparameters of the price prediction model and skip data processing execution. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `ds` (as labelled in `register_pipelines`), execute the following command:
+In some cases you may want to run just part of a pipeline. For example, you may need to only run the data science pipeline to tune the hyperparameters of the price prediction model and skip data processing execution. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
 ```bash
-kedro run --pipeline=ds
+kedro run --pipeline=data_science
 ```
 
 See the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
@@ -587,7 +587,7 @@ To successfully run the pipeline, you need to make sure that all required input 
 ```
 
 ```bash
-kedro run --pipeline=ds
+kedro run --pipeline=data_science
 
 2019-10-04 12:36:12,135 - root - INFO - ** Kedro project kedro-tutorial
 2019-10-04 12:36:12,158 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataSet)...

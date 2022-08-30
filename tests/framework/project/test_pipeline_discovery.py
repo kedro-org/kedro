@@ -168,3 +168,63 @@ def test_find_pipelines_skips_modules_that_cause_exceptions_upon_import(
         pipelines = find_pipelines()
     assert set(pipelines) == pipeline_names | {"__default__"}
     assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
+    indirect=True,
+)
+def test_find_pipelines_handles_simplified_project_structure(
+    mock_package_name_with_pipelines,
+    pipeline_names,
+):
+    (Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py").write_text(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline, node, pipeline
+
+
+            def create_pipeline(**kwargs) -> Pipeline:
+                return pipeline([node(lambda: 1, None, "simple_pipeline")])
+            """
+        )
+    )
+
+    configure_project(mock_package_name_with_pipelines)
+    pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names | {"simple_pipeline"}
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
+    indirect=True,
+)
+def test_find_pipelines_skips_unimportable_pipeline_module(
+    mock_package_name_with_pipelines,
+    pipeline_names,
+):
+    (Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py").write_text(
+        textwrap.dedent(
+            f"""
+            import {pipeline_names}
+
+            from kedro.pipeline import Pipeline, node, pipeline
+
+
+            def create_pipeline(**kwargs) -> Pipeline:
+                return pipeline([node(lambda: 1, None, "simple_pipeline")])
+            """
+        )
+    )
+
+    configure_project(mock_package_name_with_pipelines)
+    with pytest.warns(
+        UserWarning,
+        match=r"An error occurred while importing the '\S+' module.",
+    ):
+        pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names

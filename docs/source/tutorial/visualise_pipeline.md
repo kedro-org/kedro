@@ -248,3 +248,67 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 >**Note:** The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
 
 <!-- Add example on how to add Matplotlib charts-->
+
+To use this dataset, configure your plot in your Kedro node. 
+
+Below is an example of how to visualise plots on Kedro-Viz using `matplotlib.MatplotlibWriter`.
+
+The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
+
+```python
+import matplotlib.pyplot as plt
+
+def create_confusion_matrix(companies: pd.DataFrame):
+    # generate random confusion matrix
+    random_actuals = []
+    random_predicted = []
+    for i in range(0, 11):
+        actual = random.randint(0, 1)
+        predicted = random.randint(0, 1)
+        random_actuals.append(actual)
+        random_predicted.append(predicted)
+
+    data = {"y_Actual": random_actuals, "y_Predicted": random_predicted}
+    plt.style.use("dark_background")
+    df = pd.DataFrame(data, columns=["y_Actual", "y_Predicted"])
+    confusion_matrix = pd.crosstab(
+        df["y_Actual"],
+        df["y_Predicted"],
+        rownames=["Actual"],
+        colnames=["Predicted"]
+    )
+    sn.heatmap(confusion_matrix, annot=True)
+    return plt
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """This is a simple pipeline which generates a plot"""
+    return pipeline(
+        [
+            node(
+                func=create_confusion_matrix,
+                inputs="companies",
+                outputs="dummy_confusion_matrix",
+            ),
+        ]
+    )
+```
+
+You must also specify the output type in the `catalog.yml` file, like below.
+
+```yaml
+reporting.dummy_confusion_matrix:
+  type: matplotlib.MatplotlibWriter
+  filepath: ${base_location}/08_reporting/dummy_confusion_matrix.png
+  versioned: true
+```
+
+
+
+Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Click on the node to see a small preview of your Matplotlib image in the metadata panel.
+
+<!-- Replace ![](../meta/images/pipeline_visualisation_plotly.png) with Matplotlib example-->
+
+You can view the larger visualisation of the chart by clicking the 'Expand Matplotlib Image' button on the bottom of the metadata panel.
+
+<!-- Replace ![](../meta/images/pipeline_visualisation_plotly_expand.png) with Matplotlib example-->

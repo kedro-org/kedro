@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+from IPython.core.magic import register_line_magic
+
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
 
@@ -94,8 +96,6 @@ def load_ipython_extension(ipython):  # pylint: disable=unused-argument
     When user use `kedro jupyter notebook` or `jupyter ipython`, this extension is
     loaded automatically.
     """
-
-    from IPython.core.magic import register_line_magic
     from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
     @magic_arguments()

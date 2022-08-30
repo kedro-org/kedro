@@ -71,7 +71,7 @@ class TestLoadKedroObjects:
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
         mock_register_line_magic = mocker.patch(
-            "IPython.core.magic.register_line_magic"
+            "kedro.extras.extensions.ipython.register_line_magic"
         )
         mock_session_create = mocker.patch(
             "kedro.framework.session.KedroSession.create"
@@ -122,7 +122,7 @@ class TestLoadKedroObjects:
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
         mock_register_line_magic = mocker.patch(
-            "IPython.core.magic.register_line_magic"
+            "kedro.extras.extensions.ipython.register_line_magic"
         )
         mock_session_create = mocker.patch(
             "kedro.framework.session.KedroSession.create"
@@ -144,7 +144,7 @@ class TestLoadKedroObjects:
         )
         assert mock_register_line_magic.call_count == 1
 
-    def test_load_kedro_objects_no_path(self, tmp_path, caplog, mocker):
+    def test_load_kedro_objects_no_path(self, tmp_path, caplog, mocker, ipython):
         from kedro.extras.extensions.ipython import default_project_path
 
         assert default_project_path == tmp_path
@@ -177,9 +177,8 @@ class TestLoadKedroObjects:
         mocker.patch(
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
-        mocker.patch("IPython.core.magic.register_line_magic")
+        mocker.patch("kedro.extras.extensions.ipython.register_line_magic")
         mocker.patch("kedro.framework.session.KedroSession.load_context")
-        mocker.patch("IPython.get_ipython")
 
         reload_kedro()
 

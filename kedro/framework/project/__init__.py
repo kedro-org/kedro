@@ -23,6 +23,11 @@ from dynaconf.validator import ValidationError, Validator
 
 from kedro.pipeline import Pipeline, pipeline
 
+IMPORT_ERROR_MESSAGE = (
+    "An error occurred while importing the '{module}' module. Nothing "
+    "defined therein will be returned by 'find_pipelines'.\n\n{tb_exc}"
+)
+
 
 def _get_default_class(class_import_path):
     module, _, class_name = class_import_path.rpartition(".")
@@ -284,6 +289,25 @@ def find_pipelines() -> Dict[str, Pipeline]:
             ``Pipeline`` object, or if the module import fails up front.
     """
     pipelines_dict = {"__default__": pipeline([])}
+
+    # Handle the simplified project structure found in several starters.
+    pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
+    try:
+        pipeline_module = importlib.import_module(pipeline_module_name)
+    except ModuleNotFoundError as exc:
+        if str(exc) != f"No module named '{pipeline_module_name}'":
+            warnings.warn(
+                IMPORT_ERROR_MESSAGE.format(
+                    module=pipeline_module_name, tb_exc=traceback.format_exc()
+                )
+            )
+    except:  # pylint: disable=bare-except  # noqa: E722
+        warnings.warn(
+            IMPORT_ERROR_MESSAGE.format(
+                module=pipeline_module_name, tb_exc=traceback.format_exc()
+            )
+        )
+
     for pipeline_dir in importlib_resources.files(
         f"{PACKAGE_NAME}.pipelines"
     ).iterdir():
@@ -294,16 +318,14 @@ def find_pipelines() -> Dict[str, Pipeline]:
         if pipeline_name == "__pycache__":
             continue
 
+        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
-            pipeline_module = importlib.import_module(
-                f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
-            )
+            pipeline_module = importlib.import_module(pipeline_module_name)
         except:  # pylint: disable=bare-except  # noqa: E722
             warnings.warn(
-                f"An error occurred while importing the "
-                f"'{PACKAGE_NAME}.pipelines.{pipeline_name}' module. "
-                f"Nothing defined therein will be returned by "
-                f"'find_pipelines'.\n\n{traceback.format_exc()}"
+                IMPORT_ERROR_MESSAGE.format(
+                    module=pipeline_module_name, tb_exc=traceback.format_exc()
+                )
             )
             continue
 

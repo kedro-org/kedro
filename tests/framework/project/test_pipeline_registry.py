@@ -25,7 +25,15 @@ def mock_package_name_with_pipelines_file(tmpdir):
     sys.path.pop(0)
 
 
-def test_pipelines_without_configure_project_is_empty():
+def test_pipelines_without_configure_project_is_empty(
+    mock_package_name_with_pipelines_file,  # pylint: disable=unused-argument
+):
+    # Reimport `pipelines` from `kedro.framework.project` to ensure that
+    # it was not set by a pior call to the `configure_project` function.
+    del sys.modules["kedro.framework.project"]
+    # pylint: disable=reimported, import-outside-toplevel
+    from kedro.framework.project import pipelines
+
     assert pipelines == {}
 
 

@@ -363,6 +363,10 @@ jobs:
       - run:
           name: Build docs
           command: make build-docs
+      - run:
+          name: Pip freeze including docs dependencies
+          command: pip freeze
+          when: always
 
   docs_linkcheck:
     executor:
@@ -373,6 +377,10 @@ jobs:
       - run:
           name: Check for broken links
           command: make linkcheck
+      - run:
+          name: Pip freeze including docs dependencies
+          command: pip freeze
+          when: always
 
   sync:
     docker:

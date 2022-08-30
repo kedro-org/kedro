@@ -144,7 +144,9 @@ class TestLoadKedroObjects:
         )
         assert mock_register_line_magic.call_count == 1
 
-    def test_load_kedro_objects_no_path(self, tmp_path, caplog, mocker, ipython):
+    def test_load_kedro_objects_no_path(
+        self, tmp_path, caplog, mocker, ipython
+    ):  # pylint: disable=unused-argument
         from kedro.extras.extensions.ipython import default_project_path
 
         assert default_project_path == tmp_path

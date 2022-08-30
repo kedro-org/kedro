@@ -10,7 +10,7 @@ A machine learning model can use the Iris dataset to illustrate classification (
 
 ## Create the example project
 
-You must first [create a project](./new_project.md). Feel free to name your project as you like, but here we will assume the project's repository name is `get-started`.
+You must first [create a project](./new_project.md). Feel free to name your project as you like, but here we will assume the project's name is `Get started`.
 
 ```bash
 kedro new --starter=pandas-iris
@@ -124,4 +124,4 @@ These are the node function within `src/get_started/nodes.py`:
 | Report accuracy | Reports the accuracy of the predictions performed by the previous node                           | `report_accuracy`  |
 
 
-The file `src/pipeline_registry.py` creates and collates into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.
+The file `src/get_started/pipeline_registry.py` creates and collates into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.

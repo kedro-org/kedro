@@ -239,10 +239,12 @@ You can view the larger visualisation of the chart by clicking the 'Expand Plotl
 
 ### Visualise Matplotlib charts in Kedro-Viz
 
-<!-- Some few lines on Matplotlib; highlight difference between Matplotlib and Plotly charts -->
+[Matplotlib](https://matplotlib.org/) is a Python library for creating static, animated, and interactive visualizations. Integrating Matplotlib into Kedro-Viz allows you to output your charts as part of your pipeline visualisation.
 
-You can view Matplotlib charts in Kedro-Viz when you use Kedro's MatplotLib Writer dataset. You must update the `requirements.txt` file in your Kedro project and add the following dataset to enable Matplotlib for your project.
+You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](https://kedro.readthedocs.io/en/latest/kedro.extras.datasets.matplotlib.MatplotlibWriter.html). You must update the `requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 `kedro[matplotlib.MatplotlibWriter]==0.18.2`
+
+>**Note:** The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
 
 <!-- Add example on how to add Matplotlib charts-->

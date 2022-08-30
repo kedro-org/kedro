@@ -213,7 +213,7 @@ def test_find_pipelines_skips_unimportable_pipeline_module(
     (Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py").write_text(
         textwrap.dedent(
             f"""
-            import {pipeline_names}
+            import {"".join(pipeline_names)}
 
             from kedro.pipeline import Pipeline, node, pipeline
 

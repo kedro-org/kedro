@@ -7,6 +7,7 @@ import operator
 import os
 import sys
 import traceback
+import types
 import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
@@ -275,6 +276,32 @@ def validate_settings():
     importlib.import_module(f"{PACKAGE_NAME}.settings")
 
 
+def _create_pipeline(pipeline_module: Optional[types.ModuleType]) -> Optional[Pipeline]:
+    if pipeline_module is None:
+        return None
+
+    if not hasattr(pipeline_module, "create_pipeline"):
+        warnings.warn(
+            f"The '{pipeline_module.__name__}' module does not "
+            f"expose a 'create_pipeline' function, so no pipelines "
+            f"defined therein will be returned by 'find_pipelines'."
+        )
+        return None
+
+    obj = getattr(pipeline_module, "create_pipeline")()
+    if not isinstance(obj, Pipeline):
+        warnings.warn(
+            f"Expected the 'create_pipeline' function in the "
+            f"'{pipeline_module.__name__}' module to return a "
+            f"'Pipeline' object, got '{type(obj).__name__}' "
+            f"instead. Nothing defined therein will be returned by "
+            f"'find_pipelines'."
+        )
+        return None
+
+    return obj
+
+
 def find_pipelines() -> Dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
@@ -288,7 +315,7 @@ def find_pipelines() -> Dict[str, Pipeline]:
             function, the ``create_pipeline`` function does not return a
             ``Pipeline`` object, or if the module import fails up front.
     """
-    pipelines_dict = {"__default__": pipeline([])}
+    pipeline_module = None
 
     # Handle the simplified project structure found in several starters.
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
@@ -307,6 +334,8 @@ def find_pipelines() -> Dict[str, Pipeline]:
                 module=pipeline_module_name, tb_exc=traceback.format_exc()
             )
         )
+
+    pipelines_dict = {"__default__": _create_pipeline(pipeline_module) or pipeline([])}
 
     for pipeline_dir in importlib_resources.files(
         f"{PACKAGE_NAME}.pipelines"
@@ -329,24 +358,7 @@ def find_pipelines() -> Dict[str, Pipeline]:
             )
             continue
 
-        if not hasattr(pipeline_module, "create_pipeline"):
-            warnings.warn(
-                f"The '{pipeline_module.__name__}' module does not "
-                f"expose a 'create_pipeline' function, so no pipelines "
-                f"defined therein will be returned by 'find_pipelines'."
-            )
-            continue
-
-        obj = getattr(pipeline_module, "create_pipeline")()
-        if not isinstance(obj, Pipeline):
-            warnings.warn(
-                f"Expected the 'create_pipeline' function in the "
-                f"'{pipeline_module.__name__}' module to return a "
-                f"'Pipeline' object, got '{type(obj).__name__}' "
-                f"instead. Nothing defined therein will be returned by "
-                f"'find_pipelines'."
-            )
-            continue
-
-        pipelines_dict[pipeline_name] = obj
+        pipeline_obj = _create_pipeline(pipeline_module)
+        if pipeline_obj is not None:
+            pipelines_dict[pipeline_name] = pipeline_obj
     return pipelines_dict

@@ -187,7 +187,7 @@ reporting.confusion_matrix:
 
 Clicking on a plot will expand the image. If in comparison view, expanding a plot will show all the plots in comparison view for them to be compared side-by-side.
 
-<!-- Add gif of expanding plot in run list and then in comparison view -->
+![](../meta/images/expand-plot-comparison-view.gif)
 
 Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab ![](../meta/images/pipeline_visualisation_icon.png). Clicking on any [MetricsDataset](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.tracking.MetricsDataSet.html) node will open a side panel displaying how the metric value has changed over time.
 

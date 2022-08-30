@@ -19,6 +19,8 @@ def register_pipelines() -> Dict[str, Pipeline]:
     }
 ```
 
+As a reminder, [running `kedro run` without the `--pipeline` option runs the default pipeline](./run_a_pipeline.md#run-a-pipeline-by-name).
+
 ```{note}
 The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
 ```
@@ -51,7 +53,7 @@ Under the hood, the `find_pipelines()` function traverses the `src/<package_name
 
 If any of these steps fail, `find_pipelines()` raises an appropriate warning and skips the current pipeline but continues traversal.
 
-The mapping returned by `find_pipelines()` can be modified. For example, to add a data engineering pipeline that isn't part of the default pipeline, add it to the dictionary *after* constructing the default pipeline:
+The mapping returned by `find_pipelines()` can be modified, meaning you are not limited to the pipelines returned by each of the `create_pipeline()` functions found above. For example, to add a data engineering pipeline that isn't part of the default pipeline, add it to the dictionary *after* constructing the default pipeline:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -69,5 +71,26 @@ def register_pipelines() -> Dict[str, Pipeline]:
     pipelines["data_engineering"] = pipeline(
         pipelines["data_processing"], namespace="data_engineering"
     )
+    return pipelines
+```
+
+On the other hand, adding the same pipeline *before* assigning `pipelines["__default__"] = sum(pipelines.values())` includes it in the default pipeline, so the data engineering pipeline will be run if `kedro run` is called without specifying a pipeline name:
+
+```python
+def register_pipelines() -> Dict[str, Pipeline]:
+    """Register the project's pipelines.
+
+    Since Kedro 0.18.3, projects can use the ``find_pipelines`` function
+    to autodiscover pipelines. However, projects that require more fine-
+    grained control can still construct the pipeline mapping without it.
+
+    Returns:
+        A mapping from pipeline names to ``Pipeline`` objects.
+    """
+    pipelines = find_pipelines()
+    pipelines["data_engineering"] = pipeline(
+        pipelines["data_processing"], namespace="data_engineering"
+    )
+    pipelines["__default__"] = sum(pipelines.values())
     return pipelines
 ```

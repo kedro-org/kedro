@@ -32,6 +32,9 @@ def mock_package_name_with_pipelines(tmp_path, request):
     yield package_name
     sys.path.pop(0)
 
+    # Make sure that any new `test_package.pipeline` module gets loaded.
+    del sys.modules[f"{package_name}.pipeline"]
+
     # Make sure that the `importlib_resources.files` in `find_pipelines`
     # will point to the correct `test_package.pipelines` not from cache.
     del sys.modules[f"{package_name}.pipelines"]

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from kedro.io import DataCatalog, LambdaDataSet, MemoryDataSet
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import pipeline, node
 
 
 def source():
@@ -86,7 +86,7 @@ def persistent_dataset_catalog():
 
 @pytest.fixture
 def fan_out_fan_in():
-    return Pipeline(
+    return pipeline(
         [
             node(identity, "A", "B"),
             node(identity, "B", "C"),
@@ -100,7 +100,7 @@ def fan_out_fan_in():
 @pytest.fixture
 def branchless_no_input_pipeline():
     """The pipeline runs in the order A->B->C->D->E."""
-    return Pipeline(
+    return pipeline(
         [
             node(identity, "D", "E", name="node1"),
             node(identity, "C", "D", name="node2"),
@@ -113,7 +113,7 @@ def branchless_no_input_pipeline():
 
 @pytest.fixture
 def branchless_pipeline():
-    return Pipeline(
+    return pipeline(
         [
             node(identity, "ds1", "ds2", name="node1"),
             node(identity, "ds2", "ds3", name="node2"),
@@ -123,19 +123,19 @@ def branchless_pipeline():
 
 @pytest.fixture
 def saving_result_pipeline():
-    return Pipeline([node(identity, "ds", "dsX")])
+    return pipeline([node(identity, "ds", "dsX")])
 
 
 @pytest.fixture
 def saving_none_pipeline():
-    return Pipeline(
+    return pipeline(
         [node(random, None, "A"), node(return_none, "A", "B"), node(identity, "B", "C")]
     )
 
 
 @pytest.fixture
 def unfinished_outputs_pipeline():
-    return Pipeline(
+    return pipeline(
         [
             node(identity, dict(arg="ds4"), "ds8", name="node1"),
             node(sink, "ds7", None, name="node2"),
@@ -149,7 +149,7 @@ def unfinished_outputs_pipeline():
 @pytest.fixture
 def two_branches_crossed_pipeline():
     """A ``Pipeline`` with an X-shape (two branches with one common node)"""
-    return Pipeline(
+    return pipeline(
         [
             node(identity, "ds0_A", "ds1_A", name="node1_A"),
             node(identity, "ds0_B", "ds1_B", name="node1_B"),

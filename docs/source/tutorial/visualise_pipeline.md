@@ -225,7 +225,7 @@ shuttle_passenger_capacity_plot:
 
 
 
-Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Click on the node to see a small preview of your Plotly chart in the metadata panel.
+Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/chart-icon.png) . Click on the node to see a small preview of your Plotly chart in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_plotly.png)
 
@@ -305,7 +305,7 @@ reporting.dummy_confusion_matrix:
 
 
 
-Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Click on the node to see a small preview of your Matplotlib image in the metadata panel.
+Again, once this setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/chart-icon.png) . Click on the node to see a small preview of your Matplotlib image in the metadata panel.
 
 <!-- Replace ![](../meta/images/pipeline_visualisation_plotly.png) with Matplotlib example-->
 

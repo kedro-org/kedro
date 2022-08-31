@@ -249,7 +249,7 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 
 <!-- Add example on how to add Matplotlib charts-->
 
-To use this dataset, configure your plot in your Kedro node. 
+To use this dataset, configure your plot in your Kedro node.
 
 Below is an example of how to visualise plots on Kedro-Viz using `matplotlib.MatplotlibWriter`.
 
@@ -258,6 +258,7 @@ The below functions can be added to the `nodes.py` and `pipeline.py` files respe
 ```python
 # nodes.py
 import matplotlib.pyplot as plt
+
 
 def create_confusion_matrix(companies: pd.DataFrame):
     # generate random confusion matrix
@@ -273,10 +274,7 @@ def create_confusion_matrix(companies: pd.DataFrame):
     plt.style.use("dark_background")
     df = pd.DataFrame(data, columns=["y_Actual", "y_Predicted"])
     confusion_matrix = pd.crosstab(
-        df["y_Actual"],
-        df["y_Predicted"],
-        rownames=["Actual"],
-        colnames=["Predicted"]
+        df["y_Actual"], df["y_Predicted"], rownames=["Actual"], colnames=["Predicted"]
     )
     sn.heatmap(confusion_matrix, annot=True)
     return plt

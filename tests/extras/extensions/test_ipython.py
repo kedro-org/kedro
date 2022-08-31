@@ -1,6 +1,10 @@
 # pylint: disable=import-outside-toplevel,reimported
-import pytest
+import importlib
 import sys
+
+import pytest
+from IPython.testing.globalipapp import get_ipython
+
 from kedro.extras.extensions.ipython import load_ipython_extension, reload_kedro
 from kedro.framework.startup import ProjectMetadata
 from kedro.pipeline import Pipeline
@@ -18,6 +22,14 @@ def cleanup_pipeline():
     from kedro.framework.project import pipelines
 
     pipelines.configure()
+
+
+# get_ipython() with IPython.testing can be call once only
+@pytest.fixture(scope="module")
+def ipython():
+    ipython = get_ipython()
+    load_ipython_extension(ipython)
+    return ipython
 
 
 PACKAGE_NAME = "fake_page_name"
@@ -219,23 +231,32 @@ class TestLoadIPythonExtension:
         )
         assert expected_message in log_messages
 
-def test_ipython_alias(mocker, ipython):
-    ...
 
-def test_ipython_alias_has_no_side_effect(mocker, ipython):
+def test_ipython_alias(ipython):
+    ipython.magic("load_ext kedro")
+
+
+def test_ipython_alias_has_no_side_effect():
     """
     Make sure import kedro does not import kedro.framework.project, which used to cause
     problem when logging is set up at import time and has inconsistent behavior when
     processed are spawned.
     """
-    if "kedro.framework.project"  in sys.modules:
+    if "kedro.framework.project" in sys.modules:
         # Force reload
         del sys.modules["kedro"]
         del sys.modules["kedro.framework.project"]
 
-      # pylint: disable=unused-import
+    # pylint: disable=unused-import
 
-    assert "kedro.framework.project"  not in sys.modules
+    import kedro
+    assert "kedro.framework.project" not in sys.modules
 
     # Remove side-effect
     import kedro.framework.project
+
+def test_import_without_ipython_installed(monkeypatch):
+    monkeypatch.setitem(sys.modules, "IPython", None)
+    import kedro
+
+    importlib.reload(kedro)

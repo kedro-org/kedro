@@ -9,10 +9,9 @@ __version__ = "0.18.2"
 import logging
 
 try:
-    # Only available in IPython enviornment
-    get_ipython()  # pylint: disable
+    from IPython import get_ipython
     from .extras.extensions.ipython import load_ipython_extension
-except NameError:
-    pass
+except ModuleNotFoundError:
+    pass  # Skip it when IPython is not instsalled
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

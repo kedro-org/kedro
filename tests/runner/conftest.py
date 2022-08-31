@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from kedro.io import DataCatalog, LambdaDataSet, MemoryDataSet
-from kedro.pipeline import pipeline, node
+from kedro.pipeline import node, pipeline
 
 
 def source():
@@ -70,6 +70,7 @@ def persistent_dataset_catalog():
     def _load():
         return 0
 
+    # pylint: disable=unused-argument
     def _save(arg):
         pass
 

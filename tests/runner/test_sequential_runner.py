@@ -239,14 +239,14 @@ class TestSequentialRunnerRelease:
 
 
 @pytest.mark.parametrize(
-    "failing_node_indexes,expected_pattern",
+    "failing_node_names,expected_pattern",
     [
-        ([0], r"No nodes ran."),
-        ([2], r"(node1_A,node1_B|node1_B,node1_A)"),
-        ([3], r"(node3_A,node3_B|node3_B,node3_A)"),
-        ([5], r"(node3_A,node3_B|node3_B,node3_A)"),
-        ([3, 5], r"(node3_A,node3_B|node3_B,node3_A)"),
-        ([2, 5], r"(node1_A,node1_B|node1_B,node1_A)"),
+        (["node1_A"], r"No nodes ran."),
+        (["node2"], r"(node1_A,node1_B|node1_B,node1_A)"),
+        (["node3_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+        (["node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+        (["node3_A", "node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
+        (["node2", "node4_A"], r"(node1_A,node1_B|node1_B,node1_A)"),
     ],
 )
 class TestSuggestResumeScenario:
@@ -255,14 +255,14 @@ class TestSuggestResumeScenario:
         caplog,
         two_branches_crossed_pipeline,
         persistent_dataset_catalog,
-        failing_node_indexes,
+        failing_node_names,
         expected_pattern,
     ):
-        for idx in failing_node_indexes:
-            failing_node = two_branches_crossed_pipeline.nodes[idx]
-            two_branches_crossed_pipeline -= pipeline([failing_node])
+        nodes = {n.name: n for n in two_branches_crossed_pipeline.nodes}
+        for name in failing_node_names:
+            two_branches_crossed_pipeline -= pipeline([nodes[name]])
             two_branches_crossed_pipeline += pipeline(
-                [failing_node._copy(func=exception_fn)]
+                [nodes[name]._copy(func=exception_fn)]
             )
         with pytest.raises(Exception):
             SequentialRunner().run(

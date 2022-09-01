@@ -48,7 +48,7 @@ In [3]: %reload_kedro
 ```
 
 ```{note}
-`%reload_kedro` accepts optional keyword arguments `env` and `extra_params`. For example, to use configuration environment `prod` you should run `%reload_kedro --env=prod`. For more details, run `%reload_kedro?`.
+`%reload_kedro` accepts optional keyword arguments `env` and `params`. For example, to use configuration environment `prod` you should run `%reload_kedro --env=prod`. For more details, run `%reload_kedro?`.
 ```
 
 ## Kedro variables: `catalog`, `context`, `pipelines` and `session`

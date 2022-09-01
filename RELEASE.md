@@ -12,7 +12,7 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
-* The line magic `%reload_kedro` now accepts keywords arguments. i.e. `%reload_kedro . --env=base`.
+* The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
 
 
 ## Bug fixes and other changes

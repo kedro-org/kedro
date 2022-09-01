@@ -48,8 +48,7 @@ In [3]: %reload_kedro
 ```
 
 ```{note}
-If you want to pass arguments to the `reload_kedro` line magic, e.g. to specify a configuration environment. You can provide extra keyword arguments like this:
-`%reload_kedro <path_to_project_root> --env=<env> --extra_params=<extra_params_dict>`
+`%reload_kedro` accepts optional keyword arguments `env` and `extra_params`. For example, to use configuration environment `prod` you should run `%reload_kedro --env=prod`. For more details, run `%reload_kedro?`.
 ```
 
 ## Kedro variables: `catalog`, `context`, `pipelines` and `session`

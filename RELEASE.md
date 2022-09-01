@@ -12,7 +12,7 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
-* Implemented autodiscovery of project pipelines. By default, the simplified `register_pipelines()` function in `src/<package_name>/pipeline_registry.py` looks like:
+* Implemented autodiscovery of project pipelines. A pipeline created with `kedro pipeline create <pipeline_name>` can now be accessed immediately without needing to explicitly register it in `src/<package_name>/pipeline_registry.py`, either individually by name (e.g. `kedro run --pipeline=<pipeline_name>`) or as part of the combined default pipeline (e.g. `kedro run`). By default, the simplified `register_pipelines()` function in `pipeline_registry.py` looks like:
 
     ```python
     def register_pipelines() -> Dict[str, Pipeline]:
@@ -29,8 +29,6 @@
         pipelines["__default__"] = sum(pipelines.values())
         return pipelines
     ```
-
-  It also need not be updated upon `kedro pipeline create`.
 
 ## Bug fixes and other changes
 * Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.

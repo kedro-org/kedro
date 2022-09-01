@@ -86,7 +86,7 @@ def reload_kedro(
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
 
 
-def load_ipython_extension(ipython):  # pylint: disable=unused-argument
+def load_ipython_extension(ipython):
     """
     Main entry point when %load_ext is executed.
     IPython will look for this function specifically.
@@ -122,7 +122,7 @@ def load_ipython_extension(ipython):  # pylint: disable=unused-argument
          https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
         """
         args = parse_argstring(magic_reload_kedro, line)
-        reload_kedro(args.path, args.env, args.extra_params)
+        reload_kedro(args.path, args.env, args.params)
 
     global default_project_path
 

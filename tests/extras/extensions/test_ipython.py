@@ -71,7 +71,7 @@ class TestLoadKedroObjects:
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
         mock_register_line_magic = mocker.patch(
-            "kedro.extras.extensions.ipython.register_line_magic"
+            "IPython.core.magic.register_line_magic"
         )
         mock_session_create = mocker.patch(
             "kedro.framework.session.KedroSession.create"
@@ -122,7 +122,7 @@ class TestLoadKedroObjects:
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
         mock_register_line_magic = mocker.patch(
-            "kedro.extras.extensions.ipython.register_line_magic"
+            "IPython.core.magic.register_line_magic"
         )
         mock_session_create = mocker.patch(
             "kedro.framework.session.KedroSession.create"
@@ -179,7 +179,7 @@ class TestLoadKedroObjects:
         mocker.patch(
             "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
         )
-        mocker.patch("kedro.extras.extensions.ipython.register_line_magic")
+        mocker.patch("IPython.core.magic.register_line_magic")
         mocker.patch("kedro.framework.session.KedroSession.load_context")
 
         reload_kedro()
@@ -254,7 +254,7 @@ class TestLoadIPythonExtension:
             ". --env=base",
             "--env=base",
             "-e base",
-            '. --env=base --extra_params={"key":"dummy"}',
+            ". --env=base --params=key:val",
         ],
     )
     def test_line_magic_with_valid_arguments(self, mocker, args, ipython):

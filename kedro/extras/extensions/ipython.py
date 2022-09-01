@@ -3,14 +3,13 @@
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
 """
-import json
 import logging
 import sys
 from pathlib import Path
 from typing import Any, Dict
 
 from kedro.framework.cli.project import PARAMS_ARG_HELP
-from kedro.framework.cli.utils import _split_params, ENV_HELP
+from kedro.framework.cli.utils import ENV_HELP, _split_params
 
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()

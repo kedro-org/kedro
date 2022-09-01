@@ -111,7 +111,9 @@ class TestFeatherDataSet:
         assert isinstance(data_set._filepath, PurePosixPath)
 
         mock_pandas_call = mocker.patch("pandas.read_feather")
+        mocker.patch("kedro.io.core.AbstractVersionedDataSet._filesystem_exists")
         data_set.load()
+
         assert mock_pandas_call.call_count == 1
         assert mock_pandas_call.call_args_list[0][0][0] == load_path
 

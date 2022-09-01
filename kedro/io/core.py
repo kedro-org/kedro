@@ -594,11 +594,16 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
+    def _filesystem_exists(self, path) -> bool:
+        filesystem = getattr(self, "_fs", None)
+        if filesystem:
+            if filesystem.exists(path):
+                return True
+        return False
+
     def load(self) -> _DO:
         try:
-            filesystem = getattr(self, "_fs", None)
-            if filesystem:
-                filesystem.exists(str(self._filepath))
+            self._filesystem_exists(str(self._filepath))
         except PermissionError as err:
             raise DataSetError(
                 f"Cannot load versioned dataset '{self._filepath}' due to insufficient permission."

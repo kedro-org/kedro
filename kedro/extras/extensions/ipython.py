@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+from kedro.framework.cli.project import PARAMS_ARG_HELP
+from kedro.framework.cli.utils import _split_params, ENV_HELP
 
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
@@ -108,22 +110,12 @@ def load_ipython_extension(ipython):  # pylint: disable=unused-argument
         nargs="?",
         default=None,
     )
+    @argument("-e", "--env", type=str, default=None, help=ENV_HELP)
     @argument(
-        "-e",
-        "--env",
-        type=str,
+        "--params",
+        type=lambda value: _split_params(None, None, value),
         default=None,
-        help="Kedro configuration environment name. Defaults to `local`.",
-    )
-    @argument(
-        "--extra_params",
-        type=json.loads,
-        default=None,
-        help=(
-            "Optional dictionary containing extra project parameters for underlying "
-            "KedroContext. If specified, will update (and therefore take precedence "
-            "over) the parameters retrieved from the project configuration."
-        ),
+        help=PARAMS_ARG_HELP,
     )
     def magic_reload_kedro(line: str):
         """

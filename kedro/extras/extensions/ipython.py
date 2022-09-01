@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
-from IPython.core.magic import register_line_magic
 
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
@@ -41,7 +40,7 @@ def reload_kedro(
     Setting the path will also make it default for subsequent calls.
     """
     from IPython import get_ipython
-    from IPython.core.magic import needs_local_scope
+    from IPython.core.magic import needs_local_scope, register_line_magic
 
     from kedro.framework.cli import load_entry_points
     from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
@@ -123,10 +122,7 @@ def load_ipython_extension(ipython):  # pylint: disable=unused-argument
             "over) the parameters retrieved from the project configuration."
         ),
     )
-    @register_line_magic(
-        "reload_kedro"
-    )  # Register the line magic's name as `reload_kedro`
-    def reload_kedro_line_magic(line):
+    def magic_reload_kedro(line: str):
         """
         The `%reload_kedro` IPython line magic.
 

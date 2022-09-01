@@ -19,7 +19,6 @@ from kedro.framework.project import pipelines
 
 @click.group(name="JSON")
 def commands():
-    """Kedro plugin for printing the pipeline in JSON format"""
     pass
 
 

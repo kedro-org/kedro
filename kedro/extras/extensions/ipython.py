@@ -101,7 +101,10 @@ def load_ipython_extension(ipython):  # pylint: disable=unused-argument
     @argument(
         "path",
         type=str,
-        help="Path to the project root directory.",
+        help=(
+            "Path to the project root directory. If not given, use the previously set"
+            "project root."
+        ),
         nargs="?",
         default=None,
     )
@@ -124,18 +127,15 @@ def load_ipython_extension(ipython):  # pylint: disable=unused-argument
     )
     def magic_reload_kedro(line: str):
         """
-        The `%reload_kedro` IPython line magic.
-
-        To use it in a IPython shell or Jupyter Notebook:
-        %reload_kedro  # Default path
-        %reload kedro <path_to_project_root>
-        %reload_kedro <path_to_project_root> --env=<env> --extra_params=<extra_params_dict>
+        The `%reload_kedro` IPython line magic. See
+         https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
         """
-        args = parse_argstring(reload_kedro_line_magic, line)
+        args = parse_argstring(magic_reload_kedro, line)
         reload_kedro(args.path, args.env, args.extra_params)
 
     global default_project_path
 
+    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
     default_project_path = _find_kedro_project(Path.cwd())
 
     if default_project_path is None:

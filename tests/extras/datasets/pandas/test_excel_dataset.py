@@ -143,8 +143,6 @@ class TestExcelDataSet:
     )
     def test_protocol_usage(self, filepath, instance_type, load_path, mocker):
         data_set = ExcelDataSet(filepath=filepath)
-        print("file path : ", filepath)
-        print(instance_type)
         assert isinstance(data_set._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]

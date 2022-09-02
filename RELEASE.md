@@ -13,6 +13,12 @@
 
 ## Major features and improvements
 * Implemented autodiscovery of project pipelines.
+* The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
+
+## Bug fixes and other changes
+* Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
+* Update documentation for `rich` logging.
+* Implemented autodiscovery of project pipelines.
 
 ## Bug fixes and other changes
 * Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.

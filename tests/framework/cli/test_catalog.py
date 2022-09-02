@@ -153,7 +153,7 @@ def identity(data):
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestCatalogCreateCommand:
-    PIPELINE_NAME = "de"
+    PIPELINE_NAME = "data_engineering"
 
     @staticmethod
     @pytest.fixture(params=["base"])

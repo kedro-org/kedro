@@ -6,7 +6,12 @@ import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
 
-from kedro.extras.extensions.ipython import load_ipython_extension, reload_kedro
+import kedro
+from kedro.extras.extensions.ipython import (
+    _remove_cached_modules,
+    load_ipython_extension,
+    reload_kedro,
+)
 from kedro.framework.startup import ProjectMetadata
 from kedro.pipeline import Pipeline
 
@@ -23,6 +28,7 @@ def cleanup_pipeline():
     from kedro.framework.project import pipelines
 
     pipelines.configure()
+
 
 @pytest.fixture(scope="module")  # get_ipython() twice will result in None
 def ipython():
@@ -63,22 +69,24 @@ class TestLoadKedroObjects:
             "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
             return_value=my_register_pipeline,
         )
+        mock_session_create = mocker.patch(
+            "kedro.framework.session.KedroSession.create"
+        )
         mocker.patch("kedro.framework.startup.configure_project")
         mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
+            "kedro.extras.extensions.ipython.bootstrap_project", return_value=fake_metadata
         )
         mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
         mocker.patch(
-            "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
+            "kedro.extras.extensions.ipython.load_entry_points", return_value=[mock_line_magic]
         )
         mock_register_line_magic = mocker.patch(
-            "IPython.core.magic.register_line_magic"
+            "kedro.extras.extensions.ipython.register_line_magic"
         )
-        mock_session_create = mocker.patch(
-            "kedro.framework.session.KedroSession.create"
-        )
-        mock_ipython = mocker.patch("IPython.get_ipython")
+        mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
+
+
 
         reload_kedro(kedro_path)
 
@@ -115,21 +123,23 @@ class TestLoadKedroObjects:
             project_path=tmp_path,
         )
         mocker.patch("kedro.framework.project.configure_project")
+        mock_session_create = mocker.patch(
+            "kedro.framework.session.KedroSession.create"
+        )
         mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
+            "kedro.extras.extensions.ipython.bootstrap_project", return_value=fake_metadata
         )
         mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
         mocker.patch(
-            "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
+            "kedro.extras.extensions.ipython.load_entry_points", return_value=[mock_line_magic]
         )
         mock_register_line_magic = mocker.patch(
-            "IPython.core.magic.register_line_magic"
+            "kedro.extras.extensions.ipython.register_line_magic"
         )
-        mock_session_create = mocker.patch(
-            "kedro.framework.session.KedroSession.create"
-        )
-        mock_ipython = mocker.patch("IPython.get_ipython")
+        mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
+
+
 
         reload_kedro(tmp_path, env="env1", extra_params={"key": "val"})
 
@@ -173,16 +183,18 @@ class TestLoadKedroObjects:
         mocker.patch("kedro.framework.project.settings.configure")
         mocker.patch("kedro.framework.session.session.validate_settings")
         mocker.patch("kedro.framework.session.KedroSession._setup_logging")
+        mocker.patch("kedro.framework.session.KedroSession.load_context")
         mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
+            "kedro.extras.extensions.ipython.bootstrap_project", return_value=fake_metadata
         )
+        mocker.patch("kedro.extras.extensions.ipython.register_line_magic")
         mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
         mocker.patch(
-            "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
+            "kedro.extras.extensions.ipython.load_entry_points", return_value=[mock_line_magic]
         )
-        mocker.patch("IPython.core.magic.register_line_magic")
-        mocker.patch("kedro.framework.session.KedroSession.load_context")
+
+
 
         reload_kedro()
 
@@ -205,9 +217,9 @@ class TestLoadIPythonExtension:
             "kedro.extras.extensions.ipython._find_kedro_project",
             return_value=mocker.Mock(),
         )
-        mocker.patch("IPython.core.magic.register_line_magic")
-        mocker.patch("IPython.core.magic_arguments.magic_arguments")
-        mocker.patch("IPython.core.magic_arguments.argument")
+        mocker.patch("kedro.extras.extensions.ipython.register_line_magic")
+        mocker.patch("kedro.extras.extensions.ipython.magic_arguments")
+        mocker.patch("kedro.extras.extensions.ipython.argument")
         mock_ipython = mocker.patch("IPython.get_ipython")
 
         with pytest.raises(ImportError):
@@ -220,9 +232,9 @@ class TestLoadIPythonExtension:
         mocker.patch(
             "kedro.extras.extensions.ipython._find_kedro_project", return_value=None
         )
-        mocker.patch("IPython.core.magic.register_line_magic")
-        mocker.patch("IPython.core.magic_arguments.magic_arguments")
-        mocker.patch("IPython.core.magic_arguments.argument")
+        mocker.patch("kedro.extras.extensions.ipython.register_line_magic")
+        mocker.patch("kedro.extras.extensions.ipython.magic_arguments")
+        mocker.patch("kedro.extras.extensions.ipython.argument")
         mock_ipython = mocker.patch("IPython.get_ipython")
 
         load_ipython_extension(mocker.Mock())
@@ -237,34 +249,11 @@ class TestLoadIPythonExtension:
         )
         assert expected_message in log_messages
 
-def test_ipython_alias(ipython):
-    ipython.magic("load_ext kedro")
+    def test_import_without_ipython_installed(self, monkeypatch):
+        monkeypatch.setitem(sys.modules, "IPython", None)
+        import kedro
 
-
-def test_ipython_alias_has_no_side_effect():
-    """
-    Make sure import kedro does not import kedro.framework.project, which used to cause
-    problem when logging is set up at import time and has inconsistent behavior when
-    processed are spawned.
-    """
-    if "kedro.framework.project" in sys.modules:
-        # Force reload
-        del sys.modules["kedro"]
-        del sys.modules["kedro.framework.project"]
-
-    # pylint: disable=unused-import
-
-    import kedro
-    assert "kedro.framework.project" not in sys.modules
-
-    # Remove side-effect
-    import kedro.framework.project
-
-def test_import_without_ipython_installed(monkeypatch):
-    monkeypatch.setitem(sys.modules, "IPython", None)
-    import kedro
-
-    importlib.reload(kedro)
+        importlib.reload(kedro)
 
     def test_load_extension_register_line_magic(self, mocker, ipython):
 
@@ -304,3 +293,25 @@ def test_import_without_ipython_installed(monkeypatch):
         ):
             ipython.magic("reload_kedro --invalid_arg=dummy")
 
+    def test_ipython_alias(self, ipython):
+        ipython.magic("load_ext kedro")
+
+    # def test_ipython_alias_has_no_side_effect(self):
+    #     """
+    #     Make sure import kedro does not import kedro.framework.project, which used to cause
+    #     problem when logging is set up at import time and has inconsistent behavior when
+    #     processed are spawned.
+    #     """
+    #     # Force reload kedro
+    #     _remove_cached_modules("kedro")
+    #     for m in sys.modules:
+    #         if m.startswith("kedro"):
+    #             print(m)
+    #     import kedro  # pylint: disable=unused-import
+    #     for m in sys.modules:
+    #         if m.startswith("kedro"):
+    #             print("After: ", m)
+    #     assert "kedro.framework.project" not in sys.modules
+
+    #     # Remove side-effect
+    #     import kedro.framework.project

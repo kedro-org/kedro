@@ -7,11 +7,11 @@ __version__ = "0.18.2"
 
 
 import logging
+from contextlib import suppress
 
-try:
-    from IPython import get_ipython
+with suppress(NameError):
+    get_ipython()  # Only available in IPython env
     from .extras.extensions.ipython import load_ipython_extension
-except ModuleNotFoundError:
-    pass  # Skip it when IPython is not instsalled
+
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

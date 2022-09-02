@@ -15,7 +15,7 @@ spark.scheduler.mode: FAIR
 Optimal configuration for Spark depends on the setup of your Spark cluster.
 ```
 
-## Initialise a `SparkSession` using hooks
+## Initialise a `SparkSession` using a hook
 
 Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) using an `after_context_created` [hook](../hooks/introduction). This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
 

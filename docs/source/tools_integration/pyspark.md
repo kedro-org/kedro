@@ -54,7 +54,7 @@ Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere 
 
 We don't recommend storing Spark session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
 
-You will also need to register `Hooks` implementation by updating the HOOKS variable in `src/<package_name>/settings.py` as follows:
+You will also need to register `SparkHooks` by updating the `HOOKS` variable in `src/<package_name>/settings.py` as follows:
 
 ```python
 from <package_name>.hooks import SparkHooks

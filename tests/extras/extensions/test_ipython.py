@@ -251,8 +251,6 @@ class TestLoadIPythonExtension:
 
     def test_import_without_ipython_installed(self, monkeypatch):
         monkeypatch.setitem(sys.modules, "IPython", None)
-        import kedro
-
         importlib.reload(kedro)
 
     def test_load_extension_register_line_magic(self, mocker, ipython):

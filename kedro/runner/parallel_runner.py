@@ -335,7 +335,6 @@ class ParallelRunner(AbstractRunner):
                     try:
                         node = future.result()
                     except Exception:
-                        self._suggest_resume_scenario(pipeline, done_nodes, catalog)
                         raise
                     done_nodes.add(node)
 

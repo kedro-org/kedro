@@ -3,6 +3,7 @@ import importlib
 import sys
 
 import pytest
+from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
 
 from kedro.extras.extensions.ipython import load_ipython_extension, reload_kedro
@@ -23,9 +24,7 @@ def cleanup_pipeline():
 
     pipelines.configure()
 
-
-# get_ipython() with IPython.testing can be call once only
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module")  # get_ipython() twice will result in None
 def ipython():
     ipython = get_ipython()
     load_ipython_extension(ipython)
@@ -147,7 +146,9 @@ class TestLoadKedroObjects:
         )
         assert mock_register_line_magic.call_count == 1
 
-    def test_load_kedro_objects_no_path(self, tmp_path, caplog, mocker):
+    def test_load_kedro_objects_no_path(
+        self, tmp_path, caplog, mocker, ipython
+    ):  # pylint: disable=unused-argument
         from kedro.extras.extensions.ipython import default_project_path
 
         assert default_project_path == tmp_path
@@ -182,7 +183,6 @@ class TestLoadKedroObjects:
         )
         mocker.patch("IPython.core.magic.register_line_magic")
         mocker.patch("kedro.framework.session.KedroSession.load_context")
-        mocker.patch("IPython.get_ipython")
 
         reload_kedro()
 
@@ -205,6 +205,9 @@ class TestLoadIPythonExtension:
             "kedro.extras.extensions.ipython._find_kedro_project",
             return_value=mocker.Mock(),
         )
+        mocker.patch("IPython.core.magic.register_line_magic")
+        mocker.patch("IPython.core.magic_arguments.magic_arguments")
+        mocker.patch("IPython.core.magic_arguments.argument")
         mock_ipython = mocker.patch("IPython.get_ipython")
 
         with pytest.raises(ImportError):
@@ -217,6 +220,9 @@ class TestLoadIPythonExtension:
         mocker.patch(
             "kedro.extras.extensions.ipython._find_kedro_project", return_value=None
         )
+        mocker.patch("IPython.core.magic.register_line_magic")
+        mocker.patch("IPython.core.magic_arguments.magic_arguments")
+        mocker.patch("IPython.core.magic_arguments.argument")
         mock_ipython = mocker.patch("IPython.get_ipython")
 
         load_ipython_extension(mocker.Mock())
@@ -230,7 +236,6 @@ class TestLoadIPythonExtension:
             "Make sure you run '%reload_kedro <project_root>'."
         )
         assert expected_message in log_messages
-
 
 def test_ipython_alias(ipython):
     ipython.magic("load_ext kedro")
@@ -260,3 +265,42 @@ def test_import_without_ipython_installed(monkeypatch):
     import kedro
 
     importlib.reload(kedro)
+
+    def test_load_extension_register_line_magic(self, mocker, ipython):
+
+        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
+        mock_reload_kedro = mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
+        load_ipython_extension(ipython)
+        mock_reload_kedro.assert_called_once()
+
+        # Calling the line magic to check if the line magic is available
+        ipython.magic("reload_kedro")
+        assert mock_reload_kedro.call_count == 2
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            "",
+            ".",
+            ". --env=base",
+            "--env=base",
+            "-e base",
+            ". --env=base --params=key:val",
+        ],
+    )
+    def test_line_magic_with_valid_arguments(self, mocker, args, ipython):
+        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
+        mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
+
+        ipython.magic(f"reload_kedro {args}")
+
+    def test_line_magic_with_invalid_arguments(self, mocker, ipython):
+        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
+        mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
+        load_ipython_extension(ipython)
+
+        with pytest.raises(
+            UsageError, match=r"unrecognized arguments: --invalid_arg=dummy"
+        ):
+            ipython.magic("reload_kedro --invalid_arg=dummy")
+

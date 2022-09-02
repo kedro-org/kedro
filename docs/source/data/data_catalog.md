@@ -50,7 +50,7 @@ Data Catalog accepts two different groups of `*_args` parameters that serve diff
 The `fs_args` is used to configure the interaction with a filesystem.
 All the top-level parameters of `fs_args` (except `open_args_load` and `open_args_save`) will be passed in an underlying filesystem class.
 
-Example 1: Provide the `project` value to the underlying filesystem class (`GCSFileSystem`) to interact with Google Cloud Storage (GCS)
+### Example 1: Provide the `project` value to the underlying filesystem class (`GCSFileSystem`) to interact with Google Cloud Storage (GCS)
 
 ```yaml
 test_dataset:
@@ -61,7 +61,7 @@ test_dataset:
 
 The `open_args_load` and `open_args_save` parameters are passed to the filesystem's `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation, respectively.
 
-Example 2: Load data from a local binary file using `utf-8` encoding
+### Example 2: Load data from a local binary file using `utf-8` encoding
 
 ```yaml
 test_dataset:
@@ -74,7 +74,7 @@ test_dataset:
 
 `load_args` and `save_args` configure how a third-party library (e.g. `pandas` for `CSVDataSet`) loads/saves data from/to a file.
 
-Example 3: Save data to a CSV file without row names (index) using `utf-8` encoding
+### Example 3: Save data to a CSV file without row names (index) using `utf-8` encoding
 
 ```yaml
 test_dataset:
@@ -91,7 +91,7 @@ The YAML API allows you to configure your datasets in a YAML configuration file,
 
 Here are some examples of data configuration in a `catalog.yml`:
 
-Example 1: Loads / saves a CSV file from / to a local file system
+### Example 1: Loads / saves a CSV file from / to a local file system
 
 ```yaml
 bikes:
@@ -99,7 +99,7 @@ bikes:
   filepath: data/01_raw/bikes.csv
 ```
 
-Example 2: Loads and saves a CSV on a local file system, using specified load and save arguments
+### Example 2: Loads and saves a CSV on a local file system, using specified load and save arguments
 
 ```yaml
 cars:
@@ -114,7 +114,7 @@ cars:
 
 ```
 
-Example 3: Loads and saves a compressed CSV on a local file system
+### Example 3: Loads and saves a compressed CSV on a local file system
 
 ```yaml
 boats:
@@ -128,7 +128,7 @@ boats:
       mode: 'rb'
 ```
 
-Example 4: Loads a CSV file from a specific S3 bucket, using credentials and load arguments
+### Example 4: Loads a CSV file from a specific S3 bucket, using credentials and load arguments
 
 ```yaml
 motorbikes:
@@ -142,7 +142,7 @@ motorbikes:
     na_values: ['#NA', NA]
 ```
 
-Example 5: Loads / saves a pickle file from / to a local file system
+### Example 5: Loads / saves a pickle file from / to a local file system
 
 ```yaml
 airplanes:
@@ -151,7 +151,7 @@ airplanes:
   backend: pickle
 ```
 
-Example 6: Loads an excel file from Google Cloud Storage
+### Example 6: Loads an Excel file from Google Cloud Storage
 
 ```yaml
 rockets:
@@ -164,7 +164,7 @@ rockets:
     sheet_name: Sheet1
 ```
 
-Example 7: Loads a multi-sheet excel file from a local file system
+### Example 7: Loads a multi-sheet Excel file from a local file system
 
 ```yaml
 trains:
@@ -174,7 +174,7 @@ trains:
     sheet_name: [Sheet1, Sheet2, Sheet3]
 ```
 
-Example 8: Saves an image created with Matplotlib on Google Cloud Storage
+### Example 8: Saves an image created with Matplotlib on Google Cloud Storage
 
 ```yaml
 results_plot:
@@ -185,7 +185,8 @@ results_plot:
   credentials: my_gcp_credentials
 ```
 
-Example 9: Loads / saves an HDF file on local file system storage, using specified load and save arguments
+
+### Example 9: Loads / saves an HDF file on local file system storage, using specified load and save arguments
 
 ```yaml
 skateboards:
@@ -199,7 +200,7 @@ skateboards:
     dropna: True
 ```
 
-Example 10: Loads / saves a parquet file on local file system storage, using specified load and save arguments
+### Example 10: Loads / saves a parquet file on local file system storage, using specified load and save arguments
 
 ```yaml
 trucks:
@@ -216,7 +217,8 @@ trucks:
     partition_on: [name]
 ```
 
-Example 11: Loads / saves a Spark table on S3, using specified load and save arguments
+
+### Example 11: Loads / saves a Spark table on S3, using specified load and save arguments
 
 ```yaml
 weather:
@@ -232,7 +234,8 @@ weather:
     header: True
 ```
 
-Example 12: Loads / saves a SQL table using credentials, a database connection, using specified load and save arguments
+
+### Example 12: Loads / saves a SQL table using credentials, a database connection, using specified load and save arguments
 
 ```yaml
 scooters:
@@ -246,7 +249,8 @@ scooters:
     if_exists: replace
 ```
 
-Example 13: Loads an SQL table with credentials, a database connection, and applies a SQL query to the table
+### Example 13: Loads an SQL table with credentials, a database connection, and applies a SQL query to the table
+
 
 ```yaml
 scooters_query:
@@ -259,7 +263,8 @@ scooters_query:
 
 When you use [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
-Example 14: Loads data from an API endpoint, example US corn yield data from USDA
+
+### Example 14: Loads data from an API endpoint, example US corn yield data from USDA
 
 ```yaml
 us_corn_yield_data:
@@ -283,7 +288,9 @@ usda_credentials:
   - password
 ```
 
-Example 15: Loads data from Minio (S3 API Compatible Storage)
+
+### Example 15: Loads data from Minio (S3 API Compatible Storage)
+
 
 ```yaml
 test:
@@ -307,7 +314,8 @@ The easiest way to setup MinIO is to run a Docker image. After the following com
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
-Example 16: Loads a model saved as a pickle from Azure Blob Storage
+
+### Example 16: Loads a model saved as a pickle from Azure Blob Storage
 
 ```yaml
 ml_model:
@@ -323,7 +331,9 @@ dev_abs:
   account_name: accountname
   account_key: key
 ```
-Example 17: Loads a CSV file stored in a remote location through SSH
+
+
+### Example 17: Loads a CSV file stored in a remote location through SSH
 
 ```{note}
 This example requires [Paramiko](https://www.paramiko.org) to be installed (`pip install paramiko`).

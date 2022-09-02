@@ -8,6 +8,9 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+from kedro.framework.cli.project import PARAMS_ARG_HELP
+from kedro.framework.cli.utils import ENV_HELP, _split_params
+
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
 
@@ -84,12 +87,46 @@ def reload_kedro(
 
 
 def load_ipython_extension(ipython):
-    """Main entry point when %load_ext is executed"""
+    """
+    Main entry point when %load_ext is executed.
+    IPython will look for this function specifically.
+    See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
+
+    This function is called when users do `%load_ext kedro.extras.extensions.ipython`.
+    When user use `kedro jupyter notebook` or `jupyter ipython`, this extension is
+    loaded automatically.
+    """
+    from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+
+    @magic_arguments()
+    @argument(
+        "path",
+        type=str,
+        help=(
+            "Path to the project root directory. If not given, use the previously set"
+            "project root."
+        ),
+        nargs="?",
+        default=None,
+    )
+    @argument("-e", "--env", type=str, default=None, help=ENV_HELP)
+    @argument(
+        "--params",
+        type=lambda value: _split_params(None, None, value),
+        default=None,
+        help=PARAMS_ARG_HELP,
+    )
+    def magic_reload_kedro(line: str):
+        """
+        The `%reload_kedro` IPython line magic. See
+         https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
+        """
+        args = parse_argstring(magic_reload_kedro, line)
+        reload_kedro(args.path, args.env, args.params)
 
     global default_project_path
 
-    ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
-
+    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
     default_project_path = _find_kedro_project(Path.cwd())
 
     if default_project_path is None:

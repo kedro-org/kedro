@@ -131,7 +131,7 @@ class ThreadRunner(AbstractRunner):
                     try:
                         node = future.result()
                     except Exception:
-                        self._suggest_resume_scenario(pipeline, done_nodes)
+                        self._suggest_resume_scenario(pipeline, done_nodes, catalog)
                         raise
                     done_nodes.add(node)
                     self._logger.info("Completed node: %s", node.name)

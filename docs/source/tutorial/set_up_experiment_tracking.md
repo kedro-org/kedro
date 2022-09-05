@@ -174,7 +174,10 @@ You can now access, compare and pin your runs by toggling the `Compare runs` but
 
 ![](../meta/images/experiment-tracking_demo.gif)
 
-Kedro-Viz also supports the [display and comparison of plots](../tutorial/visualise_pipeline.md#visualising-charts-in-kedro-viz). To include your plots in experiment tracking it is important to set the versioned flag to true within the project catalog.
+## View and compare plot data
+
+Experiment tracking in Kedro-Viz also supports the display and comparison of plots, such as Plotly and Matplotlib. Once you have [created your plots](../tutorial/visualise_pipeline.md#visualise-charts-in-kedro-viz) in your kedro-project, you must set the versioned flag to `true` within the project catalog to include them in experiment tracking.
+
 
 ```
 # conf/base/catalog.yml
@@ -185,7 +188,7 @@ reporting.confusion_matrix:
   versioned: true
 ```
 
-Clicking on a plot will expand the image. If in comparison view, expanding a plot will show all the plots in comparison view for them to be compared side-by-side.
+Clicking on a plot will expand it. If in comparison view, expanding a plot will show all the plots in that view for them to be compared side-by-side.
 
 ![](../meta/images/expand-plot-comparison-view.gif)
 

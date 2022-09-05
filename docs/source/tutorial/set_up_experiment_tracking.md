@@ -185,7 +185,7 @@ reporting.confusion_matrix:
   versioned: true
 ```
 
-Clicking on a plot will expand the image. If in comparison view, expanding a plot will show all the plots in comparison view for them to be compared side-by-side.
+Clicking on a plot will expand it. If in comparison view, expanding a plot will show all the plots in that view for them to be compared side-by-side.
 
 ![](../meta/images/expand-plot-comparison-view.gif)
 

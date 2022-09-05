@@ -307,8 +307,6 @@ reporting.dummy_confusion_matrix:
   versioned: true
 ```
 
-
-
 Once this setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset node with this icon ![](../meta/images/chart-icon.png). Click on the node to see a small preview of your Matplotlib image in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_matplotlib.png)

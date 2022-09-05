@@ -1,6 +1,6 @@
 # Set up experiment tracking
 
-Experiment tracking is the process of saving all machine-learning related experiment information so that it is easy to find and compare past runs. [Kedro-Viz](https://github.com/kedro-org/kedro-viz) supports native experiment tracking from [version 4.1.1](https://github.com/kedro-org/kedro-viz/releases/tag/v4.1.1) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and compare your experiments directly from the Kedro-Viz web app.
+Experiment tracking is the process of saving all machine-learning related experiment information so that it is easy to find and compare past runs. [Kedro-Viz](https://github.com/kedro-org/kedro-viz) supports native experiment tracking from [version 4.1.1](https://github.com/kedro-org/kedro-viz/releases/tag/v4.1.1) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and [compare your experiments](#access-run-data-and-compare-runs) directly from the Kedro-Viz web app, as well as [see how your metrics have change over time](#view-your-metrics-timeline).
 
 ![](../meta/images/experiment-tracking_demo_small.gif)
 
@@ -190,6 +190,8 @@ reporting.confusion_matrix:
 Clicking on a plot will expand it. When in comparison view, expanding a plot will show all the plots in that view for them to be compared side-by-side.
 
 ![](../meta/images/expand-plot-comparison-view.gif)
+
+## View your metrics timeline
 
 Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab ![](../meta/images/pipeline_visualisation_icon.png). Clicking on any [MetricsDataset](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.tracking.MetricsDataSet.html) node will open a side panel displaying how the metric value has changed over time.
 

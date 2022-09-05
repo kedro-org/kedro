@@ -259,8 +259,8 @@ import matplotlib.pyplot as plt
 
 
 def create_confusion_matrix(companies: pd.DataFrame):
-    actuals = [0,1,0,0,1,1,1,0,1,0,1]
-    predicted = [1,1,0,1,0,1,0,0,0,1,1]
+    actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+    predicted = [1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1]
     data = {"y_Actual": actuals, "y_Predicted": predicted}
     df = pd.DataFrame(data, columns=["y_Actual", "y_Predicted"])
     confusion_matrix = pd.crosstab(

@@ -74,7 +74,7 @@ class TestLoadKedroObjects:
         )
         mocker.patch("kedro.framework.startup.configure_project")
         mocker.patch(
-            "kedro.extras.extensions.ipython.bootstrap_project",
+            "kedro.framework.startup.bootstrap_project",
             return_value=fake_metadata,
         )
         mock_line_magic = mocker.Mock()
@@ -127,7 +127,7 @@ class TestLoadKedroObjects:
             "kedro.framework.session.KedroSession.create"
         )
         mocker.patch(
-            "kedro.extras.extensions.ipython.bootstrap_project",
+            "kedro.framework.startup.bootstrap_project",
             return_value=fake_metadata,
         )
         mock_line_magic = mocker.Mock()
@@ -185,7 +185,7 @@ class TestLoadKedroObjects:
         mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         mocker.patch("kedro.framework.session.KedroSession.load_context")
         mocker.patch(
-            "kedro.extras.extensions.ipython.bootstrap_project",
+            "kedro.framework.startup.bootstrap_project",
             return_value=fake_metadata,
         )
         mocker.patch("kedro.extras.extensions.ipython.register_line_magic")
@@ -294,22 +294,24 @@ class TestLoadIPythonExtension:
     def test_ipython_alias(self, ipython):
         ipython.magic("load_ext kedro")
 
-    # def test_ipython_alias_has_no_side_effect(self):
-    #     """
-    #     Make sure import kedro does not import kedro.framework.project, which used to cause
-    #     problem when logging is set up at import time and has inconsistent behavior when
-    #     processed are spawned.
-    #     """
-    #     # Force reload kedro
-    #     _remove_cached_modules("kedro")
-    #     for m in sys.modules:
-    #         if m.startswith("kedro"):
-    #             print(m)
-    #     import kedro  # pylint: disable=unused-import
-    #     for m in sys.modules:
-    #         if m.startswith("kedro"):
-    #             print("After: ", m)
-    #     assert "kedro.framework.project" not in sys.modules
+    def test_ipython_alias_has_no_side_effect(self, mocker):
+        """
+        Make sure import kedro does not import kedro.framework.project, which used to cause
+        problem when logging is set up at import time and has inconsistent behavior when
+        processed are spawned.
+        """
+        
+        loaded_kedro_modules = []
+        for module in sys.modules:
+            if module.startswith("kedro"):
+                loaded_kedro_modules.append(module)
 
-    #     # Remove side-effect
-    #     import kedro.framework.project
+        _remove_cached_modules("kedro")
+
+        import kedro
+        print(list(filter(lambda x: x.startswith("kedro"), sys.modules)))
+        assert "kedro.framework.project" not in sys.modules
+
+        # Remove side-effect
+        for kedro_module in loaded_kedro_modules:
+            __import__(kedro_module)

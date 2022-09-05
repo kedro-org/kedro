@@ -12,11 +12,7 @@ from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
-from kedro.framework.cli import load_entry_points
-from kedro.framework.cli.project import PARAMS_ARG_HELP
-from kedro.framework.cli.utils import ENV_HELP, _split_params
 from kedro.framework.session import KedroSession
-from kedro.framework.startup import bootstrap_project
 
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
@@ -47,9 +43,9 @@ def reload_kedro(
     """Line magic which reloads all Kedro default variables.
     Setting the path will also make it default for subsequent calls.
     """
-
     from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
     from kedro.framework.project import configure_project, pipelines
+    from kedro.framework.startup import bootstrap_project
 
     # If a path is provided, set it as default for subsequent calls
     global default_project_path
@@ -98,6 +94,9 @@ def load_ipython_extension(ipython):
     When user use `kedro jupyter notebook` or `jupyter ipython`, this extension is
     loaded automatically.
     """
+    from kedro.framework.cli import load_entry_points
+    from kedro.framework.cli.project import PARAMS_ARG_HELP
+    from kedro.framework.cli.utils import ENV_HELP, _split_params
 
     @magic_arguments()
     @argument(
@@ -120,7 +119,7 @@ def load_ipython_extension(ipython):
     def magic_reload_kedro(line: str):
         """
         The `%reload_kedro` IPython line magic. See
-         https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
+        https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
         """
         args = parse_argstring(magic_reload_kedro, line)
         reload_kedro(args.path, args.env, args.params)

@@ -75,7 +75,8 @@ layers = [
 ignore_imports = [
     "kedro.runner.parallel_runner -> kedro.framework.project",
     "kedro.framework.hooks.specs -> kedro.framework.context",
-    "kedro.pipeline.pipeline -> kedro"
+    "kedro.pipeline.pipeline -> kedro",
+    "kedro -> kedro.extras.extensions.ipython",
 ]
 
 [[tool.importlinter.contracts]]

@@ -251,13 +251,7 @@ kedro[matplotlib.MatplotlibWriter]==0.18.2
 The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
 ```
 
-<!-- Add example on how to add Matplotlib charts-->
-
-To use this dataset, configure your plot in your Kedro node.
-
-Below is an example of how to visualise plots on Kedro-Viz using `matplotlib.MatplotlibWriter`.
-
-The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
+To use this dataset, configure your plot in your Kedro node. The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
 
 ```python
 # nodes.py

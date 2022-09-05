@@ -74,7 +74,8 @@ layers = [
 ]
 ignore_imports = [
     "kedro.runner.parallel_runner -> kedro.framework.project",
-    "kedro.framework.hooks.specs -> kedro.framework.context"
+    "kedro.framework.hooks.specs -> kedro.framework.context",
+    "kedro.pipeline.pipeline -> kedro"
 ]
 
 [[tool.importlinter.contracts]]
@@ -84,7 +85,9 @@ modules = [
     "kedro.pipeline",
     "kedro.io"
 ]
-
+ignore_imports = [
+    "kedro.pipeline.pipeline -> kedro",
+]
 [[tool.importlinter.contracts]]
 name = "Config cannot import Runner et al"
 type = "forbidden"

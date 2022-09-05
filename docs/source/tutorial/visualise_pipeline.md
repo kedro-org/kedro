@@ -259,17 +259,9 @@ import matplotlib.pyplot as plt
 
 
 def create_confusion_matrix(companies: pd.DataFrame):
-    # generate random confusion matrix
-    random_actuals = []
-    random_predicted = []
-    for i in range(0, 11):
-        actual = random.randint(0, 1)
-        predicted = random.randint(0, 1)
-        random_actuals.append(actual)
-        random_predicted.append(predicted)
-
-    data = {"y_Actual": random_actuals, "y_Predicted": random_predicted}
-    plt.style.use("dark_background")
+    actuals = [0,1,0,0,1,1,1,0,1,0,1]
+    predicted = [1,1,0,1,0,1,0,0,0,1,1]
+    data = {"y_Actual": actuals, "y_Predicted": predicted}
     df = pd.DataFrame(data, columns=["y_Actual", "y_Predicted"])
     confusion_matrix = pd.crosstab(
         df["y_Actual"], df["y_Predicted"], rownames=["Actual"], colnames=["Predicted"]

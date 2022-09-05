@@ -247,7 +247,9 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 kedro[matplotlib.MatplotlibWriter]==0.18.2
 ```
 
->**Note:** The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
+```{note}
+The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
+```
 
 <!-- Add example on how to add Matplotlib charts-->
 

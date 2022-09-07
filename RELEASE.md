@@ -12,7 +12,7 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
-* The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`. 
+* The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
 * The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
 
 ## Bug fixes and other changes

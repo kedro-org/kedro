@@ -10,10 +10,10 @@ importing the underlying Python functions.
 """
 import warnings
 
-from ...ipython import (
+from ...ipython import (  # noqa  # pylint: disable=unused-import
     load_ipython_extension,
     reload_kedro,
-)  # pylint: disable=unused-import
+)
 
 warnings.warn(
     "kedro.extras.extensions.ipython should be accessed only using the alias "

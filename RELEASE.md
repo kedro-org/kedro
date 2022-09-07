@@ -12,6 +12,7 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
+* The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`. 
 * The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
 
 ## Bug fixes and other changes
@@ -29,6 +30,7 @@
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 
 ## Upcoming deprecations for Kedro 0.19.0
+* The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 
 # Release 0.18.2
 

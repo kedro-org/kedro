@@ -291,7 +291,6 @@ class TestLoadIPythonExtension:
         ):
             ipython.magic("reload_kedro --invalid_arg=dummy")
 
-
     def test_ipython_alias_has_no_side_effect(self, mocker):
         """
         Make sure import kedro does not import kedro.framework.project, which used to cause
@@ -305,6 +304,7 @@ class TestLoadIPythonExtension:
 
         _remove_cached_modules("kedro")
         import kedro
+
         assert "kedro.framework.project" not in sys.modules
 
         # Remove side-effect

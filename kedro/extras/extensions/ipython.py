@@ -1,4 +1,4 @@
-# pylint: disable=import-outside-toplevel,global-statement,invalid-name,too-many-locals
+# pylint: disable=import-outside-toplevel,global-statement,invalid-name
 """
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
@@ -87,7 +87,6 @@ def reload_kedro(
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
 
 
-
 @magic_arguments()
 @argument(
     "path",
@@ -125,7 +124,6 @@ def load_ipython_extension(ipython):
     When user use `kedro jupyter notebook` or `jupyter ipython`, this extension is
     loaded automatically.
     """
-
 
     global default_project_path
 

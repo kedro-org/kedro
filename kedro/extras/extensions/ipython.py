@@ -9,3 +9,10 @@ Line magics such as reload_kedro should always be called as line magics rather t
 importing the underlying Python functions.
 """
 from ...ipython import load_ipython_extension, reload_kedro
+import warnings
+
+warnings.warn(
+    "kedro.extras.extensions.ipython should be accessed only using the alias "
+    "kedro.ipython. The unaliased name will be removed in Kedro 0.19.0.",
+    DeprecationWarning,
+)

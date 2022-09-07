@@ -1,4 +1,4 @@
-# pylint: disable=import-outside-toplevel,global-statement,invalid-name,too-many-locals
+# pylint: disable=global-statement,invalid-name,too-many-locals
 """
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
@@ -8,8 +8,17 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+from IPython import get_ipython
+from IPython.core.magic import needs_local_scope, register_line_magic
+from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
+
+from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import PARAMS_ARG_HELP
 from kedro.framework.cli.utils import ENV_HELP, _split_params
+from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
+from kedro.framework.project import configure_project, pipelines
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import _is_project, bootstrap_project
 
 logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
@@ -24,8 +33,6 @@ def _remove_cached_modules(package_name):
 
 
 def _find_kedro_project(current_dir: Path):  # pragma: no cover
-    from kedro.framework.startup import _is_project
-
     while current_dir != current_dir.parent:
         if _is_project(current_dir):
             return current_dir
@@ -37,17 +44,8 @@ def _find_kedro_project(current_dir: Path):  # pragma: no cover
 def reload_kedro(
     path: str = None, env: str = None, extra_params: Dict[str, Any] = None
 ):
-    """Line magic which reloads all Kedro default variables.
-    Setting the path will also make it default for subsequent calls.
-    """
-    from IPython import get_ipython
-    from IPython.core.magic import needs_local_scope, register_line_magic
-
-    from kedro.framework.cli import load_entry_points
-    from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
-    from kedro.framework.project import configure_project, pipelines
-    from kedro.framework.session import KedroSession
-    from kedro.framework.startup import bootstrap_project
+    """Function that underlies the %reload_kedro Line magic. This should not be imported
+    or run directly but instead invoked through %reload_kedro."""
 
     # If a path is provided, set it as default for subsequent calls
     global default_project_path
@@ -86,43 +84,40 @@ def reload_kedro(
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
 
 
+@magic_arguments()
+@argument(
+    "path",
+    type=str,
+    help=(
+        "Path to the project root directory. If not given, use the previously set"
+        "project root."
+    ),
+    nargs="?",
+    default=None,
+)
+@argument("-e", "--env", type=str, default=None, help=ENV_HELP)
+@argument(
+    "--params",
+    type=lambda value: _split_params(None, None, value),
+    default=None,
+    help=PARAMS_ARG_HELP,
+)
+def magic_reload_kedro(line: str):
+    """
+    The `%reload_kedro` IPython line magic. See
+     https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
+    """
+    args = parse_argstring(magic_reload_kedro, line)
+    reload_kedro(args.path, args.env, args.params)
+
+
 def load_ipython_extension(ipython):
     """
-    Main entry point when %load_ext is executed.
+    Main entry point when %load_ext kedro.ipython is executed, either manually or
+    automatically through `kedro ipython` or `kedro jupyter lab/notebook`.
     IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
-
-    This function is called when users do `%load_ext kedro.extras.extensions.ipython`.
-    When user use `kedro jupyter notebook` or `jupyter ipython`, this extension is
-    loaded automatically.
     """
-    from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
-
-    @magic_arguments()
-    @argument(
-        "path",
-        type=str,
-        help=(
-            "Path to the project root directory. If not given, use the previously set"
-            "project root."
-        ),
-        nargs="?",
-        default=None,
-    )
-    @argument("-e", "--env", type=str, default=None, help=ENV_HELP)
-    @argument(
-        "--params",
-        type=lambda value: _split_params(None, None, value),
-        default=None,
-        help=PARAMS_ARG_HELP,
-    )
-    def magic_reload_kedro(line: str):
-        """
-        The `%reload_kedro` IPython line magic. See
-         https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
-        """
-        args = parse_argstring(magic_reload_kedro, line)
-        reload_kedro(args.path, args.env, args.params)
 
     global default_project_path
 

@@ -12,6 +12,9 @@ from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
+from kedro.framework.cli import load_entry_points
+from kedro.framework.cli.project import PARAMS_ARG_HELP
+from kedro.framework.cli.utils import ENV_HELP, _split_params
 from kedro.framework.session import KedroSession
 
 logger = logging.getLogger(__name__)
@@ -84,6 +87,34 @@ def reload_kedro(
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
 
 
+
+@magic_arguments()
+@argument(
+    "path",
+    type=str,
+    help=(
+        "Path to the project root directory. If not given, use the previously set"
+        "project root."
+    ),
+    nargs="?",
+    default=None,
+)
+@argument("-e", "--env", type=str, default=None, help=ENV_HELP)
+@argument(
+    "--params",
+    type=lambda value: _split_params(None, None, value),
+    default=None,
+    help=PARAMS_ARG_HELP,
+)
+def magic_reload_kedro(line: str):
+    """
+    The `%reload_kedro` IPython line magic. See
+    https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
+    """
+    args = parse_argstring(magic_reload_kedro, line)
+    reload_kedro(args.path, args.env, args.params)
+
+
 def load_ipython_extension(ipython):
     """
     Main entry point when %load_ext is executed.
@@ -94,35 +125,7 @@ def load_ipython_extension(ipython):
     When user use `kedro jupyter notebook` or `jupyter ipython`, this extension is
     loaded automatically.
     """
-    from kedro.framework.cli import load_entry_points
-    from kedro.framework.cli.project import PARAMS_ARG_HELP
-    from kedro.framework.cli.utils import ENV_HELP, _split_params
 
-    @magic_arguments()
-    @argument(
-        "path",
-        type=str,
-        help=(
-            "Path to the project root directory. If not given, use the previously set"
-            "project root."
-        ),
-        nargs="?",
-        default=None,
-    )
-    @argument("-e", "--env", type=str, default=None, help=ENV_HELP)
-    @argument(
-        "--params",
-        type=lambda value: _split_params(None, None, value),
-        default=None,
-        help=PARAMS_ARG_HELP,
-    )
-    def magic_reload_kedro(line: str):
-        """
-        The `%reload_kedro` IPython line magic. See
-        https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
-        """
-        args = parse_argstring(magic_reload_kedro, line)
-        reload_kedro(args.path, args.env, args.params)
 
     global default_project_path
 

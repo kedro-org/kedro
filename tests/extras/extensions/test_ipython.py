@@ -291,8 +291,6 @@ class TestLoadIPythonExtension:
         ):
             ipython.magic("reload_kedro --invalid_arg=dummy")
 
-    def test_ipython_alias(self, ipython):
-        ipython.magic("load_ext kedro")
 
     def test_ipython_alias_has_no_side_effect(self, mocker):
         """
@@ -300,18 +298,18 @@ class TestLoadIPythonExtension:
         problem when logging is set up at import time and has inconsistent behavior when
         processed are spawned.
         """
-        
         loaded_kedro_modules = []
         for module in sys.modules:
             if module.startswith("kedro"):
                 loaded_kedro_modules.append(module)
 
         _remove_cached_modules("kedro")
-
         import kedro
-        print(list(filter(lambda x: x.startswith("kedro"), sys.modules)))
         assert "kedro.framework.project" not in sys.modules
 
         # Remove side-effect
         for kedro_module in loaded_kedro_modules:
             __import__(kedro_module)
+
+    def test_ipython_alias(self, ipython):
+        ipython.magic("load_ext kedro")

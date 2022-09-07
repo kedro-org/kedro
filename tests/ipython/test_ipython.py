@@ -11,7 +11,7 @@ from kedro.pipeline import Pipeline
 @pytest.fixture(autouse=True)
 def project_path(mocker, tmp_path):
     path = tmp_path
-    mocker.patch("kedro.extras.extensions.ipython.default_project_path", path)
+    mocker.patch("kedro.ipython.default_project_path", path)
 
 
 @pytest.fixture(autouse=True)
@@ -38,7 +38,7 @@ class TestLoadKedroObjects:
     def test_load_kedro_objects(
         self, tmp_path, mocker, caplog
     ):  # pylint: disable=too-many-locals
-        from kedro.extras.extensions.ipython import default_project_path
+        from kedro.ipython import default_project_path
 
         assert default_project_path == tmp_path
 
@@ -98,7 +98,7 @@ class TestLoadKedroObjects:
 
         log_messages = [record.getMessage() for record in caplog.records]
         assert expected_message in log_messages
-        from kedro.extras.extensions.ipython import default_project_path
+        from kedro.ipython import default_project_path
 
         # make sure global variable updated
         assert default_project_path == expected_path
@@ -147,7 +147,7 @@ class TestLoadKedroObjects:
     def test_load_kedro_objects_no_path(
         self, tmp_path, caplog, mocker, ipython
     ):  # pylint: disable=unused-argument
-        from kedro.extras.extensions.ipython import default_project_path
+        from kedro.ipython import default_project_path
 
         assert default_project_path == tmp_path
 
@@ -188,7 +188,7 @@ class TestLoadKedroObjects:
         log_messages = [record.getMessage() for record in caplog.records]
         assert expected_message in log_messages
 
-        from kedro.extras.extensions.ipython import default_project_path
+        from kedro.ipython import default_project_path
 
         # make sure global variable stayed the same
         assert default_project_path == tmp_path
@@ -196,11 +196,9 @@ class TestLoadKedroObjects:
 
 class TestLoadIPythonExtension:
     def test_load_extension_missing_dependency(self, mocker):
+        mocker.patch("kedro.ipython.reload_kedro", side_effect=ImportError)
         mocker.patch(
-            "kedro.extras.extensions.ipython.reload_kedro", side_effect=ImportError
-        )
-        mocker.patch(
-            "kedro.extras.extensions.ipython._find_kedro_project",
+            "kedro.ipython._find_kedro_project",
             return_value=mocker.Mock(),
         )
         mocker.patch("IPython.core.magic.register_line_magic")
@@ -215,9 +213,7 @@ class TestLoadIPythonExtension:
         assert not mock_ipython().push.called
 
     def test_load_extension_not_in_kedro_project(self, mocker, caplog):
-        mocker.patch(
-            "kedro.extras.extensions.ipython._find_kedro_project", return_value=None
-        )
+        mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
         mocker.patch("IPython.core.magic.register_line_magic")
         mocker.patch("IPython.core.magic_arguments.magic_arguments")
         mocker.patch("IPython.core.magic_arguments.argument")
@@ -237,8 +233,8 @@ class TestLoadIPythonExtension:
 
     def test_load_extension_register_line_magic(self, mocker, ipython):
 
-        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
-        mock_reload_kedro = mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mock_reload_kedro = mocker.patch("kedro.ipython.reload_kedro")
         load_ipython_extension(ipython)
         mock_reload_kedro.assert_called_once()
 
@@ -258,14 +254,14 @@ class TestLoadIPythonExtension:
         ],
     )
     def test_line_magic_with_valid_arguments(self, mocker, args, ipython):
-        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
-        mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.reload_kedro")
 
         ipython.magic(f"reload_kedro {args}")
 
     def test_line_magic_with_invalid_arguments(self, mocker, ipython):
-        mocker.patch("kedro.extras.extensions.ipython._find_kedro_project")
-        mocker.patch("kedro.extras.extensions.ipython.reload_kedro")
+        mocker.patch("kedro.ipython._find_kedro_project")
+        mocker.patch("kedro.ipython.reload_kedro")
         load_ipython_extension(ipython)
 
         with pytest.raises(

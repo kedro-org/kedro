@@ -156,9 +156,9 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
         # ipykernel.write_kernel_spec).
         kernel_json.write_text(json.dumps(kernel_spec, indent=1), encoding="utf-8")
 
-        kedro_extensions_dir = Path(__file__).parents[2] / "extras" / "extensions"
-        shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
-        shutil.copy(kedro_extensions_dir / "logo-64x64.png", kernel_path)
+        kedro_ipython_dir = Path(__file__).parents[2] / "ipython"
+        shutil.copy(kedro_ipython_dir / "logo-32x32.png", kernel_path)
+        shutil.copy(kedro_ipython_dir / "logo-64x64.png", kernel_path)
     except Exception as exc:
         raise KedroCliError(
             f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"

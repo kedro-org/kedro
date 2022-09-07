@@ -3,5 +3,5 @@ include LICENSE.md
 include requirements.txt
 include test_requirements.txt
 include kedro/framework/project/default_logging.yml
-include kedro/extras/extensions/*.png
+include kedro/ipython/*.png
 recursive-include templates *

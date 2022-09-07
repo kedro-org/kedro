@@ -3,7 +3,7 @@ import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
 
-from kedro.extras.extensions.ipython import load_ipython_extension, reload_kedro
+from kedro.ipython import load_ipython_extension, reload_kedro
 from kedro.framework.startup import ProjectMetadata
 from kedro.pipeline import Pipeline
 

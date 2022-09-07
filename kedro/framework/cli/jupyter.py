@@ -117,7 +117,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
       "-f",
       "{connection_file}",
       "--ext",
-      "kedro.extras.extensions.ipython"
+      "kedro.ipython"
      ],
      "display_name": "Kedro (spaceflights)",
      "language": "python",
@@ -151,7 +151,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
 
         kernel_json = Path(kernel_path) / "kernel.json"
         kernel_spec = json.loads(kernel_json.read_text(encoding="utf-8"))
-        kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
+        kernel_spec["argv"].extend(["--ext", "kedro.ipython"])
         # indent=1 is to match the default ipykernel style (see
         # ipykernel.write_kernel_spec).
         kernel_json.write_text(json.dumps(kernel_spec, indent=1), encoding="utf-8")

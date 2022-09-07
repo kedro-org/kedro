@@ -244,3 +244,9 @@ class TestLoadIPythonExtension:
             UsageError, match=r"unrecognized arguments: --invalid_arg=dummy"
         ):
             ipython.magic("reload_kedro --invalid_arg=dummy")
+
+    def test_load_ipython_extension(self, ipython):
+        ipython.magic("load_ext kedro.ipython")
+
+    def test_load_ipython_extension_old_location(self, ipython):
+        ipython.magic("load_ext kedro.extras.extensions.ipython")

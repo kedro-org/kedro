@@ -8,8 +8,12 @@ The Kedro IPython extension should always be loaded as %load_ext kedro.ipython.
 Line magics such as reload_kedro should always be called as line magics rather than
 importing the underlying Python functions.
 """
-from ...ipython import load_ipython_extension, reload_kedro
 import warnings
+
+from ...ipython import (
+    load_ipython_extension,
+    reload_kedro,
+)  # pylint: disable=unused-import
 
 warnings.warn(
     "kedro.extras.extensions.ipython should be accessed only using the alias "

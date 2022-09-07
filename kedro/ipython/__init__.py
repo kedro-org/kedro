@@ -1,4 +1,4 @@
-# pylint: disable=global-statement,invalid-name,too-many-locals
+# pylint: disable=global-statement
 """
 This script creates an IPython extension to load Kedro-related variables in
 local scope.

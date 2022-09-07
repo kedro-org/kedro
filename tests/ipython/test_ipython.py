@@ -3,8 +3,8 @@ import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
 
-from kedro.ipython import load_ipython_extension, reload_kedro
 from kedro.framework.startup import ProjectMetadata
+from kedro.ipython import load_ipython_extension, reload_kedro
 from kedro.pipeline import Pipeline
 
 
@@ -29,7 +29,7 @@ def ipython():
     return ipython
 
 
-PACKAGE_NAME = "fake_page_name"
+PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
 PROJECT_VERSION = "0.1"
 
@@ -45,12 +45,12 @@ class TestLoadKedroObjects:
         kedro_path = tmp_path / "here"
 
         fake_metadata = ProjectMetadata(
-            source_dir=tmp_path / "src",  # default
-            config_file=tmp_path / "pyproject.toml",
+            source_dir=kedro_path / "src",  # default
+            config_file=kedro_path / "pyproject.toml",
             package_name=PACKAGE_NAME,
             project_name=PROJECT_NAME,
             project_version=PROJECT_VERSION,
-            project_path=tmp_path,
+            project_path=kedro_path,
         )
         my_pipelines = {"ds": Pipeline([])}
 
@@ -62,21 +62,15 @@ class TestLoadKedroObjects:
             return_value=my_register_pipeline,
         )
         mocker.patch("kedro.framework.startup.configure_project")
-        mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
-        )
+        mocker.patch("kedro.ipython.bootstrap_project", return_value=fake_metadata)
         mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
-        mocker.patch(
-            "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
-        )
-        mock_register_line_magic = mocker.patch(
-            "IPython.core.magic.register_line_magic"
-        )
+        mocker.patch("kedro.ipython.load_entry_points", return_value=[mock_line_magic])
+        mock_register_line_magic = mocker.patch("kedro.ipython.register_line_magic")
         mock_session_create = mocker.patch(
             "kedro.framework.session.KedroSession.create"
         )
-        mock_ipython = mocker.patch("IPython.get_ipython")
+        mock_ipython = mocker.patch("kedro.ipython.get_ipython")
 
         reload_kedro(kedro_path)
 
@@ -112,22 +106,15 @@ class TestLoadKedroObjects:
             project_version=PROJECT_VERSION,
             project_path=tmp_path,
         )
-        mocker.patch("kedro.framework.project.configure_project")
-        mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
-        )
+
+        mocker.patch("kedro.ipython.configure_project")
+        mocker.patch("kedro.ipython.bootstrap_project", return_value=fake_metadata)
         mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
-        mocker.patch(
-            "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
-        )
-        mock_register_line_magic = mocker.patch(
-            "IPython.core.magic.register_line_magic"
-        )
-        mock_session_create = mocker.patch(
-            "kedro.framework.session.KedroSession.create"
-        )
-        mock_ipython = mocker.patch("IPython.get_ipython")
+        mocker.patch("kedro.ipython.load_entry_points", return_value=[mock_line_magic])
+        mock_register_line_magic = mocker.patch("kedro.ipython.register_line_magic")
+        mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
+        mock_ipython = mocker.patch("kedro.ipython.get_ipython")
 
         reload_kedro(tmp_path, env="env1", extra_params={"key": "val"})
 
@@ -159,28 +146,17 @@ class TestLoadKedroObjects:
             project_version=PROJECT_VERSION,
             project_path=tmp_path,
         )
-        my_pipelines = {"ds": Pipeline([])}
 
-        def my_register_pipeline():
-            return my_pipelines
-
-        mocker.patch(
-            "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
-            return_value=my_register_pipeline,
-        )
-        mocker.patch("kedro.framework.project.settings.configure")
-        mocker.patch("kedro.framework.session.session.validate_settings")
-        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
-        mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata
-        )
+        mocker.patch("kedro.framework.startup.configure_project")
+        mocker.patch("kedro.ipython.bootstrap_project", return_value=fake_metadata)
         mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
-        mocker.patch(
-            "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
+        mocker.patch("kedro.ipython.load_entry_points", return_value=[mock_line_magic])
+        mock_register_line_magic = mocker.patch("kedro.ipython.register_line_magic")
+        mock_session_create = mocker.patch(
+            "kedro.framework.session.KedroSession.create"
         )
-        mocker.patch("IPython.core.magic.register_line_magic")
-        mocker.patch("kedro.framework.session.KedroSession.load_context")
+        mock_ipython = mocker.patch("kedro.ipython.get_ipython")
 
         reload_kedro()
 

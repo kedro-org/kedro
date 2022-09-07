@@ -1,4 +1,4 @@
-# pylint: disable=global-statement
+# pylint: disable=global-statement,invalid-name
 """
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
@@ -15,7 +15,7 @@ from IPython.core.magic_arguments import argument, magic_arguments, parse_argstr
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import PARAMS_ARG_HELP
 from kedro.framework.cli.utils import ENV_HELP, _split_params
-from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
+from kedro.framework.project import LOGGING  # noqa
 from kedro.framework.project import configure_project, pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project

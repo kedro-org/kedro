@@ -169,9 +169,9 @@ class TestLoadKedroObjects:
         mock_line_magic = mocker.Mock()
         mock_line_magic.__name__ = "abc"
         mocker.patch("kedro.ipython.load_entry_points", return_value=[mock_line_magic])
-        # mock_register_line_magic = mocker.patch("kedro.ipython.register_line_magic")
-        # mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
-        # mock_ipython = mocker.patch("kedro.ipython.get_ipython")
+        mocker.patch("kedro.ipython.register_line_magic")
+        mocker.patch("kedro.ipython.KedroSession.create")
+        mocker.patch("kedro.ipython.get_ipython")
 
         reload_kedro()
 

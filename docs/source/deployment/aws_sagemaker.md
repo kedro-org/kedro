@@ -204,7 +204,7 @@ Open `src/kedro_tutorial/pipelines/data_science/pipeline.py` and replace its con
 <summary><b>Click to expand</b></summary>
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import (
     evaluate_model,

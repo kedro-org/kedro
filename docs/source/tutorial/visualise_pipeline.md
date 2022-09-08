@@ -251,7 +251,7 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 kedro[matplotlib.MatplotlibWriter]==0.18.2
 ```
 
-To use this dataset, configure your plot in your Kedro node. The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
+To use this dataset, configure your plot in your Kedro node. The below functions should be added to the `nodes.py` and `pipeline.py` files respectively.
 
 ```python
 # nodes.py

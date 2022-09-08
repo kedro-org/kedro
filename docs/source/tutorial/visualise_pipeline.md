@@ -284,7 +284,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-You must also specify the output type in the `catalog.yml` file, like below.
+You must also specify the output type in the `catalog.yml` file, like below. Remember to set the versioned flag to `true` if you want to add the plots to experiment tracking as well.
 
 ```yaml
 reporting.dummy_confusion_matrix:

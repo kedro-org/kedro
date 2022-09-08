@@ -13,6 +13,26 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
+    Example adding a catalog entry with
+    `YAML API
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> usda:
+        >>>   type: api.APIDataSet
+        >>>   url: https://quickstats.nass.usda.gov
+        >>>   params:
+        >>>     key: SOME_TOKEN,
+        >>>     format: SON,
+        >>>     commodity_desc: CORN,
+        >>>     statisticcat_des: YIELD,
+        >>>     agg_level_desc: STATE,
+        >>>     year: 2000
+        >>>
+
+
     Example:
     ::
 

@@ -25,6 +25,20 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
 
+    .. code-block:: yaml
+
+        >>> tensorflow_model:
+        >>>   type: tensorflow.TensorFlowModelDataset
+        >>>   filepath: data/06_models/tensorflow_model
+        >>>   load_args:
+        >>>     compile: False
+        >>>   save_args:
+        >>>     overwrite: True
+        >>>     include_optimizer: False
+        >>>   credentials: tf_creds
+        >>>
+
+
     Example:
     ::
 
@@ -32,7 +46,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>
-        >>> data_set = TensorFlowModelDataset("saved_model_path")
+        >>> data_set = TensorFlowModelDataset("saved_model/my_model")
         >>> model = tf.keras.Model()
         >>> predictions = model.predict([...])
         >>>

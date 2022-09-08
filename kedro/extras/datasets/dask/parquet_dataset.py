@@ -15,6 +15,25 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
+        Example adding a catalog entry with
+        `YAML API
+        <https://kedro.readthedocs.io/en/stable/data/\
+            data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+        .. code-block:: yaml
+
+        >>> cars:
+        >>>   type: dask.ParquetDataSet
+        >>>   filepath: s3://bucket_name/path/to/folder
+        >>>   save_args:
+        >>>     compression: GZIP
+        >>>   credentials:
+        >>>     client_kwargs:
+        >>>         aws_access_key_id: YOUR_KEY
+        >>>         aws_secret_access_key: YOUR SECRET
+        >>>
+
+
         Example (AWS S3):
         ::
 
@@ -61,7 +80,6 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
             filepath: Filepath in POSIX format to a parquet file
                 parquet collection or the directory of a multipart parquet.
             load_args: Additional loading options `dask.dataframe.read_parquet`:
-                https://docs.dask.org/en/latest/generated/dask.dataframe.read_parquet.html
             save_args: Additional saving options for `dask.dataframe.to_parquet`:
                 https://docs.dask.org/en/latest/generated/dask.dataframe.to_parquet.html
             credentials: Credentials required to get access to the underlying filesystem.

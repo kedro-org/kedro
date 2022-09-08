@@ -99,7 +99,7 @@ This will visualise the pipeline visualisation saved as `my_shareable_pipeline.j
 
 ## Visualise charts in Kedro-Viz
 
-Kedro-Viz aims to help users communicate different aspects of their workflow through an interactive flowchart. With the Plotly and Matplotlib integrations, we take one step further in this direction to allow our users to share their data insights effectively while exploring the pipeline.
+Kedro-Viz supports [Plotly](https://plotly.com/python/) and [Matplotlib](https://matplotlib.org/) integrations so that you can share your data insights while exploring your pipeline.
 
 ### Visualise Plotly charts in Kedro-Viz
 

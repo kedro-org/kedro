@@ -33,7 +33,7 @@ PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
 PROJECT_VERSION = "0.1"
 
-
+@pytest.mark.skip()
 class TestLoadKedroObjects:
     def test_load_kedro_objects(
         self, tmp_path, mocker, caplog

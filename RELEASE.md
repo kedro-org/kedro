@@ -11,9 +11,9 @@
 
 ### Other
 * Removed deprecated `kedro.extras.ColorHandler`.
+* The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
-
 
 # Upcoming Release 0.18.3
 

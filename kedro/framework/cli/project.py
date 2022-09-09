@@ -124,7 +124,7 @@ def ipython(
 
     if env:
         os.environ["KEDRO_ENV"] = env
-    call(["ipython", "--ext", "kedro.extras.extensions.ipython"] + list(args))
+    call(["ipython", "--ext", "kedro.ipython"] + list(args))
 
 
 @project_group.command()

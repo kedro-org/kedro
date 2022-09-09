@@ -249,7 +249,7 @@ class TestIpythonCommand:
             [
                 "ipython",
                 "--ext",
-                "kedro.extras.extensions.ipython",
+                "kedro.ipython",
                 "--random-arg",
                 "value",
             ]

@@ -41,9 +41,9 @@ def _find_kedro_project(current_dir: Path):  # pragma: no cover
     return None
 
 
-def reload_kedro(  # pragma: no cover
+def reload_kedro(
     path: str = None, env: str = None, extra_params: Dict[str, Any] = None
-):
+):  # pragma: no cover
     """Function that underlies the %reload_kedro Line magic. This should not be imported
     or run directly but instead invoked through %reload_kedro."""
 

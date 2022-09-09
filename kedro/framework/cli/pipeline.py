@@ -223,7 +223,6 @@ def _create_pipeline(name: str, output_dir: Path) -> Path:
     return result_path
 
 
-# pylint: disable=missing-raises-doc
 def _sync_dirs(source: Path, target: Path, prefix: str = "", overwrite: bool = False):
     """Recursively copies `source` directory (or file) into `target` directory without
     overwriting any existing files/directories in the target using the following

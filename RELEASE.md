@@ -12,7 +12,7 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
-* Implemented autodiscovery of project pipelines.
+* The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
 * The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
 
 ## Bug fixes and other changes
@@ -30,6 +30,7 @@
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 
 ## Upcoming deprecations for Kedro 0.19.0
+* The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 
 # Release 0.18.2
 
@@ -130,7 +131,7 @@ main(
 * Added `save_args` to `feather.FeatherDataSet`.
 
 ### Jupyter and IPython integration
-* The [only recommended way to work with Kedro in Jupyter or IPython is now the Kedro IPython extension](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html). Managed Jupyter instances should load this via `%load_ext kedro.extras.extensions.ipython` and use the line magic `%reload_kedro`.
+* The [only recommended way to work with Kedro in Jupyter or IPython is now the Kedro IPython extension](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html). Managed Jupyter instances should load this via `%load_ext kedro.ipython` and use the line magic `%reload_kedro`.
 * `kedro ipython` launches an IPython session that preloads the Kedro IPython extension.
 * `kedro jupyter notebook/lab` creates a custom Jupyter kernel that preloads the Kedro IPython extension and launches a notebook with that kernel selected. There is no longer a need to specify `--all-kernels` to show all available kernels.
 

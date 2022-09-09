@@ -4,6 +4,7 @@ implementations.
 
 import logging
 from abc import ABC, abstractmethod
+from collections import deque
 from concurrent.futures import (
     ALL_COMPLETED,
     Future,
@@ -11,12 +12,12 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, List, Set
 
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataSet, DataCatalog
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -157,31 +158,123 @@ class AbstractRunner(ABC):
         Returns:
             An instance of an implementation of ``AbstractDataSet`` to be
             used for all unregistered datasets.
-
         """
         pass
 
     def _suggest_resume_scenario(
-        self, pipeline: Pipeline, done_nodes: Iterable[Node]
+        self,
+        pipeline: Pipeline,
+        done_nodes: Iterable[Node],
+        catalog: DataCatalog,
     ) -> None:
+        """
+        Suggest a command to the user to resume a run after it fails.
+        The run should be started from the point closest to the failure
+        for which persisted input exists.
+
+        Args:
+            pipeline: the ``Pipeline`` of the run.
+            done_nodes: the ``Node``s that executed successfully.
+            catalog: the ``DataCatalog`` of the run.
+
+        """
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
 
         postfix = ""
         if done_nodes:
             node_names = (n.name for n in remaining_nodes)
             resume_p = pipeline.only_nodes(*node_names)
-
             start_p = resume_p.only_nodes_with_inputs(*resume_p.inputs())
-            start_node_names = (n.name for n in start_p.nodes)
+
+            # find the nearest persistent ancestors of the nodes in start_p
+            start_p_persistent_ancestors = _find_persistent_ancestors(
+                pipeline, start_p.nodes, catalog
+            )
+
+            start_node_names = (n.name for n in start_p_persistent_ancestors)
             postfix += f"  --from-nodes \"{','.join(start_node_names)}\""
 
-        self._logger.warning(
-            "There are %d nodes that have not run.\n"
-            "You can resume the pipeline run by adding the following "
-            "argument to your previous command:\n%s",
-            len(remaining_nodes),
-            postfix,
-        )
+        if not postfix:
+            self._logger.warning(
+                "No nodes ran. Repeat the previous command to attempt a new run."
+            )
+        else:
+            self._logger.warning(
+                "There are %d nodes that have not run.\n"
+                "You can resume the pipeline run from the nearest nodes with "
+                "persisted inputs by adding the following "
+                "argument to your previous command:\n%s",
+                len(remaining_nodes),
+                postfix,
+            )
+
+
+def _find_persistent_ancestors(
+    pipeline: Pipeline, children: Iterable[Node], catalog: DataCatalog
+) -> Set[Node]:
+    """Breadth-first search approach to finding the complete set of
+    persistent ancestors of an iterable of ``Node``s. Persistent
+    ancestors exclusively have persisted ``Dataset``s as inputs.
+
+    Args:
+        pipeline: the ``Pipeline`` to find ancestors in.
+        children: the iterable containing ``Node``s to find ancestors of.
+        catalog: the ``DataCatalog`` of the run.
+
+    Returns:
+        A set containing first persistent ancestors of the given
+        ``Node``s.
+
+    """
+    ancestor_nodes_to_run = set()
+    queue, visited = deque(children), set(children)
+    while queue:
+        current_node = queue.popleft()
+        if _has_persistent_inputs(current_node, catalog):
+            ancestor_nodes_to_run.add(current_node)
+            continue
+        for parent in _enumerate_parents(pipeline, current_node):
+            if parent in visited:
+                continue
+            visited.add(parent)
+            queue.append(parent)
+    return ancestor_nodes_to_run
+
+
+def _enumerate_parents(pipeline: Pipeline, child: Node) -> List[Node]:
+    """For a given ``Node``, returns a list containing the direct parents
+    of that ``Node`` in the given ``Pipeline``.
+
+    Args:
+        pipeline: the ``Pipeline`` to search for direct parents in.
+        child: the ``Node`` to find parents of.
+
+    Returns:
+        A list of all ``Node``s that are direct parents of ``child``.
+
+    """
+    parent_pipeline = pipeline.only_nodes_with_outputs(*child.inputs)
+    return parent_pipeline.nodes
+
+
+def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
+    """Check if a ``Node`` exclusively has persisted Datasets as inputs.
+    If at least one input is a ``MemoryDataSet``, return False.
+
+    Args:
+        node: the ``Node`` to check the inputs of.
+        catalog: the ``DataCatalog`` of the run.
+
+    Returns:
+        True if the ``Node`` being checked exclusively has inputs that
+        are not ``MemoryDataSet``, else False.
+
+    """
+    for node_input in node.inputs:
+        # pylint: disable=protected-access
+        if isinstance(catalog._data_sets[node_input], MemoryDataSet):
+            return False
+    return True
 
 
 def run_node(

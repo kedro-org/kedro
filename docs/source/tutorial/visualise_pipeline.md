@@ -97,11 +97,13 @@ kedro viz --load-file my_shareable_pipeline.json
 This will visualise the pipeline visualisation saved as `my_shareable_pipeline.json`.
 
 
-## Visualise Plotly charts in Kedro-Viz
+## Visualise charts in Kedro-Viz
+
+Kedro-Viz supports [Plotly](https://plotly.com/python/) and [Matplotlib](https://matplotlib.org/) integrations so that you can share your data insights while exploring your pipeline.
+
+### Visualise Plotly charts in Kedro-Viz
 
 [Plotly](https://plotly.com/python/) is a free and open source Python library that allows you to make interactive, publication-quality graphs. With the Plotly integration on Kedro-Viz, you can output your interactive charts as part of your pipeline visualisation.
-
-Kedro-Viz aims to help users communicate different aspects of their workflow through an interactive flowchart. With the Plotly integration, we take one step further in this direction to allow our users to share their data insights effectively while exploring the pipeline.
 
 We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
 
@@ -115,7 +117,7 @@ You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
 
 There are two types of Plotly datasets in Kedro: the `plotly.PlotlyDataSet` and `plotly.JSONDataSet`.
 
-### [`plotly.PlotlyDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet)
+#### [`plotly.PlotlyDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet)
 
 To use this dataset, configure your plot in the `catalog.yml` file. This dataset only supports [Plotly Express](https://plotly.com/python/plotly-express).
 
@@ -163,7 +165,7 @@ shuttle_passenger_capacity_plot:
 ```
 
 
-### [plotly.JSONDataSet](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet)
+#### [`plotly.JSONDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet)
 
 To use this dataset, configure your plot in your Kedro node. This dataset supports [Plotly Express](https://plotly.com/python/plotly-express) and [Plotly Graph Objects](https://plotly.com/python/graph-objects/).
 
@@ -223,7 +225,7 @@ shuttle_passenger_capacity_plot:
 
 
 
-Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/plotly-icon.png) . Click on the node to see a small preview of your Plotly chart in the metadata panel.
+Once the above setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset type with icon ![](../meta/images/chart-icon.png) . Click on the node to see a small preview of your Plotly chart in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_plotly.png)
 
@@ -233,3 +235,68 @@ You can view the larger visualisation of the chart by clicking the 'Expand Plotl
 
 
 ![](../meta/images/pipeline_visualisation_plotly_expand.png)
+
+
+### Visualise Matplotlib charts in Kedro-Viz
+
+[Matplotlib](https://matplotlib.org/) is a Python library for creating static, animated, and interactive visualisations. Integrating Matplotlib into Kedro-Viz allows you to output your charts as part of your pipeline visualisation.
+
+```{note}
+The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
+```
+
+You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.extras.datasets.matplotlib.MatplotlibWriter). You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
+
+```
+kedro[matplotlib.MatplotlibWriter]==0.18.2
+```
+
+To use this dataset, configure your plot in your Kedro node. The below functions should be added to the `nodes.py` and `pipeline.py` files respectively.
+
+```python
+# nodes.py
+import matplotlib.pyplot as plt
+
+
+def create_confusion_matrix(companies: pd.DataFrame):
+    actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+    predicted = [1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1]
+    data = {"y_Actual": actuals, "y_Predicted": predicted}
+    df = pd.DataFrame(data, columns=["y_Actual", "y_Predicted"])
+    confusion_matrix = pd.crosstab(
+        df["y_Actual"], df["y_Predicted"], rownames=["Actual"], colnames=["Predicted"]
+    )
+    sn.heatmap(confusion_matrix, annot=True)
+    return plt
+
+
+# pipeline.py
+def create_pipeline(**kwargs) -> Pipeline:
+    """This is a simple pipeline which generates a plot"""
+    return pipeline(
+        [
+            node(
+                func=create_confusion_matrix,
+                inputs="companies",
+                outputs="dummy_confusion_matrix",
+            ),
+        ]
+    )
+```
+
+You must also specify the output type in the `catalog.yml` file, like below. Remember to set the versioned flag to `true` if you want to add the plots to experiment tracking as well.
+
+```yaml
+reporting.dummy_confusion_matrix:
+  type: matplotlib.MatplotlibWriter
+  filepath: ${base_location}/08_reporting/dummy_confusion_matrix.png
+  versioned: true
+```
+
+Once this setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset node with this icon ![](../meta/images/chart-icon.png). Click on the node to see a small preview of your Matplotlib image in the metadata panel.
+
+![](../meta/images/pipeline_visualisation_matplotlib.png)
+
+You can view the larger visualisation of the chart by clicking the 'Expand Matplotlib Image' button on the bottom of the metadata panel.
+
+![](../meta/images/pipeline_visualisation_matplotlib_expand.png)

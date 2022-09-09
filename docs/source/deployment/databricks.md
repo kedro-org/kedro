@@ -55,9 +55,10 @@ kedro run
 You should get a similar output:
 ```console
 ...
-2020-09-09 18:57:36,762 - iris_databricks.pipelines.data_science.nodes - INFO - Model accuracy: 100.00%
-2020-09-09 18:57:36,762 - kedro.runner.sequential_runner - INFO - Completed 5 out of 5 tasks
-2020-09-09 18:57:36,762 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+[08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
+                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
+                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 ### 3. Create a Databricks cluster
 
@@ -160,7 +161,7 @@ Congratulations, you are now ready to run your Kedro project from the Databricks
 
 [Create your Databricks notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and remember to [attach it to the cluster](https://docs.databricks.com/notebooks/notebooks-manage.html#attach) you have just configured.
 
-In your newly created notebook put each code snippet from below into a separate cell and then [run all notebook cells](https://docs.databricks.com/notebooks/notebooks-use.html#run-all-cells):
+In your newly-created notebook, put each of the below code snippets into a separate cell, then [run all cells](https://docs.databricks.com/notebooks/notebooks-use.html#run-notebooks):
 
 * Clone your project from GitHub
 
@@ -216,12 +217,10 @@ You should get a similar output:
 
 ```console
 ...
-2020-09-16 10:45:21,991 - kedro.io.data_catalog - INFO - Loading data from `example_predictions` (MemoryDataSet)...
-2020-09-16 10:45:21,991 - kedro.pipeline.node - INFO - Running node: report_accuracy([example_predictions]) -> None
-2020-09-16 10:45:23,128 - iris_databricks.pipelines.data_science.nodes - INFO - Model accuracy: 97.30%
-2020-09-16 10:45:23,144 - kedro.runner.sequential_runner - INFO - Completed 5 out of 5 tasks
-2020-09-16 10:45:23,145 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
-Out[12]: {}
+[08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
+                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
+                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 
 Your complete notebook should look similar to this (the results are hidden):
@@ -231,7 +230,7 @@ Your complete notebook should look similar to this (the results are hidden):
 
 ### 9. Using the Kedro IPython Extension
 
-You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`.
+You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.ipython`.
 
 The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
@@ -240,7 +239,7 @@ The IPython extension can be used in a Databricks notebook in a similar way to h
 If you encounter a `ContextualVersionConflictError`, it is likely caused by Databricks using an old version of `pip`. Hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
 
 ```ipython
-In [1]: %load_ext kedro.extras.extensions.ipython
+In [1]: %load_ext kedro.ipython
 ```
 
 You must explicitly upgrade your `pip` version by doing the below:
@@ -249,50 +248,14 @@ You must explicitly upgrade your `pip` version by doing the below:
 %pip install -U pip
 ```
 
-After this, you can reload Kedro by running the line magic command `%reload_kedro <path_to_project_root>`.
+After this, you can reload Kedro by running the line magic command `%reload_kedro <project_root>`.
 
 ### 10. Running Kedro-Viz on Databricks
 
 For Kedro-Viz to run with your Kedro project, you need to ensure that both the packages are installed in the same scope (notebook-scoped vs. cluster library). i.e. if you `%pip install kedro` from inside your notebook then you should also `%pip install kedro-viz` from inside your notebook.
 If your cluster comes with Kedro installed on it as a library already then you should also add Kedro-Viz as a [cluster library](https://docs.microsoft.com/en-us/azure/databricks/libraries/cluster-libraries).
 
-Currently, if you try to run `%run_viz` on Databricks it will only display the below instead of running the Kedro-Viz app in the notebook.
-
-```console
-<IPython.core.display.HTML object>
-```
-
-While we fix this issue, we have a temporary workaround which involves you setting up a R Shiny application to run Kedro-Viz on Databricks.
-
-To run Kedro-Viz, first ensure that you are in your Kedro project directory and then run the below command in your Databricks notebook:
-
-```bash
-%sh kedro viz --no-browser --host 0.0.0.0 --port 4141
-```
-
-```{note}
-The command execution continues to run and will need to be cancelled manually before proceeding to the next step. Cancelling the command will not quit the Kedro-Viz server. Please see below GIF on how to cancel.
-```
-
-![](../meta/images/databricks_cancel_command.gif)
-
-
-After this, you must try and run an example Shiny app using the below command:
-
-```bash
-%r
-library(shiny)
-runExample("01_hello")
-```
-
-![](../meta/images/databricks_shiny_command.png)
-
-When you click on the Shiny app link, it will open a browser with an example Shiny app running. Now edit the port at the end of the URL and change it to 4141.
-
-![](../meta/images/databricks_kedro_viz.gif)
-
-You will notice Kedro-Viz is blank at first, but if you click on the flowchart tab, Kedro-Viz will run as normal.
-
-```{note}
-Ctrl+C to quit the Kedro-Viz server doesn't work on Databricks. To end the process you will need to find the process-id on port=4141 or the port you used and kill it using the Linux command `kill -9 PID`.
+Kedro-Viz can then be launched in a new browser tab with the `%run_viz` line magic:
+```ipython
+In [2]: %run_viz
 ```

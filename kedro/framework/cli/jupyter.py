@@ -117,7 +117,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
       "-f",
       "{connection_file}",
       "--ext",
-      "kedro.extras.extensions.ipython"
+      "kedro.ipython"
      ],
      "display_name": "Kedro (spaceflights)",
      "language": "python",
@@ -151,14 +151,14 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
 
         kernel_json = Path(kernel_path) / "kernel.json"
         kernel_spec = json.loads(kernel_json.read_text(encoding="utf-8"))
-        kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
+        kernel_spec["argv"].extend(["--ext", "kedro.ipython"])
         # indent=1 is to match the default ipykernel style (see
         # ipykernel.write_kernel_spec).
         kernel_json.write_text(json.dumps(kernel_spec, indent=1), encoding="utf-8")
 
-        kedro_extensions_dir = Path(__file__).parents[2] / "extras" / "extensions"
-        shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
-        shutil.copy(kedro_extensions_dir / "logo-64x64.png", kernel_path)
+        kedro_ipython_dir = Path(__file__).parents[2] / "ipython"
+        shutil.copy(kedro_ipython_dir / "logo-32x32.png", kernel_path)
+        shutil.copy(kedro_ipython_dir / "logo-64x64.png", kernel_path)
     except Exception as exc:
         raise KedroCliError(
             f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
@@ -186,8 +186,15 @@ def convert_notebook(
     *Note*: Make sure your notebooks have unique names!
     FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
     relative and absolute paths are accepted.
-    Should not be provided if --all flag is already present.
+    Should not be provided if --all flag is already present. (DEPRECATED)
     """
+
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro jupyter convert' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
+
     project_path = metadata.project_path
     source_path = metadata.source_dir
     package_name = metadata.package_name

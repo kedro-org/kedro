@@ -12,9 +12,9 @@ from kedro.io.core import DataSetError, get_filepath_str
 
 class MetricsDataSet(JSONDataSet):
     """``MetricsDataSet`` saves data to a JSON file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
-    The ``MetricsDataSet`` is part of Kedro Experiment Tracking. The dataset is versioned by default
-    and only takes metrics of numeric values.
+    filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file. The
+    ``MetricsDataSet`` is part of Kedro Experiment Tracking. The dataset is write-only,
+    it is versioned by default and only takes metrics of numeric values.
 
         Example:
         ::
@@ -26,8 +26,6 @@ class MetricsDataSet(JSONDataSet):
         >>> # data_set = MetricsDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = MetricsDataSet(filepath="test.json")
         >>> data_set.save(data)
-        >>> reloaded = data_set.load()
-        >>> assert data == reloaded
 
     """
 

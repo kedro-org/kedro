@@ -24,12 +24,12 @@ logger = logging.getLogger(__name__)
 default_project_path = Path.cwd()
 
 
-def _remove_cached_modules(package_name):
+def _remove_cached_modules(package_name):  # pragma: no cover
     to_remove = [mod for mod in sys.modules if mod.startswith(package_name)]
     # `del` is used instead of `reload()` because: If the new version of a module does not
     # define a name that was defined by the old version, the old definition remains.
     for module in to_remove:
-        del sys.modules[module]  # pragma: no cover
+        del sys.modules[module]
 
 
 def _find_kedro_project(current_dir: Path):  # pragma: no cover
@@ -41,7 +41,7 @@ def _find_kedro_project(current_dir: Path):  # pragma: no cover
     return None
 
 
-def reload_kedro(
+def reload_kedro(  # pragma: no cover
     path: str = None, env: str = None, extra_params: Dict[str, Any] = None
 ):
     """Function that underlies the %reload_kedro Line magic. This should not be imported

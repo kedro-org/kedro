@@ -1,6 +1,6 @@
 # Custom datasets
 
-Kedro supports many [datasets](/kedro.extras.datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
+[Kedro supports many datasets](/kedro.extras.datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## Scenario
 
@@ -30,6 +30,9 @@ At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataSe
 * `_save`
 * `_describe`
 
+`AbstractDataSet` is generically typed with an input data type for saving data, and an output data type for loading data.
+This typing is optional however, and defaults to `Any` type.
+
 Here is an example skeleton for `ImageDataSet`:
 
 <details>
@@ -43,7 +46,7 @@ import numpy as np
 from kedro.io import AbstractDataSet
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
@@ -90,7 +93,7 @@ src/kedro_pokemon/extras
 
 ## Implement the `_load` method with `fsspec`
 
-Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](../data/data_catalog.md#specifying-the-location-of-the-dataset). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
+Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](../data/data_catalog.md#specify-the-location-of-the-dataset). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
 
 Here is the implementation of the `_load` method using `fsspec` and `Pillow` to read the data of a single image into a `numpy` array:
 
@@ -109,7 +112,7 @@ from kedro.io import AbstractDataSet
 from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
     def __init__(self, filepath: str):
         """Creates a new instance of ImageDataSet to load / save image data for given filepath.
 
@@ -166,7 +169,7 @@ Similarly, we can implement the `_save` method as follows:
 
 
 ```python
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
@@ -190,7 +193,7 @@ You can open the file to verify that the data was written back correctly.
 The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset.
 
 ```python
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes the attributes of the dataset."""
         return dict(filepath=self._filepath, protocol=self._protocol)
@@ -215,7 +218,7 @@ from kedro.io import AbstractDataSet
 from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
@@ -321,7 +324,7 @@ from kedro.io import AbstractVersionedDataSet
 from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
-class ImageDataSet(AbstractVersionedDataSet):
+class ImageDataSet(AbstractVersionedDataSet[np.ndarray, np.ndarray]):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
@@ -394,8 +397,8 @@ The difference between the original `ImageDataSet` and the versioned `ImageDataS
 +from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
--class ImageDataSet(AbstractDataSet):
-+class ImageDataSet(AbstractVersionedDataSet):
+-class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
++class ImageDataSet(AbstractVersionedDataSet[np.ndarray, np.ndarray]):
      """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
      Example:
@@ -559,12 +562,12 @@ class ImageDataSet(AbstractVersionedDataSet):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)'s implementation.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)'s implementation.
 
 
 ## How to contribute a custom dataset implementation
 
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md) on Github.
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide on GitHub](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
 
 To contribute your custom dataset:
 

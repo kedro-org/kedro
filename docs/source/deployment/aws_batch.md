@@ -9,11 +9,11 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 
 ## Prerequisites
 
-To use AWS Batch, make sure you have the following prerequisites in place:
+To use AWS Batch, ensure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
-- A `name` attribute is set for each Kedro [node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node <node_name>`.
-- All node input/output `DataSets` must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api)). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
+- A `name` attribute is set for each [Kedro node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node <node_name>`.
+- [All node input/output `DataSets` must be configured in `catalog.yml`](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -71,9 +71,9 @@ y_test:
 
 ### Containerise your Kedro project
 
-First, you need to containerise your Kedro project, using any preferred container solution (e.g. [`Docker`](https://www.docker.com/)), to build an image to use in AWS Batch.
+First, you need to containerise your Kedro project, using any preferred container solution (e.g. [Docker](https://www.docker.com/)), to build an image to use in AWS Batch.
 
-For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend using the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process.  [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
+For the purpose of this walk-through, we are going to assume a Docker workflow. We recommend using the [Kedro-Docker plugin](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) to streamline the process.  [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).
 
 After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./single_machine.md#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
 
@@ -165,7 +165,11 @@ class AWSBatchRunner(ThreadRunner):
         return super()._get_required_workers_count(pipeline)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog, session_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         nodes = pipeline.nodes
         node_dependencies = pipeline.node_dependencies
@@ -299,7 +303,7 @@ aws_batch:
 
 #### Update CLI implementation
 
-You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../extend_kedro/common_use_cases.md#use-case-3-how-to-add-or-modify-cli-commands). Add the following `run()` function to your `cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../development/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
 
 ```python
 def run(tag, env, ...):
@@ -349,4 +353,4 @@ kedro run --env aws_batch --runner kedro_tutorial.runner.AWSBatchRunner
 
 You should start seeing jobs appearing on your Jobs dashboard, under the `Runnable` tab - meaning they're ready to start as soon as the resources are provisioned in the compute environment.
 
-AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on the Batch job in the [Jobs](https://console.aws.amazon.com/batch/home/jobs) tab and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.
+AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on [the Batch job in the Jobs tab](https://console.aws.amazon.com/batch/home/jobs) and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.

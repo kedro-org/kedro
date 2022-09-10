@@ -19,7 +19,7 @@ from kedro.io.core import (
 )
 
 
-class PickleDataSet(AbstractVersionedDataSet):
+class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
     the specified backend library passed in (defaults to the ``pickle`` library), so it
@@ -27,7 +27,7 @@ class PickleDataSet(AbstractVersionedDataSet):
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -87,7 +87,7 @@ class PickleDataSet(AbstractVersionedDataSet):
     ) -> None:
         """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
         file on a specific filesystem. ``PickleDataSet`` supports custom backends to
-        serialize/deserialize objects.
+        serialise/deserialise objects.
 
         Example backends that are compatible (non-exhaustive):
             * `pickle`
@@ -220,7 +220,7 @@ class PickleDataSet(AbstractVersionedDataSet):
                 imported_backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
                 raise DataSetError(
-                    f"{data.__class__} was not serialized due to: {exc}"
+                    f"{data.__class__} was not serialised due to: {exc}"
                 ) from exc
 
         self._invalidate_cache()

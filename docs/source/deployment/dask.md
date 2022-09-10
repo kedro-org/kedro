@@ -2,7 +2,7 @@
 
 This page explains how to distribute execution of the nodes composing your Kedro pipeline using [Dask](https://docs.dask.org/en/stable/), a flexible, open-source library for parallel computing in Python.
 
-Dask offers both a default, single-machine scheduler and a more sophisticated, distributed scheduler. The newer [`dask.distributed`](http://distributed.dask.org/en/stable/) scheduler is often preferable, even on single workstations, and is the focus of our deployment guide. For more information on the various ways to set up Dask on varied hardware, see [the official how-to guide](https://docs.dask.org/en/stable/how-to/deploy-dask-clusters.html).
+Dask offers both a default, single-machine scheduler and a more sophisticated, distributed scheduler. The newer [`dask.distributed`](http://distributed.dask.org/en/stable/) scheduler is often preferable, even on single workstations, and is the focus of our deployment guide. For more information on the various ways to set up Dask on varied hardware, see [the official Dask how-to guide](https://docs.dask.org/en/stable/how-to/deploy-dask-clusters.html).
 
 ## Why would you use Dask?
 
@@ -38,10 +38,17 @@ from itertools import chain
 from typing import Any, Dict
 
 from distributed import Client, as_completed, worker_client
+from kedro.framework.hooks.manager import (
+    _create_hook_manager,
+    _register_hooks,
+    _register_hooks_setuptools,
+)
+from kedro.framework.project import settings
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import AbstractRunner, run_node
+from pluggy import PluginManager
 
 
 class _DaskDataSet(AbstractDataSet):
@@ -121,6 +128,9 @@ class DaskRunner(AbstractRunner):
         depends on. When ``dependencies`` are futures, Dask ensures that
         the upstream node futures are completed before running ``node``.
 
+        A ``PluginManager`` instance is created on each worker because the
+        ``PluginManager`` can't be serialised.
+
         Args:
             node: The ``Node`` to run.
             catalog: A ``DataCatalog`` containing the node's inputs and outputs.
@@ -133,10 +143,18 @@ class DaskRunner(AbstractRunner):
         Returns:
             The node argument.
         """
-        return run_node(node, catalog, is_async, session_id)
+        hook_manager = _create_hook_manager()
+        _register_hooks(hook_manager, settings.HOOKS)
+        _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+        return run_node(node, catalog, hook_manager, is_async, session_id)
 
     def _run(
-        self, pipeline: Pipeline, catalog: DataCatalog, session_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager,
+        session_id: str = None,
     ) -> None:
         nodes = pipeline.nodes
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
@@ -228,19 +246,12 @@ class DaskRunner(AbstractRunner):
 
 ### Update CLI implementation
 
-You're nearly there! Before being able to use the new runner, update the `run()` function in your `cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before you can use the new runner, you need to add a `cli.py` file at the same level as `settings.py`, using [the template we provide](../development/commands_reference.md#customise-or-override-project-specific-kedro-commands). Update the `run()` function in the newly-created `cli.py` file to make sure the runner class is instantiated correctly:
 
 ```python
-def run(tag, env, parallel, ...):
+def run(tag, env, ...):
     """Run the pipeline."""
-    if parallel and runner:
-        raise KedroCliError(
-            "Both --parallel and --runner options cannot be used together. "
-            "Please use either --parallel or --runner."
-        )
     runner = runner or "SequentialRunner"
-    if parallel:
-        runner = "ParallelRunner"
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names

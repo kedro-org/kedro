@@ -54,6 +54,7 @@ class SequentialRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         Raises:
@@ -69,7 +70,7 @@ class SequentialRunner(AbstractRunner):
                 run_node(node, catalog, hook_manager, self._is_async, session_id)
                 done_nodes.add(node)
             except Exception:
-                self._suggest_resume_scenario(pipeline, done_nodes)
+                self._suggest_resume_scenario(pipeline, done_nodes, catalog)
                 raise
 
             # decrement load counts and release any data sets we've finished with

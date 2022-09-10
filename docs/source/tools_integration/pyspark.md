@@ -15,48 +15,32 @@ spark.scheduler.mode: FAIR
 Optimal configuration for Spark depends on the setup of your Spark cluster.
 ```
 
-## Initialise a `SparkSession` in custom project context class
+## Initialise a `SparkSession` using a hook
 
-Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) in your custom project context class, which is the entrypoint for your Kedro project. This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
+Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) using an `after_context_created` [hook](../hooks/introduction). This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
 
-Below is an example implementation to initialise the `SparkSession` in `<project-name>/src/<python_package>/custom_context.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
+Below is an example implementation to initialise the `SparkSession` in `src/<package_name>/hooks.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
 
 ```python
-from typing import Any, Dict, Union
-from pathlib import Path
-
+from kedro.framework.hooks import hook_impl
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
-from kedro.config import ConfigLoader
-from kedro.framework.context import KedroContext
 
-
-class CustomContext(KedroContext):
-    def __init__(
-        self,
-        package_name: str,
-        project_path: Union[Path, str],
-        config_loader: ConfigLoader,
-        hook_manager: PluginManager,
-        env: str = None,
-        extra_params: Dict[str, Any] = None,
-    ):
-        super().__init__(
-            package_name, project_path, config_loader, hook_manager, env, extra_params
-        )
-        self.init_spark_session()
-
-    def init_spark_session(self) -> None:
-        """Initialises a SparkSession using the config defined in project's conf folder."""
+class SparkHooks:
+    @hook_impl
+    def after_context_created(self, context) -> None:
+        """Initialises a SparkSession using the config
+        defined in project's conf folder.
+        """
 
         # Load the spark configuration in spark.yaml using the config loader
-        parameters = self.config_loader.get("spark*", "spark*/**")
+        parameters = context.config_loader.get("spark*", "spark*/**")
         spark_conf = SparkConf().setAll(parameters.items())
 
         # Initialise the spark session
         spark_session_conf = (
-            SparkSession.builder.appName(self._package_name)
+            SparkSession.builder.appName(context._package_name)
             .enableHiveSupport()
             .config(conf=spark_conf)
         )
@@ -70,24 +54,24 @@ Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere 
 
 We don't recommend storing Spark session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
 
-Now, you need to configure Kedro to use `CustomContext`. Set `CONTEXT_CLASS` in `<project-name>/src/<python_package>/settings.py` as follows:
+You will also need to register `SparkHooks` by updating the `HOOKS` variable in `src/<package_name>/settings.py` as follows:
 
 ```python
-from <python_package>.custom_context import CustomContext
+from <package_name>.hooks import SparkHooks
 
-CONTEXT_CLASS = CustomContext
+HOOKS = (SparkHooks(),)
 ```
 
 ## Use Kedro's built-in Spark datasets to load and save raw data
 
-We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis), as well as to write them back to storage. Some of our built-in Spark datasets include:
+We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
 * [spark.DeltaTableDataSet](/kedro.extras.datasets.spark.DeltaTableDataSet)
 * [spark.SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)
 * [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)
 * [spark.SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
 
-The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `<project-name>/conf/base/catalog.yml`:
+The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
 
 ```yaml
 weather:
@@ -126,7 +110,7 @@ assert isinstance(df, pyspark.sql.DataFrame)
 [Delta Lake](https://delta.io/) is an open-source project that enables building a Lakehouse architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
 To setup PySpark with Delta Lake, have a look at [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python).
 
-We recommend the following workflow, which makes use of the [Transcoding](../data/data_catalog.md) feature in Kedro:
+We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../data/data_catalog.md):
 
 * To create a Delta table, use a `SparkDataSet` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table and/or overwrite it.
 * To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataSet` and perform the write operations within the node function.
@@ -263,7 +247,7 @@ Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `col
 kedro run --runner=ThreadRunner
 ```
 
-To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-in-custom-project-context-class) section:
+To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-using-a-hook) section:
 
 ```yaml
 spark.scheduler.mode: FAIR

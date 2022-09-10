@@ -1,12 +1,12 @@
 # Pipelines
 
-We previously introduced [Nodes](./nodes.md) as building blocks that represent tasks, and which can be combined in a pipeline to build your workflow.  A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline determines the node execution order by resolving dependencies and does *not* necessarily run the nodes in the order in which they are passed in.
+We previously introduced [Nodes](./nodes.md) as building blocks that represent tasks, and can be combined in a pipeline to build your workflow. A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline resolves dependencies to determine the node execution order, and does *not* necessarily run the nodes in the order in which they are passed in.
 
 To benefit from Kedro's automatic dependency resolution, you can chain your nodes into a [pipeline](/kedro.pipeline.Pipeline), which is a list of nodes that use a shared set of variables.
 
 ## How to build a pipeline
 
-In the following example, we construct a simple pipeline that computes the variance of a set of numbers. In practice, pipelines can use more complicated node definitions and the variables they use usually correspond to entire datasets:
+In the following example, we construct a simple pipeline that computes the variance of a set of numbers. In practice, pipelines can use more complicated node definitions, and the variables they use usually correspond to entire datasets:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -36,7 +36,7 @@ variance_pipeline = pipeline(
 ```
 </details>
 
-You can use `describe` to understand what nodes are part of the pipeline:
+You can use `describe` to discover what nodes are part of the pipeline:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -188,7 +188,7 @@ A pipelines can usually readily resolve its dependencies. In some cases, resolut
 
 ### Pipeline with bad nodes
 
-In this case we have a pipeline consisting of a single node with no input and output:
+In this case, we have a pipeline consisting of a single node with no input and output:
 
 <details>
 <summary><b>Click to expand</b></summary>

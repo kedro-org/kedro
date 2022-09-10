@@ -255,7 +255,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 @click.pass_obj  # this will pass the metadata as first argument
 def package_micropkg(
     metadata: ProjectMetadata, module_path, env, alias, destination, all_flag
-):  # pylint: disable=too-many-arguments
+):
     """Package up a modular pipeline or micro-package as a Python source distribution."""
     if not module_path and not all_flag:
         click.secho(
@@ -354,7 +354,7 @@ def _refactor_code_for_unpacking(
 
     to:
     <temp_dir>  # also the root of the Rope project
-    |__ <project_package>
+    |__ <package_name>
         |__ __init__.py
         |__ <path_to_micro_package>
             |__ __init__.py
@@ -620,7 +620,7 @@ def _refactor_code_for_package(
     """In order to refactor the imports properly, we need to recreate
     the same nested structure as in the project. Therefore, we create:
     <temp_dir>  # also the root of the Rope project
-    |__ <project_package>
+    |__ <package_name>
         |__ __init__.py
         |__ <path_to_micro_package>
             |__ __init__.py

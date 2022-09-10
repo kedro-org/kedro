@@ -12,7 +12,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 
 
 # pylint:disable=too-many-instance-attributes
-class SparkHiveDataSet(AbstractDataSet):
+class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
     """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
     hive which will not normally allow upserts to existing data without a complete replacement
@@ -27,7 +27,7 @@ class SparkHiveDataSet(AbstractDataSet):
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 

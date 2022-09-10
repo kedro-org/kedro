@@ -4,13 +4,24 @@ configure a Kedro project and access its settings."""
 import importlib
 import logging.config
 import operator
+import os
+import sys
+import traceback
+import warnings
+from collections import UserDict
 from collections.abc import MutableMapping
+from pathlib import Path
 from typing import Any, Dict, Optional
 
+import click
+import importlib_resources
+import rich.pretty
+import rich.traceback
+import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
 
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, pipeline
 
 
 def _get_default_class(class_import_path):
@@ -143,7 +154,7 @@ class _ProjectPipelines(MutableMapping):
         return register_pipelines
 
     def _load_data(self):
-        """Lazily read pipelines defined in the pipelines registry module"""
+        """Lazily read pipelines defined in the pipelines registry module."""
 
         # If the pipelines dictionary has not been configured with a pipelines module
         # or if data has been loaded
@@ -160,7 +171,7 @@ class _ProjectPipelines(MutableMapping):
 
     def configure(self, pipelines_module: Optional[str] = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
-        Reset the data loading state so that after every `configure` call,
+        Reset the data loading state so that after every ``configure`` call,
         data are reloaded.
         """
         self._pipelines_module = pipelines_module
@@ -179,8 +190,39 @@ class _ProjectPipelines(MutableMapping):
     __str__ = _load_data_wrapper(str)
 
 
+class _ProjectLogging(UserDict):
+    # pylint: disable=super-init-not-called
+    def __init__(self):
+        """Initialise project logging with default configuration. Also enable
+        rich tracebacks."""
+        default_logging = (Path(__file__).parent / "default_logging.yml").read_text(
+            encoding="utf-8"
+        )
+        self.configure(yaml.safe_load(default_logging))
+        logging.captureWarnings(True)
+
+        # We suppress click here to hide tracebacks related to it conversely,
+        # kedro is not suppressed to show its tracebacks for easier debugging.
+        # sys.executable is used to get the kedro executable path to hide the
+        # top level traceback.
+        # Rich traceback handling does not work on databricks. Hopefully this will be
+        # fixed on their side at some point, but until then we disable it.
+        # See https://github.com/Textualize/rich/issues/2455
+        if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
+            rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
+        rich.pretty.install()
+
+    def configure(self, logging_config: Dict[str, Any]) -> None:
+        """Configure project logging using ``logging_config`` (e.g. from project
+        logging.yml). We store this in the UserDict data so that it can be reconfigured
+        in _bootstrap_subprocess.
+        """
+        logging.config.dictConfig(logging_config)
+        self.data = logging_config
+
+
 PACKAGE_NAME = None
-LOGGING = None
+LOGGING = _ProjectLogging()
 
 settings = _ProjectSettings()
 
@@ -206,10 +248,8 @@ def configure_project(package_name: str):
 
 
 def configure_logging(logging_config: Dict[str, Any]) -> None:
-    """Configure logging to make it available as a global variable."""
-    logging.config.dictConfig(logging_config)
-    global LOGGING
-    LOGGING = logging_config
+    """Configure logging according to ``logging_config`` dictionary."""
+    LOGGING.configure(logging_config)
 
 
 def validate_settings():
@@ -220,4 +260,71 @@ def validate_settings():
     error message ``Expected an instance of `ConfigLoader`, got `NoneType` instead``.
     More info on the dynaconf issue: https://github.com/rochacbruno/dynaconf/issues/460
     """
+    if PACKAGE_NAME is None:
+        raise ValueError(
+            "Package name not found. Make sure you have configured the project using "
+            "'bootstrap_project'. This should happen automatically if you are using "
+            "Kedro command line interface."
+        )
+
     importlib.import_module(f"{PACKAGE_NAME}.settings")
+
+
+def find_pipelines() -> Dict[str, Pipeline]:
+    """Automatically find modular pipelines having a ``create_pipeline``
+    function. By default, projects created using Kedro 0.18.3 and higher
+    call this function to autoregister pipelines upon creation/addition.
+
+    Returns:
+        A generated mapping from pipeline names to ``Pipeline`` objects.
+
+    Warns:
+        UserWarning: When a module does not expose a ``create_pipeline``
+            function, the ``create_pipeline`` function does not return a
+            ``Pipeline`` object, or if the module import fails up front.
+    """
+    pipelines_dict = {"__default__": pipeline([])}
+    for pipeline_dir in importlib_resources.files(
+        f"{PACKAGE_NAME}.pipelines"
+    ).iterdir():
+        if not pipeline_dir.is_dir():
+            continue
+
+        pipeline_name = pipeline_dir.name
+        if pipeline_name == "__pycache__":
+            continue
+
+        try:
+            pipeline_module = importlib.import_module(
+                f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+            )
+        except:  # pylint: disable=bare-except  # noqa: E722
+            warnings.warn(
+                f"An error occurred while importing the "
+                f"'{PACKAGE_NAME}.pipelines.{pipeline_name}' module. "
+                f"Nothing defined therein will be returned by "
+                f"'find_pipelines'.\n\n{traceback.format_exc()}"
+            )
+            continue
+
+        if not hasattr(pipeline_module, "create_pipeline"):
+            warnings.warn(
+                f"The '{pipeline_module.__name__}' module does not "
+                f"expose a 'create_pipeline' function, so no pipelines "
+                f"defined therein will be returned by 'find_pipelines'."
+            )
+            continue
+
+        obj = getattr(pipeline_module, "create_pipeline")()
+        if not isinstance(obj, Pipeline):
+            warnings.warn(
+                f"Expected the 'create_pipeline' function in the "
+                f"'{pipeline_module.__name__}' module to return a "
+                f"'Pipeline' object, got '{type(obj).__name__}' "
+                f"instead. Nothing defined therein will be returned by "
+                f"'find_pipelines'."
+            )
+            continue
+
+        pipelines_dict[pipeline_name] = obj
+    return pipelines_dict

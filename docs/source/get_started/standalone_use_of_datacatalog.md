@@ -2,9 +2,9 @@
 
 ## Introduction
 
-To make it easier to share a Jupyter notebook with others you need to avoid hard-coded file paths used to load or save data. One way to explore data within a shareable Jupyter notebook is take advantage of Kedro's [`DataCatalog`](../data/data_catalog.md), but in the early phases of a project, you may not want to use any other Kedro features.
+To make it easier to share a Jupyter notebook with others, avoid the use of hard-coded file paths to load or save data. One way to explore data within a shareable Jupyter notebook is to use Kedro's [`DataCatalog`](../data/data_catalog.md), but in the early phases of a project, you might not want to use any other Kedro features.
 
-The Kedro starter with alias `standalone-datacatalog` (formerly known as `mini-kedro`) provides this minimal functionality. You can specify the sources required to load and save data using a YAML API. For example:
+The Kedro starter with alias `standalone-datacatalog` (formerly known as `mini-kedro`) provides this minimal functionality. You can use a YAML API to specify the sources required to load and save data, for example,
 
  ```yaml
 # conf/base/catalog.yml
@@ -30,7 +30,7 @@ df_2 = catalog.save("example_dataset_2")
 
 ## Usage
 
-Create a new project using the [`standalone-datacatalog` starter](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog):
+Use the [`standalone-datacatalog` starter](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog) to create a new project:
 
 ```bash
 $ kedro new --starter=standalone-datacatalog
@@ -44,12 +44,12 @@ The starter contains:
 
 * A `conf/` directory, which contains an example `DataCatalog` configuration (`catalog.yml`)
 * A `data/` directory, which contains an example dataset identical to the one used by the [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) starter
-* An example notebook showing how to instantiate the `DataCatalog` and interact with the example dataset
-* A blank `README.md` which points to this page of documentation
+* An example notebook, which shows how to instantiate the `DataCatalog` and interact with the example dataset
+* A blank `README.md` file, which points to this page of documentation
 
 ## Create a full Kedro project
 
-When you later wish to build a full pipeline, you can use the same configuration, with the following steps:
+When you later want to build a full pipeline, you can use the same configuration, as follows:
 
 ***1. Create a new empty Kedro project in a new directory***
 

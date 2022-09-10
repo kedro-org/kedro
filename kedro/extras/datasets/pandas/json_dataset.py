@@ -22,13 +22,13 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class JSONDataSet(AbstractVersionedDataSet):
+class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -141,7 +141,7 @@ class JSONDataSet(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> Any:
+    def _load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows

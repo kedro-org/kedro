@@ -5,7 +5,7 @@ import pytest
 
 from kedro.config import ConfigLoader, TemplatedConfigLoader
 from kedro.framework.context.context import KedroContext
-from kedro.framework.project import configure_project, settings
+from kedro.framework.project import configure_project, settings, validate_settings
 from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io import DataCatalog
@@ -94,3 +94,9 @@ def test_settings_after_configuring_project_shows_updated_values(
     assert settings.CONFIG_LOADER_CLASS == TemplatedConfigLoader
     assert settings.CONFIG_LOADER_ARGS == {"globals_pattern": "*globals.yml"}
     assert settings.DATA_CATALOG_CLASS == MyDataCatalog
+
+
+def test_validate_settings_with_empty_package_name():
+    with pytest.raises(ValueError):
+        configure_project(None)  # Simulate outside of project mode
+        validate_settings()

@@ -11,13 +11,13 @@ You previously registered the raw datasets for your Kedro project, so you can no
 
 ### Generate a new pipeline template
 
-In the terminal run the following command:
+In the terminal, run the following command:
 
 ```bash
 kedro pipeline create data_processing
 ```
 
-This generates all the files you need to start writing a `data_processing` pipeline:
+This command generates all the files you need to start to write a `data_processing` pipeline:
 * `nodes.py` and `pipeline.py` in the `src/kedro_tutorial/pipelines/data_processing` folder for the main node functions that form your pipeline
 * `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
 * `src/tests/pipelines/data_processing` for tests for your pipeline
@@ -192,12 +192,14 @@ kedro run --node=preprocess_companies_node
 You should see output similar to the below:
 
 ```bash
-2019-08-19 10:44:33,112 - root - INFO - ** Kedro project kedro-tutorial
-2019-08-19 10:44:33,123 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
-2019-08-19 10:44:33,161 - kedro.pipeline.node - INFO - Running node: preprocess_companies_node: preprocess_companies([companies]) -> [preprocessed_companies]
-2019-08-19 10:44:33,206 - kedro.io.data_catalog - INFO - Saving data to `preprocess_companies_node` (MemoryDataSet)...
-2019-08-19 10:44:33,471 - kedro.runner.sequential_runner - INFO - Completed 1 out of 1 tasks
-2019-08-19 10:44:33,471 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+[08/09/22 16:43:10] INFO     Kedro project kedro-tutorial                                         session.py:346
+[08/09/22 16:43:11] INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Running node: preprocess_companies_node:                                node.py:327
+                             preprocess_companies([companies]) -> [preprocessed_companies]
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Completed 1 out of 1 tasks                                  sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                             runner.py:89
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
 
 ```
 
@@ -210,16 +212,20 @@ kedro run
 You should see output similar to the following:
 
 ```bash
-2019-08-19 10:50:39,950 - root - INFO - ** Kedro project kedro-tutorial
-2019-08-19 10:50:39,957 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
-2019-08-19 10:50:48,521 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
-2019-08-19 10:50:48,587 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (MemoryDataSet)...
-2019-08-19 10:50:49,133 - kedro.runner.sequential_runner - INFO - Completed 1 out of 2 tasks
-2019-08-19 10:50:49,133 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
-2019-08-19 10:50:49,168 - kedro.pipeline.node - INFO - Running node: preprocess_companies_node: preprocess_companies([companies]) -> [preprocessed_companies]
-2019-08-19 10:50:49,212 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (MemoryDataSet)...
-2019-08-19 10:50:49,458 - kedro.runner.sequential_runner - INFO - Completed 2 out of 2 tasks
-2019-08-19 10:50:49,459 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+[08/09/22 16:45:46] INFO     Kedro project kedro-tutorial                                         session.py:346
+                    INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Running node: preprocess_companies_node:                                node.py:327
+                             preprocess_companies([companies]) -> [preprocessed_companies]
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Completed 1 out of 2 tasks                                  sequential_runner.py:85
+                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
+[08/09/22 16:46:08] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
+                             -> [preprocessed_shuttles]
+                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataSet)...       data_catalog.py:382
+                    INFO     Completed 2 out of 2 tasks                                  sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                             runner.py:89
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataSet)...    data_catalog.py:343
 
 ```
 
@@ -329,24 +335,30 @@ kedro run
 You should see output similar to the following:
 
 ```bash
-2019-08-19 10:55:47,534 - root - INFO - ** Kedro project kedro-tutorial
-2019-08-19 10:55:47,541 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
-2019-08-19 10:55:55,670 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
-2019-08-19 10:55:55,736 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (ParquetDataSet)...
-2019-08-19 10:55:56,284 - kedro.runner.sequential_runner - INFO - Completed 1 out of 3 tasks
-2019-08-19 10:55:56,284 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
-2019-08-19 10:55:56,318 - kedro.pipeline.node - INFO - Running node: preprocess_companies_node: preprocess_companies([companies]) -> [preprocessed_companies]
-2019-08-19 10:55:56,361 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (ParquetDataSet)...
-2019-08-19 10:55:56,610 - kedro.runner.sequential_runner - INFO - Completed 2 out of 3 tasks
-2019-08-19 10:55:56,610 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (ParquetDataSet)...
-2019-08-19 10:55:56,715 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (ParquetDataSet)...
-2019-08-19 10:55:56,750 - kedro.io.data_catalog - INFO - Loading data from `reviews` (CSVDataSet)...
-2019-08-19 10:55:56,812 - kedro.pipeline.node - INFO - Running node: create_model_input_table_node: create_model_input_table([preprocessed_companies,preprocessed_shuttles,reviews]) -> [model_input_table]
-2019-08-19 10:55:58,679 - kedro.io.data_catalog - INFO - Saving data to `model_input_table` (ParquetDataSet)...
-2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
-2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
-```
+[08/09/22 17:00:54] INFO     Kedro project kedro-tutorial                                         session.py:346
+[08/09/22 17:01:10] INFO     Reached after_catalog_created hook                                     plugin.py:17
+                    INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Running node: preprocess_companies_node:                                node.py:327
+                             preprocess_companies([companies]) -> [preprocessed_companies]
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Completed 1 out of 3 tasks                                  sequential_runner.py:85
+                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
+[08/09/22 17:01:25] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
+                             -> [preprocessed_shuttles]
 
+                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataSet)...       data_catalog.py:382
+                    INFO     Completed 2 out of 3 tasks                                  sequential_runner.py:85
+                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataSet)...    data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
+                    INFO     Loading data from 'reviews' (CSVDataSet)...                     data_catalog.py:343
+                    INFO     Running node: create_model_input_table_node:                            node.py:327
+                             create_model_input_table([preprocessed_shuttles,preprocessed_companies,
+                             reviews]) -> [model_input_table]
+[08/09/22 17:01:28] INFO     Saving data to 'model_input_table' (MemoryDataSet)...           data_catalog.py:382
+[08/09/22 17:01:29] INFO     Completed 3 out of 3 tasks                                  sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                             runner.py:89
+                    INFO     Loading data from 'model_input_table' (MemoryDataSet)...        data_catalog.py:343
+```
 ### Use `kedro viz --autoreload`
 
 Run the following command:
@@ -506,7 +518,7 @@ regressor:
   versioned: true
 ```
 
-Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning](../data/kedro_io.md#versioning) section.
+Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning section](../data/kedro_io.md#versioning).
 
 ### Update the project pipeline
 
@@ -556,42 +568,50 @@ You should see output similar to the following:
 <details>
 <summary><b>Click to expand</b></summary>
 
-```text
-2019-08-19 10:51:46,501 - root - INFO - ** Kedro project kedro-tutorial
-2019-08-19 10:51:46,510 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
-2019-08-19 10:51:46,547 - kedro.pipeline.node - INFO - Running node: preprocess_companies_node: preprocess_companies([companies]) -> [preprocessed_companies]
-2019-08-19 10:51:46,597 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVDataSet)...
-2019-08-19 10:51:46,906 - kedro.runner.sequential_runner - INFO - Completed 1 out of 6 tasks
-2019-08-19 10:51:46,906 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
-2019-08-19 10:51:55,324 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
-2019-08-19 10:51:55,389 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVDataSet)...
-2019-08-19 10:51:55,932 - kedro.runner.sequential_runner - INFO - Completed 2 out of 6 tasks
-2019-08-19 10:51:55,932 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVDataSet)...
-2019-08-19 10:51:56,042 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (CSVDataSet)...
-2019-08-19 10:51:56,078 - kedro.io.data_catalog - INFO - Loading data from `reviews` (CSVDataSet)...
-2019-08-19 10:51:56,139 - kedro.pipeline.node - INFO - Running node: create_model_input_table_node: create_model_input_table([preprocessed_companies,preprocessed_shuttles,reviews]) -> [model_input_table]
-2019-08-19 10:51:58,037 - kedro.io.data_catalog - INFO - Saving data to `model_input_table` (CSVDataSet)...
-2019-08-19 10:52:09,133 - kedro.runner.sequential_runner - INFO - Completed 3 out of 6 tasks
-2019-08-19 10:52:09,133 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataSet)...
-2019-08-19 10:52:10,941 - kedro.io.data_catalog - INFO - Loading data from `params:model_options` (MemoryDataSet)...
-2019-08-19 10:52:10,941 - kedro.pipeline.node - INFO - Running node: split_data_node: split_data([model_input_table,params:model_options]) -> [X_test,X_train,y_test,y_train]
-2019-08-19 10:52:11,343 - kedro.io.data_catalog - INFO - Saving data to `X_train` (MemoryDataSet)...
-2019-08-19 10:52:11,372 - kedro.io.data_catalog - INFO - Saving data to `X_test` (MemoryDataSet)...
-2019-08-19 10:52:11,380 - kedro.io.data_catalog - INFO - Saving data to `y_train` (MemoryDataSet)...
-2019-08-19 10:52:11,381 - kedro.io.data_catalog - INFO - Saving data to `y_test` (MemoryDataSet)...
-2019-08-19 10:52:11,443 - kedro.runner.sequential_runner - INFO - Completed 4 out of 6 tasks
-2019-08-19 10:52:11,443 - kedro.io.data_catalog - INFO - Loading data from `X_train` (MemoryDataSet)...
-2019-08-19 10:52:11,472 - kedro.io.data_catalog - INFO - Loading data from `y_train` (MemoryDataSet)...
-2019-08-19 10:52:11,474 - kedro.pipeline.node - INFO - Running node: train_model_node: train_model([X_train,y_train]) -> [regressor]
-2019-08-19 10:52:11,704 - kedro.io.data_catalog - INFO - Saving data to `regressor` (PickleDataSet)...
-2019-08-19 10:52:11,776 - kedro.runner.sequential_runner - INFO - Completed 5 out of 6 tasks
-2019-08-19 10:52:11,776 - kedro.io.data_catalog - INFO - Loading data from `regressor` (PickleDataSet)...
-2019-08-19 10:52:11,776 - kedro.io.data_catalog - INFO - Loading data from `X_test` (MemoryDataSet)...
-2019-08-19 10:52:11,784 - kedro.io.data_catalog - INFO - Loading data from `y_test` (MemoryDataSet)...
-2019-08-19 10:52:11,785 - kedro.pipeline.node - INFO - Running node: evaluate_model_node: evaluate_model([X_test,regressor,y_test]) -> None
-2019-08-19 10:52:11,830 - kedro_tutorial.pipelines.data_science.nodes - INFO - Model has a coefficient R^2 of 0.462 on test data.
-2019-08-19 10:52:11,869 - kedro.runner.sequential_runner - INFO - Completed 6 out of 6 tasks
-2019-08-19 10:52:11,869 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+```bash
+[08/09/22 16:56:00] INFO     Kedro project kedro-tutorial                                         session.py:346
+                    INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Running node: preprocess_companies_node:                                node.py:327
+                             preprocess_companies([companies]) -> [preprocessed_companies]
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Completed 1 out of 6 tasks                                  sequential_runner.py:85
+                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
+[08/09/22 16:56:15] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
+                             -> [preprocessed_shuttles]
+                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataSet)...       data_catalog.py:382
+                    INFO     Completed 2 out of 6 tasks                                  sequential_runner.py:85
+                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataSet)...    data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
+                    INFO     Loading data from 'reviews' (CSVDataSet)...                     data_catalog.py:343
+                    INFO     Running node: create_model_input_table_node:                            node.py:327
+                             create_model_input_table([preprocessed_shuttles,preprocessed_companies,
+                             reviews]) -> [model_input_table]
+[08/09/22 16:56:18] INFO     Saving data to 'model_input_table' (MemoryDataSet)...           data_catalog.py:382
+[08/09/22 16:56:19] INFO     Completed 3 out of 6 tasks                                  sequential_runner.py:85
+                    INFO     Loading data from 'model_input_table' (MemoryDataSet)...        data_catalog.py:343
+                    INFO     Loading data from 'params:model_options' (MemoryDataSet)...     data_catalog.py:343
+                    INFO     Running node: split_data_node:                                          node.py:327
+                             split_data([model_input_table,params:model_options]) ->
+                             [X_train,X_test,y_train,y_test]
+                    INFO     Saving data to 'X_train' (MemoryDataSet)...                     data_catalog.py:382
+                    INFO     Saving data to 'X_test' (MemoryDataSet)...                      data_catalog.py:382
+                    INFO     Saving data to 'y_train' (MemoryDataSet)...                     data_catalog.py:382
+                    INFO     Saving data to 'y_test' (MemoryDataSet)...                      data_catalog.py:382
+                    INFO     Completed 4 out of 6 tasks                                  sequential_runner.py:85
+                    INFO     Loading data from 'X_train' (MemoryDataSet)...                  data_catalog.py:343
+                    INFO     Loading data from 'y_train' (MemoryDataSet)...                  data_catalog.py:343
+                    INFO     Running node: train_model_node: train_model([X_train,y_train]) ->       node.py:327
+                             [regressor]
+[08/09/22 16:56:20] INFO     Saving data to 'regressor' (PickleDataSet)...                   data_catalog.py:382
+                    INFO     Completed 5 out of 6 tasks                                  sequential_runner.py:85
+                    INFO     Loading data from 'regressor' (PickleDataSet)...                data_catalog.py:343
+                    INFO     Loading data from 'X_test' (MemoryDataSet)...                   data_catalog.py:343
+                    INFO     Loading data from 'y_test' (MemoryDataSet)...                   data_catalog.py:343
+                    INFO     Running node: evaluate_model_node:                                      node.py:327
+                             evaluate_model([regressor,X_test,y_test]) -> None
+                    INFO     Model has a coefficient R^2 of 0.462 on test data.                      nodes.py:55
+                    INFO     Completed 6 out of 6 tasks                                  sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                             runner.py:89
 ```
 
 </details>

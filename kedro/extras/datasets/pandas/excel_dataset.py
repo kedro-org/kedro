@@ -22,7 +22,12 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class ExcelDataSet(AbstractVersionedDataSet):
+class ExcelDataSet(
+    AbstractVersionedDataSet[
+        Union[pd.DataFrame, Dict[str, pd.DataFrame]],
+        Union[pd.DataFrame, Dict[str, pd.DataFrame]],
+    ]
+):
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 
@@ -60,6 +65,36 @@ class ExcelDataSet(AbstractVersionedDataSet):
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
 
+    Note: To save a multi-sheet Excel file, no special ``save_args`` are required.
+    Instead, return a dictionary of ``Dict[str, pd.DataFrame]`` where the string
+    keys are your sheet names.
+
+    Example adding a catalog entry for multi-sheet Excel file with the ``YAML API``:
+
+    .. code-block:: yaml
+
+        >>> trains:
+        >>>   type: pandas.ExcelDataSet
+        >>>   filepath: data/02_intermediate/company/trains.xlsx
+        >>>   load_args:
+        >>>     sheet_name: [Sheet1, Sheet2, Sheet3]
+
+    Example multi-sheet Excel file using Python API:
+    ::
+
+        >>> from kedro.extras.datasets.pandas import ExcelDataSet
+        >>> import pandas as pd
+        >>>
+        >>> dataframe = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
+        >>>                      'col3': [5, 6]})
+        >>> another_dataframe = pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
+        >>> multiframe = {"Sheet1": dataframe, "Sheet2": another_dataframe}
+        >>> data_set = ExcelDataSet(filepath="test.xlsx", load_args = {"sheet_name": None})
+        >>> data_set.save(multiframe)
+        >>> reloaded = data_set.load()
+        >>> assert multiframe["Sheet1"].equals(reloaded["Sheet1"])
+        >>> assert multiframe["Sheet2"].equals(reloaded["Sheet2"])
+
     """
 
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
@@ -84,7 +119,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            engine: The engine used to write to excel files. The default
+            engine: The engine used to write to Excel files. The default
                 engine is 'openpyxl'.
             load_args: Pandas options for loading Excel files.
                 Here you can find all available arguments:

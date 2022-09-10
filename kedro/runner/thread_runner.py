@@ -92,6 +92,7 @@ class ThreadRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         Raises:
@@ -130,7 +131,7 @@ class ThreadRunner(AbstractRunner):
                     try:
                         node = future.result()
                     except Exception:
-                        self._suggest_resume_scenario(pipeline, done_nodes)
+                        self._suggest_resume_scenario(pipeline, done_nodes, catalog)
                         raise
                     done_nodes.add(node)
                     self._logger.info("Completed node: %s", node.name)

@@ -50,7 +50,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             url: The API URL endpoint.
             method: The Method of the request, GET, POST, PUT, DELETE, HEAD, etc...
             load_args: Additional parameters to be fed to requests.request.
-                https://docs.python-requests.org/en/latest/api/
+                https://requests.readthedocs.io/en/latest/api/#requests.request
             credentials: Allows specifying secrets in credentials.yml.
                 Expected format is ``('login', 'password')`` if given as a tuple or list.
                 An ``AuthBase`` instance can be provided for more complex cases.

@@ -6,6 +6,9 @@
 
 ## Breaking changes to the API
 
+### DataSets
+* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+
 ### CLI
 * Removed deprecated `kedro docs` command.
 
@@ -14,6 +17,10 @@
 * The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+
+### DataSets
+
+* If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 
 # Upcoming Release 0.18.3
 

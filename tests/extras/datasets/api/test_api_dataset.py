@@ -103,6 +103,7 @@ class TestAPIDataSet:
             {"load_args": {"auth": HTTPBasicAuth("john", "doe")}},
             {"credentials": ("john", "doe")},
             {"credentials": ["john", "doe"]},
+            {"credentials": HTTPBasicAuth("john", "doe")},
         ],
     )
     def test_auth_sequence(self, requests_mock, auth_kwarg):

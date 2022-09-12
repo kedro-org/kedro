@@ -1,9 +1,11 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-from typing import Any, Dict, List, Tuple, NoReturn, Union
+from typing import Any, Dict, List, NoReturn, Tuple, Union
+
 import requests
 from requests import Session, sessions
+from requests.auth import AuthBase
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
@@ -40,7 +42,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         url: str,
         method: str = "GET",
         load_args: Dict[str, Any] = None,
-        credentials: Union[Tuple[str, str], List[str]] = None,
+        credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 

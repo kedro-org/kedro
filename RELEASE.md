@@ -26,7 +26,12 @@
         return pipelines
     ```
 
+* The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
+* The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
+* Implemented autodiscovery of project pipelines.
+
 ## Bug fixes and other changes
+
 * Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
 * Rich traceback handling is disabled on Databricks so that exceptions now halt execution as expected. This is a workaround for a [bug in `rich`](https://github.com/Textualize/rich/issues/2455).
 * When using `kedro run -n [some_node]`, if `some_node` is missing a namespace the resulting error message will suggest the correct node name.
@@ -34,8 +39,10 @@
 * Updated Prefect deployment documentation to allow for reruns with saved versioned datasets.
 * The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
+* Added `gdrive` to list of cloud protocols, enabling Google Drive paths for datasets.
 
 ## Upcoming deprecations for Kedro 0.19.0
+* The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 
 # Release 0.18.2
 
@@ -136,7 +143,7 @@ main(
 * Added `save_args` to `feather.FeatherDataSet`.
 
 ### Jupyter and IPython integration
-* The [only recommended way to work with Kedro in Jupyter or IPython is now the Kedro IPython extension](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html). Managed Jupyter instances should load this via `%load_ext kedro.extras.extensions.ipython` and use the line magic `%reload_kedro`.
+* The [only recommended way to work with Kedro in Jupyter or IPython is now the Kedro IPython extension](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html). Managed Jupyter instances should load this via `%load_ext kedro.ipython` and use the line magic `%reload_kedro`.
 * `kedro ipython` launches an IPython session that preloads the Kedro IPython extension.
 * `kedro jupyter notebook/lab` creates a custom Jupyter kernel that preloads the Kedro IPython extension and launches a notebook with that kernel selected. There is no longer a need to specify `--all-kernels` to show all available kernels.
 

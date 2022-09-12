@@ -627,9 +627,12 @@ class TestMicropkgPullCommand:
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
+
+        package_name = "my-pipeline"
+
         result = CliRunner().invoke(
             fake_project_cli,
-            ["micropkg", "pull", f"{PIPELINE_NAME}-{version}", *options],
+            ["micropkg", "pull", package_name, *options],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
@@ -642,7 +645,7 @@ class TestMicropkgPullCommand:
                 "--no-deps",
                 "--dest",
                 str(tmp_path),
-                f"{PIPELINE_NAME}-{version}",
+                package_name,
             ],
         )
 

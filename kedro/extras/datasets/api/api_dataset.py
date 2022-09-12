@@ -52,7 +52,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             load_args: Additional parameters to be fed to requests.request.
                 https://docs.python-requests.org/en/latest/api/
             credentials: Allows specifying secrets in credentials.yml.
-                Expected format is ``('login', 'password')``.
+                Expected format is ``('login', 'password')`` if given as a tuple or list.
+                An ``AuthBase`` instance can be provided for more complex cases.
         Raises:
             ValueError: if both ``auth`` in ``load_args`` and ``credentials`` are specified.
         """
@@ -82,8 +83,8 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     @staticmethod
     def _convert_type(value: Any):
         """
-        From the Catalog, iterations are provided as lists.
-        However, for some Parameters in the python Requests library,
+        From the Data Catalog, iterables are provided as Lists.
+        However, for some parameters in the Python requests library,
         only Tuples are allowed.
         """
         if isinstance(value, List):

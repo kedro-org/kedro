@@ -1,8 +1,8 @@
 # Create a new project
 
-Once you have [installed Kedro](./install.md), you can create a new, empty project by answering a series of questions, or by using settings recorded in a configuration file.
+Once you have [installed Kedro](./install.md), to create a new, empty project, you can answer a series of questions, or use settings recorded in a configuration file.
 
-If you want to create a Kedro project that is populated with some template or example code, you can use Kedro starters by specifying the `--starter` flag. Read the guide to [creating new projects with Kedro Starters](./starters.md) for more information.
+If you want to create a Kedro project that is populated with some template or example code, you can specify the `--starter` flag to use Kedro starters. Read the guide to [creating new projects with Kedro Starters](./starters.md) for more information.
 
 ## Create a new project interactively
 
@@ -12,7 +12,7 @@ Create a new project in your current working directory:
 kedro new
 ```
 
-You will be asked to enter each of the following variables in turn. Once you have entered text for the first option (the project's name), you will be offered a default choice for the other options:
+You will be asked to enter the `project_name`. The `project_name` must be at least two characters long, and only contain alphanumeric symbols, spaces, underscores and hyphens. The `project_name` is used to automatically generate the `repo_name` and `python_package`.
 
 | Option           | Example       | Description                                                               |
 | ---------------- | ------------- | ------------------------------------------------------------------------- |

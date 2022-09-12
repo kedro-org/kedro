@@ -44,7 +44,7 @@ def _is_project(project_path: Union[str, Path]) -> bool:
 
 
 def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
-    """Read project metadata from `<project_path>/pyproject.toml` config file,
+    """Read project metadata from `<project_root>/pyproject.toml` config file,
     under the `[tool.kedro]` section.
 
     Args:

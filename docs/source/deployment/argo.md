@@ -14,12 +14,12 @@ Here are the main reasons to use Argo Workflows:
 
 ## Prerequisites
 
-To use Argo Workflows, make sure you have the following prerequisites in place:
+To use Argo Workflows, ensure you have the following prerequisites in place:
 
 - [Argo Workflows is installed](https://github.com/argoproj/argo/blob/master/README.md#quickstart) on your Kubernetes cluster
-- [Argo CLI is installed](https://github.com/argoproj/argo/releases) on you machine
+- [Argo CLI is installed](https://github.com/argoproj/argo/releases) on your machine
 - A `name` attribute is set for each [Kedro node](/kedro.pipeline.node) since it is used to build a DAG
-- [All node input/output DataSets must be configured in `catalog.yml`](../data/data_catalog.md#using-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3); you cannot use the `MemoryDataSet` in your workflow
+- [All node input/output DataSets must be configured in `catalog.yml`](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3); you cannot use the `MemoryDataSet` in your workflow
 
 ```{note}
 Each node will run in its own container.
@@ -65,16 +65,16 @@ def generate_argo_config(image, pipeline_name, env):
 
     project_path = Path.cwd()
     metadata = bootstrap_project(project_path)
-    project_name = metadata.project_name
+    package_name = metadata.package_name
 
     pipeline_name = pipeline_name or "__default__"
     pipeline = pipelines.get(pipeline_name)
 
     tasks = get_dependencies(pipeline.node_dependencies)
 
-    output = template.render(image=image, project_name=project_name, tasks=tasks)
+    output = template.render(image=image, package_name=package_name, tasks=tasks)
 
-    (SEARCH_PATH / f"argo-{project_name}.yml").write_text(output)
+    (SEARCH_PATH / f"argo-{package_name}.yml").write_text(output)
 
 
 def get_dependencies(dependencies):
@@ -113,7 +113,7 @@ Add the following Argo Workflows spec template to `<project_root>/templates/argo
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: {{ project_name }}-
+  generateName: {{ package_name }}-
 spec:
   entrypoint: dag
   templates:
@@ -169,15 +169,15 @@ spec:
 The Argo Workflows is defined as the dependencies between tasks using a directed-acyclic graph (DAG).
 ```
 
-For the purpose of this walk-through, we are going to use AWS S3 bucket for DataSets therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) ([an example Kubernetes Secrets spec is given below](#submit-argo-workflows-spec-to-kubernetes)).
+For the purpose of this walk-through, we will use an AWS S3 bucket for DataSets; therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example [Kubernetes Secrets spec is given below](#submit-argo-workflows-spec-to-kubernetes)).
 
-The spec template is written with using [Jinja templating language](https://jinja.palletsprojects.com/en/2.11.x/) so you need to install the Jinja Python package:
+The spec template is written with the [Jinja templating language](https://jinja.palletsprojects.com/en/2.11.x/), so you must install the Jinja Python package:
 
 ```console
 $ pip install Jinja2
 ```
 
-Finally, run the helper script from project's directory to build the Argo Workflows spec (the spec will be saved to `<project_root>/templates/argo-<project_name>.yml` file).
+Finally, run the helper script from project's directory to build the Argo Workflows spec (the spec will be saved to `<project_root>/templates/argo-<package_name>.yml` file).
 
 ```console
 $ cd <project_root>
@@ -219,7 +219,7 @@ Now, you are ready to submit the Argo Workflows spec as follows:
 
 ```console
 $ cd <project_root>
-$ argo submit --watch templates/argo-<project_name>.yml
+$ argo submit --watch templates/argo-<package_name>.yml
 ```
 
 ```{note}

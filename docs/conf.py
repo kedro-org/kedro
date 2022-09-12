@@ -20,11 +20,16 @@ import sys
 from distutils.dir_util import copy_tree
 from inspect import getmembers, isclass, isfunction
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from click import secho, style
+from docutils import nodes
+from sphinx.application import Sphinx
+from sphinxcontrib.mermaid import mermaid
 
 from kedro import __version__ as release
+
+MERMAID_JS_URL = "https://unpkg.com/mermaid/dist/mermaid.min.js"
 
 # -- Project information -----------------------------------------------------
 
@@ -56,6 +61,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "nbsphinx",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
     "myst_parser",
 ]
 
@@ -135,6 +141,8 @@ type_targets = {
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
         "pluggy._manager.PluginManager",
+        "_DI",
+        "_DO",
     ),
     "py:data": (
         "typing.Any",
@@ -198,14 +206,14 @@ linkcheck_ignore = [
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
-    "https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog",  # temporary until 0.18
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
-    "https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf",
+    "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving",  # Until 0.18.4
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -259,9 +267,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, "Kedro.tex", "Kedro Documentation", "Kedro", "manual")
-]
+latex_documents = [(master_doc, "Kedro.tex", "Kedro Documentation", "Kedro", "manual")]
 
 # -- Options for manual page output ------------------------------------------
 
@@ -377,7 +383,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
             # first do plural only for classes
             replacements += [
                 (
-                    fr"``{obj}``s",
+                    rf"``{obj}``s",
                     f":{what}:`~{module}.{obj}`\\\\s",
                     obj,
                 )
@@ -386,7 +392,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # singular
         replacements += [
-            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj) for obj in objects
+            (rf"``{obj}``", f":{what}:`~{module}.{obj}`", obj) for obj in objects
         ]
 
         # Look for recognised class names/function names which are NOT
@@ -395,13 +401,13 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             suggestions += [
-                (fr"(?<!\w|`){obj}s(?!\w|`{{2}})", f"``{obj}``s", obj)
+                (rf"(?<!\w|`){obj}s(?!\w|`{{2}})", f"``{obj}``s", obj)
                 for obj in objects
             ]
 
         # then singular
         suggestions += [
-            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj) for obj in objects
+            (rf"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj) for obj in objects
         ]
 
     return replacements, suggestions
@@ -423,7 +429,7 @@ def log_suggestions(lines: List[str], name: str):
             continue
 
         for existing, replacement, obj in suggestions:
-            new = re.sub(existing, fr"{replacement}", lines[i])
+            new = re.sub(existing, rf"{replacement}", lines[i])
             if new == lines[i]:
                 continue
             if ":rtype:" in lines[i] or ":type " in lines[i]:
@@ -456,7 +462,7 @@ def autolink_classes_and_methods(lines):
             continue
 
         for existing, replacement, obj in replacements:
-            lines[i] = re.sub(existing, fr"{replacement}", lines[i])
+            lines[i] = re.sub(existing, rf"{replacement}", lines[i])
 
 
 def autodoc_process_docstring(app, what, name, obj, options, lines):
@@ -516,6 +522,29 @@ def _add_jinja_filters(app):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
+def remove_unused_mermaid_script_file(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: Dict,
+    doctree: Optional[nodes.document],
+) -> None:
+    # The `doctree` arg is `None` when not created from a reST document.
+    if not doctree:
+        return
+
+    # Remove the Mermaid JavaScript from pages without Mermaid diagrams.
+    if not doctree.next_node(mermaid):
+        # Create a copy of `context["script_files"]`; modifying the list
+        # in place affects all pages, because they all use the same ref.
+        context["script_files"] = [
+            x for x in context["script_files"] if x != MERMAID_JS_URL
+        ]
+
+    # Remove "None" entries added when `mermaid_version` is set to `""`.
+    context["script_files"] = [x for x in context["script_files"] if x != "None"]
+
+
 def setup(app):
     app.connect("config-inited", _prepare_build_dir)
     app.connect("builder-inited", _add_jinja_filters)
@@ -524,6 +553,8 @@ def setup(app):
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
     app.add_css_file("css/theme-overrides.css")
+    app.add_js_file(MERMAID_JS_URL)
+    app.connect("html-page-context", remove_unused_mermaid_script_file)
 
 
 # (regex, restructuredText link replacement, object) list
@@ -551,3 +582,5 @@ except Exception as e:
 user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0"
 
 myst_heading_anchors = 5
+
+mermaid_version = ""  # We add a minified Mermaid script file ourselves.

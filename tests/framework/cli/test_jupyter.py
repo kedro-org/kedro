@@ -139,7 +139,7 @@ class TestCreateKernel:
         kernel_spec = get_kernel_spec("my_kernel_name")
         assert kernel_spec.display_name == "My display name"
         assert kernel_spec.language == "python"
-        assert kernel_spec.argv[-2:] == ["--ext", "kedro.extras.extensions.ipython"]
+        assert kernel_spec.argv[-2:] == ["--ext", "kedro.ipython"]
         kernel_files = {file.name for file in Path(kernel_spec.resource_dir).iterdir()}
         assert kernel_files == {"logo-32x32.png", "logo-64x64.png", "kernel.json"}
 
@@ -267,7 +267,7 @@ class TestConvertNotebookCommand:
             "add '--all' to convert all notebooks.\n"
         )
         assert result.exit_code
-        assert result.stdout == expected_output
+        assert expected_output in result.stdout
 
     def test_non_unique_notebook_names_error(
         self, fake_project_cli, mocker, fake_metadata

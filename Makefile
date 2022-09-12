@@ -31,9 +31,11 @@ secret-scan:
 SPHINXPROJ = Kedro
 
 build-docs:
+	pip install -e ".[docs]"
 	./docs/build-docs.sh "docs"
 
 linkcheck:
+	pip install -e ".[docs]"
 	./docs/build-docs.sh "linkcheck"
 
 devserver: build-docs

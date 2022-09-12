@@ -5,9 +5,9 @@ This section covers the following:
 * A brief introduction to namespaces and modular pipelines
 * How to convert the existing spaceflights project into a namespaced one
 
-Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipelines.md) unlocks some sophisticated functionality in Kedro
+Add namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipelines.md) to unlock some sophisticated functionality in Kedro.
 
-1. You are able to [instantiate the same pipeline structure multiple times](../nodes_and_pipelines/modular_pipelines.md), but provide different inputs/outputs.
+1. You can [instantiate the same pipeline structure multiple times](../nodes_and_pipelines/modular_pipelines.md), but provide different inputs/outputs.
 2. You can unlock the full power of [micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 3. You can de-clutter your mental model with Kedro-Viz rendering collapsible components.
 
@@ -16,7 +16,7 @@ Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipeline
 ## Adding a namespace to the  `data_processing` pipeline
 
 * Update the code in `src/kedro_tutorial/pipelines/data_processing/pipeline.py` using the snippet below.
-* This introduces the lowercase `pipeline()` method imported from `kedro.pipeline.modular_pipeline`
+* This introduces the lowercase `pipeline()` method imported from `kedro.pipeline.modular_pipeline`.
 
     <details>
     <summary><b>Click to expand</b></summary>
@@ -62,23 +62,23 @@ Adding namespaces to [modular pipelines](../nodes_and_pipelines/modular_pipeline
 
     </details>
 
-* Update the catalog entries for `preprocessed_shuttles` and `preprocessed_companies` by appending the `data_processing` namespace. This is to ensure both datasets are still persisted when running the pipeline.
+* Append the `data_processing` namespace to the catalog entries for `preprocessed_shuttles` and `preprocessed_companies`. This is to ensure both datasets are still persisted when running the pipeline.
 
-### Why do we need to provide explicit inputs and outputs?
+### Why must we provide explicit inputs and outputs?
 
-* When introducing a namespace you must tell Kedro which inputs/outputs live at the 'edges' of the namespace
-* Failing to do so in this situation causes Kedro to think that `companies` and `data_processing.companies` are two different datasets.
-* Highlighting 'focus mode' Kedro-Viz highlights how the **explicitly declared** inputs/outputs live outside of the collapsed part of the namespace. `model_input_table` in particular is shared across both pipelines and thus needs to be outside of the `Data Processing` namespace.
+* When introducing a namespace, you must tell Kedro which inputs/outputs live at the 'edges' of the namespace
+* If you fail to do so in this situation, Kedro thinks that `companies` and `data_processing.companies` are two different datasets.
+* Highlighting 'focus mode' Kedro-Viz highlights how the **explicitly declared** inputs/outputs live outside of the collapsed part of the namespace. `model_input_table` in particular is shared across both pipelines and thus must be outside of the `Data Processing` namespace.
 
     ![focus](../meta/images/focus_mode.png)
 
-> As an experiment, remove the explicit inputs and outputs from your `namespaced_pipeline` and see how this creates a disjointed pipeline visualisation
+> As an experiment, remove the explicit inputs and outputs from your `namespaced_pipeline` and see how this creates a disjointed pipeline visualisation.
 
 ## Adding namespaces to the  `data_science` pipeline
 
-In this section we want to add some namespaces in the modelling component of the pipeline and also highlight the power of instantiating the same modular pipeline multiple times with different parameters.
+In this section, we want to add some namespaces in the modelling component of the pipeline, and also highlight the power of instantiating the same modular pipeline multiple times with different parameters.
 
-1. Update the parameters file `conf/base/parameters/data_science.yml` using this snippet:
+1. Update the parameters file `conf/base/parameters/data_science.yml` with this snippet:
 
     ```yaml
 
@@ -108,7 +108,7 @@ In this section we want to add some namespaces in the modelling component of the
 
     ```
 
-2. Update you catalog to reflect the new namespaced outputs. Replace the `regressor` key with the following two new dataset keys in `conf/base/catalog.yml`:
+2. Update your catalog to reflect the new namespaced outputs. Replace the `regressor` key with the following two new dataset keys in the `conf/base/catalog.yml` file:
 
     ```yaml
 
@@ -126,7 +126,7 @@ In this section we want to add some namespaces in the modelling component of the
 
     ```
 
-3. Update the code in `pipelines/data_science/pipeline.py` using the snippet below.
+3. Update the code in the `pipelines/data_science/pipeline.py` file with the snippet below:
 
     <details>
     <summary><b>Click to expand</b></summary>
@@ -197,9 +197,9 @@ ds_pipeline_2 = pipeline(
 )
 ```
 
-> The `pipeline_instance` variable is our 'template' pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parametrised instantiations.
+> The `pipeline_instance` variable is our 'template' pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parameterised instantiations.
 
-The table below describes the purpose of each keyword arguments in detail:
+The table below describes the purpose of each keyword argument in detail:
 
 | Keyword argument | `ds_pipeline_1`                                                                         | `ds_pipeline_2`              |
 | ---------------- | --------------------------------------------------------------------------------------- | ---------------------------- |
@@ -210,9 +210,9 @@ The table below describes the purpose of each keyword arguments in detail:
 ## Nesting modular pipelines
 
 * Modular pipelines can be nested an arbitrary number of times
-* This can be an effective pattern for simplifying you mental model and to reduce visual noise
-* Namespaces will be chained using the `.` syntax just like you `import` modules in Python
-* You can quickly wrap your two modelling pipeline instances under one 'Data science' namespace by adding the following to your `pipelines/data_science/pipeline.py` return statement:
+* This can be an effective pattern for simplifying your mental model, and to reduce visual noise
+* Namespaces will be chained using the `.` syntax, just like your `import` modules in Python
+* To wrap your two modelling pipeline instances quickly under one 'Data science' namespace, add the following to your `pipelines/data_science/pipeline.py` return statement:
 
     ```python
     ...
@@ -223,7 +223,7 @@ The table below describes the purpose of each keyword arguments in detail:
     )
     ```
 
-  * As we've created an outer namespace `data_science`, we'll be updating our catalog entries for the `regressor` datasets by adding the `data_science` prefix. Additionally, you need to add the `data_science` prefix at the top level of your parameter file `data_science.yml` and indent the other entries. The complete `catalog.yml` and `data_science.yml` parameter files should look like the below.
+  * As we've created an outer namespace `data_science`, we'll add the `data_science` prefix to our catalog entries for the `regressor` datasets. Additionally, you must add the `data_science` prefix at the top level of your parameter file `data_science.yml` and indent the other entries. The complete `catalog.yml` and `data_science.yml` parameter files should look like the below:
 
     <details>
     <summary><b>Click to expand</b></summary>

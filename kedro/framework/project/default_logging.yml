@@ -1,0 +1,14 @@
+version: 1
+
+disable_existing_loggers: False
+
+handlers:
+  rich:
+    class: rich.logging.RichHandler
+
+loggers:
+  kedro:
+    level: INFO
+
+root:
+  handlers: [rich]

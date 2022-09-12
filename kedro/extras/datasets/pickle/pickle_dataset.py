@@ -19,7 +19,7 @@ from kedro.io.core import (
 )
 
 
-class PickleDataSet(AbstractVersionedDataSet):
+class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
     the specified backend library passed in (defaults to the ``pickle`` library), so it
@@ -27,7 +27,7 @@ class PickleDataSet(AbstractVersionedDataSet):
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 

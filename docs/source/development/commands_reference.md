@@ -113,7 +113,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.18.1
+v0.18.2
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -296,7 +296,7 @@ Call the `run()` method of the `KedroSession` defined in `kedro.framework.sessio
 kedro run
 ```
 
-`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../faq/architecture_overview.md#kedro-project) configuration file.
+`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext`, you need to set `context_path` in the [`pyproject.toml` configuration file](../faq/architecture_overview.md#kedro-project).
 
 #### Modifying a `kedro run`
 
@@ -352,7 +352,7 @@ The above command will take the bundled `.tar.gz` file and do the following:
 `kedro micropkg pull` works with PyPI, local and cloud storage:
 
 * PyPI: `kedro micropkg pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro micropkg pull <path-to-your-project-root>/dist/<my-pipeline>-0.1.tar.gz`
+* Local storage: `kedro micropkg pull dist/<my-pipeline>-0.1.tar.gz`
 * Cloud storage: `kedro micropkg pull s3://<my-bucket>/<my-pipeline>-0.1.tar.gz`
 
 ### Project quality
@@ -400,7 +400,7 @@ The following command packages all the files related to a micro-package, e.g. a 
 kedro micropkg package <package_module_path>
 ```
 
-Further information is available in the [micro-packaging](../nodes_and_pipelines/micro_packaging.md) documentation.
+Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
 
 ##### Pull a micro-package in your project
 The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [Pypi](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
@@ -484,21 +484,17 @@ To start an IPython shell:
 kedro ipython
 ```
 
-Every time you start or restart a notebook kernel, a startup script (`<project-root>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
+The [Kedro IPython extension](../tools_integration/ipython.md) will make the following variables available in your IPython or Jupyter session:
 
-- `context`: An instance of `kedro.framework.context.KedroContext` class or custom context class extending `KedroContext` if one was set to `CONTEXT_CLASS` in `settings.py` file (further details of how to use `context` can be found [in the IPython documentation](../tools_integration/ipython.md))
-- `startup_error` (`Exception`)
-- `catalog`
+* `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
+* `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
+* `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
-To reload these variables at any point in your notebook (e.g. if you updated `catalog.yml`) use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#line-magics) `%reload_kedro`, which can be also used to see the error message if any of the variables above are undefined.
-
-If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``pip install -r requirements.txt`` first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to do the following:
-
-1. Make sure the corresponding dependency is present in `src/requirements.txt`
-2. Run [`pip install -r src/requirements.txt`](#install-all-package-dependencies) command from your terminal
+To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined.
 
 ##### Copy tagged cells
-To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
+To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
 kedro jupyter convert --all

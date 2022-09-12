@@ -15,6 +15,7 @@
 
 ### Other
 * Removed deprecated `kedro.extras.ColorHandler`.
+* The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
@@ -22,16 +23,37 @@
 
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 
+# Upcoming Release 0.18.3
+
 ## Major features and improvements
+* The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
+* The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
+
+## Bug fixes and other changes
+* Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
+* Update documentation for `rich` logging.
+* Implemented autodiscovery of project pipelines.
+
+## Bug fixes and other changes
+* Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
+* Rich traceback handling is disabled on Databricks so that exceptions now halt execution as expected. This is a workaround for a [bug in `rich`](https://github.com/Textualize/rich/issues/2455).
+* When using `kedro run -n [some_node]`, if `some_node` is missing a namespace the resulting error message will suggest the correct node name.
+* Update documentation for `rich` logging.
+* Updated Prefect deployment documentation to allow for reruns with saved versioned datasets.
+* The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
+* Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
+
+## Upcoming deprecations for Kedro 0.19.0
+* The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 
 # Release 0.18.2
-
-# Upcoming Release 0.18.2
 
 ## Major features and improvements
 * Added `abfss` to list of cloud protocols, enabling abfss paths.
 * Kedro now uses the [Rich](https://github.com/Textualize/rich) library to format terminal logs and tracebacks.
 * The file `conf/base/logging.yml` is now optional. See [our documentation](https://kedro.readthedocs.io/en/0.18.2/logging/logging.html) for details.
+* Introduced a `kedro.starters` entry point. This enables plugins to create custom starter aliases used by `kedro starter list` and `kedro new`.
+* Reduced the `kedro new` prompts to just one question asking for the project name.
 
 ## Bug fixes and other changes
 * Bumped `pyyaml` upper bound to make Kedro compatible with the [pyodide](https://pyodide.org/en/stable/usage/loading-packages.html#micropip) stack.
@@ -44,6 +66,11 @@
 * `kedro jupyter notebook/lab` no longer reuses a Jupyter kernel.
 * Required `cookiecutter>=2.1.1` to address a [known command injection vulnerability](https://security.snyk.io/vuln/SNYK-PYTHON-COOKIECUTTER-2414281).
 * The session store no longer fails if a username cannot be found with `getpass.getuser`.
+* Added generic typing for `AbstractDataSet` and `AbstractVersionedDataSet` as well as typing to all datasets.
+* Rendered the deployment guide flowchart as a Mermaid diagram, and added Dask.
+
+## Minor breaking changes to the API
+* The module `kedro.config.default_logger` no longer exists; default logging configuration is now set automatically through `kedro.framework.project.LOGGING`. Unless you explicitly import `kedro.config.default_logger` you do not need to make any changes.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro.extras.ColorHandler` will be removed in 0.19.0.
@@ -123,7 +150,7 @@ main(
 * Added `save_args` to `feather.FeatherDataSet`.
 
 ### Jupyter and IPython integration
-* The [only recommended way to work with Kedro in Jupyter or IPython is now the Kedro IPython extension](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html). Managed Jupyter instances should load this via `%load_ext kedro.extras.extensions.ipython` and use the line magic `%reload_kedro`.
+* The [only recommended way to work with Kedro in Jupyter or IPython is now the Kedro IPython extension](https://kedro.readthedocs.io/en/0.18.0/tools_integration/ipython.html). Managed Jupyter instances should load this via `%load_ext kedro.ipython` and use the line magic `%reload_kedro`.
 * `kedro ipython` launches an IPython session that preloads the Kedro IPython extension.
 * `kedro jupyter notebook/lab` creates a custom Jupyter kernel that preloads the Kedro IPython extension and launches a notebook with that kernel selected. There is no longer a need to specify `--all-kernels` to show all available kernels.
 
@@ -884,7 +911,7 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
 * Added `joblib` backend support to `pickle.PickleDataSet`.
 * Added versioning support to `MatplotlibWriter` dataset.
 * Added the ability to install dependencies for a given dataset with more granularity, e.g. `pip install "kedro[pandas.ParquetDataSet]"`.
-* Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/0.16.0/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
+* Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/0.16.0/04_user_guide/04_data_catalog.html#use-the-data-catalog-with-the-yaml-api).
 
 ### Other
 * Added `namespace` property on ``Node``, related to the modular pipeline where the node belongs.

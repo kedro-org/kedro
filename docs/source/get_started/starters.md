@@ -10,14 +10,14 @@ A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2
 
 ## How to use Kedro starters
 
-To create a Kedro project using a starter, apply the `--starter` flag to `kedro new` as follows:
+To create a Kedro project using a starter, apply the `--starter` flag to `kedro new`:
 
 ```bash
 kedro new --starter=<path-to-starter>
 ```
 
 ```{note}
-`path-to-starter` could be a local directory or a VCS repository, as long as it is supported by [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/usage.html).
+`path-to-starter` could be a local directory or a VCS repository, as long as [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/usage.html) supports it.
 ```
 
 To create a project using the `PySpark` starter:
@@ -30,7 +30,7 @@ If no starter is provided to `kedro new`, the default Kedro template will be use
 
 ### Starter aliases
 
-We provide aliases for common starters maintained by the Kedro team so that users don't have to specify the full path. For example, to create a project using the `PySpark` starter:
+We provide aliases for common starters maintained by the Kedro team so that users don't have to specify the full path. For example, to use the `PySpark` starter to create a project:
 
 ```bash
 kedro new --starter=pyspark
@@ -55,7 +55,7 @@ The Kedro team maintains the following starters to bootstrap new Kedro projects:
 
 ## Starter versioning
 
-By default, Kedro will use the latest version available in the repository, but if you want to use a specific version of a starter, you can pass a `--checkout` argument to the command as follows:
+By default, Kedro will use the latest version available in the repository, but if you want to use a specific version of a starter, you can pass a `--checkout` argument to the command:
 
 ```bash
 kedro new --starter=pyspark --checkout=0.1.0
@@ -67,20 +67,23 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 ## Use a starter in interactive mode
 
-By default, when you create a new project using a starter, `kedro new` launches [by asking a few questions](./new_project.md#create-a-new-project-interactively). You will be prompted to provide the following variables:
+By default, when you create a new project using a starter, `kedro new` launches [by asking you to enter the `project_name`](./new_project.md#create-a-new-project-interactively).
 
 * `project_name` - A human readable name for your new project
+
+Kedro will then automatically generate the following two variables from the entered `project_name`:
+
 * `repo_name` - A name for the directory that holds your project repository
 * `python_package` - A Python package name for your project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
 
-This mode assumes that the starter doesn't require any additional configuration variables.
+This mode assumes that the starter requires no additional configuration variables.
 
 ## Use a starter with a configuration file
 
-Kedro also allows you to [specify a configuration file](./new_project.md#create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
+Kedro also allows you to [specify a configuration file](./new_project.md#create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter:
 
 ```bash
 kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark
 ```
 
-This option is useful when the starter requires more configuration than is required by the interactive mode.
+This option is useful when the starter requires more configuration than the interactive mode requires.

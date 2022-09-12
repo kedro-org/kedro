@@ -107,7 +107,7 @@ PYTHONPATH=/path/to/project/src:$PYTHONPATH
 PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
 ```
 
-[You can find more information about setting up environmental variables in the VSCode documentation](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
+You can find [more information about setting up environmental variables in the VSCode documentation](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
 
 Go to **Debug > Add Configurations**.
 
@@ -199,7 +199,7 @@ ptvsd.wait_for_attach()
 Ensure both computers (the computer you are working on and the remote computer executing your code) have the same source code. For example, you can use `scp` to sync your code:
 
 ```console
-scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/
+scp -r <project_root> <your_username>@<remote_server>:projects/
 ```
 
 ❗The example above assumes there is a directory called `projects` in the home directory of the user account on the remote computer. This is where the project will be copied to. This can be set up as a deploy task as described above:
@@ -209,7 +209,7 @@ scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/
 {
     "label": "Deploy",
     "type": "shell",
-    "command": "scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/",
+    "command": "scp -r <project_root> <your_username>@<remote_server>:projects/",
 }
 ```
 
@@ -242,7 +242,7 @@ Go to the **Debugging** section in VS Code and select the newly created remote d
 
 ![](../meta/images/vscode_remote_debugger.png)
 
-You will need to [set a breakpoint in VS Code as described in the debugging section above](#debugging) and start the debugger by clicking the green play triangle:
+You must [set a breakpoint in VS Code as described in the debugging section above](#debugging) and start the debugger by clicking the green play triangle:
 
 [Find more information on debugging in VS Code](https://code.visualstudio.com/docs/python/debugging).
 

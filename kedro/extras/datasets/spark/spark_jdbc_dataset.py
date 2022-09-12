@@ -10,7 +10,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 __all__ = ["SparkJDBCDataSet"]
 
 
-class SparkJDBCDataSet(AbstractDataSet):
+class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     """``SparkJDBCDataSet`` loads data from a database table accessible
     via JDBC URL url and connection properties and saves the content of
     a PySpark DataFrame to an external database table via JDBC.  It uses
@@ -20,7 +20,7 @@ class SparkJDBCDataSet(AbstractDataSet):
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 

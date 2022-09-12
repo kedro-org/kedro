@@ -157,12 +157,12 @@ class KedroHdfsInsecureClient(InsecureClient):
         return sorted(matched)
 
 
-class SparkDataSet(AbstractVersionedDataSet):
+class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     """``SparkDataSet`` loads and saves Spark dataframes.
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 

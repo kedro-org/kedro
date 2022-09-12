@@ -222,20 +222,25 @@ def add_test_jupyter_nb(context):
         test_nb_fh.write(TEST_JUPYTER_ORG)
 
 
-@given("I have run a non-interactive kedro new with starter")
-@when("I run a non-interactive kedro new with starter")
-def create_project_with_starter(context):
+@given('I have run a non-interactive kedro new with starter "{starter}"')
+@when('I run a non-interactive kedro new with starter "{starter}"')
+def create_project_with_starter(context, starter):
     """Behave step to run kedro new given the config I previously created."""
-    starter_dir = Path(__file__).parent / "test_starter"
+
+    if starter == "default":
+        starter = Path(__file__).parent / "test_starter"
+
+    args = [
+        context.kedro,
+        "new",
+        "-c",
+        str(context.config_file),
+        "--starter",
+        str(starter),
+    ]
+
     res = run(
-        [
-            context.kedro,
-            "new",
-            "-c",
-            str(context.config_file),
-            "--starter",
-            str(starter_dir),
-        ],
+        args,
         env=context.env,
         cwd=context.temp_dir,
     )
@@ -423,34 +428,6 @@ def check_created_project_structure(context):
         assert is_created(path)
 
 
-@then("the pipeline should contain no nodes")
-def check_empty_pipeline_exists(context):
-    """Check if the created pipeline in
-    `pipeline_registry.py` contains no nodes.
-    """
-    pipeline_file = (
-        context.root_project_dir
-        / "src"
-        / context.project_name.replace("-", "_")
-        / "pipeline_registry.py"
-    )
-    assert '"__default__": pipeline([])' in pipeline_file.read_text("utf-8")
-
-
-@then("the pipeline should contain nodes")
-def check_pipeline_not_empty(context):
-    """Check if the created pipeline in
-    `pipeline_registry.py` contains nodes.
-    """
-    pipeline_file = (
-        context.root_project_dir
-        / "src"
-        / context.project_name.replace("-", "_")
-        / "pipeline_registry.py"
-    )
-    assert "pipeline = pipeline([])" not in pipeline_file.read_text("utf-8")
-
-
 @then("the logs should show that {number} nodes were run")
 def check_one_node_run(context, number):
     expected_log_line = f"Completed {number} out of {number} tasks"
@@ -468,7 +445,7 @@ def check_correct_nodes_run(context, node):
         "Expected the following message segment to be printed on stdout: "
         f"{expected_log_line},\nbut got {stdout}"
     )
-    assert expected_log_line in info_log.read_text()
+    assert expected_log_line in info_log.read_text(), info_log.read_text()
 
 
 @then("I should get a successful exit code")

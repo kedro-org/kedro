@@ -150,10 +150,6 @@ To run the pipeline by its name, you need to add your new pipeline to the `regis
 def register_pipelines():
     """Register the project's pipelines.
 
-    Since Kedro 0.18.3, projects can use the ``find_pipelines`` function
-    to autodiscover pipelines. However, projects that require more fine-
-    grained control can still construct the pipeline mapping without it.
-
     Returns:
         A mapping from pipeline names to ``Pipeline`` objects.
     """

@@ -33,10 +33,6 @@ In the above example, you need to update the `register_pipelines()` function whe
 def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipelines.
 
-    Since Kedro 0.18.3, projects can use the ``find_pipelines`` function
-    to autodiscover pipelines. However, projects that require more fine-
-    grained control can still construct the pipeline mapping without it.
-
     Returns:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
@@ -59,10 +55,6 @@ The mapping returned by `find_pipelines()` can be modified, meaning you are not 
 def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipelines.
 
-    Since Kedro 0.18.3, projects can use the ``find_pipelines`` function
-    to autodiscover pipelines. However, projects that require more fine-
-    grained control can still construct the pipeline mapping without it.
-
     Returns:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
@@ -79,10 +71,6 @@ On the other hand, adding the same pipeline *before* assigning `pipelines["__def
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipelines.
-
-    Since Kedro 0.18.3, projects can use the ``find_pipelines`` function
-    to autodiscover pipelines. However, projects that require more fine-
-    grained control can still construct the pipeline mapping without it.
 
     Returns:
         A mapping from pipeline names to ``Pipeline`` objects.

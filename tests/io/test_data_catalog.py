@@ -124,7 +124,7 @@ class BadDataSet(AbstractDataSet):  # pragma: no cover
 
 
 class DummyVersionedDataSet(AbstractVersionedDataSet):
-    def __init__(self, filepath, version):
+    def __init__(self, filepath, version=None):
         super().__init__(filepath, version)
 
     def _load(self):
@@ -576,7 +576,7 @@ class TestDataCatalogVersioned:
 
     def test_load_incorrect_permissions(self, filepath, mocker):
         """Test load of versioned data sets with incorrect permission"""
-        data_set = DummyVersionedDataSet(filepath, "version")
+        data_set = DummyVersionedDataSet(filepath)
 
         pattern = f"Cannot load versioned dataset '{filepath}' due to insufficient permission."
         with pytest.raises(DataSetError, match=pattern):
@@ -588,14 +588,10 @@ class TestDataCatalogVersioned:
 
     def test_save_incorrect_permissions(self, filepath, mocker):
         """Test save of versioned data sets with incorrect permission"""
-        data_set = DummyVersionedDataSet(filepath, "version")
+        data_set = DummyVersionedDataSet(filepath)
 
         pattern = f"Cannot save versioned dataset '{filepath}' due to insufficient permission."
         with pytest.raises(DataSetError, match=pattern):
-            mocker.patch(
-                "kedro.io.core.AbstractVersionedDataSet.resolve_save_version",
-                return_value=None,
-            )
             mocker.patch(
                 "kedro.io.core.AbstractDataSet.save", side_effect=PermissionError
             )

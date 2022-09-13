@@ -28,7 +28,6 @@
 
 * The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
 * The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
-* Implemented autodiscovery of project pipelines.
 
 ## Bug fixes and other changes
 

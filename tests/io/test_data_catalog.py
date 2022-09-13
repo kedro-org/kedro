@@ -12,6 +12,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import (
     AbstractDataSet,
+    AbstractVersionedDataSet,
     DataCatalog,
     DataSetAlreadyExistsError,
     DataSetError,
@@ -117,6 +118,20 @@ class BadDataSet(AbstractDataSet):  # pragma: no cover
 
     def _save(self, data: Any):
         pass
+
+    def _describe(self):
+        return {}
+
+
+class DummyVersionedDataSet(AbstractVersionedDataSet):
+    def __init__(self, filepath, version):
+        super().__init__(filepath, version)
+
+    def _load(self):
+        super().load()
+
+    def _save(self, data: Any):
+        super().save(data)
 
     def _describe(self):
         return {}
@@ -558,6 +573,33 @@ class TestDataCatalogVersioned:
             microsecond=current_ts.microsecond // 1000 * 1000, tzinfo=None
         )
         assert actual_timestamp == expected_timestamp
+
+    def test_load_incorrect_permissions(self, filepath, mocker):
+        """Test load of versioned data sets with incorrect permission"""
+        data_set = DummyVersionedDataSet(filepath, "version")
+
+        pattern = f"Cannot load versioned dataset '{filepath}' due to insufficient permission."
+        with pytest.raises(DataSetError, match=pattern):
+            mocker.patch(
+                "kedro.io.core.AbstractVersionedDataSet._filesystem_exists",
+                side_effect=PermissionError,
+            )
+            data_set.load()
+
+    def test_save_incorrect_permissions(self, filepath, mocker):
+        """Test save of versioned data sets with incorrect permission"""
+        data_set = DummyVersionedDataSet(filepath, "version")
+
+        pattern = f"Cannot save versioned dataset '{filepath}' due to insufficient permission."
+        with pytest.raises(DataSetError, match=pattern):
+            mocker.patch(
+                "kedro.io.core.AbstractVersionedDataSet.resolve_save_version",
+                return_value=None,
+            )
+            mocker.patch(
+                "kedro.io.core.AbstractDataSet.save", side_effect=PermissionError
+            )
+            data_set.save("dummy_data")
 
     @pytest.mark.parametrize("versioned", [True, False])
     def test_from_sane_config_versioned_warn(self, caplog, sane_config, versioned):

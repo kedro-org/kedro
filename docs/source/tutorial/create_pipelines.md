@@ -150,37 +150,6 @@ from kedro.pipeline import Pipeline, node, pipeline
 from .nodes import preprocess_companies, preprocess_shuttles
 ```
 
-### Update the project pipeline
-
-Now update the project's pipeline in `src/kedro_tutorial/pipeline_registry.py` to add the [pipeline](../resources/glossary.md#modular-pipeline) for data processing:
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-```python
-from typing import Dict
-
-from kedro.pipeline import Pipeline
-
-from kedro_tutorial.pipelines import data_processing as dp
-
-
-def register_pipelines() -> Dict[str, Pipeline]:
-    """Register the project's pipeline.
-
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
-    """
-    data_processing_pipeline = dp.create_pipeline()
-
-    return {
-        "__default__": data_processing_pipeline,
-        "dp": data_processing_pipeline,
-    }
-```
-
-</details>
-
 ### Test the example
 
 Run the following command in your terminal window to test the node named `preprocess_companies_node`:
@@ -520,41 +489,6 @@ regressor:
 
 Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning section](../data/kedro_io.md#versioning).
 
-### Update the project pipeline
-
-Add the data science pipeline to the project by replacing the code in `register_pipelines` in `src/kedro_tutorial/pipeline_registry.py` with the following:
-
-```python
-def register_pipelines() -> Dict[str, Pipeline]:
-    """Register the project's pipeline.
-
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
-
-    """
-    data_processing_pipeline = dp.create_pipeline()
-    data_science_pipeline = ds.create_pipeline()
-
-    return {
-        "__default__": data_processing_pipeline + data_science_pipeline,
-        "dp": data_processing_pipeline,
-        "ds": data_science_pipeline,
-    }
-```
-
-Include the import at the top of the file:
-
-```python
-from kedro_tutorial.pipelines import data_science as ds
-```
-
-* The two modular pipelines are merged together into a project `__default__` pipeline using the `+` operator.
-* The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
-
-```{note}
-The order in which you add the pipelines together is not significant (`data_science_pipeline + data_processing_pipeline` would produce the same result), since Kedro automatically detects the data-centric execution order for all the nodes in the resulting pipeline.
-```
-
 ### Test the pipelines
 
 Execute the default pipeline:
@@ -640,10 +574,10 @@ You can find out more about the runners Kedro provides, and how to create your o
 
 ## Slice a pipeline
 
-In some cases you may want to run just part of a pipeline. For example, you may need to only run the data science pipeline to tune the hyperparameters of the price prediction model and skip data processing execution. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `ds` (as labelled in `register_pipelines`), execute the following command:
+In some cases you may want to run just part of a pipeline. For example, you may need to only run the data science pipeline to tune the hyperparameters of the price prediction model and skip data processing execution. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
 ```bash
-kedro run --pipeline=ds
+kedro run --pipeline=data_science
 ```
 
 See the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
@@ -653,7 +587,7 @@ To successfully run the pipeline, you need to make sure that all required input 
 ```
 
 ```bash
-kedro run --pipeline=ds
+kedro run --pipeline=data_science
 
 2019-10-04 12:36:12,135 - root - INFO - ** Kedro project kedro-tutorial
 2019-10-04 12:36:12,158 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataSet)...

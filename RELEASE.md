@@ -12,9 +12,22 @@
 # Upcoming Release 0.18.3
 
 ## Major features and improvements
+* Implemented autodiscovery of project pipelines. A pipeline created with `kedro pipeline create <pipeline_name>` can now be accessed immediately without needing to explicitly register it in `src/<package_name>/pipeline_registry.py`, either individually by name (e.g. `kedro run --pipeline=<pipeline_name>`) or as part of the combined default pipeline (e.g. `kedro run`). By default, the simplified `register_pipelines()` function in `pipeline_registry.py` looks like:
+
+    ```python
+    def register_pipelines() -> Dict[str, Pipeline]:
+        """Register the project's pipelines.
+
+        Returns:
+            A mapping from pipeline names to ``Pipeline`` objects.
+        """
+        pipelines = find_pipelines()
+        pipelines["__default__"] = sum(pipelines.values())
+        return pipelines
+    ```
+
 * The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
 * The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
-* Implemented autodiscovery of project pipelines.
 
 ## Bug fixes and other changes
 

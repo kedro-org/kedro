@@ -141,7 +141,7 @@ All the datasets used in the run have to be [thread-safe](https://www.quora.com/
 
 ## Run a pipeline by name
 
-To run the pipeline by its name, you need to add your new pipeline to `register_pipelines()` function `src/<package_name>/pipeline_registry.py` as below:
+To run the pipeline by its name, you need to add your new pipeline to the `register_pipelines()` function in `src/<package_name>/pipeline_registry.py`:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -151,27 +151,21 @@ def register_pipelines():
     """Register the project's pipelines.
 
     Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
-
+        A mapping from pipeline names to ``Pipeline`` objects.
     """
-
-    data_engineering_pipeline = de.create_pipeline()
-    data_science_pipeline = ds.create_pipeline()
+    pipelines = find_pipelines()
+    pipelines["__default__"] = sum(pipelines.values())
     my_pipeline = pipeline(
         [
             # your definition goes here
         ]
     )
-
-    return {
-        "de": data_engineering_pipeline,
-        "my_pipeline": my_pipeline,
-        "__default__": data_engineering_pipeline + data_science_pipeline,
-    }
+    pipelines["my_pipeline"] = my_pipeline
+    return pipelines
 ```
 </details>
 
-Then from the command line, execute the following:
+Then, from the command line, execute the following:
 
 ```bash
 kedro run --pipeline my_pipeline

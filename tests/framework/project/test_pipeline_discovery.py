@@ -1,3 +1,4 @@
+import shutil
 import sys
 import textwrap
 import warnings
@@ -38,7 +39,8 @@ def mock_package_name_with_pipelines(tmp_path, request):
 
     # Make sure that the `importlib_resources.files` in `find_pipelines`
     # will point to the correct `test_package.pipelines` not from cache.
-    del sys.modules[f"{package_name}.pipelines"]
+    if f"{package_name}.pipelines" in sys.modules:
+        del sys.modules[f"{package_name}.pipelines"]
 
 
 @pytest.fixture
@@ -232,3 +234,39 @@ def test_find_pipelines_skips_unimportable_pipeline_module(
         pipelines = find_pipelines()
     assert set(pipelines) == pipeline_names | {"__default__"}
     assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines",
+    [(set(), False), (set(), True)],
+    indirect=["mock_package_name_with_pipelines"],
+)
+def test_find_pipelines_handles_project_structure_without_pipelines_dir(
+    mock_package_name_with_pipelines,
+    simplified,
+):
+    # Delete the `pipelines` directory to simulate a project without it.
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    shutil.rmtree(pipelines_dir)
+
+    if simplified:
+        (
+            Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py"
+        ).write_text(
+            textwrap.dedent(
+                """
+                from kedro.pipeline import Pipeline, node, pipeline
+
+
+                def create_pipeline(**kwargs) -> Pipeline:
+                    return pipeline([node(lambda: 1, None, "simple_pipeline")])
+                """
+            )
+        )
+
+    configure_project(mock_package_name_with_pipelines)
+    pipelines = find_pipelines()
+    assert set(pipelines) == {"__default__"}
+    assert (
+        sum(pipelines.values()).outputs() == {"simple_pipeline"} if simplified else {}
+    )

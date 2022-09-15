@@ -344,9 +344,14 @@ def find_pipelines() -> Dict[str, Pipeline]:
 
     pipelines_dict = {"__default__": _create_pipeline(pipeline_module) or pipeline([])}
 
-    for pipeline_dir in importlib_resources.files(
-        f"{PACKAGE_NAME}.pipelines"
-    ).iterdir():
+    # Handle the case that a project doesn't have a pipelines directory.
+    try:
+        pipelines_package = importlib_resources.files(f"{PACKAGE_NAME}.pipelines")
+    except ModuleNotFoundError as exc:
+        if str(exc) == f"No module named '{PACKAGE_NAME}.pipelines'":
+            return pipelines_dict
+
+    for pipeline_dir in pipelines_package.iterdir():
         if not pipeline_dir.is_dir():
             continue
 

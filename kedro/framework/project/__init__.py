@@ -322,7 +322,7 @@ def find_pipelines() -> Dict[str, Pipeline]:
             function, the ``create_pipeline`` function does not return a
             ``Pipeline`` object, or if the module import fails up front.
     """
-    pipeline_module = None
+    pipeline_obj = None
 
     # Handle the simplified project structure found in several starters.
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
@@ -335,8 +335,10 @@ def find_pipelines() -> Dict[str, Pipeline]:
                     module=pipeline_module_name, tb_exc=traceback.format_exc()
                 )
             )
+    else:
+        pipeline_obj = _create_pipeline(pipeline_module)
 
-    pipelines_dict = {"__default__": _create_pipeline(pipeline_module) or pipeline([])}
+    pipelines_dict = {"__default__": pipeline_obj or pipeline([])}
 
     # Handle the case that a project doesn't have a pipelines directory.
     try:

@@ -328,19 +328,13 @@ def find_pipelines() -> Dict[str, Pipeline]:
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
     try:
         pipeline_module = importlib.import_module(pipeline_module_name)
-    except ModuleNotFoundError as exc:
+    except Exception as exc:  # pylint: disable=broad-except
         if str(exc) != f"No module named '{pipeline_module_name}'":
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()
                 )
             )
-    except:  # pylint: disable=bare-except  # noqa: E722
-        warnings.warn(
-            IMPORT_ERROR_MESSAGE.format(
-                module=pipeline_module_name, tb_exc=traceback.format_exc()
-            )
-        )
 
     pipelines_dict = {"__default__": _create_pipeline(pipeline_module) or pipeline([])}
 

@@ -27,7 +27,7 @@ The order in which you add the pipelines together is not significant (`data_scie
 
 ## Pipeline autodiscovery
 
-In the above example, you need to update the `register_pipelines()` function whenever you create a pipeline that should be returned as part of the project's pipelines. Since Kedro 0.18.3, you can achieve the same result with less code using `find_pipelines()`[/kedro.framework.project.find_pipelines]. The [updated pipeline registry](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) contains no project-specific code:
+In the above example, you need to update the `register_pipelines()` function whenever you create a pipeline that should be returned as part of the project's pipelines. Since Kedro 0.18.3, you can achieve the same result with less code using [`find_pipelines()`](/kedro.framework.project.find_pipelines). The [updated pipeline registry](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/pipeline_registry.py) contains no project-specific code:
 
 ```python
 def register_pipelines() -> Dict[str, Pipeline]:

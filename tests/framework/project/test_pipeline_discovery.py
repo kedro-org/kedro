@@ -1,3 +1,4 @@
+import shutil
 import sys
 import textwrap
 import warnings
@@ -32,9 +33,14 @@ def mock_package_name_with_pipelines(tmp_path, request):
     yield package_name
     sys.path.pop(0)
 
+    # Make sure that any new `test_package.pipeline` module gets loaded.
+    if f"{package_name}.pipeline" in sys.modules:
+        del sys.modules[f"{package_name}.pipeline"]
+
     # Make sure that the `importlib_resources.files` in `find_pipelines`
     # will point to the correct `test_package.pipelines` not from cache.
-    del sys.modules[f"{package_name}.pipelines"]
+    if f"{package_name}.pipelines" in sys.modules:
+        del sys.modules[f"{package_name}.pipelines"]
 
 
 @pytest.fixture
@@ -47,10 +53,7 @@ def pipeline_names(request):
     [(x, x) for x in [set(), {"my_pipeline"}]],
     indirect=True,
 )
-def test_find_pipelines(
-    mock_package_name_with_pipelines,
-    pipeline_names,
-):
+def test_find_pipelines(mock_package_name_with_pipelines, pipeline_names):
     configure_project(mock_package_name_with_pipelines)
     pipelines = find_pipelines()
     assert set(pipelines) == pipeline_names | {"__default__"}
@@ -63,8 +66,7 @@ def test_find_pipelines(
     indirect=True,
 )
 def test_find_pipelines_skips_modules_without_create_pipelines_function(
-    mock_package_name_with_pipelines,
-    pipeline_names,
+    mock_package_name_with_pipelines, pipeline_names
 ):
     # Create a module without `create_pipelines` in the `pipelines` dir.
     pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
@@ -87,8 +89,7 @@ def test_find_pipelines_skips_modules_without_create_pipelines_function(
     indirect=True,
 )
 def test_find_pipelines_skips_modules_with_unexpected_return_value_type(
-    mock_package_name_with_pipelines,
-    pipeline_names,
+    mock_package_name_with_pipelines, pipeline_names
 ):
     # Define `create_pipelines` so that it does not return a `Pipeline`.
     pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
@@ -130,8 +131,7 @@ def test_find_pipelines_skips_modules_with_unexpected_return_value_type(
     indirect=True,
 )
 def test_find_pipelines_skips_regular_files_within_the_pipelines_folder(
-    mock_package_name_with_pipelines,
-    pipeline_names,
+    mock_package_name_with_pipelines, pipeline_names
 ):
     # Create a regular file (not a subdirectory) in the `pipelines` dir.
     pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
@@ -151,8 +151,7 @@ def test_find_pipelines_skips_regular_files_within_the_pipelines_folder(
     indirect=True,
 )
 def test_find_pipelines_skips_modules_that_cause_exceptions_upon_import(
-    mock_package_name_with_pipelines,
-    pipeline_names,
+    mock_package_name_with_pipelines, pipeline_names
 ):
     # Create a module that will result in errors when we try to load it.
     pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
@@ -162,9 +161,100 @@ def test_find_pipelines_skips_modules_that_cause_exceptions_upon_import(
 
     configure_project(mock_package_name_with_pipelines)
     with pytest.warns(
-        UserWarning,
-        match=r"An error occurred while importing the '\S+' module.",
+        UserWarning, match=r"An error occurred while importing the '\S+' module."
     ):
         pipelines = find_pipelines()
     assert set(pipelines) == pipeline_names | {"__default__"}
     assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
+    indirect=True,
+)
+def test_find_pipelines_handles_simplified_project_structure(
+    mock_package_name_with_pipelines, pipeline_names
+):
+    (Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py").write_text(
+        textwrap.dedent(
+            """
+            from kedro.pipeline import Pipeline, node, pipeline
+
+
+            def create_pipeline(**kwargs) -> Pipeline:
+                return pipeline([node(lambda: 1, None, "simple_pipeline")])
+            """
+        )
+    )
+
+    configure_project(mock_package_name_with_pipelines)
+    pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names | {"simple_pipeline"}
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,pipeline_names",
+    [(x, x) for x in [set(), {"my_pipeline"}]],
+    indirect=True,
+)
+def test_find_pipelines_skips_unimportable_pipeline_module(
+    mock_package_name_with_pipelines, pipeline_names
+):
+    (Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py").write_text(
+        textwrap.dedent(
+            f"""
+            import {"".join(pipeline_names)}
+
+            from kedro.pipeline import Pipeline, node, pipeline
+
+
+            def create_pipeline(**kwargs) -> Pipeline:
+                return pipeline([node(lambda: 1, None, "simple_pipeline")])
+            """
+        )
+    )
+
+    configure_project(mock_package_name_with_pipelines)
+    with pytest.warns(
+        UserWarning, match=r"An error occurred while importing the '\S+' module."
+    ):
+        pipelines = find_pipelines()
+    assert set(pipelines) == pipeline_names | {"__default__"}
+    assert sum(pipelines.values()).outputs() == pipeline_names
+
+
+@pytest.mark.parametrize(
+    "mock_package_name_with_pipelines,simplified",
+    [(set(), False), (set(), True)],
+    indirect=["mock_package_name_with_pipelines"],
+)
+def test_find_pipelines_handles_project_structure_without_pipelines_dir(
+    mock_package_name_with_pipelines, simplified
+):
+    # Delete the `pipelines` directory to simulate a project without it.
+    pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
+    shutil.rmtree(pipelines_dir)
+
+    if simplified:
+        (
+            Path(sys.path[0]) / mock_package_name_with_pipelines / "pipeline.py"
+        ).write_text(
+            textwrap.dedent(
+                """
+                from kedro.pipeline import Pipeline, node, pipeline
+
+
+                def create_pipeline(**kwargs) -> Pipeline:
+                    return pipeline([node(lambda: 1, None, "simple_pipeline")])
+                """
+            )
+        )
+
+    configure_project(mock_package_name_with_pipelines)
+    pipelines = find_pipelines()
+    assert set(pipelines) == {"__default__"}
+    assert sum(pipelines.values()).outputs() == (
+        {"simple_pipeline"} if simplified else set()
+    )

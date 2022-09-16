@@ -226,7 +226,7 @@ def test_find_pipelines_skips_unimportable_pipeline_module(
 
 
 @pytest.mark.parametrize(
-    "mock_package_name_with_pipelines",
+    "mock_package_name_with_pipelines,simplified",
     [(set(), False), (set(), True)],
     indirect=["mock_package_name_with_pipelines"],
 )

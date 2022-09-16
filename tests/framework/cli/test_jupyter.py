@@ -141,10 +141,11 @@ class TestCreateKernel:
         assert kernel_spec.language == "python"
         assert kernel_spec.argv[-2:] == ["--ext", "kedro.ipython"]
         kernel_files = {file.name for file in Path(kernel_spec.resource_dir).iterdir()}
-        assert kernel_files >= {
+        assert kernel_files == {
+            "kernel.json",
             "logo-32x32.png",
             "logo-64x64.png",
-            "kernel.json",
+            "logo-svg.svg",
         }
 
     def test_kernel_install_replaces(self):

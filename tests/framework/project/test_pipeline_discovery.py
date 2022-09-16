@@ -255,6 +255,6 @@ def test_find_pipelines_handles_project_structure_without_pipelines_dir(
     configure_project(mock_package_name_with_pipelines)
     pipelines = find_pipelines()
     assert set(pipelines) == {"__default__"}
-    assert (
-        sum(pipelines.values()).outputs() == {"simple_pipeline"} if simplified else {}
+    assert sum(pipelines.values()).outputs() == (
+        {"simple_pipeline"} if simplified else {}
     )

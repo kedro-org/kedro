@@ -332,11 +332,7 @@ class ParallelRunner(AbstractRunner):
                     break  # pragma: no cover
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:
-                    try:
-                        node = future.result()
-                    except Exception:
-                        self._suggest_resume_scenario(pipeline, done_nodes)
-                        raise
+                    node = future.result()
                     done_nodes.add(node)
 
                     # Decrement load counts, and release any datasets we

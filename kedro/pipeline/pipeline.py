@@ -380,6 +380,21 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         """
         unregistered_nodes = set(node_names) - set(self._nodes_by_name.keys())
         if unregistered_nodes:
+            # check if unregistered nodes are available under namespace
+            namespaces = []
+            for unregistered_node in unregistered_nodes:
+                namespaces.extend(
+                    [
+                        node_name
+                        for node_name in self._nodes_by_name.keys()
+                        if node_name.endswith(f".{unregistered_node}")
+                    ]
+                )
+            if namespaces:
+                raise ValueError(
+                    f"Pipeline does not contain nodes named {list(unregistered_nodes)}. "
+                    f"Did you mean: {namespaces}?"
+                )
             raise ValueError(
                 f"Pipeline does not contain nodes named {list(unregistered_nodes)}."
             )

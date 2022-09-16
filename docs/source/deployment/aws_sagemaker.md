@@ -109,7 +109,7 @@ s3:
   output_path: s3://<your_s3_bucket_name>/output
 ```
 
-### Update the project hooks
+### Update the project settings
 
 Now you need to tell Kedro to use the [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via `settings.py` file - open `src/kedro_tutorial/settings.py` file and set the `CONFIG_LOADER_CLASS` constant:
 
@@ -118,6 +118,9 @@ from kedro.config import TemplatedConfigLoader
 
 
 CONFIG_LOADER_CLASS = TemplatedConfigLoader
+CONFIG_LOADER_ARGS = {
+    "globals_pattern": "*globals.yml",
+}
 ```
 
 ### Update the data science pipeline
@@ -204,7 +207,7 @@ Open `src/kedro_tutorial/pipelines/data_science/pipeline.py` and replace its con
 <summary><b>Click to expand</b></summary>
 
 ```python
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import (
     evaluate_model,

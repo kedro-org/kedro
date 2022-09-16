@@ -71,12 +71,9 @@ class KedroSessionError(Exception):
 
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
-    of a Kedro run.
-    - Use `KedroSession.create("<your-kedro-project-package-name>")` as
+    of a Kedro run. Use `KedroSession.create("<package_name>")` as
     a context manager to construct a new KedroSession with session data
     provided (see the example below).
-    - Use `KedroSession(session_id=<id>)` to instantiate an existing session with a given
-    ID.
 
 
 
@@ -87,8 +84,8 @@ class KedroSession:
         >>> from kedro.framework.startup import bootstrap_project
         >>> from pathlib import Path
 
-        >>> # If you are creating session outside of a kedro project, i.e. not using
-        >>> # `kedro run` or `kedro jupyter`. You need to run `bootstrap_project` to
+        >>> # If you are creating a session outside of a Kedro project (i.e. not using
+        >>> # `kedro run` or `kedro jupyter`), you need to run `bootstrap_project` to
         >>> # let Kedro find your configuration.
         >>> metadata = bootstrap_project(Path("<project_root>"))
         >>> with KedroSession.create(metadata.package_name) as session:

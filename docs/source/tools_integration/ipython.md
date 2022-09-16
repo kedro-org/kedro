@@ -13,38 +13,42 @@ There are reasons why you may want to use a Notebook, although in general, the p
 
 ## Kedro IPython extension
 
-The recommended way to interact with Kedro in IPython and Jupyter is through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`. An [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/) is an importable Python module that has a couple of special functions to load and unload it.
+The recommended way to interact with Kedro in IPython and Jupyter is through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.ipython`. An [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/) is an importable Python module that has a couple of special functions to load and unload it.
 
-The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro`  [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
 The simplest way to make use of the Kedro IPython extension is through the following commands:
-* `kedro ipython`. This launches an IPython shell with the extension already loaded and is equivalent to the command `ipython --ext kedro.extras.extensions.ipython`.
+* `kedro ipython`. This launches an IPython shell with the extension already loaded and is equivalent to the command `ipython --ext kedro.ipython`.
 * `kedro jupyter notebook`. This creates a custom Jupyter kernel that automatically loads the extension and launches Jupyter Notebook with this kernel selected.
 * `kedro jupyter lab`. This creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected.
 
 Running any of the above from within your Kedro project will make the `catalog`, `context`, `pipelines` and `session` variables immediately accessible to you.
 
+```{note}
+If these variables are not available then Kedro has not been able to load your project. This could be, for example, due to a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro ipython`, `kedro jupyter notebook` or `kedro jupyter lab`. Alternatively, it can be accessed inside the IPython or Jupyter session directly with `%reload_kedro`.
+```
+
 ### Managed Jupyter instances
 
 If the above commands are not available to you (e.g. you work in a managed Jupyter service such as a Databricks Notebook) then equivalent behaviour can be achieved by explicitly loading the Kedro IPython extension with the `%load_ext` line magic:
 ```ipython
-In [1]: %load_ext kedro.extras.extensions.ipython
+In [1]: %load_ext kedro.ipython
 ```
 
 If your IPython or Jupyter instance was launched from outside your Kedro project then you will need to run a second line magic to set the project path so that Kedro can load the `catalog`, `context`, `pipelines` and `session` variables:
 ```ipython
-In [2]: %reload_kedro <path_to_project_root>
+In [2]: %reload_kedro <project_root>
 ```
 The Kedro IPython extension remembers the project path so that subsequent calls to `%reload_kedro` do not need to specify it:
 
 ```ipython
-In [1]: %load_ext kedro.extras.extensions.ipython
-In [2]: %reload_kedro <path_to_project_root>
+In [1]: %load_ext kedro.ipython
+In [2]: %reload_kedro <project_root>
 In [3]: %reload_kedro
 ```
 
 ```{note}
-If you want to pass arguments to the `reload_kedro` line magic, e.g. to specify a configuration environment, you should call it as a normal Python function (`reload_kedro(env=env, extra_params=extra_params)`) rather than using `%reload_kedro` in a Notebook cell (`%reload_kedro(extra_params=extra_params)` wouldn't work). You might have to call `%automagic False` beforehand to make this work.
+`%reload_kedro` accepts optional keyword arguments `env` and `params`. For example, to use configuration environment `prod` you should run `%reload_kedro --env=prod`. For more details, run `%reload_kedro?`.
 ```
 
 ## Kedro variables: `catalog`, `context`, `pipelines` and `session`
@@ -169,21 +173,21 @@ You can only execute one *successful* run per session, as there's a one-to-one m
 
 You can also specify the following optional arguments for `session.run`:
 
-| Argument name   | Accepted types   | Description                                                                                                                                         |
-| --------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tags`          | `Iterable[str]`  | Construct the pipeline using only nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags |
-| `runner`        | `AbstractRunner` | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner); can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)         |
-| `node_names`    | `Iterable[str]`  | Run only nodes with specified names                                                                                                                 |
-| `from_nodes`    | `Iterable[str]`  | A list of node names which should be used as a starting point                                                                                       |
-| `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                           |
-| `from_inputs`   | `Iterable[str]`  | A list of dataset names which should be used as a starting point                                                                                    |
-| `to_outputs`    | `Iterable[str]`  | A list of dataset names which should be used as an end point                                                                                        |
-| `load_versions` | `Dict[str, str]` | A mapping of a dataset name to a specific dataset version (timestamp) for loading - this applies to the versioned datasets only                     |
-| `pipeline_name` | `str`            | Name of the modular pipeline to run - must be one of those returned by register_pipelines function from src/<package_name>/pipeline_registry.py     |
+| Argument name   | Accepted types   | Description                                                                                                                                          |
+| --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tags`          | `Iterable[str]`  | Construct the pipeline using only nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags  |
+| `runner`        | `AbstractRunner` | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner). Can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)          |
+| `node_names`    | `Iterable[str]`  | Run only nodes with specified names                                                                                                                  |
+| `from_nodes`    | `Iterable[str]`  | A list of node names which should be used as a starting point                                                                                        |
+| `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                            |
+| `from_inputs`   | `Iterable[str]`  | A list of dataset names which should be used as a starting point                                                                                     |
+| `to_outputs`    | `Iterable[str]`  | A list of dataset names which should be used as an end point                                                                                         |
+| `load_versions` | `Dict[str, str]` | A mapping of a dataset name to a specific dataset version (timestamp) for loading. Applies to versioned datasets only                                |
+| `pipeline_name` | `str`            | Name of the modular pipeline to run. Must be one of those returned by the `register_pipelines` function in `src/<package_name>/pipeline_registry.py` |
 
 ## Kedro and Jupyter
 
-We recommend that you store your Jupyter Notebooks in the `notebooks` folder of your Kedro project. If you are using `kedro jupyter notebook` or `kedro jupyter lab` then you should use the default kernel selected for you, which is listed as `Kedro (<project_package_name>)`. This will run the Kedro IPython extension automatically when the kernel is started, so that the `catalog`, `context`, `pipelines` and `session` variables are available immediately to you.
+We recommend that you store your Jupyter Notebooks in the `notebooks` folder of your Kedro project. If you are using `kedro jupyter notebook` or `kedro jupyter lab` then you should use the default kernel selected for you, which is listed as `Kedro (<package_name>)`. This will run the Kedro IPython extension automatically when the kernel is started, so that the `catalog`, `context`, `pipelines` and `session` variables are available immediately to you.
 
 ```{note}
 Restarting the kernel will reload the Kedro IPython extension and hence refresh the `catalog`, `context`, `pipelines` and `session` variables.
@@ -200,10 +204,10 @@ If you are not able to execute `kedro jupyter notebook` or `kedro jupyter lab` t
 
 ### Manage Jupyter kernels
 
-Behind the scenes, the `kedro jupyter notebook` and `kedro jupyter lab` commands create a Jupyter kernel named `kedro_<project_package_name>`. This kernel is identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs) that automatically loads `kedro.extras.extensions.ipython` when the kernel is started. The kernel specification is installed at a user level rather than system-wide.
+Behind the scenes, the `kedro jupyter notebook` and `kedro jupyter lab` commands create a Jupyter kernel named `kedro_<package_name>`. This kernel is identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs) that automatically loads `kedro.ipython` when the kernel is started. The kernel specification is installed at a user level rather than system-wide.
 
 ```{note}
-If a Jupyter kernel with the name `kedro_<project_package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook/lab` to replace the kernel specification with one that points to the new environment.
+If a Jupyter kernel with the name `kedro_<package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook/lab` to replace the kernel specification with one that points to the new environment.
 ```
 
 As each Kedro project has its own Jupyter kernel, you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel.

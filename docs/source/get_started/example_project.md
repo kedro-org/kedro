@@ -10,7 +10,7 @@ A machine learning model can use the Iris dataset to illustrate classification (
 
 ## Create the example project
 
-You must first [create a project](./new_project.md). Feel free to name your project as you like, but here we will assume the project's repository name is `get-started`.
+You must first [create a project](./new_project.md). Feel free to name your project as you like, but here we will assume the project's name is `Get started`.
 
 ```bash
 kedro new --starter=pandas-iris
@@ -99,10 +99,11 @@ kedro run
 
 When the command completes, you should see a log message similar to the following in your console:
 
-```bash
-2022-04-08 11:55:03,043 - get_started.nodes - INFO - Model has a accuracy of 0.933 on test data.
-2022-04-08 11:55:03,044 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
-2022-04-08 11:55:03,044 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+```
+[08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
+                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
+                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 
 ## Under the hood: Pipelines and nodes
@@ -123,4 +124,4 @@ These are the node function within `src/get_started/nodes.py`:
 | Report accuracy | Reports the accuracy of the predictions performed by the previous node                           | `report_accuracy`  |
 
 
-The file `src/pipeline_registry.py` creates and collates into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.
+The file `src/get_started/pipeline_registry.py` creates and collates into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.

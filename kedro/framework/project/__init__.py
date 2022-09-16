@@ -276,10 +276,7 @@ def validate_settings():
     importlib.import_module(f"{PACKAGE_NAME}.settings")
 
 
-def _create_pipeline(pipeline_module: Optional[types.ModuleType]) -> Optional[Pipeline]:
-    if pipeline_module is None:
-        return None
-
+def _create_pipeline(pipeline_module: types.ModuleType) -> Optional[Pipeline]:
     if not hasattr(pipeline_module, "create_pipeline"):
         warnings.warn(
             f"The '{pipeline_module.__name__}' module does not "

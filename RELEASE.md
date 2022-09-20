@@ -39,6 +39,7 @@
 * The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 * Added `gdrive` to list of cloud protocols, enabling Google Drive paths for datasets.
+* Fix save format argument for `SparkHiveDataSet`.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.

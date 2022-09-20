@@ -1,9 +1,10 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
-from typing import Any, Dict, Iterable, List, NoReturn, Union
+from typing import Any, Dict, List, NoReturn, Tuple, Union
 
 import requests
+from requests import Session, sessions
 from requests.auth import AuthBase
 
 from kedro.io.core import AbstractDataSet, DataSetError
@@ -21,83 +22,84 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>>
         >>> data_set = APIDataSet(
         >>>     url="https://quickstats.nass.usda.gov",
-        >>>     params={
-        >>>         "key": "SOME_TOKEN",
-        >>>         "format": "JSON",
-        >>>         "commodity_desc": "CORN",
-        >>>         "statisticcat_des": "YIELD",
-        >>>         "agg_level_desc": "STATE",
-        >>>         "year": 2000
-        >>>     }
+        >>>     load_args={
+        >>>         "params": {
+        >>>             "key": "SOME_TOKEN",
+        >>>             "format": "JSON",
+        >>>             "commodity_desc": "CORN",
+        >>>             "statisticcat_des": "YIELD",
+        >>>             "agg_level_desc": "STATE",
+        >>>             "year": 2000
+        >>>         }
+        >>>     },
+        >>>     credentials=("username", "password")
         >>> )
         >>> data = data_set.load()
     """
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         url: str,
         method: str = "GET",
-        data: Any = None,
-        params: Dict[str, Any] = None,
-        headers: Dict[str, Any] = None,
-        auth: Union[Iterable[str], AuthBase] = None,
-        json: Union[List, Dict[str, Any]] = None,
-        timeout: int = 60,
-        credentials: Union[Iterable[str], AuthBase] = None,
+        load_args: Dict[str, Any] = None,
+        credentials: Union[Tuple[str, str], List[str], AuthBase] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
         Args:
             url: The API URL endpoint.
             method: The Method of the request, GET, POST, PUT, DELETE, HEAD, etc...
-            data: The request payload, used for POST, PUT, etc requests
-                https://requests.readthedocs.io/en/latest/user/quickstart/#more-complicated-post-requests
-            params: The url parameters of the API.
-                https://requests.readthedocs.io/en/latest/user/quickstart/#passing-parameters-in-urls
-            headers: The HTTP headers.
-                https://requests.readthedocs.io/en/latest/user/quickstart/#custom-headers
-            auth: Anything ``requests`` accepts. Normally it's either ``('login', 'password')``,
-                or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases. Any
-                iterable will be cast to a tuple.
-            json: The request payload, used for POST, PUT, etc requests, passed in
-                to the json kwarg in the requests object.
-                https://requests.readthedocs.io/en/latest/user/quickstart/#more-complicated-post-requests
-            timeout: The wait time in seconds for a response, defaults to 1 minute.
-                https://requests.readthedocs.io/en/latest/user/quickstart/#timeouts
-            credentials: same as ``auth``. Allows specifying ``auth`` secrets in
-                credentials.yml.
-
+            load_args: Additional parameters to be fed to requests.request.
+                https://requests.readthedocs.io/en/latest/api/#requests.request
+            credentials: Allows specifying secrets in credentials.yml.
+                Expected format is ``('login', 'password')`` if given as a tuple or list.
+                An ``AuthBase`` instance can be provided for more complex cases.
         Raises:
-            ValueError: if both ``credentials`` and ``auth`` are specified.
+            ValueError: if both ``auth`` in ``load_args`` and ``credentials`` are specified.
         """
         super().__init__()
 
-        if credentials is not None and auth is not None:
+        self._load_args = load_args or {}
+        self._load_args_auth = self._load_args.pop("auth", None)
+
+        if credentials is not None and self._load_args_auth is not None:
             raise ValueError("Cannot specify both auth and credentials.")
 
-        auth = credentials or auth
+        self._auth = credentials or self._load_args_auth
 
-        if isinstance(auth, Iterable):
-            auth = tuple(auth)
+        if "cert" in self._load_args:
+            self._load_args["cert"] = self._convert_type(self._load_args["cert"])
+
+        if "timeout" in self._load_args:
+            self._load_args["timeout"] = self._convert_type(self._load_args["timeout"])
 
         self._request_args: Dict[str, Any] = {
             "url": url,
             "method": method,
-            "data": data,
-            "params": params,
-            "headers": headers,
-            "auth": auth,
-            "json": json,
-            "timeout": timeout,
+            "auth": self._convert_type(self._auth),
+            **self._load_args,
         }
 
-    def _describe(self) -> Dict[str, Any]:
-        return dict(**self._request_args)
+    @staticmethod
+    def _convert_type(value: Any):
+        """
+        From the Data Catalog, iterables are provided as Lists.
+        However, for some parameters in the Python requests library,
+        only Tuples are allowed.
+        """
+        if isinstance(value, List):
+            return tuple(value)
+        return value
 
-    def _execute_request(self) -> requests.Response:
+    def _describe(self) -> Dict[str, Any]:
+        # prevent auth from logging
+        request_args_cp = self._request_args.copy()
+        request_args_cp.pop("auth", None)
+        return request_args_cp
+
+    def _execute_request(self, session: Session) -> requests.Response:
         try:
-            response = requests.request(**self._request_args)
+            response = session.request(**self._request_args)
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
             raise DataSetError("Failed to fetch data", exc) from exc
@@ -107,12 +109,13 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         return response
 
     def _load(self) -> requests.Response:
-        return self._execute_request()
+        with sessions.Session() as session:
+            return self._execute_request(session)
 
     def _save(self, data: None) -> NoReturn:
         raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
 
     def _exists(self) -> bool:
-        response = self._execute_request()
-
+        with sessions.Session() as session:
+            response = self._execute_request(session)
         return response.ok

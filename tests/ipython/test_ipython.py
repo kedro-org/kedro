@@ -190,9 +190,6 @@ class TestLoadIPythonExtension:
     def test_load_ipython_extension(self, ipython):
         ipython.magic("load_ext kedro.ipython")
 
-    def test_load_ipython_extension_old_location(self, ipython):
-        ipython.magic("load_ext kedro.ipython")
-
     def test_load_extension_missing_dependency(self, mocker):
         mocker.patch("kedro.ipython.reload_kedro", side_effect=ImportError)
         mocker.patch(

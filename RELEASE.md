@@ -39,14 +39,15 @@
 
 ## Bug fixes and other changes
 
-* Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
+* Changed default `False` value for rich logging `show_locals`, to make sure credentials and other sensitive data isn't shown in logs.
 * Rich traceback handling is disabled on Databricks so that exceptions now halt execution as expected. This is a workaround for a [bug in `rich`](https://github.com/Textualize/rich/issues/2455).
 * When using `kedro run -n [some_node]`, if `some_node` is missing a namespace the resulting error message will suggest the correct node name.
-* Update documentation for `rich` logging.
+* Updated documentation for `rich` logging.
 * Updated Prefect deployment documentation to allow for reruns with saved versioned datasets.
 * The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 * Added `gdrive` to list of cloud protocols, enabling Google Drive paths for datasets.
+* Added svg logo resource for ipython kernel.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.

@@ -8,8 +8,15 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+# Upcoming Release 0.18.4
 
-# Upcoming Release 0.18.3
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+# Release 0.18.3
 
 ## Major features and improvements
 * Implemented autodiscovery of project pipelines. A pipeline created with `kedro pipeline create <pipeline_name>` can now be accessed immediately without needing to explicitly register it in `src/<package_name>/pipeline_registry.py`, either individually by name (e.g. `kedro run --pipeline=<pipeline_name>`) or as part of the combined default pipeline (e.g. `kedro run`). By default, the simplified `register_pipelines()` function in `pipeline_registry.py` looks like:
@@ -28,6 +35,7 @@
 
 * The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
 * The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
+* Improved resume pipeline suggestion for `SequentialRunner`, it will backtrack the closest persisted inputs to resume.
 
 ## Bug fixes and other changes
 
@@ -42,6 +50,7 @@
 
 ## Upcoming deprecations for Kedro 0.19.0
 * The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
+* `kedro jupyter convert`, `kedro build-docs`, `kedro build-reqs` and `kedro activate-nbstripout` will be deprecated.
 
 # Release 0.18.2
 

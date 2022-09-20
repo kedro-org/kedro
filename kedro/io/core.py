@@ -6,6 +6,7 @@ import abc
 import copy
 import logging
 import re
+from typing_extensions import Literal
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -13,7 +14,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, Type, TypeVar
+from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, Type, TypeVar, Union
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -319,6 +320,34 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         return dataset_copy
 
 
+def _remove_microseconds(timestamp: datetime) -> datetime:
+    """Remove microseconds from a datetime object.
+
+    Args:
+        timestamp: Timestamp to remove microseconds from.
+
+    Returns:
+        Timestamp without microseconds.
+
+    """
+    ms = timestamp.microsecond
+    return timestamp.replace(microsecond=(ms - ms % 1000))
+
+
+def _format_timestamp(timestamp: datetime) -> str:
+    """Format the timestamp to be used by versioning.
+
+    Args:
+        timestamp: Timestamp to format.
+
+    Returns:
+        String representation of the timestamp.
+
+    """
+    ts = timestamp.strftime(VERSION_FORMAT)
+    return ts[:-4] + ts[-1:]  # Don't keep microseconds
+
+
 def generate_timestamp() -> str:
     """Generate the timestamp to be used by versioning.
 
@@ -326,8 +355,8 @@ def generate_timestamp() -> str:
         String representation of the current timestamp.
 
     """
-    current_ts = datetime.now(tz=timezone.utc).strftime(VERSION_FORMAT)
-    return current_ts[:-4] + current_ts[-1:]  # Don't keep microseconds
+    timestamp = _remove_microseconds(datetime.now(tz=timezone.utc))
+    return _format_timestamp(timestamp)
 
 
 class Version(namedtuple("Version", ["load", "save"])):
@@ -500,6 +529,8 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
             # param2 will be True by default
     """
 
+    _FORMAT_CODE_PATTERN = r'%[a-zA-Z]'
+
     def __init__(
         self,
         filepath: PurePosixPath,
@@ -527,14 +558,81 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         # 1 entry for load version, 1 for save version
         self._version_cache = Cache(maxsize=2)  # type: Cache
 
+    @property
+    def _is_custom_format(self) -> bool:
+        return bool(re.search(self._FORMAT_CODE_PATTERN, str(self._filepath)))
+
+    def _parse_datetime(self, version: str) -> datetime:
+        def _datetime_from_path(timestamp: datetime) -> datetime:
+            pattern = str(self._pattern)
+            return datetime.strptime(timestamp.strftime(pattern), pattern)
+
+        timestamp = datetime.strptime(version, VERSION_FORMAT)
+        return _datetime_from_path(timestamp)
+
+    def _parse_timestamp(self, version: str) -> str:
+        return _format_timestamp(self._parse_datetime(version))
+
+    def _extract_version(self, path: str) -> str:
+        pattern = str(self._pattern)
+        return _format_timestamp(datetime.strptime(path, pattern))
+
+    @property
+    def version(self) -> Version:
+        """Returns the safe version of the dataset.
+
+        Returns:
+            Version: The version of the dataset.
+        """
+        def _parse_version(version: Union[str, None]) -> Union[datetime, None]:
+            if version:
+                return self._parse_timestamp(version)
+            else:
+                return version
+
+        return Version(_parse_version(self._version.load),
+                       _parse_version(self._version.save))
+
+    @property
+    def _is_unique_format(self) -> bool:
+        now = generate_timestamp()
+        return self._parse_timestamp(now) == now
+
+    @property
+    def _pattern(self) -> PurePosixPath:
+        if self._is_custom_format:
+            return self._filepath
+        else:
+            return self._filepath / VERSION_FORMAT / self._filepath.name
+
+    def _sort_glob(self, glob: List[str]) -> List[str]:
+        def _extract_key(x: str) -> tuple:
+            # Sorts by datetime as first criteria, then by path
+            # as second criteria
+            return self._extract_version(x), x
+
+        return sorted(glob, key=_extract_key, reverse=True)
+
+    def _get_versioned_path(
+        self,
+        version: Union[Literal['*'], str]
+    ) -> PurePosixPath:
+        if version == '*':
+            return re.sub(self._FORMAT_CODE_PATTERN, version,
+                          str(self._pattern))
+        else:
+            dt = self._parse_datetime(version)
+            filepath = dt.strftime(str(self._pattern))
+            return PurePosixPath(filepath)
+
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
     @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
-    def _fetch_latest_load_version(self) -> str:
+    def _fetch_latest_load_version(self) -> datetime:
         # When load version is unpinned, fetch the most recent existing
         # version from the given path.
-        pattern = str(self._get_versioned_path("*"))
-        version_paths = sorted(self._glob_function(pattern), reverse=True)
+        pattern = str(self._get_versioned_path('*'))
+        version_paths = self._sort_glob(self._glob_function(pattern))
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
@@ -542,21 +640,21 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         if not most_recent:
             raise VersionNotFoundError(f"Did not find any versions for {self}")
 
-        return PurePath(most_recent).parent.name
+        return self._extract_version(most_recent)
 
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
     @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
     def _fetch_latest_save_version(self) -> str:  # pylint: disable=no-self-use
         """Generate and cache the current save version"""
-        return generate_timestamp()
+        return self._parse_timestamp(generate_timestamp())
 
     def resolve_load_version(self) -> Optional[str]:
         """Compute the version the dataset should be loaded with."""
         if not self._version:
             return None
         if self._version.load:
-            return self._version.load
+            return self.version.load
         return self._fetch_latest_load_version()
 
     def _get_load_path(self) -> PurePosixPath:
@@ -572,7 +670,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         if not self._version:
             return None
         if self._version.save:
-            return self._version.save
+            return self.version.save
         return self._fetch_latest_save_version()
 
     def _get_save_path(self) -> PurePosixPath:
@@ -584,15 +682,17 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         versioned_path = self._get_versioned_path(save_version)  # type: ignore
 
         if self._exists_function(str(versioned_path)):
-            raise DataSetError(
-                f"Save path '{versioned_path}' for {str(self)} must not exist if "
-                f"versioning is enabled."
-            )
+            if self._is_unique_format:
+                raise DataSetError(
+                    f"Save path '{versioned_path}' for {str(self)} must not exist if "
+                    f"versioning is enabled."
+                )
+            else:
+                self._logger.warning(
+                    f"Saving versioned dataset to existing path: {versioned_path}"
+                )
 
         return versioned_path
-
-    def _get_versioned_path(self, version: str) -> PurePosixPath:
-        return self._filepath / version / self._filepath.name
 
     def load(self) -> _DO:
         self.resolve_load_version()  # Make sure last load version is set

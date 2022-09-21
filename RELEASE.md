@@ -14,6 +14,8 @@
 
 ## Bug fixes and other changes
 
+* Fix `kedro micropkg pull` for packages on PyPI.
+
 ## Breaking changes to the API
 
 # Release 0.18.3
@@ -36,7 +38,6 @@
 * The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
 * The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
 * Improved resume pipeline suggestion for `SequentialRunner`, it will backtrack the closest persisted inputs to resume.
-* Fix `kedro micropkg pull` for packages on PyPI.
 
 ## Bug fixes and other changes
 

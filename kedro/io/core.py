@@ -3,12 +3,12 @@ saving functionality provided by ``kedro.io``.
 """
 
 import abc
+from collections import namedtuple
 import copy
 import logging
 import re
 from typing_extensions import Literal
 import warnings
-from collections import namedtuple
 from datetime import datetime, timezone
 from functools import partial
 from glob import iglob
@@ -16,6 +16,7 @@ from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, Type, TypeVar, Union
 from urllib.parse import urlsplit
+from xml.etree.ElementTree import VERSION
 
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
@@ -30,6 +31,7 @@ VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "gcs", "gs", "adl", "abfs", "abfss")
+FORMAT_CODE_PATTERN = r'%[a-zA-Z]'
 
 
 class DataSetError(Exception):
@@ -320,30 +322,8 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         return dataset_copy
 
 
-def _remove_microseconds(timestamp: datetime) -> datetime:
-    """Remove microseconds from a datetime object.
-
-    Args:
-        timestamp: Timestamp to remove microseconds from.
-
-    Returns:
-        Timestamp without microseconds.
-
-    """
-    ms = timestamp.microsecond
-    return timestamp.replace(microsecond=(ms - ms % 1000))
-
-
 def _format_timestamp(timestamp: datetime) -> str:
-    """Format the timestamp to be used by versioning.
-
-    Args:
-        timestamp: Timestamp to format.
-
-    Returns:
-        String representation of the timestamp.
-
-    """
+    # Converts datetime to string and removes its microseconds
     ts = timestamp.strftime(VERSION_FORMAT)
     return ts[:-4] + ts[-1:]  # Don't keep microseconds
 
@@ -355,8 +335,47 @@ def generate_timestamp() -> str:
         String representation of the current timestamp.
 
     """
-    timestamp = _remove_microseconds(datetime.now(tz=timezone.utc))
+    timestamp = datetime.now(tz=timezone.utc)
     return _format_timestamp(timestamp)
+
+
+def parse_partial_timestamp(timestamp: str) -> str:
+    """Parses a timestamp string to a datetime object.
+
+    Args:
+        timestamp: Timestamp string to be parsed.
+
+    Returns:
+        Datetime object representing the timestamp provided.
+
+    Raises:
+        ValueError: If no format codes are present in the timestamp string.
+
+    Example:
+        >>> parse_partial_timestamp('2019')
+        datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
+    """
+    dt = None
+
+    def _try_parse(fmt: str) -> Union[datetime, None]:
+        nonlocal dt
+        try:
+            dt = datetime.strptime(timestamp, fmt)
+            return dt
+        except ValueError:
+            pass
+
+    _try_parse(VERSION_FORMAT)
+    next(filter(lambda x: _try_parse(VERSION_FORMAT[:x.span()[1]]),
+                re.finditer(FORMAT_CODE_PATTERN, VERSION_FORMAT)), None)
+
+    if dt:
+        return _format_timestamp(dt.replace(tzinfo=timezone.utc))
+    else:
+        raise ValueError(
+            f"Failed to parse partial timestamp '{timestamp}' using format "
+            f"'{VERSION_FORMAT}'."
+        )
 
 
 class Version(namedtuple("Version", ["load", "save"])):
@@ -529,8 +548,6 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
             # param2 will be True by default
     """
 
-    _FORMAT_CODE_PATTERN = r'%[a-zA-Z]'
-
     def __init__(
         self,
         filepath: PurePosixPath,
@@ -560,11 +577,11 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
     @property
     def _is_custom_format(self) -> bool:
-        return bool(re.search(self._FORMAT_CODE_PATTERN, str(self._filepath)))
+        return bool(re.search(FORMAT_CODE_PATTERN, str(self._filepath)))
 
     def _parse_datetime(self, version: str) -> datetime:
         def _datetime_from_path(timestamp: datetime) -> datetime:
-            pattern = str(self._pattern)
+            pattern = self._pattern
             return datetime.strptime(timestamp.strftime(pattern), pattern)
 
         timestamp = datetime.strptime(version, VERSION_FORMAT)
@@ -572,10 +589,6 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
     def _parse_timestamp(self, version: str) -> str:
         return _format_timestamp(self._parse_datetime(version))
-
-    def _extract_version(self, path: str) -> str:
-        pattern = str(self._pattern)
-        return _format_timestamp(datetime.strptime(path, pattern))
 
     @property
     def version(self) -> Version:
@@ -586,6 +599,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         """
         def _parse_version(version: Union[str, None]) -> Union[datetime, None]:
             if version:
+                version = parse_partial_timestamp(version)
                 return self._parse_timestamp(version)
             else:
                 return version
@@ -593,36 +607,35 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         return Version(_parse_version(self._version.load),
                        _parse_version(self._version.save))
 
+    def _apply_version(self, version: str) -> str:
+        return self._parse_datetime(version).strftime(self._pattern)
+
+    def _extract_version(self, path: str) -> str:
+        return _format_timestamp(datetime.strptime(path, self._pattern))
+
     @property
     def _is_unique_format(self) -> bool:
         now = generate_timestamp()
         return self._parse_timestamp(now) == now
 
     @property
-    def _pattern(self) -> PurePosixPath:
+    def _pattern(self) -> str:
         if self._is_custom_format:
-            return self._filepath
+            return str(self._filepath)
         else:
-            return self._filepath / VERSION_FORMAT / self._filepath.name
+            return str(self._filepath / VERSION_FORMAT / self._filepath.name)
 
     def _sort_glob(self, glob: List[str]) -> List[str]:
-        def _extract_key(x: str) -> tuple:
-            # Sorts by datetime as first criteria, then by path
-            # as second criteria
-            return self._extract_version(x), x
-
-        return sorted(glob, key=_extract_key, reverse=True)
+        return sorted(glob, key=self._extract_version, reverse=True)
 
     def _get_versioned_path(
         self,
         version: Union[Literal['*'], str]
     ) -> PurePosixPath:
         if version == '*':
-            return re.sub(self._FORMAT_CODE_PATTERN, version,
-                          str(self._pattern))
+            return re.sub(FORMAT_CODE_PATTERN, version, self._pattern)
         else:
-            dt = self._parse_datetime(version)
-            filepath = dt.strftime(str(self._pattern))
+            filepath = self._apply_version(version)
             return PurePosixPath(filepath)
 
     # 'key' is set to prevent cache key overlapping for load and save:

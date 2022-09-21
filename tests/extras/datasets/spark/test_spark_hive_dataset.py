@@ -303,9 +303,9 @@ class TestSparkHiveDataSet:
             dataset.load()
 
     def test_save_delta_format(self):
-        dataset = SparkHiveDataSet(database='default_1',
-                                   table='delta_table',
-                                   format='delta')
+        dataset = SparkHiveDataSet(
+            database="default_1", table="delta_table", save_args={"format": "delta"}
+        )
         dataset.save(_generate_spark_df_one())
         dataset.load()
-        assert dataset._format == 'delta'
+        assert dataset._format == "delta"

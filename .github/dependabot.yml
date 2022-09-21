@@ -12,4 +12,4 @@ updates:
     target-branch: "dependency-update"
     labels:
       - "dependencies"
-    open-pull-requests-limit: 50 # Allow up to 10 open pull requests
+    open-pull-requests-limit: 50 # Allow up to 50 open pull requests

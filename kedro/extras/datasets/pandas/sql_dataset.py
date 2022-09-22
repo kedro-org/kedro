@@ -1,10 +1,9 @@
 """``SQLDataSet`` to load and save data to a SQL backend."""
 
 import copy
-import json
 import re
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn, Optional, Tuple
+from typing import Any, Dict, NoReturn, Optional
 
 import fsspec
 import pandas as pd
@@ -316,7 +315,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     # using Any because of Sphinx but it should be
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
-    engines: Dict[Tuple[str, str], Any] = {}
+    engines: Dict[str, Any] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -400,38 +399,25 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             self._filepath = path
         self._connection_str = credentials["con"]
         self._execution_options = execution_options or {}
-        self.create_connection(self._connection_str, self._execution_options)
+        self.create_connection(self._connection_str)
 
     @classmethod
-    def _execution_options_repr(cls, execution_options: Dict[str, Any]) -> str:
-        return json.dumps(execution_options, sort_keys=True)
-
-    @classmethod
-    def create_connection(
-        cls, connection_str: str, execution_options: Dict[str, Any]
-    ) -> None:
-        """Given a connection string and some execution options, create singleton
-        connection to be used across all instances of `SQLQueryDataSet` that need to
-        connect to the same source with the same options.
+    def create_connection(cls, connection_str: str) -> None:
+        """Given a connection string, create singleton connection
+        to be used across all instances of `SQLQueryDataSet` that
+        need to connect to the same source.
         """
-        if (
-            connection_str,
-            cls._execution_options_repr(execution_options),
-        ) in cls.engines:
+        if connection_str in cls.engines:
             return
 
         try:
-            engine = create_engine(connection_str).execution_options(
-                **execution_options
-            )
+            engine = create_engine(connection_str)
         except ImportError as import_error:
             raise _get_missing_module_error(import_error) from import_error
         except NoSuchModuleError as exc:
             raise _get_sql_alchemy_missing_error() from exc
 
-        cls.engines[
-            (connection_str, cls._execution_options_repr(execution_options))
-        ] = engine
+        cls.engines[connection_str] = engine
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
@@ -444,12 +430,9 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
-        engine = self.engines[
-            (
-                self._connection_str,
-                self._execution_options_repr(self._execution_options),
-            )
-        ]  # type: ignore
+        engine = self.engines[self._connection_str].execution_options(
+            **self._execution_options
+        )  # type: ignore
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)

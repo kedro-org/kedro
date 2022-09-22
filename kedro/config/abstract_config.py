@@ -1,11 +1,11 @@
 """This module provides ``kedro.abstract_config`` with the baseline
 class model for a `ConfigLoader` implementation.
 """
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Any, Dict
 
 
-class AbstractConfigLoader(ABC):
+class AbstractConfigLoader(dict):
     """``AbstractConfigLoader`` is the abstract base class
         for all `ConfigLoader` implementations.
     All user-defined `ConfigLoader` implementations should inherit
@@ -19,12 +19,13 @@ class AbstractConfigLoader(ABC):
         runtime_params: Dict[str, Any] = None,
         **kwargs  # pylint: disable=unused-argument
     ):
+        super().__init__()
         self.conf_source = conf_source
         self.env = env
         self.runtime_params = runtime_params
 
     @abstractmethod  # pragma: no cover
-    def get(self) -> Dict[str, Any]:
+    def get(self) -> Dict[str, Any]:  # type: ignore
         """Required method to get all configurations."""
         pass
 

@@ -284,20 +284,21 @@ class TestSQLQueryDataSet:
         )
 
     @pytest.mark.parametrize(
-        "query_data_set, execution_options_repr",
+        "query_data_set, execution_options_repr, nb_execution_options",
         [
-            ({"execution_options": dict(streaming=True)}, '{"streaming": true}'),
+            ({"execution_options": dict(streaming=True)}, '{"streaming": true}', 1),
             (
                 {"execution_options": dict(toto=True, hello="world")},
                 '{"hello": "world", "toto": true}',
+                2,
             ),
-            ({"execution_options": {}}, "{}"),
-            ({}, "{}"),
+            ({"execution_options": {}}, "{}", 0),
+            ({}, "{}", 0),
         ],
         indirect=["query_data_set"],
     )
     def test_load_execution_options(
-        self, mocker, query_data_set, execution_options_repr
+        self, mocker, query_data_set, execution_options_repr, nb_execution_options
     ):
         """Test `load` method with execution options"""
         mocker.patch("pandas.read_sql_query")
@@ -305,6 +306,7 @@ class TestSQLQueryDataSet:
 
         assert (CONNECTION, execution_options_repr) in query_data_set.engines
         engine = query_data_set.engines[CONNECTION, execution_options_repr]
+        assert len(engine.get_execution_options()) == nb_execution_options
         pd.read_sql_query.assert_called_once_with(sql=SQL_QUERY, con=engine)
 
     def test_load_driver_missing(self, mocker):

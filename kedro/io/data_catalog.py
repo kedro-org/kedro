@@ -9,7 +9,7 @@ import difflib
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from typing import Any, Dict, KeysView, List, Optional, Set, Type, Union
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -19,6 +19,7 @@ from kedro.io.core import (
     DataSetNotFoundError,
     Version,
     generate_timestamp,
+    parse_partial_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataSet
 
@@ -125,6 +126,61 @@ class _FrozenDatasets:
         raise AttributeError(msg)
 
 
+class Versioner:
+    """``Versioner`` is a class that encapsulates the version information for a
+    ``AbstractVersionedDataSet``. It is used by ``DataCatalog`` to handle the
+    versioning of data sets.
+    """
+
+    def __init__(
+        self,
+        load_versions: Dict[str, str] = None,
+        save_version: str = None,
+        version_class: Type[Version] = None,
+    ):
+        """``Versioner`` is a class that encapsulates the version information for a
+        ``AbstractVersionedDataSet``. It is used by ``DataCatalog`` to handle the
+        versioning of data sets.
+
+        Args:
+            load_versions: A mapping between dataset names and versions
+                to load. Has no effect on data sets without enabled versioning.
+            save_version: Version string to be used for ``save`` operations
+                by all data sets with enabled versioning. It must: a) be a
+                case-insensitive string that conforms with operating system
+                filename limitations, b) always return the latest version when
+                sorted in lexicographical order.
+            version_class: A class that inherits ``Version``. It must be able
+                to parse the ``save_version`` and ``load_versions`` strings.
+                The class can be used to implement custom versioning schemes.
+                If not provided, ``Version`` will be used.
+        """
+        self._save_version = save_version or generate_timestamp()
+        self._load_versions = copy.deepcopy(load_versions) or {}
+        self._version_class = version_class or Version
+
+    def __getitem__(self, key) -> Version:
+        load = self._load_versions.get(key, None)
+        load = parse_partial_timestamp(load) if load else None
+        save = self._save_version
+        save = parse_partial_timestamp(save) if save else None
+        return self._version_class(load, save)
+
+    @property
+    def save_version(self) -> str:
+        """Returns the save version."""
+        return self._save_version
+
+    @save_version.setter
+    def save_version(self, value: str) -> None:
+        """Sets the save version."""
+        self._save_version = value
+
+    def keys(self) -> KeysView[str]:
+        """Returns a view of the load versions keys."""
+        return self._load_versions.keys()
+
+
 class DataCatalog:
     """``DataCatalog`` stores instances of ``AbstractDataSet`` implementations
     to provide ``load`` and ``save`` capabilities from anywhere in the
@@ -182,7 +238,7 @@ class DataCatalog:
         cls: Type,
         catalog: Optional[Dict[str, Dict[str, Any]]],
         credentials: Dict[str, Dict[str, Any]] = None,
-        load_versions: Dict[str, str] = None,
+        load_versions: Union[Versioner, Dict[str, str]] = None,
         save_version: str = None,
     ) -> "DataCatalog":
         """Create a ``DataCatalog`` instance from configuration. This is a
@@ -202,7 +258,8 @@ class DataCatalog:
                 to refer to the appropriate credentials as shown in the example
                 below.
             load_versions: A mapping between dataset names and versions
-                to load. Has no effect on data sets without enabled versioning.
+                to load or a versioner instance. Has no effect on data sets
+                without enabled versioning.
             save_version: Version string to be used for ``save`` operations
                 by all data sets with enabled versioning. It must: a) be a
                 case-insensitive string that conforms with operating system
@@ -257,10 +314,14 @@ class DataCatalog:
         data_sets = {}
         catalog = copy.deepcopy(catalog) or {}
         credentials = copy.deepcopy(credentials) or {}
-        save_version = save_version or generate_timestamp()
-        load_versions = copy.deepcopy(load_versions) or {}
 
-        missing_keys = load_versions.keys() - catalog.keys()
+        if isinstance(load_versions, Versioner):
+            versioner = load_versions
+            versioner.save_version = save_version or versioner.save_version
+        else:
+            versioner = Versioner(load_versions, save_version)
+
+        missing_keys = versioner.keys() - catalog.keys()
         if missing_keys:
             raise DataSetNotFoundError(
                 f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
@@ -275,7 +336,9 @@ class DataCatalog:
 
             ds_config = _resolve_credentials(ds_config, credentials)
             data_sets[ds_name] = AbstractDataSet.from_config(
-                ds_name, ds_config, load_versions.get(ds_name), save_version
+                ds_name,
+                ds_config,
+                versioner[ds_name],
             )
 
         dataset_layers = layers or None

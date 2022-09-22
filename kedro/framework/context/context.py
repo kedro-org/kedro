@@ -11,6 +11,7 @@ from pluggy import PluginManager
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
+from kedro.io.data_catalog import Versioner
 from kedro.pipeline.pipeline import _transcode_split
 
 
@@ -283,11 +284,14 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        catalog = settings.DATA_CATALOG_CLASS.from_config(
-            catalog=conf_catalog,
-            credentials=conf_creds,
+        versioner = Versioner(
             load_versions=load_versions,
             save_version=save_version,
+            version_class=settings.VERSION_CLASS,
+        )
+
+        catalog = settings.DATA_CATALOG_CLASS.from_config(
+            catalog=conf_catalog, credentials=conf_creds, load_versions=versioner
         )
 
         feed_dict = self._get_feed_dict()

@@ -272,7 +272,7 @@ class TestSQLQueryDataSet:
         mocker.patch("pandas.read_sql_query")
         query_data_set.load()
         pd.read_sql_query.assert_called_once_with(
-            sql=SQL_QUERY, con=query_data_set.engines[CONNECTION]
+            sql=SQL_QUERY, con=query_data_set.engines[CONNECTION, "{}"]
         )
 
     def test_load_query_file(self, mocker, query_file_data_set):
@@ -280,8 +280,33 @@ class TestSQLQueryDataSet:
         mocker.patch("pandas.read_sql_query")
         query_file_data_set.load()
         pd.read_sql_query.assert_called_once_with(
-            sql=SQL_QUERY, con=query_file_data_set.engines[CONNECTION]
+            sql=SQL_QUERY, con=query_file_data_set.engines[CONNECTION, "{}"]
         )
+
+    @pytest.mark.parametrize(
+        "query_data_set, execution_options_repr",
+        [
+            ({"execution_options": dict(streaming=True)}, '{"streaming": true}'),
+            (
+                {"execution_options": dict(toto=True, hello="world")},
+                '{"hello": "world", "toto": true}',
+            ),
+            ({"execution_options": dict()}, "{}"),
+            ({}, "{}"),
+        ],
+        indirect=["query_data_set"],
+    )
+    def test_load_execution_options(
+        self, mocker, query_data_set, execution_options_repr
+    ):
+        """Test `load` method with execution options"""
+        mocker.patch("pandas.read_sql_query")
+        query_data_set.load()
+
+        assert (CONNECTION, execution_options_repr) in query_data_set.engines
+        engine = query_data_set.engines[CONNECTION, execution_options_repr]
+        breakpoint()
+        pd.read_sql_query.assert_called_once_with(sql=SQL_QUERY, con=engine)
 
     def test_load_driver_missing(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -332,7 +357,7 @@ class TestSQLQueryDataSet:
         """Test the data set instance string representation"""
         str_repr = str(query_data_set)
         assert (
-            f"SQLQueryDataSet(filepath=None, load_args={{}}, sql={SQL_QUERY})"
+            f"SQLQueryDataSet(execution_options={{}}, filepath=None, load_args={{}}, sql={SQL_QUERY})"
             in str_repr
         )
         assert CONNECTION not in str_repr
@@ -342,7 +367,7 @@ class TestSQLQueryDataSet:
         """Test the data set instance string representation with filepath arg."""
         str_repr = str(query_file_data_set)
         assert (
-            f"SQLQueryDataSet(filepath={str(sql_file)}, load_args={{}}, sql=None)"
+            f"SQLQueryDataSet(execution_options={{}}, filepath={str(sql_file)}, load_args={{}}, sql=None)"
             in str_repr
         )
         assert CONNECTION not in str_repr

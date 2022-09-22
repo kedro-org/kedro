@@ -3,7 +3,8 @@
 import copy
 import re
 from pathlib import PurePosixPath
-from typing import Any, Dict, NoReturn, Optional
+import json
+from typing import Any, Dict, NoReturn, Optional, Tuple
 
 import fsspec
 import pandas as pd
@@ -281,6 +282,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>   type: pandas.SQLQueryDataSet
         >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
         >>>   credentials: db_credentials
+        >>>   execution_options:
+        >>>      streaming: true
         >>>   layer: raw
 
     Sample database credentials entry in ``credentials.yml``:
@@ -303,7 +306,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>     "con": "postgresql://scott:tiger@localhost/test"
         >>> }
         >>> data_set = SQLQueryDataSet(sql=sql,
-        >>>                            credentials=credentials)
+        >>>                            credentials=credentials,
+        >>>                            execution_options={"streaming": True})
         >>>
         >>> sql_data = data_set.load()
         >>>
@@ -312,7 +316,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     # using Any because of Sphinx but it should be
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
-    engines: Dict[str, Any] = {}
+    engines: Dict[Tuple[str, str], Any] = {}
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -321,6 +325,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
         filepath: str = None,
+        execution_options: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -346,6 +351,9 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
             filepath: A path to a file with a sql query statement.
+            execution_options: A dictionary with non-SQL options for the connection to
+                be applied to the underlying engine. To find all supported execution options, see here:
+                https://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is empty.
@@ -390,25 +398,39 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
         self._connection_str = credentials["con"]
-        self.create_connection(self._connection_str)
+        self._execution_options = execution_options or {}
+        self.create_connection(self._connection_str, self._execution_options)
 
     @classmethod
-    def create_connection(cls, connection_str: str) -> None:
-        """Given a connection string, create singleton connection
-        to be used across all instances of `SQLQueryDataSet` that
-        need to connect to the same source.
+    def _execution_options_repr(cls, execution_options: Dict[str, Any]) -> str:
+        return json.dumps(execution_options, sort_keys=True)
+
+    @classmethod
+    def create_connection(
+        cls, connection_str: str, execution_options: Dict[str, Any]
+    ) -> None:
+        """Given a connection string and some execution options, create singleton
+        connection to be used across all instances of `SQLQueryDataSet` that need to
+        connect to the same source with the same options.
         """
-        if connection_str in cls.engines:
+        if (
+            connection_str,
+            cls._execution_options_repr(execution_options),
+        ) in cls.engines:
             return
 
         try:
-            engine = create_engine(connection_str)
+            engine = create_engine(connection_str).execution_options(
+                **execution_options
+            )
         except ImportError as import_error:
             raise _get_missing_module_error(import_error) from import_error
         except NoSuchModuleError as exc:
             raise _get_sql_alchemy_missing_error() from exc
 
-        cls.engines[connection_str] = engine
+        cls.engines[
+            (connection_str, cls._execution_options_repr(execution_options))
+        ] = engine
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
@@ -416,11 +438,17 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             sql=str(load_args.pop("sql", None)),
             filepath=str(self._filepath),
             load_args=str(load_args),
+            execution_options=str(self._execution_options),
         )
 
     def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
-        engine = self.engines[self._connection_str]  # type: ignore
+        engine = self.engines[
+            (
+                self._connection_str,
+                self._execution_options_repr(self._execution_options),
+            )
+        ]  # type: ignore
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)

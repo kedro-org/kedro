@@ -215,7 +215,7 @@ class TestTemplatedConfigLoader:
         config_loader.default_run_env = ""
         catalog = config_loader["catalog"]
         assert catalog["boats"]["type"] == "SparkDataSet"
-    
+
     @pytest.mark.usefixtures("proj_catalog_param")
     def test_catalog_parameterized_w_dict(self, tmp_path, template_config):
         """Test parameterized config with input from dictionary with values"""

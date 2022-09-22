@@ -11,6 +11,7 @@ from kedro.io import DataSetError
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"
 SQL_QUERY = "SELECT * FROM table_a"
+EXECUTION_OPTIONS = {"streaming": True}
 FAKE_CONN_STR = "some_sql://scott:tiger@localhost/foo"
 ERROR_PREFIX = (
     r"A module\/driver is missing when connecting to your SQL server\.(.|\n)*"
@@ -384,8 +385,9 @@ class TestSQLQueryDataSet:
             SQLQueryDataSet(sql=SQL_QUERY, filepath=sql_file)
 
     def test_create_connection_only_once(self, mocker):
-        """Test that two datasets that need to connect to the same db
-        (but different tables, for example) only create a connection once.
+        """Test that two datasets that need to connect to the same db with same
+        execution options (but different tables, for example) only create a connection
+        once.
         """
         mock_engine = mocker.patch(
             "kedro.extras.datasets.pandas.sql_dataset.create_engine"
@@ -393,8 +395,31 @@ class TestSQLQueryDataSet:
         first = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
         assert len(first.engines) == 1
 
+        # second engine has identical params to the first one
+        # => first engine should be reused
         second = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
-        assert len(second.engines) == 1
+        mock_engine.assert_called_once_with(CONNECTION)
+        assert second.engines == first.engines
         assert len(first.engines) == 1
 
-        mock_engine.assert_called_once_with(CONNECTION)
+        # third engine differs from the first two (it has execution options)
+        # => a new engine should be created
+        third = SQLQueryDataSet(
+            sql=SQL_QUERY,
+            credentials=dict(con=CONNECTION),
+            execution_options=EXECUTION_OPTIONS,
+        )
+        assert mock_engine.call_count == 2
+        assert third.engines == first.engines
+        assert len(first.engines) == 2
+
+        # fourth engine is identical to the third one
+        # => no new engine should be created
+        fourth = SQLQueryDataSet(
+            sql=SQL_QUERY,
+            credentials=dict(con=CONNECTION),
+            execution_options=EXECUTION_OPTIONS,
+        )
+        assert mock_engine.call_count == 2
+        assert fourth.engines == first.engines
+        assert len(first.engines) == 2

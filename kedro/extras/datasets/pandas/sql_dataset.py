@@ -1,9 +1,9 @@
 """``SQLDataSet`` to load and save data to a SQL backend."""
 
 import copy
+import json
 import re
 from pathlib import PurePosixPath
-import json
 from typing import Any, Dict, NoReturn, Optional, Tuple
 
 import fsspec
@@ -352,7 +352,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
             filepath: A path to a file with a sql query statement.
             execution_options: A dictionary with non-SQL options for the connection to
-                be applied to the underlying engine. To find all supported execution options, see here:
+                be applied to the underlying engine. To find all supported execution
+                options, see here:
                 https://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options
 
         Raises:

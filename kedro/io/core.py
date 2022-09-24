@@ -7,7 +7,7 @@ import copy
 import logging
 import re
 import warnings
-from datetime import datetime, timezone
+from datetime import timezone
 from functools import partial
 from glob import iglob
 from operator import attrgetter
@@ -23,6 +23,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
 )
 from urllib.parse import urlsplit
 
@@ -30,14 +31,19 @@ from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 from typing_extensions import Literal
 
+from kedro.io.datetime import (
+    DATETIME_FORMAT,
+    FORMAT_CODE_PATTERN,
+    DateTime,
+    UnknownDateTime,
+)
 from kedro.utils import load_obj
 
 warnings.simplefilter("default", DeprecationWarning)
 
-VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
+VERSION_FORMAT = DATETIME_FORMAT
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
-FORMAT_CODE_PATTERN = r"%[a-zA-Z]"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "gcs", "gs", "adl", "abfs", "abfss")
@@ -73,6 +79,14 @@ class DataSetAlreadyExistsError(DataSetError):
 class VersionNotFoundError(DataSetError):
     """``VersionNotFoundError`` raised by ``AbstractVersionedDataSet`` implementations
     in case of no load versions available for the data set.
+    """
+
+    pass
+
+
+class IncompatibleVersionError(DataSetError):
+    """``IncompatibleVersionError`` raised by ``Version`` implementation in case
+    of custom version pattern used with a non date based version.
     """
 
     pass
@@ -335,64 +349,13 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         return dataset_copy
 
 
-def _format_timestamp(timestamp: datetime) -> str:
-    formatted = timestamp.strftime(VERSION_FORMAT)
-    return formatted[:-4] + formatted[-1:]  # Don't keep microseconds
-
-
 def generate_timestamp() -> str:
     """Generate the timestamp to be used by versioning.
 
     Returns:
-        String representation of the current timestamp.
-
+    String representation of the current timestamp.
     """
-    timestamp = datetime.now(tz=timezone.utc)
-    return _format_timestamp(timestamp)
-
-
-def parse_partial_timestamp(timestamp: str) -> str:
-    """Parses a timestamp string to a datetime object.
-
-    Args:
-        timestamp: Timestamp string to be parsed.
-
-    Returns:
-        Datetime object representing the timestamp provided.
-
-    Raises:
-        ValueError: If no format codes are present in the timestamp string.
-
-    Example:
-        >>> parse_partial_timestamp('2019')
-        datetime.datetime(2019, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
-    """
-    datetime_ = None
-
-    def _try_parse(fmt: str) -> Optional[datetime]:
-        nonlocal datetime_
-        try:
-            datetime_ = datetime.strptime(timestamp, fmt)
-            return datetime_
-        except ValueError:
-            return None
-
-    _try_parse(VERSION_FORMAT)
-    next(
-        filter(
-            lambda x: _try_parse(VERSION_FORMAT[: x.span()[1]]),
-            re.finditer(FORMAT_CODE_PATTERN, VERSION_FORMAT),
-        ),
-        None,
-    )
-
-    if not datetime_:
-        raise ValueError(
-            f"Failed to parse partial timestamp '{timestamp}' using format "
-            f"'{VERSION_FORMAT}'."
-        )
-
-    return _format_timestamp(datetime_.replace(tzinfo=timezone.utc))
+    return str(DateTime.now(tz=timezone.utc))
 
 
 class Version:  # Proposing the use of this class in order to make custom versioning easier
@@ -411,6 +374,14 @@ class Version:  # Proposing the use of this class in order to make custom versio
         self._load = load
         self._save = save
         self._date_format = date_format or VERSION_FORMAT
+        self._is_default = VERSION_FORMAT in self._date_format
+
+    @classmethod
+    def from_version(cls, version: "Version") -> "Version":
+        """Creates a new Version object from an existing Version object."""
+        return cls(
+            version._load, version._save, version._date_format  # pylint: disable=W0212
+        )
 
     def __getitem__(self, key: Literal[1, 2]) -> Optional[str]:
         if key == 1:
@@ -419,30 +390,54 @@ class Version:  # Proposing the use of this class in order to make custom versio
             return self._save
         raise KeyError(f"Version object has only 2 keys: 1 and 2. Got {key}.")
 
-    def parse(self, timestamp: str) -> datetime:
+    def parse(self, timestamp: str) -> DateTime:
         """Parses a timestamp string to a datetime object.
 
         Args:
             timestamp (str): Timestamp string to be parsed.
 
         Returns:
-            datetime: Datetime object representing the timestamp provided.
+            DateTime: Datetime object representing the timestamp provided.
         """
-        return datetime.strptime(timestamp, self._date_format)
+        return DateTime.strptime(timestamp, self._date_format)
 
-    def unparse(self, timestamp: datetime) -> str:
+    def _extract_default(self, timestamp: str) -> str:
+        pattern = cast(re.Match, re.search(VERSION_FORMAT, self._date_format))
+        span = pattern.span()
+        span = (span[0], len(timestamp) - (len(self._date_format) - span[1]))
+        return timestamp[span[0] : span[1]]
+
+    def _safe_parse(self, timestamp: str) -> DateTime:
+        try:
+            return self.parse(timestamp)
+        except ValueError as exc:
+            if self._is_default:
+                return UnknownDateTime(self._extract_default(timestamp))
+            raise IncompatibleVersionError(
+                f"``{self.__class__.__name__}`` isn't able to parse the ``{timestamp}``. "
+                f"using the format ``{self._date_format}``. Consider using a custom "
+                "``Version`` class that can handle this format or use the default "
+                "pattern to enable non date parsing."
+            ) from exc
+
+    def unparse(self, timestamp: DateTime) -> str:
         """Unparses a datetime object to a timestamp string.
 
         Args:
-            timestamp (datetime): Datetime object to be unparsed.
+            timestamp (DateTime): Datetime object to be unparsed.
 
         Returns:
             str: Timestamp string representing the datetime provided.
         """
         return timestamp.strftime(self._date_format)
 
+    def _safe_unparse(self, timestamp: DateTime) -> str:
+        if isinstance(timestamp, UnknownDateTime):
+            return self._date_format.replace(VERSION_FORMAT, str(timestamp))
+        return self.unparse(timestamp)
+
     def _parse_format(self, timestamp: str) -> str:
-        return _format_timestamp(self.parse(timestamp))
+        return self._safe_unparse(self._safe_parse(timestamp))
 
     @property
     def load(self) -> Optional[str]:
@@ -465,7 +460,27 @@ class Version:  # Proposing the use of this class in order to make custom versio
         self._save = value
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__}(load={self.load}, save={self.save})"
+        attrs = {}
+        for attr in ["load", "save"]:
+            value = getattr(self, attr)
+            if isinstance(value, str):
+                attrs[attr] = f"'{value}'"
+            else:
+                attrs[attr] = value
+        content = ", ".join(f"{k}={v}" for k, v in attrs.items())
+        return f"{self.__class__.__name__}({content})"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Version):
+            return (
+                self.load == other.load
+                and self.save == other.save
+                and self._date_format == other._date_format
+            )
+        raise NotImplementedError("Can't compare ``Version`` with other types.")
 
 
 _CONSISTENCY_WARNING = (
@@ -543,10 +558,7 @@ def parse_dataset_definition(
     if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
         class_obj, VERSIONED_FLAG_KEY, False
     ):
-        if version is None:
-            raise DataSetError(
-                f"Versioned data set '{class_obj.__name__}' requires a version to be specified."
-            )
+        version = version or Version()
         version.save = version.save or generate_timestamp()
         config[VERSION_KEY] = version
 
@@ -673,13 +685,17 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
             )
         return self._version
 
-    def _version_parse(self, path: str, pattern: str) -> datetime:
-        return self._safe_version.__class__(None, None, pattern).parse(path)
+    def _version_parse(self, path: str, pattern: str) -> DateTime:
+        return self._safe_version.__class__(  # pylint: disable=W0212
+            None, None, pattern
+        )._safe_parse(path)
 
-    def _version_unparse(self, timestamp: datetime, pattern: str) -> str:
-        return self._safe_version.__class__(None, None, pattern).unparse(timestamp)
+    def _version_unparse(self, timestamp: DateTime, pattern: str) -> str:
+        return self._safe_version.__class__(  # pylint: disable=W0212
+            None, None, pattern
+        )._safe_unparse(timestamp)
 
-    def _parse_datetime(self, version: str) -> datetime:
+    def _parse_datetime(self, version: str) -> DateTime:
         # converts a version in format ``YYYY-MM-DDThh.mm.ss.sssZ`` to the
         # specified filepath pattern. For example, if the ``filepath`` is
         # ``data/%Y-%m/file.csv`` it means only year and month are relevant,
@@ -690,7 +706,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         return self._version_parse(filepath, self._pattern)
 
     def _parse_timestamp(self, version: str) -> str:
-        return _format_timestamp(self._parse_datetime(version))
+        return str(self._parse_datetime(version))
 
     @property
     def version(self) -> Version:
@@ -704,8 +720,8 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def _apply_version(self, version: str) -> str:
         return self._version_unparse(self._parse_datetime(version), self._pattern)
 
-    def _extract_version(self, path: str) -> str:
-        return _format_timestamp(self._version_parse(path, self._pattern))
+    def _extract_version(self, path: str) -> DateTime:
+        return self._version_parse(path, self._pattern)
 
     @property
     def _is_unique_date_format(self) -> bool:
@@ -721,7 +737,9 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
     def _get_versioned_path(self, version: Union[Literal["*"], str]) -> PurePosixPath:
         if version == "*":
-            filepath = re.sub(FORMAT_CODE_PATTERN, version, self._pattern)
+            filepath = self._pattern
+            filepath = filepath.replace(VERSION_FORMAT, version)
+            filepath = re.sub(FORMAT_CODE_PATTERN, version, filepath)
         else:
             filepath = self._apply_version(version)
         return PurePosixPath(filepath)
@@ -743,7 +761,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         if not most_recent:
             raise VersionNotFoundError(f"Did not find any versions for {self}")
 
-        return self._extract_version(most_recent)
+        return str(self._extract_version(most_recent))
 
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod

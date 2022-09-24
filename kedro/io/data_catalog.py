@@ -19,8 +19,8 @@ from kedro.io.core import (
     DataSetNotFoundError,
     Version,
     generate_timestamp,
-    parse_partial_timestamp,
 )
+from kedro.io.datetime import DateTime
 from kedro.io.memory_dataset import MemoryDataSet
 
 CATALOG_KEY = "catalog"
@@ -159,12 +159,17 @@ class Versioner:
         self._load_versions = copy.deepcopy(load_versions) or {}
         self._version_class = version_class or Version
 
-    def __getitem__(self, key) -> Version:
+    def __getitem__(self, key: str) -> Version:
         load = self._load_versions.get(key, None)
-        load = parse_partial_timestamp(load) if load else None
         save = self._save_version
-        save = parse_partial_timestamp(save) if save else None
-        return self._version_class(load, save)
+        try:
+            load = str(DateTime.partialstrptime(load)) if load else None
+            save = str(DateTime.partialstrptime(save))
+            return self._version_class(load, save)
+        except ValueError:
+            return self._version_class(load, save)
+        except TypeError:
+            return self._version_class(None, None)
 
     @property
     def save_version(self) -> str:
@@ -366,6 +371,7 @@ class DataCatalog:
         if version and isinstance(data_set, AbstractVersionedDataSet):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
+            version = data_set.version.from_version(version)
             data_set = data_set._copy(  # pylint: disable=protected-access
                 _version=version
             )

@@ -374,7 +374,6 @@ class Version:  # Proposing the use of this class in order to make custom versio
         self._load = load
         self._save = save
         self._date_format = date_format or VERSION_FORMAT
-        self._is_default = VERSION_FORMAT in self._date_format
 
     @classmethod
     def from_version(cls, version: "Version") -> "Version":
@@ -382,6 +381,20 @@ class Version:  # Proposing the use of this class in order to make custom versio
         return cls(
             version._load, version._save, version._date_format  # pylint: disable=W0212
         )
+
+    @classmethod
+    def new(
+        cls,
+        load: Optional[str] = None,
+        save: Optional[str] = None,
+        date_format: Optional[str] = None,
+    ) -> "Version":
+        """Creates a new Version object keeping the class of the object."""
+        return cls(load, save, date_format)
+
+    @property
+    def _is_default(self) -> bool:
+        return VERSION_FORMAT in self._date_format
 
     def __getitem__(self, key: Literal[1, 2]) -> Optional[str]:
         if key == 1:
@@ -436,13 +449,15 @@ class Version:  # Proposing the use of this class in order to make custom versio
             return self._date_format.replace(VERSION_FORMAT, str(timestamp))
         return self.unparse(timestamp)
 
-    def _parse_format(self, timestamp: str) -> str:
+    def _preprocess(self, timestamp: Optional[str]) -> Optional[str]:
+        if timestamp is None:
+            return None
         return self._safe_unparse(self._safe_parse(timestamp))
 
     @property
     def load(self) -> Optional[str]:
         """Gets the load version in the specified date format."""
-        return self._parse_format(self._load) if self._load else None
+        return self._preprocess(self._load)
 
     @load.setter
     def load(self, value: Optional[str]) -> None:
@@ -452,7 +467,7 @@ class Version:  # Proposing the use of this class in order to make custom versio
     @property
     def save(self) -> Optional[str]:
         """Gets the save version in the specified date format."""
-        return self._parse_format(self._save) if self._save else None
+        return self._preprocess(self._save)
 
     @save.setter
     def save(self, value: Optional[str]) -> None:
@@ -686,12 +701,12 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         return self._version
 
     def _version_parse(self, path: str, pattern: str) -> DateTime:
-        return self._safe_version.__class__(  # pylint: disable=W0212
+        return self._safe_version.new(  # pylint: disable=W0212
             None, None, pattern
         )._safe_parse(path)
 
     def _version_unparse(self, timestamp: DateTime, pattern: str) -> str:
-        return self._safe_version.__class__(  # pylint: disable=W0212
+        return self._safe_version.new(  # pylint: disable=W0212
             None, None, pattern
         )._safe_unparse(timestamp)
 
@@ -712,7 +727,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def version(self) -> Version:
         """Gets the dataset version parsed from the filepath."""
         version = self._safe_version
-        return version.__class__(
+        return version.new(
             self._parse_timestamp(version.load) if version.load else None,
             self._parse_timestamp(version.save) if version.save else None,
         )

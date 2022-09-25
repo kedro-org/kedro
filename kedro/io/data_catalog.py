@@ -20,7 +20,7 @@ from kedro.io.core import (
     Version,
     generate_timestamp,
 )
-from kedro.io.datetime import DateTime
+from kedro.io.date_time import ProxyDateTime
 from kedro.io.memory_dataset import MemoryDataSet
 
 CATALOG_KEY = "catalog"
@@ -163,8 +163,8 @@ class Versioner:
         load = self._load_versions.get(key, None)
         save = self._save_version
         try:
-            load = str(DateTime.partialstrptime(load)) if load else None
-            save = str(DateTime.partialstrptime(save))
+            load = str(ProxyDateTime.partialstrptime(load)) if load else None
+            save = str(ProxyDateTime.partialstrptime(save))
             return self._version_class(load, save)
         except ValueError:
             return self._version_class(load, save)

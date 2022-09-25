@@ -23,7 +23,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
 )
 from urllib.parse import urlsplit
 
@@ -31,10 +30,11 @@ from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 from typing_extensions import Literal
 
-from kedro.io.datetime import (
+from kedro.io.date_time import (
     DATETIME_FORMAT,
     FORMAT_CODE_PATTERN,
     DateTime,
+    ProxyDateTime,
     UnknownDateTime,
 )
 from kedro.utils import load_obj
@@ -355,7 +355,7 @@ def generate_timestamp() -> str:
     Returns:
     String representation of the current timestamp.
     """
-    return str(DateTime.now(tz=timezone.utc))
+    return str(ProxyDateTime.now(timezone=timezone.utc))
 
 
 class Version:  # Proposing the use of this class in order to make custom versioning easier
@@ -412,20 +412,16 @@ class Version:  # Proposing the use of this class in order to make custom versio
         Returns:
             DateTime: Datetime object representing the timestamp provided.
         """
-        return DateTime.strptime(timestamp, self._date_format)
-
-    def _extract_default(self, timestamp: str) -> str:
-        pattern = cast(re.Match, re.search(VERSION_FORMAT, self._date_format))
-        span = pattern.span()
-        span = (span[0], len(timestamp) - (len(self._date_format) - span[1]))
-        return timestamp[span[0] : span[1]]
+        return ProxyDateTime.strptime(timestamp, self._date_format)
 
     def _safe_parse(self, timestamp: str) -> DateTime:
         try:
             return self.parse(timestamp)
         except ValueError as exc:
             if self._is_default:
-                return UnknownDateTime(self._extract_default(timestamp))
+                return UnknownDateTime.strptime(
+                    timestamp, VERSION_FORMAT, self._date_format
+                )
             raise IncompatibleVersionError(
                 f"``{self.__class__.__name__}`` isn't able to parse the ``{timestamp}``. "
                 f"using the format ``{self._date_format}``. Consider using a custom "
@@ -444,15 +440,10 @@ class Version:  # Proposing the use of this class in order to make custom versio
         """
         return timestamp.strftime(self._date_format)
 
-    def _safe_unparse(self, timestamp: DateTime) -> str:
-        if isinstance(timestamp, UnknownDateTime):
-            return self._date_format.replace(VERSION_FORMAT, str(timestamp))
-        return self.unparse(timestamp)
-
     def _preprocess(self, timestamp: Optional[str]) -> Optional[str]:
         if timestamp is None:
             return None
-        return self._safe_unparse(self._safe_parse(timestamp))
+        return self.unparse(self._safe_parse(timestamp))
 
     @property
     def load(self) -> Optional[str]:
@@ -706,9 +697,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         )._safe_parse(path)
 
     def _version_unparse(self, timestamp: DateTime, pattern: str) -> str:
-        return self._safe_version.new(  # pylint: disable=W0212
-            None, None, pattern
-        )._safe_unparse(timestamp)
+        return self._safe_version.new(None, None, pattern).unparse(timestamp)
 
     def _parse_datetime(self, version: str) -> DateTime:
         # converts a version in format ``YYYY-MM-DDThh.mm.ss.sssZ`` to the

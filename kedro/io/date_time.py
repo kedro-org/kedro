@@ -1,17 +1,57 @@
 """``DateTime`` is an proxy of the ``datetime`` class that simplifies the
 string conversion of datetime objects."""
+import itertools
 import re
+from abc import ABC, abstractmethod
 from datetime import datetime
 from datetime import tzinfo as TZInfo
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, cast
 
 DATETIME_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 FORMAT_CODE_PATTERN = r"%[a-zA-Z]"
 
 
-class DateTime:
-    """A subclass of the ``datetime`` for customizing how it handles string
-    conversion."""
+class DateTime(ABC):
+    """``DateTime`` is the base class datetime classes."""
+
+    @abstractmethod
+    def strftime(self, format_: str) -> str:
+        """Return a string representing ``DateTime``."""
+        pass  # pragma: no cover
+
+    @classmethod
+    @abstractmethod
+    def strptime(cls, date_string: str, format_: str) -> "DateTime":
+        """Converts a ``string`` into a ``DateTime`` object."""
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def __str__(self) -> str:
+        """Return the string representation of the ``DateTime`` object.
+
+        Note:
+        This method can be implemented using ``strftime``."""
+        pass  # pragma: no cover
+
+    def __repr__(self) -> str:
+        """Return the string representation of the ``DateTime`` object."""
+        return f"{self.__class__.__name__}('{self.__str__()}')"
+
+    def __eq__(self, other) -> bool:
+        """Return whether two ``DateTime`` objects are equal."""
+        if isinstance(other, DateTime):
+            return str(self) == str(other)
+        raise NotImplementedError("Can't compare ``DateTime`` with other types")
+
+    def __lt__(self, other) -> bool:
+        """Return whether one ``DateTime`` object is less than another."""
+        if isinstance(other, DateTime):
+            return str(self) < str(other)
+        raise NotImplementedError("Cannot compare DateTime with other types")
+
+
+class ProxyDateTime(DateTime):
+    """A ``datetime`` proxy for customizing how it handles string conversion."""
 
     __slots__ = (
         "_datetime",
@@ -24,7 +64,7 @@ class DateTime:
         "microsecond",
     )
 
-    if TYPE_CHECKING:
+    if TYPE_CHECKING:  # pragma: no cover
         _datetime: datetime
         year: int
         month: int
@@ -54,16 +94,14 @@ class DateTime:
     @classmethod
     def from_datetime(cls, timestamp: datetime):
         """Return a ``DateTime`` object from a ``datetime`` object."""
-        max_ = datetime.max
-        obj = cls(max_.year, max_.month, max_.day)
+        min_ = datetime.min
+        obj = cls(min_.year, min_.month, min_.day)
         obj._datetime = timestamp
         return obj
 
-    def __getattr__(self, name) -> Union[int, "DateTime", TZInfo]:
+    def __getattr__(self, name: str) -> Union[int, TZInfo]:
         """Return the attribute of the underlying datetime object."""
         value = getattr(self._datetime, name)
-        if isinstance(value, datetime):
-            return self.from_datetime(value)
         return value
 
     @property
@@ -72,34 +110,41 @@ class DateTime:
         return self._datetime
 
     @classmethod
-    def max(cls) -> "DateTime":  # type: ignore
+    def max(cls) -> "ProxyDateTime":  # type: ignore
         """Return the maximum datetime object."""
         return cls.from_datetime(datetime.max)
 
     @classmethod
-    def min(cls) -> "DateTime":  # type: ignore
+    def now(cls, timezone: TZInfo = None) -> "ProxyDateTime":
+        """Return the current datetime."""
+        return cls.from_datetime(datetime.now(tz=timezone))
+
+    @classmethod
+    def min(cls) -> "ProxyDateTime":  # type: ignore
         """Return the minimum datetime object."""
         return cls.from_datetime(datetime.min)
 
-    def replace(self, **kwargs) -> "DateTime":
+    def replace(self, **kwargs) -> "ProxyDateTime":
         """Return a ``DateTime`` object with the specified attributes replaced."""
         return self.from_datetime(self._datetime.replace(**kwargs))
 
-    def strftime(self, fmt: str = DATETIME_FORMAT) -> str:
+    def strftime(self, format_: str = DATETIME_FORMAT) -> str:
         """Return a string representing the datetime object."""
         microseconds = f"{int(self.microsecond / 1000):03d}"
-        pattern = re.sub("%f", microseconds, fmt)
+        pattern = re.sub("%f", microseconds, format_)
         return self.datetime.strftime(pattern)
 
     @classmethod
-    def strptime(cls, date_string: str, _format: str = DATETIME_FORMAT) -> "DateTime":
+    def strptime(
+        cls, date_string: str, format_: str = DATETIME_FORMAT
+    ) -> "ProxyDateTime":
         """Return a datetime object from a string representing a datetime."""
-        return cls.from_datetime(datetime.strptime(date_string, _format))
+        return cls.from_datetime(datetime.strptime(date_string, format_))
 
     @classmethod
     def partialstrptime(
-        cls, date_string: str, _format: str = DATETIME_FORMAT
-    ) -> "DateTime":
+        cls, date_string: str, format_: str = DATETIME_FORMAT
+    ) -> "ProxyDateTime":
         """Return a ``DateTime`` object from a string with part of the values
         expected for a format. it will read the format from left to right and
         try to parse the string accordingly. For example, if the format is
@@ -110,62 +155,52 @@ class DateTime:
             ValueError: If the format string contains unsupported format codes,
                 or if the date_string and format cannot be matched.
         """
-        value_pattern = re.sub(FORMAT_CODE_PATTERN, r"(\\d+)", _format)
-        format_codes = re.findall(FORMAT_CODE_PATTERN, _format)
-        values = re.search(value_pattern, date_string)
-
-        if not values:
-            raise ValueError(
-                "No format codes found in the format string, or "
-                "no matching values found in the string."
-            )
-
-        new_format, new_date_string = "", ""
-        for code, value in zip(format_codes, values.groups()):
-            new_format += f"-{code}"
-            new_date_string += f"-{value}"
-
-        return cls.strptime(new_date_string, new_format)
+        format_codes = re.finditer(FORMAT_CODE_PATTERN, format_)
+        itself = cast(re.Match, re.match(format_, format_))
+        for code in itertools.chain(format_codes, [itself]):
+            try:
+                return cls.strptime(date_string, format_[: code.span()[1]])
+            except ValueError:
+                pass
+        raise ValueError(
+            "No format codes found in the format string, or "
+            "no matching values found in the string."
+        )
 
     def __str__(self) -> str:
         """Return the Kedro representation of the ``DateTime`` object."""
         return self.strftime(DATETIME_FORMAT)
 
-    def __repr__(self) -> str:
-        """Return the string representation of the ``DateTime`` object."""
-        return f"{self.__class__.__name__}('{self.__str__()}')"
-
-    def __eq__(self, other) -> bool:
-        """Return whether two ``DateTime`` objects are equal."""
-        if isinstance(other, DateTime):
-            return str(self) == str(other)
-        raise NotImplementedError("Can't compare ``DateTime`` with other types")
-
-    def __lt__(self, other) -> bool:
-        """Return whether one ``DateTime`` object is less than another."""
-        if isinstance(other, DateTime):
-            return str(self) < str(other)
-        raise NotImplementedError("Cannot compare DateTime with other types")
-
 
 class UnknownDateTime(DateTime):
-    """This class is used to represent a datetime in an unknown granularity."""
+    """This class is used to represent a datetime made of unknown symbols."""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str, format_: str = None):
         """Initialize an ``UnknownDateTime`` object."""
-        max_ = super().max()
-        super().__init__(max_.year, max_.month, max_.day)
         self.value = value
+        self.format = format_ or DATETIME_FORMAT
+
+    def strftime(self, format_: str) -> str:
+        """Replaces ``pattern`` in ``format_`` by ``value``."""
+        return re.sub(self.format, self.value, format_)
 
     @classmethod
-    def max(cls) -> "UnknownDateTime":
-        """Return the maximum datetime object."""
-        raise NotImplementedError("UnknownDateTime does not have a maximum value")
-
-    @classmethod
-    def min(cls) -> "UnknownDateTime":
-        """Return the minimum datetime object."""
-        raise NotImplementedError("UnknownDateTime does not have a minimum value")
+    def strptime(
+        cls,
+        date_string: str,
+        format_: str = DATETIME_FORMAT,
+        pattern: str = DATETIME_FORMAT,
+    ) -> "UnknownDateTime":
+        """Finds ``format_`` in ``pattern`` and returns the corresponding
+        value in ``date_string``."""
+        format_pattern = re.sub(format_, "(.*)", pattern)
+        timestamp = re.search(format_pattern, date_string)
+        if timestamp and timestamp.groups():
+            return UnknownDateTime(timestamp[1], format_)
+        raise ValueError(
+            f"Could not parse ``{date_string}`` with format ``{format_}``"
+            f" and pattern ``{pattern}``."
+        )
 
     def __str__(self) -> str:
         return self.value

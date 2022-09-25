@@ -19,7 +19,7 @@ from kedro.io import (
     LambdaDataSet,
     MemoryDataSet,
 )
-from kedro.io.core import VERSION_FORMAT, generate_timestamp
+from kedro.io.core import VERSION_FORMAT, IncompatibleVersionError, generate_timestamp
 
 
 @pytest.fixture
@@ -137,6 +137,20 @@ def data_catalog(data_set):
 @pytest.fixture
 def data_catalog_from_config(sane_config):
     return DataCatalog.from_config(**sane_config)
+
+
+@pytest.fixture
+def custom_format_filepath(filepath):
+    path = Path(filepath)
+    filepath = path.parent / "%Y" / "%m-%d" / path.name
+    return filepath.as_posix()
+
+
+@pytest.fixture
+def unique_custom_format_filepath(custom_format_filepath):
+    path = Path(custom_format_filepath)
+    filepath = path.parent / "%H-%M-%S-%f" / path.name
+    return filepath.as_posix()
 
 
 class TestDataCatalog:
@@ -652,3 +666,93 @@ class TestDataCatalogVersioned:
         assert "ds2_spark" in catalog.datasets.__dict__
         assert "ds3__csv" in catalog.datasets.__dict__
         assert "jalapeño" in catalog.datasets.__dict__
+
+    def test_partial_load_version(self, sane_config, dummy_dataframe):
+        """Test load versioned data sets from config"""
+        sane_config["catalog"]["boats"]["versioned"] = True
+
+        catalog = DataCatalog.from_config(**sane_config, save_version="2022-09")
+        catalog.save("boats", dummy_dataframe)
+
+        assert_frame_equal(catalog.load("boats", version="2022-09"), dummy_dataframe)
+
+    @pytest.mark.freeze_time("2022-09-25")
+    def test_custom_version_format(self, sane_config, dummy_dataframe, filepath):
+        """Test load versioned data sets from config"""
+        path = Path(filepath)
+        filepath = path.parent / "%Y" / "%m-%d" / path.name
+        sane_config["catalog"]["boats"]["filepath"] = filepath.as_posix()
+        sane_config["catalog"]["boats"]["versioned"] = True
+
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", dummy_dataframe)
+
+        assert_frame_equal(catalog.load("boats", version="2022-09-25"), dummy_dataframe)
+        assert (path.parent / "2022" / "09-25" / path.name).is_file()
+
+    def test_custom_version_format_load_latest(
+        self, sane_config, dummy_dataframe, filepath, mocker
+    ):
+        """Test load versioned data sets from config"""
+        path = Path(filepath)
+        filepath = path.parent / "%Y" / "%m-%d" / path.name
+        sane_config["catalog"]["boats"]["filepath"] = filepath.as_posix()
+        sane_config["catalog"]["boats"]["versioned"] = True
+
+        date_old, date_new = "2022-09-25T10.10.10.100Z", "2022-09-26T10.10.10.100Z"
+        mocker.patch(
+            "kedro.io.data_catalog.generate_timestamp",
+            side_effect=[date_old, date_new, date_new],
+        )
+
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", dummy_dataframe)
+
+        new_dataframe = dummy_dataframe.assign(new_col=1)
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", new_dataframe)
+
+        catalog = DataCatalog.from_config(**sane_config)
+        assert_frame_equal(catalog.load("boats"), new_dataframe)
+        assert (path.parent / "2022" / "09-25" / path.name).is_file()
+        assert (path.parent / "2022" / "09-26" / path.name).is_file()
+
+    def test_non_unique_custom_version_format_warn(
+        self, sane_config, dummy_dataframe, custom_format_filepath, caplog
+    ):
+        sane_config["catalog"]["boats"]["filepath"] = custom_format_filepath
+        sane_config["catalog"]["boats"]["versioned"] = True
+
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        log_record = caplog.records[-1]
+        expected_log_message = "Saving versioned dataset to existing path: "
+        assert log_record.levelname == "WARNING"
+        assert expected_log_message in log_record.message
+
+    def test_error_unique_custom_version_format_saving_twice(
+        self, sane_config, dummy_dataframe, unique_custom_format_filepath
+    ):
+        sane_config["catalog"]["boats"]["filepath"] = unique_custom_format_filepath
+        sane_config["catalog"]["boats"]["versioned"] = True
+
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", dummy_dataframe)
+
+        with pytest.raises(DataSetError):
+            catalog.save("boats", dummy_dataframe)
+
+    @pytest.mark.freeze_time("2022-09-25")
+    def test_incompatible_custom_version_parsing(
+        self, sane_config, dummy_dataframe, custom_format_filepath
+    ):
+        sane_config["catalog"]["boats"]["filepath"] = custom_format_filepath
+        sane_config["catalog"]["boats"]["versioned"] = True
+
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", dummy_dataframe)
+
+        with pytest.raises(IncompatibleVersionError):
+            catalog.load("boats", version="2022-09-100")

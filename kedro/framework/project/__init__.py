@@ -107,6 +107,9 @@ class _ProjectSettings(LazySettings):
     _VERSION_CLASS = Validator(
         "VERSION_CLASS", default=_get_default_class("kedro.io.core.Version")
     )
+    _VERSION_CLASS = _IsSubclassValidator(
+        "VERSION_CLASS", default=_get_default_class("kedro.io.core.Version")
+    )
 
     def __init__(self, *args, **kwargs):
 

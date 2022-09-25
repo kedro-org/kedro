@@ -135,8 +135,9 @@ class Versioner:
     def __init__(
         self,
         load_versions: Dict[str, str] = None,
-        save_version: str = None,
+        save_version: Optional[str] = None,
         version_class: Type[Version] = None,
+        generate_save_version: bool = True,
     ):
         """``Versioner`` is a class that encapsulates the version information for a
         ``AbstractVersionedDataSet``. It is used by ``DataCatalog`` to handle the
@@ -154,8 +155,12 @@ class Versioner:
                 to parse the ``save_version`` and ``load_versions`` strings.
                 The class can be used to implement custom versioning schemes.
                 If not provided, ``Version`` will be used.
+            no_generation: If True, ``save`` operations will not generate
+                new versions.
         """
-        self._save_version = save_version or generate_timestamp()
+        self._save_version = save_version
+        if generate_save_version:
+            self._save_version = self._save_version or generate_timestamp()
         self._load_versions = copy.deepcopy(load_versions) or {}
         self._version_class = version_class or Version
 
@@ -164,7 +169,7 @@ class Versioner:
         save = self._save_version
         try:
             load = str(ProxyDateTime.partialstrptime(load)) if load else None
-            save = str(ProxyDateTime.partialstrptime(save))
+            save = str(ProxyDateTime.partialstrptime(save)) if save else None
             return self._version_class(load, save)
         except ValueError:
             return self._version_class(load, save)
@@ -172,7 +177,7 @@ class Versioner:
             return self._version_class(None, None)
 
     @property
-    def save_version(self) -> str:
+    def save_version(self) -> Optional[str]:
         """Returns the save version."""
         return self._save_version
 
@@ -378,7 +383,7 @@ class DataCatalog:
 
         return data_set
 
-    def load(self, name: str, version: str = None) -> Any:
+    def load(self, name: str, version: Optional[str] = None) -> Any:
         """Loads a registered data set.
 
         Args:
@@ -406,7 +411,11 @@ class DataCatalog:
             >>>
             >>> df = io.load("cars")
         """
-        load_version = Version(version, None) if version else None
+        load_version = (
+            None
+            if version is None
+            else Versioner({name: version}, generate_save_version=False)[name]
+        )
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(

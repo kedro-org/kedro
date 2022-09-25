@@ -396,13 +396,6 @@ class Version:  # Proposing the use of this class in order to make custom versio
     def _is_default(self) -> bool:
         return VERSION_FORMAT in self._date_format
 
-    def __getitem__(self, key: Literal[1, 2]) -> Optional[str]:
-        if key == 1:
-            return self._load
-        if key == 2:
-            return self._save
-        raise KeyError(f"Version object has only 2 keys: 1 and 2. Got {key}.")
-
     def parse(self, timestamp: str) -> DateTime:
         """Parses a timestamp string to a datetime object.
 
@@ -450,11 +443,6 @@ class Version:  # Proposing the use of this class in order to make custom versio
         """Gets the load version in the specified date format."""
         return self._preprocess(self._load)
 
-    @load.setter
-    def load(self, value: Optional[str]) -> None:
-        """Sets the load version. it should be in the specified date format."""
-        self._load = value
-
     @property
     def save(self) -> Optional[str]:
         """Gets the save version in the specified date format."""
@@ -465,7 +453,7 @@ class Version:  # Proposing the use of this class in order to make custom versio
         """Sets the save version. it should be in the specified date format."""
         self._save = value
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         attrs = {}
         for attr in ["load", "save"]:
             value = getattr(self, attr)
@@ -476,8 +464,8 @@ class Version:  # Proposing the use of this class in order to make custom versio
         content = ", ".join(f"{k}={v}" for k, v in attrs.items())
         return f"{self.__class__.__name__}({content})"
 
-    def __repr__(self) -> str:
-        return str(self)
+    def __str__(self) -> str:
+        return repr(self)
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Version):
@@ -684,7 +672,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
     @property
     def _safe_version(self) -> Version:
-        if not self._version:
+        if not self._version:  # pragma: no cover
             raise DataSetError(
                 "No version provided for versioned dataset. This method is "
                 "not supposed to be called when no version is provided"
@@ -730,7 +718,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     @property
     def _is_unique_date_format(self) -> bool:
         # if the filepath contains enough format codes to not conflict.
-        now = generate_timestamp()
+        now = str(ProxyDateTime.max())
         return self._parse_timestamp(now) == now
 
     @property
@@ -813,7 +801,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
                     f"versioning is enabled."
                 )
             self._logger.warning(
-                "Saving versioned dataset to existing path: %s", versioned_path
+                "Saving versioned dataset to existing path: '%s'", versioned_path
             )
 
         return versioned_path

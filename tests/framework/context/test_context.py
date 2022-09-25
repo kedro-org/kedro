@@ -37,6 +37,12 @@ class BadCatalog:  # pylint: disable=too-few-public-methods
     """
 
 
+class BadVersion:  # pylint: disable=too-few-public-methods
+    """
+    Version class that doesn't subclass `Version`, for testing only.
+    """
+
+
 def _write_yaml(filepath: Path, config: Dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
@@ -137,6 +143,20 @@ def mock_settings_file_bad_data_catalog_class(tmpdir):
             f"""
             from {__name__} import BadCatalog
             DATA_CATALOG_CLASS = BadCatalog
+            """
+        )
+    )
+    return mock_settings_file
+
+
+@pytest.fixture
+def mock_settings_file_bad_version_class(tmpdir):
+    mock_settings_file = tmpdir.join("mock_settings_file.py")
+    mock_settings_file.write(
+        textwrap.dedent(
+            f"""
+            from {__name__} import BadVersion
+            VERSION_CLASS = BadVersion
             """
         )
     )
@@ -251,6 +271,18 @@ class TestKedroContext:
         )
         with pytest.raises(ValidationError, match=re.escape(pattern)):
             assert mock_settings.DATA_CATALOG_CLASS
+
+    def test_wrong_version_type(self, mock_settings_file_bad_version_class):
+        pattern = (
+            "Invalid value 'tests.framework.context.test_context.BadVersion' received "
+            "for setting 'VERSION_CLASS'. "
+            "It must be a subclass of 'kedro.io.core.Version'."
+        )
+        mock_settings = _ProjectSettings(
+            settings_file=str(mock_settings_file_bad_version_class)
+        )
+        with pytest.raises(ValidationError, match=re.escape(pattern)):
+            assert mock_settings.VERSION_CLASS
 
     @pytest.mark.parametrize(
         "extra_params",

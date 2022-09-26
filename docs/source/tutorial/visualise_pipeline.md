@@ -129,6 +129,7 @@ The below functions can be added to the `nodes.py` and `pipeline.py` files respe
 # nodes.py
 import pandas as pd
 
+
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
 ```
@@ -262,6 +263,7 @@ To use this dataset, configure your plot in your Kedro node. The below functions
 # nodes.py
 import matplotlib.pyplot as plt
 import seaborn as sn
+
 
 def create_confusion_matrix(companies: pd.DataFrame):
     actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]

@@ -515,7 +515,7 @@ cars.csv:
   versioned: True
 ```
 
-The `DataCatalog` will create a versioned `CSVDataSet` called `cars.csv`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
+The `DataCatalog` will create a versioned `CSVDataSet` called `cars.csv`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`. Although, if you require a custom date formatting, you can specify it in the filepath using `datetime` [format codes](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes).
 
 You can run the pipeline with a particular versioned data set with `--load-version` flag as follows:
 
@@ -523,6 +523,10 @@ You can run the pipeline with a particular versioned data set with `--load-versi
 kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
+
+```{note}
+If a custom format is defined, load version doesn't have to be a fully specified timestamp. You can use a partial timestamp, e.g. `YYYY-MM-DDThh.mm.ss` or `YYYY-MM-DDThh.mm` or `YYYY-MM-DDThh` or `YYYY-MM-DD` or `YYYY-MM` or `YYYY`.
+```
 
 This section shows just the very basics of versioning, which is described further in [the documentation about Kedro IO](../data/kedro_io.md#versioning).
 

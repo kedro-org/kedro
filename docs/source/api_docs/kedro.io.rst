@@ -20,6 +20,8 @@ kedro.io
    kedro.io.IncrementalDataSet
    kedro.io.CachedDataSet
    kedro.io.Version
+   kedro.io.DateTime
+   kedro.io.ProxyDateTime
 
 .. rubric:: Exceptions
 

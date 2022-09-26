@@ -13,6 +13,7 @@ from .core import (
     Version,
 )
 from .data_catalog import DataCatalog
+from .date_time import DateTime, ProxyDateTime
 from .lambda_dataset import LambdaDataSet
 from .memory_dataset import MemoryDataSet
 from .partitioned_dataset import IncrementalDataSet, PartitionedDataSet
@@ -30,4 +31,6 @@ __all__ = [
     "MemoryDataSet",
     "PartitionedDataSet",
     "Version",
+    "DateTime",
+    "ProxyDateTime",
 ]

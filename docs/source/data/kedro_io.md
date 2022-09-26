@@ -40,7 +40,7 @@ For contributors, if you would like to submit a new dataset, you must extend the
 
 In order to enable versioning, you need to update the `catalog.yml` config file and set the `versioned` attribute to `true` for the given dataset. If this is a custom dataset, the implementation must also:
   1. extend `kedro.io.core.AbstractVersionedDataSet` AND
-  2. add `version` namedtuple as an argument to its `__init__` method AND
+  2. add `Version` class as an argument to its `__init__` method AND
   3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with `glob` and `exists` functions if it uses a non-local filesystem (see [kedro.extras.datasets.pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) as an example) AND
   4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.extras.datasets.pandas.CSVDataSet`](/kedro.extras.datasets.pandas.CSVDataSet) for an example implementation)
 
@@ -91,7 +91,7 @@ my_dataset:
   # param2 will be True by default
 ```
 
-### `version` namedtuple
+### `Version` class
 
 Versioned dataset `__init__` method must have an optional argument called `version` with a default value of `None`. If provided, this argument must be an instance of [`kedro.io.core.Version`](/kedro.io.Version). Its `load` and `save` attributes must either be `None` or contain string values representing exact load and save versions:
 
@@ -130,6 +130,25 @@ The last row in the example above would attempt to load a CSV file from `data/01
 
 ```{warning}
 The `DataCatalog` does not re-generate save versions between instantiations. Therefore, if you call `catalog.save('cars', some_data)` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling `%reload_kedro` line magic. This limitation does not apply to `load` operation.
+```
+
+#### Custom date format
+
+By default, Kedro will save your versioned datasets as `<path>/<version>/<filename>`, but what if you want to change the way it manipulates versioned paths? For example, you might want to save it as `<path>/<year>/<month>/<day>/<filename>` instead. In this case you may use [format codes](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes) in your `filepath` argument to specify where you want to save it. Let's see how it works:
+
+```yaml
+cars:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/company/car_data/%Y/%m/%d/car_data.csv
+  versioned: true
+```
+
+Consider today's date as `2019-02-13`. The `cars` dataset will be saved as `data/01_raw/company/car_data/2019/02/13/car_data.csv`.
+
+If you want to load a dataset from a specific datetime, you can use the partial timestamp of the `YYYY-MM-DDThh.mm.ss.sssZ` pattern instead of writing it fully. For example, if you want to load the dataset from the previous example, you could pass `--load-version "cars:2019-02-13"` to the `kedro run` command, instead of typing `cars:2019-02-13T00.00.00.000Z`.
+
+```{warning}
+Non unique formats don't raise errors when overwriting a dataset. For example, if you run a code that writes `cars` dataset twice in the same day, the second run will overwrite the first. This behaviour is only avoided when you specify an unique format, such as `%Y-%m-%d-%H-%M-%S-%f`.
 ```
 
 ### Versioning using the Code API
@@ -210,6 +229,42 @@ io.save("test_data_set", data1)  # emits a UserWarning due to version inconsiste
 # file does not exist
 reloaded = io.load("test_data_set")
 ```
+
+```{note}
+If a custom date format is specified, you can use the partial date format when calling `load` via code API.
+```
+
+### Custom version parsers
+
+The `Version` class is not only responsible for storing `save` and `load` versions, but also for manipulating them. The methods `parse` and `unparse` from `Version` are respectively used for receiving a timestamp string and returning a [`DateTime`](/kedro.io.DateTime) object, and vice versa. By default, the `parse` method uses [`ProxyDateTime.strptime`](/kedro.io.ProxyDateTime) for parsing strings into a [`ProxyDateTime`](/kedro.io.ProxyDateTime) object. While the `unparse` method uses the `strftime` of the received `DateTime` subclass for returning a timestamp.
+
+However, if these methods are not enough to implement your custom versioning logic, you can inherit the `Version` class and specify how to handle parsing and unparsing operations. To enable the use of your custom `Version` class, you just have to set the `VERSION_CLASS` variable in your `settings.py` file. For example, let's say you want to add a new special `format code` that points to sunday of that week.
+
+```python
+# sunday_version.py
+from kedro.io import Version, ProxyDateTime
+from datetime import timedelta
+
+class SundayVersion(Version):
+    def parse(self, version_str: str) -> ProxyDateTime:
+        version_str = version_str.replace('%ds', '%d')
+        dt = super().parse(version_str).datetime
+        dt = dt - timedelta(dt.weekday() + 1)
+        return ProxyDateTime.from_datetime(dt)
+
+    def unparse(self, version: ProxyDateTime) -> str:
+        format_ = self._date_format.replace('%ds', '%d)
+        return version.strftime(format_)
+```
+
+```python
+# settings.py
+from project.sunday_version import SundayVersion
+
+VERSION_CLASS = SundayVersion
+```
+
+This way you can implement your own custom versioning logic.
 
 ### Supported datasets
 

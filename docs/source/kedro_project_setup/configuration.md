@@ -189,7 +189,7 @@ This will load configuration files from any subdirectories in `conf` that have a
 Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 ```
 
-Calling `conf_loader[]` in the example above will throw a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
+Calling `conf_loader[key]` in the example above will throw a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
@@ -324,7 +324,7 @@ This will load configuration files from `conf/base` and `conf/local` whose filen
 Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence, any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 ```
 
-Calling `conf_loader[]` in the example above throws a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
+Calling `conf_loader[key]` in the example above throws a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException

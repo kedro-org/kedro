@@ -14,7 +14,7 @@
 
 ## Bug fixes and other changes
 
-* Fix `kedro micropkg pull` for packages on PyPI.
+* Fixed `kedro micropkg pull` for packages on PyPI.
 
 ## Breaking changes to the API
 

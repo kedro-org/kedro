@@ -143,6 +143,15 @@ type_targets = {
         "pluggy._manager.PluginManager",
         "_DI",
         "_DO",
+        # The seven statements below were added after subclassing dict in AbstractConfigLoader. More
+        # explanation in: https://github.com/numpy/numpydoc/issues/275#issuecomment-654418024
+        "None.  Remove all items from D.",
+        "a shallow copy of D",
+        "a set-like object providing a view on D's items",
+        "a set-like object providing a view on D's keys",
+        "v, remove specified key and return the corresponding value.",
+        "None.  Update D from dict/iterable E and F.",
+        "an object providing a view on D's values",
     ),
     "py:data": (
         "typing.Any",

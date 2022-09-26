@@ -71,7 +71,15 @@ def project_group():  # pragma: no cover
 @forward_command(project_group, forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
 def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-argument
-    """Run the test suite."""
+    """Run the test suite. (DEPRECATED)"""
+
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro test' is deprecated and "
+        "will not be available from Kedro 0.19.0. "
+        "Use the command 'pytest' instead. "
+
+    )
+    click.secho(deprecation_message, fg="red")
     try:
         _check_module_importable("pytest")
     except KedroCliError as exc:
@@ -90,7 +98,13 @@ def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-a
 def lint(
     metadata: ProjectMetadata, files, check_only, **kwargs
 ):  # pylint: disable=unused-argument
-    """Run flake8, isort and black."""
+    """Run flake8, isort and black. (DEPRECATED)"""
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro lint' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
+
     source_path = metadata.source_dir
     package_name = metadata.package_name
     files = files or (str(source_path / "tests"), str(source_path / package_name))

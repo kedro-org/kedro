@@ -14,7 +14,9 @@
 
 ## Bug fixes and other changes
 
-## Breaking changes to the API
+## Upcoming deprecations for Kedro 0.19.0
+
+* `kedro test`, `kedro lint` will be deprecated.
 
 # Release 0.18.3
 

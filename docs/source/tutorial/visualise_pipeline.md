@@ -126,13 +126,15 @@ Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyD
 The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
 
 ```python
+# nodes.py
 import pandas as pd
-
 
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
+```
 
-
+```python
+# pipeline.py
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
     return pipeline(
@@ -175,6 +177,7 @@ Below is an example of how to visualise plots using [Plotly Express](https://plo
 The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
 
 ```python
+# nodes.py
 import plotly.express as px
 import pandas as pd
 
@@ -200,8 +203,10 @@ def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
         ]
     )
     return fig
+```
 
-
+```python
+# pipeline.py
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
     return pipeline(

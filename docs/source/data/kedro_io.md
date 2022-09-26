@@ -245,16 +245,16 @@ However, if these methods are not enough to implement your custom versioning log
 from kedro.io import Version, ProxyDateTime
 from datetime import timedelta
 
+
 class SundayVersion(Version):
-    def parse(self, version_str: str) -> ProxyDateTime:
-        version_str = version_str.replace('%ds', '%d')
-        dt = super().parse(version_str).datetime
-        dt = dt - timedelta(dt.weekday() + 1)
+    def tosunday(self, version: ProxyDateTime) -> ProxyDateTime:
+        dt = version.datetime
+        dt = dt - timedelta((dt.weekday() + 1) % 7)
         return ProxyDateTime.from_datetime(dt)
 
-    def unparse(self, version: ProxyDateTime) -> str:
-        format_ = self._date_format.replace('%ds', '%d)
-        return version.strftime(format_)
+    def parse(self, version_str: str) -> ProxyDateTime:
+        date_time = super().parse(version_str)
+        return self.tosunday(date_time)
 ```
 
 ```python
@@ -265,6 +265,55 @@ VERSION_CLASS = SundayVersion
 ```
 
 This way you can implement your own custom versioning logic.
+
+For more complex versioning logic, you can also overload the `glob` method. This method controls the glob pattern used for finding the latest data, and in more specific cases, it may be necessary to override it. For example, let's say you want to replicate the last example, but still be able to save regular days. You could acomplish this by overloading the `glob` method:
+
+```python
+# sunday_version.py
+from kedro.io import Version, ProxyDateTime
+from datetime import timedelta
+
+
+class SundayVersion(Version):
+    @property
+    def is_sunday(self) -> bool:
+        return "%c" in self._date_format
+
+    @property
+    def pattern(self) -> str:
+        return (
+            self._date_format.replace("%c", "%d")
+            if self.is_sunday
+            else self._date_format
+        )
+
+    def tosunday(self, version: ProxyDateTime) -> ProxyDateTime:
+        dt = version.datetime
+        dt = dt - timedelta((dt.weekday() + 1) % 7)
+        return ProxyDateTime.from_datetime(dt)
+
+    def parse(self, version_str: str) -> ProxyDateTime:
+        if self.is_sunday:
+            date_time = super().parse(version_str, self.pattern)
+            return self.tosunday(date_time)
+        return super().parse(version_str)
+
+    def unparse(self, version: ProxyDateTime) -> str:
+        return super().unparse(version, self.pattern)
+
+    def glob(self) -> str:
+        return super().glob(date_format=self.pattern)
+```
+
+This way, you create a new `format code` that points to sunday of that week.
+
+```{note}
+All overidable methods have a `date_format` parameter that can be used to replace `_date_format` momentarily. Subclasses don't need to implement them, they are just there to simplify `super()` calls.
+```
+
+```{warning}
+Don't forget to use the `super` method whenever as possible to avoid breaking the default behaviour. Make sure to read the methods source code to understand how they work.
+```
 
 ### Supported datasets
 

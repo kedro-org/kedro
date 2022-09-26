@@ -392,46 +392,49 @@ class Version:  # Proposing the use of this class in order to make custom versio
         """Creates a new Version object keeping the class of the object."""
         return cls(load, save, date_format)
 
-    @property
-    def _is_default(self) -> bool:
-        return VERSION_FORMAT in self._date_format
+    def _is_default(self, date_format: str = None) -> bool:
+        date_format = date_format or self._date_format
+        return VERSION_FORMAT in date_format
 
-    def parse(self, timestamp: str) -> DateTime:
-        """Parses a timestamp string to a datetime object.
+    def parse(self, timestamp: str, date_format: Optional[str] = None) -> DateTime:
+        """Parses a timestamp in ``date_format`` format into a ``DateTime`` object."""
+        date_format = date_format or self._date_format
+        return ProxyDateTime.strptime(timestamp, date_format)
 
-        Args:
-            timestamp (str): Timestamp string to be parsed.
-
-        Returns:
-            DateTime: Datetime object representing the timestamp provided.
-        """
-        return ProxyDateTime.strptime(timestamp, self._date_format)
-
-    def _safe_parse(self, timestamp: str) -> DateTime:
+    def _safe_parse(
+        self, timestamp: str, date_format: Optional[str] = None
+    ) -> DateTime:
+        stored_format = self._date_format
+        date_format = date_format or stored_format
+        self._date_format = date_format
         try:
-            return self.parse(timestamp)
+            datetime = self.parse(timestamp)
+            self._date_format = stored_format
+            return datetime
         except ValueError as exc:
-            if self._is_default:
-                return UnknownDateTime.strptime(
-                    timestamp, VERSION_FORMAT, self._date_format
-                )
+            self._date_format = stored_format
+            if self._is_default(date_format):
+                return UnknownDateTime.strptime(timestamp, VERSION_FORMAT, date_format)
             raise IncompatibleVersionError(
                 f"``{self.__class__.__name__}`` isn't able to parse the ``{timestamp}``. "
-                f"using the format ``{self._date_format}``. Consider using a custom "
+                f"using the format ``{date_format}``. Consider using a custom "
                 "``Version`` class that can handle this format or use the default "
                 "pattern to enable non date parsing."
             ) from exc
 
-    def unparse(self, timestamp: DateTime) -> str:
-        """Unparses a datetime object to a timestamp string.
+    def unparse(self, timestamp: DateTime, date_format: Optional[str] = None) -> str:
+        """Unparses a ``DateTime`` into ``date_format``."""
+        date_format = date_format or self._date_format
+        return timestamp.strftime(date_format)
 
-        Args:
-            timestamp (DateTime): Datetime object to be unparsed.
-
-        Returns:
-            str: Timestamp string representing the datetime provided.
-        """
-        return timestamp.strftime(self._date_format)
+    def glob(self, pattern: str = "*", date_format: Optional[str] = None) -> str:
+        """Returns a glob pattern to be used to find versions."""
+        date_format = date_format or self._date_format
+        if self._is_default(date_format):
+            date_format = date_format.replace(VERSION_FORMAT, pattern)
+        else:
+            date_format = re.sub(FORMAT_CODE_PATTERN, pattern, date_format)
+        return date_format
 
     def _preprocess(self, timestamp: Optional[str]) -> Optional[str]:
         if timestamp is None:
@@ -729,9 +732,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
     def _get_versioned_path(self, version: Union[Literal["*"], str]) -> PurePosixPath:
         if version == "*":
-            filepath = self._pattern
-            filepath = filepath.replace(VERSION_FORMAT, version)
-            filepath = re.sub(FORMAT_CODE_PATTERN, version, filepath)
+            filepath = self._safe_version.glob(date_format=self._pattern)
         else:
             filepath = self._apply_version(version)
         return PurePosixPath(filepath)

@@ -256,7 +256,7 @@ To use this dataset, configure your plot in your Kedro node. The below functions
 ```python
 # nodes.py
 import matplotlib.pyplot as plt
-
+import seaborn as sn
 
 def create_confusion_matrix(companies: pd.DataFrame):
     actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]
@@ -268,8 +268,9 @@ def create_confusion_matrix(companies: pd.DataFrame):
     )
     sn.heatmap(confusion_matrix, annot=True)
     return plt
+```
 
-
+```python
 # pipeline.py
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
@@ -287,7 +288,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 You must also specify the output type in the `catalog.yml` file, like below. Remember to set the versioned flag to `true` if you want to add the plots to experiment tracking as well.
 
 ```yaml
-reporting.dummy_confusion_matrix:
+dummy_confusion_matrix:
   type: matplotlib.MatplotlibWriter
   filepath: ${base_location}/08_reporting/dummy_confusion_matrix.png
   versioned: true

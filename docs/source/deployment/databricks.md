@@ -34,7 +34,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.18.2"
+pip install "kedro~=0.18.3"
 # name your project Iris Databricks when prompted for it
 kedro new --starter pyspark-iris
 ```
@@ -169,10 +169,10 @@ In your newly-created notebook, put each of the below code snippets into a separ
 %sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch main https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
 ```
 
-* Install the latest version of Kedro compatible with version `0.18.2`
+* Install the latest version of Kedro compatible with version `0.18.3`
 
 ```console
-%pip install "kedro[spark.SparkDataSet]~=0.18.2"
+%pip install "kedro[spark.SparkDataSet]~=0.18.3"
 ```
 
 * Copy input data into DBFS
@@ -230,7 +230,7 @@ Your complete notebook should look similar to this (the results are hidden):
 
 ### 9. Using the Kedro IPython Extension
 
-You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.extras.extensions.ipython`.
+You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.ipython`.
 
 The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
@@ -239,7 +239,7 @@ The IPython extension can be used in a Databricks notebook in a similar way to h
 If you encounter a `ContextualVersionConflictError`, it is likely caused by Databricks using an old version of `pip`. Hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
 
 ```ipython
-In [1]: %load_ext kedro.extras.extensions.ipython
+In [1]: %load_ext kedro.ipython
 ```
 
 You must explicitly upgrade your `pip` version by doing the below:

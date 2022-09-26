@@ -106,7 +106,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
     on the CLI: https://ipython.readthedocs.io/en/stable/install/kernel_install.html.
 
     On linux this creates a directory ~/.local/share/jupyter/kernels/{kernel_name}
-    containing kernel.json, logo-32x32.png and logo-64x64.png. An example kernel.json
+    containing kernel.json, logo-32x32.png, logo-64x64.png and logo-svg.svg. An example kernel.json
     looks as follows:
 
     {
@@ -117,7 +117,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
       "-f",
       "{connection_file}",
       "--ext",
-      "kedro.extras.extensions.ipython"
+      "kedro.ipython"
      ],
      "display_name": "Kedro (spaceflights)",
      "language": "python",
@@ -151,14 +151,15 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
 
         kernel_json = Path(kernel_path) / "kernel.json"
         kernel_spec = json.loads(kernel_json.read_text(encoding="utf-8"))
-        kernel_spec["argv"].extend(["--ext", "kedro.extras.extensions.ipython"])
+        kernel_spec["argv"].extend(["--ext", "kedro.ipython"])
         # indent=1 is to match the default ipykernel style (see
         # ipykernel.write_kernel_spec).
         kernel_json.write_text(json.dumps(kernel_spec, indent=1), encoding="utf-8")
 
-        kedro_extensions_dir = Path(__file__).parents[2] / "extras" / "extensions"
-        shutil.copy(kedro_extensions_dir / "logo-32x32.png", kernel_path)
-        shutil.copy(kedro_extensions_dir / "logo-64x64.png", kernel_path)
+        kedro_ipython_dir = Path(__file__).parents[2] / "ipython"
+        shutil.copy(kedro_ipython_dir / "logo-32x32.png", kernel_path)
+        shutil.copy(kedro_ipython_dir / "logo-64x64.png", kernel_path)
+        shutil.copy(kedro_ipython_dir / "logo-svg.svg", kernel_path)
     except Exception as exc:
         raise KedroCliError(
             f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"

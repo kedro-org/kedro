@@ -11,6 +11,8 @@
 # Upcoming Release 0.18.4
 
 ## Major features and improvements
+* Implemented custom datetime format versioning. Now, the user can specify format codes in the filepath argument. For example `filepath: data/%Y/%m/%d/data.csv` will create a versioned dataset with the format `data/2022/09/25/data.csv` if today's date is `2022-09-25`.
+* Added custom version parsing and unparsing for extending the versioning functionality. Now, the user can specify a custom `Version` class in `settings.py` and override the `parse` and `unparse` methods in order to allow implementing custom logic when resolving a `filepath`.
 
 ## Bug fixes and other changes
 

@@ -72,7 +72,6 @@ def project_group():  # pragma: no cover
 @click.pass_obj  # this will pass the metadata as first argument
 def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-argument
     """Run the test suite. (DEPRECATED)"""
-
     deprecation_message = (
         "DeprecationWarning: Command 'kedro test' is deprecated and "
         "will not be available from Kedro 0.19.0. "
@@ -80,6 +79,7 @@ def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-a
 
     )
     click.secho(deprecation_message, fg="red")
+
     try:
         _check_module_importable("pytest")
     except KedroCliError as exc:
@@ -185,13 +185,15 @@ def package(metadata: ProjectMetadata):
 @click.pass_obj  # this will pass the metadata as first argument
 def build_docs(metadata: ProjectMetadata, open_docs):
     """Build the project documentation. (DEPRECATED)"""
-    source_path = metadata.source_dir
-    package_name = metadata.package_name
     deprecation_message = (
         "DeprecationWarning: Command 'kedro build-docs' is deprecated and "
         "will not be available from Kedro 0.19.0."
     )
     click.secho(deprecation_message, fg="red")
+
+    source_path = metadata.source_dir
+    package_name = metadata.package_name
+
     python_call("pip", ["install", str(source_path / "[docs]")])
     python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])
     python_call("ipykernel", ["install", "--user", f"--name={package_name}"])
@@ -276,12 +278,13 @@ def activate_nbstripout(
     metadata: ProjectMetadata, **kwargs
 ):  # pylint: disable=unused-argument
     """Install the nbstripout git hook to automatically clean notebooks. (DEPRECATED)"""
-    source_path = metadata.source_dir
     deprecation_message = (
         "DeprecationWarning: Command 'kedro activate-nbstripout' is deprecated and "
         "will not be available from Kedro 0.19.0."
     )
     click.secho(deprecation_message, fg="red")
+
+    source_path = metadata.source_dir
     click.secho(
         (
             "Notebook output cells will be automatically cleared before committing"

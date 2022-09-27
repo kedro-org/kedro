@@ -16,7 +16,7 @@
 
 ## Upcoming deprecations for Kedro 0.19.0
 
-* `kedro test`, `kedro lint` will be deprecated.
+* `kedro test` and `kedro lint` will be deprecated.
 
 # Release 0.18.3
 

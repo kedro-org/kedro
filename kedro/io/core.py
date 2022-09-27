@@ -681,11 +681,11 @@ def _parse_filepath(filepath: str) -> Dict[str, str]:
     options = {"protocol": protocol, "path": path}
 
     if parsed_path.netloc:
-        if protocol not in ("hdfs"):
+        if protocol not in ("123",):
             host_with_port = parsed_path.netloc.rsplit("@", 1)[-1]
             host = host_with_port.rsplit(":", 1)[0]
             options["path"] = host + options["path"]
-            print(host_with_port.rsplit(":", 1))
+            print(host_with_port.rsplit(":", 1), options, host)
 
     return options
 

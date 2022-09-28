@@ -136,3 +136,24 @@ addopts = """
 
 #### Run pytest with pytest-cov
 
+Now when you run `pytest` you will receive a test coverage report. Adding the example test to the spaceflights tutorial results in the following additional report.
+
+```
+Name                                                     Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------------------------
+src/spaceflights/__init__.py                                 1      1     0%   4
+src/spaceflights/__main__.py                                30     30     0%   4-47
+src/spaceflights/pipeline_registry.py                        7      7     0%   2-16
+src/spaceflights/pipelines/__init__.py                       0      0   100%
+src/spaceflights/pipelines/data_processing/__init__.py       1      1     0%   3
+src/spaceflights/pipelines/data_processing/nodes.py         25     25     0%   1-67
+src/spaceflights/pipelines/data_processing/pipeline.py       5      5     0%   1-8
+src/spaceflights/pipelines/data_science/__init__.py          1      1     0%   3
+src/spaceflights/pipelines/data_science/nodes.py            20     20     0%   1-55
+src/spaceflights/pipelines/data_science/pipeline.py          8      8     0%   1-40
+src/spaceflights/settings.py                                 0      0   100%
+--------------------------------------------------------------------------------------
+TOTAL                                                       98     98     0%
+```
+
+The report gives an overview 

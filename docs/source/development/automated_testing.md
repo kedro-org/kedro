@@ -1,8 +1,8 @@
-# Best Practices
+# Automated Testing
 
-Two important steps to achieving high code quality and maintainability in your Kedro project are the use of linting tools and automated tests. Let's take a look at how you can set these up.
+An important step towards achieving high code quality and maintainability in your Kedro project is the use of automated tests. Let's take a look at how you can set this up.
 
-## Automated Testing
+## Motivation
 
 Software testing is the process of checking that the code you have written fulfils its requirements. Software testing can either be **manual** or **automated**. In the context of Kedro:
 - **Manual testing** is when you run part or all of your project and check that the results are what you expect.
@@ -14,13 +14,13 @@ The major disadvantage of manual testing is that it is time-consuming. Manual te
 
 The solution to this problem is automated testing, which allows many tests across the codebase to be run in seconds, every time a new feature is added or an old one is changed. In this way, breaking changes can be discovered early, before any time is lost in production.
 
-### Set up automated testing with pytest
+## Set up automated testing with pytest
 
 There are many testing frameworks available for Python. One of the most popular is a [pytest](https://docs.pytest.org/). Pytest is often used in Python projects for its short, readable tests and powerful set of features.
 
 Let's look at how you can start working with pytest in your Kedro project.
 
-#### Install pytest
+### Install pytest
 
 Install pytest as you would install other packages with pip, making sure your project's virtual environment is active.
 
@@ -28,7 +28,7 @@ Install pytest as you would install other packages with pip, making sure your pr
 pip install pytest
 ```
 
-#### Create a /tests directory
+### Create a /tests directory
 
 Now that pytest is installed, you will need a place to put your tests. Create a `/tests` folder in the `/src' directory of your project.
 
@@ -36,7 +36,7 @@ Now that pytest is installed, you will need a place to put your tests. Create a 
 mkdir <project_root>/src/tests
 ```
 
-#### Test directory structure
+### Test directory structure
 
 The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `<project_root>/src/<project_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. For instance:
 
@@ -58,7 +58,7 @@ src
 │           │   ...
 ```
 
-#### Create an example test
+### Create an example test
 
 Now that you have a place to put your tests, you can create an example 
 
@@ -88,7 +88,7 @@ class TestProjectContext:
         assert project_context.project_path == Path.cwd()
 ```
 
-#### Run your tests
+### Run your tests
 
 To run your tests, run `pytest` from within your project's root directory or from the `/src` directory.
 
@@ -111,11 +111,11 @@ src/tests/test_run.py .                                                  [100%]
 
 This output indicates that one test ran successfully in the file `src/tests/test_run.py`. For help writing your own tests and using all of the features of pytest, see the [docs](https://docs.pytest.org/).
 
-### Add test coverage reports with pytest-cov
+## Add test coverage reports with pytest-cov
 
 It can be useful to see how much of your project is covered by tests. For this, you can install and configure the [pytest-cov](https://pypi.org/project/pytest-cov/) plugin for pytest, which is based on the popular [coverage.py](https://coverage.readthedocs.io/) library.
 
-#### Installing pytest-cov
+### Install pytest-cov
 
 Install pytest as you would install other packages with pip, making sure your project's virtual environment is active.
 
@@ -123,7 +123,7 @@ Install pytest as you would install other packages with pip, making sure your pr
 pip install pytest-cov
 ```
 
-#### Configure pytest to use pytest-cov
+### Configure pytest to use pytest-cov
 
 To configure pytest to generate a coverage report using pytest-cov, you can add the following lines to your `<project_root>/pyproject.toml` file (creating it if it does not exist).
 
@@ -134,7 +134,7 @@ addopts = """
 --cov src/<project_name> -ra"""
 ```
 
-#### Run pytest with pytest-cov
+### Run pytest with pytest-cov
 
 Now when you run `pytest` you will receive a test coverage report. Running `pytest` in the spaceflights starter with pytest-cov installed results in the following additional report.
 

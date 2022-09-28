@@ -14,6 +14,8 @@
 
 ## Bug fixes and other changes
 
+* Fixed `format` in `save_args` for `SparkHiveDataSet`, previously it didn't allow you to save it as delta format.
+
 ## Breaking changes to the API
 
 # Release 0.18.3

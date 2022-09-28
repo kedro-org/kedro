@@ -109,11 +109,11 @@ src/tests/test_run.py .                                                  [100%]
 ============================== 1 passed in 0.38s ===============================
 ```
 
-This output indicates that one test ran successfully in the file `src/tests/test_run.py`. For a full discussion on interpreting the output of pytest, see the relevant (docs)[] on the subject.
+This output indicates that one test ran successfully in the file `src/tests/test_run.py`. For help writing your own tests and using all of the features of pytest, see the [docs](https://docs.pytest.org/).
 
 ### Add test coverage reports with pytest-cov
 
-It can be useful to see how much of your project is covered by tests. For this, you can install and configure the (pytest-cov)[] plugin for pytest.
+It can be useful to see how much of your project is covered by tests. For this, you can install and configure the [pytest-cov](https://pypi.org/project/pytest-cov/) plugin for pytest, which is based on the popular [coverage.py](https://coverage.readthedocs.io/) library.
 
 #### Installing pytest-cov
 
@@ -136,7 +136,7 @@ addopts = """
 
 #### Run pytest with pytest-cov
 
-Now when you run `pytest` you will receive a test coverage report. Adding the example test to the spaceflights tutorial results in the following additional report.
+Now when you run `pytest` you will receive a test coverage report. Running `pytest` in the spaceflights starter with pytest-cov installed results in the following additional report.
 
 ```
 Name                                                     Stmts   Miss  Cover   Missing
@@ -156,4 +156,4 @@ src/spaceflights/settings.py                                 0      0   100%
 TOTAL                                                       98     98     0%
 ```
 
-The report gives an overview 
+This is the simplest report that coverage.py (via pytest-cov) will produce, it gives an overview of how many of the executable statements in each project file are covered by tests. For a full set of features offered by coverage.py, see the [docs](https://coverage.readthedocs.io/).

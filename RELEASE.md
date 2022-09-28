@@ -14,6 +14,8 @@
 
 ## Bug fixes and other changes
 
+* Fixed `format` in `save_args` for `SparkHiveDataSet`, previously it does not allows you to save it as delta format.
+
 ## Breaking changes to the API
 
 # Release 0.18.3
@@ -48,7 +50,6 @@
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
 * Added `gdrive` to list of cloud protocols, enabling Google Drive paths for datasets.
 * Added svg logo resource for ipython kernel.
-* Fixed `format` in `save_args` for `SparkHiveDataSet`.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.

@@ -656,12 +656,9 @@ class TestDataCatalogVersioned:
     def test_no_version_cloud(self):
         """Check the error if no versions are available for load from cloud storage"""
         version = Version(load=None, save=None)
-        dummy_credentials = \
-            {'client_kwargs': {'aws_access_key_id': 'FAKE', 'aws_secret_access_key': 'FAKE'}}
         ds = CSVDataSet(
             "s3://bucket/file.csv",
-            version=version,
-            credentials=dummy_credentials)
+            version=version)
         pattern = re.escape(f"Did not find any versions for {ds} "
                             f"This could be due to insufficient permission.")
         with pytest.raises(DataSetError, match=pattern):

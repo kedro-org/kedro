@@ -541,7 +541,8 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         protocol = getattr(self, "_protocol", None)
         if not most_recent:
             if protocol in CLOUD_PROTOCOLS:
-                message = f"Did not find any versions for {self}. This could be due to insufficient permission."
+                message = f"Did not find any versions for {self} This could be " \
+                          f"due to insufficient permission."
             else:
                 message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)

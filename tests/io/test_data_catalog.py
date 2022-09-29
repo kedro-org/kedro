@@ -19,7 +19,7 @@ from kedro.io import (
     LambdaDataSet,
     MemoryDataSet,
 )
-from kedro.io.core import VERSION_FORMAT, generate_timestamp
+from kedro.io.core import VERSION_FORMAT, generate_timestamp, Version
 
 
 @pytest.fixture
@@ -652,3 +652,17 @@ class TestDataCatalogVersioned:
         assert "ds2_spark" in catalog.datasets.__dict__
         assert "ds3__csv" in catalog.datasets.__dict__
         assert "jalapeño" in catalog.datasets.__dict__
+
+    def test_no_version_cloud(self):
+        """Check the error if no versions are available for load from cloud storage"""
+        version = Version(load=None, save=None)
+        dummy_credentials = \
+            {'client_kwargs': {'aws_access_key_id': 'FAKE', 'aws_secret_access_key': 'FAKE'}}
+        ds = CSVDataSet(
+            "s3://bucket/file.csv",
+            version=version,
+            credentials=dummy_credentials)
+        pattern = re.escape(f"Did not find any versions for {ds} "
+                            f"This could be due to insufficient permission.")
+        with pytest.raises(DataSetError, match=pattern):
+            ds.load()

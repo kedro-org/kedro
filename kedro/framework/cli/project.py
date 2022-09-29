@@ -76,7 +76,6 @@ def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-a
         "DeprecationWarning: Command 'kedro test' is deprecated and "
         "will not be available from Kedro 0.19.0. "
         "Use the command 'pytest' instead. "
-
     )
     click.secho(deprecation_message, fg="red")
 

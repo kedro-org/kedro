@@ -653,13 +653,13 @@ class TestDataCatalogVersioned:
         assert "ds3__csv" in catalog.datasets.__dict__
         assert "jalapeño" in catalog.datasets.__dict__
 
-    def test_no_versions_cloud_protocol(self):
+    def test_no_version_cloud(self):
         """Check the error if no versions are available for load from cloud storage"""
         version = Version(load=None, save=None)
-        versioned_dataset = CSVDataSet("s3://bucket/file.csv", version=version)
+        ds = CSVDataSet("s3://bucket/file.csv", version=version)
         pattern = re.escape(
-            f"Did not find any versions for {versioned_dataset} "
+            f"Did not find any versions for {ds} "
             f"This could be due to insufficient permission."
         )
         with pytest.raises(DataSetError, match=pattern):
-            versioned_dataset.load()
+            ds.load()

@@ -13,6 +13,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 
 ## Upcoming deprecations for Kedro 0.19.0
 

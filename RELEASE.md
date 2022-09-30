@@ -13,11 +13,14 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed `kedro micropkg pull` for packages on PyPI.
+* Fixed `format` in `save_args` for `SparkHiveDataSet`, previously it didn't allow you to save it as delta format.
+
+## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
-
 * `kedro test` and `kedro lint` will be deprecated.
-* Fixed `format` in `save_args` for `SparkHiveDataSet`, previously it didn't allow you to save it as delta format.
+
 
 # Release 0.18.3
 

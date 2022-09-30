@@ -542,7 +542,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         if not most_recent:
             if protocol in CLOUD_PROTOCOLS:
                 message = (
-                    f"Did not find any versions for {self} This could be "
+                    f"Did not find any versions for {self}. This could be "
                     f"due to insufficient permission."
                 )
             else:

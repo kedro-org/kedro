@@ -21,7 +21,7 @@ Let's look at how you can start working with `pytest` in your Kedro project.
 
 ### Install `pytest`
 
-Install `pytest` as you would install other packages with `pip`, making sure your project's virtual environment is active.
+Install `pytest` as you would install other packages with `pip`, making sure your project's virtual environment is active.  If you're unfamiliar with virtual environments, see our [docs page](https://kedro.readthedocs.io/en/stable/get_started/prerequisites.html#virtual-environments) on the subject for a quick primer.
 
 ```bash
 pip install pytest

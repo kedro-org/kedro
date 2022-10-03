@@ -98,7 +98,7 @@ You can read more about the [basics of using `pytest` on the getting started pag
 
 ### Run your tests
 
-To run your tests, run `pytest` from within your project's root directory or from the `/src` directory.
+To run your tests, run `pytest` from within your project's root directory.
 
 ```bash
 cd <project_root>

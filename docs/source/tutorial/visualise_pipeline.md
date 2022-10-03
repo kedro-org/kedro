@@ -297,7 +297,7 @@ You must also specify the output type in the `catalog.yml` file, like below. Rem
 ```yaml
 dummy_confusion_matrix:
   type: matplotlib.MatplotlibWriter
-  filepath: ${base_location}/08_reporting/dummy_confusion_matrix.png
+  filepath: data/08_reporting/dummy_confusion_matrix.png
   versioned: true
 ```
 

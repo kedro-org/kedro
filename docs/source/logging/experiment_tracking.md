@@ -30,7 +30,7 @@ SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data")}
 
 This will specify the creation of the `SQLiteStore` under the `/data` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin.
 
-Please ensure that your installed version of Kedro-Viz is at least version 4.1.1 onwards. This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. 
+Please ensure that your installed version of Kedro-Viz is at least version 4.1.1 onwards. This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end.
 
 ### Set up tracking datasets
 
@@ -47,11 +47,12 @@ metrics:
 
 ### Set up your nodes and pipelines to log metrics
 
-Add a node that returns the data to be tracked. The `report_accuracy` node below returns metrics. 
+Add a node that returns the data to be tracked. The `report_accuracy` node below returns metrics.
 
 ```python
 # nodes.py
 from sklearn.metrics import accuracy_score
+
 
 def report_accuracy():
     """Node for reporting the accuracy of the predictions."""
@@ -69,6 +70,7 @@ Add the node to your pipeline and ensure that the output name matches the name o
 # pipeline.py
 from kedro.pipeline import Pipeline, node, pipeline
 from .nodes import report_accuracy
+
 
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(

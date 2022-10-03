@@ -176,7 +176,7 @@ You can now access, compare and pin your runs by toggling the `Compare runs` but
 
 ## View and compare plot data
 
-From Kedro-Viz version 5.0.0 experiment tracking also supports the display and comparison of plots, such as Plotly and Matplotlib. 
+From Kedro-Viz version 5.0.0 experiment tracking also supports the display and comparison of plots, such as Plotly and Matplotlib.
 
 Add a new node to the `data_processing` nodes (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`):
 
@@ -197,7 +197,7 @@ def create_confusion_matrix(companies: pd.DataFrame):
     return plt
 ```
 
-> You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet. 
+> You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
 
 And now add this node to the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/pipeline.py`)
 

@@ -164,4 +164,4 @@ src/spaceflights/settings.py                                 0      0   100%
 TOTAL                                                       98     98     0%
 ```
 
-This is the simplest report that `coverage.py` (via `pytest-cov`) will produce. It gives an overview of how many of the executable statements in each project file are covered by tests. For detail on the full set of features offered, see [ the`coverage.py` docs](https://coverage.readthedocs.io/).
+This is the simplest report that `coverage.py` (via `pytest-cov`) will produce. It gives an overview of how many of the executable statements in each project file are covered by tests. For detail on the full set of features offered, see the [`coverage.py` docs](https://coverage.readthedocs.io/).

@@ -94,7 +94,7 @@ This test is redundant, but it introduces a few of `pytest`'s core features and 
 
 Tests should be named as descriptively as possible, especially if you are working with other people. For example, it is easier to understand the purpose of a test with the name `test_node_passes_with_valid_input` than a test with the name `test_passes`.
 
-You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using all of the features of `pytest`, see the [docs](https://docs.pytest.org/).
+You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using all of the features of `pytest`, see the [project documentation](https://docs.pytest.org/).
 
 ### Run your tests
 

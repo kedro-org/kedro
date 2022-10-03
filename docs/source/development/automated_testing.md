@@ -37,12 +37,12 @@ mkdir <project_root>/src/tests
 
 ### Test directory structure
 
-The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `/src/<project_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. For instance:
+The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `/src/<package_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. For instance:
 
 ```
 src
 │   ...
-└───<project_name>
+└───<package_name>
 │   └───pipelines
 │       └───dataprocessing
 │           │   ...
@@ -139,7 +139,7 @@ To configure `pytest` to generate a coverage report using `pytest-cov`, you can 
 [tool.pytest.ini_options]
 addopts = """
 --cov-report term-missing \
---cov src/<project_name> -ra"""
+--cov src/<package_name> -ra"""
 ```
 
 ### Run `pytest` with `pytest-cov`

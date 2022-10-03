@@ -15,13 +15,13 @@ The solution to this problem is automated testing, which allows many tests acros
 
 ## Set up automated testing with `pytest`
 
-There are many testing frameworks available for Python. One of the most popular is [`pytest`](https://docs.pytest.org/). `pytest` is often used in Python projects for its short, readable tests and powerful set of features.
+There are many testing frameworks available for Python. One of the most popular is `pytest` (see the [project's home page](https://docs.pytest.org/en/7.1.x/) for a quick overview). `pytest` is often used in Python projects for its short, readable tests and powerful set of features.
 
 Let's look at how you can start working with `pytest` in your Kedro project.
 
 ### Install `pytest`
 
-Install `pytest` as you would install other packages with `pip`, making sure your project's virtual environment is active.  If you're unfamiliar with virtual environments, see our [docs page](https://kedro.readthedocs.io/en/stable/get_started/prerequisites.html#virtual-environments) on the subject for a quick primer.
+Install `pytest` as you would install other packages with `pip`, making sure your project's virtual environment is active.  If you're unfamiliar with virtual environments, see our [docs page on the subject](https://kedro.readthedocs.io/en/stable/get_started/prerequisites.html#virtual-environments) for a quick primer.
 
 ```bash
 pip install pytest
@@ -94,7 +94,7 @@ This test is redundant, but it introduces a few of `pytest`'s core features and 
 
 Tests should be named as descriptively as possible, especially if you are working with other people. For example, it is easier to understand the purpose of a test with the name `test_node_passes_with_valid_input` than a test with the name `test_passes`.
 
-You can read more about the basics of using `pytest` [here](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using all of the features of `pytest`, see the [docs](https://docs.pytest.org/).
+You can read more about the [basics of using `pytest` on the getting started page](https://docs.pytest.org/en/7.1.x/getting-started.html). For help writing your own tests and using all of the features of `pytest`, see the [docs](https://docs.pytest.org/).
 
 ### Run your tests
 
@@ -121,7 +121,7 @@ This output indicates that one test ran successfully in the file `src/tests/test
 
 ## Add test coverage reports with `pytest-cov`
 
-It can be useful to see how much of your project is covered by tests. For this, you can install and configure the [`pytest-cov`](https://pypi.org/project/pytest-cov/) plugin for `pytest`, which is based on the popular [`coverage.py`](https://coverage.readthedocs.io/) library.
+It can be useful to see how much of your project is covered by tests. For this, you can install and configure the [`pytest-cov`](https://pypi.org/project/pytest-cov/) plugin for `pytest`, which is based on the popular [`coverage.py` library](https://coverage.readthedocs.io/).
 
 ### Install `pytest-cov`
 
@@ -164,4 +164,4 @@ src/spaceflights/settings.py                                 0      0   100%
 TOTAL                                                       98     98     0%
 ```
 
-This is the simplest report that `coverage.py` (via `pytest-cov`) will produce. It gives an overview of how many of the executable statements in each project file are covered by tests. For a full set of features offered by `coverage.py`, see the [docs](https://coverage.readthedocs.io/).
+This is the simplest report that `coverage.py` (via `pytest-cov`) will produce. It gives an overview of how many of the executable statements in each project file are covered by tests. For detail on the full set of features offered, see [ the`coverage.py` docs](https://coverage.readthedocs.io/).

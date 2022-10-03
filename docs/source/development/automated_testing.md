@@ -125,7 +125,7 @@ It can be useful to see how much of your project is covered by tests. For this, 
 
 ### Install `pytest-cov`
 
-Install `pytest` as you would install other packages with pip, making sure your project's virtual environment is active.
+Install `pytest` as you would install other packages with pip, making sure your project's virtual environment is active (see our [docs page on virtual environments](https://kedro.readthedocs.io/en/stable/get_started/prerequisites.html#virtual-environments)).
 
 ```bash
 pip install pytest-cov

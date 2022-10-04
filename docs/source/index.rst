@@ -145,6 +145,7 @@ Welcome to Kedro's documentation!
    development/set_up_pycharm
    development/commands_reference
    development/debugging
+   development/automated_testing
 
 .. toctree::
    :maxdepth: 2

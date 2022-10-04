@@ -122,7 +122,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [WovenLight](https://www.wovenlight.com/) and
 [XP](https://youtu.be/wgnGOVNkXqU?t=2210).
 
-Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/). Kedro also received [an honorable mention in the User Experience category in Fast Company’s 2022 Innovation by Design Awards](https://www.fastcompany.com/90772252/user-experience-innovation-by-design-2022).
+Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/). Kedro also received an [honorable mention in the User Experience category in Fast Company’s 2022 Innovation by Design Awards](https://www.fastcompany.com/90772252/user-experience-innovation-by-design-2022).
 
 
 ## How can I cite Kedro?

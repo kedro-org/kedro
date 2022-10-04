@@ -9,9 +9,9 @@ Software testing is the process of checking that the code you have written fulfi
 
 As a project grows larger, new code will increasingly rely on existing code. As these interdependencies grow, making changes in one part of the code base can unexpectedly break the intended functionality in another part.
 
-The major disadvantage of manual testing is that it is time-consuming. Manual tests are usually run once, directly after new functionality has been added. It is impractical to repeat the manual tests for the entire existing code base each time a change is made, which means this strategy often misses breaking changes. 
+The major disadvantage of manual testing is that it is time-consuming. Manual tests are usually run once, directly after new functionality has been added. It is impractical to repeat manual tests for the entire code base each time a change is made, which means this strategy often misses breaking changes. 
 
-The solution to this problem is automated testing, which allows many tests across the whole code base to be run in seconds, every time a new feature is added or an old one is changed. In this way, breaking changes can be discovered during development rather than in production.
+The solution to this problem is automated testing. Automated testing allows many tests across the whole code base to be run in seconds, every time a new feature is added or an old one is changed. In this way, breaking changes can be discovered during development rather than in production.
 
 ## Set up automated testing with `pytest`
 
@@ -37,7 +37,7 @@ mkdir <project_root>/src/tests
 
 ### Test directory structure
 
-The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `/src/<package_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. For instance:
+The subdirectories in your project's `/tests` directory should mirror the directory structure of your project's `/src/<package_name>` directory. All files in the `/tests` folder should be named `test_<file_being_tested>.py`. See an example `/src` folder below.
 
 ```
 src

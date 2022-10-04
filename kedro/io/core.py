@@ -538,9 +538,16 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
-
+        protocol = getattr(self, "_protocol", None)
         if not most_recent:
-            raise VersionNotFoundError(f"Did not find any versions for {self}")
+            if protocol in CLOUD_PROTOCOLS:
+                message = (
+                    f"Did not find any versions for {self}. This could be "
+                    f"due to insufficient permission."
+                )
+            else:
+                message = f"Did not find any versions for {self}"
+            raise VersionNotFoundError(message)
 
         return PurePath(most_recent).parent.name
 

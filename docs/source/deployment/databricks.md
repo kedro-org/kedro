@@ -64,7 +64,7 @@ You should get a similar output:
 
 If you already have an active cluster with runtime version `7.1`, you can skip this step. Here is [how to find clusters in your Databricks workspace](https://docs.databricks.com/clusters/clusters-manage.html).
 
-Follow the [Databricks official guide to create a new cluster](https://docs.databricks.com/clusters/create.html). For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
+Follow the [Databricks official guide to create a new cluster](https://docs.databricks.com/clusters/create-cluster.html). For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
 * Runtime: `7.1 (Scala 2.12, Spark 3.0.0)`
 * Enable autoscaling: `off`
 * Terminate after 120 minutes of inactivity: `on`

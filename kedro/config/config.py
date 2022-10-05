@@ -2,7 +2,7 @@
 or more configuration files from specified paths.
 """
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, List
 
 from kedro.config import AbstractConfigLoader
 from kedro.config.common import _get_config_from_patterns, _remove_duplicates
@@ -69,6 +69,7 @@ class ConfigLoader(AbstractConfigLoader):
         conf_source: str,
         env: str = None,
         runtime_params: Dict[str, Any] = None,
+        config_patterns: Dict[str, List[str]] = None,
         *,
         base_env: str = "base",
         default_run_env: str = "local",
@@ -89,13 +90,13 @@ class ConfigLoader(AbstractConfigLoader):
         self.base_env = base_env
         self.default_run_env = default_run_env
 
-        core_config_patterns = {
+        self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
             "logging": ["logging*", "logging*/**", "**/logging*"],
         }
-        self.config_patterns = core_config_patterns
+        self.config_patterns.update(config_patterns or {})
 
         super().__init__(
             conf_source=conf_source,

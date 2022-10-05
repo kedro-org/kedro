@@ -5,7 +5,7 @@ with the values from the passed dictionary.
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 import jmespath
 
@@ -92,6 +92,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         conf_source: str,
         env: str = None,
         runtime_params: Dict[str, Any] = None,
+        config_patterns: Dict[str, List[str]] = None,
         *,
         base_env: str = "base",
         default_run_env: str = "local",
@@ -114,13 +115,13 @@ class TemplatedConfigLoader(AbstractConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
-        core_config_patterns = {
+        self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
             "logging": ["logging*", "logging*/**", "**/logging*"],
         }
-        self.config_patterns = core_config_patterns
+        self.config_patterns.update(config_patterns or {})
 
         super().__init__(
             conf_source=conf_source, env=env, runtime_params=runtime_params

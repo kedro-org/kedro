@@ -334,7 +334,7 @@ conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:
-    credentials = conf_loader["credentials*"]
+    credentials = conf_loader["credentials"]
 except MissingConfigException:
     credentials = {}
 ```

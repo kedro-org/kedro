@@ -29,8 +29,7 @@ class CachedDataSet(AbstractDataSet):
 
     # this dataset cannot be used with ``ParallelRunner``,
     # therefore it has the attribute ``_SINGLE_PROCESS = True``
-    # for parallelism within a Spark pipeline please consider
-    # ``ThreadRunner`` instead
+    # for parallelism please consider ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
     def __init__(

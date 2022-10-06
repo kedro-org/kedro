@@ -54,12 +54,12 @@ shuttles:
 
 preprocessed_companies:
   type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_companies.csv
+  filepath: data/02_intermediate/preprocessed_companies.pq
   layer: intermediate
 
 preprocessed_shuttles:
   type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_shuttles.csv
+  filepath: data/02_intermediate/preprocessed_shuttles.pq
   layer: intermediate
 
 model_input_table:

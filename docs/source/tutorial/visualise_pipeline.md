@@ -180,6 +180,7 @@ The below functions can be added to the `nodes.py` and `pipeline.py` files respe
 ```python
 # nodes.py
 import plotly.express as px
+import plotly.graph_objs as go
 import pandas as pd
 
 # the below function uses plotly.express

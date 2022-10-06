@@ -74,7 +74,7 @@ regressor:
   layer: models
 ```
 
-Run kedro-viz again with `kedro viz` and observe how your visualisation has changed to indicate the layers:
+Run Kedro-Viz again with `kedro viz` and observe how your visualisation has changed to indicate the layers:
 
 ![](../meta/images/pipeline_visualisation_with_layers.png)
 

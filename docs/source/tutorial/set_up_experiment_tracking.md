@@ -225,7 +225,7 @@ After running the pipeline with `kedro run`, the plot will be saved and you will
 ![](../meta/images/expand-plot-comparison-view.gif)
 
 
-Read more about [creating plots and visualising them in Kedro Viz in the visualise pipeline section.](../tutorial/visualise_pipeline.md#visualise-charts-in-kedro-viz)
+Read more about [creating plots and visualising them in Kedro-Viz in the visualise pipeline section.](../tutorial/visualise_pipeline.md#visualise-charts-in-kedro-viz)
 
 ## View your metrics timeline
 

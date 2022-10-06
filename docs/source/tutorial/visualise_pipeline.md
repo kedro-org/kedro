@@ -64,7 +64,7 @@ preprocessed_shuttles:
 
 model_input_table:
   type: pandas.CSVDataSet
-  filepath: data/03_primary/model_input_table.csv
+  filepath: data/03_primary/model_input_table.pq
   layer: primary
 
 regressor:

@@ -67,6 +67,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro jupyter convert`](#copy-tagged-cells)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
+  * [`kedro lint`](#lint-your-project)
   * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package)
   * [`kedro micropkg pull <package_name>`](#pull-a-micro-package)
   * [`kedro package`](#deploy-the-project)
@@ -371,6 +372,14 @@ kedro build-docs
 
 The `build-docs` command builds [project documentation](../tutorial/package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
+
+#### Lint your project
+
+```bash
+kedro lint
+```
+
+Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
 
 
 #### Test your project

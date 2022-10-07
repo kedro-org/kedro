@@ -58,16 +58,16 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro new`](#create-a-new-kedro-project)
 
 * Project-specific Kedro commands
-  * [`kedro activate-nbstripout (deprecated from version 0.19.0)`](#strip-output-cells)
-  * [`kedro build-docs (deprecated from version 0.19.0)`](#build-the-project-documentation)
-  * [`kedro build-reqs (deprecated from version 0.19.0)`](#build-the-projects-dependency-tree)
+  * [`kedro activate-nbstripout`](#strip-output-cells)
+  * [`kedro build-docs`](#build-the-project-documentation)
+  * [`kedro build-reqs`](#build-the-projects-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro ipython`](#notebooks)
-  * [`kedro jupyter convert (deprecated from version 0.19.0)`](#copy-tagged-cells)
+  * [`kedro jupyter convert`](#copy-tagged-cells)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro lint (deprecated from version 0.19.0)`](#lint-your-project)
+  * [`kedro lint`](#lint-your-project)
   * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package)
   * [`kedro micropkg pull <package_name>`](#pull-a-micro-package)
   * [`kedro package`](#deploy-the-project)
@@ -76,7 +76,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro registry describe <pipeline_name>`](#describe-a-registered-pipeline)
   * [`kedro registry list`](#list-all-registered-pipelines-in-your-project)
   * [`kedro run`](#run-the-project)
-  * [`kedro test (deprecated from version 0.19.0)`](#test-your-project)
+  * [`kedro test`](#test-your-project)
 
 ## Global Kedro commands
 
@@ -275,13 +275,11 @@ def run(
 
 #### Build the project's dependency tree
 
+{_This command will be deprecated from Kedro version 0.19.0._}
+
 ```bash
 kedro build-reqs
 ```
-
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
 
 This command runs [`pip-compile`](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) on the project's `src/requirements.txt` file and will create `src/requirements.lock` with the compiled requirements.
 
@@ -370,41 +368,35 @@ The above command will take the bundled `.tar.gz` file and do the following:
 
 #### Build the project documentation
 
+{_This command will be deprecated from Kedro version 0.19.0._}
+
 ```bash
 kedro build-docs
 ```
-
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
 
 The `build-docs` command builds [project documentation](../tutorial/package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 #### Lint your project
 
+{_This command will be deprecated from Kedro version 0.19.0._}
+
 ```bash
 kedro lint
 ```
-
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
 
 Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
 
 
 #### Test your project
 
+{_This command will be deprecated from Kedro version 0.19.0._}
+
 The following runs all `pytest` unit tests found in `src/tests`, including coverage (see the file `.coveragerc`):
 
 ```bash
 kedro test
 ```
-
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
 
 ### Project development
 
@@ -518,27 +510,22 @@ To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_k
 
 ##### Copy tagged cells
 
+{_This command will be deprecated from Kedro version 0.19.0._}
+
 To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
 kedro jupyter convert --all
 ```
 
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
-
 ##### Strip output cells
+
+{_This command will be deprecated from Kedro version 0.19.0._}
 
 Output cells of Jupyter Notebook should not be tracked by git, especially if they contain sensitive information. To strip them out:
 
 ```bash
 kedro activate-nbstripout
 ```
-
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
-
 
 This command adds a `git hook` which clears all notebook output cells before committing anything to `git`. It needs to run only once per local repository.

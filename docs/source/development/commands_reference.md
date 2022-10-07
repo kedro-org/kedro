@@ -275,15 +275,15 @@ def run(
 
 #### Build the project's dependency tree
 
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
-
 ```bash
 kedro build-reqs
 ```
 
 This command runs [`pip-compile`](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) on the project's `src/requirements.txt` file and will create `src/requirements.lock` with the compiled requirements.
+
+___
+_This command will be deprecated from Kedro version 0.19.0._
+___
 
 `kedro build-reqs` has two optional arguments to specify which file to compile the requirements from and where to save the compiled requirements to. These arguments are `--input-file` and `--output-file` respectively.
 
@@ -370,37 +370,37 @@ The above command will take the bundled `.tar.gz` file and do the following:
 
 #### Build the project documentation
 
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
-
 ```bash
 kedro build-docs
 ```
+
+___
+_This command will be deprecated from Kedro version 0.19.0._
+___
 
 The `build-docs` command builds [project documentation](../tutorial/package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 #### Lint your project
 
-___
-_This command will be deprecated from Kedro version 0.19.0._
-___
-
 ```bash
 kedro lint
 ```
+
+___
+_This command will be deprecated from Kedro version 0.19.0._
+___
 
 Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
 
 
 #### Test your project
 
+The following runs all `pytest` unit tests found in `src/tests`, including coverage (see the file `.coveragerc`):
+
 ___
 _This command will be deprecated from Kedro version 0.19.0._
 ___
-
-The following runs all `pytest` unit tests found in `src/tests`, including coverage (see the file `.coveragerc`):
 
 ```bash
 kedro test
@@ -518,11 +518,11 @@ To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_k
 
 ##### Copy tagged cells
 
+To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
+
 ___
 _This command will be deprecated from Kedro version 0.19.0._
 ___
-
-To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
 kedro jupyter convert --all
@@ -530,11 +530,11 @@ kedro jupyter convert --all
 
 ##### Strip output cells
 
+Output cells of Jupyter Notebook should not be tracked by git, especially if they contain sensitive information. To strip them out:
+
 ___
 _This command will be deprecated from Kedro version 0.19.0._
 ___
-
-Output cells of Jupyter Notebook should not be tracked by git, especially if they contain sensitive information. To strip them out:
 
 ```bash
 kedro activate-nbstripout

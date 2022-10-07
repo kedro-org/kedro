@@ -275,8 +275,9 @@ def run(
 
 #### Build the project's dependency tree
 
-{_This command will be deprecated from Kedro version 0.19.0._}
-
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
 ```bash
 kedro build-reqs
 ```
@@ -368,7 +369,9 @@ The above command will take the bundled `.tar.gz` file and do the following:
 
 #### Build the project documentation
 
-{_This command will be deprecated from Kedro version 0.19.0._}
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
 
 ```bash
 kedro build-docs
@@ -379,7 +382,9 @@ The `build-docs` command builds [project documentation](../tutorial/package_a_pr
 
 #### Lint your project
 
-{_This command will be deprecated from Kedro version 0.19.0._}
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
 
 ```bash
 kedro lint
@@ -390,7 +395,9 @@ Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](
 
 #### Test your project
 
-{_This command will be deprecated from Kedro version 0.19.0._}
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
 
 The following runs all `pytest` unit tests found in `src/tests`, including coverage (see the file `.coveragerc`):
 
@@ -510,7 +517,9 @@ To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_k
 
 ##### Copy tagged cells
 
-{_This command will be deprecated from Kedro version 0.19.0._}
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
 
 To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
@@ -520,7 +529,9 @@ kedro jupyter convert --all
 
 ##### Strip output cells
 
-{_This command will be deprecated from Kedro version 0.19.0._}
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
 
 Output cells of Jupyter Notebook should not be tracked by git, especially if they contain sensitive information. To strip them out:
 

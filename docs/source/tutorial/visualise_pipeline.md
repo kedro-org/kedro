@@ -53,17 +53,17 @@ shuttles:
   layer: raw
 
 preprocessed_companies:
-  type: pandas.CSVDataSet
+  type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_companies.pq
   layer: intermediate
 
 preprocessed_shuttles:
-  type: pandas.CSVDataSet
+  type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_shuttles.pq
   layer: intermediate
 
 model_input_table:
-  type: pandas.CSVDataSet
+  type: pandas.ParquetDataSet
   filepath: data/03_primary/model_input_table.pq
   layer: primary
 

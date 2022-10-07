@@ -278,6 +278,8 @@ def create_confusion_matrix(companies: pd.DataFrame):
     return plt
 ```
 
+> You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
+
 ```python
 # pipeline.py
 def create_pipeline(**kwargs) -> Pipeline:

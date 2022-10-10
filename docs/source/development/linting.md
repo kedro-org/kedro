@@ -18,7 +18,7 @@ check for styling inconsistencies and reformat your files in place.
 programming errors and coding style inconsistencies with respect to [PEP 8](https://peps.python.org/pep-0008/),
 and check the cyclomatic complexity of your code base.
 [You can read more in the `flake8` documentation](https://flake8.pycqa.org/en/latest/).
-- **`isort`** is a Python library used to sort imports alphabetically, and automatically separated into sections and by
+- **`isort`** is a Python library used to sort imports alphabetically and automatically separate them into sections by
 type. [You can read more in the `isort` documentation](https://pycqa.github.io/isort/).
 
 ### Install linting tools
@@ -53,7 +53,7 @@ You can also have `black` and `isort` automatically format your code by omitting
 
 ## Automating linting with `pre-commit` hooks
 
-You can also automate linting by using [`pre-commit`](https://github.com/pre-commit/pre-commit) hooks.
+You can automate linting by using [`pre-commit`](https://github.com/pre-commit/pre-commit) hooks.
 These hooks are run before committing your code to your repositories to automatically point out formatting issues,
 making code reviews easier and less time-consuming.
 

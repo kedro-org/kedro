@@ -53,18 +53,18 @@ shuttles:
   layer: raw
 
 preprocessed_companies:
-  type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_companies.csv
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_companies.pq
   layer: intermediate
 
 preprocessed_shuttles:
-  type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_shuttles.csv
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_shuttles.pq
   layer: intermediate
 
 model_input_table:
-  type: pandas.CSVDataSet
-  filepath: data/03_primary/model_input_table.csv
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/model_input_table.pq
   layer: primary
 
 regressor:
@@ -74,7 +74,7 @@ regressor:
   layer: models
 ```
 
-Run kedro-viz again with `kedro viz` and observe how your visualisation has changed to indicate the layers:
+Run Kedro-Viz again with `kedro viz` and observe how your visualisation has changed to indicate the layers:
 
 ![](../meta/images/pipeline_visualisation_with_layers.png)
 
@@ -180,6 +180,7 @@ The below functions can be added to the `nodes.py` and `pipeline.py` files respe
 ```python
 # nodes.py
 import plotly.express as px
+import plotly.graph_objs as go
 import pandas as pd
 
 # the below function uses plotly.express
@@ -276,6 +277,8 @@ def create_confusion_matrix(companies: pd.DataFrame):
     sn.heatmap(confusion_matrix, annot=True)
     return plt
 ```
+
+> You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
 
 ```python
 # pipeline.py

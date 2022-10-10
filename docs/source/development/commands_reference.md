@@ -58,16 +58,16 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro new`](#create-a-new-kedro-project)
 
 * Project-specific Kedro commands
-  * [`kedro activate-nbstripout`](#strip-output-cells)
-  * [`kedro build-docs`](#build-the-project-documentation)
-  * [`kedro build-reqs`](#build-the-projects-dependency-tree)
+  * [`kedro activate-nbstripout`](#strip-output-cells)(deprecated from version 0.19.0)
+  * [`kedro build-docs`](#build-the-project-documentation) (deprecated from version 0.19.0)
+  * [`kedro build-reqs`](#build-the-projects-dependency-tree) (deprecated from version 0.19.0)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro ipython`](#notebooks)
-  * [`kedro jupyter convert`](#copy-tagged-cells)
+  * [`kedro jupyter convert`](#copy-tagged-cells) (deprecated from version 0.19.0)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro lint`](#lint-your-project)
+  * [`kedro lint`](#lint-your-project) (deprecated from version 0.19.0)
   * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package)
   * [`kedro micropkg pull <package_name>`](#pull-a-micro-package)
   * [`kedro package`](#deploy-the-project)
@@ -76,7 +76,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro registry describe <pipeline_name>`](#describe-a-registered-pipeline)
   * [`kedro registry list`](#list-all-registered-pipelines-in-your-project)
   * [`kedro run`](#run-the-project)
-  * [`kedro test`](#test-your-project)
+  * [`kedro test`](#test-your-project) (deprecated from version 0.19.0)
 
 ## Global Kedro commands
 

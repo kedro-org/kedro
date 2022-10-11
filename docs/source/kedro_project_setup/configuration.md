@@ -19,7 +19,7 @@ from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
-conf_catalog = conf_loader.get("catalog*", "catalog*/**")
+conf_catalog = conf_loader["catalog"]
 ```
 
 This recursively scans for configuration files firstly in the `conf/base/` (`base` being the default environment) and then in the `conf/local/` (`local` being the designated overriding environment) directory according to the following rules:
@@ -180,7 +180,7 @@ from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
-parameters = conf_loader.get("parameters*", "parameters*/**")
+parameters = conf_loader["parameters"]
 ```
 
 This will load configuration files from any subdirectories in `conf` that have a filename starting with `parameters`, or are located inside a folder with name starting with `parameters`.
@@ -189,7 +189,7 @@ This will load configuration files from any subdirectories in `conf` that have a
 Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 ```
 
-Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if no configuration files match the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
+Calling `conf_loader[key]` in the example above will throw a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
@@ -199,7 +199,7 @@ conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:
-    parameters = conf_loader.get("parameters*", "parameters*/**", "**/parameters*")
+    parameters = conf_loader["parameters"]
 except MissingConfigException:
     parameters = {}
 ```
@@ -315,7 +315,7 @@ from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
-credentials = conf_loader.get("credentials*", "credentials*/**")
+credentials = conf_loader["credentials"]
 ```
 
 This will load configuration files from `conf/base` and `conf/local` whose filenames start with `credentials`, or that are located inside a folder with a name that starts with `credentials`.
@@ -324,7 +324,7 @@ This will load configuration files from `conf/base` and `conf/local` whose filen
 Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence, any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 ```
 
-Calling `conf_loader.get()` in the example above throws a `MissingConfigException` error if no configuration files match the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
+Calling `conf_loader[key]` in the example above throws a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
@@ -334,7 +334,7 @@ conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:
-    credentials = conf_loader.get("credentials*", "credentials*/**")
+    credentials = conf_loader["credentials"]
 except MissingConfigException:
     credentials = {}
 ```

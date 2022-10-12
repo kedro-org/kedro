@@ -15,6 +15,7 @@
 ## Bug fixes and other changes
 * Fixed `kedro micropkg pull` for packages on PyPI.
 * Fixed `format` in `save_args` for `SparkHiveDataSet`, previously it didn't allow you to save it as delta format.
+* Fixed save errors in `TensorFlowModelDataset` when used without versioning, previously it wouldn't overwrite an existing model.
 * Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 * Updated Experiment Tracking docs with working examples.
 

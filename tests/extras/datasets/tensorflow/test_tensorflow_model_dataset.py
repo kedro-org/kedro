@@ -429,7 +429,7 @@ class TestTensorFlowModelDatasetVersioned:
         """Test versioned TensorflowModelDataset can load models using an explicit tf_device"""
         hdf5_dataset = tensorflow_model_dataset(
             filepath=filepath,
-            load_args={"tf_device": "cpu"},
+            load_args={"tf_device": "/CPU:0"},
             version=Version(load_version, save_version),
         )
 

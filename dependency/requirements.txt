@@ -1,6 +1,6 @@
 anyconfig~=0.10.0
 attrs~=21.3
-cachetools~=4.1
+cachetools~=5.2
 click<9.0
 cookiecutter>=2.1.1, <3.0
 dynaconf>=3.1.2, <4.0

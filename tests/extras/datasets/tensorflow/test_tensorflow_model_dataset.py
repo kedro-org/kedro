@@ -267,7 +267,7 @@ class TestTensorFlowModelDataset:
     def test_save_and_overwrite_existing_model(
         self, tf_model_dataset, dummy_tf_base_model, dummy_tf_base_model_new
     ):
-        """Test saving and reloading the data set."""
+        """Test models are correcty overwritten."""
         tf_model_dataset.save(dummy_tf_base_model)
 
         tf_model_dataset.save(dummy_tf_base_model_new)

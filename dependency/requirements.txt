@@ -1,4 +1,4 @@
-anyconfig~=0.10.0
+anyconfig~=0.13.0
 attrs~=21.3
 cachetools~=4.1
 click<9.0

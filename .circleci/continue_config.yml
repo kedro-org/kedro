@@ -371,7 +371,7 @@ jobs:
   docs_linkcheck:
     executor:
       name: docker
-      python_version: "3.7"
+      python_version: "3.8"
     steps:
       - setup
       - run:

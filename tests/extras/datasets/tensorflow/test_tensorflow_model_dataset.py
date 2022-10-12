@@ -95,6 +95,24 @@ def dummy_tf_base_model(dummy_x_train, dummy_y_train, tf):
 
 
 @pytest.fixture
+def dummy_tf_base_model_new(dummy_x_train, dummy_y_train, tf):
+    # dummy 2 layer model
+    inputs = tf.keras.Input(shape=(2, 1))
+    x = tf.keras.layers.Dense(1)(inputs)
+    x = tf.keras.layers.Dense(1)(x)
+    outputs = tf.keras.layers.Dense(1)(x)
+
+    model = tf.keras.Model(inputs=inputs, outputs=outputs, name="2_layer_dummy")
+    model.compile("rmsprop", "mse")
+    model.fit(dummy_x_train, dummy_y_train, batch_size=64, epochs=1)
+    # from https://www.tensorflow.org/guide/keras/save_and_serialize
+    # Reset metrics before saving so that loaded model has same state,
+    # since metric states are not preserved by Model.save_weights
+    model.reset_metrics()
+    return model
+
+
+@pytest.fixture
 def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     """Demonstrate that own class models cannot be saved
     using HDF5 format but can using TF format
@@ -246,6 +264,18 @@ class TestTensorFlowModelDataset:
         mocker.patch("kedro.io.core.get_filepath_str", side_effct=DataSetError)
         assert not tf_model_dataset.exists()
 
+    def test_save_and_overwrite_existing_model(
+        self, tf_model_dataset, dummy_tf_base_model, dummy_tf_base_model_new
+    ):
+        """Test saving and reloading the data set."""
+        tf_model_dataset.save(dummy_tf_base_model)
+
+        tf_model_dataset.save(dummy_tf_base_model_new)
+
+        reloaded = tf_model_dataset.load()
+
+        assert len(dummy_tf_base_model.layers) != len(reloaded.layers)
+
 
 class TestTensorFlowModelDatasetVersioned:
     """Test suite with versioning argument passed into TensorFlowModelDataset creator"""
@@ -385,3 +415,26 @@ class TestTensorFlowModelDatasetVersioned:
         assert tf_model_dataset._filepath == versioned_tf_model_dataset._filepath
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         assert versioned_tf_model_dataset.exists()
+
+    def test_save_and_load_with_device(
+        self,
+        dummy_tf_base_model,
+        dummy_x_test,
+        filepath,
+        tensorflow_model_dataset,
+        load_version,
+        save_version,
+    ):
+        """Test versioned TensorflowModelDataset can load models using an explicit tf_device"""
+        hdf5_dataset = tensorflow_model_dataset(
+            filepath=filepath,
+            load_args={"tf_device": "cpu"},
+            version=Version(load_version, save_version),
+        )
+
+        predictions = dummy_tf_base_model.predict(dummy_x_test)
+        hdf5_dataset.save(dummy_tf_base_model)
+
+        reloaded = hdf5_dataset.load()
+        new_predictions = reloaded.predict(dummy_x_test)
+        np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)

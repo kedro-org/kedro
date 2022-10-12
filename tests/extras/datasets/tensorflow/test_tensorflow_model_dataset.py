@@ -275,6 +275,7 @@ class TestTensorFlowModelDataset:
         reloaded = tf_model_dataset.load()
 
         assert len(dummy_tf_base_model.layers) != len(reloaded.layers)
+        assert len(dummy_tf_base_model_new.layers) == len(reloaded.layers)
 
 
 class TestTensorFlowModelDatasetVersioned:

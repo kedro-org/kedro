@@ -142,7 +142,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
             else:
                 if self._fs.exists(save_path):
                     self._fs.rm(save_path, recursive=True)
-                self._fs.put(path, save_path + "//", recursive=True, overwrite=True)
+                self._fs.put(path, save_path, recursive=True)
 
     def _exists(self) -> bool:
         try:

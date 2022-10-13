@@ -309,10 +309,13 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             path = PurePosixPath(filepath)
 
             if filepath.startswith("/dbfs"):
-                dbutils = _get_dbutils(self._get_spark())
-                if dbutils:
-                    glob_function = partial(_dbfs_glob, dbutils=dbutils)
-                    exists_function = partial(_dbfs_exists, dbutils=dbutils)
+                try:
+                    dbutils = _get_dbutils(self._get_spark())
+                    if dbutils:
+                        glob_function = partial(_dbfs_glob, dbutils=dbutils)
+                        exists_function = partial(_dbfs_exists, dbutils=dbutils)
+                except:
+                    pass
 
         super().__init__(
             filepath=path,

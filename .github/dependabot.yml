@@ -8,8 +8,7 @@ updates:
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "/dependency" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
     target-branch: "dependency-update"
     labels:
       - "dependencies"
-    open-pull-requests-limit: 50 # Allow up to 50 open pull requests

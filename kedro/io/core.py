@@ -548,7 +548,6 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
             else:
                 message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
-
         return PurePath(most_recent).parent.name
 
     # 'key' is set to prevent cache key overlapping for load and save:

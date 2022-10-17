@@ -600,7 +600,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:
+    def load(self) -> _DO:  # pylint: disable=useless-parent-delegation
         return super().load()
 
     def save(self, data: _DI) -> None:

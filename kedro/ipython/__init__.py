@@ -1,4 +1,3 @@
-# pylint: disable=global-statement,invalid-name
 """
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
@@ -31,16 +30,7 @@ def load_ipython_extension(ipython):
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
     ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
-    default_project_path = _find_kedro_project(Path.cwd())
-
-    if default_project_path is None:
-        logger.warning(
-            "Kedro extension was registered but couldn't find a Kedro project. "
-            "Make sure you run '%reload_kedro <project_root>'."
-        )
-        return
-
-    reload_kedro(default_project_path)
+    reload_kedro()
 
 
 @needs_local_scope
@@ -68,18 +58,20 @@ def magic_reload_kedro(line: str, local_ns: Dict[str, Any] = None):
      https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
-
-    reload_kedro(args.path, args.env, args.params)
+    reload_kedro(args.path, args.env, args.params, local_ns)
 
 
 def reload_kedro(
-    path: str = None, env: str = None, extra_params: Dict[str, Any] = None
-):  # pragma: no cover
+    path: str = None,
+    env: str = None,
+    extra_params: Dict[str, Any] = None,
+    local_ns: Optional[Dict[str, Any]] = None,
+) -> None:  # pragma: no cover
     """Function that underlies the %reload_kedro Line magic. This should not be imported
     or run directly but instead invoked through %reload_kedro."""
 
     # If a path is provided, set it as default for subsequent calls
-    project_path = _resolve_project_path()
+    project_path = _resolve_and_update_project_path(path, local_ns)
 
     metadata = bootstrap_project(project_path)
     _remove_cached_modules(metadata.package_name)
@@ -110,8 +102,41 @@ def reload_kedro(
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
 
 
-def _resolve_project_path() -> Path:
-    pass
+def _resolve_and_update_project_path(
+    path: Optional[str] = None, local_ns: Optional[Dict[str, Any]] = None
+) -> Path:
+    """
+    Resolve the project path to use with reload_kedro, updating or adding it
+    (in-place) to the local ipython Namespace (``local_ns``) if necessary.
+
+    Raises TypeError if no value for the project path can be determined.
+
+    Arguments:
+        path: the path to use as a string object
+        local_ns: Namespace with local variables of the scope where the line
+            magic is invoked in a dict.
+    """
+    if path:
+        project_path = Path(path).expanduser().resolve()
+        logger.info("Updated path to Kedro project: %s", project_path)
+    else:
+        if local_ns and "project_path" in local_ns:
+            project_path = local_ns["project_path"]
+        else:
+            project_path = _find_kedro_project(Path.cwd())
+
+        if not project_path:
+            logger.error(
+                "Kedro extension was registered but couldn't find a Kedro project. "
+                "Make sure you run '%reload_kedro <project_root>'."
+            )
+            raise TypeError("No path could be resolved")
+        logger.info("No path argument was provided. Using: %s", project_path)
+
+    if local_ns:
+        local_ns["project_path"] = project_path
+
+    return project_path
 
 
 def _remove_cached_modules(package_name):  # pragma: no cover

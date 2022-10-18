@@ -8,6 +8,7 @@ import traceback
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Iterable, Union
+from warnings import warn
 
 import click
 
@@ -138,7 +139,12 @@ class KedroSession:
         Returns:
             A new ``KedroSession`` instance.
         """
-
+        if package_name:
+            warn(
+                "The package_name argument does not serve a purpose in the KedroSession.create() "
+                "method anymore and will be removed in Kedro `0.19.0`.",
+                DeprecationWarning,
+            )
         validate_settings()
 
         session = cls(

@@ -4,6 +4,8 @@
 
 ## Bug fixes and other changes
 
+* Updated MatplotlibWriter Dataset docs with working examples.
+
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*

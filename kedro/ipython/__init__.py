@@ -30,6 +30,16 @@ def load_ipython_extension(ipython):
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
     ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
+
+    # Check if a project path can be resolved without input, if not, return early
+    project_path = _resolve_project_path()
+    if project_path is None:
+        logger.warning(
+            "Kedro extension was registered but couldn't find a Kedro project. "
+            "Make sure you run '%reload_kedro <project_root>'."
+        )
+        return
+
     reload_kedro()
 
 
@@ -71,7 +81,7 @@ def reload_kedro(
     or run directly but instead invoked through %reload_kedro."""
 
     # If a path is provided, set it as default for subsequent calls
-    project_path = _resolve_and_update_project_path(path, local_ns)
+    project_path = _resolve_project_path(path, local_ns)
 
     metadata = bootstrap_project(project_path)
     _remove_cached_modules(metadata.package_name)
@@ -102,7 +112,7 @@ def reload_kedro(
         logger.info("Registered line magic '%s'", line_magic.__name__)  # type: ignore
 
 
-def _resolve_and_update_project_path(
+def _resolve_project_path(
     path: Optional[str] = None, local_ns: Optional[Dict[str, Any]] = None
 ) -> Path:
     """
@@ -124,13 +134,6 @@ def _resolve_and_update_project_path(
             project_path = local_ns["project_path"]
         else:
             project_path = _find_kedro_project(Path.cwd())
-
-        if not project_path:
-            logger.error(
-                "Kedro extension was registered but couldn't find a Kedro project. "
-                "Make sure you run '%reload_kedro <project_root>'."
-            )
-            raise TypeError("No path could be resolved")
         logger.info("No path argument was provided. Using: %s", project_path)
 
     if local_ns:

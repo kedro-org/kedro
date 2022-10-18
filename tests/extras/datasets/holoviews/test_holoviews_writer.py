@@ -174,7 +174,7 @@ class TestHoloviewsWriterVersioned:
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
 
-    def test_no_versions(self, versioned_hv_writer):
+    def test_load_not_supported(self, versioned_hv_writer):
         """Check the error if no versions are available for load."""
         pattern = (
             rf"Loading not supported for '{versioned_hv_writer.__class__.__name__}'"

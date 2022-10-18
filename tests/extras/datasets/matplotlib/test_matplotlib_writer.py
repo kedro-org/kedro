@@ -324,7 +324,7 @@ class TestMatplotlibWriterVersioned:
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
 
-    def test_no_versions(self, versioned_plot_writer):
+    def test_load_not_supported(self, versioned_plot_writer):
         """Check the error if no versions are available for load."""
         pattern = (
             rf"Loading not supported for '{versioned_plot_writer.__class__.__name__}'"

@@ -832,11 +832,6 @@ class TestKedroSession:
             catalog=mock_catalog,
         )
 
-    def test_package_name_deprecation_warning(self, fake_project):
-        pattern = "The package_name argument does not serve a purpose in the KedroSession.create()"
-        with pytest.warns(DeprecationWarning, match=pattern):
-            KedroSession.create(package_name="my_package", project_path=fake_project)
-
 
 @pytest.fixture
 def fake_project_with_logging_file_handler(fake_project):

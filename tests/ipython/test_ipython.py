@@ -254,7 +254,9 @@ class TestProjectPathResolution:
         assert result == expected
 
     def test_only_local_namespace_specified(self):
-        result = _resolve_project_path(local_ns={"project_path": Path("/test").resolve()})
+        result = _resolve_project_path(
+            local_ns={"project_path": Path("/test").resolve()}
+        )
         expected = Path("/test").resolve()
         assert result == expected
 

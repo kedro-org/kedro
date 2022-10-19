@@ -250,16 +250,16 @@ class TestLoadIPythonExtension:
 class TestProjectPathResolution:
     def test_only_path_specified(self):
         result = _resolve_project_path(path="/test")
-        expected = Path("/test").expanduser().resolve()
+        expected = Path("/test").resolve()
         assert result == expected
 
     def test_only_local_namespace_specified(self):
-        result = _resolve_project_path(local_ns={"project_path": Path("/test")})
-        expected = Path("/test").expanduser().resolve()
+        result = _resolve_project_path(local_ns={"project_path": Path("/test").resolve()})
+        expected = Path("/test").resolve()
         assert result == expected
 
     def no_path_no_local_namespace_specified(self, mocker):
         mocker.patch("kedro.ipython._find_kedro_project", return_value=Path("/test"))
         result = _resolve_project_path()
-        expected = Path("/test").expanduser().resolve()
+        expected = Path("/test").resolve()
         assert result == expected

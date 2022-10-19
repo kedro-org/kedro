@@ -9,6 +9,5 @@ updates:
     directory: "/dependency" # Location of package manifests
     schedule:
       interval: "weekly"
-    target-branch: "dependency-update"
     labels:
       - "dependencies"

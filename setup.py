@@ -114,6 +114,7 @@ extras_require = {
         "ipykernel>=5.3, <7.0",
         "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=0.17.2",
+        "Jinja2<3.1.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),

@@ -1,12 +1,12 @@
 # pylint: disable=import-outside-toplevel,reimported
+from pathlib import Path
+
 import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
 
-from pathlib import Path
-
 from kedro.framework.startup import ProjectMetadata
-from kedro.ipython import load_ipython_extension, reload_kedro, _resolve_project_path
+from kedro.ipython import _resolve_project_path, load_ipython_extension, reload_kedro
 from kedro.pipeline import Pipeline
 
 
@@ -249,13 +249,13 @@ class TestLoadIPythonExtension:
 
 class TestProjectPathResolution:
     def test_only_path_specified(self):
-        result = _resolve_project_path(path='/test')
-        expected = Path('/test')
+        result = _resolve_project_path(path="/test")
+        expected = Path("/test")
         assert result == expected
 
     def test_only_local_namespace_specified(self):
         result = _resolve_project_path(local_ns={"project_path": Path("/test")})
-        expected = Path('/test')
+        expected = Path("/test")
         assert result == expected
 
     def no_path_no_local_namespace_specified(self, mocker):

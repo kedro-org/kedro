@@ -119,8 +119,6 @@ def _resolve_project_path(
     Resolve the project path to use with reload_kedro, updating or adding it
     (in-place) to the local ipython Namespace (``local_ns``) if necessary.
 
-    Raises TypeError if no value for the project path can be determined.
-
     Arguments:
         path: the path to use as a string object
         local_ns: Namespace with local variables of the scope where the line

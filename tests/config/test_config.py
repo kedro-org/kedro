@@ -93,6 +93,19 @@ use_proj_catalog = pytest.mark.usefixtures("proj_catalog")
 
 class TestConfigLoader:
     @use_config_dir
+    def test_load_core_config_dict_get(self, tmp_path):
+        """Make sure core config can be fetched with a dict [] access."""
+        conf = ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)
+        params = conf["parameters"]
+        catalog = conf["catalog"]
+
+        assert params["param1"] == 1
+        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
+        assert catalog["boats"]["type"] == "MemoryDataSet"
+        assert not catalog["cars"]["save_args"]["index"]
+
+    @use_config_dir
     def test_load_local_config(self, tmp_path):
         """Make sure that configs from `local/` override the ones
         from `base/`"""
@@ -238,6 +251,27 @@ class TestConfigLoader:
         )
         with pytest.raises(MissingConfigException, match=pattern):
             ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV).get("non-existent-pattern")
+
+    @use_config_dir
+    def test_key_not_found_dict_get(self, tmp_path):
+        """Check the error if no config files satisfy a given pattern"""
+        with pytest.raises(KeyError):
+            # pylint: disable=expression-not-assigned
+            ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)["non-existent-pattern"]
+
+    @use_config_dir
+    def test_no_files_found_dict_get(self, tmp_path):
+        """Check the error if no config files satisfy a given pattern"""
+        pattern = (
+            r"No files found in "
+            r"\[\'.*base\', "
+            r"\'.*local\'\] "
+            r"matching the glob pattern\(s\): "
+            r"\[\'credentials\*\', \'credentials\*/\**\', \'\**/credentials\*\'\]"
+        )
+        with pytest.raises(MissingConfigException, match=pattern):
+            # pylint: disable=expression-not-assigned
+            ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)["credentials"]
 
     def test_duplicate_paths(self, tmp_path, caplog):
         """Check that trying to load the same environment config multiple times logs a

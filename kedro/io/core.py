@@ -526,6 +526,8 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         self._glob_function = glob_function or iglob
         # 1 entry for load version, 1 for save version
         self._version_cache = Cache(maxsize=2)  # type: Cache
+        self._loaded_version = None
+        self._saved_version = None
 
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
@@ -563,8 +565,11 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         if not self._version:
             return None
         if self._version.load:
-            return self._version.load
-        return self._fetch_latest_load_version()
+            self._loaded_version = self._version.load
+        else:
+            self._loaded_version = self._fetch_latest_load_version()
+
+        return self._loaded_version
 
     def _get_load_path(self) -> PurePosixPath:
         if not self._version:
@@ -579,8 +584,10 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         if not self._version:
             return None
         if self._version.save:
-            return self._version.save
-        return self._fetch_latest_save_version()
+            self._saved_version = self._version.save
+        else:
+            self._saved_version = self._fetch_latest_save_version()
+        return self._saved_version
 
     def _get_save_path(self) -> PurePosixPath:
         if not self._version:
@@ -602,7 +609,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         return self._filepath / version / self._filepath.name
 
     def load(self) -> _DO:
-        self.resolve_load_version()  # Make sure last load version is set
+        # self.resolve_load_version()  # Make sure last load version is set
         return super().load()
 
     def save(self, data: _DI) -> None:

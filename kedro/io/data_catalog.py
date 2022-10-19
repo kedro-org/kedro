@@ -345,6 +345,8 @@ class DataCatalog:
         )
 
         result = dataset.load()
+        if isinstance(dataset, AbstractVersionedDataSet):
+            self._logger.info(f"Debug - load_version={dataset._loaded_version}")
 
         return result
 
@@ -380,7 +382,8 @@ class DataCatalog:
         dataset = self._get_dataset(name)
 
         self._logger.info("Saving data to '%s' (%s)...", name, type(dataset).__name__)
-
+        if isinstance(dataset, AbstractVersionedDataSet):
+            self._logger.info(f"Debug - save_version={dataset._saved_version}")
         dataset.save(data)
 
     def exists(self, name: str) -> bool:

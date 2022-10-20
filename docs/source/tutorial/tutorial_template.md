@@ -2,10 +2,12 @@
 
 In this section, we discuss the project set-up phase, which is the first part of the [standard development workflow](./spaceflights_tutorial.md#kedro-project-development-workflow). The set-up steps are as follows:
 
-* Create a new project
-* Install dependencies
-* Configure the project
-
+* Create a new project with `kedro new`
+* Install project dependencies with `pip install -r src/requirements.txt`
+* Configure the following in the `conf` folder:
+	* Credentials and any other sensitive information
+	* Logging
+	
 ## Create a new project
 
 Navigate to your chosen working directory and run the following to [create a new empty Kedro project](../get_started/new_project.md#create-a-new-project-interactively) using the default interactive prompts:

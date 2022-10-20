@@ -1,4 +1,4 @@
-# Set up the spaceflights project
+# Set up the spaceflights tutorial project
 
 In this section, we discuss the project set-up phase, which is the first part of the [standard development workflow](./spaceflights_tutorial.md#kedro-project-development-workflow). The set-up steps are as follows:
 
@@ -14,7 +14,13 @@ Navigate to your chosen working directory and run the following to [create a new
 kedro new
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. Subsequently, press enter to accept the default suggestions for `repo_name` and `python_package`. Then navigate to the root directory of the project, `kedro-tutorial`.
+Alternatively, if you want the full example code added to the project in advance, generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+
+```
+run `kedro new --starter=spaceflights`
+```
+
+When prompted for a project name, enter `Kedro Tutorial`. When your project is ready, navigate to the root directory of the project: `kedro-tutorial`.
 
 ## Install dependencies
 
@@ -36,10 +42,6 @@ pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with p
 pytest~=6.2 # Testing framework for Python code
 ```
 
-```{note}
-If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
-```
-
 The dependencies above might be sufficient for some projects, but for this tutorial you must add some extra requirements. These requirements will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.
 
 Add the following lines to your `src/requirements.txt` file:
@@ -59,8 +61,9 @@ pip install -r src/requirements.txt
 You can find out more about [how to work with project dependencies](../kedro_project_setup/dependencies.md) in the Kedro project documentation.
 
 
-## Configure the project
+## Optional: configuration and logging
 
-You may optionally add in any credentials to the `conf/local/credentials.yml` file that are required to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials. You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
+You may want to store credentials, such as usernames and passwords, if they are needed for specific data sources. 
+To do this, add them to `conf/local/credentials.yml`. Some examples are included in that file for illustration. You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
 
 At this stage of the workflow, you might also want to [set up logging](../logging/logging.md), but we do not use it in this tutorial.

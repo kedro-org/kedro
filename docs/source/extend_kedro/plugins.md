@@ -106,8 +106,7 @@ from kedro.framework.session import KedroSession
 
 
 project_path = Path.cwd()
-metadata = _get_project_metadata(project_path)
-session = KedroSession.create(metadata.package_name, project_path)
+session = KedroSession.create(project_path=project_path)
 context = session.load_context()
 ```
 

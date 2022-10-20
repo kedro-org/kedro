@@ -30,7 +30,7 @@ PROJECT_NAME = "fake_project_name"
 PROJECT_VERSION = "0.1"
 
 
-#@pytest.mark.skip()
+@pytest.mark.skip()
 class TestLoadKedroObjects:
     def test_load_kedro_objects(
         self, tmp_path, mocker, caplog
@@ -157,6 +157,7 @@ class TestLoadKedroObjects:
         mocker.patch("kedro.ipython.register_line_magic")
         mocker.patch("kedro.ipython.KedroSession.create")
         mocker.patch("kedro.ipython.get_ipython")
+        mocker.patch("kedro.ipython._find_kedro_project", return_value=tmp_path)
 
         reload_kedro()
 

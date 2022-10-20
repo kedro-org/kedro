@@ -260,7 +260,7 @@ class TestProjectPathResolution:
         expected = Path("/test").resolve()
         assert result == expected
 
-    def no_path_no_local_namespace_specified(self, mocker):
+    def test_no_path_no_local_namespace_specified(self, mocker):
         mocker.patch("kedro.ipython._find_kedro_project", return_value=Path("/test"))
         result = _resolve_project_path()
         expected = Path("/test").resolve()

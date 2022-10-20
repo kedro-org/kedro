@@ -28,7 +28,7 @@ example_tensorflow_data:
   type: tensorflow.TensorFlowModelDataset
   filepath: data/08_reporting/tf_model_dirname
   load_args:
-    tf_device: cpu  # optional
+    tf_device: "/CPU:0"  # optional
 ```
 
 Contributed by (Aleks Hughes)[https://github.com/w0rdsm1th].

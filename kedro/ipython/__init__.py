@@ -80,7 +80,6 @@ def reload_kedro(
     """Function that underlies the %reload_kedro Line magic. This should not be imported
     or run directly but instead invoked through %reload_kedro."""
 
-    # If a path is provided, set it as default for subsequent calls
     project_path = _resolve_project_path(path, local_ns)
 
     metadata = bootstrap_project(project_path)

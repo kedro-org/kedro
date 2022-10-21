@@ -273,17 +273,13 @@ class TestProjectPathResolution:
         assert result == expected
 
     def test_project_path_unresolvable(self, mocker):
-        mocker.patch(
-            "kedro.ipython._find_kedro_project", return_value=None
-        )
+        mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
         result = _resolve_project_path()
         expected = None
         assert result == expected
 
     def test_project_path_unresolvable_warning(self, mocker, caplog, ipython):
-        mocker.patch(
-            "kedro.ipython._find_kedro_project", return_value=None
-        )
+        mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
         ipython.magic("load_ext kedro.ipython")
         log_messages = [record.getMessage() for record in caplog.records]
         expected_message = (

@@ -52,7 +52,6 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = JSONDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = JSONDataSet(filepath="test.json")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

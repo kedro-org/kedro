@@ -73,7 +73,6 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = GenericDataSet(filepath="s3://test.csv", file_format='csv')
         >>> data_set = GenericDataSet(filepath="test.csv", file_format='csv')
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

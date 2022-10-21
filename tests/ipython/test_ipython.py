@@ -287,3 +287,13 @@ class TestProjectPathResolution:
             "Make sure you run '%reload_kedro <project_root>'."
         )
         assert expected_message in log_messages
+
+    def test_project_path_update(self, caplog):
+        first_path = Path("/test1").resolve()
+        second_path = Path("/test2").resolve()
+        local_namespace = {}
+
+        _resolve_project_path(path=first_path, local_namespace=local_namespace)
+        assert local_namespace["_project_path"] == first_path
+        _resolve_project_path(path=second_path, local_namespace=local_namespace)
+        assert local_namespace["_project_path"] == second_path

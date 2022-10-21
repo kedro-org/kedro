@@ -136,7 +136,7 @@ def _resolve_project_path(
 
     if (
         project_path
-        and local_namespace
+        and local_namespace is not None
         and local_namespace.get("_project_path", None) != project_path
     ):
         local_namespace["_project_path"] = project_path

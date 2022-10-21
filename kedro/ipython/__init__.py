@@ -29,18 +29,15 @@ def load_ipython_extension(ipython):
     IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
-    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
-
-    # Check if a project path can be resolved without input, if not, return early
-    project_path = _resolve_project_path()
-    if project_path is None:
+    if _find_kedro_project(Path.cwd()) is None:
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
             "Make sure you run '%reload_kedro <project_root>'."
         )
         return
 
-    reload_kedro()
+    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
+    ipython.magic("reload_kedro")
 
 
 @needs_local_scope
@@ -125,16 +122,21 @@ def _resolve_project_path(
     """
     if path:
         project_path = Path(path).expanduser().resolve()
-        logger.info("Updated path to Kedro project: %s", project_path)
     else:
         if local_ns and "project_path" in local_ns:
             project_path = local_ns["project_path"]
         else:
             project_path = _find_kedro_project(Path.cwd())
-        logger.info("No path argument was provided. Using: %s", project_path)
+        if project_path:
+            logger.info(
+                "Resolved project path as: %s.\nTo set a different path, run "
+                "'%%reload_kedro <project_root>'",
+                project_path,
+            )
 
-    if local_ns:
+    if project_path and local_ns and local_ns.get("project_path", None) != project_path:
         local_ns["project_path"] = project_path
+        logger.info("Updated path to Kedro project: %s", project_path)
 
     return project_path
 

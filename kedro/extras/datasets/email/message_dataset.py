@@ -46,7 +46,6 @@ class EmailMessageDataSet(
         >>> msg["From"] = '"sin studly17"'
         >>> msg["To"] = '"strong bad"'
         >>>
-        >>> # data_set = EmailMessageDataSet(filepath="gcs://bucket/test")
         >>> data_set = EmailMessageDataSet(filepath="test")
         >>> data_set.save(msg)
         >>> reloaded = data_set.load()

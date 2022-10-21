@@ -17,7 +17,7 @@ class AbstractConfigLoader(UserDict):
         conf_source: str,
         env: str = None,
         runtime_params: Dict[str, Any] = None,
-        **kwargs  # pylint: disable=unused-argument
+        **kwargs
     ):
         super().__init__()
         self.conf_source = conf_source

@@ -21,7 +21,6 @@ class JSONDataSet(JDS):
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>
-        >>> # data_set = JSONDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = JSONDataSet(filepath="test.json")
         >>> data_set.save(data)
 

@@ -161,7 +161,10 @@ class TestLoadKedroObjects:
 
         reload_kedro()
 
-        expected_message = f"No path argument was provided. Using: {tmp_path}"
+        expected_message = (
+            f"Resolved project path as: {tmp_path}.\nTo set a different path, run "
+            "'%reload_kedro <project_root>'"
+        )
         log_messages = [record.getMessage() for record in caplog.records]
         assert expected_message in log_messages
 

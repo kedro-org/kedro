@@ -37,7 +37,7 @@ def load_ipython_extension(ipython):
         return
 
     ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
-    ipython.magic("reload_kedro")
+    reload_kedro()
 
 
 @needs_local_scope

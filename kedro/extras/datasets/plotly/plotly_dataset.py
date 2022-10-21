@@ -31,13 +31,13 @@ class PlotlyDataSet(JSONDataSet):
         >>>   plotly_args:
         >>>     type: bar
         >>>     fig:
-        >>>       x: features
-        >>>       y: importance
-        >>>       orientation: h
+        >>>         x: features
+        >>>         y: importance
+        >>>         orientation: h
         >>>     layout:
-        >>>       xaxis_title: x
-        >>>       yaxis_title: y
-        >>>       title: Test
+        >>>         xaxis_title: x
+        >>>         yaxis_title: y
+        >>>         title: Title
     """
 
     # pylint: disable=too-many-arguments

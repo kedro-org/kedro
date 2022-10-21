@@ -25,7 +25,7 @@ We assume that you have already [installed Kedro](../get_started/install.md) and
 kedro new --starter=spaceflights
 ```
 
-Feel free to name your project as you like, but this guide will assume the project is named **Kedro Experiment Tracking Tutorial**, and that your project is in a sub-folder in your working directory that was created by `kedro new`, named `kedro-experiment-tracking-tutorial`. To keep the default names for the `repo_name` and `python_package` when prompted, press the enter key.
+Feel free to name your project as you like, but this guide will assume the project is named **Kedro Experiment Tracking Tutorial**, and that your project is in a sub-folder in your working directory that was created by `kedro new`, named `kedro-experiment-tracking-tutorial`.
 
 ## Set up the session store
 
@@ -176,20 +176,56 @@ You can now access, compare and pin your runs by toggling the `Compare runs` but
 
 ## View and compare plot data
 
-Experiment tracking in Kedro-Viz also supports the display and comparison of plots, such as Plotly and Matplotlib. Once you have [created your plots](../tutorial/visualise_pipeline.md#visualise-charts-in-kedro-viz) in your kedro-project, you must set the versioned flag to `true` within the project catalog to include them in experiment tracking.
+From Kedro-Viz version 5.0.0 experiment tracking also supports the display and comparison of plots, such as Plotly and Matplotlib.
 
+Add a new node to the `data_processing` nodes (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`):
+
+```python
+import matplotlib.pyplot as plt
+import seaborn as sn
+
+
+def create_confusion_matrix(companies: pd.DataFrame):
+    actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+    predicted = [1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1]
+    data = {"y_Actual": actuals, "y_Predicted": predicted}
+    df = pd.DataFrame(data, columns=["y_Actual", "y_Predicted"])
+    confusion_matrix = pd.crosstab(
+        df["y_Actual"], df["y_Predicted"], rownames=["Actual"], colnames=["Predicted"]
+    )
+    sn.heatmap(confusion_matrix, annot=True)
+    return plt
 ```
+
+> You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
+
+And now add this node to the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/pipeline.py`)
+
+```python
+node(
+    func=create_confusion_matrix,
+    inputs="companies",
+    outputs="confusion_matrix",
+),
+```
+
+In the catalog add the `confusion_matrix` data definition, making sure to set the versioned flag to `true` within the project catalog to include the plot in experiment tracking.
+
+```yaml
 # conf/base/catalog.yml
 
-reporting.confusion_matrix:
+data_processing.confusion_matrix:
   type: matplotlib.MatplotlibWriter
-  filepath: ${base_location}/08_reporting/confusion_matrix.png
+  filepath: data/09_tracking/confusion_matrix.png
   versioned: true
 ```
 
-Clicking on a plot will expand it. When in comparison view, expanding a plot will show all the plots in that view for them to be compared side-by-side.
+After running the pipeline with `kedro run`, the plot will be saved and you will be able to see the plot in the experiment tracking panel when you execute `kedro viz`. Clicking on a plot will expand it. When in comparison view, expanding a plot will show all the plots in that view for them to be compared side-by-side.
 
 ![](../meta/images/expand-plot-comparison-view.gif)
+
+
+Read more about [creating plots and visualising them in Kedro-Viz in the visualise pipeline section.](../tutorial/visualise_pipeline.md#visualise-charts-in-kedro-viz)
 
 ## View your metrics timeline
 

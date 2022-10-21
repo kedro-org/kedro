@@ -53,18 +53,18 @@ shuttles:
   layer: raw
 
 preprocessed_companies:
-  type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_companies.csv
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_companies.pq
   layer: intermediate
 
 preprocessed_shuttles:
-  type: pandas.CSVDataSet
-  filepath: data/02_intermediate/preprocessed_shuttles.csv
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_shuttles.pq
   layer: intermediate
 
 model_input_table:
-  type: pandas.CSVDataSet
-  filepath: data/03_primary/model_input_table.csv
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/model_input_table.pq
   layer: primary
 
 regressor:
@@ -74,7 +74,7 @@ regressor:
   layer: models
 ```
 
-Run kedro-viz again with `kedro viz` and observe how your visualisation has changed to indicate the layers:
+Run Kedro-Viz again with `kedro viz` and observe how your visualisation has changed to indicate the layers:
 
 ![](../meta/images/pipeline_visualisation_with_layers.png)
 
@@ -110,7 +110,7 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
 
 You must update the `requirements.txt` file in your Kedro project and add the following datasets to enable Plotly for your project.
 
-`kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.2`
+`kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.3`
 
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
@@ -126,13 +126,16 @@ Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyD
 The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
 
 ```python
+# nodes.py
 import pandas as pd
 
 
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
+```
 
-
+```python
+# pipeline.py
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
     return pipeline(
@@ -175,7 +178,9 @@ Below is an example of how to visualise plots using [Plotly Express](https://plo
 The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
 
 ```python
+# nodes.py
 import plotly.express as px
+import plotly.graph_objs as go
 import pandas as pd
 
 # the below function uses plotly.express
@@ -200,8 +205,10 @@ def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
         ]
     )
     return fig
+```
 
-
+```python
+# pipeline.py
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
     return pipeline(
@@ -248,7 +255,7 @@ The MatplotlibWriter dataset converts Matplotlib objects to image files. This me
 You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.extras.datasets.matplotlib.MatplotlibWriter). You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```
-kedro[matplotlib.MatplotlibWriter]==0.18.2
+kedro[matplotlib.MatplotlibWriter]==0.18.3
 ```
 
 To use this dataset, configure your plot in your Kedro node. The below functions should be added to the `nodes.py` and `pipeline.py` files respectively.
@@ -256,6 +263,7 @@ To use this dataset, configure your plot in your Kedro node. The below functions
 ```python
 # nodes.py
 import matplotlib.pyplot as plt
+import seaborn as sn
 
 
 def create_confusion_matrix(companies: pd.DataFrame):
@@ -268,8 +276,11 @@ def create_confusion_matrix(companies: pd.DataFrame):
     )
     sn.heatmap(confusion_matrix, annot=True)
     return plt
+```
 
+> You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
 
+```python
 # pipeline.py
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
@@ -287,9 +298,9 @@ def create_pipeline(**kwargs) -> Pipeline:
 You must also specify the output type in the `catalog.yml` file, like below. Remember to set the versioned flag to `true` if you want to add the plots to experiment tracking as well.
 
 ```yaml
-reporting.dummy_confusion_matrix:
+dummy_confusion_matrix:
   type: matplotlib.MatplotlibWriter
-  filepath: ${base_location}/08_reporting/dummy_confusion_matrix.png
+  filepath: data/08_reporting/dummy_confusion_matrix.png
   versioned: true
 ```
 

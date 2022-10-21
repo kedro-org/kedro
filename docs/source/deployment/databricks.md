@@ -34,7 +34,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.18.2"
+pip install "kedro~=0.18.3"
 # name your project Iris Databricks when prompted for it
 kedro new --starter pyspark-iris
 ```
@@ -64,7 +64,7 @@ You should get a similar output:
 
 If you already have an active cluster with runtime version `7.1`, you can skip this step. Here is [how to find clusters in your Databricks workspace](https://docs.databricks.com/clusters/clusters-manage.html).
 
-Follow the [Databricks official guide to create a new cluster](https://docs.databricks.com/clusters/create.html). For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
+Follow the [Databricks official guide to create a new cluster](https://docs.databricks.com/clusters/create-cluster.html). For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
 * Runtime: `7.1 (Scala 2.12, Spark 3.0.0)`
 * Enable autoscaling: `off`
 * Terminate after 120 minutes of inactivity: `on`
@@ -159,7 +159,7 @@ Then press `Confirm` button. Your cluster will be restarted to apply the changes
 
 Congratulations, you are now ready to run your Kedro project from the Databricks!
 
-[Create your Databricks notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and remember to [attach it to the cluster](https://docs.databricks.com/notebooks/notebooks-manage.html#attach) you have just configured.
+[Create your Databricks notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and remember to attach it to the cluster you have just configured.
 
 In your newly-created notebook, put each of the below code snippets into a separate cell, then [run all cells](https://docs.databricks.com/notebooks/notebooks-use.html#run-notebooks):
 
@@ -169,10 +169,10 @@ In your newly-created notebook, put each of the below code snippets into a separ
 %sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch main https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
 ```
 
-* Install the latest version of Kedro compatible with version `0.18.2`
+* Install the latest version of Kedro compatible with version `0.18.3`
 
 ```console
-%pip install "kedro[spark.SparkDataSet]~=0.18.2"
+%pip install "kedro[spark.SparkDataSet]~=0.18.3"
 ```
 
 * Copy input data into DBFS

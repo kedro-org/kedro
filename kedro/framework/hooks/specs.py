@@ -245,7 +245,6 @@ class DatasetSpecs:
 
         Args:
             dataset_name: name of the dataset to be loaded from the catalog.
-
         """
         pass
 
@@ -256,7 +255,6 @@ class DatasetSpecs:
         Args:
             dataset_name: name of the dataset that was loaded from the catalog.
             data: the actual data that was loaded from the catalog.
-
         """
         pass
 
@@ -267,7 +265,6 @@ class DatasetSpecs:
         Args:
             dataset_name: name of the dataset to be saved to the catalog.
             data: the actual data to be saved to the catalog.
-
         """
         pass
 
@@ -293,6 +290,7 @@ class KedroContextSpecs:
         """Hooks to be invoked after a `KedroContext` is created. This is the earliest
         hook triggered within a Kedro run. The `KedroContext` stores useful information
         such as `credentials`, `config_loader` and `env`.
+
         Args:
             context: The context that was created.
         """

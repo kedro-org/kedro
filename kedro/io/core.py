@@ -548,7 +548,6 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
             else:
                 message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
-
         return PurePath(most_recent).parent.name
 
     # 'key' is set to prevent cache key overlapping for load and save:
@@ -601,8 +600,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:
-        self.resolve_load_version()  # Make sure last load version is set
+    def load(self) -> _DO:  # pylint: disable=useless-parent-delegation
         return super().load()
 
     def save(self, data: _DI) -> None:

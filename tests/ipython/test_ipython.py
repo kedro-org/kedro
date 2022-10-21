@@ -1,4 +1,4 @@
-# pylint: disable=import-outside-toplevel,reimported
+# pylint: disable=import-outside-toplevel
 from pathlib import Path
 
 import pytest
@@ -32,9 +32,7 @@ PROJECT_VERSION = "0.1"
 
 @pytest.mark.skip()
 class TestLoadKedroObjects:
-    def test_load_kedro_objects(
-        self, tmp_path, mocker, caplog
-    ):  # pylint: disable=too-many-locals
+    def test_load_kedro_objects(self, tmp_path, mocker, caplog):
         kedro_path = tmp_path / "here"
 
         fake_metadata = ProjectMetadata(
@@ -288,7 +286,7 @@ class TestProjectPathResolution:
         )
         assert expected_message in log_messages
 
-    def test_project_path_update(self, caplog):
+    def test_project_path_update(self):
         first_path = Path("/test1").resolve()
         second_path = Path("/test2").resolve()
         local_namespace = {}

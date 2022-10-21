@@ -72,12 +72,12 @@ def reload_kedro(
     path: str = None,
     env: str = None,
     extra_params: Dict[str, Any] = None,
-    local_ns: Optional[Dict[str, Any]] = None,
+    local_namespace: Optional[Dict[str, Any]] = None,
 ) -> None:  # pragma: no cover
     """Function that underlies the %reload_kedro Line magic. This should not be imported
     or run directly but instead invoked through %reload_kedro."""
 
-    project_path = _resolve_project_path(path, local_ns)
+    project_path = _resolve_project_path(path, local_namespace)
 
     metadata = bootstrap_project(project_path)
     _remove_cached_modules(metadata.package_name)
@@ -109,22 +109,22 @@ def reload_kedro(
 
 
 def _resolve_project_path(
-    path: Optional[str] = None, local_ns: Optional[Dict[str, Any]] = None
+    path: Optional[str] = None, local_namespace: Optional[Dict[str, Any]] = None
 ) -> Path:
     """
     Resolve the project path to use with reload_kedro, updating or adding it
-    (in-place) to the local ipython Namespace (``local_ns``) if necessary.
+    (in-place) to the local ipython Namespace (``local_namespace``) if necessary.
 
     Arguments:
         path: the path to use as a string object
-        local_ns: Namespace with local variables of the scope where the line
+        local_namespace: Namespace with local variables of the scope where the line
             magic is invoked in a dict.
     """
     if path:
         project_path = Path(path).expanduser().resolve()
     else:
-        if local_ns and "project_path" in local_ns:
-            project_path = local_ns["project_path"]
+        if local_namespace and "_project_path" in local_namespace:
+            project_path = local_namespace["_project_path"]
         else:
             project_path = _find_kedro_project(Path.cwd())
         if project_path:
@@ -134,8 +134,12 @@ def _resolve_project_path(
                 project_path,
             )
 
-    if project_path and local_ns and local_ns.get("project_path", None) != project_path:
-        local_ns["project_path"] = project_path
+    if (
+        project_path
+        and local_namespace
+        and local_namespace.get("_project_path", None) != project_path
+    ):
+        local_namespace["_project_path"] = project_path
         logger.info("Updated path to Kedro project: %s", project_path)
 
     return project_path

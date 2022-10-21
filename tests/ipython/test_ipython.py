@@ -259,7 +259,7 @@ class TestProjectPathResolution:
 
     def test_only_local_namespace_specified(self):
         result = _resolve_project_path(
-            local_ns={"project_path": Path("/test").resolve()}
+            local_namespace={"_project_path": Path("/test").resolve()}
         )
         expected = Path("/test").resolve()
         assert result == expected
@@ -280,7 +280,7 @@ class TestProjectPathResolution:
 
     def test_project_path_unresolvable_warning(self, mocker, caplog, ipython):
         mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
-        ipython.magic("load_ext kedro.ipython")
+        ipython.magic("reload_ext kedro.ipython")
         log_messages = [record.getMessage() for record in caplog.records]
         expected_message = (
             "Kedro extension was registered but couldn't find a Kedro project. "

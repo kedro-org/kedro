@@ -60,7 +60,6 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
         >>>
-        >>> # Add "compress_pickle[lz4]" to requirements.txt
         >>> data_set = PickleDataSet(filepath="test.pickle.lz4",
         >>>                          backend="compress_pickle",
         >>>                          load_args={"compression":"lz4"},

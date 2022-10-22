@@ -4,7 +4,6 @@
 
 ## Bug fixes and other changes
 
-* Updated MatplotlibWriter Dataset docs with working examples.
 
 ## Breaking changes to the API
 
@@ -21,6 +20,7 @@
 * Fixed `format` in `save_args` for `SparkHiveDataSet`, previously it didn't allow you to save it as delta format.
 * Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 * Updated Experiment Tracking docs with working examples.
+* Updated MatplotlibWriter Dataset docs with working examples.
 
 ## Minor breaking changes to the API
 

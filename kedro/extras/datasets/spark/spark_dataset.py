@@ -309,13 +309,15 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             path = PurePosixPath(filepath)
 
             if filepath.startswith("/dbfs"):
+                dbutils = None
                 try:
                     dbutils = _get_dbutils(self._get_spark())
-                    if dbutils:
-                        glob_function = partial(_dbfs_glob, dbutils=dbutils)
-                        exists_function = partial(_dbfs_exists, dbutils=dbutils)
-                except:
-                    pass
+                except AttributeError: 
+                    # DataBricks is known to raise AttributeError when called on unsupported environment
+                    pass 
+                if dbutils:
+                    glob_function = partial(_dbfs_glob, dbutils=dbutils)
+                    exists_function = partial(_dbfs_exists, dbutils=dbutils)
 
         super().__init__(
             filepath=path,

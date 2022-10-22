@@ -4,7 +4,6 @@
 
 ## Bug fixes and other changes
 
-
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*

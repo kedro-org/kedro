@@ -36,6 +36,8 @@ class MatplotlibWriter(
         >>> output_plot:
         >>>   type: matplotlib.MatplotlibWriter
         >>>   filepath: data/08_reporting/output_plot.png
+        >>>   save_args:
+        >>>     format: png
         >>>
 
     Example using the Python API:

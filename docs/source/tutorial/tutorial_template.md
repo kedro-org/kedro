@@ -16,7 +16,7 @@ Navigate to your chosen working directory and run the following to [create a new
 kedro new
 ```
 
-Alternatively, if you want the full example code added to the project in advance, generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+Alternatively, if you want the working example code added to the project in advance, generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
 
 ```
 run `kedro new --starter=spaceflights`
@@ -24,7 +24,7 @@ run `kedro new --starter=spaceflights`
 
 When prompted for a project name, enter `Kedro Tutorial`. When your project is ready, navigate to the root directory of the project: `kedro-tutorial`.
 
-## Install dependencies
+## Project dependencies
 
 Up to this point, we have not discussed project dependencies, so now is a good time to examine them. We use a `requirements.txt` file to specify a project's dependencies and make it easier for others to run your project. This avoids version conflicts by ensuring that you use same Python packages and versions.
 
@@ -46,6 +46,10 @@ pytest~=6.2 # Testing framework for Python code
 
 The dependencies above might be sufficient for some projects, but for this tutorial you must add some extra requirements. These requirements will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.
 
+### Add dependencies to the project
+
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth opening `src/requirements.txt` to inspect the contents.
+
 Add the following lines to your `src/requirements.txt` file:
 
 ```text
@@ -53,6 +57,8 @@ kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.3   #
 kedro-viz~=5.0                                                                 # Visualise your pipelines
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```
+
+### Install the dependencies
 
 To install all the project-specific dependencies, navigate to the root directory of the project and run:
 

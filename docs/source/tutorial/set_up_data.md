@@ -8,87 +8,41 @@ In this section, we discuss the data set-up phase, which is the second part of t
 You can find further information about the [Data Catalog](../data/data_catalog.md) in specific documentation covering advanced usage.
 
 
-## Add your datasets to `data`
+## Download datasets
 
-The spaceflights tutorial makes use of fictional datasets of companies shuttling customers to the Moon and back. You will use the data to train a model to predict the price of shuttle hire. However, before you get to train the model, you will need to prepare the data for model building by creating a model input table.
+The spaceflights tutorial makes use of three fictional datasets of companies shuttling customers to the Moon and back:
 
-The spaceflight tutorial has three files and uses two data formats: `.csv` and `.xlsx`. Download and save the files to the `data/01_raw/` folder of your project directory:
+* `companies.csv` contains data about space travel companies, such as their location, fleet count and rating
+* `reviews.csv` is a set of reviews from customers for categories, such as comfort and price
+* `shuttles.xlsx` is a set of attributes for spacecraft across the fleet, such as their engine type and passenger capacity
 
-* [reviews.csv](https://kedro-org.github.io/kedro/reviews.csv)
+You will use the data to train a model to predict the price of shuttle hire. However, before you get to train the model, you will need to prepare the data for model building by combining the files to create a model input table.
+
+The data comes in two different formats: `.csv` and `.xlsx`. Kedro supports a number of different data types, and those supported can be found in the API documentation. 
+
+> If you are using the tutorial created by the spaceflights starter, you can omit this step.
+
+Download and save the files to the `data/01_raw/` folder of your project directory:
+
 * [companies.csv](https://kedro-org.github.io/kedro/companies.csv)
+* [reviews.csv](https://kedro-org.github.io/kedro/reviews.csv)
 * [shuttles.xlsx](https://kedro-org.github.io/kedro/shuttles.xlsx)
 
-Here are some examples of how you can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) to the `data/01_raw` directory inside your project:
-
-Using [cURL in a Unix terminal](https://curl.se/download.html):
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-```bash
-# reviews
-curl -o data/01_raw/reviews.csv https://kedro-org.github.io/kedro/reviews.csv
-# companies
-curl -o data/01_raw/companies.csv https://kedro-org.github.io/kedro/companies.csv
-# shuttles
-curl -o data/01_raw/shuttles.xlsx https://kedro-org.github.io/kedro/shuttles.xlsx
-```
-</details>
-
-Using [cURL for Windows](https://curl.se/windows/):
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-```bat
-curl -o data\01_raw\reviews.csv https://kedro-org.github.io/kedro/reviews.csv
-curl -o data\01_raw\companies.csv https://kedro-org.github.io/kedro/companies.csv
-curl -o data\01_raw\shuttles.xlsx https://kedro-org.github.io/kedro/shuttles.xlsx
-```
-</details>
-
-Using [Wget in a Unix terminal](https://www.gnu.org/software/wget/):
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-```bash
-# reviews
-wget -O data/01_raw/reviews.csv https://kedro-org.github.io/kedro/reviews.csv
-# companies
-wget -O data/01_raw/companies.csv https://kedro-org.github.io/kedro/companies.csv
-# shuttles
-wget -O data/01_raw/shuttles.xlsx https://kedro-org.github.io/kedro/shuttles.xlsx
-```
-</details>
-
-Using [Wget for Windows](https://eternallybored.org/misc/wget/):
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-```bat
-wget -O data\01_raw\reviews.csv https://kedro-org.github.io/kedro/reviews.csv
-wget -O data\01_raw\companies.csv https://kedro-org.github.io/kedro/companies.csv
-wget -O data\01_raw\shuttles.xlsx https://kedro-org.github.io/kedro/shuttles.xlsx
-```
-</details>
 
 ## Register the datasets
 
-You now need to register the datasets so they can be loaded by Kedro. All Kedro projects have a `conf/base/catalog.yml` file, and you register each dataset by adding a named entry into the `.yml` file. The entry should include the following:
+You now need to register the datasets so they can be loaded by Kedro. All Kedro projects have a `conf/base/catalog.yml` file, and you register each dataset by adding a named entry into the `.yml` file that includes the following:
 
 * File location (path)
 * Parameters for the given dataset
 * Type of data
 * Versioning
 
-Kedro supports a number of different data types, and those supported can be found in the API documentation. Kedro uses [`fssspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read data from a variety of data stores including local file systems, network file systems, cloud object stores and HDFS.
+### Register `csv` data
 
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth opening `conf/base/catalog.yml` to inspect the contents.
 
-### `csv`
-
-For the spaceflights data, first register the `csv` datasets by adding this snippet to the end of the `conf/base/catalog.yml` file:
+First, for the spaceflights data, first register the two `csv` datasets by adding this snippet to the end of the `conf/base/catalog.yml` file and saving it:
 
 ```yaml
 companies:
@@ -100,7 +54,15 @@ reviews:
   filepath: data/01_raw/reviews.csv
 ```
 
-To check whether Kedro can load the data correctly, open a `kedro ipython` session and run:
+### Test that Kedro can load the `csv` data
+
+Open a `kedro ipython` session in your terminal from the root of the `kedro-tutorial` project directory:
+
+```bash
+kedro ipython
+```
+
+Then type in and run the following:
 
 ```python
 companies = catalog.load("companies")
@@ -113,15 +75,29 @@ If this is the first `kedro` command you have executed in the project, you will 
 
 The command loads the dataset named `companies` (as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv` into the variable `companies`, which is of type `pandas.DataFrame`. The `head` method from `pandas` then displays the first five rows of the DataFrame.
 
+```python
+INFO     Loading data from 'companies' (CSVDataSet)
+Out[1]: 
+      id company_rating       company_location  total_fleet_count iata_approved
+0  35029           100%                   Niue                4.0             f
+1  30292            67%               Anguilla                6.0             f
+2  19032            67%     Russian Federation                4.0             f
+3   8238            91%               Barbados               15.0             t
+4  30342            NaN  Sao Tome and Principe                2.0             t
+
+```
+
 When you have finished, close `ipython` session as follows:
 
 ```python
 exit()
 ```
 
-### `xlsx`
+### Register `xlsx` data
 
-Now register the `xlsx` dataset by adding this snippet to the end of the `conf/base/catalog.yml` file:
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
+
+Now register the `xlsx` dataset by adding this snippet to the end of the `conf/base/catalog.yml` file, and save it:
 
 ```yaml
 shuttles:
@@ -131,25 +107,45 @@ shuttles:
     engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
 ```
 
-```{note}
+This registration has an additional line: `load_args`. This value is passed to the excel file read method (`pd.read_excel`) as [keyword arguments](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the equivalent output is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
 
- The `load_args` are passed to the `pd.read_excel` method as [keyword arguments](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html); although not specified here, `save_args` would be passed to the [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
-```
+### Test that Kedro can load the `xlsx` data
 
-To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session and display its first five rows:
+To test that everything works as expected, load the dataset within a `kedro ipython` session and display its first five rows:
 
 ```python
 shuttles = catalog.load("shuttles")
 shuttles.head()
 ```
+
+You should see output such as the following:
+
+```python
+INFO     Loading data from 'shuttles' (ExcelDataSet)
+Out[1]: 
+      id       shuttle_location shuttle_type engine_type  ... d_check_complete  moon_clearance_complete     price company_id
+0  63561                   Niue      Type V5     Quantum  ...                f                        f  $1,325.0      35029
+1  36260               Anguilla      Type V5     Quantum  ...                t                        f  $1,780.0      30292
+2  57015     Russian Federation      Type V5     Quantum  ...                f                        f  $1,715.0      19032
+3  14035               Barbados      Type V5      Plasma  ...                f                        f  $4,770.0       8238
+4  10036  Sao Tome and Principe      Type V2      Plasma  ...                f                        f  $2,820.0      30342
+
+```
+
 When you have finished, close `ipython` session as follows:
 
 ```python
 exit()
 ```
 
-## Custom data
+## Futher information
+
+### Custom data
 
 Kedro supports a number of [datasets](/kedro.extras.datasets) out of the box, but you can also add support for any proprietary data format or filesystem in your pipeline.
 
 You can find further information about [how to add support for custom datasets](../extend_kedro/custom_datasets.md) in specific documentation covering advanced usage.
+
+### Data location
+
+Kedro uses [`fssspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read data from a variety of data stores including local file systems, network file systems, cloud object stores and HDFS.

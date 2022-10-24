@@ -30,6 +30,18 @@ If a visualisation panel opens up and a pipeline is not visible, then please che
 
 To exit this visualisation, close the open browser and enter **Ctrl+C** or **Cmd+C** in your terminal.
 
+## Use `kedro viz --autoreload`
+
+Run the following command:
+
+```bash
+kedro viz --autoreload
+```
+
+The `autoreload` flag will ensure that changes to your pipeline are automatically reflected in Kedro-Viz. For example, commenting out `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
+
+![autoreload](../meta/images/autoreload.gif)
+
 ## Visualise layers
 
 A pipeline can be broken up into different layers according to how data is processed, and using a convention for layers makes it easier to collaborate. For example, the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention) shown here labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).

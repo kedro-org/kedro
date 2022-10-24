@@ -83,6 +83,7 @@ Welcome to Kedro's documentation!
    tutorial/namespace_pipelines
    tutorial/set_up_experiment_tracking
    tutorial/package_a_project
+   tutorial/spaceflights_tutorial_faqs
 
 .. toctree::
    :maxdepth: 2

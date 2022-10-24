@@ -168,6 +168,65 @@ Our preferred Kedro-community channel for feedback is through [GitHub issues](ht
 
 If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/kedro-org/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files).
 
+## Can I create a virtual environment without `conda`?
+
+You can use `venv` or `pipenv` instead.
+
+### `venv` (instead of `conda`)
+
+If you use Python 3, you should already have the `venv` module installed with the standard library. Create a directory for working with Kedro within your virtual environment:
+
+```bash
+mkdir kedro-environment && cd kedro-environment
+```
+
+This will create a `kedro-environment` directory in your current working directory. Next, to create a new virtual environment in this directory, run:
+
+```bash
+python -m venv env/kedro-environment  # macOS / Linux
+python -m venv env\kedro-environment  # Windows
+```
+
+Activate this virtual environment:
+
+```bash
+source env/kedro-environment/bin/activate # macOS / Linux
+.\env\kedro-environment\Scripts\activate  # Windows
+```
+
+To exit the environment:
+
+```bash
+deactivate
+```
+
+### `pipenv` (instead of `conda`)
+
+Install `pipenv` as follows:
+
+```bash
+pip install pipenv
+```
+
+Create a directory for the virtual environment and change to that directory:
+
+```bash
+mkdir kedro-environment && cd kedro-environment
+```
+
+Once all the dependencies are installed, to start a session with the correct virtual environment activated:
+
+```bash
+pipenv shell
+```
+
+To exit the shell session:
+
+```bash
+exit
+```
+
+
 ## How can I get my question answered?
 
-If your question isn't answered above, check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
+If your question isn't answered above, check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Kedro Slack channels](kedro-org.slack.com).

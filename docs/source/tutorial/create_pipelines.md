@@ -1,27 +1,31 @@
 # Create a pipeline
 
-This section covers the third part of the [standard development workflow](./spaceflights_tutorial.md#kedro-project-development-workflow), and covers the following:
+This section covers the third part of the standard Kedro development workflow, and covers the following:
 
-* How to create each [node](../resources/glossary.md#node) required by the example
-* How to set up a [pipeline](../resources/glossary.md#pipeline)
+* How to create the data transformation steps as Python functions
+* How to add a function to make a [Keddro node](../resources/glossary.md#node) 
+* How to construct a [Kedro pipeline](../resources/glossary.md#pipeline) as a set of nodes
 
 ## Data processing pipeline
 
-You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets, [companies.csv](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights/%7B%7B%20cookiecutter.repo_name%20%7D%7D/data/01_raw/companies.csv) and [shuttles.xlsx](https://github.com/kedro-org/kedro-starters/blob/main/spaceflights/%7B%7B%20cookiecutter.repo_name%20%7D%7D/data/01_raw/shuttles.xlsx), to prepare the data for modelling.
+You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets, companies.csv and shuttles.xlsx, to prepare the data for modelling.
 
 ### Generate a new pipeline template
 
-In the terminal, run the following command:
+> If you are using the tutorial created by the spaceflights starter, you can omit this command, but it's worth reviewing the files associated with the `data_processing` pipeline as described below.
+
+In the terminal, run the following command to generate a new pipeline for data processing:
 
 ```bash
 kedro pipeline create data_processing
 ```
 
-This command generates all the files you need to start to write a `data_processing` pipeline:
-* `nodes.py` and `pipeline.py` in the `src/kedro_tutorial/pipelines/data_processing` folder for the main node functions that form your pipeline
-* `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
-* `src/tests/pipelines/data_processing` for tests for your pipeline
-* `__init__.py` files in the required places to ensure that the pipeline can be imported by Python
+This command generates all the files you need for the pipeline:
+
+* Two python files: `nodes.py` (for the node functions that form the data processing) and `pipeline.py` (to build the pipeline) within `src/kedro_tutorial/pipelines/data_processing` pipeline
+* A yaml file: `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
+* A folder for test code: `src/tests/pipelines/data_processing` 
+* `__init__.py` files in the required folders to ensure that the pipeline can be imported by Python
 
 ```bash
 
@@ -51,7 +55,9 @@ This command generates all the files you need to start to write a `data_processi
 
 ### Add node functions
 
-Open `src/kedro_tutorial/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each take a raw DataFrame and output a DataFrame containing pre-processed data:
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth opening `src/kedro_tutorial/pipelines/data_processing/nodes.py` to inspect the contents.
+
+Open `src/kedro_tutorial/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each take a raw DataFrame as input, convert the data in several columns to different types, and output a DataFrame containing the pre-processed data:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -111,6 +117,8 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 
 The next steps are to create a [node](../resources/glossary.md#node) for each function, and to create a [modular pipeline](../resources/glossary.md#modular-pipeline) for data processing:
 
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the code in `src/kedro_tutorial/pipelines/data_processing/pipeline.py`.
+
 Add the following to `src/kedro_tutorial/pipelines/data_processing/pipeline.py`, so the `create_pipeline()` function looks as follows:
 
 <details>
@@ -136,12 +144,6 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-</details>
-
-```{note}
-`companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. These are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
-```
-
 Be sure to import `node`, and your functions by adding them to the beginning of `pipeline.py`:
 
 ```python
@@ -149,6 +151,11 @@ from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import preprocess_companies, preprocess_shuttles
 ```
+</details>
+
+
+Note that `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. These are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
+
 
 ### Test the example
 
@@ -198,23 +205,27 @@ You should see output similar to the following:
 
 ```
 
-### Visualise the pipeline
+### Optional: visualise the pipeline
 
-Kedro-Viz at this point will render a visualisation of a very simple, but valid, pipeline. To show the visualisation, run:
+The next section of this tutorial covers visualisation in greater detail, but you can now use Kedro-Viz to show your `data_processing` pipeline. In your terminal type the following:
 
 ```bash
 kedro viz
 ```
 
-This command should open up a visualisation in your browser that looks like the following:
+This command automatically opens a browser tab to serve the visualisation at http://127.0.0.1:4141/:
 
 ![simple_pipeline](../meta/images/simple_pipeline.png)
 
-### Persist pre-processed data
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `Ctrl+C` or `Cmd+C`.
 
-The nodes above each output a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). When Kedro ran the pipeline, it determined that neither datasets had been registered in the data catalog (`conf/base/catalog.yml`). If a dataset is not registered, Kedro stores it in memory as a Python object using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes depending on it have been executed, the `MemoryDataSet` is cleared and its memory released by the Python garbage collector.
+### Optional: persist pre-processed data
 
-You can persist the preprocessed data by adding the following to `conf/base/catalog.yml`.:
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). 
+
+When Kedro runs the pipeline, it determines that neither datasets is registered in the data catalog so it stores these _ephemeral datasets_ in memory as Python objects using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes that depend on an ephemeral dataset have executed, the dataset is cleared and the memory is released by the Python garbage collector. 
+
+If you prefer to persist the preprocessed data, add the following to `conf/base/catalog.yml` (If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste):
 
 ```yaml
 preprocessed_companies:
@@ -226,15 +237,20 @@ preprocessed_shuttles:
   filepath: data/02_intermediate/preprocessed_shuttles.pq
 ```
 
-The code above declares explicitly that [pandas.ParquetDataSet](/kedro.extras.datasets.pandas.ParquetDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet).
+Adding the data to the catalog declares explicitly that Kedro should use [pandas.ParquetDataSet](/kedro.extras.datasets.pandas.ParquetDataSet) instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet). The [Data Catalog](../resources/glossary.md#data-catalog) automatically saves the datasets (in Parquet format) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
-The [Data Catalog](../resources/glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as Parquet) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
-
-We choose the [Apache Parquet](https://github.com/apache/parquet-format) format for working with processed and typed data. We recommend getting your data out of CSV as soon as possible. Parquet supports things like compression, partitioning and types out of the box. Whilst you lose the ability to view the file as text, the benefits greatly outweigh the drawbacks.
+We chose the [Apache Parquet](https://github.com/apache/parquet-format) format for working with processed and typed data. We recommend getting your data out of CSV as soon as possible. Parquet supports things like compression, partitioning and types out of the box. Whilst you lose the ability to view the file as text, the benefits greatly outweigh the drawbacks.
 
 ### Extend the data processing pipeline
 
-The next step in the tutorial is to add another node for a function to join together the three DataFrames into a single model input table. First, add the `create_model_input_table()` function from the snippet below to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
+The next step in the tutorial is to add another node for a function that joins together the three DataFrames into a single model input table. You'll add some code for a function and node called `create_model_input_table`, which Kedro processes as follows:
+
+* Kedro uses the `preprocessed_shuttles`, `preprocessed_companies`, and `reviews` datasets as inputs
+* Kedro saves the output as a dataset called `model_input_table`
+
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the `create_model_input_table` code in `nodes.py` and `pipeline.py` .
+
+First, add the `create_model_input_table()` function from the snippet below to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -263,7 +279,11 @@ def create_model_input_table(
 
 </details>
 
-Add the function to the data processing pipeline in `src/kedro_tutorial/pipelines/data_processing/pipeline.py` as a node:
+Add an import statement for `create_model_input_table` at the top of `src/kedro_tutorial/pipelines/data_processing/pipeline.py` and add the code below to include the new node in the pipeline:
+
+```python
+from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
+```
 
 ```python
 node(
@@ -274,18 +294,10 @@ node(
 ),
 ```
 
-The code above informs Kedro that the function `create_model_input_table` should be called with the data loaded from datasets `preprocessed_shuttles`, `preprocessed_companies`, and `reviews` and the output should be saved to dataset `model_input_table`.
 
-Add an import statement for `create_model_input_table` at the top of the file:
+### Optional: persist the model input table
 
-```python
-from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
-```
-
-
-### Persist the model input table
-
-If you want the model input table data to be saved to file rather than used in-memory, add an entry to `conf/base/catalog.yml`:
+If you want the model input table data to be saved to file rather than used in-memory, add an entry to `conf/base/catalog.yml`. (If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste):
 
 ```yaml
 model_input_table:
@@ -328,21 +340,7 @@ You should see output similar to the following:
                     INFO     Pipeline execution completed successfully.                             runner.py:89
                     INFO     Loading data from 'model_input_table' (MemoryDataSet)...        data_catalog.py:343
 ```
-### Use `kedro viz --autoreload`
 
-Run the following command:
-
-```bash
-kedro viz --autoreload
-```
-
-The `autoreload` flag will ensure that changes to your pipeline are automatically reflected in Kedro-Viz. For example, commenting out `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
-
-![autoreload](../meta/images/autoreload.gif)
-
-```{note}
-This is also a great time to highlight how Kedro's [topological sorting](https://en.wikipedia.org/wiki/Topological_sorting) works. The actual order of the `node()` calls in the `pipeline` is irrelevant; Kedro works out the execution graph via the inputs/outputs declared, not the order provided by the user. This means that you, as a developer, simply ask Kedro what data you want and it will derive the execution graph automatically.
-```
 
 ## Data science pipeline
 

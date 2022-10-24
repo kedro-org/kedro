@@ -256,8 +256,11 @@ class TestProjectPathResolution:
         assert result == expected
 
     def test_only_local_namespace_specified(self):
+        class Context:
+            _project_path = Path("/test").resolve()
+
         result = _resolve_project_path(
-            local_namespace={"_project_path": Path("/test").resolve()}
+            local_namespace={"context": Context()}
         )
         expected = Path("/test").resolve()
         assert result == expected
@@ -286,12 +289,15 @@ class TestProjectPathResolution:
         )
         assert expected_message in log_messages
 
-    def test_project_path_update(self):
-        first_path = Path("/test1").resolve()
-        second_path = Path("/test2").resolve()
-        local_namespace = {}
+    def test_project_path_update(self, caplog):
+        class Context:
+            def __init__(self, project_path):
+                self._project_path = Path(project_path).resolve()
 
-        _resolve_project_path(path=first_path, local_namespace=local_namespace)
-        assert local_namespace["_project_path"] == first_path
-        _resolve_project_path(path=second_path, local_namespace=local_namespace)
-        assert local_namespace["_project_path"] == second_path
+        local_namespace = {"context": Context("/path")}
+        updated_path = Path("/updated_path").resolve()
+        _resolve_project_path(path=updated_path, local_namespace=local_namespace)
+
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_message = f"Updating path to Kedro project: {updated_path}..."
+        assert expected_message in log_messages

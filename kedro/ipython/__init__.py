@@ -123,8 +123,8 @@ def _resolve_project_path(
     if path:
         project_path = Path(path).expanduser().resolve()
     else:
-        if local_namespace and "_project_path" in local_namespace:
-            project_path = local_namespace["_project_path"]
+        if local_namespace and "context" in local_namespace:
+            project_path = local_namespace["context"]._project_path
         else:
             project_path = _find_kedro_project(Path.cwd())
         if project_path:
@@ -136,11 +136,11 @@ def _resolve_project_path(
 
     if (
         project_path
-        and local_namespace is not None
-        and local_namespace.get("_project_path", None) != project_path
+        and local_namespace
+        and "context" in local_namespace
+        and project_path != local_namespace["context"]._project_path
     ):
-        local_namespace["_project_path"] = project_path
-        logger.info("Updated path to Kedro project: %s", project_path)
+        logger.info("Updating path to Kedro project: %s...", project_path)
 
     return project_path
 

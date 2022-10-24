@@ -468,3 +468,16 @@ class TestFormatObject:
     def test_raises_error(self, val, format_dict, expected_error_message):
         with pytest.raises(ValueError, match=expected_error_message):
             _format_object(val, format_dict)
+
+    def test_customised_patterns(self, tmp_path, template_config):
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path),
+            globals_dict=template_config,
+            config_patterns={"spark": ["spark*/"]},
+        )
+        assert config_loader.config_patterns["catalog"] == [
+            "catalog*",
+            "catalog*/**",
+            "**/catalog*",
+        ]
+        assert config_loader.config_patterns["spark"] == ["spark*/"]

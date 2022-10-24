@@ -124,6 +124,7 @@ def _resolve_project_path(
         project_path = Path(path).expanduser().resolve()
     else:
         if local_namespace and "context" in local_namespace:
+            # pylint: disable=protected-access
             project_path = local_namespace["context"]._project_path
         else:
             project_path = _find_kedro_project(Path.cwd())
@@ -134,6 +135,7 @@ def _resolve_project_path(
                 project_path,
             )
 
+    # pylint: disable=protected-access
     if (
         project_path
         and local_namespace

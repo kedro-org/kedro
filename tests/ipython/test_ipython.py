@@ -256,12 +256,11 @@ class TestProjectPathResolution:
         assert result == expected
 
     def test_only_local_namespace_specified(self):
+        # pylint: disable=too-few-public-methods
         class Context:
             _project_path = Path("/test").resolve()
 
-        result = _resolve_project_path(
-            local_namespace={"context": Context()}
-        )
+        result = _resolve_project_path(local_namespace={"context": Context()})
         expected = Path("/test").resolve()
         assert result == expected
 
@@ -290,11 +289,11 @@ class TestProjectPathResolution:
         assert expected_message in log_messages
 
     def test_project_path_update(self, caplog):
+        # pylint: disable=too-few-public-methods
         class Context:
-            def __init__(self, project_path):
-                self._project_path = Path(project_path).resolve()
+            _project_path = Path("/test").resolve()
 
-        local_namespace = {"context": Context("/path")}
+        local_namespace = {"context": Context()}
         updated_path = Path("/updated_path").resolve()
         _resolve_project_path(path=updated_path, local_namespace=local_namespace)
 

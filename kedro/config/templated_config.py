@@ -106,8 +106,8 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             env: Environment that will take precedence over base.
             runtime_params: Extra parameters passed to a Kedro run.
             config_patterns: Patterns that specify the naming convention for configuration files
-                so they can be loaded. Can be customised by supplying config_patterns in
-                `settings.py`.
+                so they can be loaded. Can be customised by supplying config_patterns as
+                in `CONFIG_LOADER_ARGS` in `settings.py`.
             base_env:
             default_run_env:
             globals_pattern: Optional keyword-only argument specifying a glob

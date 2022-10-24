@@ -21,7 +21,7 @@ from kedro.io.core import (
 )
 
 
-class H5pyDataSet(AbstractVersionedDataSet):
+class H5pyDataSet(AbstractVersionedDataSet[h5py.File, h5py.File]):
     """``H5pyDataSet`` loads/saves data from/to a hdf file using an underlying
     filesystem (e.g. local, S3, GCS). It uses h5py.File to handle the hdf file.
 

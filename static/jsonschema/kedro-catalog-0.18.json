@@ -397,6 +397,45 @@
           "if": {
             "properties": {
               "type": {
+                "const": "h5py.H5pyDataSet"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "filepath"
+            ],
+            "properties": {
+              "filepath": {
+                "type": "string",
+                "description": "Filepath in POSIX format to a hdf file prefixed with a protocol like `s3://`.\nIf prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nNote: `http(s)` doesn't support versioning."
+              },
+              "load_args": {
+                "type": "object",
+                "description": "h5py options for loading hdf files.\nYou can find all available arguments at:\nhttps://docs.h5py.org/en/stable/high/file.html#h5py.File\nAll defaults are preserved."
+              },
+              "save_args": {
+                "type": "object",
+                "description": "h5py options for saving hdf files.\nYou can find all available arguments at:\nhttps://docs.h5py.org/en/stable/high/file.html#h5py.File\nAll defaults are preserved."
+              },
+              "credentials": {
+                "type": [
+                  "object",
+                  "string"
+                ],
+                "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
+              },
+              "fs_args": {
+                "type": "object",
+                "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set `wb` when saving."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
                 "const": "geopandas.GeoJSONDataSet"
               }
             }

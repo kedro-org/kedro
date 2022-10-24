@@ -13,6 +13,11 @@
 ## Major features and improvements
 * The config loader objects now implement `UserDict` and the configuration is accessed through `conf_loader['catalog']`
 * You can configure config file patterns through `settings.py` without creating a custom config loader
+* Added the following new datasets:
+
+| Type                      | Description                                                                             | Location                        |
+| ------------------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
+| `hdf5.H5pyDataSet`        | Work with HDF5 files through h5py.File objects, which support more formats than pandas  | `kedro.extras.datasets.hdf5`    |
 
 ## Bug fixes and other changes
 * Fixed `kedro micropkg pull` for packages on PyPI.

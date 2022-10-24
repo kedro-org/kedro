@@ -16,6 +16,7 @@ kedro.extras.datasets
    kedro.extras.datasets.dask.ParquetDataSet
    kedro.extras.datasets.email.EmailMessageDataSet
    kedro.extras.datasets.geopandas.GeoJSONDataSet
+   kedro.extras.datasets.hdf5.H5pyDataSet
    kedro.extras.datasets.holoviews.HoloviewsWriter
    kedro.extras.datasets.json.JSONDataSet
    kedro.extras.datasets.matplotlib.MatplotlibWriter

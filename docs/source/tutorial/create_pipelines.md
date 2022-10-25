@@ -297,7 +297,7 @@ node(
 
 ### Optional: persist the model input table
 
-If you want the model input table data to be saved to file rather than used in-memory, add an entry to `conf/base/catalog.yml`. (If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste):
+If you want the model input table data to be saved to file (in `data/03_primary`) rather than used in-memory, add an entry to `conf/base/catalog.yml`. (If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste):
 
 ```yaml
 model_input_table:
@@ -342,18 +342,33 @@ You should see output similar to the following:
 ```
 
 
+## Checkpoint
+
+This is a good place to take a breath and summarise what you have done so far.
+
+* Created a new project and installed dependencies
+* Added three datasets to the project and set up the Kedro Data Catalog to accept it
+* Created a data processing pipeline with three nodes to transform and merge the input datasets and create a model input table 
+
+The next step is to create the data science pipeline for spaceflight price prediction.
+
 ## Data science pipeline
 
-We have created a modular pipeline for data processing, which merges three input datasets to create a model input table. Now we will create the data science pipeline for price prediction, which uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
+In this tutorial, the data science pipeline uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Create the data science pipeline
 
-Run the following command to create the `data_science` pipeline:
+Run the following command to create the `data_science` pipeline. If you are using the tutorial created by the spaceflights starter, you can omit this step:
+
+
 ```bash
 kedro pipeline create data_science
 ```
 
 Add the following code to the `src/kedro_tutorial/pipelines/data_science/nodes.py` file:
+
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the code for the three nodes.
+
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -420,6 +435,9 @@ def evaluate_model(
 
 ### Configure the input parameters
 
+You now need to add some parameters for use by the `DataCatalog` when the pipeline is executed. 	
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the code for the three nodes.
+
 Add the following to `conf/base/parameters/data_science.yml`:
 
 ```yaml
@@ -437,11 +455,15 @@ model_options:
     - review_scores_rating
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../kedro_project_setup/configuration.md#parameters) is available in later documentation for advanced usage. Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
+Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
+
+More information about [parameters](../kedro_project_setup/configuration.md#parameters) is available in later documentation for advanced usage. 
 
 ### Assemble the data science pipeline
 
 To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
+
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
 
 ```python
 from kedro.pipeline import Pipeline, node, pipeline
@@ -478,6 +500,8 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
 
+> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
+
 ```yaml
 regressor:
   type: pickle.PickleDataSet
@@ -485,11 +509,11 @@ regressor:
   versioned: true
 ```
 
-Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning section](../data/kedro_io.md#versioning).
+By setting `versioned` to `true`, versioning is enabled for `regressor`. This means that the pickled output of the `regressor` is saved every time the pipeline runs, which stores the history of the models built using this pipeline. Further details can be found in the [Versioning section](../data/kedro_io.md#versioning).
 
 ### Test the pipelines
 
-Execute the default pipeline:
+You can now run the "default pipeline", which executes both pipelines in turn (data processing and then data science pipelines):
 
 ```bash
 kedro run
@@ -548,7 +572,19 @@ You should see output similar to the following:
 
 </details>
 
-## Kedro runners
+
+### Slice a pipeline
+
+In some cases you may want to run just part of the default pipeline. For example, you may want to skip data processing execution and run only the data science pipeline to tune the hyperparameters of the price prediction model. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
+
+```bash
+kedro run --pipeline=data_science
+```
+
+There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run).
+
+
+## Optional: Kedro runners
 
 There are three different Kedro runners that can run the pipeline:
 
@@ -565,44 +601,7 @@ kedro run --runner=module.path.to.my.runner
 ```
 
 ```{note}
-`ParallelRunner` performs task parallelisation via multiprocessing. `ThreadRunner` is intended for use with remote execution engines such as [Spark](../tools_integration/pyspark.md) and [Dask](https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py). You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
-```
+`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../tools_integration/pyspark.md) and [Dask](https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py). 
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
-
-## Slice a pipeline
-
-In some cases you may want to run just part of a pipeline. For example, you may need to only run the data science pipeline to tune the hyperparameters of the price prediction model and skip data processing execution. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
-
-```bash
-kedro run --pipeline=data_science
-```
-
-See the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run) for other ways to run sections of your pipeline.
-
-```{warning}
-To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
-```
-
-```bash
-kedro run --pipeline=data_science
-
-2019-10-04 12:36:12,135 - root - INFO - ** Kedro project kedro-tutorial
-2019-10-04 12:36:12,158 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataSet)...
-2019-10-04 12:36:12,158 - kedro.runner.sequential_runner - WARNING - There are 3 nodes that have not run.
-You can resume the pipeline run with the following command:
-kedro run
-Traceback (most recent call last):
-  ...
-  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
-  File "pandas/_libs/parsers.pyx", line 689, in pandas._libs.parsers.TextReader._setup_parser_source
-FileNotFoundError: [Errno 2] File b'data/03_primary/model_input_table.csv' does not exist: b'data/03_primary/model_input_table.csv'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  ...
-    raise DataSetError(message) from exc
-kedro.io.core.DataSetError: Failed while loading data from data set CSVDataSet(filepath=data/03_primary/model_input_table.csv, save_args={'index': False}).
-[Errno 2] File b'data/03_primary/model_input_table.csv' does not exist: b'data/03_primary/model_input_table.csv'
 ```

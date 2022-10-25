@@ -350,17 +350,18 @@ class TestKedroSession:
         result = session._get_config_loader()
 
         assert isinstance(result, ConfigLoader)
-        mocker.patch(
-            "kedro.config.config.ConfigLoader.get",
-            return_value=["spark/*"],
-        )
         assert result.config_patterns["catalog"] == [
             "catalog*",
             "catalog*/**",
             "**/catalog*",
         ]
         assert result.config_patterns["spark"] == ["spark/*"]
+        mocker.patch(
+            "kedro.config.config.ConfigLoader.get",
+            return_value=["spark/*"],
+        )    
         assert result["spark"] == ["spark/*"]
+        
 
     def test_broken_config_loader(self, mock_settings_file_bad_config_loader_class):
         pattern = (

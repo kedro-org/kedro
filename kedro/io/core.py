@@ -28,7 +28,7 @@ VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
-CLOUD_PROTOCOLS = ("s3", "gcs", "gs", "adl", "abfs", "abfss")
+CLOUD_PROTOCOLS = ("s3", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
 
 
 class DataSetError(Exception):
@@ -538,10 +538,16 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
-
+        protocol = getattr(self, "_protocol", None)
         if not most_recent:
-            raise VersionNotFoundError(f"Did not find any versions for {self}")
-
+            if protocol in CLOUD_PROTOCOLS:
+                message = (
+                    f"Did not find any versions for {self}. This could be "
+                    f"due to insufficient permission."
+                )
+            else:
+                message = f"Did not find any versions for {self}"
+            raise VersionNotFoundError(message)
         return PurePath(most_recent).parent.name
 
     # 'key' is set to prevent cache key overlapping for load and save:
@@ -594,8 +600,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:
-        self.resolve_load_version()  # Make sure last load version is set
+    def load(self) -> _DO:  # pylint: disable=useless-parent-delegation
         return super().load()
 
     def save(self, data: _DI) -> None:

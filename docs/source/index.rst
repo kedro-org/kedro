@@ -107,6 +107,7 @@ Welcome to Kedro's documentation!
    nodes_and_pipelines/nodes
    nodes_and_pipelines/pipeline_introduction
    nodes_and_pipelines/modular_pipelines
+   nodes_and_pipelines/pipeline_registry
    nodes_and_pipelines/micro_packaging
    nodes_and_pipelines/run_a_pipeline
    nodes_and_pipelines/slice_a_pipeline
@@ -144,6 +145,8 @@ Welcome to Kedro's documentation!
    development/set_up_pycharm
    development/commands_reference
    development/debugging
+   development/automated_testing
+   development/linting
 
 .. toctree::
    :maxdepth: 2

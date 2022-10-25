@@ -7,10 +7,6 @@ set -o nounset
 
 action=$1
 
-pip install -e ".[docs]"
-pip install -r test_requirements.txt
-python -m ipykernel install --user --name=kedro --display-name=Kedro
-
 # Move some files around. We need a separate build directory, which would
 # have all the files, build scripts would shuffle the files,
 # we don't want that happening on the actual code locally.

@@ -25,12 +25,12 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from pathlib import Path
 
-metadata = bootstrap_project(Path.cwd())
-with KedroSession.create(metadata.package_name) as session:
+bootstrap_project(Path.cwd())
+with KedroSession.create() as session:
     session.run()
 ```
 
-You must tell `KedroSession` the package name of your Kedro project so it can load your settings, nodes and pipelines. Additionally, you can provide the following optional arguments in `KedroSession.create()`:
+You can provide the following optional arguments in `KedroSession.create()`:
 
 - `project_path`: Path to the project root directory
 - `save_on_close`: A boolean value to indicate whether or not to save the session to disk when it's closed

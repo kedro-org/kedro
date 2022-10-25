@@ -4,7 +4,7 @@ This section contains detailed information about configuration, for which the re
 
 ## Configuration root
 
-We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, point Kedro to any other directory and change the configuration paths by setting the `CONF_SOURCE` variable in [`src/<python_package>/settings.py`](settings.md) as follows:
+We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, point Kedro to any other directory and change the configuration paths by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](settings.md) as follows:
 ```python
 CONF_SOURCE = "new_conf"
 ```
@@ -19,7 +19,7 @@ from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
-conf_catalog = conf_loader.get("catalog*", "catalog*/**")
+conf_catalog = conf_loader["catalog"]
 ```
 
 This recursively scans for configuration files firstly in the `conf/base/` (`base` being the default environment) and then in the `conf/local/` (`local` being the designated overriding environment) directory according to the following rules:
@@ -47,7 +47,7 @@ kedro run --env=test
 
 If no `env` option is specified, this will default to using the `local` environment to overwrite `conf/base`.
 
-If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<python_package>/settings.py` under the `CONTEXT_CLASS` key.
+If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<package_name>/settings.py` under the `CONTEXT_CLASS` key.
 
 If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
 
@@ -61,7 +61,7 @@ If you both specify the `KEDRO_ENV` environment variable and provide the `--env`
 
 ## Template configuration
 
-Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your `src/<python_package>/settings.py`:
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your `src/<package_name>/settings.py`:
 
 ```python
 from kedro.config import TemplatedConfigLoader  # new import
@@ -180,7 +180,7 @@ from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
-parameters = conf_loader.get("parameters*", "parameters*/**")
+parameters = conf_loader["parameters"]
 ```
 
 This will load configuration files from any subdirectories in `conf` that have a filename starting with `parameters`, or are located inside a folder with name starting with `parameters`.
@@ -189,7 +189,7 @@ This will load configuration files from any subdirectories in `conf` that have a
 Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 ```
 
-Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if no configuration files match the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
+Calling `conf_loader[key]` in the example above will throw a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
@@ -199,7 +199,7 @@ conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:
-    parameters = conf_loader.get("parameters*", "parameters*/**", "**/parameters*")
+    parameters = conf_loader["parameters"]
 except MissingConfigException:
     parameters = {}
 ```
@@ -315,7 +315,7 @@ from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
-credentials = conf_loader.get("credentials*", "credentials*/**")
+credentials = conf_loader["credentials"]
 ```
 
 This will load configuration files from `conf/base` and `conf/local` whose filenames start with `credentials`, or that are located inside a folder with a name that starts with `credentials`.
@@ -324,7 +324,7 @@ This will load configuration files from `conf/base` and `conf/local` whose filen
 Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence, any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 ```
 
-Calling `conf_loader.get()` in the example above throws a `MissingConfigException` error if no configuration files match the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
+Calling `conf_loader[key]` in the example above throws a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
@@ -334,7 +334,7 @@ conf_path = str(project_path / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 
 try:
-    credentials = conf_loader.get("credentials*", "credentials*/**")
+    credentials = conf_loader["credentials"]
 except MissingConfigException:
     credentials = {}
 ```

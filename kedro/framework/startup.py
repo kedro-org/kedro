@@ -44,7 +44,7 @@ def _is_project(project_path: Union[str, Path]) -> bool:
 
 
 def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
-    """Read project metadata from `<project_path>/pyproject.toml` config file,
+    """Read project metadata from `<project_root>/pyproject.toml` config file,
     under the `[tool.kedro]` section.
 
     Args:
@@ -140,7 +140,7 @@ def _add_src_to_path(source_dir: Path, project_path: Path) -> None:
     if str(source_dir) not in sys.path:
         sys.path.insert(0, str(source_dir))
 
-    python_path = os.getenv("PYTHONPATH") or ""
+    python_path = os.getenv("PYTHONPATH", "")
     if str(source_dir) not in python_path:
         sep = os.pathsep if python_path else ""
         os.environ["PYTHONPATH"] = f"{str(source_dir)}{sep}{python_path}"

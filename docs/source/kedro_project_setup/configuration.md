@@ -30,6 +30,7 @@ This recursively scans for configuration files firstly in the `conf/base/` (`bas
 * *And* file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties`
 
 This logic is specified by `config_patterns` in the [ConfigLoader](/kedro.config.ConfigLoader) and [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) classes. By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
+
 ```python
 config_patterns = {
     "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
@@ -41,6 +42,7 @@ config_patterns = {
 
 The configuration patterns can be changed by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md). You can change the default patterns as well as add additional ones, for example, for Spark configuration files.
 This example shows how to load `parameters` if your files are using a `params` naming convention instead of `parameters` and how to add patterns to load Spark configuration:
+
 ```python
 CONFIG_LOADER_ARGS = {
     "config_patterns": {

@@ -87,10 +87,11 @@ Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.Templated
 ```python
 from kedro.config import TemplatedConfigLoader  # new import
 
-...
 CONFIG_LOADER_CLASS = TemplatedConfigLoader
-...
 ```
+
+### Globals
+When using the `TemplatedConfigLoader` you can provide values in the configuration template through a `globals` file or dictionary.
 
 Let's assume the project contains a `conf/base/globals.yml` file with the following contents:
 
@@ -109,7 +110,13 @@ folders:
     fea: "04_feature"
 ```
 
-The contents of the dictionary resulting from `globals_pattern` are merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence. The resulting global dictionary prepared by `TemplatedConfigLoader` will look like this:
+To point your `TemplatedConfigLoader` to the globals file, add it to the the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md):
+
+```python
+CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
+```
+
+Alternatively, you can declare which values to fill in the template through a dictionary. This dictionary could look like the below: 
 
 ```python
 {
@@ -125,6 +132,28 @@ The contents of the dictionary resulting from `globals_pattern` are merged with 
     },
 }
 ```
+
+To point your `TemplatedConfigLoader` to the globals dictionary, add it to the the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md):
+
+```python
+CONFIG_LOADER_ARGS = { 
+    "globals_dict": 
+        {
+        "bucket_name": "another_bucket_name",
+        "non_string_key": 10,
+        "key_prefix": "my/key/prefix",
+        "datasets": {"csv": "pandas.CSVDataSet", "spark": "spark.SparkDataSet"},
+        "folders": {
+            "raw": "01_raw",
+            "int": "02_intermediate",
+            "pri": "03_primary",
+            "fea": "04_feature",
+        },
+    }
+}
+```
+
+If you provide both a globals file and globals dict, the contents of the dictionary resulting from `globals_pattern` are merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence. 
 
 Now the templating can be applied to the configuration. Here is an example of a templated `conf/base/catalog.yml` file:
 

@@ -1,5 +1,5 @@
 """This module implements a dict-like store object used to persist Kedro sessions.
-This module is seperated from store.py to ensure it's only imported when exported explicitly
+This module is separated from store.py to ensure it's only imported when exported explicitly.
 """
 import dbm
 import shelve

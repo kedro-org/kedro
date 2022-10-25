@@ -15,7 +15,7 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 
 Currently, the core Kedro team consists of
 [Ahdra Merali](https://github.com/AhdraMeraliQB),
-Andrew Mackay,
+[Andrew Mackay](https://github.com/Mackay031),
 [Ankita Katiyar](https://github.com/ankatiyar),
 [Antony Milne](https://github.com/AntonyMilneQB),
 [Cvetanka Nechevska](https://github.com/cvetankanechevska),

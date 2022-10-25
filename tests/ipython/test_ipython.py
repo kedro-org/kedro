@@ -258,6 +258,7 @@ class TestProjectPathResolution:
     def test_only_local_namespace_specified(self):
         # pylint: disable=too-few-public-methods
         class DummyKedroContext:
+            # A dummy stand-in for KedroContext
             _project_path = Path("/test").resolve()
 
         result = _resolve_project_path(local_namespace={"context": DummyKedroContext()})
@@ -291,6 +292,7 @@ class TestProjectPathResolution:
     def test_project_path_update(self, caplog):
         # pylint: disable=too-few-public-methods
         class DummyKedroContext:
+            # A dummy stand-in for KedroContext
             _project_path = Path("/test").resolve()
 
         local_namespace = {"context": DummyKedroContext()}

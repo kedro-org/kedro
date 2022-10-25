@@ -5,6 +5,8 @@ This section covers the third part of the standard Kedro development workflow, a
 * How to create the data transformation steps as Python functions
 * How to add a function to make a [Keddro node](../resources/glossary.md#node) 
 * How to construct a [Kedro pipeline](../resources/glossary.md#pipeline) as a set of nodes
+* How to run part of a default pipeline
+
 
 ## Data processing pipeline
 
@@ -205,19 +207,6 @@ You should see output similar to the following:
 
 ```
 
-### Optional: visualise the pipeline
-
-The next section of this tutorial covers visualisation in greater detail, but you can now use Kedro-Viz to show your `data_processing` pipeline. In your terminal type the following:
-
-```bash
-kedro viz
-```
-
-This command automatically opens a browser tab to serve the visualisation at http://127.0.0.1:4141/:
-
-![simple_pipeline](../meta/images/simple_pipeline.png)
-
-To exit the visualisation, close the browser tab. To regain control of the terminal, enter `Ctrl+C` or `Cmd+C`.
 
 ### Optional: persist pre-processed data
 
@@ -513,7 +502,7 @@ By setting `versioned` to `true`, versioning is enabled for `regressor`. This me
 
 ### Test the pipelines
 
-You can now run the "default pipeline", which executes both pipelines in turn (data processing and then data science pipelines):
+You can now run the default pipeline, which executes both pipelines in turn (data processing and then data science pipelines):
 
 ```bash
 kedro run
@@ -572,8 +561,7 @@ You should see output similar to the following:
 
 </details>
 
-
-### Slice a pipeline
+#### Slice a pipeline
 
 In some cases you may want to run just part of the default pipeline. For example, you may want to skip data processing execution and run only the data science pipeline to tune the hyperparameters of the price prediction model. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
@@ -582,6 +570,25 @@ kedro run --pipeline=data_science
 ```
 
 There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run).
+
+
+### Visualise the project
+
+The documentation on [visualisation with Kedro-Viz](../visualisation/kedro_viz_visualisation) discusses this topic in greater detail, but this is a swift introduction on how to use Kedro-Viz to visualise the project. 
+
+In your terminal type the following:
+
+```bash
+kedro viz
+```
+
+This command automatically opens a browser tab to serve the visualisation at http://127.0.0.1:4141/, and you can explore the project with Kedro-Viz.
+
+You should see the following:
+
+![](../meta/images/pipeline_visualisation.png)
+
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `Ctrl+C` or `Cmd+C`.
 
 
 ## Optional: Kedro runners
@@ -602,6 +609,7 @@ kedro run --runner=module.path.to.my.runner
 
 ```{note}
 `ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../tools_integration/pyspark.md) and [Dask](https://github.com/kedro-org/kedro/blob/develop/kedro/extras/datasets/dask/parquet_dataset.py). 
+```
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
-```
+

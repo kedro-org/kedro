@@ -79,11 +79,22 @@ Welcome to Kedro's documentation!
    tutorial/tutorial_template
    tutorial/set_up_data
    tutorial/create_pipelines
-   tutorial/visualise_pipeline
-   tutorial/namespace_pipelines
-   tutorial/set_up_experiment_tracking
    tutorial/package_a_project
    tutorial/spaceflights_tutorial_faqs
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Visualisation with Kedro-Viz
+   
+   visualisation/kedro_viz_visualisation
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Optional tutorial extension
+
+   tutorial/namespace_pipelines
+   tutorial/reporting_pipeline
+   tutorial/experiment_tracking
 
 .. toctree::
    :maxdepth: 2

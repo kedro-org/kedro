@@ -8,7 +8,9 @@ In the text, we assume that you have created an empty Kedro project; we show the
 You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) so you can follow along without copy/pasting. 
 ```
 
-**Scenario**: *It is 2160 and the space tourism industry is booming. Globally, thousands of space shuttle companies take tourists to the Moon and back. You have been able to source amenities offered in each space shuttle, customer reviews and company information.*
+## Scenario
+
+*It is 2160 and the space tourism industry is booming. Globally, thousands of space shuttle companies take tourists to the Moon and back. You have been able to source amenities offered in each space shuttle, customer reviews and company information.*
 
 **Project**: *You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight.*
 

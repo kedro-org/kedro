@@ -19,7 +19,7 @@ kedro new
 Alternatively, if you want the working example code added to the project in advance, generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
 
 ```
-run `kedro new --starter=spaceflights`
+kedro new --starter=spaceflights
 ```
 
 When prompted for a project name, enter `Kedro Tutorial`. When your project is ready, navigate to the root directory of the project: `kedro-tutorial`.

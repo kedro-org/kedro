@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from kedro.framework.session.store import BaseSessionStore, ShelveStore
+from kedro.framework.session.shelvestore import ShelveStore
+from kedro.framework.session.store import BaseSessionStore
 
 FAKE_SESSION_ID = "fake_session_id"
 STORE_LOGGER_NAME = "kedro.framework.session.store"

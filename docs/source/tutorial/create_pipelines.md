@@ -5,12 +5,12 @@ This section covers the third part of the standard Kedro development workflow, a
 * How to create the data transformation steps as Python functions
 * How to add a function to make a [Keddro node](../resources/glossary.md#node) 
 * How to construct a [Kedro pipeline](../resources/glossary.md#pipeline) as a set of nodes
-* How to run part of a default pipeline
+* How to run a whole pipeline and how to run just part of a pipeline
 
 
 ## Data processing pipeline
 
-You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets, companies.csv and shuttles.xlsx, to prepare the data for modelling.
+You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets, `companies.csv` and `shuttles.xlsx`, to prepare the data for modelling.
 
 ### Generate a new pipeline template
 

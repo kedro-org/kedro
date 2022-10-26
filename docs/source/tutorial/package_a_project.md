@@ -1,14 +1,25 @@
-# Package a project
+# Package a Kedro project
 
 This section explains how to build your project documentation, and how to bundle your project into a Python package.
 
+
 ## Add documentation to your project
 
-To generate project-specific documentation, run `kedro build-docs` in the project's root directory. Kedro builds the resulting HTML files in `docs/build/html/`. To browse the documentation generated, open `docs/build/html/index.html` in your browser, or run `kedro build-docs --open` to open the documentation automatically after it builds.
+Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) and creates a `docs` directory that builds a basic template for project-specific documentation. We recommend that you add your project-specific documentation as markdown in `docs/source` 
 
+If you want to customise your documentation beyond the basic template, refer to the [Sphinx documentation](https://www.sphinx-doc.org/en/master/usage/configuration.html) for details of how to extend `docs/source/conf.py`.
+
+Once you have added any documentation you need, run the following from the project's root directory: 
+
+```bash
+kedro build-docs --open
+``` 
+
+The HTML documention is built to `docs/build/html/` and opens automatically in a browser tab. 
+
+```{note} 
 The `build-docs` command creates documentation based on the code structure of your project. Documentation includes any [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) defined in your code.
-
-Kedro uses the [Sphinx framework](https://www.sphinx-doc.org), so if you want to customise your documentation, please refer to `docs/source/conf.py` and the [corresponding section of the Sphinx documentation](https://www.sphinx-doc.org/en/master/usage/configuration.html).
+```
 
 
 ## Package your project
@@ -21,26 +32,32 @@ kedro package
 
 Kedro builds the package into the `dist/` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
 
-The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf/`, `data/` and `logs/` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration, data and logging. When distributed, the packaged project must be run from within a directory that contains the `conf/` subfolder (and `data/` and `logs/` if your pipeline loads/saves local data or uses logging).
+The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf/`, `data/` and `logs/` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration, dataset location and logging as. 
 
-Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed. The project is installed to the root of a folder with the relevant `conf/`, `data/` and `logs/` subfolders, by navigating to the root and calling:
+### Package recipients
+
+Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed. 
+
+A recipient can install the project into a folder by calling:
 
 ```bash
 pip install <path-to-wheel-file>
 ```
 
-For example, having installed project `kedro-spaceflights` and package `kedro_spaceflights`, a recipient can run the Kedro project as follows from the root of the project:
+An executable, `kedro-tutorial`, is placed in the `bin/` subfolder of the Python installation location, so the project can be run as follows from the installation directory:
 
 ```bash
-python -m kedro_spaceflights
+python -m kedro_tutorial
 ```
 
-An executable, `kedro-spaceflights`, is also placed in the `bin/` subfolder of the Python installation location.
+```{note}
+The recipient will need to add a `conf/` subfolder. They also need to add `data/` and `logs/` if the pipeline loads/saves local data or uses logging.
+```
 
 Once your project is installed, to run your pipelines from any Python code, simply import it:
 
 ```python
-from kedro_spaceflights.__main__ import main
+from kedro_tutorial.__main__ import main
 
 main(
     ["--pipeline", "__default__"]
@@ -49,7 +66,7 @@ main(
 
 This is equivalent to running `kedro run`, and you can provide all the parameters described by `kedro run --help`.
 
-### Docker, Airflow and Deployment
+### Docker, Airflow and other deployment targets
 
 There are several methods to deploy packaged pipelines via 1st party plugins and associated documentation:
 

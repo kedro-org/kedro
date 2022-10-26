@@ -10,19 +10,23 @@ In this section, we discuss the project set-up phase, which is the first part of
 	
 ## Create a new project
 
-Navigate to your chosen working directory and run the following to [create a new empty Kedro project](../get_started/new_project.md#create-a-new-project-interactively) using the default interactive prompts:
+In your terminal window, navigate to the folder you want to store the project and type the following to create an empty project:
 
 ```bash
 kedro new
 ```
 
-Alternatively, if you want the working example code added to the project in advance, generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+Alternatively, if you want to include a full set of working example code within the project, generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) by typing the following:
 
-```
+```bash
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. When your project is ready, navigate to the root directory of the project: `kedro-tutorial`.
+When prompted for a project name, enter `Kedro Tutorial`. Your project will be created and you can change directory into the parent folder (the root directory) for the project: `kedro-tutorial`:
+
+```bash
+cd kedro-tutorial
+```
 
 ## Project dependencies
 
@@ -60,7 +64,7 @@ scikit-learn~=1.0                                                              #
 
 ### Install the dependencies
 
-To install all the project-specific dependencies, navigate to the root directory of the project and run:
+To install all the project-specific dependencies, navigate to the parent folder for the project and run:
 
 ```bash
 pip install -r src/requirements.txt
@@ -72,6 +76,8 @@ You can find out more about [how to work with project dependencies](../kedro_pro
 ## Optional: configuration and logging
 
 You may want to store credentials, such as usernames and passwords, if they are needed for specific data sources. 
-To do this, add them to `conf/local/credentials.yml`. Some examples are included in that file for illustration. You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
+To do this, add them to `conf/local/credentials.yml` (some examples are included in that file for illustration). 
+
+You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
 
 At this stage of the workflow, you might also want to [set up logging](../logging/logging.md), but we do not use it in this tutorial.

@@ -17,7 +17,12 @@ You may prefer to get up and running more swiftly. We also provide the example a
 ![](../meta/images/moon-rocket.gif)
 
 
+## Terminology
 
+The Kedro specific terminology we use in the tutorial will be explained as we introduce it (and we provide links to further information in the [glossary](../resources/glossary.md)). We use some additional terminology which may not be familiar to every reader, such as:
+
+* "**project root directory**" or "**root directory**": This is the parent folder for the entire project, it is the top level folder that contains all other files and directories associated with the project.
+* "**dependencies**": These are Python packages, or libraries, that an individual project depends upon in order to complete a task. For example, the Spaceflights tutorial project depends on the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 
 

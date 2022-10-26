@@ -30,7 +30,7 @@ https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 # CONFIG_LOADER_ARGS = {
 #       "config_patterns": {
 #           "spark" : ["spark*/"],
-#           "parameters": ["params*", "params*/**", "**/params*"],
+#           "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
 #       }
 # }
 

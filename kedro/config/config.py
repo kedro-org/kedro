@@ -110,6 +110,12 @@ class ConfigLoader(AbstractConfigLoader):
     def __getitem__(self, key):
         return self.get(*self.config_patterns[key])
 
+    def __repr__(self):
+        return (
+            f"ConfigLoader(conf_source={self.conf_source}, env={self.env}, "
+            f"config_patterns={self.config_patterns})"
+        )
+
     @property
     def conf_paths(self):
         """Property method to return deduplicated configuration paths."""

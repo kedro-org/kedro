@@ -71,7 +71,7 @@ class KedroSessionError(Exception):
 
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
-    of a Kedro run. Use `KedroSession.create("<package_name>")` as
+    of a Kedro run. Use `KedroSession.create()` as
     a context manager to construct a new KedroSession with session data
     provided (see the example below).
 
@@ -87,8 +87,8 @@ class KedroSession:
         >>> # If you are creating a session outside of a Kedro project (i.e. not using
         >>> # `kedro run` or `kedro jupyter`), you need to run `bootstrap_project` to
         >>> # let Kedro find your configuration.
-        >>> metadata = bootstrap_project(Path("<project_root>"))
-        >>> with KedroSession.create(metadata.package_name) as session:
+        >>> bootstrap_project(Path("<project_root>"))
+        >>> with KedroSession.create() as session:
         >>>     session.run()
 
     """
@@ -125,7 +125,7 @@ class KedroSession:
 
         Args:
             package_name: Package name for the Kedro project the session is
-                created for.
+                created for. The package_name argument will be removed in Kedro `0.19.0`.
             project_path: Path to the project root directory. Default is
                 current working directory Path.cwd().
             save_on_close: Whether or not to save the session when it's closed.
@@ -138,7 +138,6 @@ class KedroSession:
         Returns:
             A new ``KedroSession`` instance.
         """
-
         validate_settings()
 
         session = cls(

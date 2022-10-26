@@ -360,9 +360,8 @@ class TestKedroSession:
         mocker.patch(
             "kedro.config.config.ConfigLoader.get",
             return_value=["spark/*"],
-        )    
+        )
         assert result["spark"] == ["spark/*"]
-        
 
     def test_broken_config_loader(self, mock_settings_file_bad_config_loader_class):
         pattern = (

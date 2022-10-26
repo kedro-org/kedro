@@ -1,17 +1,13 @@
-# pylint: disable=import-outside-toplevel,reimported
+# pylint: disable=import-outside-toplevel
+from pathlib import Path
+
 import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
 
 from kedro.framework.startup import ProjectMetadata
-from kedro.ipython import load_ipython_extension, reload_kedro
+from kedro.ipython import _resolve_project_path, load_ipython_extension, reload_kedro
 from kedro.pipeline import Pipeline
-
-
-@pytest.fixture(autouse=True)
-def project_path(mocker, tmp_path):
-    path = tmp_path
-    mocker.patch("kedro.ipython.default_project_path", path)
 
 
 @pytest.fixture(autouse=True)
@@ -36,13 +32,7 @@ PROJECT_VERSION = "0.1"
 
 @pytest.mark.skip()
 class TestLoadKedroObjects:
-    def test_load_kedro_objects(
-        self, tmp_path, mocker, caplog
-    ):  # pylint: disable=too-many-locals
-        from kedro.ipython import default_project_path
-
-        assert default_project_path == tmp_path
-
+    def test_load_kedro_objects(self, tmp_path, mocker, caplog):
         kedro_path = tmp_path / "here"
 
         fake_metadata = ProjectMetadata(
@@ -91,10 +81,6 @@ class TestLoadKedroObjects:
 
         log_messages = [record.getMessage() for record in caplog.records]
         assert expected_message in log_messages
-        from kedro.ipython import default_project_path
-
-        # make sure global variable updated
-        assert default_project_path == expected_path
 
     def test_load_kedro_objects_extra_args(self, tmp_path, mocker):
         fake_metadata = ProjectMetadata(
@@ -142,10 +128,6 @@ class TestLoadKedroObjects:
     def test_load_kedro_objects_no_path(
         self, tmp_path, caplog, mocker, ipython
     ):  # pylint: disable=unused-argument
-        from kedro.ipython import default_project_path
-
-        assert default_project_path == tmp_path
-
         fake_metadata = ProjectMetadata(
             source_dir=tmp_path / "src",  # default
             config_file=tmp_path / "pyproject.toml",
@@ -173,17 +155,16 @@ class TestLoadKedroObjects:
         mocker.patch("kedro.ipython.register_line_magic")
         mocker.patch("kedro.ipython.KedroSession.create")
         mocker.patch("kedro.ipython.get_ipython")
+        mocker.patch("kedro.ipython._find_kedro_project", return_value=tmp_path)
 
         reload_kedro()
 
-        expected_message = f"No path argument was provided. Using: {tmp_path}"
+        expected_message = (
+            f"Resolved project path as: {tmp_path}.\nTo set a different path, run "
+            "'%reload_kedro <project_root>'"
+        )
         log_messages = [record.getMessage() for record in caplog.records]
         assert expected_message in log_messages
-
-        from kedro.ipython import default_project_path
-
-        # make sure global variable stayed the same
-        assert default_project_path == tmp_path
 
 
 class TestLoadIPythonExtension:
@@ -266,3 +247,58 @@ class TestLoadIPythonExtension:
             UsageError, match=r"unrecognized arguments: --invalid_arg=dummy"
         ):
             ipython.magic("reload_kedro --invalid_arg=dummy")
+
+
+class TestProjectPathResolution:
+    def test_only_path_specified(self):
+        result = _resolve_project_path(path="/test")
+        expected = Path("/test").resolve()
+        assert result == expected
+
+    def test_only_local_namespace_specified(self):
+        # pylint: disable=too-few-public-methods
+        class MockKedroContext:
+            # A dummy stand-in for KedroContext sufficient for this test
+            _project_path = Path("/test").resolve()
+
+        result = _resolve_project_path(local_namespace={"context": MockKedroContext()})
+        expected = Path("/test").resolve()
+        assert result == expected
+
+    def test_no_path_no_local_namespace_specified(self, mocker):
+        mocker.patch(
+            "kedro.ipython._find_kedro_project", return_value=Path("/test").resolve()
+        )
+        result = _resolve_project_path()
+        expected = Path("/test").resolve()
+        assert result == expected
+
+    def test_project_path_unresolvable(self, mocker):
+        mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
+        result = _resolve_project_path()
+        expected = None
+        assert result == expected
+
+    def test_project_path_unresolvable_warning(self, mocker, caplog, ipython):
+        mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
+        ipython.magic("reload_ext kedro.ipython")
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_message = (
+            "Kedro extension was registered but couldn't find a Kedro project. "
+            "Make sure you run '%reload_kedro <project_root>'."
+        )
+        assert expected_message in log_messages
+
+    def test_project_path_update(self, caplog):
+        # pylint: disable=too-few-public-methods
+        class MockKedroContext:
+            # A dummy stand-in for KedroContext sufficient for this test
+            _project_path = Path("/test").resolve()
+
+        local_namespace = {"context": MockKedroContext()}
+        updated_path = Path("/updated_path").resolve()
+        _resolve_project_path(path=updated_path, local_namespace=local_namespace)
+
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_message = f"Updating path to Kedro project: {updated_path}..."
+        assert expected_message in log_messages

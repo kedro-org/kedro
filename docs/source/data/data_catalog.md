@@ -403,6 +403,11 @@ CSVDataSet(
 )
 ```
 
+```{note}
+You can use the same dot notation as the one used with `globals.yml` to reference
+nested keys in the credentials file.
+```
+
 
 ## Load multiple datasets with similar configuration
 

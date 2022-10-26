@@ -66,6 +66,15 @@ def sane_config_with_nested_creds(sane_config):
 
 
 @pytest.fixture
+def sane_config_with_dot_nested_creds(sane_config):
+    sane_config["catalog"]["cars"]["credentials"] = "aws.s3.credentials"
+    sane_config["credentials"]["aws"] = {
+        "s3": {"credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}}
+    }
+    return sane_config
+
+
+@pytest.fixture
 def sane_config_with_tracking_ds(tmp_path):
     boat_path = (tmp_path / "some" / "dir" / "test.csv").as_posix()
     plane_path = (tmp_path / "some" / "dir" / "metrics.json").as_posix()
@@ -455,6 +464,22 @@ class TestDataCatalogFromConfig:
         pattern = "Unable to find credentials 'other_credentials'"
         with pytest.raises(KeyError, match=pattern):
             DataCatalog.from_config(**sane_config_with_nested_creds)
+
+    def test_dot_nested_credentials(self, sane_config_with_dot_nested_creds, mocker):
+        mock_client = mocker.patch("kedro.extras.datasets.pandas.csv_dataset.fsspec")
+        config = deepcopy(sane_config_with_dot_nested_creds)
+        del config["catalog"]["boats"]
+
+        DataCatalog.from_config(**config)
+
+        expected_client_kwargs = config["credentials"]["aws"]["s3"]["credentials"]
+        mock_client.filesystem.assert_called_with("s3", **expected_client_kwargs)
+
+    def test_missing_dot_nested_credentials(self, sane_config_with_dot_nested_creds):
+        del sane_config_with_dot_nested_creds["credentials"]["aws"]["s3"]["credentials"]
+        pattern = "Unable to find credentials 'aws.s3.credentials'"
+        with pytest.raises(KeyError, match=pattern):
+            DataCatalog.from_config(**sane_config_with_dot_nested_creds)
 
     def test_missing_dependency(self, sane_config, mocker):
         """Test that dependency is missing."""

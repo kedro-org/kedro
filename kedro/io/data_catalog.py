@@ -9,6 +9,7 @@ import difflib
 import logging
 import re
 from collections import defaultdict
+from functools import reduce
 from typing import Any, Dict, List, Optional, Set, Type, Union
 
 from kedro.io.core import (
@@ -45,7 +46,11 @@ def _get_credentials(
 
     """
     try:
-        return credentials[credentials_name]
+        return reduce(
+            lambda credentials, key: credentials[key],
+            credentials_name.split("."),
+            credentials,
+        )
     except KeyError as exc:
         raise KeyError(
             f"Unable to find credentials '{credentials_name}': check your data "

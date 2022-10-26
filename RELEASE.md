@@ -23,6 +23,7 @@
 * Updated Experiment Tracking docs with working examples.
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
 * Refactored `ShelveStore` to it's own module to ensure multiprocessing works with it.
+* Added dot nested credentials support.
 
 ## Minor breaking changes to the API
 

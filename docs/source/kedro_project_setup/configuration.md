@@ -29,6 +29,29 @@ This recursively scans for configuration files firstly in the `conf/base/` (`bas
   * file is located in a sub-directory whose name is prefixed with `catalog`
 * *And* file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties`
 
+This logic is specified by `config_patterns` in the [ConfigLoader](/kedro.config.ConfigLoader) and [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) classes. By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
+
+```python
+config_patterns = {
+    "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
+    "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
+    "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
+    "logging": ["logging*", "logging*/**", "**/logging*"],
+}
+```
+
+The configuration patterns can be changed by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md). You can change the default patterns as well as add additional ones, for example, for Spark configuration files.
+This example shows how to load `parameters` if your files are using a `params` naming convention instead of `parameters` and how to add patterns to load Spark configuration:
+
+```python
+CONFIG_LOADER_ARGS = {
+    "config_patterns": {
+        "spark": ["spark*/"],
+        "parameters": ["params*", "params*/**", "**/params*"],
+    }
+}
+```
+
 Configuration information from files stored in `base` or `local` that match these rules is merged at runtime and returned as a config dictionary:
 
 * If any two configuration files located inside the same environment path (`conf/base/` or `conf/local/` in this example) contain the same top-level key, `load_config` will raise a `ValueError` indicating that the duplicates are not allowed.
@@ -61,15 +84,16 @@ If you both specify the `KEDRO_ENV` environment variable and provide the `--env`
 
 ## Template configuration
 
-Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your `src/<package_name>/settings.py`:
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
 
 ```python
 from kedro.config import TemplatedConfigLoader  # new import
 
-...
 CONFIG_LOADER_CLASS = TemplatedConfigLoader
-...
 ```
+
+### Globals
+When using the `TemplatedConfigLoader` you can provide values in the configuration template through a `globals` file or dictionary.
 
 Let's assume the project contains a `conf/base/globals.yml` file with the following contents:
 
@@ -88,7 +112,13 @@ folders:
     fea: "04_feature"
 ```
 
-The contents of the dictionary resulting from `globals_pattern` are merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence. The resulting global dictionary prepared by `TemplatedConfigLoader` will look like this:
+To point your `TemplatedConfigLoader` to the globals file, add it to the the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md):
+
+```python
+CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
+```
+
+Alternatively, you can declare which values to fill in the template through a dictionary. This dictionary could look like the below:
 
 ```python
 {
@@ -104,6 +134,27 @@ The contents of the dictionary resulting from `globals_pattern` are merged with 
     },
 }
 ```
+
+To point your `TemplatedConfigLoader` to the globals dictionary, add it to the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md):
+
+```python
+CONFIG_LOADER_ARGS = {
+    "globals_dict": {
+        "bucket_name": "another_bucket_name",
+        "non_string_key": 10,
+        "key_prefix": "my/key/prefix",
+        "datasets": {"csv": "pandas.CSVDataSet", "spark": "spark.SparkDataSet"},
+        "folders": {
+            "raw": "01_raw",
+            "int": "02_intermediate",
+            "pri": "03_primary",
+            "fea": "04_feature",
+        },
+    }
+}
+```
+
+If you specify both `globals_pattern` and `globals_dict` in `CONFIG_LOADER_ARGS`, the contents of the dictionary resulting from `globals_pattern` are merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence.
 
 Now the templating can be applied to the configuration. Here is an example of a templated `conf/base/catalog.yml` file:
 

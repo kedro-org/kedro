@@ -39,9 +39,9 @@ Welcome to Kedro's documentation!
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
 
-.. image:: https://img.shields.io/discord/778216384475693066.svg?color=7289da&label=Kedro%20Discord&logo=discord&style=flat-square
-    :target: https://discord.gg/akJDeVaxnB
-    :alt: Discord Server
+.. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack&style=flat-square
+    :target: https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw
+    :alt: Kedro's Slack organization
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black

@@ -23,7 +23,7 @@ In this section, we detail:
 - Guide the community to use the right channel:
   - [Github](https://github.com/kedro-org/kedro/) for feature requests and bug reports
   - [GitHub discussions](https://github.com/kedro-org/kedro/discussions)
-  - [Discord](https://discord.gg/akJDeVaxnB)
+  - [Slack](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw)
 
 ## Requirements to become a maintainer
 
@@ -46,7 +46,7 @@ We look for commitment markers with the following:
 Quarterly, existing maintainers will curate a list of contributors that have shown regular activity on the project over the prior months and want to become maintainers. From this list, maintainer candidates are selected and proposed for a vote.
 
 Following a successful vote, candidates are added to the `kedro-developers` team on the Kedro GitHub organisation
-and the `kedro-team` group on the Kedro Discord organisation.
+and the `kedro-team` channel on the Kedro Slack organisation.
 
 ## Voting process
 

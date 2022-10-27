@@ -19,7 +19,14 @@ from kedro.io import (
     LambdaDataSet,
     MemoryDataSet,
 )
-from kedro.io.core import VERSION_FORMAT, Version, generate_timestamp
+from kedro.io.core import (
+    _DEFAULT_PACKAGES,
+    VERSION_FORMAT,
+    Version,
+    _load_obj,
+    generate_timestamp,
+    parse_dataset_definition,
+)
 
 
 @pytest.fixture
@@ -372,6 +379,20 @@ class TestDataCatalogFromConfig:
         pattern = "'type' class path does not support relative paths"
         with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
+
+    def test_config_import_kedro_datasets(self, sane_config, mocker):
+        """Test kedro.extras.datasets default path to the dataset class"""
+        # Spy _load_obj because kedro_datasets is installed
+        class DummyMock:
+            def _load_obj(self, class_path):
+                return _load_obj(class_path)
+
+        dummy_mock = DummyMock()
+        spy = mocker.spy(dummy_mock, "_load_obj")
+        mocker.patch("kedro.io.core._load_obj", dummy_mock._load_obj)
+        parse_dataset_definition(sane_config["catalog"]["boats"])
+        for prefix, call_args in zip(_DEFAULT_PACKAGES, spy.call_args_list):
+            assert call_args.args[0] == f"{prefix}pandas.CSVDataSet"
 
     def test_config_import_extras(self, sane_config):
         """Test kedro.extras.datasets default path to the dataset class"""

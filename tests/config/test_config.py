@@ -332,3 +332,23 @@ class TestConfigLoader:
         msg = f"Invalid YAML file {conf_path / 'catalog.yml'}, unable to read line 3, position 10."
         with pytest.raises(ParserError, match=re.escape(msg)):
             ConfigLoader(str(tmp_path)).get("catalog*.yml")
+
+    def test_customised_config_patterns(self, tmp_path):
+        config_loader = ConfigLoader(
+            conf_source=str(tmp_path),
+            config_patterns={
+                "spark": ["spark*/"],
+                "parameters": ["params*", "params*/**", "**/params*"],
+            },
+        )
+        assert config_loader.config_patterns["catalog"] == [
+            "catalog*",
+            "catalog*/**",
+            "**/catalog*",
+        ]
+        assert config_loader.config_patterns["spark"] == ["spark*/"]
+        assert config_loader.config_patterns["parameters"] == [
+            "params*",
+            "params*/**",
+            "**/params*",
+        ]

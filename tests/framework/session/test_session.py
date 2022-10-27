@@ -92,6 +92,17 @@ def mock_settings_custom_config_loader_class(mocker):
 
 
 @pytest.fixture
+def mock_settings_config_loader_args(mocker):
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_ARGS = Validator(
+            "CONFIG_LOADER_ARGS",
+            default={"config_patterns": {"spark": ["spark/*"]}},
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
 def mock_settings_file_bad_config_loader_class(tmpdir):
     mock_settings_file = tmpdir.join("mock_settings_file.py")
     mock_settings_file.write(
@@ -333,6 +344,24 @@ class TestKedroSession:
 
         assert isinstance(result, AbstractConfigLoader)
         assert result.__class__.__name__ == "MyConfigLoader"
+
+    @pytest.mark.usefixtures("mock_settings_config_loader_args")
+    def test_load_config_loader_args(self, fake_project, mock_package_name, mocker):
+        session = KedroSession.create(mock_package_name, fake_project)
+        result = session._get_config_loader()
+
+        assert isinstance(result, ConfigLoader)
+        assert result.config_patterns["catalog"] == [
+            "catalog*",
+            "catalog*/**",
+            "**/catalog*",
+        ]
+        assert result.config_patterns["spark"] == ["spark/*"]
+        mocker.patch(
+            "kedro.config.config.ConfigLoader.get",
+            return_value=["spark/*"],
+        )
+        assert result["spark"] == ["spark/*"]
 
     def test_broken_config_loader(self, mock_settings_file_bad_config_loader_class):
         pattern = (

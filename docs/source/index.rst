@@ -41,7 +41,7 @@ Welcome to Kedro's documentation!
 
 .. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack&style=flat-square
     :target: https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw
-    :alt: Kedro's Slack organization
+    :alt: Kedro's Slack organisation
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black

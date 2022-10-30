@@ -15,7 +15,7 @@ Once you have added any documentation you need, run the following from the proje
 kedro build-docs --open
 ``` 
 
-The HTML documention is built to `docs/build/html/` and opens automatically in a browser tab. 
+The HTML documention is built to `docs/build/html` and opens automatically in a browser tab. 
 
 ```{note} 
 The `build-docs` command creates documentation based on the code structure of your project. Documentation includes any [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) defined in your code.
@@ -30,9 +30,9 @@ To package your project, run the following in your project's root directory:
 kedro package
 ```
 
-Kedro builds the package into the `dist/` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
+Kedro builds the package into the `dist` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
 
-The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf/`, `data/` and `logs/` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration, dataset location and logging as. 
+The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations. 
 
 ### Package recipients
 
@@ -44,14 +44,14 @@ A recipient can install the project into a folder by calling:
 pip install <path-to-wheel-file>
 ```
 
-An executable, `kedro-tutorial`, is placed in the `bin/` subfolder of the Python installation location, so the project can be run as follows from the installation directory:
+An executable, `kedro-tutorial`, is placed in the `bin` subfolder of the Python installation location, so the project can be run as follows from the installation directory:
 
 ```bash
 python -m kedro_tutorial
 ```
 
 ```{note}
-The recipient will need to add a `conf/` subfolder. They also need to add `data/` and `logs/` if the pipeline loads/saves local data or uses logging.
+The recipient will need to add a `conf` subfolder. They also need to add `data` and `logs` if the pipeline loads/saves local data or uses logging.
 ```
 
 Once your project is installed, to run your pipelines from any Python code, simply import it:

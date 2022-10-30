@@ -23,7 +23,7 @@ The Kedro specific terminology we use in the tutorial will be explained as we in
 
 * "**project root directory**" or "**root directory**": This is the parent folder for the entire project, it is the top level folder that contains all other files and directories associated with the project.
 * "**dependencies**": These are Python packages, or libraries, that an individual project depends upon in order to complete a task. For example, the Spaceflights tutorial project depends on the [scikit-learn](https://scikit-learn.org/stable/) library.
-
+* "**standard development workflow**"
 
 
 

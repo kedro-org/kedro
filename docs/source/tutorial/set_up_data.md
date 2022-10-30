@@ -1,6 +1,6 @@
 # Set up the data
 
-In this section, we discuss the data set-up phase, which is the second part of the [standard development workflow](./spaceflights_tutorial.md#kedro-project-development-workflow). The steps are as follows:
+In this section, we discuss the data set-up phase, which is the second part of the standard development workflow. The steps are as follows:
 
 * Add datasets to your `data/` folder, according to [data engineering convention](../faq/faq.md#what-is-data-engineering-convention)
 * Register the datasets with the Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
@@ -75,7 +75,7 @@ If this is the first `kedro` command you have executed in the project, you will 
 
 The command loads the dataset named `companies` (as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv` into the variable `companies`, which is of type `pandas.DataFrame`. The `head` method from `pandas` then displays the first five rows of the DataFrame.
 
-```python
+```
 INFO     Loading data from 'companies' (CSVDataSet)
 Out[1]: 
       id company_rating       company_location  total_fleet_count iata_approved
@@ -120,7 +120,7 @@ shuttles.head()
 
 You should see output such as the following:
 
-```python
+```
 INFO     Loading data from 'shuttles' (ExcelDataSet)
 Out[1]: 
       id       shuttle_location shuttle_type engine_type  ... d_check_complete  moon_clearance_complete     price company_id

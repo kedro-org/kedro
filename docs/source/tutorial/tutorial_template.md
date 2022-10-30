@@ -1,6 +1,6 @@
 # Set up the spaceflights tutorial project
 
-In this section, we discuss the project set-up phase, which is the first part of the [standard development workflow](./spaceflights_tutorial.md#kedro-project-development-workflow). The set-up steps are as follows:
+In this section, we discuss the project set-up phase, which is the first part of the standard development workflow. The set-up steps are as follows:
 
 * Create a new project with `kedro new`
 * Install project dependencies with `pip install -r src/requirements.txt`

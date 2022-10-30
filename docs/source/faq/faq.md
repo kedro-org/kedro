@@ -231,4 +231,4 @@ exit
 
 ## How can I get my question answered?
 
-If your question isn't answered above, check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Kedro Slack channels](kedro-org.slack.com).
+If your question isn't answered above, talk to the community on the [Kedro Slack channels](https://kedro-org.slack.com).

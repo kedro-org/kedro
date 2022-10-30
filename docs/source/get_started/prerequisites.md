@@ -1,6 +1,6 @@
 # Installation prerequisites
 
-Kedro supports macOS, Linux and Windows (7 / 8 / 10 and Windows Server 2016+). If you encounter any problems on these platforms, please check the [frequently asked questions](../faq/faq.md), [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or the [Kedro Slack channels](kedro-org.slack.com).
+Kedro supports macOS, Linux and Windows (7 / 8 / 10 and Windows Server 2016+). If you encounter any problems on these platforms, please check the [Kedro Slack channels](https://kedro-org.slack.com).
 
 If you use PySpark, you must also [install Java](https://www.oracle.com/java/technologies/javase-downloads.html). If you are a Windows user, you will need admin rights to complete the installation.
 
@@ -9,9 +9,9 @@ A Python virtual environment creates an isolated environment for a Python projec
 
 > [Read more about Python Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/).
 
-We suggest that you create a new virtual environment for *each* new Kedro project you create, and recommend that you [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version), which comes bundled with [`conda`](#conda), a package and environment manager.
+We suggest that you create a new virtual environment for *each* new Kedro project you create, and recommend that you [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version), which comes bundled with a package and environment manager called `conda`.
 
-Depending on your preferred Python installation, you can also create virtual environments to work with Kedro using [`venv`](#venv-instead-of-conda) or [`pipenv`](#pipenv-instead-of-conda) instead of `conda`. Further information about these can be found in the [FAQ](../faq/faq.md)
+> Depending on your preferred Python installation, you can also create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`. Further information about these can be found in the [FAQ](../faq/faq.md)
 
 ### Create a virtual environment with `conda`
 

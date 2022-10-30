@@ -1,6 +1,6 @@
 # Visualisation with Kedro-Viz
 
-This page assumes you are familiar with the basic Kedro concepts described in the [Spaceflights tutorial](spaceflights_tutorial.md). If you have not yet worked through the tutorial, you can generate the project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+This page assumes you are familiar with the basic Kedro concepts described in the [Spaceflights tutorial](../tutorial/spaceflights_tutorial.md). If you have not yet worked through the tutorial, you can generate the project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
 
 ```
 kedro new --starter=spaceflights
@@ -31,7 +31,7 @@ You should see the following:
 
 ![](../meta/images/pipeline_visualisation.png)
 
-If a visualisation panel opens up and a pipeline is not visible, then please check that your [pipeline definition](create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/kedro-org/kedro-viz).
+If a visualisation panel opens up and a pipeline is not visible, then please check that your [pipeline definition](../tutorial/create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/kedro-org/kedro-viz).
 
 ### Exit an open visualisation
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `Ctrl+C` or `Cmd+C`.

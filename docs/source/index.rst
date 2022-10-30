@@ -86,15 +86,10 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Visualisation with Kedro-Viz
    
-   visualisation/kedro_viz_visualisation
+   visualisation/kedro-viz_visualisation
+   visualisation/visualise_charts_with_plotly
+   visualisation/experiment_tracking
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Optional tutorial extension
-
-   tutorial/namespace_pipelines
-   tutorial/reporting_pipeline
-   tutorial/experiment_tracking
 
 .. toctree::
    :maxdepth: 2

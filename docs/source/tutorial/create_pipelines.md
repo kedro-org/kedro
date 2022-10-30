@@ -574,7 +574,7 @@ There are a range of options to run sections of the default pipeline as describe
 
 ### Visualise the project
 
-The documentation on [visualisation with Kedro-Viz](../visualisation/kedro_viz_visualisation) discusses this topic in greater detail, but this is a swift introduction on how to use Kedro-Viz to visualise the project. 
+The documentation on [visualisation with Kedro-Viz](../visualisation/kedro-viz_visualisation) discusses this topic in greater detail, but this is a swift introduction on how to use Kedro-Viz to visualise the project. 
 
 In your terminal type the following:
 

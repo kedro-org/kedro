@@ -13,6 +13,7 @@ __all__ = [
     "SQLTableDataSet",
     "XMLDataSet",
     "GenericDataSet",
+    "SnowflakeTableDataSet",
 ]
 
 from contextlib import suppress
@@ -37,3 +38,5 @@ with suppress(ImportError):
     from .xml_dataset import XMLDataSet
 with suppress(ImportError):
     from .generic_dataset import GenericDataSet
+with suppress(ImportError):
+    from .snowflake_dataset import SnowflakeTableDataSet

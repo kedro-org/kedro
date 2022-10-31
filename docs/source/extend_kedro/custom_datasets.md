@@ -567,22 +567,32 @@ We provide additional examples of [how to use parameters through the data catalo
 
 ## How to contribute a custom dataset implementation
 
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide on GitHub](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro-datasets` package in 
+[`kedro-plugins` repository](https://github.com/kedro-org/kedro-plugins) where you can add a new custom dataset 
+implementation to share it with others. You can find out more in the [Kedro contribution guide on GitHub](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
 
 To contribute your custom dataset:
 
-1. Add your dataset package to `kedro/extras/datasets/`.
+1. Add your dataset package to `kedro-plugins/kedro-datasets/kedro_datasets/`.
 
 For example, in our `ImageDataSet` example, the directory structure should be:
 
 ```
-kedro/extras/datasets/image
+kedro-plugins/kedro-datasets/kedro_datasets/image
 ├── __init__.py
 └── image_dataset.py
 ```
 
 2. If the dataset is complex, create a `README.md` file to explain how it works and document its API.
 
-3. The dataset should be accompanied by full test coverage in `tests/extras/datasets`.
+3. The dataset should be accompanied by full test coverage in `kedro-plugins/kedro-datasets/tests/`.
 
-4. Make a pull request against the `main` branch of [Kedro's Github repository](https://github.com/kedro-org/kedro).
+4. Make a pull request against the `main` branch of [Kedro's plugin repository](https://github.com/kedro-org/kedro-plugins).
+
+```{note}
+There are two special considerations when contributing a dataset:
+
+   1. Add the dataset to `kedro.extras.datasets.rst` so it shows up in the API documentation.
+   2. Add the dataset to `static/jsonschema/kedro-catalog-X.json` for IDE validation.
+
+```

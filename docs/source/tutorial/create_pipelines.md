@@ -3,7 +3,7 @@
 This section covers the third part of the standard Kedro development workflow, and covers the following:
 
 * How to create the data transformation steps as Python functions
-* How to add a function to make a [Keddro node](../resources/glossary.md#node) 
+* How to add a function to make a [Kedro node](../resources/glossary.md#node) 
 * How to construct a [Kedro pipeline](../resources/glossary.md#pipeline) as a set of nodes
 * How to run a whole pipeline and how to run just part of a pipeline
 

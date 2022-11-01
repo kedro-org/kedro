@@ -22,8 +22,10 @@ In this section, we detail:
 - Make sure that ongoing pull requests are moving forward at the right pace or closing them
 - Guide the community to use the right channel:
   - [Github](https://github.com/kedro-org/kedro/) for feature requests and bug reports
-  - [GitHub discussions](https://github.com/kedro-org/kedro/discussions)
+  - [GitHub discussions](https://github.com/kedro-org/kedro/discussions) to discuss
+    the Kedro project
   - [Slack](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw)
+    for questions and to support other users
 
 ## Requirements to become a maintainer
 

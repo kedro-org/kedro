@@ -1,6 +1,7 @@
 # Installation prerequisites
 
-- Kedro supports macOS, Linux and Windows (7 / 8 / 10 and Windows Server 2016+). If you encounter any problems on these platforms, please check the [frequently asked questions](../faq/faq.md), [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
+- Kedro supports macOS, Linux and Windows (7 / 8 / 10 and Windows Server 2016+). If you
+  encounter any problems on these platforms, please check the [frequently asked questions](../faq/faq.md), the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
 
 - To work with Kedro, we highly recommend that you [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version).
 

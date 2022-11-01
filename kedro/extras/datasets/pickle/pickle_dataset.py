@@ -46,9 +46,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
         >>>   backend: joblib
         >>>   credentials: s3_credentials
         >>>   save_args:
-        >>>     compression: lz4
-        >>>   load_args:
-        >>>     compression: lz4
+        >>>     compress: lz4
 
     Example using Python API:
     ::

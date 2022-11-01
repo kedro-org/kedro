@@ -1,4 +1,4 @@
-# Visualisation with Kedro-Viz
+# Get started with Kedro-Viz
 
 This page assumes you are familiar with the basic Kedro concepts described in the [Spaceflights tutorial](../tutorial/spaceflights_tutorial.md). If you have not yet worked through the tutorial, you can generate the project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
 

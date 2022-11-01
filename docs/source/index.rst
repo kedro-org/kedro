@@ -78,7 +78,8 @@ Welcome to Kedro's documentation!
    tutorial/spaceflights_tutorial
    tutorial/tutorial_template
    tutorial/set_up_data
-   tutorial/create_pipelines
+   tutorial/create_a_pipeline
+   tutorial/add_another_pipeline
    tutorial/package_a_project
    tutorial/spaceflights_tutorial_faqs
 

@@ -22,7 +22,7 @@ The data comes in two different formats: `.csv` and `.xlsx`. Kedro supports a nu
 
 > If you are using the tutorial created by the spaceflights starter, you can omit this step.
 
-Download and save the files to the `data/01_raw` folder of your project directory:
+Download and save the files to the `data/01_raw` folder of your project:
 
 * [companies.csv](https://kedro-org.github.io/kedro/companies.csv)
 * [reviews.csv](https://kedro-org.github.io/kedro/reviews.csv)
@@ -56,7 +56,7 @@ reviews:
 
 ### Test that Kedro can load the `csv` data
 
-Open a `kedro ipython` session in your terminal from the root of the `kedro-tutorial` project directory:
+Open a `kedro ipython` session in your terminal from the project root directory:
 
 ```bash
 kedro ipython

@@ -9,7 +9,7 @@ Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) and creates a `doc
 
 If you want to customise your documentation beyond the basic template, refer to the [Sphinx documentation](https://www.sphinx-doc.org/en/master/usage/configuration.html) for details of how to extend `docs/source/conf.py`.
 
-Once you have added any documentation you need, run the following from the project's root directory: 
+Once you have added any documentation you need, run the following from the project root directory: 
 
 ```bash
 kedro build-docs --open
@@ -24,7 +24,7 @@ The `build-docs` command creates documentation based on the code structure of yo
 
 ## Package your project
 
-To package your project, run the following in your project's root directory:
+To package your project, run the following in your project root directory:
 
 ```bash
 kedro package
@@ -34,17 +34,19 @@ Kedro builds the package into the `dist` folder of your project, and creates one
 
 The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations. 
 
+We recommend that you document the configuration required (parameters and catalog) in the local `README.md` file for any project recipients.
+
 ### Package recipients
 
 Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed. 
 
-A recipient can install the project into a folder by calling:
+A recipient can install the project by calling:
 
 ```bash
 pip install <path-to-wheel-file>
 ```
 
-An executable, `kedro-tutorial`, is placed in the `bin` subfolder of the Python installation location, so the project can be run as follows from the installation directory:
+An executable, `kedro-tutorial`, is placed in the `bin` subfolder of the Python install folder, so the project can be run as follows:
 
 ```bash
 python -m kedro_tutorial

@@ -22,7 +22,7 @@ Alternatively, if you want to include a full set of working example code within 
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. Your project will be created and you can change directory into the parent folder (the root directory) for the project: `kedro-tutorial`:
+When prompted for a project name, enter `Kedro Tutorial`. Your project will be created and you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 
 ```bash
 cd kedro-tutorial
@@ -64,7 +64,7 @@ scikit-learn~=1.0                                                              #
 
 ### Install the dependencies
 
-To install all the project-specific dependencies, navigate to the parent folder for the project and run:
+To install all the project-specific dependencies, run the following from the project root directory:
 
 ```bash
 pip install -r src/requirements.txt

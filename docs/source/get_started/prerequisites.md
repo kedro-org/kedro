@@ -2,7 +2,13 @@
 
 Kedro supports macOS, Linux and Windows. If you encounter any problems on these platforms, please check the [Kedro Slack channels](https://kedro-org.slack.com).
 
-If you are a Windows user, you will need to install [`git`](https://git-scm.com/) onto your machine if you do not have it.  
+If you are a Windows user, you will need to install [`git`](https://git-scm.com/) onto your machine if you do not have it. To confirm whether you have it installed:
+
+```bash
+git -v
+```
+
+You should see the version of `git` available, or an error message to indicate that it is not installed.
 
 PySpark users must [install Java](https://www.oracle.com/java/technologies/javase-downloads.html) (if you are working on Windows, you will need admin rights to complete the installation).
 

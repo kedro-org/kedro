@@ -19,6 +19,10 @@ from kedro.io.core import (
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.Model]):
     """``TensorflowModelDataset`` loads and saves TensorFlow models.

@@ -9,6 +9,10 @@ from typing import Dict, NoReturn
 from kedro.extras.datasets.json import JSONDataSet
 from kedro.io.core import DataSetError, get_filepath_str
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class MetricsDataSet(JSONDataSet):
     """``MetricsDataSet`` saves data to a JSON file using an underlying

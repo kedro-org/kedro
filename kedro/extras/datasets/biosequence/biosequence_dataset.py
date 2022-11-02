@@ -10,6 +10,10 @@ from Bio import SeqIO
 
 from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_path
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class BioSequenceDataSet(AbstractDataSet[List, List]):
     r"""``BioSequenceDataSet`` loads and saves data to a sequence file.

@@ -26,8 +26,9 @@
 # Upcoming Release 0.18.4
 
 ## Major features and improvements
-* The config loader objects now implement `UserDict` and the configuration is accessed through `conf_loader['catalog']`
-* You can configure config file patterns through `settings.py` without creating a custom config loader
+* Make Kedro instantiate datasets from `kedro_datasets` with higher priority than `kedro.extras.datasets`. `kedro_datasets` is the namespace for the new `kedro-datasets` python package.
+* The config loader objects now implement `UserDict` and the configuration is accessed through `conf_loader['catalog']`.
+* You can configure config file patterns through `settings.py` without creating a custom config loader.
 
 ## Bug fixes and other changes
 * Fixed `kedro micropkg pull` for packages on PyPI.

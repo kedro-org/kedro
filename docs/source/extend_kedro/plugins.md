@@ -195,7 +195,7 @@ When you are ready to submit your code:
 
 ## Supported Kedro plugins
 
-- [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets), a collection of all of Kedro's data connectors. These data 
+- [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets), a collection of all of Kedro's data connectors. These data
 connectors are implementations of the `AbstractDataSet`
 - [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow), a tool for converting your Kedro project into an Airflow project

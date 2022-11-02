@@ -2,15 +2,15 @@
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 
-In the text, we assume that you have created an empty Kedro project; we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete. 
+In the text, we assume you have created an empty Kedro project; we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete. 
 
 ```{note}
-You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) so you can follow along without copy/pasting. 
+You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) you can follow along without copy/pasting. 
 ```
 
 ## Scenario
 
-*It is 2160 and the space tourism industry is booming. Globally, thousands of space shuttle companies take tourists to the Moon and back. You have been able to source data that lists the amenities offered in each space shuttle, customer reviews and company information.*
+*It is 2160, and the space tourism industry is booming. Globally, thousands of space shuttle companies take tourists to the Moon and back. You have been able to source data that lists the amenities offered in each space shuttle, customer reviews, and company information.*
 
 ***Project***: *You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight.*
 
@@ -23,26 +23,25 @@ Things you can do:
 
 * check the [Spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already
 * search the [archive of Discord discussions](https://linen-discord.kedro.org/)
-* use the [#questions channel](https://kedro-org.slack.com/archives/C03RKP2LW64) on our Slack channel (which replaces our Discord server) to ask the community for help.
+* use the [#questions channel](https://kedro-org.slack.com/archives/C03RKP2LW64) on our Slack channel (which replaces our Discord server) to ask the community for help
 
 ## Terminology
 
-The Kedro specific terminology we use in the tutorial will be explained as we introduce it. We use some additional terminology which may not be familiar to every reader, so we explain some of the commonly used concepts below.
+We will explain any Kedro-specific terminology we use in the tutorial as we introduce it. We use additional terminology that may not be familiar to some readers, such as the concepts below.
 
 ### Project root directory
-Also known as "root directory", this is the parent folder for the entire project, it is the top level folder that contains all other files and directories associated with the project.
+Also known as the "root directory", this is the parent folder for the entire project. It is the top-level folder that contains all other files and directories associated with the project.
 
 ### Dependencies
-These are Python packages, or libraries, that an individual project depends upon in order to complete a task. For example, the Spaceflights tutorial project depends on the [scikit-learn](https://scikit-learn.org/stable/) library.
+These are Python packages or libraries that an individual project depends upon to complete a task. For example, the Spaceflights tutorial project depends on the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Standard development workflow
 When you build a Kedro project, you will typically follow a [standard development workflow](../faq/faq.md#what-is-the-typical-kedro-project-development-workflow):
 
 1. Set up the project template
 
-    * Create a new project with `kedro new`
-    * Install project dependencies.   
-    * Configure credentials and any other sensitive / personal content, and logging
+    * Create a new project` and install project dependencies.   
+    * Configure credentials and any other sensitive/personal content, and logging
 
 2. Set up the data
 
@@ -61,7 +60,7 @@ When you build a Kedro project, you will typically follow a [standard developmen
 
 ### Source control with `git`
 
-We recommend that you use `git` for source control. If you are unfamiliar with a typical `git` workflow, but want to learn more, we suggest that you look into [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
+We recommend that you use `git` for source control. If you are unfamiliar with a typical `git` workflow but want to learn more, we suggest you look into [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
 
 Navigate to the project root directory and create a `git` repository on your machine (a local repository) for the project:
 
@@ -72,7 +71,7 @@ git remote add origin https://github.com/<your-repo>
 
 ### Submit your changes to GitHub
 
-If you work on a project as part of a team, you will share the `git` repository via Github, which stores a shared copy of the repository. You should periodically save your changes to your local repository and then merge them into the Github repository. 
+If you work on a project as part of a team, you will share the `git` repository via GitHub, which stores a shared copy of the repository. You should periodically save your changes to your local repository and merge them into the GitHub repository. 
 
 Within your team, we suggest that you each develop your code on a branch and create pull requests to submit it to the `develop` or `main` branches:
 

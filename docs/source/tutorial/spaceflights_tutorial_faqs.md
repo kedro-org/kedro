@@ -1,10 +1,7 @@
 # Spaceflights tutorial FAQs
 
 
-
-
-
-## Common errors
+## How do I resolve these common errors?
 
 ### Data Catalog setup
 You're [testing whether Kedro can load the companies or reviews data](./set_up_data.md#test-that-kedro-can-load-the-csv-data) and see the following:
@@ -33,7 +30,7 @@ DataSetNotFoundError: DataSet 'shuttles' not found in the catalog
 
 Make sure you have saved `catalog.yml`. Call `exit()` within the ipython session and restart `kedro ipython`. Then try again.
 
-## Pipeline run
+### Pipeline run
 
 To successfully run the pipeline, all required input datasets must already exist, otherwise you may get an error similar to this:
 

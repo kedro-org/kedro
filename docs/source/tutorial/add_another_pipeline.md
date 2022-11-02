@@ -11,9 +11,9 @@ This section explains the following:
 
 ## Data science pipeline
 
-In this tutorial, the data science pipeline uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
+The data science pipeline uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
-### Create the data science pipeline
+### Generate a new pipeline template
 
 Run the following command to create the `data_science` pipeline. If you are using the tutorial created by the spaceflights starter, you can omit this step:
 
@@ -92,7 +92,7 @@ def evaluate_model(
 
 ### Configure the input parameters
 
-You now need to add some parameters for use by the `DataCatalog` when the pipeline is executed. 	
+You now need to add some parameters that are used by the `DataCatalog` when the pipeline executes. 	
 > If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the code for the three nodes.
 
 Add the following to `conf/base/parameters/data_science.yml`:
@@ -118,7 +118,7 @@ More information about [parameters](../kedro_project_setup/configuration.md#para
 
 ### Assemble the data science pipeline
 
-To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
+To create a modular pipeline for the price prediction model, replace the contents of `src/kedro_tutorial/pipelines/data_science/pipeline.py` with the following:
 
 > If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
 
@@ -170,7 +170,7 @@ regressor:
   versioned: true
 ```
 
-By setting `versioned` to `true`, versioning is enabled for `regressor`. This means that the pickled output of the `regressor` is saved every time the pipeline runs, which stores the history of the models built using this pipeline. Further details can be found in the [Versioning section](../data/kedro_io.md#versioning).
+By setting `versioned` to `true`, versioning is enabled for `regressor`. This means that the pickled output of the `regressor` is saved every time the pipeline runs, which stores the history of the models built using this pipeline. You can learn more in the [Versioning section](../data/kedro_io.md#versioning).
 
 ### Test the pipelines
 
@@ -235,7 +235,7 @@ You should see output similar to the following:
 
 #### Slice a pipeline
 
-In some cases you may want to run just part of the default pipeline. For example, you may want to skip data processing execution and run only the data science pipeline to tune the hyperparameters of the price prediction model. 
+Sometimes you may want to run just part of the default pipeline. For example, you may could skip data processing execution and run only the data science pipeline to tune the hyperparameters of the price prediction model. 
 
 You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
@@ -248,7 +248,7 @@ There are a range of options to run sections of the default pipeline as describe
 
 ## Visualise the project
 
-The documentation on [visualisation with Kedro-Viz](../visualisation/kedro-viz_visualisation) discusses this topic in greater detail, but this is a swift introduction on how to use Kedro-Viz to visualise the project. 
+The documentation on [visualisation with Kedro-Viz](../visualisation/kedro-viz_visualisation) discusses this topic in greater detail, so this is a swift introduction on how to use Kedro-Viz to visualise the project. 
 
 In your terminal type the following:
 
@@ -256,7 +256,7 @@ In your terminal type the following:
 kedro viz
 ```
 
-This command automatically opens a browser tab to serve the visualisation at http://127.0.0.1:4141/, and you can explore the project with Kedro-Viz.
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
 
 You should see the following:
 
@@ -269,27 +269,25 @@ To exit the visualisation, close the browser tab. To regain control of the termi
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../nodes_and_pipelines/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs/outputs/parameters. 
 
-Modular pipelines are easier to develop, test and maintain. They are reusable within the same codebase, but also portable across projects via [micro-packaging](../nodes_and_pipelines/micro_packaging.md). This is a scalable way to use Kedro, and will change the way you think about Kedro pipelines.
+Modular pipelines are easier to develop, test and maintain. They are reusable within the same codebase but also portable across projects via [micro-packaging](../nodes_and_pipelines/micro_packaging.md). This is a scalable way to use Kedro, and will change how you think about Kedro pipelines.
 
 ### Extend the project with namespacing and a modular pipeline
-We will now show how to use the data science pipeline multiple times with different parameters. We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline`. 
+We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline`. 
 
 > This is optional code so is **not** provided in the spaceflights starter. Unlike the rest of the tutorial, if you want to see this in action, you need to copy and paste the code as instructed.
 
 1. Update your catalog to add namespaces to the outputs of each instance. Replace the `regressor` key with the following two new dataset keys in the `conf/base/catalog.yml` file:
 
 ```yaml
-    active_modelling_pipeline.regressor:
-      type: pickle.PickleDataSet
-      filepath: data/06_models/regressor_active.pickle
-      versioned: true
-      layer: models
+active_modelling_pipeline.regressor:
+  type: pickle.PickleDataSet
+  filepath: data/06_models/regressor_active.pickle
+  versioned: true
 
-    candidate_modelling_pipeline.regressor:
-      type: pickle.PickleDataSet
-      filepath: data/06_models/regressor_candidate.pickle
-      versioned: true
-      layer: models
+candidate_modelling_pipeline.regressor:
+  type: pickle.PickleDataSet
+  filepath: data/06_models/regressor_candidate.pickle
+  versioned: true
 
 ```
 
@@ -297,82 +295,175 @@ We will now show how to use the data science pipeline multiple times with differ
 
 
 ```yaml
-    active_modelling_pipeline:
-        model_options:
-          test_size: 0.2
-          random_state: 3
-          features:
-            - engines
-            - passenger_capacity
-            - crew
-            - d_check_complete
-            - moon_clearance_complete
-            - iata_approved
-            - company_rating
-            - review_scores_rating
+active_modelling_pipeline:
+    model_options:
+      test_size: 0.2
+      random_state: 3
+      features:
+        - engines
+        - passenger_capacity
+        - crew
+        - d_check_complete
+        - moon_clearance_complete
+        - iata_approved
+        - company_rating
+        - review_scores_rating
 
-    candidate_modelling_pipeline:
-        model_options:
-          test_size: 0.2
-          random_state: 8
-          features:
-            - engines
-            - passenger_capacity
-            - crew
-            - review_scores_rating
+candidate_modelling_pipeline:
+    model_options:
+      test_size: 0.2
+      random_state: 8
+      features:
+        - engines
+        - passenger_capacity
+        - crew
+        - review_scores_rating
 ```
 
 
-3. Update the code in the `pipelines/data_science/pipeline.py` file with the snippet below:
+3. Replace the code in `pipelines/data_science/pipeline.py` with the snippet below:
 
-    <details>
-    <summary><b>Click to expand</b></summary>
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
-    from kedro.pipeline import Pipeline, node
-    from kedro.pipeline.modular_pipeline import pipeline
+from kedro.pipeline import Pipeline, node
+from kedro.pipeline.modular_pipeline import pipeline
 
-    from .nodes import evaluate_model, split_data, train_model
+from .nodes import evaluate_model, split_data, train_model
 
 
-    def create_pipeline(**kwargs) -> Pipeline:
-        pipeline_instance = pipeline(
-            [
-                node(
-                    func=split_data,
-                    inputs=["model_input_table", "params:model_options"],
-                    outputs=["X_train", "X_test", "y_train", "y_test"],
-                    name="split_data_node",
-                ),
-                node(
-                    func=train_model,
-                    inputs=["X_train", "y_train"],
-                    outputs="regressor",
-                    name="train_model_node",
-                ),
-                node(
-                    func=evaluate_model,
-                    inputs=["regressor", "X_test", "y_test"],
-                    outputs=None,
-                    name="evaluate_model_node",
-                ),
-            ]
-        )
-        ds_pipeline_1 = pipeline(
-            pipe=pipeline_instance,
-            inputs="model_input_table",
-            namespace="active_modelling_pipeline",
-        )
-        ds_pipeline_2 = pipeline(
-            pipe=pipeline_instance,
-            inputs="model_input_table",
-            namespace="candidate_modelling_pipeline",
-        )
+def create_pipeline(**kwargs) -> Pipeline:
+    pipeline_instance = pipeline(
+        [
+            node(
+                func=split_data,
+                inputs=["model_input_table", "params:model_options"],
+                outputs=["X_train", "X_test", "y_train", "y_test"],
+                name="split_data_node",
+            ),
+            node(
+                func=train_model,
+                inputs=["X_train", "y_train"],
+                outputs="regressor",
+                name="train_model_node",
+            ),
+            node(
+                func=evaluate_model,
+                inputs=["regressor", "X_test", "y_test"],
+                outputs=None,
+                name="evaluate_model_node",
+            ),
+        ]
+    )
+    ds_pipeline_1 = pipeline(
+        pipe=pipeline_instance,
+        inputs="model_input_table",
+        namespace="active_modelling_pipeline",
+    )
+    ds_pipeline_2 = pipeline(
+        pipe=pipeline_instance,
+        inputs="model_input_table",
+        namespace="candidate_modelling_pipeline",
+    )
 
-        return ds_pipeline_1 + ds_pipeline_2
+    return ds_pipeline_1 + ds_pipeline_2    
 ```
 
-    </details>
+</details>
+
+You should see output as follows:
+
+<details>
+<summary><b>Click to expand</b></summary>
+
+
+```bash
+[11/02/22 10:41:06] WARNING  /Users/jo_stichbury/opt/anaconda3/envs/py38/lib/python3.8/site-packages/plotly/graph_objects/ warnings.py:109
+                             __init__.py:288: DeprecationWarning: distutils Version classes are deprecated. Use                           
+                             packaging.version instead.                                                                                   
+                               if LooseVersion(ipywidgets.__version__) >= LooseVersion("7.0.0"):                                          
+                                                                                                                                          
+[11/02/22 10:41:07] INFO     Kedro project kedro-tutorial                                                                   session.py:340
+[11/02/22 10:41:08] INFO     Loading data from 'companies' (CSVDataSet)...                                             data_catalog.py:343
+                    INFO     Running node: preprocess_companies_node: preprocess_companies([companies]) ->                     node.py:327
+                             [preprocessed_companies]                                                                                     
+                    INFO     Saving data to 'preprocessed_companies' (ParquetDataSet)...                               data_catalog.py:382
+                    INFO     Completed 1 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                                            data_catalog.py:343
+[11/02/22 10:41:13] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) ->                        node.py:327
+                             [preprocessed_shuttles]                                                                                      
+                    WARNING  /Users/jo_stichbury/Documents/kedro-projects/kedro-tutorial/src/kedro_tutorial/pipelines/data warnings.py:109
+                             _processing/nodes.py:19: FutureWarning: The default value of regex will change from True to                  
+                             False in a future version. In addition, single character regular expressions will *not* be                   
+                             treated as literal strings when regex=True.                                                                  
+                               x = x.str.replace("$", "").str.replace(",", "")                                                            
+                                                                                                                                          
+                    INFO     Saving data to 'preprocessed_shuttles' (ParquetDataSet)...                                data_catalog.py:382
+                    INFO     Completed 2 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Loading data from 'preprocessed_shuttles' (ParquetDataSet)...                             data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (ParquetDataSet)...                            data_catalog.py:343
+                    INFO     Loading data from 'reviews' (CSVDataSet)...                                               data_catalog.py:343
+                    INFO     Running node: create_model_input_table_node:                                                      node.py:327
+                             create_model_input_table([preprocessed_shuttles,preprocessed_companies,reviews]) ->                          
+                             [model_input_table]                                                                                          
+^[[B[11/02/22 10:41:14] INFO     Saving data to 'model_input_table' (ParquetDataSet)...                                    data_catalog.py:382
+[11/02/22 10:41:15] INFO     Completed 3 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Loading data from 'model_input_table' (ParquetDataSet)...                                 data_catalog.py:343
+                    INFO     Loading data from 'params:active_modelling_pipeline.model_options' (MemoryDataSet)...     data_catalog.py:343
+                    INFO     Running node: split_data_node:                                                                    node.py:327
+                             split_data([model_input_table,params:active_modelling_pipeline.model_options]) ->                            
+                             [active_modelling_pipeline.X_train,active_modelling_pipeline.X_test,active_modelling_pipeline.y_t            
+                             rain,active_modelling_pipeline.y_test]                                                                       
+                    INFO     Saving data to 'active_modelling_pipeline.X_train' (MemoryDataSet)...                     data_catalog.py:382
+                    INFO     Saving data to 'active_modelling_pipeline.X_test' (MemoryDataSet)...                      data_catalog.py:382
+                    INFO     Saving data to 'active_modelling_pipeline.y_train' (MemoryDataSet)...                     data_catalog.py:382
+                    INFO     Saving data to 'active_modelling_pipeline.y_test' (MemoryDataSet)...                      data_catalog.py:382
+                    INFO     Completed 4 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Loading data from 'model_input_table' (ParquetDataSet)...                                 data_catalog.py:343
+                    INFO     Loading data from 'params:candidate_modelling_pipeline.model_options' (MemoryDataSet)...  data_catalog.py:343
+                    INFO     Running node: split_data_node:                                                                    node.py:327
+                             split_data([model_input_table,params:candidate_modelling_pipeline.model_options]) ->                         
+                             [candidate_modelling_pipeline.X_train,candidate_modelling_pipeline.X_test,candidate_modelling_pip            
+                             eline.y_train,candidate_modelling_pipeline.y_test]                                                           
+                    INFO     Saving data to 'candidate_modelling_pipeline.X_train' (MemoryDataSet)...                  data_catalog.py:382
+                    INFO     Saving data to 'candidate_modelling_pipeline.X_test' (MemoryDataSet)...                   data_catalog.py:382
+                    INFO     Saving data to 'candidate_modelling_pipeline.y_train' (MemoryDataSet)...                  data_catalog.py:382
+                    INFO     Saving data to 'candidate_modelling_pipeline.y_test' (MemoryDataSet)...                   data_catalog.py:382
+                    INFO     Completed 5 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Loading data from 'active_modelling_pipeline.X_train' (MemoryDataSet)...                  data_catalog.py:343
+                    INFO     Loading data from 'active_modelling_pipeline.y_train' (MemoryDataSet)...                  data_catalog.py:343
+                    INFO     Running node: train_model_node:                                                                   node.py:327
+                             train_model([active_modelling_pipeline.X_train,active_modelling_pipeline.y_train]) ->                        
+                             [active_modelling_pipeline.regressor]                                                                        
+                    INFO     Saving data to 'active_modelling_pipeline.regressor' (PickleDataSet)...                   data_catalog.py:382
+                    INFO     Completed 6 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Loading data from 'candidate_modelling_pipeline.X_train' (MemoryDataSet)...               data_catalog.py:343
+                    INFO     Loading data from 'candidate_modelling_pipeline.y_train' (MemoryDataSet)...               data_catalog.py:343
+                    INFO     Running node: train_model_node:                                                                   node.py:327
+                             train_model([candidate_modelling_pipeline.X_train,candidate_modelling_pipeline.y_train]) ->                  
+                             [candidate_modelling_pipeline.regressor]                                                                     
+                    INFO     Saving data to 'candidate_modelling_pipeline.regressor' (PickleDataSet)...                data_catalog.py:382
+                    INFO     Completed 7 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Loading data from 'active_modelling_pipeline.regressor' (PickleDataSet)...                data_catalog.py:343
+                    INFO     Loading data from 'active_modelling_pipeline.X_test' (MemoryDataSet)...                   data_catalog.py:343
+                    INFO     Loading data from 'active_modelling_pipeline.y_test' (MemoryDataSet)...                   data_catalog.py:343
+                    INFO     Running node: evaluate_model_node:                                                                node.py:327
+                             evaluate_model([active_modelling_pipeline.regressor,active_modelling_pipeline.X_test,active_model            
+                             ling_pipeline.y_test]) -> None                                                                               
+                    INFO     Model has a coefficient R^2 of 0.462 on test data.                                                nodes.py:60
+                    INFO     Completed 8 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Loading data from 'candidate_modelling_pipeline.regressor' (PickleDataSet)...             data_catalog.py:343
+                    INFO     Loading data from 'candidate_modelling_pipeline.X_test' (MemoryDataSet)...                data_catalog.py:343
+                    INFO     Loading data from 'candidate_modelling_pipeline.y_test' (MemoryDataSet)...                data_catalog.py:343
+                    INFO     Running node: evaluate_model_node:                                                                node.py:327
+                             evaluate_model([candidate_modelling_pipeline.regressor,candidate_modelling_pipeline.X_test,candid            
+                             ate_modelling_pipeline.y_test]) -> None                                                                      
+                    INFO     Model has a coefficient R^2 of 0.449 on test data.                                                nodes.py:60
+                    INFO     Completed 9 out of 9 tasks                                                            sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.            
+```
+</details>
 
 #### How it works: the modular `pipeline()` wrapper 
 
@@ -411,7 +502,7 @@ ds_pipeline_2 = pipeline(
 )
 ```
 
-We instantiate the template_pipeline twice, but pass in different parameters. The `pipeline_instance` variable is our template pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parameterised instantiations.
+We instantiate the template_pipeline twice but pass in different parameters. The `pipeline_instance` variable is our template pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parameterised instantiations.
 
 
 This renders as follows:

@@ -1,6 +1,6 @@
 # Set up the spaceflights tutorial project
 
-In this section, we discuss the project set-up phase, which is the first part of the standard development workflow. The set-up steps are as follows:
+In this section, we discuss the project set-up phase, which is the first part of the standard development workflow. The setup steps are as follows:
 
 * Create a new project with `kedro new`
 * Install project dependencies with `pip install -r src/requirements.txt`
@@ -16,13 +16,11 @@ In your terminal window, navigate to the folder you want to store the project an
 kedro new
 ```
 
-Alternatively, if you want to include a full set of working example code within the project, generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) by typing the following:
-
-```bash
-kedro new --starter=spaceflights
+```{note}
+Alternatively, if you want to include a complete set of working example code within the project, generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) by typing `kedro new --starter=spaceflights`.
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. Your project will be created and you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
+When prompted for a project name, enter `Kedro Tutorial`. When Kedro has created your project, you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 
 ```bash
 cd kedro-tutorial
@@ -30,7 +28,7 @@ cd kedro-tutorial
 
 ## Project dependencies
 
-Up to this point, we have not discussed project dependencies, so now is a good time to examine them. We use a `requirements.txt` file to specify a project's dependencies and make it easier for others to run your project. This avoids version conflicts by ensuring that you use same Python packages and versions.
+Kedro projects have a `requirements.txt` file to specify their dependencies and enable sharable projects by ensuring consistency across Python packages and versions. 
 
 The generic project template bundles some typical dependencies in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers differ slightly depending on your version of Kedro:
 
@@ -48,9 +46,11 @@ pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with p
 pytest~=6.2 # Testing framework for Python code
 ```
 
-The dependencies above might be sufficient for some projects, but for this tutorial you must add some extra requirements. These requirements will enable us to work with different data formats (including CSV, Excel and Parquet) and to visualise the pipeline.
+You can learn more about [project dependencies](../kedro_project_setup/dependencies.md) in the Kedro project documentation.
 
 ### Add dependencies to the project
+
+The dependencies above might be sufficient for some projects, but for this tutorial, you must add some extra requirements. These requirements will enable us to work with different data formats (including CSV, Excel, and Parquet) and to visualise the pipeline.
 
 > If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth opening `src/requirements.txt` to inspect the contents.
 
@@ -70,14 +70,12 @@ To install all the project-specific dependencies, run the following from the pro
 pip install -r src/requirements.txt
 ```
 
-You can find out more about [how to work with project dependencies](../kedro_project_setup/dependencies.md) in the Kedro project documentation.
-
-
 ## Optional: configuration and logging
 
-You may want to store credentials, such as usernames and passwords, if they are needed for specific data sources. 
+You may want to store credentials such as usernames and passwords if they are needed for specific data sources used by the project.
+ 
 To do this, add them to `conf/local/credentials.yml` (some examples are included in that file for illustration). 
 
 You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
 
-At this stage of the workflow, you might also want to [set up logging](../logging/logging.md), but we do not use it in this tutorial.
+You might also want to [set up logging](../logging/logging.md) at this stage of the workflow, but we do not use it in this tutorial.

@@ -347,7 +347,7 @@ _CONSISTENCY_WARNING = (
     "intermediate data sets where possible to avoid this warning."
 )
 
-_DEFAULT_PACKAGES = ["kedro.io.", "kedro.extras.datasets.", ""]
+_DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", ""]
 
 
 def parse_dataset_definition(

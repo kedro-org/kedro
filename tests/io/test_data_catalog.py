@@ -384,6 +384,7 @@ class TestDataCatalogFromConfig:
         # Spy _load_obj because kedro_datasets is not installed and we can't import it.
 
         import kedro.io.core  # pylint: disable=import-outside-toplevel
+
         spy = mocker.spy(kedro.io.core, "_load_obj")
         parse_dataset_definition(sane_config["catalog"]["boats"])
         for prefix, call_args in zip(_DEFAULT_PACKAGES, spy.call_args_list):

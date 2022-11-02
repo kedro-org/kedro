@@ -2,7 +2,7 @@
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 
-In the text, we assume you have created an empty Kedro project; we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete.
+In the text, we assume you have started with an empty Kedro project and we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete.
 
 ```{note}
 You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) you can follow along without copy/pasting.

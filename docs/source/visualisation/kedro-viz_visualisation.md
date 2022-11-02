@@ -31,7 +31,7 @@ You should see the following:
 
 ![](../meta/images/pipeline_visualisation.png)
 
-If a visualisation panel opens up and a pipeline is not visible, then please check that your [pipeline definition](../tutorial/create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/kedro-org/kedro-viz).
+If a visualisation panel opens up and a pipeline is not visible, then please check that your [pipeline definition](../tutorial/create_a_pipeline.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/kedro-org/kedro-viz).
 
 ### Exit an open visualisation
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `Ctrl+C` or `Cmd+C`.

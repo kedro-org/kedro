@@ -1,5 +1,6 @@
 # Set up the spaceflights tutorial project
 
+
 In this section, we discuss the project set-up phase, which is the first part of the standard development workflow. The setup steps are as follows:
 
 * Create a new project with `kedro new`
@@ -9,6 +10,12 @@ In this section, we discuss the project set-up phase, which is the first part of
 	* Logging
 
 ## Create a new project
+
+If you have not yet set up Kedro, please do so by following the guidelines to [set up a virtual environment with `conda`](../get_started/prerequisites.md#create-a-virtual-environment-with-conda) and [install Kedro](../get_started/install.md).
+
+```{important}
+We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.3).
+```
 
 In your terminal window, navigate to the folder you want to store the project and type the following to create an empty project:
 

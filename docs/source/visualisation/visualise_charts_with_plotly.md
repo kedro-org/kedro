@@ -144,7 +144,7 @@ You can view the larger visualisation of the chart by clicking the 'Expand Plotl
 ![](../meta/images/pipeline_visualisation_plotly_expand.png)
 
 
-### Visualisation with Matplotlib 
+### Visualisation with Matplotlib
 
 [Matplotlib](https://matplotlib.org/) is a Python library for creating static, animated, and interactive visualisations. Integrating Matplotlib into Kedro-Viz allows you to output your charts as part of your pipeline visualisation.
 

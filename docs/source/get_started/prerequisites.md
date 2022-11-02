@@ -15,7 +15,7 @@ PySpark users must [install Java](https://www.oracle.com/java/technologies/javas
 ## Virtual environments
 We recommend that you create a new Python virtual environment for *each* new Kedro project you create. A virtual environment creates an isolated environment for a Python project to have its own dependencies, regardless of other projects.
 
-If you don't already have it, you should [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version), which comes bundled with a package and environment manager called `conda`. 
+If you don't already have it, you should [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version), which comes bundled with a package and environment manager called `conda`.
 
 > [Read more about Python Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/).
 
@@ -32,7 +32,7 @@ Depending on your preferred Python installation, you can also create virtual env
 conda create --name kedro-environment python=3.8 -y
 ```
 
-This will create an isolated Python 3.8 environment. 
+This will create an isolated Python 3.8 environment.
 
 3. Activate the new environment:
 
@@ -49,4 +49,3 @@ conda deactivate
 ```{note}
 The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory.
 ```
-

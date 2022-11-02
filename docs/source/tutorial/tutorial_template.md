@@ -7,7 +7,7 @@ In this section, we discuss the project set-up phase, which is the first part of
 * Configure the following in the `conf` folder:
 	* Credentials and any other sensitive information
 	* Logging
-	
+
 ## Create a new project
 
 In your terminal window, navigate to the folder you want to store the project and type the following to create an empty project:
@@ -28,7 +28,7 @@ cd kedro-tutorial
 
 ## Project dependencies
 
-Kedro projects have a `requirements.txt` file to specify their dependencies and enable sharable projects by ensuring consistency across Python packages and versions. 
+Kedro projects have a `requirements.txt` file to specify their dependencies and enable sharable projects by ensuring consistency across Python packages and versions.
 
 The generic project template bundles some typical dependencies in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers differ slightly depending on your version of Kedro:
 
@@ -73,8 +73,8 @@ pip install -r src/requirements.txt
 ## Optional: configuration and logging
 
 You may want to store credentials such as usernames and passwords if they are needed for specific data sources used by the project.
- 
-To do this, add them to `conf/local/credentials.yml` (some examples are included in that file for illustration). 
+
+To do this, add them to `conf/local/credentials.yml` (some examples are included in that file for illustration).
 
 You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
 

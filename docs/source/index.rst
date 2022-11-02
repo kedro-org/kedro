@@ -86,7 +86,7 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Visualisation with Kedro-Viz
-   
+
    visualisation/kedro-viz_visualisation
    visualisation/visualise_charts_with_plotly
    visualisation/experiment_tracking

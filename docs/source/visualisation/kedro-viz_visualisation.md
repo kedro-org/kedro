@@ -7,11 +7,11 @@ kedro new --starter=spaceflights
 ```
 
 When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout this documentation. When your project is ready, navigate to the root directory of the project.
- 
+
 
 ## Install Kedro-Viz and visualise the project
 
-[Kedro-Viz](https://github.com/kedro-org/kedro-viz) displays data and machine-learning pipelines in an informative way, emphasising the connections between datasets and nodes. It shows the structure of your Kedro pipeline. 
+[Kedro-Viz](https://github.com/kedro-org/kedro-viz) displays data and machine-learning pipelines in an informative way, emphasising the connections between datasets and nodes. It shows the structure of your Kedro pipeline.
 
 To install the dependencies for the project, including Kedro-Viz, type the following in your terminal, from the root of the project directory:
 
@@ -54,7 +54,7 @@ The `autoreload` flag reflects changes to the project as they happen. For exampl
 
 ## Visualise layers
 
-By convention, a pipeline can be broken up into different layers according to how data is processed, which makes it easier to collaborate. 
+By convention, a pipeline can be broken up into different layers according to how data is processed, which makes it easier to collaborate.
 
 For example, the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
@@ -119,6 +119,3 @@ To visualise the JSON file:
 ```bash
 kedro viz --load-file my_shareable_pipeline.json
 ```
-
-
-

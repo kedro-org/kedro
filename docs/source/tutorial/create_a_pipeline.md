@@ -25,7 +25,7 @@ This command generates all the files you need for the pipeline:
 
 * Two python files: `nodes.py` (for the node functions that form the data processing) and `pipeline.py` (to build the pipeline) within `src/kedro_tutorial/pipelines/data_processing` pipeline
 * A yaml file: `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
-* A folder for test code: `src/tests/pipelines/data_processing` 
+* A folder for test code: `src/tests/pipelines/data_processing`
 * `__init__.py` files in the required folders to ensure that Python can import the pipeline
 
 
@@ -192,9 +192,9 @@ You should see output similar to the following:
 
 ### Optional: persist preprocessed data
 
-Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). 
+Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`).
 
-When Kedro runs the pipeline, it determines that neither dataset is registered in the data catalog, so it stores these _ephemeral datasets_ in memory as Python objects using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes that depend on an ephemeral dataset have executed, the dataset is cleared and the Python garbage collector releases the memory. 
+When Kedro runs the pipeline, it determines that neither dataset is registered in the data catalog, so it stores these _ephemeral datasets_ in memory as Python objects using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes that depend on an ephemeral dataset have executed, the dataset is cleared and the Python garbage collector releases the memory.
 
 If you prefer to persist the preprocessed data, add the following to the end of `conf/base/catalog.yml` (If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste):
 
@@ -324,7 +324,6 @@ This is an exceelent place to take a breath and summarise what you have done so 
 
 * Created a new project and installed dependencies
 * Added three datasets to the project and set up the Kedro Data Catalog to accept it
-* Created a data processing pipeline with three nodes to transform and merge the input datasets and create a model input table 
+* Created a data processing pipeline with three nodes to transform and merge the input datasets and create a model input table
 
 The next step is to create the data science pipeline for spaceflight price prediction.
-

@@ -5,19 +5,19 @@ This section explains how to build your project documentation, and how to bundle
 
 ## Add documentation to your project
 
-Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) and creates a `docs` directory that builds a basic template for project-specific documentation. We recommend that you add your project-specific documentation as markdown in `docs/source` 
+Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) and creates a `docs` directory that builds a basic template for project-specific documentation. We recommend that you add your project-specific documentation as markdown in `docs/source`
 
 If you want to customise your documentation beyond the basic template, refer to the [Sphinx documentation](https://www.sphinx-doc.org/en/master/usage/configuration.html) for details of how to extend `docs/source/conf.py`.
 
-Once you have added any documentation you need, run the following from the project root directory: 
+Once you have added any documentation you need, run the following from the project root directory:
 
 ```bash
 kedro build-docs --open
-``` 
+```
 
-The HTML documention is built to `docs/build/html` and opens automatically in a browser tab. 
+The HTML documention is built to `docs/build/html` and opens automatically in a browser tab.
 
-```{note} 
+```{note}
 The `build-docs` command creates documentation based on the code structure of your project. Documentation includes any [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) defined in your code.
 ```
 
@@ -32,13 +32,13 @@ kedro package
 
 Kedro builds the package into the `dist` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
 
-The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations. 
+The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
 
 We recommend that you document the configuration required (parameters and catalog) in the local `README.md` file for any project recipients.
 
 ### Package recipients
 
-Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed. 
+Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed.
 
 A recipient can install the project by calling:
 

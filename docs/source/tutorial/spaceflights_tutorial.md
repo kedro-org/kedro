@@ -2,10 +2,10 @@
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 
-In the text, we assume you have created an empty Kedro project; we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete. 
+In the text, we assume you have created an empty Kedro project; we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete.
 
 ```{note}
-You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) you can follow along without copy/pasting. 
+You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) you can follow along without copy/pasting.
 ```
 
 ## Scenario
@@ -17,7 +17,7 @@ You may prefer to get up and running more swiftly. We also provide the example a
 ![](../meta/images/moon-rocket.gif)
 
 ## Get help
-If you hit an issue with the tutorial, the Kedro community can help! 
+If you hit an issue with the tutorial, the Kedro community can help!
 
 Things you can do:
 
@@ -40,14 +40,14 @@ When you build a Kedro project, you will typically follow a [standard developmen
 
 1. Set up the project template
 
-    * Create a new project` and install project dependencies.   
+    * Create a new project` and install project dependencies.
     * Configure credentials and any other sensitive/personal content, and logging
 
 2. Set up the data
 
     * Add data to the `data` folder
     * Reference all datasets for the project
-    
+
 3. Create the pipeline
 
     * Construct nodes to make up the pipeline
@@ -71,7 +71,7 @@ git remote add origin https://github.com/<your-repo>
 
 ### Submit your changes to GitHub
 
-If you work on a project as part of a team, you will share the `git` repository via GitHub, which stores a shared copy of the repository. You should periodically save your changes to your local repository and merge them into the GitHub repository. 
+If you work on a project as part of a team, you will share the `git` repository via GitHub, which stores a shared copy of the repository. You should periodically save your changes to your local repository and merge them into the GitHub repository.
 
 Within your team, we suggest that you each develop your code on a branch and create pull requests to submit it to the `develop` or `main` branches:
 
@@ -96,7 +96,3 @@ git commit -m 'Create project template'
 # push changes to remote main
 git push origin main
 ```
-
-
-
-

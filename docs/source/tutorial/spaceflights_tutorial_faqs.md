@@ -7,7 +7,7 @@
 You're [testing whether Kedro can load the companies or reviews data](./set_up_data.md#test-that-kedro-can-load-the-csv-data) and see the following:
 
 ```python
-DataSetError: Failed while loading data from data set 
+DataSetError: Failed while loading data from data set
 CSVDataSet(filepath=...).
 [Errno 2] No such file or directory: '.../companies.csv'
 ```

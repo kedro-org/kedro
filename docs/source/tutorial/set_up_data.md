@@ -18,7 +18,7 @@ The spaceflights tutorial makes use of three fictional datasets of companies shu
 
 You will use the data to train a model to predict the price of shuttle hire. However, before you get to train the model, you will need to prepare the data for model building by combining the files to create a model input table.
 
-The data comes in two different formats: `.csv` and `.xlsx`. Kedro supports a number of different data types, and those supported can be found in the API documentation. 
+The data comes in two different formats: `.csv` and `.xlsx`. Kedro supports a number of different data types, and those supported can be found in the API documentation.
 
 > If you are using the tutorial created by the spaceflights starter, you can omit this step.
 
@@ -73,12 +73,12 @@ companies = catalog.load("companies")
 companies.head()
 ```
 
-* The first command creates a variable (`companies`), which is of type `pandas.DataFrame` and loads the dataset (also named `companies` as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv`. 
+* The first command creates a variable (`companies`), which is of type `pandas.DataFrame` and loads the dataset (also named `companies` as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv`.
 * The `head` method from `pandas` displays the first five rows of the DataFrame.
 
 ```
 INFO     Loading data from 'companies' (CSVDataSet)
-Out[1]: 
+Out[1]:
       id company_rating       company_location  total_fleet_count iata_approved
 0  35029           100%                   Niue                4.0             f
 1  30292            67%               Anguilla                6.0             f
@@ -123,7 +123,7 @@ You should see output such as the following:
 
 ```
 INFO     Loading data from 'shuttles' (ExcelDataSet)
-Out[1]: 
+Out[1]:
       id       shuttle_location shuttle_type engine_type  ... d_check_complete  moon_clearance_complete     price company_id
 0  63561                   Niue      Type V5     Quantum  ...                f                        f  $1,325.0      35029
 1  36260               Anguilla      Type V5     Quantum  ...                t                        f  $1,780.0      30292

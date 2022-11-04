@@ -522,17 +522,17 @@ We instantiate the template_pipeline twice but pass in different parameters. The
 
 So let's go through in detail how those namespaces affect our catalog references:
 
-- all `inputs` and `outputs` within the nodes of our `pipeline_instance` get `active_modelling_pipeline` prepended:
+- All `inputs` and `outputs` within the nodes of our `pipeline_instance` get `active_modelling_pipeline` prepended:
   - `params:model_options` turns into `active_modelling_pipeline.params:model_options`
   -  `X_train` turns into `active_modelling_pipeline.X_train`
   - `X_test` turns into `active_modelling_pipeline.X_test`
   - and so on 
-- because we have 2 instances of the template pipeline we will have a separate set of parameters for `candidate_modelling_pipeline`:
+- Because we have 2 instances of the template pipeline we will have a separate set of parameters for `candidate_modelling_pipeline`:
   - `params:model_options` turns into `candidate_modelling_pipeline.params:model_options`
   -  `X_train` turns into `candidate_modelling_pipeline.X_train`
   - `X_test` turns into `candidate_modelling_pipeline.X_test`
   - and so on 
-- except `model_input_table` which does not get parameterised as it was *frozen* in the pipeline wrapper. So any datasets that you want to share between instances you need to lift outside their scope of the wrapper.
+- Except `model_input_table` which does not get parameterised as it was *frozen* in the pipeline wrapper. So any datasets that you want to share between instances you need to lift outside their scope of the wrapper.
 
 
 This renders as follows using `kedro viz` (hover over the datasets to see their full path) :

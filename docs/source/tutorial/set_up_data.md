@@ -66,7 +66,7 @@ kedro ipython
 If this is the first `kedro` command you have executed in the project, you will be asked whether you wish to opt into [usage analytics](https://github.com/quantumblacklabs/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask you again.
 ```
 
-Then type the following into the iPython prompt:
+Then type the following into the IPython prompt:
 
 ```python
 companies = catalog.load("companies")

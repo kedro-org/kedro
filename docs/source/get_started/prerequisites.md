@@ -34,24 +34,6 @@ conda create --name kedro-environment python=3.8 -y
 
 This will create an isolated Python 3.8 environment.
 
->  does kedro require 3.8? on main github page it says: 3.7, 3.8, 3.9, 3.10
->
-> I am running 3.10 and it might be the cause for :
->
-> ```
-> (kedro-review-py3.10) PS C:\code\kedro\kedro-review> kedro run
-> [11/04/22 09:56:06] WARNING  C:\Users\Sean\AppData\Local\pypoetry\Cache\virtualenvs\kedro-review- warnings.py:109                             M43hp0I7-py3.10\lib\site-packages\plotly\graph_objects\__init__.py:2
->                              88: DeprecationWarning: distutils Version classes are deprecated.
->                              Use packaging.version instead.
->                                if LooseVersion(ipywidgets.__version__) >= LooseVersion("7.0.0"):
-> ```
->
-> 
->
->  
-
-
-
 3. Activate the new environment:
 
 ```bash

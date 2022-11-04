@@ -40,7 +40,7 @@ When you build a Kedro project, you will typically follow a [standard developmen
 
 1. Set up the project template
 
-    * Create a new project` and install project dependencies.
+    * Create a new project and install project dependencies.
     * Configure credentials and any other sensitive/personal content, and logging
 
 2. Set up the data

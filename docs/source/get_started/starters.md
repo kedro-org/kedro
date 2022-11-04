@@ -1,10 +1,11 @@
 # Kedro starters
 
-Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused, for example:
+Kedro starters provide pre-defined example code and configuration that can be reused, for example:
 
-* As example code for a typical Kedro project
+* As template code for a typical Kedro project
 * To add a `docker-compose` setup to launch Kedro next to a monitoring stack
 * To add deployment scripts and CI/CD setup for your targeted infrastructure
+
 
 A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../extend_kedro/create_kedro_starters.md).
 
@@ -26,9 +27,7 @@ To create a project using the `PySpark` starter:
 kedro new --starter=pyspark
 ```
 
-If no starter is provided to `kedro new`, the default Kedro template will be used, as documented in ["Creating a new project"](./new_project.md).
-
-### Starter aliases
+## Starter aliases
 
 We provide aliases for common starters maintained by the Kedro team so that users don't have to specify the full path. For example, to use the `PySpark` starter to create a project:
 
@@ -65,25 +64,15 @@ The `--checkout` value points to a branch, tag or commit in the starter reposito
 
 Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/usage.html#works-directly-with-git-and-hg-mercurial-repos-too).
 
-## Use a starter in interactive mode
-
-By default, when you create a new project using a starter, `kedro new` launches [by asking you to enter the `project_name`](./new_project.md#create-a-new-project-interactively).
-
-* `project_name` - A human readable name for your new project
-
-Kedro will then automatically generate the following two variables from the entered `project_name`:
-
-* `repo_name` - A name for the directory that holds your project repository
-* `python_package` - A Python package name for your project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
-
-This mode assumes that the starter requires no additional configuration variables.
 
 ## Use a starter with a configuration file
 
-Kedro also allows you to [specify a configuration file](./new_project.md#create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter:
+By default, when you create a new project using a starter, `kedro new` asks you to enter the `project_name`, which it uses to set the `repo_name` and `python_package` name. This is the same behavior as when you [create a new empty project](./new_project.md#create-a-new-empty-project)
+
+However, Kedro also allows you to [specify a configuration file](./new_project.md#create-a-new-project-from-a-configuration-file) when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
 
 ```bash
 kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark
 ```
 
-This option is useful when the starter requires more configuration than the interactive mode requires.
+This option is useful when the starter requires more configuration than the default mode requires.

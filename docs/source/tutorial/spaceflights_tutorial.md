@@ -35,6 +35,9 @@ Also known as the "root directory", this is the parent folder for the entire pro
 ### Dependencies
 These are Python packages or libraries that an individual project depends upon to complete a task. For example, the Spaceflights tutorial project depends on the [scikit-learn](https://scikit-learn.org/stable/) library.
 
+### Data processing vs data science
+In this tutorial, we use data processing to wrangle the raw data into a clean and reliable state. We use data science to extract insights from the processed data by using a combination of domain expertise, programming skills, and knowledge of mathematics and statistics. 
+
 ### Standard development workflow
 When you build a Kedro project, you will typically follow a [standard development workflow](../faq/faq.md#what-is-the-typical-kedro-project-development-workflow):
 

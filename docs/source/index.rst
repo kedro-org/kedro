@@ -60,14 +60,8 @@ Welcome to Kedro's documentation!
 
    get_started/prerequisites
    get_started/install
-   get_started/hello_kedro
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Make a project
-
+   get_started/kedro_concepts
    get_started/new_project
-   get_started/example_project
    get_started/starters
    get_started/standalone_use_of_datacatalog
 

@@ -24,7 +24,7 @@ You should see an ASCII art graphic and the Kedro version number: for example,
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../faq/faq.md), check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
+If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../faq/faq.md), check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [SlackServer](https://kedro-org.slack.com/archives/C03QT86H8DT).
 
 ## Install a development version
 

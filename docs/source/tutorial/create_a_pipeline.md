@@ -6,14 +6,18 @@ This section explains the following:
 * How to construct a Kedro pipeline from a set of nodes
 * How to run the pipeline
 
+```{note}
+If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files mentioned.
+```
+
+
+
 
 ## Data processing pipeline
 
 You previously registered the raw datasets for your Kedro project, so you can now create nodes to preprocess two of the datasets, `companies.csv`, and `shuttles.xlsx`, to prepare the data for modelling.
 
 ### Generate a new pipeline template
-
-> If you are using the tutorial created by the spaceflights starter, you can omit this command, but it's worth reviewing the files associated with the `data_processing` pipeline as described below.
 
 In the terminal, run the following command to generate a new pipeline for data processing:
 
@@ -31,9 +35,9 @@ This command generates all the files you need for the pipeline:
 
 ### Add node functions
 
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
 
-Open `src/kedro_tutorial/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each takes a raw DataFrame as input, convert the data in several columns to different types, and output a DataFrame containing the preprocessed data:
+
+Open `pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each takes a raw DataFrame as input, convert the data in several columns to different types, and output a DataFrame containing the preprocessed data:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -93,8 +97,6 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 
 The next steps are to create a [node](../resources/glossary.md#node) for each function and to create a [modular pipeline](../resources/glossary.md#modular-pipeline) for data processing:
 
-> If you are using the tutorial created by the spaceflights starter, you can omit all the copy/paste actions, but it's worth reviewing the code added to form the pipeline.
-
 First, add import statements for your functions by adding them to the beginning of `pipeline.py`:
 
 ```python
@@ -103,7 +105,7 @@ from kedro.pipeline import Pipeline, node, pipeline
 from .nodes import preprocess_companies, preprocess_shuttles
 ```
 
-Next, add the following to `src/kedro_tutorial/pipelines/data_processing/pipeline.py`, so the `create_pipeline()` function is as follows:
+Next, add the following to `pipelines/data_processing/pipeline.py`, so the `create_pipeline()` function is as follows:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -131,7 +133,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 </details>
 
 
-Note that the `input` statements for `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. They are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. Kedro uses the named node inputs (and outputs) to determine interdependencies between the nodes, and their execution order.
+Note that the `inputs` statements for `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. They are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. Kedro uses the named node inputs (and outputs) to determine interdependencies between the nodes, and their execution order.
 
 
 ### Test the example
@@ -219,9 +221,7 @@ The next step in the tutorial is to add another node for a function that joins t
 * Kedro uses the `preprocessed_shuttles`, `preprocessed_companies`, and `reviews` datasets as inputs
 * Kedro saves the output as a dataset called `model_input_table`
 
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the `create_model_input_table` code.
-
-First, add the `create_model_input_table()` function from the snippet below to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
+First, add the `create_model_input_table()` function from the snippet below to `pipelines/data_processing/nodes.py`.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -250,7 +250,7 @@ def create_model_input_table(
 
 </details>
 
-Add an import statement for `create_model_input_table` at the top of `src/kedro_tutorial/pipelines/data_processing/pipeline.py`:
+Add an import statement for `create_model_input_table` at the top of `pipelines/data_processing/pipeline.py`:
 
 ```python
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
@@ -270,7 +270,7 @@ node(
 
 ### Optional: persist the model input table
 
-If you want the model input table data to be saved to file (in `data/03_primary`) rather than used in memory, add an entry to `conf/base/catalog.yml`. (If you are using a project created by the spaceflights starter, you can omit the copy/paste):
+If you want the model input table data to be saved to file (in `data/03_primary`) rather than used in memory, add an entry to `conf/base/catalog.yml`:
 
 ```yaml
 model_input_table:
@@ -320,7 +320,7 @@ You should see output similar to the following:
 
 ## Checkpoint
 
-This is an exceelent place to take a breath and summarise what you have done so far.
+This is an excellent place to take a breath and summarise what you have done so far.
 
 * Created a new project and installed dependencies
 * Added three datasets to the project and set up the Kedro Data Catalog to accept it

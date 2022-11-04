@@ -9,22 +9,28 @@ This section explains the following:
 * (Optional) How to make a modular pipeline
 
 
+
+```{note}
+If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files mentioned.
+```
+
+
+
+
 ## Data science pipeline
 
 The data science pipeline uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Generate a new pipeline template
 
-Run the following command to create the `data_science` pipeline. If you are using the tutorial created by the spaceflights starter, you can omit this step:
+Run the following command to create the `data_science` pipeline.
 
 
 ```bash
 kedro pipeline create data_science
 ```
 
-Add the following code to the `src/kedro_tutorial/pipelines/data_science/nodes.py` file:
-
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the code for the three nodes.
+Add the following code to the `pipelines/data_science/nodes.py` file:
 
 
 <details>
@@ -93,7 +99,6 @@ def evaluate_model(
 ### Configure the input parameters
 
 You now need to add some parameters that are used by the `DataCatalog` when the pipeline executes.
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the code for the three nodes.
 
 Add the following to `conf/base/parameters/data_science.yml`:
 
@@ -118,9 +123,7 @@ More information about [parameters](../kedro_project_setup/configuration.md#para
 
 ### Assemble the data science pipeline
 
-To create a modular pipeline for the price prediction model, replace the contents of `src/kedro_tutorial/pipelines/data_science/pipeline.py` with the following:
-
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
+To create a modular pipeline for the price prediction model, replace the contents of `pipelines/data_science/pipeline.py` with the following:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -160,8 +163,6 @@ def create_pipeline(**kwargs) -> Pipeline:
 ### Register the dataset
 
 The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
-
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
 
 ```yaml
 regressor:
@@ -233,14 +234,22 @@ You should see output similar to the following:
 
 </details>
 
+As you can see we successfully ran both the `data_processing` and `data_science` pipelines, generating a model and evaluating it.
+
+
+
 #### Slice a pipeline
 
-Sometimes you may want to run just part of the default pipeline. For example, you may could skip data processing execution and run only the data science pipeline to tune the hyperparameters of the price prediction model.
+Sometimes you may want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
 
 You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
 ```bash
 kedro run --pipeline=data_science
+```
+
+``` {note}
+This will only work if you have persisted the input to the `data_science` pipeline, which is the `model_input_table`. This was an optional step in the previous chapter.
 ```
 
 There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run).
@@ -274,7 +283,11 @@ Modular pipelines are easier to develop, test and maintain. They are reusable wi
 ### Extend the project with namespacing and a modular pipeline
 We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline`.
 
-> This is optional code so is **not** provided in the spaceflights starter. Unlike the rest of the tutorial, if you want to see this in action, you need to copy and paste the code as instructed.
+``` {note}
+This is optional code so is **not** provided in the spaceflights starter. Unlike the rest of the tutorial, if you want to see this in action, you need to copy and paste the code as instructed.
+```
+
+
 
 1. Update your catalog to add namespaces to the outputs of each instance. Replace the `regressor` key with the following two new dataset keys in the `conf/base/catalog.yml` file:
 
@@ -372,11 +385,12 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 </details>
 
-You should see output as follows:
+
+
+After executing `kedro run`, you should see output as follows:
 
 <details>
 <summary><b>Click to expand</b></summary>
-
 
 ```bash
 [11/02/22 10:41:06] WARNING  /Users/jo_stichbury/opt/anaconda3/envs/py38/lib/python3.8/site-packages/plotly/graph_objects/ warnings.py:109
@@ -473,6 +487,8 @@ The import you added to the code introduces the pipeline wrapper, which enables 
 from kedro.pipeline.modular_pipeline import pipeline
 ```
 
+ 
+
 The `pipeline()` wrapper method takes the following arguments:
 
 | Keyword argument | Description                                                                         |
@@ -504,8 +520,22 @@ ds_pipeline_2 = pipeline(
 
 We instantiate the template_pipeline twice but pass in different parameters. The `pipeline_instance` variable is our template pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parameterised instantiations.
 
+So let's go through in detail how those namespaces affect our catalog references:
 
-This renders as follows:
+- all `inputs` and `outputs` within the nodes of our `pipeline_instance` get `active_modelling_pipeline` prepended:
+  - `params:model_options` turns into `active_modelling_pipeline.params:model_options`
+  -  `X_train` turns into `active_modelling_pipeline.X_train`
+  - `X_test` turns into `active_modelling_pipeline.X_test`
+  - and so on 
+- because we have 2 instances of the template pipeline we will have a separate set of parameters for `candidate_modelling_pipeline`:
+  - `params:model_options` turns into `candidate_modelling_pipeline.params:model_options`
+  -  `X_train` turns into `candidate_modelling_pipeline.X_train`
+  - `X_test` turns into `candidate_modelling_pipeline.X_test`
+  - and so on 
+- except `model_input_table` which does not get parameterised as it was *frozen* in the pipeline wrapper. So any datasets that you want to share between instances you need to lift outside their scope of the wrapper.
+
+
+This renders as follows using `kedro viz` (hover over the datasets to see their full path) :
 
 ![modular_ds](../meta/images/modular_ds.gif)
 

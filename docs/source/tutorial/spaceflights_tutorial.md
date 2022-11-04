@@ -58,6 +58,8 @@ When you build a Kedro project, you will typically follow a [standard developmen
     * Package the project for distribution
 
 
+
+
 ### Source control with `git`
 
 We recommend that you use `git` for source control. If you are unfamiliar with a typical `git` workflow but want to learn more, we suggest you look into [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).

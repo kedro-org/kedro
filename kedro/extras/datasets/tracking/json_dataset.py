@@ -7,6 +7,10 @@ from typing import NoReturn
 from kedro.extras.datasets.json import JSONDataSet as JDS
 from kedro.io.core import DataSetError
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class JSONDataSet(JDS):
     """``JSONDataSet`` saves data to a JSON file using an underlying

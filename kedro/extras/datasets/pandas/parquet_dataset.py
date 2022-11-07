@@ -22,6 +22,10 @@ from kedro.io.core import (
 
 logger = logging.getLogger(__name__)
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``ParquetDataSet`` loads/saves data from/to a Parquet file using an underlying

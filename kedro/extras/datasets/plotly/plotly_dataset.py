@@ -13,6 +13,10 @@ from kedro.io.core import Version
 
 from .json_dataset import JSONDataSet
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class PlotlyDataSet(JSONDataSet):
     """``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON

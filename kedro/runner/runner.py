@@ -128,6 +128,43 @@ class AbstractRunner(ABC):
 
         return self.run(to_rerun, catalog, hook_manager)
 
+    def run_incremental(
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager = None,
+        session_id: str = None,
+    ) -> Dict[str, Any]:
+        """Run the ``Pipeline`` using the datasets provided by ``catalog``
+        and save results back to the same objects.
+        Existing intermediate outputs are not processed.
+
+        Args:
+            pipeline: The ``Pipeline`` to run.
+            catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
+            session_id: The id of the session.
+
+        Raises:
+            ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
+
+        Returns:
+            Any node outputs that cannot be processed by the ``DataCatalog``.
+            These are returned in a dictionary, where the keys are defined
+            by the node outputs.
+
+        """
+
+        missing = []
+        for node in pipeline.nodes:
+            for o in node.outputs:
+                if not catalog.exists(o):
+                    missing += node.outputs
+                    break
+
+        to_run = pipeline.only_nodes_with_outputs(*missing)
+        return self.run(to_run, catalog, hook_manager, session_id)
+
     @abstractmethod  # pragma: no cover
     def _run(
         self,

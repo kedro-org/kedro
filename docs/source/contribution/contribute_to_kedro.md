@@ -2,8 +2,9 @@
 
 We welcome any and all contributions to Kedro, at whatever level you can manage. For example, you could:
 
-- Join the community on [Discord](https://discord.gg/akJDeVaxnB)
-- Troubleshoot other users' questions or get answers to your own queries on [GitHub discussions](https://github.com/kedro-org/kedro/discussions)
+- Join the community on [Slack](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw)
+- Review Kedro's [GitHub isusses](https://github.com/kedro-org/kedro/issues) or raise your own issue to report a bug or feature request
+- Start a conversation about the Kedro project on [GitHub discussions](https://github.com/kedro-org/kedro/discussions)
 - Make a pull request on the [kedro-community Github repo](https://github.com/kedro-org/kedro-community) to update the curated list of Kedro community content.
 - Report a bug or propose a new feature on [GitHub issues](https://github.com/kedro-org/kedro/issues)
 - [Review other contributors' PRs](https://github.com/kedro-org/kedro/pulls)

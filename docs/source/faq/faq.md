@@ -1,7 +1,7 @@
 # Frequently asked questions
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
- question which isn't answered here, check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
+question which isn't answered here, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
 
 ## What is Kedro?
 

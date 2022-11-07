@@ -1,6 +1,6 @@
 # Installation prerequisites
 
-Kedro supports macOS, Linux and Windows. If you encounter any problems on these platforms, please check the [Kedro Slack channels](https://kedro-org.slack.com).
+Kedro supports macOS, Linux and Windows. If you encounter any problems on these platforms, please check the [frequently asked questions](../faq/faq.md), the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
 
 If you are a Windows user, you will need to install [`git`](https://git-scm.com/) onto your machine if you do not have it. To confirm whether you have it installed:
 

@@ -26,10 +26,10 @@ Depending on your preferred Python installation, you can also create virtual env
 
 1. [Install `conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) on your computer.
 
-2. Create a new Python virtual environment, called `kedro-environment`, using `conda`:
+2. Create a new Python virtual environment, called `kedro-environment`, using `conda`. In the example below, we use Python 3.10 but you can opt for a different version if you need it for your particular project:
 
 ```bash
-conda create --name kedro-environment python=3.8 -y
+conda create --name kedro-environment python=3.10 -y
 ```
 
 This will create an isolated Python 3.8 environment.

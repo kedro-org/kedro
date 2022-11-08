@@ -27,6 +27,7 @@ class PlotlyDataSet(JSONDataSet):
     the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
     Example configuration for a PlotlyDataSet in the catalog:
+
     .. code-block:: yaml
 
         >>> bar_plot:

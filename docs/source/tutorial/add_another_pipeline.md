@@ -9,13 +9,9 @@ This section explains the following:
 * (Optional) How to make a modular pipeline
 
 
-
 ```{note}
-If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files mentioned.
+If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files described.
 ```
-
-
-
 
 ## Data science pipeline
 
@@ -288,7 +284,6 @@ This is optional code so is **not** provided in the spaceflights starter. Unlike
 ```
 
 
-
 1. Update your catalog to add namespaces to the outputs of each instance. Replace the `regressor` key with the following two new dataset keys in the `conf/base/catalog.yml` file:
 
 ```yaml
@@ -487,8 +482,6 @@ The import you added to the code introduces the pipeline wrapper, which enables 
 from kedro.pipeline.modular_pipeline import pipeline
 ```
 
- 
-
 The `pipeline()` wrapper method takes the following arguments:
 
 | Keyword argument | Description                                                                         |
@@ -518,22 +511,21 @@ ds_pipeline_2 = pipeline(
 )
 ```
 
-We instantiate the template_pipeline twice but pass in different parameters. The `pipeline_instance` variable is our template pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parameterised instantiations.
+We instantiate the template_pipeline twice but pass in different parameters. The `pipeline_instance` variable is the template pipeline, and `ds_pipeline_1` and `ds_pipeline_2` are the two separately parameterised instantiations.
 
 So let's go through in detail how those namespaces affect our catalog references:
 
-- All `inputs` and `outputs` within the nodes of our `pipeline_instance` get `active_modelling_pipeline` prepended:
+- All `inputs` and `outputs` within the nodes of our `ds_pipeline_1` have the `active_modelling_pipeline` prefix:
   - `params:model_options` turns into `active_modelling_pipeline.params:model_options`
-  -  `X_train` turns into `active_modelling_pipeline.X_train`
-  - `X_test` turns into `active_modelling_pipeline.X_test`
-  - and so on 
-- Because we have 2 instances of the template pipeline we will have a separate set of parameters for `candidate_modelling_pipeline`:
+  - `X_train` turns into `active_modelling_pipeline.X_train`
+  - `X_test` turns into `active_modelling_pipeline.X_test`, and so on
+  
+- There are a separate set of parameters for `ds_pipeline_2` with the `candidate_modelling_pipeline` prefix:
   - `params:model_options` turns into `candidate_modelling_pipeline.params:model_options`
-  -  `X_train` turns into `candidate_modelling_pipeline.X_train`
-  - `X_test` turns into `candidate_modelling_pipeline.X_test`
-  - and so on 
-- Except `model_input_table` which does not get parameterised as it was *frozen* in the pipeline wrapper. So any datasets that you want to share between instances you need to lift outside their scope of the wrapper.
-
+  - `X_train` turns into `candidate_modelling_pipeline.X_train`
+  - `X_test` turns into `candidate_modelling_pipeline.X_test`, and so on 
+  
+However, `model_input_table` does not get parameterised as it was *frozen* in the pipeline wrapper. So any datasets that you want to share between instances you need to lift outside their scope of the wrapper.
 
 This renders as follows using `kedro viz` (hover over the datasets to see their full path) :
 

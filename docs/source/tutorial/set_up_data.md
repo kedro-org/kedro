@@ -135,7 +135,7 @@ Out[1]:
 
 When you have finished, close `ipython` session with `exit()`.
 
-## Futher information
+## Further information
 
 ### Custom data
 
@@ -143,6 +143,6 @@ When you have finished, close `ipython` session with `exit()`.
 
 You can find further information about [how to add support for custom datasets](../extend_kedro/custom_datasets.md) in specific documentation covering advanced usage.
 
-### Data location
+### Supported data locations
 
 Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read data from a variety of data stores including local file systems, network file systems, cloud object stores and HDFS.

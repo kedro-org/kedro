@@ -7,7 +7,7 @@ This section explains the following:
 * How to run the pipeline
 
 ```{note}
-If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files mentioned.
+If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files described.
 ```
 
 

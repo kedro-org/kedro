@@ -23,14 +23,20 @@ In your terminal window, navigate to the folder you want to store the project an
 kedro new
 ```
 
-```{note}
-Alternatively, if you want to include a complete set of working example code within the project, generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) by typing `kedro new --starter=spaceflights`.
+Alternatively, if you want to include a complete set of working example code within the project, generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+
+```bash
+kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. When Kedro has created your project, you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
+For either option, when prompted for a project name, enter `Kedro Tutorial`. When Kedro has created your project, you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 
 ```bash
 cd kedro-tutorial
+```
+
+```{note}
+The first time you type a `kedro` command in your new project, you will be asked whether you wish to opt into [usage analytics](https://github.com/quantumblacklabs/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask you again.
 ```
 
 ## Project dependencies

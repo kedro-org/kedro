@@ -32,8 +32,6 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         >>> json_dataset:
         >>>   type: json.JSONDataSet
         >>>   filepath: data/01_raw/location.json
-        >>>   load_args:
-        >>>     lines: True
         >>>
         >>> cars:
         >>>   type: json.JSONDataSet
@@ -41,8 +39,6 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         >>>   fs_args:
         >>>     project: my-project
         >>>   credentials: my_gcp_credentials
-        >>>   load_args:
-        >>>     lines: True
 
     Example using Python API:
     ::
@@ -51,7 +47,6 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         >>>
         >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
         >>>
-        >>> # data_set = JSONDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = JSONDataSet(filepath="test.json")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

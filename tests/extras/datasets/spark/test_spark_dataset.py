@@ -614,6 +614,16 @@ class TestSparkDataSetVersionedDBFS:
         dbutils_mock.fs.ls.side_effect = Exception()
         assert not _dbfs_exists(test_path, dbutils_mock)
 
+    def test_ds_init_get_dbutils_raises_exception(self, mocker):
+        get_dbutils_mock = mocker.Mock()
+        get_dbutils_mock.side_effect = AttributeError
+        get_dbutils_mock = mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset._get_dbutils", get_dbutils_mock
+        )
+
+        data_set = SparkDataSet(filepath="/dbfs/tmp/data")
+        assert data_set._glob_function.__name__ == "iglob"
+
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(
             "kedro.extras.datasets.spark.spark_dataset._get_dbutils", return_value=None

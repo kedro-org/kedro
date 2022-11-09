@@ -21,6 +21,7 @@
 * Added support for `tf.device` in `TensorFlowModelDataset`.
 * Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 * Updated Experiment Tracking docs with working examples.
+* Fixed `AttributeError` when using `/dbfs` paths on an unsupported environment
 
 ## Minor breaking changes to the API
 

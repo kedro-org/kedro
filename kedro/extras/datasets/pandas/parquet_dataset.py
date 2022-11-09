@@ -68,7 +68,6 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = ParquetDataSet(filepath="gcs://bucket/test.parquet")
         >>> data_set = ParquetDataSet(filepath="test.parquet")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

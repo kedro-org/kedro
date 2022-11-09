@@ -25,7 +25,7 @@ with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
     version = result.group(1)
 
 # get the dependencies and installs
-with open("requirements.txt", encoding="utf-8") as f:
+with open("dependency/requirements.txt", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
 
 # get test dependencies and installs
@@ -78,6 +78,7 @@ pandas_require = {
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }
+pickle_require = {"pickle.PickleDataSet": ["compress-pickle[lz4]~=2.1.0"]}
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
@@ -114,12 +115,14 @@ extras_require = {
         "ipykernel>=5.3, <7.0",
         "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=0.17.2",
+        "Jinja2<3.1.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
+    "pickle": _collect_requirements(pickle_require),
     "pillow": _collect_requirements(pillow_require),
     "plotly": _collect_requirements(plotly_require),
     "redis": _collect_requirements(redis_require),
@@ -134,6 +137,7 @@ extras_require = {
     **holoviews_require,
     **networkx_require,
     **pandas_require,
+    **pickle_require,
     **pillow_require,
     **plotly_require,
     **spark_require,

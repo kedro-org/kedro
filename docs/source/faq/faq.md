@@ -1,7 +1,7 @@
 # Frequently asked questions
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
- question which isn't answered here, check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
+question which isn't answered here, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
 
 ## What is Kedro?
 
@@ -15,16 +15,19 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 
 Currently, the core Kedro team consists of
 [Ahdra Merali](https://github.com/AhdraMeraliQB),
-Andrew Mackay,
+[Andrew Mackay](https://github.com/Mackay031),
+[Ankita Katiyar](https://github.com/ankatiyar),
 [Antony Milne](https://github.com/AntonyMilneQB),
 [Cvetanka Nechevska](https://github.com/cvetankanechevska),
 [Deepyaman Datta](https://github.com/deepyaman),
 [Gabriel Comym](https://github.com/comym),
 [Huong Nguyen](https://github.com/Huongg),
 [Ivan Danov](https://github.com/idanov),
+[Jannic Holzer](https://github.com/jmholzer),
+[Jo Stichbury](https://github.com/stichbury),
 [Joel Schwarzmann](https://github.com/datajoely),
 [Lim Hoang](https://github.com/limdauto),
-[Merel Theisen](https://github.com/MerelTheisenQB),
+[Merel Theisen](https://github.com/merelcht),
 [Nero Okwa](https://github.com/NeroOkwa),
 [Nok Lam Chan](https://github.com/noklam),
 [Rashida Kanchwala](https://github.com/rashidakanchwala),
@@ -40,7 +43,6 @@ Former core team members with significant contributions include:
 [Hamza Oza](https://github.com/hamzaoza),
 [Ignacio Paricio](https://github.com/ignacioparicio),
 [Jiri Klein](https://github.com/jiriklein),
-[Jo Stichbury](https://github.com/stichbury),
 [Kiyohito Kunii](https://github.com/921kiyo),
 [Laís Carvalho](https://github.com/laisbsc),
 [Liam Brummitt](https://github.com/bru5),
@@ -170,4 +172,4 @@ If you're an academic, Kedro can also help you, for example, as a tool to solve 
 
 ## How can I get my question answered?
 
-If your question isn't answered above, check out [GitHub Discussions](https://github.com/kedro-org/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
+If your question isn't answered above, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org/community or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).

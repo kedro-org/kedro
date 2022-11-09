@@ -7,6 +7,10 @@ from typing import NoReturn
 from kedro.extras.datasets.json import JSONDataSet as JDS
 from kedro.io.core import DataSetError
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class JSONDataSet(JDS):
     """``JSONDataSet`` saves data to a JSON file using an underlying
@@ -34,7 +38,6 @@ class JSONDataSet(JDS):
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>
-        >>> # data_set = JSONDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = JSONDataSet(filepath="test.json")
         >>> data_set.save(data)
 

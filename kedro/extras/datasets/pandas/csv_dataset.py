@@ -21,6 +21,10 @@ from kedro.io.core import (
 
 logger = logging.getLogger(__name__)
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
@@ -60,7 +64,6 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = CSVDataSet(filepath="gcs://bucket/test.csv")
         >>> data_set = CSVDataSet(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

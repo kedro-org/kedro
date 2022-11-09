@@ -20,6 +20,10 @@ from kedro.io.core import (
     validate_on_forbidden_chars,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
     """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.

@@ -56,7 +56,7 @@ def _setup_context_with_venv(context, venv_dir):
     context.pip = str(bin_dir / "pip")
     context.python = str(bin_dir / "python")
     context.kedro = str(bin_dir / "kedro")
-    context.requirements_path = Path("requirements.txt").resolve()
+    context.requirements_path = Path("dependency/requirements.txt").resolve()
 
     # clone the environment, remove any condas and venvs and insert our venv
     context.env = os.environ.copy()

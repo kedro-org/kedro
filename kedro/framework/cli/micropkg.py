@@ -141,18 +141,17 @@ def _pull_package(
 ):
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
-
         _unpack_sdist(package_path, temp_dir_path, fs_args)
 
-        sdist_file_name = Path(package_path).name.rstrip(".tar.gz")
-        egg_info_file = list((temp_dir_path / sdist_file_name).glob("*.egg-info"))
-        if len(egg_info_file) != 1:
+        egg_info_files = list((temp_dir_path).rglob("*.egg-info"))
+        if len(egg_info_files) != 1:
             raise KedroCliError(
                 f"More than 1 or no egg-info files found from {package_path}. "
                 f"There has to be exactly one egg-info directory."
             )
-        package_name = egg_info_file[0].stem
-        package_requirements = temp_dir_path / sdist_file_name / "setup.py"
+        egg_info_file = egg_info_files[0]
+        package_name = egg_info_file.stem
+        package_requirements = egg_info_file.parent / "setup.py"
 
         # Finds a string representation of 'install_requires' list from setup.py
         reqs_list_pattern = r"install_requires\=(.*?)\,\n"
@@ -172,7 +171,7 @@ def _pull_package(
         _install_files(
             metadata,
             package_name,
-            temp_dir_path / sdist_file_name,
+            egg_info_file.parent,
             env,
             alias,
             destination,

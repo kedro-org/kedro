@@ -8,29 +8,66 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-
-# Upcoming Release 0.18.3
+# Upcoming Release 0.18.4
 
 ## Major features and improvements
+* Make Kedro instantiate datasets from `kedro_datasets` with higher priority than `kedro.extras.datasets`. `kedro_datasets` is the namespace for the new `kedro-datasets` python package.
+* The config loader objects now implement `UserDict` and the configuration is accessed through `conf_loader['catalog']`.
+* You can configure config file patterns through `settings.py` without creating a custom config loader.
+
+## Bug fixes and other changes
+* Fixed `kedro micropkg pull` for packages on PyPI.
+* Fixed `format` in `save_args` for `SparkHiveDataSet`, previously it didn't allow you to save it as delta format.
+* Fixed save errors in `TensorFlowModelDataset` when used without versioning; previously, it wouldn't overwrite an existing model.
+* Added support for `tf.device` in `TensorFlowModelDataset`.
+* Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
+* Updated Experiment Tracking docs with working examples.
+* Updated MatplotlibWriter Dataset docs with working examples.
+* Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
+* Refactored `ShelveStore` to it's own module to ensure multiprocessing works with it.
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro test` and `kedro lint` will be deprecated.
+
+
+# Release 0.18.3
+
+## Major features and improvements
+* Implemented autodiscovery of project pipelines. A pipeline created with `kedro pipeline create <pipeline_name>` can now be accessed immediately without needing to explicitly register it in `src/<package_name>/pipeline_registry.py`, either individually by name (e.g. `kedro run --pipeline=<pipeline_name>`) or as part of the combined default pipeline (e.g. `kedro run`). By default, the simplified `register_pipelines()` function in `pipeline_registry.py` looks like:
+
+    ```python
+    def register_pipelines() -> Dict[str, Pipeline]:
+        """Register the project's pipelines.
+
+        Returns:
+            A mapping from pipeline names to ``Pipeline`` objects.
+        """
+        pipelines = find_pipelines()
+        pipelines["__default__"] = sum(pipelines.values())
+        return pipelines
+    ```
+
 * The Kedro IPython extension should now be loaded with `%load_ext kedro.ipython`.
 * The line magic `%reload_kedro` now accepts keywords arguments, e.g. `%reload_kedro --env=prod`.
+* Improved resume pipeline suggestion for `SequentialRunner`, it will backtrack the closest persisted inputs to resume.
 
 ## Bug fixes and other changes
-* Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
-* Update documentation for `rich` logging.
-* Implemented autodiscovery of project pipelines.
 
-## Bug fixes and other changes
-* Use default `False` value for rich logging `set_locals`, to make sure credentials and other sensitive data isn't shown in logs.
+* Changed default `False` value for rich logging `show_locals`, to make sure credentials and other sensitive data isn't shown in logs.
 * Rich traceback handling is disabled on Databricks so that exceptions now halt execution as expected. This is a workaround for a [bug in `rich`](https://github.com/Textualize/rich/issues/2455).
 * When using `kedro run -n [some_node]`, if `some_node` is missing a namespace the resulting error message will suggest the correct node name.
-* Update documentation for `rich` logging.
+* Updated documentation for `rich` logging.
 * Updated Prefect deployment documentation to allow for reruns with saved versioned datasets.
 * The Kedro IPython extension now surfaces errors when it cannot load a Kedro project.
 * Relaxed `delta-spark` upper bound to allow compatibility with Spark 3.1.x and 3.2.x.
+* Added `gdrive` to list of cloud protocols, enabling Google Drive paths for datasets.
+* Added svg logo resource for ipython kernel.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * The Kedro IPython extension will no longer be available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
+* `kedro jupyter convert`, `kedro build-docs`, `kedro build-reqs` and `kedro activate-nbstripout` will be deprecated.
 
 # Release 0.18.2
 

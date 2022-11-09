@@ -38,7 +38,7 @@ To exit the visualisation, close the browser tab. To regain control of the termi
 
 ## Automatic visualisation updates
 
-You can use the `--autoreload` flag to autoreload Kedro Viz when a `Python` or `YAML` file changes in the project.
+You can use the `--autoreload` flag to autoreload Kedro-Viz when a `Python` or `YAML` file changes in the project.
 
 ![](../meta/images/kedro_viz_autoreload.gif)
 

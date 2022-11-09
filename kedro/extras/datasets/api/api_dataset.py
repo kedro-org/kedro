@@ -25,7 +25,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>>   url: https://quickstats.nass.usda.gov
         >>>   params:
         >>>     key: SOME_TOKEN,
-        >>>     format: SON,
+        >>>     format: JSON,
         >>>     commodity_desc: CORN,
         >>>     statisticcat_des: YIELD,
         >>>     agg_level_desc: STATE,

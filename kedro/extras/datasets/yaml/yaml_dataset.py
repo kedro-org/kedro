@@ -32,13 +32,6 @@ class YAMLDataSet(AbstractVersionedDataSet[Dict, Dict]):
         >>>   type: yaml.YAMLDataSet
         >>>   filepath: cars.yaml
         >>>
-        >>> motorbikes:
-        >>>   type: yaml.YAMLDataSet
-        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
-        >>>   credentials: dev_s3
-        >>>
-
-
     Example:
     ::
 

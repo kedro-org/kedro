@@ -30,7 +30,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         >>>   credentials:
         >>>     client_kwargs:
         >>>         aws_access_key_id: YOUR_KEY
-        >>>         aws_secret_access_key: YOUR SECRET
+        >>>         aws_secret_access_key: YOUR_SECRET
         >>>
 
 

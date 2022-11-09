@@ -25,7 +25,7 @@ Example adding a catalog entry with
 
         >>> cars:
         >>>   type: metrics.MetricsDataSet
-        >>>   filepath: cars.json
+        >>>   filepath: data/09_tracking/cars.json
         >>>
 
 

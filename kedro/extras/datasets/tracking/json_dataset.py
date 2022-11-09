@@ -23,7 +23,7 @@ class JSONDataSet(JDS):
 
         >>> cars:
         >>>   type: tracking.JSONDataSet
-        >>>   filepath: cars.json
+        >>>   filepath: data/09_tracking/cars.json
         >>>
 
 

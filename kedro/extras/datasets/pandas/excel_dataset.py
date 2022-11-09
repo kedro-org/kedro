@@ -63,7 +63,6 @@ class ExcelDataSet(
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = ExcelDataSet(filepath="gcs://bucket/test.xlsx")
         >>> data_set = ExcelDataSet(filepath="test.xlsx")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

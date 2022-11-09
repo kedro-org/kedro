@@ -14,21 +14,15 @@ CSVDataSet(filepath=...).
 
 Have you downloaded [the three sample data files](./set_up_data.md#download-datasets) and stored them in the `data/raw` folder?
 
-Or maybe you see the following:
+Or maybe you see the following for the `companies` or `shuttles` datasets:
 
 ```python
 DataSetNotFoundError: DataSet 'companies' not found in the catalog
 ```
 
-Make sure you have saved `catalog.yml`. Call `exit()` within the ipython session and restart `kedro ipython`. Then try again.
+Make sure you have saved `catalog.yml`. Call `exit()` within the IPython session and restart `kedro ipython` (or type `@kedro_reload` into the IPython console to reload Kedro into the session without restarting). Then try again.
 
 You're [testing whether Kedro can load the shuttles data](./set_up_data.md#test-that-kedro-can-load-the-csv-data) and see the following:
-
-```python
-DataSetNotFoundError: DataSet 'shuttles' not found in the catalog
-```
-
-Make sure you have saved `catalog.yml`. Call `exit()` within the ipython session and restart `kedro ipython`. Then try again.
 
 ### Pipeline run
 

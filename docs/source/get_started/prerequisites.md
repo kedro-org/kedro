@@ -17,7 +17,7 @@ We recommend that you create a new Python virtual environment for *each* new Ked
 
 If you don't already have it, you should [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version), which comes bundled with a package and environment manager called `conda`.
 
-> [Read more about Python Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/).
+> [Read more about Python virtual environments](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 
 
 Depending on your preferred Python installation, you can also create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`. Further information about these can be found in the [FAQ](../faq/faq.md)

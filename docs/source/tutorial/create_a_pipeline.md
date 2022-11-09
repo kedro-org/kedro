@@ -193,13 +193,13 @@ You should see output similar to the following:
 ```
 </details>
 
-### Optional: persist preprocessed data
+### Optional: save the preprocessed data
 
 Each of the nodes outputs a new dataset (`preprocessed_companies` and `preprocessed_shuttles`).
 
-When Kedro runs the pipeline, it determines that neither dataset is registered in the data catalog, so it stores these _ephemeral datasets_ in memory as Python objects using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes that depend on an ephemeral dataset have executed, the dataset is cleared and the Python garbage collector releases the memory.
+When Kedro runs the pipeline, it determines that neither dataset is registered in the data catalog, so it stores these as temporary datasets in memory as Python objects using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes that depend on an temporary dataset have executed, the dataset is cleared and the Python garbage collector releases the memory.
 
-If you prefer to persist the preprocessed data, add the following to the end of `conf/base/catalog.yml` (If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste):
+If you prefer to save the preprocessed data to file, add the following to the end of `conf/base/catalog.yml` (If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste):
 
 ```yaml
 preprocessed_companies:
@@ -269,7 +269,7 @@ node(
 ```
 
 
-### Optional: persist the model input table
+### Optional: save the model input table
 
 If you want the model input table data to be saved to file (in `data/03_primary`) rather than used in memory, add an entry to `conf/base/catalog.yml`:
 

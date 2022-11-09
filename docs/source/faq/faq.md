@@ -263,4 +263,4 @@ exit
 
 ## How can I get my question answered?
 
-If your question isn't answered above, talk to the community on the [Kedro Slack channels](https://kedro-org.slack.com).
+If your question isn't answered above, talk to the community on the [Kedro Slack channels](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).

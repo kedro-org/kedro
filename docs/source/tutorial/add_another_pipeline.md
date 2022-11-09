@@ -171,7 +171,7 @@ By setting `versioned` to `true`, versioning is enabled for `regressor`. This me
 
 ### Test the pipelines
 
-You can now run the default pipeline, which executes the data processing and then data science pipelines in turn:
+You can now instruct Kedro to run the default pipeline, which automatically executes the data processing and then data science pipeline in turn. 
 
 ```bash
 kedro run
@@ -233,10 +233,11 @@ You should see output similar to the following:
 As you can see we successfully ran both the `data_processing` and `data_science` pipelines, generating a model and evaluating it.
 
 
-
 #### Slice a pipeline
 
-Sometimes you may want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
+When you created your project with `kedro new`, one of the files generated was `src/<project_name>/pipeline_registry.py` which constructs the `__default__` pipeline from every pipeline in the project, so you do not need to manually instruct Kedro to run each pipeline.
+
+However, there may be occasions when you want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
 
 You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
@@ -277,7 +278,7 @@ In many typical Kedro projects, a single (“main”) pipeline increases in comp
 Modular pipelines are easier to develop, test and maintain. They are reusable within the same codebase but also portable across projects via [micro-packaging](../nodes_and_pipelines/micro_packaging.md). This is a scalable way to use Kedro, and will change how you think about Kedro pipelines.
 
 ### Extend the project with namespacing and a modular pipeline
-We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline`.
+We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline` in order to test the model using different combinations of features.
 
 ``` {note}
 This is optional code so is **not** provided in the spaceflights starter. Unlike the rest of the tutorial, if you want to see this in action, you need to copy and paste the code as instructed.
@@ -388,7 +389,7 @@ After executing `kedro run`, you should see output as follows:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[11/02/22 10:41:06] WARNING  /Users/jo_stichbury/opt/anaconda3/envs/py38/lib/python3.8/site-packages/plotly/graph_objects/ warnings.py:109
+[11/02/22 10:41:06] WARNING  /Users/<username>/opt/anaconda3/envs/py38/lib/python3.8/site-packages/plotly/graph_objects/ warnings.py:109
                              __init__.py:288: DeprecationWarning: distutils Version classes are deprecated. Use
                              packaging.version instead.
                                if LooseVersion(ipywidgets.__version__) >= LooseVersion("7.0.0"):
@@ -402,7 +403,7 @@ After executing `kedro run`, you should see output as follows:
                     INFO     Loading data from 'shuttles' (ExcelDataSet)...                                            data_catalog.py:343
 [11/02/22 10:41:13] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) ->                        node.py:327
                              [preprocessed_shuttles]
-                    WARNING  /Users/jo_stichbury/Documents/kedro-projects/kedro-tutorial/src/kedro_tutorial/pipelines/data warnings.py:109
+                    WARNING  /Users/<username>/Documents/kedro-projects/kedro-tutorial/src/kedro_tutorial/pipelines/data warnings.py:109
                              _processing/nodes.py:19: FutureWarning: The default value of regex will change from True to
                              False in a future version. In addition, single character regular expressions will *not* be
                              treated as literal strings when regex=True.

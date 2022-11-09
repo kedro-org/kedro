@@ -54,7 +54,7 @@ The `autoreload` flag reflects changes to the project as they happen. For exampl
 
 ## Visualise layers
 
-By convention, a pipeline can be broken up into different layers according to how data is processed, which makes it easier to collaborate.
+By convention, a [pipeline can be broken up into different layers](../resources/glossary.md#layers-data-engineering-convention) according to how data is processed, which makes it easier to collaborate.
 
 For example, the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 

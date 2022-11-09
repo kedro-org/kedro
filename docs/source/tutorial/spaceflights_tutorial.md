@@ -59,10 +59,14 @@ When you build a Kedro project, you will typically follow a [standard developmen
     * Package the project for distribution
 
 
-### Source control with `git`
+### Optional: source control with `git`
 
-We recommend that you use `git` for source control. If you are unfamiliar with a typical `git` workflow but want to learn more, we suggest you look into [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
+You don't need to do this section for the tutorial, but you may want to familiarise yourself with the use of `git` for source control. 
 
+<details>
+<summary><b>Click to expand</b></summary>
+
+If you want to learn more about a typical `git` workflow, we suggest you look into [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
 Navigate to the project root directory and create a `git` repository on your machine (a local repository) for the project:
 
 ```bash
@@ -70,7 +74,7 @@ git init
 git remote add origin https://github.com/<your-repo>
 ```
 
-### Submit your changes to GitHub
+#### Submit your changes to GitHub
 
 If you work on a project as part of a team, you will share the `git` repository via GitHub, which stores a shared copy of the repository. You should periodically save your changes to your local repository and merge them into the GitHub repository.
 
@@ -97,3 +101,4 @@ git commit -m 'Create project template'
 # push changes to remote main
 git push origin main
 ```
+</details>

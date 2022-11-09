@@ -46,14 +46,18 @@ Kedro projects have a `requirements.txt` file to specify their dependencies and 
 The generic project template bundles some typical dependencies in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers differ slightly depending on your version of Kedro:
 
 ```text
+# code quality packages 
 black==22.1.0 # Used for formatting code with `kedro lint`
 flake8>=3.7.9, <5.0 # Used for linting code with `kedro lint`
 ipython==7.0 # Used for an IPython session with `kedro ipython`
 isort~=5.0 # Used for linting code with `kedro lint`
+nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
+
+# notebook tooling
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab~=3.0 # Used to open a Kedro-session in Jupyter Lab
-kedro~=0.18.3
-nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
+
+# Pytest + useful extensions
 pytest-cov~=3.0 # Produces test coverage reports
 pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with pytest
 pytest~=6.2 # Testing framework for Python code

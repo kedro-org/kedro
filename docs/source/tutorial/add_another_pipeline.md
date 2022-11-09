@@ -5,8 +5,8 @@ This section explains the following:
 * How to add a second Kedro pipeline for data science code that extends the default project pipeline
 * How to 'slice' the project and run just part of the default pipeline
 * How to visualise the default project pipeline
+* (Optional) How to make a [modular pipeline](../nodes_and_pipelines/modular_pipelines.md)
 * (Optional) How to specify the way the pipeline nodes are run: sequentially or in parallel
-* (Optional) How to make a modular pipeline
 
 
 ```{note}
@@ -26,7 +26,7 @@ Run the following command to create the `data_science` pipeline.
 kedro pipeline create data_science
 ```
 
-Add the following code to the `pipelines/data_science/nodes.py` file:
+Add the following code to the `src/kedro_tutorial/pipelines/data_science/nodes.py` file:
 
 
 <details>
@@ -119,7 +119,7 @@ More information about [parameters](../kedro_project_setup/configuration.md#para
 
 ### Assemble the data science pipeline
 
-To create a modular pipeline for the price prediction model, replace the contents of `pipelines/data_science/pipeline.py` with the following:
+To create a modular pipeline for the price prediction model, replace the contents of `src/kedro_tutorial/pipelines/data_science/pipeline.py` with the following:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -267,7 +267,7 @@ You should see the following:
 
 ![](../meta/images/pipeline_visualisation.png)
 
-To exit the visualisation, close the browser tab. To regain control of the terminal, enter `Ctrl+C` or `Cmd+C`.
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
 
 ## Optional: Modular pipelines

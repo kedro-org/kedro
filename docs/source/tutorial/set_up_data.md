@@ -132,4 +132,4 @@ You can find further information about [how to add support for custom datasets](
 
 ### Supported data locations
 
-Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read data from a variety of data stores including local file systems, network file systems, cloud object stores and HDFS.
+Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read data from a variety of data stores including local file systems, network file systems, HDFS, and all of the widely-used cloud object stores.

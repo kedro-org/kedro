@@ -27,7 +27,9 @@ kedro pipeline create data_processing
 
 This command generates all the files you need for the pipeline:
 
-* Two python files: `nodes.py` (for the node functions that form the data processing) and `pipeline.py` (to build the pipeline) within `src/kedro_tutorial/pipelines/data_processing` pipeline
+* Two python files within `src/kedro_tutorial/pipelines/data_processing`
+    * `nodes.py` (for the node functions that form the data processing) 
+    * `pipeline.py` (to build the pipeline) 
 * A yaml file: `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
 * A folder for test code: `src/tests/pipelines/data_processing`
 * `__init__.py` files in the required folders to ensure that Python can import the pipeline
@@ -104,7 +106,7 @@ from kedro.pipeline import Pipeline, node, pipeline
 from .nodes import preprocess_companies, preprocess_shuttles
 ```
 
-Next, add the following to `pipelines/data_processing/pipeline.py`, so the `create_pipeline()` function is as follows:
+Next, add the following to `src/kedro_tutorial/pipelines/data_processing/pipeline.py`, so the `create_pipeline()` function is as follows:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -220,7 +222,7 @@ The next step in the tutorial is to add another node for a function that joins t
 * Kedro uses the `preprocessed_shuttles`, `preprocessed_companies`, and `reviews` datasets as inputs
 * Kedro saves the output as a dataset called `model_input_table`
 
-First, add the `create_model_input_table()` function from the snippet below to `pipelines/data_processing/nodes.py`.
+First, add the `create_model_input_table()` function from the snippet below to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -249,7 +251,7 @@ def create_model_input_table(
 
 </details>
 
-Add an import statement for `create_model_input_table` at the top of `pipelines/data_processing/pipeline.py`:
+Add an import statement for `create_model_input_table` at the top of `src/kedro_tutorial/pipelines/data_processing/pipeline.py`:
 
 ```python
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles

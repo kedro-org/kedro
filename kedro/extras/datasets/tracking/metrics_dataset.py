@@ -27,7 +27,6 @@ class MetricsDataSet(JSONDataSet):
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>
-        >>> # data_set = MetricsDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = MetricsDataSet(filepath="test.json")
         >>> data_set.save(data)
 

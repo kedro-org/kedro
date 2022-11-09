@@ -57,13 +57,11 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = PickleDataSet(filepath="gcs://bucket/test.pkl")
         >>> data_set = PickleDataSet(filepath="test.pkl", backend="pickle")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
         >>>
-        >>> # Add "compress_pickle[lz4]" to requirements.txt
         >>> data_set = PickleDataSet(filepath="test.pickle.lz4",
         >>>                          backend="compress_pickle",
         >>>                          load_args={"compression":"lz4"},

@@ -37,7 +37,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         >>>
 
 
-    Example:
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.api import APIDataSet

@@ -43,7 +43,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
         >>>
 
 
-    Example:
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.tensorflow import TensorFlowModelDataset

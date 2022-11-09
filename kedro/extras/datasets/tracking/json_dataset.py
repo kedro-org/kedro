@@ -28,11 +28,9 @@ class JSONDataSet(JDS):
         >>> cars:
         >>>   type: tracking.JSONDataSet
         >>>   filepath: data/09_tracking/cars.json
-        >>>
 
-
-        Example:
-        ::
+    Example using Python API:
+    ::
 
         >>> from kedro.extras.datasets.tracking import JSONDataSet
         >>>

@@ -35,8 +35,8 @@ class YAMLDataSet(AbstractVersionedDataSet[Dict, Dict]):
         >>> cars:
         >>>   type: yaml.YAMLDataSet
         >>>   filepath: cars.yaml
-        >>>
-    Example:
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.yaml import YAMLDataSet

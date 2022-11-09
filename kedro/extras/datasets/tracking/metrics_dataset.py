@@ -31,9 +31,8 @@ Example adding a catalog entry with
         >>>   type: metrics.MetricsDataSet
         >>>   filepath: data/09_tracking/cars.json
 
-
-        Example:
-        ::
+    Example using Python API:
+    ::
 
         >>> from kedro.extras.datasets.tracking import MetricsDataSet
         >>>

@@ -38,7 +38,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         >>>
 
 
-        Example (AWS S3):
+        Example using Python API (AWS S3):
         ::
 
             >>> from kedro.extras.datasets.dask import ParquetDataSet

@@ -312,9 +312,10 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 dbutils = None
                 try:
                     dbutils = _get_dbutils(self._get_spark())
-                except AttributeError: 
-                    # DataBricks is known to raise AttributeError when called on unsupported environment
-                    pass 
+                except AttributeError:
+                    # Databricks is known to raise AttributeError when called
+                    # on an unsupported environment
+                    pass
                 if dbutils:
                     glob_function = partial(_dbfs_glob, dbutils=dbutils)
                     exists_function = partial(_dbfs_exists, dbutils=dbutils)

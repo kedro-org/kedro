@@ -67,7 +67,7 @@ A machine learning model can use the Iris dataset to illustrate classification (
 
 ### Create the example project
 
-The first step is to create the Kedro project using a starter to add in the example code and data. Feel free to name your project as you like, but here we will assume the project's name is `Get started`.
+The first step is to create the Kedro project using a starter to add in the example code and data. Feel free to name your project as you like, but here we will assume the project's name is `get started`.
 
 ```bash
 kedro new --starter=pandas-iris
@@ -78,7 +78,7 @@ kedro new --starter=pandas-iris
 Once you have created the project, to run project-specific Kedro commands, you must navigate to the directory in which it has been created and install the project's dependencies:
 
 ```bash
-cd getting-started
+cd get-started
 pip install -r src/requirements.txt
 ```
 

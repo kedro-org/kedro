@@ -1,5 +1,8 @@
 # Spaceflights tutorial FAQs
 
+```{note}
+If you can't find the answer you need here, [ask the Kedro community for help](spaceflights_tutorial.md#get-help)!
+```
 
 ## How do I resolve these common errors?
 

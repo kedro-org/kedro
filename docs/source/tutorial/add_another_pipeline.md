@@ -1,5 +1,9 @@
 # Create a data science pipeline
 
+```{note}
+Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you run into problems, or [ask the community for help](spaceflights_tutorial.md#get-help) if you need it!
+```
+
 This section explains the following:
 
 * How to add a second Kedro pipeline for data science code that extends the default project pipeline

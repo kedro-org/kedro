@@ -1,5 +1,9 @@
 # Set up the data
 
+```{note}
+Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you run into problems, or [ask the community for help](spaceflights_tutorial.md#get-help) if you need it!
+```
+
 In this section, we discuss the data setup phase, which is the second part of the standard development workflow. The steps are as follows:
 
 * Add datasets to your `data` folder, according to [data engineering convention](../faq/faq.md#what-is-data-engineering-convention)

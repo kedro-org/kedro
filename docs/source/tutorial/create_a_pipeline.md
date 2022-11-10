@@ -10,10 +10,9 @@ This section explains the following:
 If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files described.
 ```
 
-
-
-
 ## Data processing pipeline
+
+You will use the data to train a model to predict the price of shuttle hire, but before you get to train the model, you need to prepare the data for model building by combining the files to create a model input table.
 
 You previously registered the raw datasets for your Kedro project, so you can now create nodes to preprocess two of the datasets, `companies.csv`, and `shuttles.xlsx`, to prepare the data for modelling.
 
@@ -324,7 +323,7 @@ You should see output similar to the following:
 This is an excellent place to take a breath and summarise what you have done so far.
 
 * Created a new project and installed dependencies
-* Added three datasets to the project and set up the Kedro Data Catalog to accept it
+* Added three datasets to the project and set up the Kedro Data Catalog
 * Created a data processing pipeline with three nodes to transform and merge the input datasets and create a model input table
 
 The next step is to create the data science pipeline for spaceflight price prediction.

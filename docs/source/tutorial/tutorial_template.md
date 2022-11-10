@@ -63,7 +63,7 @@ pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with p
 pytest~=6.2 # Testing framework for Python code
 ```
 
-You can learn more about [project dependencies](../kedro_project_setup/dependencies.md) in the Kedro project documentation.
+You can learn more about [project dependencies](../kedro_project_setup/dependencies.md) in the Kedro documentation.
 
 ### Add dependencies to the project
 

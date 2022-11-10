@@ -112,7 +112,7 @@ You can share a Kedro-Viz visualisation as a JSON file:
 kedro viz --save-file my_shareable_pipeline.json
 ```
 
-This command will save a visualisation of your primary `__default__` pipeline as a JSON file called `my_shareable_pipeline.json`.
+This command will save a visualisation of the `__default__` pipeline as a JSON file called `my_shareable_pipeline.json`.
 
 To visualise the JSON file:
 

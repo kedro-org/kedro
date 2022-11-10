@@ -271,7 +271,7 @@ You should see the following:
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
 
-## Optional: Modular pipelines
+## Optional: modular pipelines
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../nodes_and_pipelines/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs/outputs/parameters.
 
@@ -381,7 +381,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 </details>
 
-
+<br/>
 
 After executing `kedro run`, you should see output as follows:
 
@@ -526,7 +526,7 @@ So let's go through in detail how those namespaces affect our catalog references
   - `X_train` turns into `candidate_modelling_pipeline.X_train`
   - `X_test` turns into `candidate_modelling_pipeline.X_test`, and so on 
   
-However, `model_input_table` does not get parameterised as it was *frozen* in the pipeline wrapper. So any datasets that you want to share between instances you need to lift outside their scope of the wrapper.
+However, `model_input_table` does not get parameterised as it needs to be shared between instances, so is frozen outside the scope of the namespace wrappers.
 
 This renders as follows using `kedro viz` (hover over the datasets to see their full path) :
 

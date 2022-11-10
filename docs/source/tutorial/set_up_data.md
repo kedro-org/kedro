@@ -13,22 +13,17 @@ If you are using the tutorial created by the spaceflights starter, you can omit 
 
 ## Download datasets
 
-The spaceflights tutorial makes use of three fictional datasets of companies shuttling customers to the Moon and back:
+The spaceflights tutorial makes use of three fictional datasets of companies shuttling customers to the Moon and back. The data comes in two different formats: `.csv` and `.xlsx`:
 
 * `companies.csv` contains data about space travel companies, such as their location, fleet count and rating
 * `reviews.csv` is a set of reviews from customers for categories, such as comfort and price
 * `shuttles.xlsx` is a set of attributes for spacecraft across the fleet, such as their engine type and passenger capacity
-
-You will use the data to train a model to predict the price of shuttle hire. However, before you get to train the model, you will need to prepare the data for model building by combining the files to create a model input table.
-
-The data comes in two different formats: `.csv` and `.xlsx`. Kedro supports a number of different data types, and those supported can be found in the API documentation.
 
 Download and save the files to the `data/01_raw` folder of your project:
 
 * [companies.csv](https://kedro-org.github.io/kedro/companies.csv)
 * [reviews.csv](https://kedro-org.github.io/kedro/reviews.csv)
 * [shuttles.xlsx](https://kedro-org.github.io/kedro/shuttles.xlsx)
-
 
 ## Register the datasets
 

@@ -5,7 +5,7 @@ In this tutorial, we construct nodes and pipelines for a price-prediction model 
 In the text, we assume you have started with an empty Kedro project and we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete.
 
 ```{note}
-You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) you can follow along without copy/pasting.
+You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) so you can follow along without copy/pasting.
 ```
 
 ## Scenario
@@ -25,7 +25,7 @@ If you hit an issue with the tutorial, the Kedro community can help!
 
 Things you can do:
 
-* check the [Spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already
+* check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already
 * use the spaceflights starter to [create a new, separate project which contains working example code](./tutorial_template.md#create-a-new-project), and compare that project with your own
 * search the [archive of Discord discussions](https://linen-discord.kedro.org/)
 * use the [#questions channel](https://kedro-org.slack.com/archives/C03RKP2LW64) on our Slack channel (which replaces our Discord server) to ask the community for help

@@ -31,7 +31,7 @@ Feel free to name your project as you like, but this guide will assume the proje
 
 In the domain of experiment tracking, each pipeline run is considered a session. A session store records all related metadata for each pipeline run, from logged metrics to other run-related data such as timestamp, git username and branch. The session store is a [SQLite](https://www.sqlite.org/index.html) database that is generated during your first pipeline run after it has been set up in your project.
 
-To set up the session store, go to the `src/settings.py` file and add the following:
+To set up the session store, go to the `src/kedro-experiment-tracking-tutorial/settings.py` file and add the following:
 
 ```python
 from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore
@@ -43,7 +43,7 @@ SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data")}
 
 This will specify the creation of the `SQLiteStore` under the `/data` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin.
 
-Please ensure that your installed version of Kedro-Viz is at least version 4.1.1 onwards. This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-tracking-datasets) or [set up your nodes and pipelines to log metrics](#set-up-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable.
+Please ensure that your installed version of Kedro-Viz is at least version 4.1.1 onwards. This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-tracking-datasets) or [set up your nodes and pipelines to log metrics](#set-up-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable, but both should be completed to get a working experiment tracking setup. 
 
 ## Set up tracking datasets
 

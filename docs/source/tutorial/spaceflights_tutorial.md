@@ -14,8 +14,12 @@ You may prefer to get up and running more swiftly. We also provide the example a
 
 ***Project***: *You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight.*
 
-![](../meta/images/moon-rocket.gif)
 
+![](../meta/images/moon-rocket.png)
+
+Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="https://unsplash.com/s/photos/spaceship">Unsplash</a>
+  
+  
 ## Get help
 If you hit an issue with the tutorial, the Kedro community can help!
 

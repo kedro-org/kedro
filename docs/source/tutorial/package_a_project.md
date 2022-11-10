@@ -1,6 +1,6 @@
 # Package an entire Kedro project
 
-This section explains how to build your project documentation, and how to bundle your entire project into a Python package. 
+This section explains how to build your project documentation, and how to bundle your entire project into a Python package.
 
 Kedro also has an advanced feature which supports packaging on a pipeline level allowing you share and reuse pipelines across projects! To read more about this please look at the [section on micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 

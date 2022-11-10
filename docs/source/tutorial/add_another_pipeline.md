@@ -175,7 +175,7 @@ By setting `versioned` to `true`, versioning is enabled for `regressor`. This me
 
 ### Test the pipelines
 
-You can now instruct Kedro to run the default pipeline, which automatically executes the data processing and then data science pipeline in turn. 
+You can now instruct Kedro to run the default pipeline, which automatically executes the data processing and then data science pipeline in turn.
 
 ```bash
 kedro run
@@ -524,12 +524,12 @@ So let's go through in detail how those namespaces affect our catalog references
   - `params:model_options` turns into `active_modelling_pipeline.params:model_options`
   - `X_train` turns into `active_modelling_pipeline.X_train`
   - `X_test` turns into `active_modelling_pipeline.X_test`, and so on
-  
+
 - There are a separate set of parameters for `ds_pipeline_2` with the `candidate_modelling_pipeline` prefix:
   - `params:model_options` turns into `candidate_modelling_pipeline.params:model_options`
   - `X_train` turns into `candidate_modelling_pipeline.X_train`
-  - `X_test` turns into `candidate_modelling_pipeline.X_test`, and so on 
-  
+  - `X_test` turns into `candidate_modelling_pipeline.X_test`, and so on
+
 However, `model_input_table` does not get parameterised as it needs to be shared between instances, so is frozen outside the scope of the namespace wrappers.
 
 This renders as follows using `kedro viz` (hover over the datasets to see their full path) :

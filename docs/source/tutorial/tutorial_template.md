@@ -49,7 +49,7 @@ Kedro projects have a `requirements.txt` file to specify their dependencies and 
 The generic project template bundles some typical dependencies in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers differ slightly depending on your version of Kedro:
 
 ```text
-# code quality packages 
+# code quality packages
 black==22.1.0 # Used for formatting code with `kedro lint`
 flake8>=3.7.9, <5.0 # Used for linting code with `kedro lint`
 ipython==7.0 # Used for an IPython session with `kedro ipython`

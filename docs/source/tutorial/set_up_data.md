@@ -54,7 +54,7 @@ reviews:
 
 ### Register `xlsx` data
 
-Now register the `xlsx` dataset by adding this snippet to the end of the `conf/base/catalog.yml` file, and save it:
+Now register the `xlsx` dataset by adding this snippet to the end of the `conf/base/catalog.yml` file, and saving it:
 
 ```yaml
 shuttles:

@@ -1,20 +1,19 @@
 # What is Kedro?
 
-Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It borrows concepts from software engineering and applies them to machine-learning code; applied concepts include modularity, separation of concerns and versioning. Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
+Kedro is an open-source Python framework to create reproducible, maintainable and modular data science code. It borrows concepts from software engineering and applies them to data science projects to help you build production-ready data pipelines that follow best practices for modularity, separation of concerns and versioning. 
+
+Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
 
 For the source code, take a look at the [Kedro repository on Github](https://github.com/kedro-org/kedro).
 
 ## Learn how to use Kedro
 
-In the next few chapters, you will learn how to [install Kedro](../get_started/prerequisites.md) and set up your own production-ready data pipelines.
+In the next few chapters, you will learn how to [install Kedro](../get_started/prerequisites.md) and learn some of the key [Kedro concepts](../get_started/kedro_concepts.md).
 
-Once you are set up, we suggest working through our examples, including:
+- The first project you create illustrates the basics of the [Kedro project template](../get_started/example_project.md) using the Iris dataset
+- You can then review the [spaceflights tutorial](../tutorial/tutorial_template.md) for a hands-on experience at building a project with Kedro.
 
-- A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](../get_started/hello_kedro.md)
-- An [introduction to the project template](../get_started/example_project.md) using the Iris dataset
-- A more detailed [spaceflights tutorial](../tutorial/tutorial_template.md) to give you hands-on experience
-
-We also recommend the [frequently asked questions](../faq/faq.md) and the [API reference documentation](/kedro) for additional information.
+We also recommend the [glossary](../resources/glossary.md) and the [API reference documentation](/kedro) for additional information.
 
 ## Assumptions
 

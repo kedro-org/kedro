@@ -7,7 +7,7 @@ Kedro starters provide pre-defined example code and configuration that can be re
 * To add deployment scripts and CI/CD setup for your targeted infrastructure
 
 
-A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../extend_kedro/create_kedro_starters.md).
+A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).
 
 ## How to use Kedro starters
 
@@ -45,9 +45,9 @@ kedro starter list
 
 The Kedro team maintains the following starters to bootstrap new Kedro projects:
 
-* [Alias `astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): The [Kedro Iris dataset example project](../get_started/example_project.md) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
+* [Alias `astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): The [Kedro Iris dataset example project](../get_started/new_project.md) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
 * [Alias `standalone-datacatalog`](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog): A minimum setup to use the traditional [Iris dataset](https://www.kaggle.com/uciml/iris) with Kedro's [`DataCatalog`](../data/data_catalog.md), which is a core component of Kedro. This starter is of use in the exploratory phase of a project. For more information, read the guide to [standalone use of the `DataCatalog`](../get_started/standalone_use_of_datacatalog.md). This starter was formerly known as `mini-kedro`.
-* [Alias `pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris): The [Kedro Iris dataset example project](./example_project.md)
+* [Alias `pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris): The [Kedro Iris dataset example project](../get_started/new_project.md)
 * [Alias `pyspark-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../tools_integration/pyspark.md)
 * [Alias `pyspark`](https://github.com/kedro-org/kedro-starters/tree/main/pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../tools_integration/pyspark.md)
 * [Alias `spaceflights`](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights): The [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) example code
@@ -67,9 +67,9 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 ## Use a starter with a configuration file
 
-By default, when you create a new project using a starter, `kedro new` asks you to enter the `project_name`, which it uses to set the `repo_name` and `python_package` name. This is the same behavior as when you [create a new empty project](./new_project.md#create-a-new-empty-project)
+By default, when you create a new project using a starter, `kedro new` asks you to enter the `project_name`, which it uses to set the `repo_name` and `python_package` name. This is the same behavior as when you [create a new empty project](../get_started/new_project.md#create-a-new-empty-project)
 
-However, Kedro also allows you to [specify a configuration file](./new_project.md#create-a-new-project-from-a-configuration-file) when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
+However, Kedro also allows you to [specify a configuration file](../get_started/new_project.md#create-a-new-project-from-a-configuration-file) when you create a project using a Kedro starter. Use the `--config` flag alongside the starter:
 
 ```bash
 kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark
@@ -169,5 +169,5 @@ Here is the layout of the project as a Cookiecutter template:
 ```
 
 ```{note}
-You can [add an alias by creating a plugin using `kedro.starters` entry point](./plugins.md#extend-starter-aliases), which will allows you to do `kedro new --starter=your_starters` and shows up on shows up on `kedro starter list`.
+You can [add an alias by creating a plugin using `kedro.starters` entry point](../extend_kedro/plugins.md#extend-starter-aliases), which will allows you to do `kedro new --starter=your_starters` and shows up on shows up on `kedro starter list`.
 ```

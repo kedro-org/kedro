@@ -54,7 +54,7 @@ kedro new --config <path>/config.yml
 
 ## Create a new project containing example code
 
-You can use a [Kedro Starter](./starters.md) to create a project containing template code, to run as-is or to adapt and extend. 
+You can use a [Kedro Starter](../kedro_project_setup/starters.md) to create a project containing template code, to run as-is or to adapt and extend. 
 
 To illustrate, we will create a Kedro project with example code based on the familiar [Iris dataset](https://www.kaggle.com/uciml/iris).
 

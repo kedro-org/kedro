@@ -62,7 +62,6 @@ Welcome to Kedro's documentation!
    get_started/install
    get_started/kedro_concepts
    get_started/new_project
-   get_started/starters
    get_started/standalone_use_of_datacatalog
 
 .. toctree::
@@ -90,6 +89,7 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Kedro project setup
 
+   kedro_project_setup/starters
    kedro_project_setup/dependencies
    kedro_project_setup/configuration
    kedro_project_setup/session
@@ -121,7 +121,6 @@ Welcome to Kedro's documentation!
    extend_kedro/common_use_cases
    extend_kedro/custom_datasets
    extend_kedro/plugins
-   extend_kedro/create_kedro_starters
 
 .. toctree::
    :maxdepth: 2

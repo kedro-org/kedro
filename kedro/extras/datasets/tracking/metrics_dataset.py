@@ -20,14 +20,24 @@ class MetricsDataSet(JSONDataSet):
     ``MetricsDataSet`` is part of Kedro Experiment Tracking. The dataset is write-only,
     it is versioned by default and only takes metrics of numeric values.
 
-        Example:
-        ::
+Example adding a catalog entry with
+    `YAML API
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> cars:
+        >>>   type: metrics.MetricsDataSet
+        >>>   filepath: data/09_tracking/cars.json
+
+    Example using Python API:
+    ::
 
         >>> from kedro.extras.datasets.tracking import MetricsDataSet
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>
-        >>> # data_set = MetricsDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = MetricsDataSet(filepath="test.json")
         >>> data_set.save(data)
 

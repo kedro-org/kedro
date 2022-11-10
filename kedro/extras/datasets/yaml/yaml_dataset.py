@@ -25,14 +25,24 @@ class YAMLDataSet(AbstractVersionedDataSet[Dict, Dict]):
     """``YAMLDataSet`` loads/saves data from/to a YAML file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> cars:
+        >>>   type: yaml.YAMLDataSet
+        >>>   filepath: cars.yaml
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.yaml import YAMLDataSet
         >>>
         >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
         >>>
-        >>> # data_set = YAMLDataSet(filepath="gcs://bucket/test.yaml")
         >>> data_set = YAMLDataSet(filepath="test.yaml")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

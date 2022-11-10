@@ -23,14 +23,20 @@ In your terminal window, navigate to the folder you want to store the project an
 kedro new
 ```
 
-```{note}
-Alternatively, if you want to include a complete set of working example code within the project, generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) by typing `kedro new --starter=spaceflights`.
+Alternatively, if you want to include a complete set of working example code within the project, generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+
+```bash
+kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. When Kedro has created your project, you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
+For either option, when prompted for a project name, enter `Kedro Tutorial`. When Kedro has created your project, you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 
 ```bash
 cd kedro-tutorial
+```
+
+```{note}
+The first time you type a `kedro` command in your new project, you will be asked whether you wish to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask you again.
 ```
 
 ## Project dependencies
@@ -40,20 +46,24 @@ Kedro projects have a `requirements.txt` file to specify their dependencies and 
 The generic project template bundles some typical dependencies in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers differ slightly depending on your version of Kedro:
 
 ```text
+# code quality packages 
 black==22.1.0 # Used for formatting code with `kedro lint`
 flake8>=3.7.9, <5.0 # Used for linting code with `kedro lint`
 ipython==7.0 # Used for an IPython session with `kedro ipython`
 isort~=5.0 # Used for linting code with `kedro lint`
+nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
+
+# notebook tooling
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab~=3.0 # Used to open a Kedro-session in Jupyter Lab
-kedro~=0.18.3
-nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
+
+# Pytest + useful extensions
 pytest-cov~=3.0 # Produces test coverage reports
 pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with pytest
 pytest~=6.2 # Testing framework for Python code
 ```
 
-You can learn more about [project dependencies](../kedro_project_setup/dependencies.md) in the Kedro project documentation.
+You can learn more about [project dependencies](../kedro_project_setup/dependencies.md) in the Kedro documentation.
 
 ### Add dependencies to the project
 

@@ -1,6 +1,6 @@
 # Installation prerequisites
 
-Kedro supports macOS, Linux and Windows. If you encounter any problems on these platforms, please check the [Kedro Slack channels](https://kedro-org.slack.com).
+Kedro supports macOS, Linux and Windows. If you encounter any problems on these platforms, please check the [frequently asked questions](../faq/faq.md), the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
 
 If you are a Windows user, you will need to install [`git`](https://git-scm.com/) onto your machine if you do not have it. To confirm whether you have it installed:
 
@@ -17,7 +17,7 @@ We recommend that you create a new Python virtual environment for *each* new Ked
 
 If you don't already have it, you should [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version), which comes bundled with a package and environment manager called `conda`.
 
-> [Read more about Python Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/).
+> [Read more about Python virtual environments](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 
 
 Depending on your preferred Python installation, you can also create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`. Further information about these can be found in the [FAQ](../faq/faq.md)

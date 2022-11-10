@@ -1,6 +1,6 @@
-# Package a Kedro project
+# Package an entire Kedro project
 
-This section explains how to build your project documentation, and how to bundle your project into a Python package.
+This section explains how to build your project documentation, and how to bundle your entire project into a Python package. If you want to include just a part of your project, you should instead take a look at the [documentation section on micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 
 
 ## Add documentation to your project
@@ -70,8 +70,8 @@ This is equivalent to running `kedro run`, and you can provide all the parameter
 
 ### Docker, Airflow and other deployment targets
 
-There are several methods to deploy packaged pipelines via 1st party plugins and associated documentation:
+There are various methods to deploy packaged pipelines via Kedro plugins:
 
 * [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
 * [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.
-* The [Deployment guide](../deployment/deployment_guide) touches on other deployment targets such as AWS Batch and Prefect.
+* The [Deployment guide](../deployment/deployment_guide) touches on other deployment targets such as AWS Batch and Prefect, and there is a [range of third-party plugins for deployment](extend_kedro/plugins.md#community-developed-plugins).

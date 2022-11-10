@@ -5,9 +5,13 @@ This section explains the following:
 * How to add a second Kedro pipeline for data science code that extends the default project pipeline
 * How to 'slice' the project and run just part of the default pipeline
 * How to visualise the default project pipeline
+* (Optional) How to make a [modular pipeline](../nodes_and_pipelines/modular_pipelines.md)
 * (Optional) How to specify the way the pipeline nodes are run: sequentially or in parallel
-* (Optional) How to make a modular pipeline
 
+
+```{note}
+If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files described.
+```
 
 ## Data science pipeline
 
@@ -15,7 +19,7 @@ The data science pipeline uses the [`LinearRegression`](https://scikit-learn.org
 
 ### Generate a new pipeline template
 
-Run the following command to create the `data_science` pipeline. If you are using the tutorial created by the spaceflights starter, you can omit this step:
+Run the following command to create the `data_science` pipeline.
 
 
 ```bash
@@ -23,8 +27,6 @@ kedro pipeline create data_science
 ```
 
 Add the following code to the `src/kedro_tutorial/pipelines/data_science/nodes.py` file:
-
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the code for the three nodes.
 
 
 <details>
@@ -93,7 +95,6 @@ def evaluate_model(
 ### Configure the input parameters
 
 You now need to add some parameters that are used by the `DataCatalog` when the pipeline executes.
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste, but it's worth reviewing the code for the three nodes.
 
 Add the following to `conf/base/parameters/data_science.yml`:
 
@@ -119,8 +120,6 @@ More information about [parameters](../kedro_project_setup/configuration.md#para
 ### Assemble the data science pipeline
 
 To create a modular pipeline for the price prediction model, replace the contents of `src/kedro_tutorial/pipelines/data_science/pipeline.py` with the following:
-
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -161,8 +160,6 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
 
-> If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste.
-
 ```yaml
 regressor:
   type: pickle.PickleDataSet
@@ -174,7 +171,7 @@ By setting `versioned` to `true`, versioning is enabled for `regressor`. This me
 
 ### Test the pipelines
 
-You can now run the default pipeline, which executes the data processing and then data science pipelines in turn:
+You can now instruct Kedro to run the default pipeline, which automatically executes the data processing and then data science pipeline in turn. 
 
 ```bash
 kedro run
@@ -233,14 +230,23 @@ You should see output similar to the following:
 
 </details>
 
+As you can see we successfully ran both the `data_processing` and `data_science` pipelines, generating a model and evaluating it.
+
+
 #### Slice a pipeline
 
-Sometimes you may want to run just part of the default pipeline. For example, you may could skip data processing execution and run only the data science pipeline to tune the hyperparameters of the price prediction model.
+When you created your project with `kedro new`, one of the files generated was `src/<project_name>/pipeline_registry.py` which constructs the `__default__` pipeline from every pipeline in the project, so you do not need to manually instruct Kedro to run each pipeline.
+
+However, there may be occasions when you want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
 
 You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
 ```bash
 kedro run --pipeline=data_science
+```
+
+``` {note}
+This will only work if you have persisted the input to the `data_science` pipeline, which is the `model_input_table`. This was an optional step in the previous chapter.
 ```
 
 There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run).
@@ -262,19 +268,22 @@ You should see the following:
 
 ![](../meta/images/pipeline_visualisation.png)
 
-To exit the visualisation, close the browser tab. To regain control of the terminal, enter `Ctrl+C` or `Cmd+C`.
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
 
-## Optional: Modular pipelines
+## Optional: modular pipelines
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../nodes_and_pipelines/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs/outputs/parameters.
 
 Modular pipelines are easier to develop, test and maintain. They are reusable within the same codebase but also portable across projects via [micro-packaging](../nodes_and_pipelines/micro_packaging.md). This is a scalable way to use Kedro, and will change how you think about Kedro pipelines.
 
 ### Extend the project with namespacing and a modular pipeline
-We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline`.
+We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline` in order to test the model using different combinations of features.
 
-> This is optional code so is **not** provided in the spaceflights starter. Unlike the rest of the tutorial, if you want to see this in action, you need to copy and paste the code as instructed.
+``` {note}
+This is optional code so is **not** provided in the spaceflights starter. Unlike the rest of the tutorial, if you want to see this in action, you need to copy and paste the code as instructed.
+```
+
 
 1. Update your catalog to add namespaces to the outputs of each instance. Replace the `regressor` key with the following two new dataset keys in the `conf/base/catalog.yml` file:
 
@@ -372,14 +381,15 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 </details>
 
-You should see output as follows:
+<br/>
+
+After executing `kedro run`, you should see output as follows:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
-
 ```bash
-[11/02/22 10:41:06] WARNING  /Users/jo_stichbury/opt/anaconda3/envs/py38/lib/python3.8/site-packages/plotly/graph_objects/ warnings.py:109
+[11/02/22 10:41:06] WARNING  /Users/<username>/opt/anaconda3/envs/py38/lib/python3.8/site-packages/plotly/graph_objects/ warnings.py:109
                              __init__.py:288: DeprecationWarning: distutils Version classes are deprecated. Use
                              packaging.version instead.
                                if LooseVersion(ipywidgets.__version__) >= LooseVersion("7.0.0"):
@@ -393,7 +403,7 @@ You should see output as follows:
                     INFO     Loading data from 'shuttles' (ExcelDataSet)...                                            data_catalog.py:343
 [11/02/22 10:41:13] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) ->                        node.py:327
                              [preprocessed_shuttles]
-                    WARNING  /Users/jo_stichbury/Documents/kedro-projects/kedro-tutorial/src/kedro_tutorial/pipelines/data warnings.py:109
+                    WARNING  /Users/<username>/Documents/kedro-projects/kedro-tutorial/src/kedro_tutorial/pipelines/data warnings.py:109
                              _processing/nodes.py:19: FutureWarning: The default value of regex will change from True to
                              False in a future version. In addition, single character regular expressions will *not* be
                              treated as literal strings when regex=True.
@@ -502,10 +512,23 @@ ds_pipeline_2 = pipeline(
 )
 ```
 
-We instantiate the template_pipeline twice but pass in different parameters. The `pipeline_instance` variable is our template pipeline, `ds_pipeline_1` and `ds_pipeline_2` are our parameterised instantiations.
+We instantiate the template_pipeline twice but pass in different parameters. The `pipeline_instance` variable is the template pipeline, and `ds_pipeline_1` and `ds_pipeline_2` are the two separately parameterised instantiations.
 
+So let's go through in detail how those namespaces affect our catalog references:
 
-This renders as follows:
+- All `inputs` and `outputs` within the nodes of our `ds_pipeline_1` have the `active_modelling_pipeline` prefix:
+  - `params:model_options` turns into `active_modelling_pipeline.params:model_options`
+  - `X_train` turns into `active_modelling_pipeline.X_train`
+  - `X_test` turns into `active_modelling_pipeline.X_test`, and so on
+  
+- There are a separate set of parameters for `ds_pipeline_2` with the `candidate_modelling_pipeline` prefix:
+  - `params:model_options` turns into `candidate_modelling_pipeline.params:model_options`
+  - `X_train` turns into `candidate_modelling_pipeline.X_train`
+  - `X_test` turns into `candidate_modelling_pipeline.X_test`, and so on 
+  
+However, `model_input_table` does not get parameterised as it needs to be shared between instances, so is frozen outside the scope of the namespace wrappers.
+
+This renders as follows using `kedro viz` (hover over the datasets to see their full path) :
 
 ![modular_ds](../meta/images/modular_ds.gif)
 

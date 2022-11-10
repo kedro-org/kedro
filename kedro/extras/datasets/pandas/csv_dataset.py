@@ -52,8 +52,6 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         >>>   type: pandas.CSVDataSet
         >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
         >>>   credentials: dev_s3
-        >>>
-
 
     Example using Python API:
     ::
@@ -64,7 +62,6 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = CSVDataSet(filepath="gcs://bucket/test.csv")
         >>> data_set = CSVDataSet(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

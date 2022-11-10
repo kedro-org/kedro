@@ -3,8 +3,9 @@
 
 ## How do I resolve these common errors?
 
-### Data Catalog setup
-You're [testing whether Kedro can load the companies or reviews data](./set_up_data.md#test-that-kedro-can-load-the-csv-data) and see the following:
+### DataSet errors
+#### DataSetError: Failed while loading data from data set
+You're [testing whether Kedro can load the raw test data](./set_up_data.md#test-that-kedro-can-load-the-csv-data) and see the following:
 
 ```python
 DataSetError: Failed while loading data from data set
@@ -12,23 +13,34 @@ CSVDataSet(filepath=...).
 [Errno 2] No such file or directory: '.../companies.csv'
 ```
 
+or a similar error for the `shuttles` or `reviews` data.
+
 Have you downloaded [the three sample data files](./set_up_data.md#download-datasets) and stored them in the `data/raw` folder?
 
-Or maybe you see the following:
+#### DataSetNotFoundError: DataSet not found in the catalog
+
+Do you see the following for one of the raw datasets, make sure you have saved `catalog.yml`?
 
 ```python
 DataSetNotFoundError: DataSet 'companies' not found in the catalog
 ```
 
-Make sure you have saved `catalog.yml`. Call `exit()` within the ipython session and restart `kedro ipython`. Then try again.
+Call `exit()` within the IPython session and restart `kedro ipython` (or type `@kedro_reload` into the IPython console to reload Kedro into the session without restarting). Then try again.
 
-You're [testing whether Kedro can load the shuttles data](./set_up_data.md#test-that-kedro-can-load-the-csv-data) and see the following:
 
-```python
-DataSetNotFoundError: DataSet 'shuttles' not found in the catalog
+#### DataSetError: An exception occurred when parsing config for DataSet
+
+Are you seeing a message saying that an exception occurred?
+
+```bash
+DataSetError: An exception occurred when parsing config for DataSet 
+'data_processing.preprocessed_companies':
+Object 'ParquetDataSet' cannot be loaded from 'kedro.extras.datasets.pandas'. Please see the 
+documentation on how to install relevant dependencies for kedro.extras.datasets.pandas.ParquetDataSet:
+https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html
 ```
 
-Make sure you have saved `catalog.yml`. Call `exit()` within the ipython session and restart `kedro ipython`. Then try again.
+The Kedro Data Catalog is missing [dependencies needed to parse the data](../kedro_project_setup/dependencies.md#install-dependencies-related-to-the-data-catalog). Check that you've added [all the project dependencies to `requirements.txt`](./tutorial_template.md#project-dependencies) and then call `pip install -r src/requirements.txt` to install them.
 
 ### Pipeline run
 

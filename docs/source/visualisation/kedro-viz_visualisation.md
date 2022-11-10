@@ -38,7 +38,7 @@ To exit the visualisation, close the browser tab. To regain control of the termi
 
 ## Automatic visualisation updates
 
-You can use the `--autoreload` flag to autoreload Kedro Viz when a `Python` or `YAML` file changes in the project.
+You can use the `--autoreload` flag to autoreload Kedro-Viz when a `Python` or `YAML` file changes in the project.
 
 ![](../meta/images/kedro_viz_autoreload.gif)
 
@@ -54,7 +54,7 @@ The `autoreload` flag reflects changes to the project as they happen. For exampl
 
 ## Visualise layers
 
-By convention, a pipeline can be broken up into different layers according to how data is processed, which makes it easier to collaborate.
+By convention, a [pipeline can be broken up into different layers](../resources/glossary.md#layers-data-engineering-convention) according to how data is processed, which makes it easier to collaborate.
 
 For example, the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
@@ -112,7 +112,7 @@ You can share a Kedro-Viz visualisation as a JSON file:
 kedro viz --save-file my_shareable_pipeline.json
 ```
 
-This command will save a visualisation of your primary `__default__` pipeline as a JSON file called `my_shareable_pipeline.json`.
+This command will save a visualisation of the `__default__` pipeline as a JSON file called `my_shareable_pipeline.json`.
 
 To visualise the JSON file:
 

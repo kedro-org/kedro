@@ -18,8 +18,8 @@ You may prefer to get up and running more swiftly. We also provide the example a
 ![](../meta/images/moon-rocket.png)
 
 Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="https://unsplash.com/s/photos/spaceship">Unsplash</a>
-  
-  
+
+
 ## Get help
 If you hit an issue with the tutorial, the Kedro community can help!
 
@@ -68,7 +68,7 @@ When you build a Kedro project, you will typically follow a [standard developmen
 
 ### Optional: source control with `git`
 
-You don't need to do this section for the tutorial, but you may want to familiarise yourself with the use of `git` for source control. 
+You don't need to do this section for the tutorial, but you may want to familiarise yourself with the use of `git` for source control.
 
 <details>
 <summary><b>Click to expand</b></summary>

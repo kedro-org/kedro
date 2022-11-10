@@ -1,6 +1,5 @@
 # Set up the spaceflights tutorial project
 
-
 In this section, we discuss the project set-up phase, which is the first part of the standard development workflow. The setup steps are as follows:
 
 * Create a new project with `kedro new`
@@ -8,6 +7,10 @@ In this section, we discuss the project set-up phase, which is the first part of
 * Configure the following in the `conf` folder:
 	* Credentials and any other sensitive information
 	* Logging
+
+```{note}
+Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you run into problems, or [ask the community for help](spaceflights_tutorial.md#get-help) if you need it!
+```
 
 ## Create a new project
 
@@ -46,7 +49,7 @@ Kedro projects have a `requirements.txt` file to specify their dependencies and 
 The generic project template bundles some typical dependencies in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers differ slightly depending on your version of Kedro:
 
 ```text
-# code quality packages 
+# code quality packages
 black==22.1.0 # Used for formatting code with `kedro lint`
 flake8>=3.7.9, <5.0 # Used for linting code with `kedro lint`
 ipython==7.0 # Used for an IPython session with `kedro ipython`

@@ -1,5 +1,9 @@
 # Create a data processing pipeline
 
+```{note}
+Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you run into problems, or [ask the community for help](spaceflights_tutorial.md#get-help) if you need it!
+```
+
 This section explains the following:
 
 * How to create a Kedro node from a Python function
@@ -27,8 +31,8 @@ kedro pipeline create data_processing
 This command generates all the files you need for the pipeline:
 
 * Two python files within `src/kedro_tutorial/pipelines/data_processing`
-    * `nodes.py` (for the node functions that form the data processing) 
-    * `pipeline.py` (to build the pipeline) 
+    * `nodes.py` (for the node functions that form the data processing)
+    * `pipeline.py` (to build the pipeline)
 * A yaml file: `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
 * A folder for test code: `src/tests/pipelines/data_processing`
 * `__init__.py` files in the required folders to ensure that Python can import the pipeline
@@ -321,6 +325,11 @@ You should see output similar to the following:
 ## Checkpoint
 
 This is an excellent place to take a breath and summarise what you have done so far.
+
+![](../meta/images/coffee-cup.png)
+
+Photo by <a href="https://unsplash.com/@maltehelmhold">Malte Helmhold</a> on <a href="https://unsplash.com">Unsplash</a>
+
 
 * Created a new project and installed dependencies
 * Added three datasets to the project and set up the Kedro Data Catalog

@@ -1,5 +1,8 @@
 # Spaceflights tutorial FAQs
 
+```{note}
+If you can't find the answer you need here, [ask the Kedro community for help](spaceflights_tutorial.md#get-help)!
+```
 
 ## How do I resolve these common errors?
 
@@ -33,9 +36,9 @@ Call `exit()` within the IPython session and restart `kedro ipython` (or type `@
 Are you seeing a message saying that an exception occurred?
 
 ```bash
-DataSetError: An exception occurred when parsing config for DataSet 
+DataSetError: An exception occurred when parsing config for DataSet
 'data_processing.preprocessed_companies':
-Object 'ParquetDataSet' cannot be loaded from 'kedro.extras.datasets.pandas'. Please see the 
+Object 'ParquetDataSet' cannot be loaded from 'kedro.extras.datasets.pandas'. Please see the
 documentation on how to install relevant dependencies for kedro.extras.datasets.pandas.ParquetDataSet:
 https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html
 ```

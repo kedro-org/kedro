@@ -333,6 +333,7 @@ KEDRO_MODULES = [
     "kedro.config",
     "kedro.extras.datasets",
     "kedro.extras.logging",
+    "kedro.datasets"
 ]
 
 

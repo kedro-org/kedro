@@ -191,7 +191,7 @@ commands:
           name: Copy kedro-datasets main to kedro/datasets
           command: |
             pip install --no-deps -t kedro/to_delete git+https://github.com/kedro-org/kedro-plugins.git#subdirectory=kedro-datasets
-            mv kedro/to_delete/kedro_datasets kedro/kedro_datasets
+            mv kedro/to_delete/kedro_datasets kedro/datasets
             rm -r kedro/to_delete
 
   copy_kedro_datasets_release:
@@ -200,7 +200,7 @@ commands:
           name: Copy kedro-datasets release to kedro/datasets
           command: |
             pip install --no-deps -t kedro/to_delete kedro-datasets
-            mv kedro/to_delete/kedro_datasets kedro/kedro_datasets
+            mv kedro/to_delete/kedro_datasets kedro/datasets
             rm -r kedro/to_delete
 
 jobs:

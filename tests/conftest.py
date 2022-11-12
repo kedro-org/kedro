@@ -12,7 +12,7 @@ import botocore
 import moto
 import pytest
 from botocore.awsrequest import AWSResponse
-
+import aiobotocore.endpoint
 
 # Patch `aiobotocore.endpoint.convert_to_response_dict` to work with moto.
 class PatchedAWSResponse:

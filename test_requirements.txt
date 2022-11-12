@@ -1,4 +1,5 @@
 -r dependency/requirements.txt
+aiobotocore~=2.4
 adlfs>=2021.7.1, <=2022.2
 bandit>=1.6.2, <2.0
 behave==1.2.6

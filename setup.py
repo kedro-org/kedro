@@ -107,7 +107,7 @@ extras_require = {
     "docs": [
         "docutils==0.16",
         "sphinx~=3.4.3",
-        "sphinx_rtd_theme==0.4.1",
+        "sphinx_rtd_theme==1.1.1",
         "nbsphinx==0.8.1",
         "nbstripout~=0.4",
         "sphinx-autodoc-typehints==1.11.1",

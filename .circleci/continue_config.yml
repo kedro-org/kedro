@@ -404,7 +404,7 @@ jobs:
           command: pip freeze
           when: always
 
-  docs_linkcheck_dataset_main:
+  docs_linkcheck_datasets_main:
     executor:
       name: docker
       python_version: "3.8"
@@ -419,7 +419,7 @@ jobs:
           command: pip freeze
           when: always
 
-  docs_linkcheck_dataset_release:
+  docs_linkcheck_datasets_release:
     executor:
       name: docker
       python_version: "3.8"
@@ -606,11 +606,11 @@ workflows:
         - not: <<pipeline.parameters.run_nightly>>
     jobs:
       - build_docs_datasets_main
-      - docs_linkcheck
+      - docs_linkcheck_datasets_main
       - all_circleci_checks_succeeded:
           requires:
             - build_docs_datasets_main
-            - docs_linkcheck
+            - docs_linkcheck_datasets_main
 
   build_code_and_docs:
     when:
@@ -649,7 +649,7 @@ workflows:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
       - build_docs_datasets_main
-      - docs_linkcheck
+      - docs_linkcheck_datasets_main
       - all_circleci_checks_succeeded:
           requires:
             - e2e_tests
@@ -660,7 +660,7 @@ workflows:
             - pip_compile
             - win_pip_compile
             - build_docs_datasets_main
-            - docs_linkcheck
+            - docs_linkcheck_datasets_main
 
   main_updated:
     when:

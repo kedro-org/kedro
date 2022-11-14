@@ -1,68 +1,88 @@
 # Kedro spaceflights tutorial
 
-**Scenario**: *It is 2160 and the space tourism industry is booming. Globally, thousands of space shuttle companies take tourists to the Moon and back. You have been able to source amenities offered in each space shuttle, customer reviews and company information.*
+In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 
-**Project**: *You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight.*
-
-In this tutorial, we illustrate the typical Kedro workflow and the steps necessary to convert an empty Kedro project template into a working project.
-
-In the text, we assume that you create an empty project and follow the flow of the tutorial by copying and pasting the example code into the project as we describe. This tutorial will take approximately two hours, during which time you will learn each step of the Kedro project development workflow, by working on an example to construct nodes and pipelines for the price-prediction model.
+In the text, we assume you have started with an empty Kedro project and we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete.
 
 ```{note}
-You may prefer to get up and running more swiftly so we provide the full spaceflights example project as a [Kedro starter](../get_started/starters.md). To create the project, run `kedro new --starter=spaceflights`. When prompted for a project name, enter `Kedro Tutorial`. This will generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) so you can follow the tutorial without any of the copy/pasting.
+You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) so you can follow along without copy/pasting.
 ```
 
-## Kedro project development workflow
+## Scenario
 
-When you build a Kedro project, you will typically follow a standard development workflow:
+*It is 2160, and the space tourism industry is booming. Globally, thousands of space shuttle companies take tourists to the Moon and back. You have been able to source data that lists the amenities offered in each space shuttle, customer reviews, and company information.*
 
-![](../meta/images/typical_workflow.png)
+***Project***: *You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight.*
 
-### 1. Set up the project template
 
-* Create a new project with `kedro new`
-* Install project dependencies with `pip install -r src/requirements.txt`
-* Configure the following in the `conf` folder:
-	* Logging
-	* Credentials
-	* Any other sensitive / personal content
+![](../meta/images/moon-rocket.png)
 
-### 2. Set up the data
+Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="https://unsplash.com/s/photos/spaceship">Unsplash</a>
 
-* Add data to the `data/` folder
-* Reference all datasets for the project in the `conf/base/catalog.yml` file
 
-### 3. Create the pipeline
+## Get help
+If you hit an issue with the tutorial, the Kedro community can help!
 
-* Create the data transformation steps as Python functions
-* Add your functions as nodes, to construct the pipeline
-* Choose how to run the pipeline: sequentially or in parallel
+Things you can do:
 
-### 4. Package the project
+* check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already
+* use the spaceflights starter to [create a new, separate project which contains working example code](./tutorial_template.md#create-a-new-project), and compare that project with your own
+* search the [archive of Discord discussions](https://linen-discord.kedro.org/)
+* use the [#questions channel](https://kedro-org.slack.com/archives/C03RKP2LW64) on our Slack channel (which replaces our Discord server) to ask the community for help
 
- * Build the project documentation
- * Package the project for distribution
+## Terminology
 
-## Optional: Git workflow
+We will explain any Kedro-specific terminology we use in the tutorial as we introduce it. We use additional terminology that may not be familiar to some readers, such as the concepts below.
 
-### Create a project repository
+### Project root directory
+Also known as the "root directory", this is the parent folder for the entire project. It is the top-level folder that contains all other files and directories associated with the project.
 
-We recommend that you use `git` for source control, but Kedro does not require it, and can work without any source control management system. This section is optional if you choose not to use a `git` repository.
+### Dependencies
+These are Python packages or libraries that an individual project depends upon to complete a task. For example, the Spaceflights tutorial project depends on the [scikit-learn](https://scikit-learn.org/stable/) library.
 
-```{note}
-If you are unfamiliar with a typical `git` workflow, you can follow one of the most popular, known as [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
-```
+### Standard development workflow
+When you build a Kedro project, you will typically follow a [standard development workflow](../faq/faq.md#what-is-the-typical-kedro-project-development-workflow):
 
-If you don't have a local `git` repository for your project already, navigate to the project directory and create one:
+1. Set up the project template
+
+    * Create a new project and install project dependencies.
+    * Configure credentials and any other sensitive/personal content, and logging
+
+2. Set up the data
+
+    * Add data to the `data` folder
+    * Reference all datasets for the project
+
+3. Create the pipeline
+
+    * Construct nodes to make up the pipeline
+    * Choose how to run the pipeline: sequentially or in parallel
+
+4. Package the project
+    * Build the project documentation
+    * Package the project for distribution
+
+
+### Optional: source control with `git`
+
+You don't need to do this section for the tutorial, but you may want to familiarise yourself with the use of `git` for source control.
+
+<details>
+<summary><b>Click to expand</b></summary>
+
+If you want to learn more about a typical `git` workflow, we suggest you look into [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
+Navigate to the project root directory and create a `git` repository on your machine (a local repository) for the project:
 
 ```bash
 git init
 git remote add origin https://github.com/<your-repo>
 ```
 
-### Submit your changes to GitHub
+#### Submit your changes to GitHub
 
-As you work on a project, you will periodically save your changes. In a team, we suggest that you each develop your code on a branch and create pull requests to submit it to the `develop` or `main` branches:
+If you work on a project as part of a team, you will share the `git` repository via GitHub, which stores a shared copy of the repository. You should periodically save your changes to your local repository and merge them into the GitHub repository.
+
+Within your team, we suggest that you each develop your code on a branch and create pull requests to submit it to the `develop` or `main` branches:
 
 ```bash
 # create a new feature branch called 'feature/project-template'
@@ -85,3 +105,4 @@ git commit -m 'Create project template'
 # push changes to remote main
 git push origin main
 ```
+</details>

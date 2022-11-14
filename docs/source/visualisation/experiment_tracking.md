@@ -9,7 +9,7 @@ Enabling experiment tracking features on Kedro-Viz relies on:
 * [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets)
 * [modifying your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
 
-This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the starter outlined in the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and build on previously discussed topics such as [namespacing](../tutorial/namespace_pipelines.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
+This tutorial will provide a step-by-step process to set up experiment tracking and access your logged metrics from each run on Kedro-Viz. It will use the starter outlined in the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). You can also jump directly to [this section for direct reference in setting up experiment tracking](../logging/experiment_tracking.md) for your Kedro project.
 
 You can also access a more detailed [Kedro-Viz live demo](https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
 
@@ -19,7 +19,7 @@ You can also access a more detailed [Kedro-Viz live demo](https://kedro-viz-live
 You can skip this step if you have followed all previous parts of the tutorial.
 ```
 
-We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../tutorial/visualise_pipeline.md). To set up a new project using the spaceflights starter, run:
+We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). To set up a new project using the spaceflights starter, run:
 
 ```bash
 kedro new --starter=spaceflights
@@ -225,7 +225,7 @@ After running the pipeline with `kedro run`, the plot will be saved and you will
 ![](../meta/images/expand-plot-comparison-view.gif)
 
 
-Read more about [creating plots and visualising them in Kedro-Viz in the visualise pipeline section.](../tutorial/visualise_pipeline.md#visualise-charts-in-kedro-viz)
+> [Read more about creating plots and visualising them in Kedro-Viz](./kedro-viz_visualisation.md).
 
 ## View your metrics timeline
 

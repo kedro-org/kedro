@@ -9,51 +9,6 @@ Kedro is an open-source Python framework for creating reproducible, maintainable
 
 For the source code, take a look at the [Kedro repository on Github](https://github.com/kedro-org/kedro).
 
-## Who maintains Kedro?
-
-Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at QuantumBlack to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr). In the project's latest iteration it is an incubating project within [LF AI & Data](https://lfaidata.foundation/).
-
-Currently, the core Kedro team consists of
-[Ahdra Merali](https://github.com/AhdraMeraliQB),
-[Andrew Mackay](https://github.com/Mackay031),
-[Ankita Katiyar](https://github.com/ankatiyar),
-[Antony Milne](https://github.com/AntonyMilneQB),
-[Cvetanka Nechevska](https://github.com/cvetankanechevska),
-[Deepyaman Datta](https://github.com/deepyaman),
-[Gabriel Comym](https://github.com/comym),
-[Huong Nguyen](https://github.com/Huongg),
-[Ivan Danov](https://github.com/idanov),
-[Jannic Holzer](https://github.com/jmholzer),
-[Jo Stichbury](https://github.com/stichbury),
-[Joel Schwarzmann](https://github.com/datajoely),
-[Lim Hoang](https://github.com/limdauto),
-[Merel Theisen](https://github.com/merelcht),
-[Nero Okwa](https://github.com/NeroOkwa),
-[Nok Lam Chan](https://github.com/noklam),
-[Rashida Kanchwala](https://github.com/rashidakanchwala),
-[Sajid Alam](https://github.com/SajidAlamQB),
-[Tynan DeBold](https://github.com/tynandebold) and
-[Yetunde Dada](https://github.com/yetudada).
-
-Former core team members with significant contributions include:
-[Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
-[Anton Kirilenko](https://github.com/Flid),
-[Dmitrii Deriabin](https://github.com/dmder),
-[Gordon Wrigley](https://github.com/tolomea),
-[Hamza Oza](https://github.com/hamzaoza),
-[Ignacio Paricio](https://github.com/ignacioparicio),
-[Jiri Klein](https://github.com/jiriklein),
-[Kiyohito Kunii](https://github.com/921kiyo),
-[Laís Carvalho](https://github.com/laisbsc),
-[Liam Brummitt](https://github.com/bru5),
-[Lorena Bălan](https://github.com/lorenabalan),
-[Nasef Khan](https://github.com/nakhan98),
-[Richard Westenra](https://github.com/richardwestenra),
-[Susanna Wong](https://github.com/studioswong) and
-[Zain Patel](https://github.com/mzjp2).
-
-And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/kedro-org/kedro/blob/main/RELEASE.md).
-
 ## What are the primary advantages of Kedro?
 
 If you're a Data Scientist, then you should be interested in Kedro because it enables you to:
@@ -96,6 +51,37 @@ Everyone sees the pipeline abstraction in Kedro and gets excited, thinking that 
 The responsibility of _"What time will this pipeline run?"_, _"How do I manage my compute?"_ and _"How will I know if it
  failed?"_ is left to the orchestrators. We also have deployment guidelines for using orchestrators as deployment
   targets and are working in collaboration with the maintainers of some of those tools to make the deployment experience as enjoyable as possible.
+
+## What is the typical Kedro project development workflow?
+
+When you build a Kedro project, you will typically follow a standard development workflow:
+
+![](../meta/images/typical_workflow.png)
+
+### 1. Set up the project template
+
+* Create a new project with `kedro new`
+* Install project dependencies with `pip install -r src/requirements.txt`
+* Configure the following in the `conf` folder:
+	* Logging
+	* Credentials
+	* Any other sensitive / personal content
+
+### 2. Set up the data
+
+* Add data to the `data` folder
+* Reference all datasets for the project in the `conf/base/catalog.yml` file
+
+### 3. Create the pipeline
+
+* Create the data transformation steps as Python functions
+* Add your functions as nodes, to construct the pipeline
+* Choose how to run the pipeline: sequentially or in parallel
+
+### 4. Package the project
+
+ * Build the project documentation
+ * Package the project for distribution
 
 ## What is data engineering convention?
 
@@ -166,10 +152,115 @@ There are a host of articles, podcasts, talks and Kedro showcase projects in the
 
 Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the Github repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
 
+## Who maintains Kedro?
+
+Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at QuantumBlack to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr). In the project's latest iteration it is an incubating project within [LF AI & Data](https://lfaidata.foundation/).
+
+Currently, the core Kedro team consists of
+[Ahdra Merali](https://github.com/AhdraMeraliQB),
+[Andrew Mackay](https://github.com/Mackay031),
+[Ankita Katiyar](https://github.com/ankatiyar),
+[Antony Milne](https://github.com/AntonyMilneQB),
+[Cvetanka Nechevska](https://github.com/cvetankanechevska),
+[Deepyaman Datta](https://github.com/deepyaman),
+[Gabriel Comym](https://github.com/comym),
+[Huong Nguyen](https://github.com/Huongg),
+[Ivan Danov](https://github.com/idanov),
+[Jannic Holzer](https://github.com/jmholzer),
+[Jo Stichbury](https://github.com/stichbury),
+[Joel Schwarzmann](https://github.com/datajoely),
+[Lim Hoang](https://github.com/limdauto),
+[Merel Theisen](https://github.com/merelcht),
+[Nero Okwa](https://github.com/NeroOkwa),
+[Nok Lam Chan](https://github.com/noklam),
+[Rashida Kanchwala](https://github.com/rashidakanchwala),
+[Sajid Alam](https://github.com/SajidAlamQB),
+[Tynan DeBold](https://github.com/tynandebold) and
+[Yetunde Dada](https://github.com/yetudada).
+
+Former core team members with significant contributions include:
+[Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
+[Anton Kirilenko](https://github.com/Flid),
+[Dmitrii Deriabin](https://github.com/dmder),
+[Gordon Wrigley](https://github.com/tolomea),
+[Hamza Oza](https://github.com/hamzaoza),
+[Ignacio Paricio](https://github.com/ignacioparicio),
+[Jiri Klein](https://github.com/jiriklein),
+[Kiyohito Kunii](https://github.com/921kiyo),
+[Laís Carvalho](https://github.com/laisbsc),
+[Liam Brummitt](https://github.com/bru5),
+[Lorena Bălan](https://github.com/lorenabalan),
+[Nasef Khan](https://github.com/nakhan98),
+[Richard Westenra](https://github.com/richardwestenra),
+[Susanna Wong](https://github.com/studioswong) and
+[Zain Patel](https://github.com/mzjp2).
+
+And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/kedro-org/kedro/blob/main/RELEASE.md).
+
+
 ## How can I cite Kedro?
 
 If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/kedro-org/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files).
 
+## Can I create a virtual environment without `conda`?
+
+You can use `venv` or `pipenv` instead.
+
+### `venv` (instead of `conda`)
+
+If you use Python 3, you should already have the `venv` module installed with the standard library. Create a directory for working with Kedro within your virtual environment:
+
+```bash
+mkdir kedro-environment && cd kedro-environment
+```
+
+This will create a `kedro-environment` directory in your current working directory. Next, to create a new virtual environment in this directory, run:
+
+```bash
+python -m venv env/kedro-environment  # macOS / Linux
+python -m venv env\kedro-environment  # Windows
+```
+
+Activate this virtual environment:
+
+```bash
+source env/kedro-environment/bin/activate # macOS / Linux
+.\env\kedro-environment\Scripts\activate  # Windows
+```
+
+To exit the environment:
+
+```bash
+deactivate
+```
+
+### `pipenv` (instead of `conda`)
+
+Install `pipenv` as follows:
+
+```bash
+pip install pipenv
+```
+
+Create a directory for the virtual environment and change to that directory:
+
+```bash
+mkdir kedro-environment && cd kedro-environment
+```
+
+Once all the dependencies are installed, to start a session with the correct virtual environment activated:
+
+```bash
+pipenv shell
+```
+
+To exit the shell session:
+
+```bash
+exit
+```
+
+
 ## How can I get my question answered?
 
-If your question isn't answered above, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org/community or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
+If your question isn't answered above, talk to the community on the [Kedro Slack channels](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).

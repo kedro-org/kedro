@@ -200,8 +200,8 @@ commands:
       - run:
           name: Copy kedro-datasets release to kedro/datasets
           command: |
-            pip install git+https://github.com/kedro-org/kedro-plugins.git#subdirectory=kedro-datasets
-            pip install -t kedro/to_delete kedro-datasets
+            pip install kedro-datasets
+            pip install --no-deps -t kedro/to_delete kedro-datasets
             mv kedro/to_delete/kedro_datasets kedro/datasets
             rm -r kedro/to_delete
 

@@ -78,6 +78,7 @@ pandas_require = {
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }
+pickle_require = {"pickle.PickleDataSet": ["compress-pickle[lz4]~=2.1.0"]}
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
 video_require = {
     "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
@@ -109,7 +110,7 @@ extras_require = {
     "docs": [
         "docutils==0.16",
         "sphinx~=3.4.3",
-        "sphinx_rtd_theme==0.4.1",
+        "sphinx_rtd_theme==1.1.1",
         "nbsphinx==0.8.1",
         "nbstripout~=0.4",
         "sphinx-autodoc-typehints==1.11.1",
@@ -124,6 +125,7 @@ extras_require = {
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
+    "pickle": _collect_requirements(pickle_require),
     "pillow": _collect_requirements(pillow_require),
     "video": _collect_requirements(video_require),
     "plotly": _collect_requirements(plotly_require),
@@ -139,6 +141,7 @@ extras_require = {
     **holoviews_require,
     **networkx_require,
     **pandas_require,
+    **pickle_require,
     **pillow_require,
     **video_require,
     **plotly_require,

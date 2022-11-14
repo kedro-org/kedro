@@ -18,14 +18,24 @@ class JSONDataSet(JDS):
     The ``JSONDataSet`` is part of Kedro Experiment Tracking.
     The dataset is write-only and it is versioned by default.
 
-        Example:
-        ::
+    Example adding a catalog entry with
+    `YAML API
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> cars:
+        >>>   type: tracking.JSONDataSet
+        >>>   filepath: data/09_tracking/cars.json
+
+    Example using Python API:
+    ::
 
         >>> from kedro.extras.datasets.tracking import JSONDataSet
         >>>
         >>> data = {'col1': 1, 'col2': 0.23, 'col3': 0.002}
         >>>
-        >>> # data_set = JSONDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = JSONDataSet(filepath="test.json")
         >>> data_set.save(data)
 

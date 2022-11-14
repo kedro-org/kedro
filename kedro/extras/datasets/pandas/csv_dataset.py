@@ -52,8 +52,6 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         >>>   type: pandas.CSVDataSet
         >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
         >>>   credentials: dev_s3
-        >>>
-
 
     Example using Python API:
     ::

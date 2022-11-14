@@ -53,22 +53,20 @@ Welcome to Kedro's documentation!
 
    introduction/introduction
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Get started
 
-   get_started/prerequisites
    get_started/install
    get_started/kedro_concepts
    get_started/new_project
 
 .. toctree::
    :maxdepth: 2
-   :caption: Notebook & IPython users  
+   :caption: Notebooks & IPython users  
 
-   notebook_and_ipython/kedro_and_notebooks
-   notebook_and_ipython/kedro_and_ipython
+   notebooks_and_ipython/kedro_and_notebooks
+   notebooks_and_ipython/kedro_and_ipython
 
 .. toctree::
    :maxdepth: 2

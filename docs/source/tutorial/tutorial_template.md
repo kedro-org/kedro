@@ -14,7 +14,7 @@ Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you r
 
 ## Create a new project
 
-If you have not yet set up Kedro, please do so by following the guidelines to [set up a virtual environment with `conda`](../get_started/prerequisites.md#create-a-virtual-environment-with-conda) and [install Kedro](../get_started/install.md).
+If you have not yet set up Kedro, please do so by following the guidelines to [set up a virtual environment with `conda`](../get_started/install.md#create-a-virtual-environment-with-conda) and [install Kedro](../get_started/install.md).
 
 ```{important}
 We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.3).

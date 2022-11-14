@@ -506,7 +506,7 @@ To start an IPython shell:
 kedro ipython
 ```
 
-The [Kedro IPython extension](../tools_integration/ipython.md) will make the following variables available in your IPython or Jupyter session:
+The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_ipython.md) makes the following variables available in your IPython or Jupyter session:
 
 * `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components

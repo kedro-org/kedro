@@ -26,7 +26,7 @@ To work on the Kedro codebase, you will need to be set up with Git, and Make.
 If your development environment is Windows, you can use the `win_setup_conda` and `win_setup_env` commands from [Circle CI configuration](https://github.com/kedro-org/kedro/blob/main/.circleci/config.yml) to guide you in the correct way to do this.
 ```
 
-You will also need to create and activate virtual environment. If this is unfamiliar to you, read through our [pre-requisites documentation](../get_started/prerequisites.md).
+You will also need to create and activate virtual environment. If this is unfamiliar to you, read through our [pre-requisites documentation](../get_started/install.md#installation-prerequisites).
 
 Next, you'll need to fork the [Kedro source code from the Github repository](https://github.com/kedro-org/kedro):
 

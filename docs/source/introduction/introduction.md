@@ -8,7 +8,7 @@ For the source code, take a look at the [Kedro repository on Github](https://git
 
 ## Learn how to use Kedro
 
-In the next few chapters, you will learn how to [install Kedro](../get_started/prerequisites.md) and learn some of the key [Kedro concepts](../get_started/kedro_concepts.md).
+In the next few chapters, you will learn how to [install Kedro](../get_started/install.md) and learn some of the key [Kedro concepts](../get_started/kedro_concepts.md).
 
 - The first project you create illustrates the basics of the [Kedro project template](../get_started/new_project.md) using the Iris dataset
 - You can then review the [spaceflights tutorial](../tutorial/tutorial_template.md) for a hands-on experience at building a project with Kedro.

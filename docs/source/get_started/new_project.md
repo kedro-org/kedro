@@ -97,58 +97,6 @@ When the command completes, you should see a log message similar to the followin
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 
-### Under the hood: Kedro project structure
-
-The example project directory is set out as follows:
-
-```
-get-started         # Parent directory of the template
-├── conf            # Project configuration files
-├── data            # Local project data (not committed to version control)
-├── docs            # Project documentation
-├── logs            # Project output logs (not committed to version control)
-├── notebooks       # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
-├── README.md       # Project README
-├── setup.cfg       # Configuration options for `pytest` when doing `kedro test` and for the `isort` utility when doing `kedro lint`
-└── src             # Project source code
-```
-
-Kedro also creates the following hidden files and folders:
-
-```
-get-started
-├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
-├── .gitignore      # Prevent staging of unnecessary files to `git`
-└── pyproject.toml  # Identifies the project root and [contains configuration information](../faq/architecture_overview.md#kedro-project)
-```
-
-#### `conf`
-
-The `conf` folder contains two subfolders for storing configuration information: `base` and `local`.
-
-**`conf/base`**
-
-For project-specific settings to share across different installations (for example, with different users), you should use the `base` subfolder of `conf`.
-
-The folder contains three files for the example, but you can add others as you require:
-
--   `catalog.yml` - [Configures the Data Catalog](../data/data_catalog.md#use-the-data-catalog-within-kedro-configuration) with the file paths and load/save configuration required for different datasets
--   `logging.yml` - Uses Python's default [`logging`](https://docs.python.org/3/library/logging.html) library to set up logging
--   `parameters.yml` - Allows you to define parameters for machine learning experiments e.g. train / test split and number of iterations
-
-**`conf/local`**
-
-The `local` subfolder of `conf` is used for **settings that should not be shared**, such as access credentials, custom editor configuration, personal IDE configuration and other sensitive or personal content. It is specific to user and installation. The contents of `conf/local` is ignored by `git` (through inclusion in `.gitignore`). By default, Kedro creates one file, `credentials.yml`, in `conf/local`.
-
-#### `data`
-
-The `data` folder contains a number of subfolders to store project data. We recommend that you put raw data into `raw` and move processed data to other subfolders according to [data engineering convention](../faq/faq.md#what-is-data-engineering-convention).
-
-#### `src`
-
-This subfolder contains the project's source code in one subfolder and another folder that you can use to add unit tests for your project. Projects are preconfigured to run tests using `pytest` when you call `kedro test` from the project's root directory
-
-
 ### Under the hood: Pipelines and nodes
 
 The example project contains a single pipeline stored in `src/get_started/pipeline.py`. The pipeline is comprised of nodes that are responsible for splitting the data into training and testing samples, running the 1-nearest neighbour algorithm to make predictions and accuracy-reporting.

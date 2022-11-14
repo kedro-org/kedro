@@ -19,10 +19,14 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
+# Type of data input
 _DI = Tuple[Union[ndarray, csr_matrix], ndarray]
-"""Type of the data input."""
+# Type of data output
 _DO = Tuple[csr_matrix, ndarray]
-"""Type of the data output."""
 
 
 class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
@@ -71,7 +75,6 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
         >>> # Features and labels.
         >>> data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))
         >>>
-        >>> # data_set = SVMLightDataSet(filepath="gcs://bucket/test.svm")
         >>> data_set = SVMLightDataSet(filepath="test.svm")
         >>> data_set.save(data)
         >>> reloaded_features, reloaded_labels = data_set.load()

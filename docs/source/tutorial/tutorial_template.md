@@ -14,7 +14,7 @@ Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you r
 
 ## Create a new project
 
-If you have not yet set up Kedro, please do so by following the guidelines to [set up a virtual environment with `conda`](../get_started/install.md#create-a-virtual-environment-with-conda) and [install Kedro](../get_started/install.md).
+If you have not yet set up Kedro, do so by [following the guidelines to install Kedro](../get_started/install.md).
 
 ```{important}
 We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.3).
@@ -100,10 +100,3 @@ You can find additional information in the [advanced documentation on configurat
 
 You might also want to [set up logging](../logging/logging.md) at this stage of the workflow, but we do not use it in this tutorial.
 
-## Optional: Set up a new local repository for your project
-
-Having created your new project, if you are using `git`, you may want to set up a new repository by calling:
-
-```bash
-git init
-```

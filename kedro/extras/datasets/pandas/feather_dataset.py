@@ -21,6 +21,10 @@ from kedro.io.core import (
 
 logger = logging.getLogger(__name__)
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``FeatherDataSet`` loads and saves data to a feather file using an
@@ -28,7 +32,28 @@ class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     is supported by pandas, so it supports all allowed pandas options
     for loading and saving csv files.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> cars:
+        >>>   type: pandas.FeatherDataSet
+        >>>   filepath: data/01_raw/company/cars.feather
+        >>>   load_args:
+        >>>     columns: ['col1', 'col2', 'col3']
+        >>>     use_threads: True
+        >>>
+        >>> motorbikes:
+        >>>   type: pandas.FeatherDataSet
+        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.feather
+        >>>   credentials: dev_s3
+        >>>
+
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.pandas import FeatherDataSet
@@ -37,7 +62,6 @@ class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = FeatherDataSet(filepath="gcs://bucket/test.feather")
         >>> data_set = FeatherDataSet(filepath="test.feather")
         >>>
         >>> data_set.save(data)

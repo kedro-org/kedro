@@ -13,7 +13,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional `execution_options`.
+* `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.
 
 ## Breaking changes to the API
 

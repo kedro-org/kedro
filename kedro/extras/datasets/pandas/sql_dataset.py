@@ -281,9 +281,19 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>   type: pandas.SQLQueryDataSet
         >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
         >>>   credentials: db_credentials
+
+    Advance example using the `stream_results` and `chunk_size` option to reduce memorgy usage
+
+    .. code-block:: yaml
+
+        >>> shuttle_id_dataset:
+        >>>   type: pandas.SQLQueryDataSet
+        >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+        >>>   credentials: db_credentials
         >>>   execution_options:
-        >>>      streaming: true
-        >>>   layer: raw
+        >>>     stream_results: true
+        >>>   load_args:
+        >>>     chunksize: 1000
 
     Sample database credentials entry in ``credentials.yml``:
 
@@ -305,8 +315,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>     "con": "postgresql://scott:tiger@localhost/test"
         >>> }
         >>> data_set = SQLQueryDataSet(sql=sql,
-        >>>                            credentials=credentials,
-        >>>                            execution_options={"streaming": True})
+        >>>                            credentials=credentials)
         >>>
         >>> sql_data = data_set.load()
         >>>
@@ -350,10 +359,12 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
             filepath: A path to a file with a sql query statement.
-            execution_options: A dictionary with non-SQL options for the connection to
+            execution_options: A dictionary with non-SQL advanced options for the connection to
                 be applied to the underlying engine. To find all supported execution
                 options, see here:
                 https://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options
+                Note that this is not a standard argument supported by pandas API, but could be
+                useful for handling large datasets.
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is empty.

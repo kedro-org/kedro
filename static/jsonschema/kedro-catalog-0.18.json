@@ -923,7 +923,7 @@
               },
               "execution_options": {
                 "type": "object",
-                "description": "A dictionary with non-SQL options for the connection\nto be applied to the underlying engine.\nTo find all supported execution options, see here:\nhttps://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options"
+                "description": "A dictionary with non-SQL options for the connection\nto be applied to the underlying engine.\nTo find all supported execution options, see here:\nhttps://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options \nNote that this is not a standard argument supported by pandas API, but could be useful for handling large datasets."
               }
             }
           }

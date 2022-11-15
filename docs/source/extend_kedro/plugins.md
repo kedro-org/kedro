@@ -106,8 +106,7 @@ from kedro.framework.session import KedroSession
 
 
 project_path = Path.cwd()
-metadata = _get_project_metadata(project_path)
-session = KedroSession.create(metadata.package_name, project_path)
+session = KedroSession.create(project_path=project_path)
 context = session.load_context()
 ```
 
@@ -196,9 +195,12 @@ When you are ready to submit your code:
 
 ## Supported Kedro plugins
 
+- [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets), a collection of all of Kedro's data connectors. These data
+connectors are implementations of the `AbstractDataSet`
 - [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow), a tool for converting your Kedro project into an Airflow project
 - [Kedro-Viz](https://github.com/kedro-org/kedro-viz), a tool for visualising your Kedro pipelines
+
 
 ## Community-developed plugins
 

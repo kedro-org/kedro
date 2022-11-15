@@ -27,6 +27,11 @@ class CachedDataSet(AbstractDataSet):
     class as shown above.
     """
 
+    # this dataset cannot be used with ``ParallelRunner``,
+    # therefore it has the attribute ``_SINGLE_PROCESS = True``
+    # for parallelism please consider ``ThreadRunner`` instead
+    _SINGLE_PROCESS = True
+
     def __init__(
         self,
         dataset: Union[AbstractDataSet, Dict],

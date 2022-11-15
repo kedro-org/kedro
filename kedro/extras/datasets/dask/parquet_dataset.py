@@ -9,13 +9,36 @@ import fsspec
 
 from kedro.io.core import AbstractDataSet, get_protocol_and_path
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     """``ParquetDataSet`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
-        Example (AWS S3):
+        Example adding a catalog entry with
+        `YAML API
+        <https://kedro.readthedocs.io/en/stable/data/\
+            data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+        .. code-block:: yaml
+
+        >>> cars:
+        >>>   type: dask.ParquetDataSet
+        >>>   filepath: s3://bucket_name/path/to/folder
+        >>>   save_args:
+        >>>     compression: GZIP
+        >>>   credentials:
+        >>>     client_kwargs:
+        >>>         aws_access_key_id: YOUR_KEY
+        >>>         aws_secret_access_key: YOUR_SECRET
+        >>>
+
+
+        Example using Python API (AWS S3):
         ::
 
             >>> from kedro.extras.datasets.dask import ParquetDataSet

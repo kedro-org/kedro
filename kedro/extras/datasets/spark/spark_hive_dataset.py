@@ -10,6 +10,10 @@ from pyspark.sql.functions import col, lit, row_number
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 # pylint:disable=too-many-instance-attributes
 class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
@@ -114,7 +118,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
-        self._format = self._save_args.get("format") or "hive"
+        self._format = self._save_args.pop("format", None) or "hive"
         self._eager_checkpoint = self._save_args.pop("eager_checkpoint", None) or True
 
     def _describe(self) -> Dict[str, Any]:

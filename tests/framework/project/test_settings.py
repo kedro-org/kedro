@@ -6,7 +6,8 @@ import pytest
 from kedro.config import ConfigLoader, TemplatedConfigLoader
 from kedro.framework.context.context import KedroContext
 from kedro.framework.project import configure_project, settings, validate_settings
-from kedro.framework.session.store import BaseSessionStore, ShelveStore
+from kedro.framework.session.shelvestore import ShelveStore
+from kedro.framework.session.store import BaseSessionStore
 from kedro.io import DataCatalog
 
 
@@ -38,7 +39,7 @@ def mock_package_name_with_settings_file(tmpdir):
 
                 DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
 
-                from kedro.framework.session.store import ShelveStore
+                from kedro.framework.session.shelvestore import ShelveStore
                 SESSION_STORE_CLASS = ShelveStore
                 SESSION_STORE_ARGS = {{
                     "path": "./sessions"

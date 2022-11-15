@@ -16,6 +16,10 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
@@ -28,8 +32,6 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         >>> json_dataset:
         >>>   type: json.JSONDataSet
         >>>   filepath: data/01_raw/location.json
-        >>>   load_args:
-        >>>     lines: True
         >>>
         >>> cars:
         >>>   type: json.JSONDataSet
@@ -37,8 +39,6 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         >>>   fs_args:
         >>>     project: my-project
         >>>   credentials: my_gcp_credentials
-        >>>   load_args:
-        >>>     lines: True
 
     Example using Python API:
     ::
@@ -47,7 +47,6 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         >>>
         >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
         >>>
-        >>> # data_set = JSONDataSet(filepath="gcs://bucket/test.json")
         >>> data_set = JSONDataSet(filepath="test.json")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()

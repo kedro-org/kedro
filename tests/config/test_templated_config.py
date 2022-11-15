@@ -208,6 +208,15 @@ def proj_catalog_param_with_default(tmp_path, param_config_with_default):
 
 class TestTemplatedConfigLoader:
     @pytest.mark.usefixtures("proj_catalog_param")
+    def test_get_catalog_config_with_dict_get(self, tmp_path, template_config):
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path), globals_dict=template_config
+        )
+        config_loader.default_run_env = ""
+        catalog = config_loader["catalog"]
+        assert catalog["boats"]["type"] == "SparkDataSet"
+
+    @pytest.mark.usefixtures("proj_catalog_param")
     def test_catalog_parameterized_w_dict(self, tmp_path, template_config):
         """Test parameterized config with input from dictionary with values"""
         config_loader = TemplatedConfigLoader(
@@ -459,3 +468,15 @@ class TestFormatObject:
     def test_raises_error(self, val, format_dict, expected_error_message):
         with pytest.raises(ValueError, match=expected_error_message):
             _format_object(val, format_dict)
+
+    def test_customised_patterns(self, tmp_path):
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path),
+            config_patterns={"spark": ["spark*/"]},
+        )
+        assert config_loader.config_patterns["catalog"] == [
+            "catalog*",
+            "catalog*/**",
+            "**/catalog*",
+        ]
+        assert config_loader.config_patterns["spark"] == ["spark*/"]

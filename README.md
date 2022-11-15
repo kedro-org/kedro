@@ -106,9 +106,11 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g),
 [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ),
 [NASA](https://github.com/nasa/ML-airport-taxi-out),
+[NHS AI Lab](https://nhsx.github.io/skunkworks/synthetic-data-pipeline),
 [Open Data Science LatAm](https://www.odesla.org/),
 [Prediqt](https://prediqt.co/),
 [QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),
+[ReSpo.Vision](https://neptune.ai/customers/respo-vision),
 [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414),
 [Roche](https://www.roche.com/),
 [Sber](https://www.linkedin.com/posts/seleznev-artem_welcome-to-kedros-documentation-kedro-activity-6767523561109385216-woTt),
@@ -120,7 +122,8 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [WovenLight](https://www.wovenlight.com/) and
 [XP](https://youtu.be/wgnGOVNkXqU?t=2210).
 
-Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/).
+Kedro won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/). Kedro has received an [honorable mention in the User Experience category in Fast Company’s 2022 Innovation by Design Awards](https://www.fastcompany.com/90772252/user-experience-innovation-by-design-2022).
+
 
 ## How can I cite Kedro?
 

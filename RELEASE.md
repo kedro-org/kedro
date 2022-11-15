@@ -47,6 +47,7 @@
 * Updated MatplotlibWriter Dataset docs with working examples.
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
 * Refactored `ShelveStore` to it's own module to ensure multiprocessing works with it.
+* `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.
 
 ## Minor breaking changes to the API
 

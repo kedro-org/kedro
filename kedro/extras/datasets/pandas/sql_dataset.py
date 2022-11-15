@@ -286,7 +286,19 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>   type: pandas.SQLQueryDataSet
         >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
         >>>   credentials: db_credentials
-        >>>   layer: raw
+
+    Advanced example using the `stream_results` and `chunksize` option to reduce memory usage
+
+    .. code-block:: yaml
+
+        >>> shuttle_id_dataset:
+        >>>   type: pandas.SQLQueryDataSet
+        >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+        >>>   credentials: db_credentials
+        >>>   execution_options:
+        >>>     stream_results: true
+        >>>   load_args:
+        >>>     chunksize: 1000
 
     Sample database credentials entry in ``credentials.yml``:
 
@@ -326,6 +338,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
         filepath: str = None,
+        execution_options: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -351,6 +364,12 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
             filepath: A path to a file with a sql query statement.
+            execution_options: A dictionary with non-SQL advanced options for the connection to
+                be applied to the underlying engine. To find all supported execution
+                options, see here:
+                https://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options
+                Note that this is not a standard argument supported by pandas API, but could be
+                useful for handling large datasets.
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is empty.
@@ -395,6 +414,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
         self._connection_str = credentials["con"]
+        self._execution_options = execution_options or {}
         self.create_connection(self._connection_str)
 
     @classmethod
@@ -421,11 +441,14 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             sql=str(load_args.pop("sql", None)),
             filepath=str(self._filepath),
             load_args=str(load_args),
+            execution_options=str(self._execution_options),
         )
 
     def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
-        engine = self.engines[self._connection_str]  # type: ignore
+        engine = self.engines[self._connection_str].execution_options(
+            **self._execution_options
+        )  # type: ignore
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)

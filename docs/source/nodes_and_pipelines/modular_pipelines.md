@@ -27,7 +27,7 @@ In this section, you will learn about how to take advantage of modular pipelines
 3. **The `kedro.pipeline.modular_pipeline.pipeline` wrapper method unlocks the real power of modular pipelines**
 
    * Applying [namespaces](https://en.wikipedia.org/wiki/Namespace) allows you to simplify your mental model and isolate 'within pipeline' processing steps.
-   * ``Kedro-Viz`` is able to accelerate development by [rendering namespaced](../tutorial/visualise_pipeline.md) pipelines as collapsible 'super nodes'.
+   * ``Kedro-Viz`` is able to accelerate development by rendering namespaced pipelines as collapsible 'super nodes'.
 
 <iframe
     src="https://demo.kedro.org"

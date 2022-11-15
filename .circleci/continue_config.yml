@@ -571,6 +571,25 @@ jobs:
             sleep 120
             ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
 
+  publish_kedro_datasets_RTD:
+    executor:
+      name: docker
+      python_version: "3.7"
+    steps:
+      - run:
+          name: Check Kedro version
+          command: |
+            KEDRO_VERSION=$(./tools/circleci/github_scripts/kedro_version.py ./kedro)
+            echo "export KEDRO_VERSION=\"${KEDRO_VERSION}\"" >> $BASH_ENV
+      - run:
+          name: Trigger Read The Docs build
+          command: |
+            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} stable
+            # give some time for GitHub release to propagate
+            # otherwise RTD fails to build a new tag
+            sleep 120
+            ./tools/circleci/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
+
   # Trigger kedro-viz build to ensure tests in that project pass
   viz_build:
     docker:
@@ -616,6 +635,7 @@ workflows:
     when:
       and:
         - <<pipeline.parameters.code_change>>
+        - not: <<<<pipeline.parameters.kedro_datasets_release>>
         - not: <<pipeline.parameters.release_kedro>>
         - not: <<pipeline.parameters.run_hourly>>
         - not: <<pipeline.parameters.run_nightly>>
@@ -665,6 +685,7 @@ workflows:
   main_updated:
     when:
       and:
+        - not: <<<<pipeline.parameters.kedro_datasets_release>>
         - not: <<pipeline.parameters.release_kedro>>
         - not: <<pipeline.parameters.run_hourly>>
         - not: <<pipeline.parameters.run_nightly>>
@@ -682,6 +703,7 @@ workflows:
     when:
       and:
         - <<pipeline.parameters.run_hourly>>
+        - not: <<<<pipeline.parameters.kedro_datasets_release>>
         - not: <<pipeline.parameters.release_kedro>>
         - not: <<pipeline.parameters.run_nightly>>
     jobs:
@@ -695,6 +717,7 @@ workflows:
     when:
       and:
         - <<pipeline.parameters.run_nightly>>
+        - not: <<<<pipeline.parameters.kedro_datasets_release>>
         - not: <<pipeline.parameters.release_kedro>>
         - not: <<pipeline.parameters.run_hourly>>
     jobs:
@@ -722,6 +745,7 @@ workflows:
     when:
       and:
         - <<pipeline.parameters.run_nightly>>
+        - not: <<<<pipeline.parameters.kedro_datasets_release>>
         - not: <<pipeline.parameters.release_kedro>>
         - not: <<pipeline.parameters.run_hourly>>
     jobs:
@@ -748,6 +772,7 @@ workflows:
     when:
       and:
         - <<pipeline.parameters.release_kedro>>
+        - not: <<<<pipeline.parameters.kedro_datasets_release>>
         - not: <<pipeline.parameters.run_hourly>>
         - not: <<pipeline.parameters.run_nightly>>
     jobs:
@@ -757,5 +782,22 @@ workflows:
             parameters:
               python_version: ["3.7", "3.8", "3.9", "3.10"]
       - publish_kedro:
+          requires:
+            - build_kedro
+
+  kedro_datasets_release:
+    when:
+      and:
+        - <<pipeline.parameters.kedro_datasets_release>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
+    jobs:
+      - build_docs_datasets_release
+      - build_kedro:
+          matrix:
+            parameters:
+              python_version: [ "3.7", "3.8", "3.9", "3.10" ]
+      - publish_kedro_datasets_RTD:
           requires:
             - build_kedro

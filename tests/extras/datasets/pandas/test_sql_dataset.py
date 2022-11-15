@@ -1,5 +1,6 @@
 # pylint: disable=no-member
 from pathlib import PosixPath
+from unittest.mock import ANY
 
 import pandas as pd
 import pytest
@@ -11,6 +12,7 @@ from kedro.io import DataSetError
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"
 SQL_QUERY = "SELECT * FROM table_a"
+EXECUTION_OPTIONS = {"stream_results": True}
 FAKE_CONN_STR = "some_sql://scott:tiger@localhost/foo"
 ERROR_PREFIX = (
     r"A module\/driver is missing when connecting to your SQL server\.(.|\n)*"
@@ -267,21 +269,51 @@ class TestSQLQueryDataSet:
         with pytest.raises(DataSetError, match=pattern):
             SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=""))
 
-    def test_load(self, mocker, query_data_set):
+    @pytest.mark.parametrize(
+        "query_data_set, has_execution_options",
+        [
+            ({"execution_options": EXECUTION_OPTIONS}, True),
+            ({"execution_options": {}}, False),
+            ({}, False),
+        ],
+        indirect=["query_data_set"],
+    )
+    def test_load(self, mocker, query_data_set, has_execution_options):
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_query")
         query_data_set.load()
-        pd.read_sql_query.assert_called_once_with(
-            sql=SQL_QUERY, con=query_data_set.engines[CONNECTION]
-        )
 
-    def test_load_query_file(self, mocker, query_file_data_set):
+        # Check that data was loaded with the expected query, connection string and
+        # execution options:
+        pd.read_sql_query.assert_called_once_with(sql=SQL_QUERY, con=ANY)
+        con_arg = pd.read_sql_query.call_args_list[0][1]["con"]
+        assert str(con_arg.url) == CONNECTION
+        assert len(con_arg.get_execution_options()) == bool(has_execution_options)
+        if has_execution_options:
+            assert con_arg.get_execution_options() == EXECUTION_OPTIONS
+
+    @pytest.mark.parametrize(
+        "query_file_data_set, has_execution_options",
+        [
+            ({"execution_options": EXECUTION_OPTIONS}, True),
+            ({"execution_options": {}}, False),
+            ({}, False),
+        ],
+        indirect=["query_file_data_set"],
+    )
+    def test_load_query_file(self, mocker, query_file_data_set, has_execution_options):
         """Test `load` method with a query file"""
         mocker.patch("pandas.read_sql_query")
         query_file_data_set.load()
-        pd.read_sql_query.assert_called_once_with(
-            sql=SQL_QUERY, con=query_file_data_set.engines[CONNECTION]
-        )
+
+        # Check that data was loaded with the expected query, connection string and
+        # execution options:
+        pd.read_sql_query.assert_called_once_with(sql=SQL_QUERY, con=ANY)
+        con_arg = pd.read_sql_query.call_args_list[0][1]["con"]
+        assert str(con_arg.url) == CONNECTION
+        assert len(con_arg.get_execution_options()) == bool(has_execution_options)
+        if has_execution_options:
+            assert con_arg.get_execution_options() == EXECUTION_OPTIONS
 
     def test_load_driver_missing(self, mocker):
         """Test that if an unknown module/driver is encountered by SQLAlchemy
@@ -332,8 +364,8 @@ class TestSQLQueryDataSet:
         """Test the data set instance string representation"""
         str_repr = str(query_data_set)
         assert (
-            f"SQLQueryDataSet(filepath=None, load_args={{}}, sql={SQL_QUERY})"
-            in str_repr
+            "SQLQueryDataSet(execution_options={}, filepath=None, "
+            f"load_args={{}}, sql={SQL_QUERY})" in str_repr
         )
         assert CONNECTION not in str_repr
         assert sql_file not in str_repr
@@ -342,8 +374,8 @@ class TestSQLQueryDataSet:
         """Test the data set instance string representation with filepath arg."""
         str_repr = str(query_file_data_set)
         assert (
-            f"SQLQueryDataSet(filepath={str(sql_file)}, load_args={{}}, sql=None)"
-            in str_repr
+            f"SQLQueryDataSet(execution_options={{}}, filepath={str(sql_file)}, "
+            "load_args={}, sql=None)" in str_repr
         )
         assert CONNECTION not in str_repr
         assert SQL_QUERY not in str_repr
@@ -358,8 +390,8 @@ class TestSQLQueryDataSet:
             SQLQueryDataSet(sql=SQL_QUERY, filepath=sql_file)
 
     def test_create_connection_only_once(self, mocker):
-        """Test that two datasets that need to connect to the same db
-        (but different tables, for example) only create a connection once.
+        """Test that two datasets that need to connect to the same db (but different
+        tables and execution options, for example) only create a connection once.
         """
         mock_engine = mocker.patch(
             "kedro.extras.datasets.pandas.sql_dataset.create_engine"
@@ -367,8 +399,29 @@ class TestSQLQueryDataSet:
         first = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
         assert len(first.engines) == 1
 
+        # second engine has identical params to the first one
+        # => no new engine should be created
         second = SQLQueryDataSet(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
-        assert len(second.engines) == 1
+        mock_engine.assert_called_once_with(CONNECTION)
+        assert second.engines == first.engines
         assert len(first.engines) == 1
 
-        mock_engine.assert_called_once_with(CONNECTION)
+        # third engine only differs by its query execution options
+        # => no new engine should be created
+        third = SQLQueryDataSet(
+            sql="a different query",
+            credentials=dict(con=CONNECTION),
+            execution_options=EXECUTION_OPTIONS,
+        )
+        assert mock_engine.call_count == 1
+        assert third.engines == first.engines
+        assert len(first.engines) == 1
+
+        # fourth engine has a different connection string
+        # => a new engine has to be created
+        fourth = SQLQueryDataSet(
+            sql=SQL_QUERY, credentials=dict(con="an other connection string")
+        )
+        assert mock_engine.call_count == 2
+        assert fourth.engines == first.engines
+        assert len(first.engines) == 2

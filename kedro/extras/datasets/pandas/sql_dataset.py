@@ -287,7 +287,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
         >>>   credentials: db_credentials
 
-    Advance example using the `stream_results` and `chunk_size` option to reduce memorgy usage
+    Advanced example using the `stream_results` and `chunksize` option to reduce memory usage
 
     .. code-block:: yaml
 

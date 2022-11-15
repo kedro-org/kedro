@@ -12,7 +12,7 @@ from kedro.io import DataSetError
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"
 SQL_QUERY = "SELECT * FROM table_a"
-EXECUTION_OPTIONS = {"streaming": True}
+EXECUTION_OPTIONS = {"stream_results": True}
 FAKE_CONN_STR = "some_sql://scott:tiger@localhost/foo"
 ERROR_PREFIX = (
     r"A module\/driver is missing when connecting to your SQL server\.(.|\n)*"

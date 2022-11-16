@@ -1,6 +1,6 @@
-# Create a new project
+# Create a new Kedro project
 
-There are several ways to create a new project once you have [installed Kedro](./install.md). For example, you can create a basic Kedro project which is set up with the project directories and basic code but is empty for you to extend as needed. Alternatively, you can create a Kedro project that is populated with template code that acts as a starter example.
+There are several ways to create a new project once you have [installed Kedro](install.md). For example, you can create a basic Kedro project set up with the project directories and basic code, but empty to extend as you need. Alternatively, you can create a Kedro project populated with template code that acts as a starter example.
 
 You can also use an existing Kedro project, for example, by cloning it from a GitHub repository.
 
@@ -15,9 +15,9 @@ kedro new
 
 You will be asked to enter a name for your project, which can be human-readable and may contain alphanumeric symbols, spaces, underscores and hyphens. It must be at least two characters long.
 
-Your choice is set as the value of `project_name` and is used to automatically generate the `repo_name` and `python_package`. 
+Your choice is set as the value of `project_name` and is used to generate the `repo_name` and `python_package` automatically. 
 
-So, if you enter "Get Started", the directory name for the project (`repo_name`) is automatically set to be `get-started` and the Python package name (`python_package`) for your project is set to be `get_started`.
+So, if you enter "Get Started", the directory name for the project (`repo_name`) is automatically set to be `get-started`, and the Python package name (`python_package`) for your project is set to be `get_started`.
 
 | Description                                                     | Setting          | Example       |
 | --------------------------------------------------------------- | ---------------- | ------------- | 
@@ -26,7 +26,7 @@ So, if you enter "Get Started", the directory name for the project (`repo_name`)
 | The Python package name for your project (short, all-lowercase) | `python_package` | `get_started` | 
 
 
-The output of `kedro new` is a directory that contains all the project files and subdirectories required for a basic Kedro project, ready for you to extend with your own code.
+The output of `kedro new` is a directory containing all the project files and subdirectories required for a basic Kedro project, ready to extend with your own code.
 
 ### Create a new project from a configuration file
 
@@ -37,7 +37,7 @@ If you prefer to customise your new project's directory and package name, you ca
 -   `repo_name`
 -   `python_package`
 
-The `output_dir` can be set to wherever you want to create the project. For example, `~` for your home directory, or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists and creates custom project directory and package names:
+The `output_dir` can be set to wherever you want to create the project. For example, `~` for your home directory, or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 
 ```yaml
 output_dir: ~/code
@@ -63,11 +63,11 @@ The dataset was generated in 1936 by the British statistician and biologist Rona
 
 ![](../meta/images/iris_measurements.png)
 
-A machine learning model can use the Iris dataset to illustrate classification (a method used to determine the type of an object by comparison with similar objects previously been categorised). Once trained on known data, the machine learning model can make a predictive classification by comparing a test object to the output of its training data.
+A machine learning model can use the Iris dataset to illustrate classification (a method used to determine the type of an object by comparison with similar objects that have previously been categorised). Once trained on known data, the machine learning model can make a predictive classification by comparing a test object to the output of its training data.
 
 ### Create the example project
 
-The first step is to create the Kedro project using a starter to add in the example code and data. Feel free to name your project as you like, but here we will assume the project's name is `get started`.
+The first step is to create the Kedro project using a starter to add the example code and data. Feel free to name your project as you like, but here we will assume the project's name is `get started`.
 
 ```bash
 kedro new --starter=pandas-iris
@@ -86,6 +86,10 @@ You are ready to run the project:
 
 ```bash
 kedro run
+```
+
+```{note}
+The first time you type a `kedro` command in your new project, you will be asked whether you wish to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask you again.
 ```
 
 When the command completes, you should see a log message similar to the following in your console:

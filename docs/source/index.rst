@@ -63,13 +63,6 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Notebooks & IPython users  
-
-   notebooks_and_ipython/kedro_and_notebooks
-   notebooks_and_ipython/kedro_and_ipython
-
-.. toctree::
-   :maxdepth: 2
    :caption: Tutorial
 
    tutorial/spaceflights_tutorial
@@ -88,7 +81,13 @@ Welcome to Kedro's documentation!
    visualisation/visualise_charts_with_plotly
    visualisation/experiment_tracking
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Notebooks & IPython users  
 
+   notebooks_and_ipython/kedro_and_notebooks
+   notebooks_and_ipython/kedro_and_ipython
+   
 .. toctree::
    :maxdepth: 2
    :caption: Kedro project setup

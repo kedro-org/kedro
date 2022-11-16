@@ -11,11 +11,13 @@
 
 ## What is Kedro?
 
-Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It borrows concepts from software engineering and applies them to machine-learning code; applied concepts include modularity, separation of concerns and versioning. Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
+Kedro is an open-source Python framework to create reproducible, maintainable, and modular data science code. It uses software engineering best practices to help you build production-ready data science pipelines.
+
+Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
 
 ## How do I install Kedro?
 
-To install Kedro from the Python Package Index (PyPI) simply run:
+To install Kedro from the Python Package Index (PyPI) run:
 
 ```
 pip install kedro
@@ -27,7 +29,7 @@ It is also possible to install Kedro using `conda`:
 conda install -c conda-forge kedro
 ```
 
-Our [Get Started guide](https://kedro.readthedocs.io/en/stable/get_started/prerequisites.html) contains full installation instructions, and includes how to set up Python virtual environments.
+Our [Get Started guide](https://kedro.readthedocs.io/en/stable/get_started/install.html) contains full installation instructions, and includes how to set up Python virtual environments.
 
 
 ## What are the main features of Kedro?
@@ -47,11 +49,15 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/get_started/prere
 
 ## How do I use Kedro?
 
-The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) includes three examples to help get you started:
-- A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](https://kedro.readthedocs.io/en/stable/get_started/hello_kedro.html)
-- An [introduction to the project template](https://kedro.readthedocs.io/en/stable/get_started/example_project.html) using the Iris dataset
-- A more detailed [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/tutorial/tutorial_template.html) to give you hands-on experience
+The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) first explains [how to install Kedro](https://kedro.readthedocs.io/en/stable/get_started/install.html) and then introduces [key Kedro concepts](https://kedro.readthedocs.io/en/stable/get_started/kedro_concepts.html).
 
+- The first example illustrates the [basics of a Kedro project](https://kedro.readthedocs.io/en/stable/get_started/new_project.html) using the Iris dataset
+- You can then review the [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/tutorial/tutorial_template.html) to build a Kedro project for hands-on experience
+
+For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://kedro.readthedocs.io/en/stable/visualisation/kedro-viz_visualisation.html) and [how to work with Kedro and Jupyter notebooks](https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks).
+
+Further documentation is available for more advanced Kedro usage and deployment. We also recommend the [glossary](https://kedro.readthedocs.io/en/stable/resources/glossary.html) and the [API reference documentation](/kedro) for additional information.
+ 
 
 ## Why does Kedro exist?
 

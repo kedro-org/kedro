@@ -38,10 +38,6 @@ For either option, when prompted for a project name, enter `Kedro Tutorial`. Whe
 cd kedro-tutorial
 ```
 
-```{note}
-The first time you type a `kedro` command in your new project, you will be asked whether you wish to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask you again.
-```
-
 ## Project dependencies
 
 Kedro projects have a `requirements.txt` file to specify their dependencies and enable sharable projects by ensuring consistency across Python packages and versions.

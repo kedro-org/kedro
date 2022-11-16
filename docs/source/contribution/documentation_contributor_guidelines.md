@@ -127,7 +127,8 @@ Do not pass "Go", do not collect £200.
 
 * You will need to use restructured text formatting within the box. Aim to keep the formatting of the callout text plain, although you can include bold, italic, code and links.
 * Keep the amount of text (and the number of callouts used) to a minimum.
-* Prefer to use `note`, `warning` and `important` only, rather than a number of different colours/types of callout.
+* Prefer to use `note`, `warning` and `important` only, rather than a larger range of callout.
+
     * Use `note` for notable information
     * Use `warning` to indicate a potential `gotcha`
     * Use `important` when highlighting a key point that cannot be ignored

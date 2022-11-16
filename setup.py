@@ -154,7 +154,6 @@ extras_require = {
 }
 
 extras_require["all"] = _collect_requirements(extras_require)
-
 setup(
     name=name,
     version=version,

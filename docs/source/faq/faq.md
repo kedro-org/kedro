@@ -1,13 +1,13 @@
 # Frequently asked questions
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
-question which isn't answered here, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
+question which isn't answered here, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://slack.kedro.org).
 
 ## What is Kedro?
 
 Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It borrows concepts from software engineering and applies them to machine-learning code; applied concepts include modularity, separation of concerns and versioning. Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
 
-For the source code, take a look at the [Kedro repository on Github](https://github.com/kedro-org/kedro).
+For the source code, take a look at the [Kedro repository on GitHub](https://github.com/kedro-org/kedro).
 
 ## What are the primary advantages of Kedro?
 
@@ -160,7 +160,7 @@ pip install kedro
 
 There are a host of articles, podcasts, talks and Kedro showcase projects in the [`kedro-community`](https://github.com/kedro-org/kedro-community) repository.
 
-Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the Github repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
+Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the GitHub repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
 
 ## Who maintains Kedro?
 

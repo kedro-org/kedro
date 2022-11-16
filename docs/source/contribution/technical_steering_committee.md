@@ -21,11 +21,10 @@ In this section, we detail:
 
 - Make sure that ongoing pull requests are moving forward at the right pace or closing them
 - Guide the community to use the right channel:
-  - [Github](https://github.com/kedro-org/kedro/) for feature requests and bug reports
-  - [GitHub discussions](https://github.com/kedro-org/kedro/discussions) to discuss
-    the Kedro project
-  - [Slack](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw)
-    for questions and to support other users
+
+  - [GitHub issues](https://github.com/kedro-org/kedro/issues) for feature requests and bug reports
+  - [GitHub discussions](https://github.com/kedro-org/kedro/discussions) to discuss the future of the Kedro project
+  - [Slack](https://slack.kedro.org) for questions and to support other users
 
 ## Requirements to become a maintainer
 
@@ -56,7 +55,7 @@ Voting can change project maintainers and decide on the future of Kedro. The TSC
 
 ### Other issues or proposals
 
-Open Github Discussions host votes on issues, proposals and changes affecting the future of Kedro, including amendments to our ways of working described in this document. These votes require **a 1/2 majority**.
+GitHub Discussions is used to host votes on issues, proposals and changes affecting the future of Kedro, including amendments to our ways of working described on this page. These votes require **a 1/2 majority**.
 
 ### Adding or removing maintainers
 

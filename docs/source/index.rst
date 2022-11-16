@@ -60,6 +60,7 @@ Welcome to Kedro's documentation!
    get_started/install
    get_started/kedro_concepts
    get_started/new_project
+   get_started/summary
 
 .. toctree::
    :maxdepth: 2

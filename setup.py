@@ -80,6 +80,9 @@ pandas_require = {
 }
 pickle_require = {"pickle.PickleDataSet": ["compress-pickle[lz4]~=2.1.0"]}
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
+video_require = {
+    "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
+}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
@@ -125,6 +128,7 @@ extras_require = {
     "pandas": _collect_requirements(pandas_require),
     "pickle": _collect_requirements(pickle_require),
     "pillow": _collect_requirements(pillow_require),
+    "video": _collect_requirements(video_require),
     "plotly": _collect_requirements(plotly_require),
     "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
@@ -141,6 +145,7 @@ extras_require = {
     **pandas_require,
     **pickle_require,
     **pillow_require,
+    **video_require,
     **plotly_require,
     **spark_require,
     **svmlight_require,

@@ -920,6 +920,10 @@
               "load_args": {
                 "type": "object",
                 "description": "Provided to underlying pandas ``read_sql_query``\nfunction along with the connection string.\nTo find all supported arguments, see here:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html\nTo find all supported connection string formats, see here:\nhttps://docs.sqlalchemy.org/en/13/core/engines.html#database-urls"
+              },
+              "execution_options": {
+                "type": "object",
+                "description": "A dictionary with non-SQL options for the connection\nto be applied to the underlying engine.\nTo find all supported execution options, see here:\nhttps://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options \nNote that this is not a standard argument supported by pandas API, but could be useful for handling large datasets."
               }
             }
           }

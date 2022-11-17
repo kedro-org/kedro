@@ -87,7 +87,7 @@ Welcome to Kedro's documentation!
    :caption: Notebooks & IPython users  
 
    notebooks_and_ipython/kedro_and_notebooks
-   notebooks_and_ipython/kedro_and_ipython
+   notebooks_and_ipython/kedro_as_a_data_registry
    
 .. toctree::
    :maxdepth: 2

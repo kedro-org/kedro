@@ -38,7 +38,7 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
     and features is Compressed Sparse Row matrix.
 
     This format is a text-based format, with one sample per line. It does
-    not store zero valued features hence is suitable for sparse dataset.
+    not store zero valued features hence it is suitable for sparse datasets.
 
     This format is used as the default format for both svmlight and the
     libsvm command line programs.

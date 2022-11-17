@@ -24,7 +24,7 @@ In this section, we detail:
   - [Github](https://github.com/kedro-org/kedro/) for feature requests and bug reports
   - [GitHub discussions](https://github.com/kedro-org/kedro/discussions) to discuss
     the Kedro project
-  - [Slack](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw)
+  - [Slack](https://slack.kedro.org/)
     for questions and to support other users
 
 ## Requirements to become a maintainer

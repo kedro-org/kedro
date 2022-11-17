@@ -39,13 +39,17 @@ Welcome to Kedro's documentation!
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
 
-.. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack&style=flat-square
+.. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack
     :target: https://slack.kedro.org
     :alt: Kedro's Slack organisation
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black
     :alt: Code style is Black
+
+.. image:: https://bestpractices.coreinfrastructure.org/projects/6711/badge
+    :target: https://bestpractices.coreinfrastructure.org/projects/6711
+    :alt: OpenSSF Best Practices Badge Program
 
 .. toctree::
    :maxdepth: 2

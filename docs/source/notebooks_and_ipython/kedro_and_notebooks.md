@@ -9,7 +9,17 @@ There are reasons why you may want to use a Jupyter Notebook:
 
 Longer term, a project based around Notebooks may run into problems when you try to scale it because of [lack of support for versioning, reproducibility, and modularity](https://towardsdatascience.com/5-reasons-why-you-should-switch-from-jupyter-notebook-to-scripts-cb3535ba9c95). 
 
+As soon as you reach a point where you need to use software best practice to control your complexity, it becomes clear that Notebooks don’t support those ideals.
 
+Another issue that hits data scientists in teams is that of environment reproducibility. Suppose you want to collaborate with a colleague and share your Notebook. But what if they are using a different version of a particular package, such as sklearn, that has changed over time? How do you specify to your colleague what environment to set up so they can run the Notebook just as you do on your machine? How do you automate that setup? Going further: you want to deploy the code to a number of people in the team as part of a demo. But how do you manage configuration and updates? Don’t even think about how to make a release and product-ise your Notebook!
+
+you can also transform an existing Notebook to a Kedro project, as a recent video from DataEngineerOne illustrates
+
+Once you have set up a Kedro project, you can use a Jupyter Notebook to develop your code if you prefer that way of working, and then transform it into a Kedro node, which is a Python function that is called by the Kedro framework in its role of managing the pipeline. 
+
+There are some neat extensions that allow you to work in a Notebook while developing your Kedro project, and you can find a video of how to use two tricks to make Jupyter Notebooks more useful with Kedro.
+
+It is opinionated to keep you aligned with software best practices, but it also allows you the option of using a Jupyter Notebook for experimentation, and eases the transfer of code from the Notebook into the Kedro project.
 
 ## Use Kedro as a data registry for a Notebook project
 

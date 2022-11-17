@@ -25,10 +25,10 @@ Depending on your preferred Python installation, you can create virtual environm
 Create a new Python virtual environment, called `kedro-environment`, using `conda`:
 
 ```bash
-conda create --name kedro-environment python=3.7 -y
+conda create --name kedro-environment python=3.8 -y
 ```
 
-This will create an isolated Python 3.7 environment. To activate it:
+This will create an isolated Python 3.8 environment. To activate it:
 
 ```bash
 conda activate kedro-environment

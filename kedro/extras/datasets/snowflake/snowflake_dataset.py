@@ -196,7 +196,7 @@ class SnowflakeTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         self._session = self._get_session(self._credentials)
 
     @classmethod
-    def _get_session(cls, credentials: dict) -> None:
+    def _get_session(cls, credentials: dict) -> Session:
         """Given a connection string, create singleton connection
         to be used across all instances of `SQLQueryDataSet` that
         need to connect to the same source.

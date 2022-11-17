@@ -27,8 +27,8 @@ Things you can do:
 
 * check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already
 * use the spaceflights starter to [create a new, separate project which contains working example code](./tutorial_template.md#create-a-new-project), and compare that project with your own
+* use the [#questions channel](https://slack.kedro.org/) on our Slack channel (which replaces our Discord server) to ask the community for help
 * search the [archive of Discord discussions](https://linen-discord.kedro.org/)
-* use the [#questions channel](https://kedro-org.slack.com/archives/C03RKP2LW64) on our Slack channel (which replaces our Discord server) to ask the community for help
 
 ## Terminology
 

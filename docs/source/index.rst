@@ -40,7 +40,7 @@ Welcome to Kedro's documentation!
     :alt: Docs build status
 
 .. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack
-    :target: https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw
+    :target: https://slack.kedro.org
     :alt: Kedro's Slack organisation
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg

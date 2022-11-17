@@ -1,7 +1,5 @@
 # Kedro concepts
 
-<!-- TO DO -- add a bit more info here and design some graphics -->
-
 It is time to introduce the most basic elements of Kedro.
 
 ## Node

@@ -97,7 +97,6 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Kedro project setup
 
-   kedro_project_setup/project_best_practices
    kedro_project_setup/starters
    kedro_project_setup/dependencies
    kedro_project_setup/configuration

@@ -95,4 +95,3 @@ To do this, add them to `conf/local/credentials.yml` (some examples are included
 You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
 
 You might also want to [set up logging](../logging/logging.md) at this stage of the workflow, but we do not use it in this tutorial.
-

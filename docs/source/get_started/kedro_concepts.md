@@ -2,7 +2,7 @@
 
 <!-- TO DO -- add a bit more info here and design some graphics -->
 
-It is time to introduce the most basic elements of Kedro. 
+It is time to introduce the most basic elements of Kedro.
 
 ## Node
 
@@ -14,7 +14,7 @@ A pipeline organises the dependencies and execution order of a collection of nod
 
 ## Data Catalog
 
-The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `DataSet`, a Kedro class that can be specialised for different types of data storage. 
+The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `DataSet`, a Kedro class that can be specialised for different types of data storage.
 
 [Kedro provides numerous different built-in datasets](/kedro.extras.datasets) for various file types and file systems, so you don’t have to write the logic for reading/writing data.
 
@@ -61,9 +61,9 @@ The folder contains three files for the example, but you can add others as you r
 
 #### `conf/local`
 
-The `local` subfolder is specific to each user and installation and its contents is ignored by `git` (through inclusion in `.gitignore`). 
+The `local` subfolder is specific to each user and installation and its contents is ignored by `git` (through inclusion in `.gitignore`).
 
-Use the `local` subfolder for **settings that should not be shared**, such as access credentials, custom editor configuration, personal IDE configuration and other sensitive or personal content. 
+Use the `local` subfolder for **settings that should not be shared**, such as access credentials, custom editor configuration, personal IDE configuration and other sensitive or personal content.
 
 By default, Kedro creates one file, `credentials.yml`, in `conf/local`.
 

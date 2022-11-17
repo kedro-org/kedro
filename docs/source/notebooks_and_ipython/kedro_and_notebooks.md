@@ -1,14 +1,14 @@
 # Kedro and Jupyter Notebooks
- 
-You can take advantage of a Jupyter Notebook's liberal development environment for exploratory data analysis and experimentation from within a Kedro project. Later, when you need to follow software best practices as the project complexity increases, or as you scale into production, you can transfer code from the Notebook into Kedro to benefit from its opinionated project framework. 
 
-This page explains how best to combine Kedro and Jupyter Notebook development and illustrates with an example Notebook that has access to the `catalog`, `context`, `pipelines` and `session` variables for a Kedro project. 
+You can take advantage of a Jupyter Notebook's liberal development environment for exploratory data analysis and experimentation from within a Kedro project. Later, when you need to follow software best practices as the project complexity increases, or as you scale into production, you can transfer code from the Notebook into Kedro to benefit from its opinionated project framework.
+
+This page explains how best to combine Kedro and Jupyter Notebook development and illustrates with an example Notebook that has access to the `catalog`, `context`, `pipelines` and `session` variables for a Kedro project.
 
 ## A custom Kedro kernel
 
-Kedro offers a command (`kedro jupyter notebook`) to create a Jupyter kernel named `kedro_<package_name>` that is almost identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs). 
+Kedro offers a command (`kedro jupyter notebook`) to create a Jupyter kernel named `kedro_<package_name>` that is almost identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs).
 
-The custom kernel automatically loads `kedro.ipython`, which is an [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/) that launches a [Kedro session](../kedro_project_setup/session.md) and makes the following Kedro variables available: 
+The custom kernel automatically loads `kedro.ipython`, which is an [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/) that launches a [Kedro session](../kedro_project_setup/session.md) and makes the following Kedro variables available:
 
 * `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
@@ -36,7 +36,7 @@ Your browser window will open, and you can then create a new Notebook using the 
 
 ![Create a new Notebook with Kedro (iris) kernel](../meta/images/jupyter_new_notebook.png)
 
-We recommend that you store your Notebooks in the `notebooks` folder of your Kedro project. 
+We recommend that you store your Notebooks in the `notebooks` folder of your Kedro project.
 
 We will now give some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, you might like to consult the relevant [API documentation](/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir) (e.g. `dir(catalog)`).
 
@@ -176,7 +176,7 @@ You can also specify the following optional arguments for `session.run`:
 
 ## `%reload_kedro` line magic
 
-You can use `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) within your Notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog). 
+You can use `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) within your Notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
 You don't need to restart the kernel to reload the Kedro IPython extension and refresh the `catalog`, `context`, `pipelines` and `session` variables.
 
@@ -195,7 +195,7 @@ If you have [Kedro-Viz](https://github.com/kedro-org/kedro-viz) installed for th
 
 ## Convert functions from Jupyter Notebooks into Kedro nodes
 
-If you are writing experimental code in your Notebook and later want to convert functions you've written to Kedro nodes, you can do this using tags. 
+If you are writing experimental code in your Notebook and later want to convert functions you've written to Kedro nodes, you can do this using tags.
 
 Say you have the following code in your Notebook:
 
@@ -219,7 +219,7 @@ The Notebook can contain multiple functions tagged as `node`, each of them will 
 5. The `some_action` function can now be used in your Kedro pipelines
 
 ## Useful to know...
-Each Kedro project has its own Jupyter kernel so you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel. 
+Each Kedro project has its own Jupyter kernel so you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel.
 
 If a Jupyter kernel with the name `kedro_<package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook` to replace the kernel specification with one that points to the new environment.
 
@@ -281,9 +281,6 @@ We recommend the following:
 
 * [Two Tricks to Optimize your Kedro Jupyter Flow](https://youtu.be/ZHIqXJEp0-w)
 
-* [Handling Custom Jupyter Data Sources](https://youtu.be/dRnCovp1GRQ) 
+* [Handling Custom Jupyter Data Sources](https://youtu.be/dRnCovp1GRQ)
 
 * [Why transition from vanilla Jupyter Notebooks to Kedro?](https://www.youtube.com/watch?v=JLTYNPoK7nw&ab_channel=PyConUS)
-
-
-

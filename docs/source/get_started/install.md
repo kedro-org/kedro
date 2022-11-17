@@ -2,11 +2,11 @@
 
 If you encounter any problems as you install Kedro, you can ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or [search the archives for a solution](https://linen-discord.kedro.org).
 
-    
+
 ## Installation prerequisites
 
 ### Python
-Kedro supports macOS, Linux, and Windows and is built for Python 3.7+. 
+Kedro supports macOS, Linux, and Windows and is built for Python 3.7+.
 
 To confirm that Python is installed, type the following in your terminal (macOS and Linux) or command prompt (Windows):
 
@@ -17,10 +17,10 @@ python
 You should see the version of Python installed on your machine:
 
 ```python
-Python 3.8.13 (default, Mar 28 2022, 06:13:39) 
+Python 3.8.13 (default, Mar 28 2022, 06:13:39)
 [Clang 12.0.0 ] :: Anaconda, Inc. on darwin
 Type "help", "copyright", "credits" or "license" for more information.
->>> 
+>>>
 ```
 Type `exit()` to return to the terminal prompt.
 

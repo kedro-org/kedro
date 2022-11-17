@@ -1,10 +1,10 @@
 # Kedro as a data registry
 
-In some projects you may want to share a Jupyter Notebook with others so you need to avoid using hard-coded file paths for data access. 
+In some projects you may want to share a Jupyter Notebook with others so you need to avoid using hard-coded file paths for data access.
 
 One solution is to set up a lightweight Kedro project that uses the Kedro [`DataCatalog`](../data/data_catalog.md) as a registry for the data, without using any of the other features of Kedro.
 
-The Kedro starter with alias `standalone-datacatalog` (formerly known as `mini-kedro`) provides this kind of minimal functionality. 
+The Kedro starter with alias `standalone-datacatalog` (formerly known as `mini-kedro`) provides this kind of minimal functionality.
 
 ## Usage
 
@@ -43,4 +43,3 @@ example_dataset_2:
 df = catalog.load("example_dataset_1")
 df_2 = catalog.save("example_dataset_2")
 ```
-

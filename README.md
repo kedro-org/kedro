@@ -57,7 +57,7 @@ The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) first explain
 For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://kedro.readthedocs.io/en/stable/visualisation/kedro-viz_visualisation.html) and [how to work with Kedro and Jupyter notebooks](https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks).
 
 Further documentation is available for more advanced Kedro usage and deployment. We also recommend the [glossary](https://kedro.readthedocs.io/en/stable/resources/glossary.html) and the [API reference documentation](/kedro) for additional information.
- 
+
 
 ## Why does Kedro exist?
 

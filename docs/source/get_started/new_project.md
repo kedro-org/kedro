@@ -15,15 +15,15 @@ kedro new
 
 You will be asked to enter a name for your project, which can be human-readable and may contain alphanumeric symbols, spaces, underscores and hyphens. It must be at least two characters long.
 
-Your choice is set as the value of `project_name` and is used to generate the `repo_name` and `python_package` automatically. 
+Your choice is set as the value of `project_name` and is used to generate the `repo_name` and `python_package` automatically.
 
 So, if you enter "Get Started", the directory name for the project (`repo_name`) is automatically set to be `get-started`, and the Python package name (`python_package`) for your project is set to be `get_started`.
 
 | Description                                                     | Setting          | Example       |
-| --------------------------------------------------------------- | ---------------- | ------------- | 
-| A human-readable name for your new project                      | `project_name`   | `Get Started` | 
-| Local directory to store your project                           | `repo_name`      | `get-started` | 
-| The Python package name for your project (short, all-lowercase) | `python_package` | `get_started` | 
+| --------------------------------------------------------------- | ---------------- | ------------- |
+| A human-readable name for your new project                      | `project_name`   | `Get Started` |
+| Local directory to store your project                           | `repo_name`      | `get-started` |
+| The Python package name for your project (short, all-lowercase) | `python_package` | `get_started` |
 
 
 The output of `kedro new` is a directory containing all the project files and subdirectories required for a basic Kedro project, ready to extend with your own code.
@@ -54,7 +54,7 @@ kedro new --config <path>/config.yml
 
 ## Create a new project containing example code
 
-You can use a [Kedro Starter](../kedro_project_setup/starters.md) to create a project containing template code, to run as-is or to adapt and extend. 
+You can use a [Kedro Starter](../kedro_project_setup/starters.md) to create a project containing template code, to run as-is or to adapt and extend.
 
 To illustrate, we will create a Kedro project with example code based on the familiar [Iris dataset](https://www.kaggle.com/uciml/iris).
 

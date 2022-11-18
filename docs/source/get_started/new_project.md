@@ -112,3 +112,21 @@ The nodes are stored in `src/get_started/nodes.py`:
 | Split data      | Splits the example Iris dataset into train and test samples                         | `split_data`       |
 | Make Predictions| Makes class predictions (using 1-nearest neighbour classifier and train-test set)   | `make_predictions` |
 | Report accuracy | Reports the accuracy of the predictions performed by the previous node.             | `report_accuracy`  |
+
+### Visualise the project
+
+This is a swift introduction to show how to visualise the project with Kedro Viz. See the [visualisation documentation](../visualisation/kedro-viz_visualisation) for more detail.
+
+In your terminal type the following:
+
+```bash
+kedro viz
+```
+
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
+
+You should see the following, which you can explore to learn more about the pipeline, nodes and datasets:
+
+![](../meta/images/pipeline_visualisation.png)
+
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.

@@ -29,10 +29,11 @@
 * Make Kedro instantiate datasets from `kedro_datasets` with higher priority than `kedro.extras.datasets`. `kedro_datasets` is the namespace for the new `kedro-datasets` python package.
 * The config loader objects now implement `UserDict` and the configuration is accessed through `conf_loader['catalog']`.
 * You can configure config file patterns through `settings.py` without creating a custom config loader.
-* Added `VideoDataSet` to read and write video files and interact with their frames:
+* Added the following new datasets:
 
 | Type                                 | Description                                                                | Location                      |
 | ------------------------------------ | -------------------------------------------------------------------------- | ----------------------------- |
+| `svmlight.SVMLightDataSet` | Work with svmlight/libsvm files using scikit-learn library | `kedro.extras.datasets.svmlight` |
 | `video.VideoDataSet`                 | Read and write video files from a filesystem                               | `kedro.extras.datasets.video` |
 | `video.video_dataset.SequenceVideo`  | Create a video object from an iterable sequence to use with `VideoDataSet` | `kedro.extras.datasets.video` |
 | `video.video_dataset.GeneratorVideo` | Create a video object from a generator to use with `VideoDataSet`          | `kedro.extras.datasets.video` |

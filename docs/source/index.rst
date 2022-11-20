@@ -39,13 +39,17 @@ Welcome to Kedro's documentation!
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
 
-.. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack&style=flat-square
-    :target: https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw
+.. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack
+    :target: https://slack.kedro.org
     :alt: Kedro's Slack organisation
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black
     :alt: Code style is Black
+
+.. image:: https://bestpractices.coreinfrastructure.org/projects/6711/badge
+    :target: https://bestpractices.coreinfrastructure.org/projects/6711
+    :alt: OpenSSF Best Practices Badge Program
 
 .. toctree::
    :maxdepth: 2
@@ -78,11 +82,19 @@ Welcome to Kedro's documentation!
    tutorial/spaceflights_tutorial
    tutorial/tutorial_template
    tutorial/set_up_data
-   tutorial/create_pipelines
-   tutorial/visualise_pipeline
-   tutorial/namespace_pipelines
-   tutorial/set_up_experiment_tracking
+   tutorial/create_a_pipeline
+   tutorial/add_another_pipeline
    tutorial/package_a_project
+   tutorial/spaceflights_tutorial_faqs
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Visualisation with Kedro-Viz
+
+   visualisation/kedro-viz_visualisation
+   visualisation/visualise_charts_with_plotly
+   visualisation/experiment_tracking
+
 
 .. toctree::
    :maxdepth: 2

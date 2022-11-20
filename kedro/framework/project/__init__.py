@@ -184,6 +184,16 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content = {}
 
+    def keys(self):
+        self._load_data()
+        return self._content.keys()
+    def values(self):
+        self._load_data()
+        return self._content.values()
+    def items(self):
+        self._load_data()
+        return self._content.items()
+
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)
     __setitem__ = _load_data_wrapper(operator.setitem)

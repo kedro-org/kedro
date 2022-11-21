@@ -1,10 +1,9 @@
 # Kedro concepts
 
-It is time to introduce the most basic elements of Kedro.
-
+It is time to introduce the most basic elements of Kedro. You can find further information about these and more advanced Kedro concepts in the [Kedro glossary](../resources/glossary.md).
 ## Node
 
-In Kedro, a node is a wrapper for a Python function that names the inputs and outputs of that function. Nodes are the building block of a pipeline, and the output of one node can be the input of another.
+In Kedro, a node is a wrapper for a [pure Python function](../resources/glossary.md#node) that names the inputs and outputs of that function. Nodes are the building block of a pipeline, and the output of one node can be the input of another.
 
 ## Pipeline
 
@@ -24,23 +23,16 @@ A standard Kedro project structure is as follows:
 
 ```
 project-dir         # Parent directory of the template
+├── .gitignore      # Hidden file that prevents staging of unnecessary files to `git`
 ├── conf            # Project configuration files
 ├── data            # Local project data (not committed to version control)
 ├── docs            # Project documentation
 ├── logs            # Project output logs (not committed to version control)
 ├── notebooks       # Project-related Jupyter notebooks (can be used for experimental code before moving the code to src)
+├── pyproject.toml  # Identifies the project root and [contains configuration information](../faq/architecture_overview.md#kedro-project)
 ├── README.md       # Project README
 ├── setup.cfg       # Configuration options for `pytest` when doing `kedro test` and for the `isort` utility when doing `kedro lint`
 └── src             # Project source code
-```
-
-Kedro also creates the following hidden files and folders:
-
-```
-project-dir
-├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
-├── .gitignore      # Prevent staging of unnecessary files to `git`
-└── pyproject.toml  # Identifies the project root and [contains configuration information](../faq/architecture_overview.md#kedro-project)
 ```
 
 ### `conf`

@@ -2,12 +2,12 @@
 
 This page summarises what you've learned about Kedro so far.
 
-## Logistics
+## [Logistics](install.md)
 * Kedro can be used on Windows, macOS or Linux
-* [Installation prerequisites](install.md#installation-prerequisites) include Python 3.7+, `git` and `conda`
+* Installation prerequisites include Python 3.7+, `git` and `conda`
 * You should install Kedro using `pip install kedro`
 
-## Kedro fundamentals
+## [Kedro concepts](kedro_concepts.md)
 
 * Kedro nodes are the building blocks of data processing pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.
 * A pipeline organises the dependencies and execution order of a collection of nodes.
@@ -15,7 +15,7 @@ This page summarises what you've learned about Kedro so far.
 * Kedro projects follow a default template that uses specific folders to store datasets, notebooks, configuration and source code.
 
 
-## Kedro project creation
+## [Kedro project creation](new_project.md)
 * You can create a Kedro project:
     * with just the basic code: `kedro new`
     * or you can populate a new project with pre-built code, e.g. `kedro new --starter=pandas-iris` from a [range of starter projects](../kedro_project_setup/starters.md#list-of-official-starters)

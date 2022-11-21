@@ -11,7 +11,7 @@ A pipeline organises the dependencies and execution order of a collection of nod
 
 ## Data Catalog
 
-The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `DataSet`, a Kedro class that can be specialised for different types of data storage.
+The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `DataCatalog`, a Kedro class that can be specialised for different types of data storage.
 
 [Kedro provides numerous different built-in datasets](/kedro.extras.datasets) for various file types and file systems, so you don’t have to write the logic for reading/writing data.
 

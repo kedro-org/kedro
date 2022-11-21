@@ -34,7 +34,7 @@
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
 * Refactored `ShelveStore` to it's own module to ensure multiprocessing works with it.
 * `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.
-* Updated Attrs minimum required version to >=21.3, and increased max to 23.0 to make Kedro compatible with Airflow >2.4.2 that requires 22.1.0
+* Updated `attrs` upper bound to 23.0 to make Kedro compatible with Airflow >2.4.2 that requires 22.1.0.
 
 ## Minor breaking changes to the API
 

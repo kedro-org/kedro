@@ -21,6 +21,7 @@ This page summarises what you've learned about Kedro so far.
     * or you can populate a new project with pre-built code, e.g. `kedro new --starter=pandas-iris` from a [range of starter projects](../kedro_project_setup/starters.md#list-of-official-starters)
 * Once you've created a project, you need to navigate to its project folder; you can then install its dependencies: `pip install -r src/requirements.txt`
 * To run the project: `kedro run`
+* To visualise the project: `kedro viz`
 
 ## What's next?
 * Next, you should work through the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) for the hands-on experience. It illustrates how to build a working project, which includes creating nodes, registering pipelines, setting up the Data Catalog and adding dependencies.

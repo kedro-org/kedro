@@ -1,27 +1,72 @@
 # Visualise charts in Kedro-Viz
 
+Kedro-Viz supports integration with Plotly and MatPlotLib so that you can share your data insights while exploring your pipeline. This page describes how you can set it up to make interactive visualisations of your Kedro projects.
+
 ## Visualisation with Plotly
-Kedro-Viz supports [Plotly](https://plotly.com/python/) and [Matplotlib](https://matplotlib.org/) integrations so that you can share your data insights while exploring your pipeline.
 
-[Plotly](https://plotly.com/python/) is a free and open source Python library that allows you to make interactive, publication-quality graphs. With the Plotly integration on Kedro-Viz, you can output your interactive charts as part of your pipeline visualisation.
+[Plotly](https://plotly.com/python/) is a free and open source Python library that combines with Kedro-Viz to output interactive charts as part of pipeline visualisation.
 
-We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
+### The spaceflights project
+We use the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and add a reporting pipeline that uses Plotly. Even if you have not yet worked through the tutorial, you can still follow this example; you'll need to use the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) to generate a copy of the project with working code in place:
+
+From your terminal:
+
+```bash
+kedro new --starter=spaceflights
+```
+
+When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout.
+
+### Update the dependencies
+
+You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets. There are two types of Plotly datasets in Kedro: the `plotly.PlotlyDataSet` and `plotly.JSONDataSet`.
+
+You must update the `requirements.txt` file in the `src` folder of your Kedro project and add the following datasets to enable Plotly for your project.
+
+```text
+kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.3`
+```
+
+Nvigate to the root directory of the project and install the dependencies for the project:
+
+```bash
+pip install -r src/requirements.txt
+```
+
+### Configure the Data Catalog
+
+The `plotly.PlotlyDataSet` dataset only supports [Plotly Express](https://plotly.com/python/plotly-express). To use it, you need to add it to the Data Catalog.
+
+Add the following to `conf/base/catalog.yml`:
+
+```yaml
+shuttle_passenger_capacity_plot:
+  type: plotly.PlotlyDataSet
+  filepath: data/08_reporting/shuttle_passenger_capacity_plot.json
+  plotly_args:
+    type: bar
+    fig:
+      x: shuttle_type
+      y: passenger_capacity
+      orientation: h
+    layout:
+      xaxis_title: Shuttles
+      yaxis_title: Average passenger capacity
+      title: Shuttle Passenger capacity
+```
 
 
-You must update the `requirements.txt` file in your Kedro project and add the following datasets to enable Plotly for your project.
+### Add the reporting pipeline
 
-`kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.3`
+In the terminal, run the following command to generate a template for the reporting pipeline:
+
+```bash
+kedro pipeline create reporting
+```
 
 
-You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
 
-There are two types of Plotly datasets in Kedro: the `plotly.PlotlyDataSet` and `plotly.JSONDataSet`.
 
-### [`plotly.PlotlyDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet)
-
-To use this dataset, configure your plot in the `catalog.yml` file. This dataset only supports [Plotly Express](https://plotly.com/python/plotly-express).
-
-Below is an example of how to visualise plots on Kedro-Viz using `plotly.PlotlyDataSet`.
 
 The below functions can be added to the `nodes.py` and `pipeline.py` files respectively.
 
@@ -51,21 +96,6 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 Next, configure the plot in the `catalog.yml` file:
 
-```yaml
-shuttle_passenger_capacity_plot:
-  type: plotly.PlotlyDataSet
-  filepath: data/08_reporting/shuttle_passenger_capacity_plot.json
-  plotly_args:
-    type: bar
-    fig:
-      x: shuttle_type
-      y: passenger_capacity
-      orientation: h
-    layout:
-      xaxis_title: Shuttles
-      yaxis_title: Average passenger capacity
-      title: Shuttle Passenger capacity
-```
 
 
 ### [`plotly.JSONDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet)
@@ -142,6 +172,9 @@ You can view the larger visualisation of the chart by clicking the 'Expand Plotl
 
 
 ![](../meta/images/pipeline_visualisation_plotly_expand.png)
+
+We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
+
 
 
 ### Visualisation with Matplotlib

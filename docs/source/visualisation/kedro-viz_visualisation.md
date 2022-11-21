@@ -1,52 +1,60 @@
 # Get started with Kedro-Viz
 
-This page assumes you are familiar with the basic Kedro concepts described in the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). If you have not yet worked through the tutorial, you can generate the project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+[Kedro-Viz](https://github.com/kedro-org/kedro-viz) is a key part of Kedro. It displays data and nodes, and the connections between them, to visualise the structure of the pipelines in a Kedro project.
 
-```
+This section assumes you are familiar with the basic Kedro concepts described in the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). If you have not yet worked through the tutorial, you can still follow this example.
+
+Generate a copy of the spaceflights tutorial project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
+
+```bash
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout this documentation. When your project is ready, navigate to the root directory of the project.
+When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout.
 
-
-## Install Kedro-Viz and visualise the project
-
-[Kedro-Viz](https://github.com/kedro-org/kedro-viz) displays data and machine-learning pipelines in an informative way, emphasising the connections between datasets and nodes. It shows the structure of your Kedro pipeline.
-
-To install the dependencies for the project, including Kedro-Viz, type the following in your terminal, from the root of the project directory:
+When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro Viz:
 
 ```bash
 pip install -r src/requirements.txt
 ```
 
-Next, type the following to run Kedro-Viz:
+## Visualise the spaceflights project
+
+To run Kedro-Viz, type the following into your terminal from the project directory:
 
 ```bash
 kedro viz
 ```
 
-This command automatically opens a browser tab to serve the visualisation at http://127.0.0.1:4141/.
+The command automatically opens a browser tab to serve the visualisation at http://127.0.0.1:4141/.
 
 You should see the following:
 
-![](../meta/images/pipeline_visualisation_tutorial.png)
+![](../meta/images/pipeline_visualisation.png)
 
-If a visualisation panel opens up and a pipeline is not visible, then please check that your [pipeline definition](../tutorial/create_a_pipeline.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/kedro-org/kedro-viz).
+If a visualisation panel opens up and a pipeline is not visible, then please check that your tutorial project code is complete if you've not generated it from the starter template.
+
+### Need help?
+
+If you still can't see the visualisation, the Kedro community can help!
+
+* use the [#questions channel](https://slack.kedro.org/) on our Slack channel (which replaces our Discord server) to ask the community for help
+* search the [archive of Discord discussions](https://linen-discord.kedro.org/)
+
 
 ### Exit an open visualisation
-To exit the visualisation, close the browser tab. To regain control of the terminal, enter `Ctrl+C` or `Cmd+C`.
+
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
 ## Automatic visualisation updates
 
-You can use the `--autoreload` flag to autoreload Kedro-Viz when a `Python` or `YAML` file changes in the project.
-
-![](../meta/images/kedro_viz_autoreload.gif)
-
-Add the flag to the command you use to start Kedro-Viz:
+You can use the `--autoreload` flag to autoreload Kedro-Viz when a `Python` or `YAML` file changes in the project. Add the flag to the command you use to start Kedro-Viz:
 
 ```bash
 kedro viz --autoreload
 ```
+
+![](../meta/images/kedro_viz_autoreload.gif)
 
 The `autoreload` flag reflects changes to the project as they happen. For example, commenting out `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
 
@@ -54,7 +62,7 @@ The `autoreload` flag reflects changes to the project as they happen. For exampl
 
 ## Visualise layers
 
-By convention, a [pipeline can be broken up into different layers](../resources/glossary.md#layers-data-engineering-convention) according to how data is processed, which makes it easier to collaborate.
+By convention, a [pipeline can be defined as having different layers](../resources/glossary.md#layers-data-engineering-convention) according to how data is processed, which makes it easier to collaborate.
 
 For example, the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
@@ -100,13 +108,13 @@ regressor:
   layer: models
 ```
 
-Run Kedro-Viz again and observe how your visualisation has changed to include the layers:
+The visualisation now includes the layers:
 
 ![](../meta/images/pipeline_visualisation_with_layers.png)
 
-## Share a pipeline
+## Share a pipeline visualisation
 
-You can share a Kedro-Viz visualisation as a JSON file:
+You can share a Kedro-Viz visualisation as a JSON file from the terminal:
 
 ```bash
 kedro viz --save-file my_shareable_pipeline.json
@@ -114,7 +122,7 @@ kedro viz --save-file my_shareable_pipeline.json
 
 This command will save a visualisation of the `__default__` pipeline as a JSON file called `my_shareable_pipeline.json`.
 
-To visualise the JSON file:
+To visualise the JSON file, type the following to load it from the terminal:
 
 ```bash
 kedro viz --load-file my_shareable_pipeline.json

@@ -9,7 +9,7 @@ This page summarises what you've learned about Kedro so far.
 
 ## [Kedro concepts](kedro_concepts.md)
 
-* Kedro nodes are the building blocks of data processing pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.
+* Kedro nodes are the building blocks of pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.
 * A pipeline organises the dependencies and execution order of a collection of nodes.
 * Kedro has a registry of all data sources the project can use called the Data Catalog. There is inbuilt support for various file types and file systems.
 * Kedro projects follow a default template that uses specific folders to store datasets, notebooks, configuration and source code.

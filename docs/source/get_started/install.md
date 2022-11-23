@@ -21,7 +21,7 @@ python --version
 
 You should see the version of Python installed on your machine:
 
-```python
+```bash
 Python 3.8.13
 ```
 

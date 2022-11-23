@@ -30,4 +30,4 @@ This page summarises what you've learned about Kedro so far.
 ## Useful links
 
 * [Kedro on GitHub](https://github.com/kedro-org/kedro)
-* [Join the Kedro community Slack channels](https://slack.kedro.org)
+* [Join the Kedro Slack organisation](https://slack.kedro.org)

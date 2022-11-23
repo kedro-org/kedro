@@ -5,6 +5,15 @@
 # Required
 version: 2
 
+# .readthedocs.yml hook to copy kedro-datasets to kedro.datasets before the building the docs
+build:
+  os: ubuntu-20.04
+  tools:
+    python: "3.7"
+  jobs:
+    post_checkout:
+      - bash docs/kedro-datasets-docs.sh
+
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: html

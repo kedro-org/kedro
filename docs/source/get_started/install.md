@@ -68,7 +68,7 @@ To exit `kedro-environment`:
 conda deactivate
 ```
 
-## Install Kedro using `pip`
+## Install Kedro using `pip` or `conda`
 
 To install Kedro from the Python Package Index (PyPI):
 

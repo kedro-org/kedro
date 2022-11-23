@@ -1,6 +1,6 @@
 # Create a new Kedro project
 
-There are several ways to create a new project once you have [installed Kedro](install.md). For example, you can create a basic Kedro project set up with the project directories and basic code, but empty to extend as you need. Alternatively, you can create a Kedro project populated with template code that acts as a starter example.
+There are a few ways to create a new project once you have [installed Kedro](install.md). For example, you can create a basic Kedro project set up with the project directories and basic code, but empty to extend as you need. Alternatively, you can create a Kedro project populated with template code that acts as a starter example.
 
 You can also use an existing Kedro project, for example, by cloning it from a GitHub repository.
 

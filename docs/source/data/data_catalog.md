@@ -536,7 +536,7 @@ The code API allows you to:
 
 ### Configure a Data Catalog
 
-In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using a number of pre-built data loaders documented in the [API reference documentation](/kedro.extras.datasets).
+In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using several pre-built data loaders documented in the [API reference documentation](/kedro.extras.datasets).
 
 ```python
 from kedro.io import DataCatalog

@@ -16,11 +16,8 @@ python
 
 You should see the version of Python installed on your machine:
 
-```python
-Python 3.8.13 (default, Mar 28 2022, 06:13:39)
-[Clang 12.0.0 ] :: Anaconda, Inc. on darwin
-Type "help", "copyright", "credits" or "license" for more information.
->>>
+```bash
+Python 3.8.13
 ```
 Type `exit()` to return to the terminal prompt.
 

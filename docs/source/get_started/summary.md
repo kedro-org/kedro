@@ -5,7 +5,7 @@ This page summarises what you've learned about Kedro so far.
 ## [Logistics](install.md)
 * Kedro can be used on Windows, macOS or Linux
 * Installation prerequisites include Python 3.7+, `git` and `conda`
-* You should install Kedro using `pip install kedro`
+* You should install Kedro using `pip install kedro` or `conda install -c conda-forge kedro`
 
 ## [Kedro concepts](kedro_concepts.md)
 

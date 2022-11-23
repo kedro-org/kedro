@@ -94,6 +94,7 @@ spark_require = {
     "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
     "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
 }
+svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
@@ -131,6 +132,7 @@ extras_require = {
     "plotly": _collect_requirements(plotly_require),
     "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
+    "svmlight": _collect_requirements(svmlight_require),
     "tensorflow": _collect_requirements(tensorflow_required),
     "yaml": _collect_requirements(yaml_require),
     **api_require,
@@ -146,6 +148,7 @@ extras_require = {
     **video_require,
     **plotly_require,
     **spark_require,
+    **svmlight_require,
     **tensorflow_required,
     **yaml_require,
 }

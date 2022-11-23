@@ -1,7 +1,7 @@
 # Frequently asked questions
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
-question which isn't answered here, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
+question which isn't answered here, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://slack.kedro.org/).
 
 ## What is Kedro?
 
@@ -263,4 +263,4 @@ exit
 
 ## How can I get my question answered?
 
-If your question isn't answered above, talk to the community on the [Kedro Slack channels](https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw).
+If your question isn't answered above, talk to the community on the [Kedro Slack channels](https://slack.kedro.org/).

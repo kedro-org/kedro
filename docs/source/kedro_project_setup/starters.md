@@ -7,7 +7,7 @@ Kedro starters provide pre-defined example code and configuration that can be re
 * To add deployment scripts and CI/CD setup for your targeted infrastructure
 
 
-A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).
+You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).
 
 ## How to use Kedro starters
 

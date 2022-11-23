@@ -24,10 +24,10 @@ You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets. Th
 You must update the `requirements.txt` file in the `src` folder of your Kedro project and add the following datasets to enable Plotly for your project.
 
 ```text
-kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]`
+kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]
 ```
 
-Nvigate to the root directory of the project and install the dependencies for the project:
+Navigate to the root directory of the project and install the dependencies for the project:
 
 ```bash
 pip install -r src/requirements.txt
@@ -61,7 +61,7 @@ shuttle_passenger_capacity_plot:
 ```
 
 
-### Add the nodes and reporting pipeline
+### Create the reporting pipeline and add the nodes
 
 In the terminal, run the following command to generate a template for the reporting pipeline:
 
@@ -69,7 +69,7 @@ In the terminal, run the following command to generate a template for the report
 kedro pipeline create reporting
 ```
 
-Add the following to `nodes.py`:
+Add the following to `nodes.py` in `src/kedro_tutorial/pipelines/reporting`:
 
 ```python
 import plotly.express as px
@@ -102,15 +102,15 @@ def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
         ]
     )
     return fig
-
-
-
 ```
 
 
-Update `pipeline.py` to add the reporting pipeline:
+Update `pipeline.py` to replace the existing code with the following:
 
 ```python
+
+from kedro.pipeline import Pipeline, node, pipeline
+from .nodes import compare_passenger_capacity
 
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
@@ -137,40 +137,53 @@ kedro run
 
 Then visualise with `kedro viz`
 
-You will see a new dataset type with icon ![](../meta/images/chart-icon.png). 
+You will see a new dataset type as an icon:
+
+![](../meta/images/chart-icon.png). 
 
 Click on the node to see a small preview of your Plotly chart in the metadata panel.
 
-![](../meta/images/pipeline_visualisation_plotly.png)
-
+![](../meta/images/pipeline_visualisation_plotly_1.png)
 
 
 You can view the larger visualisation of the chart by clicking the 'Expand Plotly Visualisation' button on the bottom of the metadata panel.
 
-![](../meta/images/pipeline_visualisation_plotly_expand.png)
+![](../meta/images/pipeline_visualisation_plotly_expand_1.png)
 
 We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
 
 
-
 ## Visualisation with Matplotlib
 
-[Matplotlib](https://matplotlib.org/) is a Python library for creating static, animated, and interactive visualisations. Integrating Matplotlib into Kedro-Viz allows you to output your charts as part of your pipeline visualisation.
+[Matplotlib](https://matplotlib.org/) is a Python library for creating static, animated, and interactive visualisations. Integrating Matplotlib into Kedro-Viz allows you to output charts as part of your pipeline visualisation.
 
 ```{note}
 The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
 ```
 
-You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.extras.datasets.matplotlib.MatplotlibWriter). You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
+You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.extras.datasets.matplotlib.MatplotlibWriter). 
+
+### Update the dependencies
+
+You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```
 kedro[matplotlib.MatplotlibWriter]==0.18.3
 ```
 
-To use this dataset, configure your plot in your Kedro node. The below functions should be added to the `nodes.py` and `pipeline.py` files respectively.
+### Configure the Data Catalog and add nodes
+You must also specify the output type in the `catalog.yml` file for the Data Catalog: 
+
+```yaml
+dummy_confusion_matrix:
+  type: matplotlib.MatplotlibWriter
+  filepath: data/08_reporting/dummy_confusion_matrix.png
+  versioned: true
+```
+
+To use this dataset, add the following to the `nodes.py` file in your reporting pipeline:
 
 ```python
-# nodes.py
 import matplotlib.pyplot as plt
 import seaborn as sn
 
@@ -187,10 +200,18 @@ def create_confusion_matrix(companies: pd.DataFrame):
     return plt
 ```
 
-> You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
+``` {note}
+You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
+```
+
+### Update the pipeline
+
+Add the following to `create_pipeline` in `pipeline.py`:
 
 ```python
-# pipeline.py
+
+from .nodes import create_confusion_matrix
+
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
     return pipeline(
@@ -204,16 +225,15 @@ def create_pipeline(**kwargs) -> Pipeline:
     )
 ```
 
-You must also specify the output type in the `catalog.yml` file, like below. Remember to set the versioned flag to `true` if you want to add the plots to experiment tracking as well.
+### Run the pipeline
 
-```yaml
-dummy_confusion_matrix:
-  type: matplotlib.MatplotlibWriter
-  filepath: data/08_reporting/dummy_confusion_matrix.png
-  versioned: true
-```
+Run the pipelines with `kedro run` and then visualise the result with `kedro viz`.
 
-Once this setup is completed, you can do a `kedro run` followed by `kedro viz` and your Kedro-Viz pipeline will show a new dataset node with this icon ![](../meta/images/chart-icon.png). Click on the node to see a small preview of your Matplotlib image in the metadata panel.
+Your Kedro-Viz pipeline will show a new dataset node with this icon 
+
+![](../meta/images/chart-icon.png). 
+
+Click on the node to see a small preview of your Matplotlib image in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_matplotlib.png)
 

@@ -7,6 +7,7 @@ set -o nounset
 # Exit script if a statement returns a non-true return value.
 set -o errexit
 
+pip install kedro-datasets
 pip install --no-deps -t kedro/to_delete kedro-datasets
 mv kedro/to_delete/kedro_datasets kedro/datasets
 rm -r kedro/to_delete

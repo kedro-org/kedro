@@ -12,7 +12,7 @@ kedro new --starter=spaceflights
 
 When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout.
 
-When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro Viz:
+When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro-Viz:
 
 ```bash
 pip install -r src/requirements.txt

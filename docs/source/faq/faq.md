@@ -159,7 +159,7 @@ pip install kedro
 
 There are a host of articles, podcasts, talks and Kedro showcase projects in the [`kedro-community`](https://github.com/kedro-org/kedro-community) repository.
 
-Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the GitHub repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
+Our preferred channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the GitHub repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
 
 ## Who maintains Kedro?
 

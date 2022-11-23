@@ -1,6 +1,6 @@
 # Kedro starters
 
-Kedro starters provide pre-defined example code and configuration that can be reused, for example:
+A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. Metaphorically, they are similar to using a template while building a blog or a website. Kedro starters provide pre-defined example code and configuration that can be reused, for example:
 
 * As template code for a typical Kedro project
 * To add a `docker-compose` setup to launch Kedro next to a monitoring stack

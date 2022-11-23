@@ -194,4 +194,4 @@ Working on your first pull request? You can learn how from these resources:
 * [First timers only](https://www.firsttimersonly.com/)
 * [How to contribute to an open source project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
 
-Previous Q&A on [GitHub discussions](https://github.com/kedro-org/kedro/discussions) and our [searchable archive from the retired Discord server](https://linen-discord.kedro.org). You can ask new questions about the development process on [Slack](https://slack.kedro.org) too!
+Previous Q&A on [GitHub discussions](https://github.com/kedro-org/kedro/discussions) and our [searchable archive of Discord discussions](https://linen-discord.kedro.org). You can ask new questions about the development process on [Slack](https://slack.kedro.org) too!

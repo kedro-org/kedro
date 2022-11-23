@@ -119,6 +119,8 @@ You should see output similar to the following, according to your username and p
 PosixPath('/Users/username/kedro_projects/iris')
 ```
 
+You can find out more about the `context` in the [API documentation](/kedro.framework.context.KedroContext).
+
 ### `pipelines`
 
 `pipelines` is a dictionary containing your project's [registered pipelines](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name):

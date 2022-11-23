@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-The following lists a set of questions that we have been asked about Kedro in the past. If you have a different question which isn't answered here, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://slack.kedro.org).
+The following lists a set of questions that we have been asked about Kedro in the past. If you have a different question which isn't answered here, check out the [searchable archive of Discord discussions](https://linen-discord.kedro.org/)(https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://slack.kedro.org).
 
 ## What is Kedro?
 

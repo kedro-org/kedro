@@ -5,7 +5,7 @@ In this tutorial, we construct nodes and pipelines for a price-prediction model 
 In the text, we assume you have started with an empty Kedro project and we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete.
 
 ```{note}
-You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../get_started/starters.md) so you can follow along without copy/pasting.
+You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../kedro_project_setup/starters.md) so you can follow along without copy/pasting.
 ```
 
 ## Scenario
@@ -27,8 +27,9 @@ Things you can do:
 
 * check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already
 * use the spaceflights starter to [create a new, separate project which contains working example code](./tutorial_template.md#create-a-new-project), and compare that project with your own
+* use [Kedro-Viz](../visualisation/kedro-viz_visualisation) to visualise your project to better understand how the datasets, nodes and pipelines fit together
 * use the [#questions channel](https://slack.kedro.org/) on our Slack channel (which replaces our Discord server) to ask the community for help
-* search the [archive of Discord discussions](https://linen-discord.kedro.org/)
+* search the [searchable archive of Discord discussions](https://linen-discord.kedro.org/)
 
 ## Terminology
 
@@ -66,6 +67,10 @@ When you build a Kedro project, you will typically follow a [standard developmen
 ### Optional: source control with `git`
 
 You don't need to do this section for the tutorial, but you may want to familiarise yourself with the use of `git` for source control.
+
+``` {note}
+For further information about this topic, check out [this post about version control for data scientists](https://flatironschool.com/blog/version-control-for-data-scientists/)
+```
 
 <details>
 <summary><b>Click to expand</b></summary>

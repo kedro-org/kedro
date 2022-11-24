@@ -153,9 +153,11 @@ You can configure Pycharm's IPython to load Kedro's Extension.
 
 Click **PyCharm | Preferences** for macOS or **File | Settings**, inside **Build, Execution, Deployment** and **Console**, enter the **Python Console** configuration.
 
-You can append the configuration necessary to use Kedro IPython to the **Starting script** as described in the [IPython configuring documentation](../tools_integration/ipython.md).
+You can append the configuration necessary to use Kedro IPython to the **Starting script**:
 
-![](../meta/images/pycharm_ipython_starting_script.png)
+```
+%load_ext kedro.ipython
+```
 
 With this configuration, when you create a Python Console you should be able to use context, session and catalog.
 

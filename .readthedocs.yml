@@ -5,7 +5,7 @@
 # Required
 version: 2
 
-# .readthedocs.yml hook to copy kedro-datasets to kedro.datasets before the building the docs
+# .readthedocs.yml hook to copy kedro-datasets to kedro.datasets before building the docs
 build:
   os: ubuntu-20.04
   tools:

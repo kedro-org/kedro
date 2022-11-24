@@ -40,6 +40,13 @@
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro test` and `kedro lint` will be deprecated.
 
+## Documentation
+* Revised the Introduction to shorten it
+* Revised the Get Started section to remove unnecessary information and clarify the learning path
+* Updated the spaceflights tutorial to simplify the later stages and clarify what the reader needed to do in each phase
+* Moved some pages that covered advanced materials into more appropriate sections
+* Moved visualisation into its own section
+* Added redirects where needed on ReadTheDocs for legacy links and bookmarks 
 
 # Release 0.18.3
 

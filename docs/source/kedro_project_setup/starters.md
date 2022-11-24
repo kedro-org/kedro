@@ -1,13 +1,14 @@
 # Kedro starters
 
+A Kedro starter contains code in the form of a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template for a Kedro project. Metaphorically, a starter is similar to using a pre-defined layout when creating a presentation or document.
+
 Kedro starters provide pre-defined example code and configuration that can be reused, for example:
 
 * As template code for a typical Kedro project
 * To add a `docker-compose` setup to launch Kedro next to a monitoring stack
 * To add deployment scripts and CI/CD setup for your targeted infrastructure
 
-
-A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).
+You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter).
 
 ## How to use Kedro starters
 
@@ -43,7 +44,7 @@ kedro starter list
 
 ## List of official starters
 
-The Kedro team maintains the following starters to bootstrap new Kedro projects:
+The Kedro team maintains the following starters for a range of Kedro projects:
 
 * [`astro-airflow-iris`](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris): The [Kedro Iris dataset example project](../get_started/new_project.md) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
 * [`standalone-datacatalog`](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog): A minimum setup to use the traditional [Iris dataset](https://www.kaggle.com/uciml/iris) with Kedro's [`DataCatalog`](../data/data_catalog.md), which is a core component of Kedro. This starter is of use in the exploratory phase of a project. For more information, read the guide to [standalone use of the `DataCatalog`](../notebooks_and_ipython/kedro_and_notebooks.md). This starter was formerly known as `mini-kedro`.

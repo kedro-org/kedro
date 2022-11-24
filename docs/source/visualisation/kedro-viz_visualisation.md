@@ -12,7 +12,7 @@ kedro new --starter=spaceflights
 
 When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout.
 
-When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro Viz:
+When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro-Viz:
 
 ```bash
 pip install -r src/requirements.txt
@@ -39,7 +39,7 @@ If a visualisation panel opens up and a pipeline is not visible, then please che
 If you still can't see the visualisation, the Kedro community can help!
 
 * use the [#questions channel](https://slack.kedro.org/) on our Slack channel (which replaces our Discord server) to ask the community for help
-* search the [archive of Discord discussions](https://linen-discord.kedro.org/)
+* search the [searchable archive of Discord discussions](https://linen-discord.kedro.org/)
 
 
 ### Exit an open visualisation

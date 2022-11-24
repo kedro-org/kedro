@@ -51,11 +51,11 @@ and the `kedro-team` channel on the Kedro Slack organisation.
 
 ## Voting process
 
-Voting can change project maintainers and decide on the future of Kedro. The TSC leads it as voting maintainers of Kedro. The voting period is one week and is either performed on GitHub Discussions or through a pull request.
+Voting can change project maintainers and decide on the future of Kedro. The TSC leads it as voting maintainers of Kedro. The voting period is one week and is either performed on GitHub discussions or through a pull request.
 
 ### Other issues or proposals
 
-GitHub Discussions is used to host votes on issues, proposals and changes affecting the future of Kedro, including amendments to our ways of working described on this page. These votes require **a 1/2 majority**.
+GitHub discussions is used to host votes on issues, proposals and changes affecting the future of Kedro, including amendments to our ways of working described on this page. These votes require **a 1/2 majority**.
 
 ### Adding or removing maintainers
 

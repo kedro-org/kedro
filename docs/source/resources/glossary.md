@@ -50,7 +50,7 @@ In many typical Kedro projects, a single (“main”) pipeline increases in comp
 ## Node
 A Kedro node is a wrapper for a pure Python function that names the inputs and outputs of that function.
 
-(A [pure function](https://realpython.com/python-functional-programming/#:~:text=A%20pure%20function%20is%20a,to%20state%20or%20mutable%20data.) is a one whose output value follows solely from its input values, without any observable side effects such as changes to state or mutable data).
+(A [pure function](https://realpython.com/python-functional-programming/#what-is-functional-programming) is a one whose output value follows solely from its input values, without any observable side effects such as changes to state or mutable data).
 
 Nodes are the building block of a pipeline. Nodes can be linked when the output of one node is the input of another.
 

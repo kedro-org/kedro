@@ -5,9 +5,40 @@ It is time to introduce the most basic elements of Kedro. You can find further i
 
 In Kedro, a node is a wrapper for a [pure Python function](../resources/glossary.md#node) that names the inputs and outputs of that function. Nodes are the building block of a pipeline, and the output of one node can be the input of another.
 
+Here are two simple nodes as an example:
+
+```python
+from kedro.pipeline import node
+
+# First node
+def return_greeting():
+    return "Hello"
+
+
+return_greeting_node = node(func=return_greeting, inputs=None, outputs="my_salutation")
+
+# Second node
+def join_statements(greeting):
+    return f"{greeting} Kedro!"
+
+
+join_statements_node = node(
+    join_statements, inputs="my_salutation", outputs="my_message"
+)
+```
+
 ## Pipeline
 
 A pipeline organises the dependencies and execution order of a collection of nodes and connects inputs and outputs while keeping your code modular. The pipeline determines the **node execution order** by resolving dependencies and does *not* necessarily run the nodes in the order in which they are passed in.
+
+Here is a pipeline comprised of the nodes shown above:
+
+```python
+from kedro.pipeline import pipeline
+
+# Assemble nodes into a pipeline
+greeting_pipeline = pipeline([return_greeting_node, join_statements_node])
+```
 
 ## Data Catalog
 

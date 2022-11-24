@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-The following lists a set of questions that we have been asked about Kedro in the past. If you have a different question which isn't answered here, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://slack.kedro.org).
+The following lists a set of questions that we have been asked about Kedro in the past. If you have a different question which isn't answered here, check out the [searchable archive of Discord discussions](https://linen-discord.kedro.org/)(https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://slack.kedro.org).
 
 ## What is Kedro?
 
@@ -159,7 +159,7 @@ pip install kedro
 
 There are a host of articles, podcasts, talks and Kedro showcase projects in the [`kedro-community`](https://github.com/kedro-org/kedro-community) repository.
 
-Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the GitHub repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
+Our preferred channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the GitHub repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
 
 ## Who maintains Kedro?
 
@@ -272,4 +272,4 @@ exit
 
 ## How can I get my question answered?
 
-If your question isn't answered above, talk to the community on the [Kedro Slack channels](https://slack.kedro.org).
+If your question isn't answered above, talk to the community on the [Kedro Slack organisation](https://slack.kedro.org).

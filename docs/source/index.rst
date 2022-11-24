@@ -57,23 +57,14 @@ Welcome to Kedro's documentation!
 
    introduction/introduction
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Get started
 
-   get_started/prerequisites
    get_started/install
-   get_started/hello_kedro
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Make a project
-
+   get_started/kedro_concepts
    get_started/new_project
-   get_started/example_project
-   get_started/starters
-   get_started/standalone_use_of_datacatalog
+   get_started/summary
 
 .. toctree::
    :maxdepth: 2
@@ -95,11 +86,18 @@ Welcome to Kedro's documentation!
    visualisation/visualise_charts_with_plotly
    visualisation/experiment_tracking
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Notebooks & IPython users
+
+   notebooks_and_ipython/kedro_and_notebooks
+   notebooks_and_ipython/kedro_as_a_data_registry
 
 .. toctree::
    :maxdepth: 2
    :caption: Kedro project setup
 
+   kedro_project_setup/starters
    kedro_project_setup/dependencies
    kedro_project_setup/configuration
    kedro_project_setup/session
@@ -131,7 +129,6 @@ Welcome to Kedro's documentation!
    extend_kedro/common_use_cases
    extend_kedro/custom_datasets
    extend_kedro/plugins
-   extend_kedro/create_kedro_starters
 
 .. toctree::
    :maxdepth: 2
@@ -179,10 +176,9 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tools integration
+   :caption: PySpark integration
 
    tools_integration/pyspark
-   tools_integration/ipython
 
 .. toctree::
    :maxdepth: 2

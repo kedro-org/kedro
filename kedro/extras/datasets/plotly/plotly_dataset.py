@@ -26,10 +26,7 @@ class PlotlyDataSet(JSONDataSet):
     ``PlotlyDataSet`` is a convenience wrapper for ``plotly.JSONDataSet``. It generates
     the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
-    Example adding a catalog entry with
-    `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example adding a catalog entry with YAML API:
 
     .. code-block:: yaml
 

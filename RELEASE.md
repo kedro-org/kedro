@@ -46,6 +46,7 @@
 * Updated the spaceflights tutorial to simplify the later stages and clarify what the reader needed to do in each phase
 * Moved some pages that covered advanced materials into more appropriate sections
 * Moved visualisation into its own section
+* Fixed a bug that degraded user experience: the table of contents is now sticky when you navigate between pages
 * Added redirects where needed on ReadTheDocs for legacy links and bookmarks 
 
 # Release 0.18.3

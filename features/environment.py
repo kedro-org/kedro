@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import venv
 from pathlib import Path
-from typing import Set
+from typing import Set  # noqa
 
 from features.steps.sh_run import run
 

@@ -6,13 +6,13 @@ import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
-from typing import Set
+from typing import Set  # noqa
 
 from pluggy import PluginManager
 
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
-from kedro.pipeline.node import Node
+from kedro.pipeline.node import Node  # noqaß
 from kedro.runner.runner import AbstractRunner, run_node
 
 

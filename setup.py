@@ -99,7 +99,7 @@ tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
         # V1 requires HDF5 and serialises differently
-        "tensorflow~=2.0"
+        "tensorflow>=2.0, <2.11.0"  # 2.11.0 is not compatible
     ]
 }
 yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <7.0"]}

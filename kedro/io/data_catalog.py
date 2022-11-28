@@ -11,6 +11,7 @@ import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Set, Type, Union
 
+from kedro.config.abstract_config import MissingConfigException
 from kedro.io.core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
@@ -42,10 +43,16 @@ def _get_credentials(
     Raises:
         KeyError: When a data set with the given name has not yet been
             registered.
+        MissingConfigError: When no credentials file is found in the
+            project.
 
     """
     try:
         return credentials[credentials_name]
+    except TypeError as exc:
+        raise MissingConfigException(
+            f"Credentials not found in your Kedro project config."
+        )
     except KeyError as exc:
         raise KeyError(
             f"Unable to find credentials '{credentials_name}': check your data "
@@ -256,7 +263,7 @@ class DataCatalog:
         """
         data_sets = {}
         catalog = copy.deepcopy(catalog) or {}
-        credentials = copy.deepcopy(credentials) or {}
+        credentials = copy.deepcopy(credentials)
         save_version = save_version or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
 

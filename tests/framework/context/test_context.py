@@ -97,6 +97,7 @@ def local_config(tmp_path):
             "filepath": boats_filepath,
             "versioned": True,
             "layer": "raw",
+            "credentials": "cred_name",
         },
         "horses": {
             "type": "pandas.CSVDataSet",
@@ -120,9 +121,10 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     parameters = tmp_path / "conf" / "base" / "parameters.json"
     db_config_path = tmp_path / "conf" / "base" / "db.ini"
     project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
+    project_credentials = {"cred_name": {"key": "secret"}}
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
-    _write_yaml(env_credentials, local_config)
+    _write_yaml(env_credentials, project_credentials)
     _write_json(parameters, project_parameters)
     _write_dummy_ini(db_config_path)
 
@@ -297,6 +299,23 @@ class TestKedroContext:
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             _ = dummy_context.catalog
 
+    def test_empty_credentials(self, dummy_context):
+
+        env_credentials = (
+            dummy_context.project_path / "conf" / "local" / "credentials.yml"
+        )
+        empty_credentials = {}
+        _write_yaml(env_credentials, empty_credentials)
+        credentials = "cred_name"
+
+        pattern = (
+            f"Unable to find credentials '{credentials}': check your data catalog and credentials configuration. "
+            f"See https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html for an example."
+        )
+
+        with pytest.raises(KeyError, match=re.escape(pattern)):
+            _ = dummy_context.catalog
+
     def test_missing_credentials(self, dummy_context):
         env_credentials = (
             dummy_context.project_path / "conf" / "local" / "credentials.yml"
@@ -304,7 +323,7 @@ class TestKedroContext:
         env_credentials.unlink()
 
         pattern = "Credentials not found in your Kedro project config."
-        with pytest.warns(UserWarning, match=re.escape(pattern)):
+        with pytest.raises(MissingConfigException, match=re.escape(pattern)):
             _ = dummy_context.catalog
 
 

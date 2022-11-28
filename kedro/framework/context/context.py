@@ -335,9 +335,8 @@ class KedroContext:
         """Getter for credentials specified in credentials directory."""
         try:
             conf_creds = self.config_loader["credentials"]
-        except MissingConfigException as exc:
-            warn(f"Credentials not found in your Kedro project config.\n{str(exc)}")
-            conf_creds = {}
+        except MissingConfigException:
+            conf_creds = None
         return conf_creds
 
 

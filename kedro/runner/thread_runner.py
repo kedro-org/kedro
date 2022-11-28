@@ -6,6 +6,7 @@ import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
+from typing import Set
 
 from pluggy import PluginManager
 

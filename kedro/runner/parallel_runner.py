@@ -11,7 +11,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Dict, Iterable, Set
+from typing import Any, Dict, Iterable
 
 from pluggy import PluginManager
 

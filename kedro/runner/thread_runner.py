@@ -12,7 +12,7 @@ from pluggy import PluginManager
 
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
-from kedro.pipeline.node import Node  # noqaß
+from kedro.pipeline.node import Node  # noqa
 from kedro.runner.runner import AbstractRunner, run_node
 
 

@@ -65,7 +65,7 @@ pandas_require = {
     "pandas.ExcelDataSet": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
-    "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0],
+    "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
     "pandas.HDFDataSet": [
         PANDAS,
         "tables~=3.6.0; platform_system == 'Windows'",

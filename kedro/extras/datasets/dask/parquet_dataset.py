@@ -193,7 +193,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
                 triad.Schema(
                     ",".join(
                         [
-                            ":".join([k, v])
+                            f"{k}:{v}"
                             for k, v in schema.items()
                             if isinstance(v, str)
                         ]

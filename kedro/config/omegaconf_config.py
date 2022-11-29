@@ -156,6 +156,10 @@ def _get_config_from_patterns_omegaconf(
             "pattern to match config filenames against."
         )
 
+    # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.
+    # It's easier to introduce them step by step, but removing them would be a breaking change.
+    _clear_omegaconf_resolvers()
+
     aggregate_config = []
     processed_files = set()  # type: Set[Path]
 
@@ -225,3 +229,14 @@ def _load_configs_omegaconf(config_filepaths: List[Path]) -> Dict[str, Any]:
         return dict(OmegaConf.merge(*aggregate_config))
 
     return config
+
+
+def _clear_omegaconf_resolvers():
+    """Clear the built-in OmegaConf resolvers."""
+    OmegaConf.clear_resolver("oc.env")
+    OmegaConf.clear_resolver("oc.create")
+    OmegaConf.clear_resolver("oc.deprecated")
+    OmegaConf.clear_resolver("oc.decode")
+    OmegaConf.clear_resolver("oc.select")
+    OmegaConf.clear_resolver("oc.dict.keys")
+    OmegaConf.clear_resolver("oc.dict.values")

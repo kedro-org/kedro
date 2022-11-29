@@ -299,33 +299,6 @@ class TestKedroContext:
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             _ = dummy_context.catalog
 
-    def test_empty_credentials(self, dummy_context):
-
-        env_credentials = (
-            dummy_context.project_path / "conf" / "local" / "credentials.yml"
-        )
-        empty_credentials = {}
-        _write_yaml(env_credentials, empty_credentials)
-        credentials = "cred_name"
-
-        pattern = (
-            f"Unable to find credentials '{credentials}': check your data catalog and credentials configuration. "
-            f"See https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html for an example."
-        )
-
-        with pytest.raises(KeyError, match=re.escape(pattern)):
-            _ = dummy_context.catalog
-
-    def test_missing_credentials(self, dummy_context):
-        env_credentials = (
-            dummy_context.project_path / "conf" / "local" / "credentials.yml"
-        )
-        env_credentials.unlink()
-
-        pattern = "Credentials not found in your Kedro project config."
-        with pytest.raises(MissingConfigException, match=re.escape(pattern)):
-            _ = dummy_context.catalog
-
 
 @pytest.mark.parametrize(
     "path_string,expected",

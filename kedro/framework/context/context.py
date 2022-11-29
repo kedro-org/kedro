@@ -336,7 +336,7 @@ class KedroContext:
         try:
             conf_creds = self.config_loader["credentials"]
         except MissingConfigException:
-            conf_creds = None
+            conf_creds = {}
         return conf_creds
 
 

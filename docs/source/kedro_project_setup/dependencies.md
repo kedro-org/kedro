@@ -1,9 +1,13 @@
 # Dependencies
 
-## Project-specific dependencies
-When we introduced Kedro, we touched briefly on how to specify a project's dependencies to make it easier for others to run your project and avoid version conflicts downstream.
+Both `pip install kedro` and `conda install -c conda-forge kedro` install the core Kedro module, which includes the CLI tool, project template, pipeline abstraction, framework, and support for configuration.
 
-You can add or remove dependencies. For a new project, edit the `src/requirements.txt` file, then run the following:
+When you create a project, you then introduce additional dependencies for the tasks it performs.
+
+## Project-specific dependencies
+You can use Kedro to specify a project's exact dependencies to make it easier for you and others to run your project in the future, and to avoid version conflicts downstream.
+
+To add or remove dependencies to a project, edit the `src/requirements.txt` file, then run the following:
 
 ```bash
 kedro build-reqs

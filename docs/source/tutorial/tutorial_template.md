@@ -14,7 +14,7 @@ Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you r
 
 ## Create a new project
 
-If you have not yet set up Kedro, please do so by following the guidelines to [set up a virtual environment with `conda`](../get_started/prerequisites.md#create-a-virtual-environment-with-conda) and [install Kedro](../get_started/install.md).
+If you have not yet set up Kedro, do so by [following the guidelines to install Kedro](../get_started/install.md).
 
 ```{important}
 We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.3).
@@ -36,10 +36,6 @@ For either option, when prompted for a project name, enter `Kedro Tutorial`. Whe
 
 ```bash
 cd kedro-tutorial
-```
-
-```{note}
-The first time you type a `kedro` command in your new project, you will be asked whether you wish to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask you again.
 ```
 
 ## Project dependencies

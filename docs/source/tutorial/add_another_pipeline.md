@@ -8,7 +8,6 @@ This section explains the following:
 
 * How to add a second Kedro pipeline for data science code that extends the default project pipeline
 * How to 'slice' the project and run just part of the default pipeline
-* How to visualise the default project pipeline
 * (Optional) How to make a [modular pipeline](../nodes_and_pipelines/modular_pipelines.md)
 * (Optional) How to specify the way the pipeline nodes are run: sequentially or in parallel
 
@@ -254,26 +253,6 @@ This will only work if you have persisted the input to the `data_science` pipeli
 ```
 
 There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run).
-
-
-## Visualise the project
-
-The documentation on [visualisation with Kedro-Viz](../visualisation/kedro-viz_visualisation) discusses this topic in greater detail, so this is a swift introduction on how to use Kedro-Viz to visualise the project.
-
-In your terminal type the following:
-
-```bash
-kedro viz
-```
-
-This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
-
-You should see the following:
-
-![](../meta/images/pipeline_visualisation.png)
-
-To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.
-
 
 ## Optional: modular pipelines
 

@@ -344,3 +344,38 @@ class TestOmegaConfLoader:
             "params*/**",
             "**/params*",
         ]
+
+    def test_merging_strategy_only_overwrites_specified_key(self, tmp_path):
+        base_mlflow = tmp_path / _BASE_ENV / "mlflow.yml"
+        base_config = {
+            "tracking": {
+                "disable_tracking": {"pipelines": "[on_exit_notification]"},
+                "experiment": {
+                    "name": "name-of-local-experiment",
+                },
+                "params": {"long_params_strategy": "tag"},
+            }
+        }
+        local_mlflow = tmp_path / _DEFAULT_RUN_ENV / "mlflow.yml"
+        local_config = {
+            "tracking": {
+                "experiment": {
+                    "name": "name-of-prod-experiment",
+                },
+            }
+        }
+
+        _write_yaml(base_mlflow, base_config)
+        _write_yaml(local_mlflow, local_config)
+
+        conf = OmegaConfLoader(str(tmp_path)).get("mlflow*")
+
+        assert conf == {
+            "tracking": {
+                "disable_tracking": {"pipelines": "[on_exit_notification]"},
+                "experiment": {
+                    "name": "name-of-prod-experiment",
+                },
+                "params": {"long_params_strategy": "tag"},
+            }
+        }

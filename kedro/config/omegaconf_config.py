@@ -156,7 +156,7 @@ def _get_config_from_patterns_omegaconf(
             "pattern to match config filenames against."
         )
 
-    config = {}  # type: Dict[str, Any]
+    aggregate_config = []
     processed_files = set()  # type: Set[Path]
 
     for conf_path in conf_paths:
@@ -172,16 +172,7 @@ def _get_config_from_patterns_omegaconf(
 
         new_conf = _load_configs_omegaconf(config_filepaths=config_filepaths)
 
-        common_keys = config.keys() & new_conf.keys()
-        if common_keys:
-            sorted_keys = ", ".join(sorted(common_keys))
-            msg = (
-                "Config from path '%s' will override the following "
-                "existing top-level config keys: %s"
-            )
-            _config_logger.info(msg, conf_path, sorted_keys)
-
-        config.update(new_conf)
+        aggregate_config.append(new_conf)
         processed_files |= set(config_filepaths)
 
     if not processed_files:
@@ -189,7 +180,7 @@ def _get_config_from_patterns_omegaconf(
             f"No files of YAML or JSON format found in {conf_paths} matching the glob "
             f"pattern(s): {patterns}"
         )
-    return config
+    return dict(OmegaConf.merge(*aggregate_config))
 
 
 def _load_configs_omegaconf(config_filepaths: List[Path]) -> Dict[str, Any]:

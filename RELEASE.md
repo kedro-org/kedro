@@ -22,6 +22,7 @@
 | `video.VideoDataSet`                 | Read and write video files from a filesystem                               | `kedro.extras.datasets.video` |
 | `video.video_dataset.SequenceVideo`  | Create a video object from an iterable sequence to use with `VideoDataSet` | `kedro.extras.datasets.video` |
 | `video.video_dataset.GeneratorVideo` | Create a video object from a generator to use with `VideoDataSet`          | `kedro.extras.datasets.video` |
+* Implemented support for a functional definition of schema in `dask.ParquetDataSet` to work with the `dask.to_parquet` API.
 
 ## Bug fixes and other changes
 * Fixed `kedro micropkg pull` for packages on PyPI.

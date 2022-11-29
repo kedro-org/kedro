@@ -97,7 +97,6 @@ def local_config(tmp_path):
             "filepath": boats_filepath,
             "versioned": True,
             "layer": "raw",
-            "credentials": "cred_name",
         },
         "horses": {
             "type": "pandas.CSVDataSet",
@@ -121,10 +120,9 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     parameters = tmp_path / "conf" / "base" / "parameters.json"
     db_config_path = tmp_path / "conf" / "base" / "db.ini"
     project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
-    project_credentials = {"cred_name": {"key": "secret"}}
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
-    _write_yaml(env_credentials, project_credentials)
+    _write_yaml(env_credentials, local_config)
     _write_json(parameters, project_parameters)
     _write_dummy_ini(db_config_path)
 

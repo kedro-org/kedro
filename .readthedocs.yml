@@ -12,8 +12,9 @@ build:
     python: "3.7"
   jobs:
     post_checkout:
-      - echo "pip install kedro-datasets"
       - echo "./docs/kedro-datasets-docs.sh"
+    post_create_environment:
+      - echo "pip install kedro-datasets"
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

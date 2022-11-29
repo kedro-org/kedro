@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 import dask.dataframe as dd
 import fsspec
+import triad
 
 from kedro.io.core import AbstractDataSet, get_protocol_and_path
 
@@ -46,7 +47,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
             >>> import dask.dataframe as dd
             >>>
             >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-            >>>                      'col3': [5, 6]})
+            >>>                      'col3': [[5, 6], [7, 8]]})
             >>> ddf = dd.from_pandas(data, npartitions=2)
             >>>
             >>> data_set = ParquetDataSet(
@@ -63,6 +64,29 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
             >>> reloaded = data_set.load()
             >>>
             >>> assert ddf.compute().equals(reloaded.compute())
+
+    The output schema can also be explicitly specified using Triad's grammar.
+    This is processed to map specific columns into pyarrow field types or schema.
+
+    References:
+    https://triad.readthedocs.io/en/latest/api/triad.collections.html#module-triad.collections.schema
+    https://arrow.apache.org/docs/python/api/datatypes.html
+
+        .. code-block:: yaml
+
+            >>> parquet_dataset:
+            >>>   type: dask.ParquetDataSet
+            >>>   filepath: "s3://bucket_name/path/to/folder"
+            >>>   credentials:
+            >>>     client_kwargs:
+            >>>       aws_access_key_id: YOUR_KEY
+            >>>       aws_secret_access_key: "YOUR SECRET"
+            >>>   save_args:
+            >>>     compression: GZIP
+            >>>     schema:
+            >>>       col1: [int32]
+            >>>       col2: [int32]
+            >>>       col3: [[int32]]
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
@@ -128,7 +152,58 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         )
 
     def _save(self, data: dd.DataFrame) -> None:
+        self._process_schema()
         data.to_parquet(self._filepath, storage_options=self.fs_args, **self._save_args)
+
+    def _process_schema(self) -> None:
+        """This method processes the schema in the catalog.yml or the API, if provided.
+        This assumes that the schema is specified using Triad's grammar for
+        schema definition.
+
+        When the value of the `schema` variable is a string, it is assumed that
+        it corresponds to the full schema specification for the data.
+
+        Alternatively, if the `schema` is specified as a dictionary, then only the
+        columns that are specified will be strictly mapped to a field type. The other
+        unspecified columns, if present, will be inferred from the data.
+
+        This method converts the Triad-parsed schema into a pyarrow schema.
+        The output directly supports Dask's specifications for providing a schema
+        when saving to a parquet file.
+
+        Note that if a `pa.Schema` object is passed directly in the `schema` argument, no
+        processing will be done. Additionally, the behavior when passing a `pa.Schema`
+        object is assumed to be consistent with how Dask sees it. That is, it should fully
+        define the  schema for all fields.
+        """
+        schema = self._save_args.get("schema")
+
+        if isinstance(schema, dict):
+            # The schema may contain values of different types, e.g., pa.DataType, Python types,
+            # strings, etc. The latter requires a transformation, then we use triad handle all
+            # other value types.
+
+            # Create a schema from values that triad can handle directly
+            triad_schema = triad.Schema(
+                {k: v for k, v in schema.items() if not isinstance(v, str)}
+            )
+
+            # Handle the schema keys that are represented as string and add them to the triad schema
+            triad_schema.update(
+                triad.Schema(
+                    ",".join(
+                        [f"{k}:{v}" for k, v in schema.items() if isinstance(v, str)]
+                    )
+                )
+            )
+
+            # Update the schema argument with the normalized schema
+            self._save_args["schema"].update(
+                {col: field.type for col, field in triad_schema.items()}
+            )
+
+        elif isinstance(schema, str):
+            self._save_args["schema"] = triad.Schema(schema).pyarrow_schema
 
     def _exists(self) -> bool:
         protocol = get_protocol_and_path(self._filepath)[0]

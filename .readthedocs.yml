@@ -12,7 +12,7 @@ build:
     python: "3.7"
   jobs:
     post_create_environment:
-      - echo "./docs/kedro-datasets-docs.sh"
+      - ./docs/kedro-datasets-docs.sh
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

@@ -14,7 +14,7 @@ build:
     post_checkout:
       - echo "./docs/kedro-datasets-docs.sh"
     post_create_environment:
-      - echo "/home/docs/checkouts/readthedocs.org/user_builds/kedro/envs/latest/bin/python -m pip install kedro-datasets"
+      - home/docs/checkouts/readthedocs.org/user_builds/kedro/envs/latest/bin/python -m pip install kedro-datasets
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

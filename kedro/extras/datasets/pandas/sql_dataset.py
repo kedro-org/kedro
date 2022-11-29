@@ -127,7 +127,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
     .. code-block:: yaml
 
-            >>> db_creds:
+            >>> db_credentials:
             >>>     con: postgresql://scott:tiger@localhost/test
 
     Example using Python API:
@@ -304,7 +304,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     .. code-block:: yaml
 
-            >>> db_creds:
+            >>> db_credentials:
             >>>     con: postgresql://scott:tiger@localhost/test
 
     Example using Python API:

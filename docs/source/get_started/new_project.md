@@ -1,31 +1,33 @@
-# Create a new project
+# Create a new Kedro project
 
-Once you have [installed Kedro](./install.md), to create a new, empty project, you can answer a series of questions, or use settings recorded in a configuration file.
+There are a few ways to create a new project once you have [installed Kedro](install.md). For example, you can create a basic Kedro project set up with the project directories and basic code, but empty to extend as you need. Alternatively, you can create a Kedro project populated with template code that acts as a starter example.
 
-If you want to create a Kedro project that is populated with some template or example code, you can specify the `--starter` flag to use Kedro starters. Read the guide to [creating new projects with Kedro Starters](./starters.md) for more information.
+## Create a new empty project
 
-## Create a new project interactively
-
-Create a new project in your current working directory:
+The simplest way to create a default Kedro project is to navigate to your preferred directory and type:
 
 ```bash
 kedro new
 ```
 
-You will be asked to enter the `project_name`. The `project_name` must be at least two characters long, and only contain alphanumeric symbols, spaces, underscores and hyphens. The `project_name` is used to automatically generate the `repo_name` and `python_package`.
+You will be asked to enter a name for your project, which can be human-readable and may contain alphanumeric symbols, spaces, underscores and hyphens. It must be at least two characters long.
 
-| Option           | Example       | Description                                                               |
-| ---------------- | ------------- | ------------------------------------------------------------------------- |
-| `project_name`   | `Get Started` | A human-readable name for your new project                                |
-| `repo_name`      | `get-started` | Directory that holds your project repository                              |
-| `python_package` | `get_started` | A name for the Python package name in your project (short, all-lowercase) |
+Your choice is set as the value of `project_name` and is used to generate the `repo_name` and `python_package` automatically.
+
+So, if you enter "Get Started", the directory name for the project (`repo_name`) is automatically set to be `get-started`, and the Python package name (`python_package`) for your project is set to be `get_started`.
+
+| Description                                                     | Setting          | Example       |
+| --------------------------------------------------------------- | ---------------- | ------------- |
+| A human-readable name for your new project                      | `project_name`   | `Get Started` |
+| Local directory to store your project                           | `repo_name`      | `get-started` |
+| The Python package name for your project (short, all-lowercase) | `python_package` | `get_started` |
 
 
-The output lists the directory in which to find the project.
+The output of `kedro new` is a directory containing all the project files and subdirectories required for a basic Kedro project, ready to extend with your own code.
 
-## Create a new project from a configuration file
+### Create a new project from a configuration file
 
-You can create a new project from a configuration file if you prefer. The file must contain:
+If you prefer to customise your new project's directory and package name, you can instead use a configuration file to specify those values. The configuration file must contain:
 
 -   `output_dir` The path in which to create the project directory
 -   `project_name`
@@ -36,21 +38,92 @@ The `output_dir` can be set to wherever you want to create the project. For exam
 
 ```yaml
 output_dir: ~/code
-project_name: Get Started
-repo_name: get-started
-python_package: get_started
+project_name: My First Kedro Project
+repo_name: testing-kedro
+python_package: test_kedro
 ```
 
-To create the new project:
+To create this new project:
 
 ```bash
-kedro new --config config.yml
+kedro new --config <path>/config.yml
 ```
 
-## Initialise a `git` repository
+## Create a new project containing example code
 
-Having created your new project, if you are using `git`, you may want to set up a new repository by calling:
+You can use a [Kedro Starter](../kedro_project_setup/starters.md) to create a project containing template code, to run as-is or to adapt and extend.
+
+To illustrate, we will create a Kedro project with example code based on the familiar [Iris dataset](https://www.kaggle.com/uciml/iris).
+
+### Background information for the iris dataset example
+The dataset was generated in 1936 by the British statistician and biologist Ronald Fisher. The dataset contains 150 samples in total, comprising 50 samples of 3 different species of Iris plant (Iris Setosa, Iris Versicolour and Iris Virginica). For each sample, the flower measurements are recorded for the sepal length, sepal width, petal length and petal width.
+
+![](../meta/images/iris_measurements.png)
+
+A machine learning model can use the Iris dataset to illustrate classification (a method used to determine the type of an object by comparison with similar objects that have previously been categorised). Once trained on known data, the machine learning model can make a predictive classification by comparing a test object to the output of its training data.
+
+### Create the example project
+
+The first step is to create the Kedro project using a starter to add the example code and data. Feel free to name your project as you like, but here we will assume the project's name is `get started`.
 
 ```bash
-git init
+kedro new --starter=pandas-iris
 ```
+
+### Run the example project
+
+Once you have created the project, to run project-specific Kedro commands, you must navigate to the directory in which it has been created and install the project's dependencies:
+
+```bash
+cd get-started
+pip install -r src/requirements.txt
+```
+
+You are ready to run the project:
+
+```bash
+kedro run
+```
+
+```{note}
+The first time you type a `kedro` command in your new project, you will be asked whether you wish to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file so that subsequent calls to `kedro` in this project do not ask you again.
+```
+
+When the command completes, you should see a log message similar to the following in your console:
+
+```
+[08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
+                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
+                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
+                    INFO     Pipeline execution completed successfully.                                      runner.py:89
+```
+
+### Under the hood: Pipelines and nodes
+
+The example project contains a single pipeline stored in `src/get_started/pipeline.py`. The pipeline is comprised of nodes that are responsible for splitting the data into training and testing samples, running the 1-nearest neighbour algorithm to make predictions and accuracy-reporting.
+
+The nodes are stored in `src/get_started/nodes.py`:
+
+| Node            | Description                                                                         | Node function name |
+| --------------- | ----------------------------------------------------------------------------------- | ------------------ |
+| Split data      | Splits the example Iris dataset into train and test samples                         | `split_data`       |
+| Make Predictions| Makes class predictions (using 1-nearest neighbour classifier and train-test set)   | `make_predictions` |
+| Report accuracy | Reports the accuracy of the predictions performed by the previous node.             | `report_accuracy`  |
+
+### Visualise the project
+
+This is a swift introduction to show how to visualise the project with Kedro-Viz. See the [visualisation documentation](../visualisation/kedro-viz_visualisation) for more detail.
+
+In your terminal type the following:
+
+```bash
+kedro viz
+```
+
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
+
+You should see the following, which you can explore to learn more about the pipeline, nodes and datasets:
+
+![](../meta/images/pipeline_visualisation.png)
+
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.

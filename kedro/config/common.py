@@ -175,8 +175,9 @@ def _lookup_config_filepaths(
     patterns: Iterable[str],
     processed_files: Set[Path],
     logger: Any,
+    omegaconf: bool = False,
 ) -> List[Path]:
-    config_files = _path_lookup(conf_path, patterns)
+    config_files = _path_lookup(conf_path, patterns, omegaconf)
 
     seen_files = config_files & processed_files
     if seen_files:
@@ -222,7 +223,11 @@ def _check_duplicate_keys(
         raise ValueError(f"Duplicate keys found in {filepath} and:\n- {dup_str}")
 
 
-def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> Set[Path]:
+def _path_lookup(
+    conf_path: Path,
+    patterns: Iterable[str],
+    omegaconf: bool = False,
+) -> Set[Path]:
     """Return a set of all configuration files from ``conf_path`` or
     its subdirectories, which satisfy a given list of glob patterns.
 
@@ -242,7 +247,11 @@ def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> Set[Path]:
         # therefore iglob is used instead
         for each in iglob(str(conf_path / pattern), recursive=True):
             path = Path(each).resolve()
-            if path.is_file() and path.suffix in SUPPORTED_EXTENSIONS:
-                config_files.add(path)
+            if omegaconf:
+                if path.is_file() and path.suffix in [".yml", ".yaml", ".json"]:
+                    config_files.add(path)
+            else:
+                if path.is_file() and path.suffix in SUPPORTED_EXTENSIONS:
+                    config_files.add(path)
 
     return config_files

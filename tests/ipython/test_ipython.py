@@ -15,7 +15,7 @@ PROJECT_NAME = "fake_project_name"
 PROJECT_VERSION = "0.1"
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True)  # pylint: disable=reimported
 def cleanup_pipeline():
     yield
     from kedro.framework.project import pipelines
@@ -49,113 +49,114 @@ def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.configure_project")
     mocker.patch("kedro.ipython.KedroSession.create")
 
+class TestLoadKedroObjects:
+    def test_ipython_load_entry_points(self,
+        mocker, mock_kedro_project, fake_metadata, caplog, ipython  # pylint: disable=unused-argument
+    ):
+        mock_line_magic = mocker.MagicMock()
+        mock_line_magic_name = "abc"
+        mock_line_magic.__name__ = mock_line_magic_name
+        mock_line_magic.__qualname__ = mock_line_magic_name  # Required by IPython
 
-def test_ipython_load_entry_points(
-    mocker, mock_kedro_project, fake_metadata, caplog, ipython
-):
-    mock_line_magic = mocker.MagicMock()
-    mock_line_magic_name = "abc"
-    mock_line_magic.__name__ = mock_line_magic_name
-    mock_line_magic.__qualname__ = mock_line_magic_name  # Required by IPython
+        mocker.patch("kedro.ipython.load_entry_points", return_value=[mock_line_magic])
+        expected_message = f"Registered line magic '{mock_line_magic_name}'"
 
-    mocker.patch("kedro.ipython.load_entry_points", return_value=[mock_line_magic])
-    expected_message = f"Registered line magic '{mock_line_magic_name}'"
+        reload_kedro(fake_metadata.project_path)
 
-    reload_kedro(fake_metadata.project_path)
-
-    log_messages = [record.getMessage() for record in caplog.records]
-    assert expected_message in log_messages
-
-
-def test_ipython_lazy_load_pipeline(
-    mocker,
-    mock_kedro_project,
-    fake_metadata,
-    ipython,
-):
-    pipelines.configure("dummy")  # Setup the pipelines
-
-    my_pipelines = {"ds": Pipeline([])}
-
-    def my_register_pipeline():
-        return my_pipelines
-
-    mocker.patch.object(
-        pipelines,
-        "_get_pipelines_registry_callable",
-        return_value=my_register_pipeline,
-    )
-    reload_kedro()
-
-    assert pipelines._content == {}  # Check if it is lazy loaded
-    pipelines._load_data()  # Trigger data load
-    assert pipelines._content == my_pipelines
+        log_messages = [record.getMessage() for record in caplog.records]
+        assert expected_message in log_messages
 
 
-def test_ipython_load_objects(
-    mocker, mock_kedro_project, fake_metadata, caplog, ipython
-):
-    mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
-    pipelines.configure("dummy")  # Setup the pipelines
+    def test_ipython_lazy_load_pipeline(
+        self,
+        mocker,
+        mock_kedro_project,
+        fake_metadata,
+        ipython,
+    ):
+        pipelines.configure("dummy")  # Setup the pipelines
 
-    my_pipelines = {"ds": Pipeline([])}
+        my_pipelines = {"ds": Pipeline([])}
 
-    def my_register_pipeline():
-        return my_pipelines
+        def my_register_pipeline():
+            return my_pipelines
 
-    mocker.patch.object(
-        pipelines,
-        "_get_pipelines_registry_callable",
-        return_value=my_register_pipeline,
-    )
-    ipython_spy = mocker.spy(ipython, "push")
+        mocker.patch.object(
+            pipelines,
+            "_get_pipelines_registry_callable",
+            return_value=my_register_pipeline,
+        )
+        reload_kedro()
 
-    reload_kedro()
-
-    mock_session_create.assert_called_once_with(
-        PACKAGE_NAME, None, env=None, extra_params=None
-    )
-    _, kwargs = ipython_spy.call_args_list[0]
-    variables = kwargs["variables"]
-
-    assert variables["context"] == mock_session_create().load_context()
-    assert variables["catalog"] == mock_session_create().load_context().catalog
-    assert variables["session"] == mock_session_create()
-    assert variables["pipelines"] == my_pipelines
+        assert pipelines._content == {}  # Check if it is lazy loaded
+        pipelines._load_data()  # Trigger data load
+        assert pipelines._content == my_pipelines
 
 
-def test_ipython_load_objects_with_args(
-    mocker, mock_kedro_project, fake_metadata, caplog, ipython
-):
-    mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
-    pipelines.configure("dummy")  # Setup the pipelines
+    def test_ipython_load_objects(self,
+        mocker, mock_kedro_project, fake_metadata, caplog, ipython  # pylint: disable=unused-argument
+    ):
+        mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
+        pipelines.configure("dummy")  # Setup the pipelines
 
-    my_pipelines = {"ds": Pipeline([])}
+        my_pipelines = {"ds": Pipeline([])}
 
-    def my_register_pipeline():
-        return my_pipelines
+        def my_register_pipeline():
+            return my_pipelines
 
-    mocker.patch.object(
-        pipelines,
-        "_get_pipelines_registry_callable",
-        return_value=my_register_pipeline,
-    )
-    ipython_spy = mocker.spy(ipython, "push")
-    dummy_env = "env"
-    dummy_dict = {"key": "value"}
+        mocker.patch.object(
+            pipelines,
+            "_get_pipelines_registry_callable",
+            return_value=my_register_pipeline,
+        )
+        ipython_spy = mocker.spy(ipython, "push")
 
-    reload_kedro(fake_metadata.project_path, "env", {"key": "value"})
+        reload_kedro()
 
-    mock_session_create.assert_called_once_with(
-        PACKAGE_NAME, fake_metadata.project_path, env=dummy_env, extra_params=dummy_dict
-    )
-    _, kwargs = ipython_spy.call_args_list[0]
-    variables = kwargs["variables"]
+        mock_session_create.assert_called_once_with(
+            PACKAGE_NAME, None, env=None, extra_params=None
+        )
+        _, kwargs = ipython_spy.call_args_list[0]
+        variables = kwargs["variables"]
 
-    assert variables["context"] == mock_session_create().load_context()
-    assert variables["catalog"] == mock_session_create().load_context().catalog
-    assert variables["session"] == mock_session_create()
-    assert variables["pipelines"] == my_pipelines
+        assert variables["context"] == mock_session_create().load_context()
+        assert variables["catalog"] == mock_session_create().load_context().catalog
+        assert variables["session"] == mock_session_create()
+        assert variables["pipelines"] == my_pipelines
+
+
+    def test_ipython_load_objects_with_args(
+        mocker, mock_kedro_project, fake_metadata, ipython  # pylint: disable=unused-argument
+    ):
+        mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
+        pipelines.configure("dummy")  # Setup the pipelines
+
+        my_pipelines = {"ds": Pipeline([])}
+
+        def my_register_pipeline():
+            return my_pipelines
+
+        mocker.patch.object(
+            pipelines,
+            "_get_pipelines_registry_callable",
+            return_value=my_register_pipeline,
+        )
+        ipython_spy = mocker.spy(ipython, "push")
+        dummy_env = "env"
+        dummy_dict = {"key": "value"}
+
+        reload_kedro(fake_metadata.project_path, "env", {"key": "value"})
+
+        mock_session_create.assert_called_once_with(
+            PACKAGE_NAME, fake_metadata.project_path, env=dummy_env, extra_params=dummy_dict
+        )
+        _, kwargs = ipython_spy.call_args_list[0]
+        variables = kwargs["variables"]
+
+        assert variables["context"] == mock_session_create().load_context()
+        assert variables["catalog"] == mock_session_create().load_context().catalog
+        assert variables["session"] == mock_session_create()
+        assert variables["pipelines"] == my_pipelines
 
 
 class TestLoadIPythonExtension:

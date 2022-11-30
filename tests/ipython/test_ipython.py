@@ -5,10 +5,10 @@ import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
 
+from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.ipython import _resolve_project_path, load_ipython_extension, reload_kedro
 from kedro.pipeline import Pipeline
-from kedro.framework.project import pipelines
 
 PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
@@ -80,14 +80,14 @@ def test_ipython_lazy_load_pipeline(
     def my_register_pipeline():
         return my_pipelines
 
-    mocker.patch(
-        "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
+    mocker.patch.object(
+        pipelines,
+        "_get_pipelines_registry_callable",
         return_value=my_register_pipeline,
     )
     reload_kedro()
 
     assert pipelines._content == {}  # Check if it is lazy loaded
-    #
     pipelines._load_data()  # Trigger data load
     assert pipelines._content == my_pipelines
 
@@ -103,8 +103,9 @@ def test_ipython_load_objects(
     def my_register_pipeline():
         return my_pipelines
 
-    mocker.patch(
-        "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
+    mocker.patch.object(
+        pipelines,
+        "_get_pipelines_registry_callable",
         return_value=my_register_pipeline,
     )
     ipython_spy = mocker.spy(ipython, "push")
@@ -134,8 +135,9 @@ def test_ipython_load_objects_with_args(
     def my_register_pipeline():
         return my_pipelines
 
-    mocker.patch(
-        "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
+    mocker.patch.object(
+        pipelines,
+        "_get_pipelines_registry_callable",
         return_value=my_register_pipeline,
     )
     ipython_spy = mocker.spy(ipython, "push")

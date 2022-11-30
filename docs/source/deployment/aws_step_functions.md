@@ -131,7 +131,7 @@ from unittest.mock import patch
 def handler(event, context):
     from kedro.framework.project import configure_project
 
-    configure_project("spaceflights_steps_function")
+    configure_project("spaceflights_step_functions")
     node_to_run = event["node_name"]
 
     # Since _multiprocessing.SemLock is not implemented on lambda yet,
@@ -179,8 +179,8 @@ COPY lambda_handler.py ${FUNCTION_DIR}
 # Add conf/ directory
 COPY conf ${FUNCTION_DIR}/conf
 # Install Kedro pipeline
-COPY dist/spaceflights_steps_function-0.1-py3-none-any.whl .
-RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir spaceflights_steps_function-0.1-py3-none-any.whl --target ${FUNCTION_DIR}
+COPY dist/spaceflights_step_functions-0.1-py3-none-any.whl .
+RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir spaceflights_step_functions-0.1-py3-none-any.whl --target ${FUNCTION_DIR}
 # Install Lambda Runtime Interface Client for Python
 RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir awslambdaric --target ${FUNCTION_DIR}
 

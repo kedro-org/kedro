@@ -11,8 +11,8 @@ build:
   tools:
     python: "3.7"
   jobs:
-    post_checkout:
-      - bash docs/kedro-datasets-docs.sh
+    post_create_environment:
+      - ./docs/kedro-datasets-docs.sh
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

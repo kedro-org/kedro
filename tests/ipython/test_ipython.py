@@ -80,7 +80,7 @@ def test_ipython_lazy_load_pipeline(
 
     mocker.patch(
         "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
-        return_value=my_register_pipeline,
+        return_value=my_register_pipeline(),
     )
     reload_kedro()
 

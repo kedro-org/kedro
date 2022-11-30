@@ -51,22 +51,7 @@
 * Added redirects where needed on ReadTheDocs for legacy links and bookmarks 
 
 ## Contributions from the Kedroid community
-We are grateful to the following for submitting PRs that contributed to this release:
-
-* [jstammers](https://github.com/jstammers)
-* [FlorianGD](https://github.com/FlorianGD)
-* [yash6318](https://github.com/yash6318)
-* [carlaprv](https://github.com/carlaprv)
-* [dinotuku](https://github.com/dinotuku)
-*  [williamcaicedo](https://github.com/williamcaicedo)
-* [avan-sh](https://github.com/avan-sh)
-* [Kastakin](https://github.com/Kastakin)
-* [amaralbf](https://github.com/amaralbf)
-* [BSGalvan](https://github.com/BSGalvan)
-* [levimjoseph](https://github.com/levimjoseph)
-* [daniel-falk](https://github.com/daniel-falk)
-* [clotildeguinard](https://github.com/clotildeguinard)
-* [picklejuicedev](https://github.com/picklejuicedev) for comments and input to documentation changes
+We are grateful to the following for submitting PRs that contributed to this release: [jstammers](https://github.com/jstammers), [FlorianGD](https://github.com/FlorianGD), [yash6318](https://github.com/yash6318), [carlaprv](https://github.com/carlaprv), [dinotuku](https://github.com/dinotuku), [williamcaicedo](https://github.com/williamcaicedo), [avan-sh](https://github.com/avan-sh), [Kastakin](https://github.com/Kastakin), [amaralbf](https://github.com/amaralbf), [BSGalvan](https://github.com/BSGalvan), [levimjoseph](https://github.com/levimjoseph), [daniel-falk](https://github.com/daniel-falk), [clotildeguinard](https://github.com/clotildeguinard), [avsolatorio](https://github.com/avsolatorio), and [picklejuicedev](https://github.com/picklejuicedev) for comments and input to documentation changes
 
 # Release 0.18.3
 

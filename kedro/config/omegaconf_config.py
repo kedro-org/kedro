@@ -22,7 +22,8 @@ _config_logger = logging.getLogger(__name__)
 class OmegaConfLoader(AbstractConfigLoader):
     """Recursively scan directories (config paths) contained in ``conf_source`` for
     configuration files with a ``yaml``, ``yml`` or ``json`` extension, load and merge
-    them through OmegaConf and return them in the form of a config dictionary.
+    them through ``OmegaConf`` (https://omegaconf.readthedocs.io/)
+    and return them in the form of a config dictionary.
 
     The first processed config path is the ``base`` directory inside
     ``conf_source``. The optional ``env`` argument can be used to specify a
@@ -33,7 +34,9 @@ class OmegaConfLoader(AbstractConfigLoader):
 
     When the same key appears in any 2 config files located in different
     (sub)directories, the last processed config path takes precedence
-    and overrides this key.
+    and overrides this key. You can find more information about how ``OmegaConf``
+    does merging of configuration in their documentation
+    https://omegaconf.readthedocs.io/en/2.2_branch/usage.html#merging-configurations
 
     You can access the different configurations as follows:
     ::
@@ -51,6 +54,23 @@ class OmegaConfLoader(AbstractConfigLoader):
         >>> conf_catalog = conf_loader["catalog"]
         >>> conf_params = conf_loader["parameters"]
 
+    ``OmegaConf`` supports variable interpolation in configuration
+    https://omegaconf.readthedocs.io/en/2.2_branch/usage.html#merging-configurations. It is
+    recommended to use this instead of yaml anchors with the ``OmegaConfLoader``.
+
+    This version of the ``OmegaConfLoader`` does not support any of the built-in ``OmegaConf``
+    resolvers. Support for resolvers might be added in future versions.
+
+    To use this class, change the setting for the `CONFIG_LOADER_CLASS` constant
+    in `settings.py`.
+
+    Example:
+    ::
+
+        >>> # in settings.py
+        >>> from kedro.config import OmegaConfLoader
+        >>>
+        >>> CONFIG_LOADER_CLASS = OmegaConfLoader
 
     """
 

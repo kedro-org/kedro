@@ -1,14 +1,13 @@
-# pylint: disable=import-outside-toplevel
 from pathlib import Path
 
 import pytest
 from IPython.core.error import UsageError
 from IPython.testing.globalipapp import get_ipython
 
+from kedro.framework.project import pipelines
 from kedro.framework.startup import ProjectMetadata
 from kedro.ipython import _resolve_project_path, load_ipython_extension, reload_kedro
 from kedro.pipeline import Pipeline
-from kedro.framework.project import pipelines
 
 PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
@@ -18,7 +17,6 @@ PROJECT_VERSION = "0.1"
 @pytest.fixture(autouse=True)
 def cleanup_pipeline():
     yield
-    from kedro.framework.project import pipelines
 
     pipelines.configure()
 
@@ -73,7 +71,7 @@ def test_ipython_lazy_load_pipeline(
     fake_metadata,
     ipython,
 ):
-    pipelines.configure("dummy")  # Setup the pipelines
+    pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
     my_pipelines = {"ds": Pipeline([])}
 
@@ -96,7 +94,7 @@ def test_ipython_load_objects(
     mocker, mock_kedro_project, fake_metadata, caplog, ipython
 ):
     mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
-    pipelines.configure("dummy")  # Setup the pipelines
+    pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
     my_pipelines = {"ds": Pipeline([])}
 
@@ -127,7 +125,7 @@ def test_ipython_load_objects_with_args(
     mocker, mock_kedro_project, fake_metadata, caplog, ipython
 ):
     mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
-    pipelines.configure("dummy")  # Setup the pipelines
+    pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
     my_pipelines = {"ds": Pipeline([])}
 

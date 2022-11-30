@@ -16,6 +16,8 @@ rm -rf docs/build
 mkdir docs/build/
 cp -r docs/_templates docs/conf.py docs/*.svg docs/*.json  docs/build/
 
+bash docs/kedro-datasets-docs.sh
+
 if [ "$action" == "linkcheck" ]; then
   sphinx-build -c docs/ -ETan -j auto -D language=en -b linkcheck docs/build/ docs/build/html
 elif [ "$action" == "docs" ]; then

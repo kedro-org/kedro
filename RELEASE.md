@@ -22,6 +22,7 @@
 | `video.VideoDataSet`                 | Read and write video files from a filesystem                               | `kedro.extras.datasets.video` |
 | `video.video_dataset.SequenceVideo`  | Create a video object from an iterable sequence to use with `VideoDataSet` | `kedro.extras.datasets.video` |
 | `video.video_dataset.GeneratorVideo` | Create a video object from a generator to use with `VideoDataSet`          | `kedro.extras.datasets.video` |
+* Implemented support for a functional definition of schema in `dask.ParquetDataSet` to work with the `dask.to_parquet` API.
 
 ## Bug fixes and other changes
 * Fixed `kedro micropkg pull` for packages on PyPI.
@@ -30,7 +31,7 @@
 * Added support for `tf.device` in `TensorFlowModelDataset`.
 * Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 * Updated Experiment Tracking docs with working examples.
-* Updated MatplotlibWriter Dataset docs with working examples.
+* Updated MatplotlibWriter Dataset, TextDataset, plotly.PlotlyDataSet and plotly.JSONDataSet docs with working examples.
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
 * Refactored `ShelveStore` to it's own module to ensure multiprocessing works with it.
 * `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.
@@ -41,6 +42,17 @@
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro test` and `kedro lint` will be deprecated.
 
+## Documentation
+* Revised the Introduction to shorten it
+* Revised the Get Started section to remove unnecessary information and clarify the learning path
+* Updated the spaceflights tutorial to simplify the later stages and clarify what the reader needed to do in each phase
+* Moved some pages that covered advanced materials into more appropriate sections
+* Moved visualisation into its own section
+* Fixed a bug that degraded user experience: the table of contents is now sticky when you navigate between pages
+* Added redirects where needed on ReadTheDocs for legacy links and bookmarks
+
+## Contributions from the Kedroid community
+We are grateful to the following for submitting PRs that contributed to this release: [jstammers](https://github.com/jstammers), [FlorianGD](https://github.com/FlorianGD), [yash6318](https://github.com/yash6318), [carlaprv](https://github.com/carlaprv), [dinotuku](https://github.com/dinotuku), [williamcaicedo](https://github.com/williamcaicedo), [avan-sh](https://github.com/avan-sh), [Kastakin](https://github.com/Kastakin), [amaralbf](https://github.com/amaralbf), [BSGalvan](https://github.com/BSGalvan), [levimjoseph](https://github.com/levimjoseph), [daniel-falk](https://github.com/daniel-falk), [clotildeguinard](https://github.com/clotildeguinard), [avsolatorio](https://github.com/avsolatorio), and [picklejuicedev](https://github.com/picklejuicedev) for comments and input to documentation changes
 
 # Release 0.18.3
 

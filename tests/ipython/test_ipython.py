@@ -15,22 +15,22 @@ PROJECT_NAME = "fake_project_name"
 PROJECT_VERSION = "0.1"
 
 
-@pytest.fixture(autouse=True)  # pylint: disable=reimported
+@pytest.fixture(autouse=True)
 def cleanup_pipeline():
     yield
-    from kedro.framework.project import pipelines
+    from kedro.framework.project import pipelines  # pylint: disable=reimported
 
     pipelines.configure()
 
 
-@pytest.fixture(scope="module")  # get_ipython() twice will result in None
+@pytest.fixture(scope="module", autouse=True)  # get_ipython() twice will result in None
 def ipython():
     ipython = get_ipython()
     load_ipython_extension(ipython)
     return ipython
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def fake_metadata(tmp_path):
     metadata = ProjectMetadata(
         source_dir=tmp_path / "src",  # default
@@ -43,15 +43,19 @@ def fake_metadata(tmp_path):
     return metadata
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_kedro_project(mocker, fake_metadata):
     mocker.patch("kedro.ipython.bootstrap_project", return_value=fake_metadata)
     mocker.patch("kedro.ipython.configure_project")
     mocker.patch("kedro.ipython.KedroSession.create")
 
+
 class TestLoadKedroObjects:
-    def test_ipython_load_entry_points(self,
-        mocker, mock_kedro_project, fake_metadata, caplog, ipython  # pylint: disable=unused-argument
+    def test_ipython_load_entry_points(
+        self,
+        mocker,
+        fake_metadata,
+        caplog,
     ):
         mock_line_magic = mocker.MagicMock()
         mock_line_magic_name = "abc"
@@ -66,15 +70,11 @@ class TestLoadKedroObjects:
         log_messages = [record.getMessage() for record in caplog.records]
         assert expected_message in log_messages
 
-
     def test_ipython_lazy_load_pipeline(
         self,
         mocker,
-        mock_kedro_project,
-        fake_metadata,
-        ipython,
     ):
-        pipelines.configure("dummy")  # Setup the pipelines
+        pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
         my_pipelines = {"ds": Pipeline([])}
 
@@ -92,12 +92,13 @@ class TestLoadKedroObjects:
         pipelines._load_data()  # Trigger data load
         assert pipelines._content == my_pipelines
 
-
-    def test_ipython_load_objects(self,
-        mocker, mock_kedro_project, fake_metadata, caplog, ipython  # pylint: disable=unused-argument
+    def test_ipython_load_objects(
+        self,
+        mocker,
+        ipython,
     ):
         mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
-        pipelines.configure("dummy")  # Setup the pipelines
+        pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
         my_pipelines = {"ds": Pipeline([])}
 
@@ -124,12 +125,9 @@ class TestLoadKedroObjects:
         assert variables["session"] == mock_session_create()
         assert variables["pipelines"] == my_pipelines
 
-
-    def test_ipython_load_objects_with_args(
-        mocker, mock_kedro_project, fake_metadata, ipython  # pylint: disable=unused-argument
-    ):
+    def test_ipython_load_objects_with_args(self, mocker, fake_metadata, ipython):
         mock_session_create = mocker.patch("kedro.ipython.KedroSession.create")
-        pipelines.configure("dummy")  # Setup the pipelines
+        pipelines.configure("dummy_pipeline")  # Setup the pipelines
 
         my_pipelines = {"ds": Pipeline([])}
 
@@ -148,7 +146,10 @@ class TestLoadKedroObjects:
         reload_kedro(fake_metadata.project_path, "env", {"key": "value"})
 
         mock_session_create.assert_called_once_with(
-            PACKAGE_NAME, fake_metadata.project_path, env=dummy_env, extra_params=dummy_dict
+            PACKAGE_NAME,
+            fake_metadata.project_path,
+            env=dummy_env,
+            extra_params=dummy_dict,
         )
         _, kwargs = ipython_spy.call_args_list[0]
         variables = kwargs["variables"]

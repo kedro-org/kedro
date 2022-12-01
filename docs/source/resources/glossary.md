@@ -33,12 +33,12 @@ You can use Kedro-Viz to visualise your Kedro data pipelines:
 * Get a clear picture when you have lots of datasets and nodes by using tags to visualise sub-pipelines
 * Search for nodes and datasets
 
-[Further information from the Kedro-Viz repository](https://github.com/kedro-org/kedro-viz) and [Kedro tutorial documentation](../tutorial/visualise_pipeline.md)
+[Further information from the Kedro-Viz repository](https://github.com/kedro-org/kedro-viz) and [Kedro-Viz documentation](../visualisation/kedro-viz_visualisation.md)
 
 ## Layers (data engineering convention)
 According to [data engineering convention](../faq/faq.md#what-is-data-engineering-convention), a pipeline can be broken up into different layers according to how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or processing has happened.
 
-Kedro-Viz makes it easy to [visualise these data processing stages](../tutorial/visualise_pipeline.md#visualise-layers) by adding a `layer` attribute to the datasets in the Data Catalog.
+Kedro-Viz makes it easy to [visualise these data processing stages](../visualisation/kedro-viz_visualisation.md#visualise-layers) by adding a `layer` attribute to the datasets in the Data Catalog.
 
 ## Modular pipeline
 _(See also [Pipeline](#pipeline))_
@@ -48,7 +48,11 @@ In many typical Kedro projects, a single (“main”) pipeline increases in comp
 [Further information about modular pipelines](../nodes_and_pipelines/modular_pipelines.md)
 
 ## Node
-A Kedro node is a wrapper for a Python function that names the inputs and outputs of that function. It is the building block of a pipeline. Nodes can be linked when the output of one node is the input of another.
+A Kedro node is a wrapper for a pure Python function that names the inputs and outputs of that function.
+
+(A [pure function](https://realpython.com/python-functional-programming/#what-is-functional-programming) is a one whose output value follows solely from its input values, without any observable side effects such as changes to state or mutable data).
+
+Nodes are the building block of a pipeline. Nodes can be linked when the output of one node is the input of another.
 
 [Further information about nodes](../nodes_and_pipelines/nodes.md)
 
@@ -85,7 +89,7 @@ Runners are different execution mechanisms to run pipelines with the specified d
 ## Starters
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused. A Kedro starter is a [Cookiecutter template](https://cookiecutter.readthedocs.io/) that contains the boilerplate code for a Kedro project.
 
-[Further information about Kedro starters](../get_started/starters.md)
+[Further information about Kedro starters](../kedro_project_setup/starters.md)
 
 ## Tags
 You can apply tags to nodes or pipelines as a means of filtering which are executed.

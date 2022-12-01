@@ -3,19 +3,22 @@
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)
-[![Discord Server](https://img.shields.io/discord/778216384475693066.svg?color=7289da&label=Kedro%20Discord&logo=discord&style=flat-square)](https://discord.gg/akJDeVaxnB)
+[![Slack Organisation](https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack)](https://slack.kedro.org)
 ![CircleCI - Main Branch](https://img.shields.io/circleci/build/github/kedro-org/kedro/main?label=main)
 ![Develop Branch Build](https://img.shields.io/circleci/build/github/kedro-org/kedro/develop?label=develop)
 [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://kedro.readthedocs.io/)
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/6711/badge)](https://bestpractices.coreinfrastructure.org/projects/6711)
 
 
 ## What is Kedro?
 
-Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It borrows concepts from software engineering and applies them to machine-learning code; applied concepts include modularity, separation of concerns and versioning. Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
+Kedro is an open-source Python framework to create reproducible, maintainable, and modular data science code. It uses software engineering best practices to help you build production-ready data engineering and data science pipelines.
+
+Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
 
 ## How do I install Kedro?
 
-To install Kedro from the Python Package Index (PyPI) simply run:
+To install Kedro from the Python Package Index (PyPI) run:
 
 ```
 pip install kedro
@@ -27,7 +30,7 @@ It is also possible to install Kedro using `conda`:
 conda install -c conda-forge kedro
 ```
 
-Our [Get Started guide](https://kedro.readthedocs.io/en/stable/get_started/prerequisites.html) contains full installation instructions, and includes how to set up Python virtual environments.
+Our [Get Started guide](https://kedro.readthedocs.io/en/stable/get_started/install.html) contains full installation instructions, and includes how to set up Python virtual environments.
 
 
 ## What are the main features of Kedro?
@@ -47,10 +50,14 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/get_started/prere
 
 ## How do I use Kedro?
 
-The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) includes three examples to help get you started:
-- A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](https://kedro.readthedocs.io/en/stable/get_started/hello_kedro.html)
-- An [introduction to the project template](https://kedro.readthedocs.io/en/stable/get_started/example_project.html) using the Iris dataset
-- A more detailed [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/tutorial/tutorial_template.html) to give you hands-on experience
+The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) first explains [how to install Kedro](https://kedro.readthedocs.io/en/stable/get_started/install.html) and then introduces [key Kedro concepts](https://kedro.readthedocs.io/en/stable/get_started/kedro_concepts.html).
+
+- The first example illustrates the [basics of a Kedro project](https://kedro.readthedocs.io/en/stable/get_started/new_project.html) using the Iris dataset
+- You can then review the [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/tutorial/tutorial_template.html) to build a Kedro project for hands-on experience
+
+For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://kedro.readthedocs.io/en/stable/visualisation/kedro-viz_visualisation.html) and [how to work with Kedro and Jupyter notebooks](https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks).
+
+Further documentation is available for more advanced Kedro usage and deployment. We also recommend the [glossary](https://kedro.readthedocs.io/en/stable/resources/glossary.html) and the [API reference documentation](/kedro) for additional information.
 
 
 ## Why does Kedro exist?
@@ -106,9 +113,11 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g),
 [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ),
 [NASA](https://github.com/nasa/ML-airport-taxi-out),
+[NHS AI Lab](https://nhsx.github.io/skunkworks/synthetic-data-pipeline),
 [Open Data Science LatAm](https://www.odesla.org/),
 [Prediqt](https://prediqt.co/),
 [QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),
+[ReSpo.Vision](https://neptune.ai/customers/respo-vision),
 [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414),
 [Roche](https://www.roche.com/),
 [Sber](https://www.linkedin.com/posts/seleznev-artem_welcome-to-kedros-documentation-kedro-activity-6767523561109385216-woTt),
@@ -120,7 +129,8 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [WovenLight](https://www.wovenlight.com/) and
 [XP](https://youtu.be/wgnGOVNkXqU?t=2210).
 
-Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/).
+Kedro won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/). Kedro has received an [honorable mention in the User Experience category in Fast Company’s 2022 Innovation by Design Awards](https://www.fastcompany.com/90772252/user-experience-innovation-by-design-2022).
+
 
 ## How can I cite Kedro?
 

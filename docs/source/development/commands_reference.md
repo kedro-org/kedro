@@ -58,16 +58,16 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro new`](#create-a-new-kedro-project)
 
 * Project-specific Kedro commands
-  * [`kedro activate-nbstripout`](#strip-output-cells)
-  * [`kedro build-docs`](#build-the-project-documentation)
-  * [`kedro build-reqs`](#build-the-projects-dependency-tree)
+  * [`kedro activate-nbstripout`](#strip-output-cells)(deprecated from version 0.19.0)
+  * [`kedro build-docs`](#build-the-project-documentation) (deprecated from version 0.19.0)
+  * [`kedro build-reqs`](#build-the-projects-dependency-tree) (deprecated from version 0.19.0)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro ipython`](#notebooks)
-  * [`kedro jupyter convert`](#copy-tagged-cells)
+  * [`kedro jupyter convert`](#copy-tagged-cells) (deprecated from version 0.19.0)
   * [`kedro jupyter lab`](#notebooks)
   * [`kedro jupyter notebook`](#notebooks)
-  * [`kedro lint`](#lint-your-project)
+  * [`kedro lint`](#lint-your-project) (deprecated from version 0.19.0)
   * [`kedro micropkg package <pipeline_name>`](#package-a-micro-package)
   * [`kedro micropkg pull <package_name>`](#pull-a-micro-package)
   * [`kedro package`](#deploy-the-project)
@@ -76,7 +76,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro registry describe <pipeline_name>`](#describe-a-registered-pipeline)
   * [`kedro registry list`](#list-all-registered-pipelines-in-your-project)
   * [`kedro run`](#run-the-project)
-  * [`kedro test`](#test-your-project)
+  * [`kedro test`](#test-your-project) (deprecated from version 0.19.0)
 
 ## Global Kedro commands
 
@@ -114,7 +114,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.18.2
+v0.18.3
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -275,6 +275,9 @@ def run(
 
 #### Build the project's dependency tree
 
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
 ```bash
 kedro build-reqs
 ```
@@ -366,6 +369,10 @@ The above command will take the bundled `.tar.gz` file and do the following:
 
 #### Build the project documentation
 
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
+
 ```bash
 kedro build-docs
 ```
@@ -375,6 +382,10 @@ The `build-docs` command builds [project documentation](../tutorial/package_a_pr
 
 #### Lint your project
 
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
+
 ```bash
 kedro lint
 ```
@@ -383,6 +394,10 @@ Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](
 
 
 #### Test your project
+
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
 
 The following runs all `pytest` unit tests found in `src/tests`, including coverage (see the file `.coveragerc`):
 
@@ -491,7 +506,7 @@ To start an IPython shell:
 kedro ipython
 ```
 
-The [Kedro IPython extension](../tools_integration/ipython.md) will make the following variables available in your IPython or Jupyter session:
+The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#a-custom-kedro-kernel) makes the following variables available in your IPython or Jupyter session:
 
 * `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
@@ -501,6 +516,11 @@ The [Kedro IPython extension](../tools_integration/ipython.md) will make the fol
 To reload these variables (e.g. if you updated `catalog.yml`) use the `%reload_kedro` line magic, which can also be used to see the error message if any of the variables above are undefined.
 
 ##### Copy tagged cells
+
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
+
 To copy the code from [cells tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with a `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
@@ -508,6 +528,11 @@ kedro jupyter convert --all
 ```
 
 ##### Strip output cells
+
+```{note}
+_This command will be deprecated from Kedro version 0.19.0._
+```
+
 Output cells of Jupyter Notebook should not be tracked by git, especially if they contain sensitive information. To strip them out:
 
 ```bash

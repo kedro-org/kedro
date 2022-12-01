@@ -39,13 +39,17 @@ Welcome to Kedro's documentation!
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
 
-.. image:: https://img.shields.io/discord/778216384475693066.svg?color=7289da&label=Kedro%20Discord&logo=discord&style=flat-square
-    :target: https://discord.gg/akJDeVaxnB
-    :alt: Discord Server
+.. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack
+    :target: https://slack.kedro.org
+    :alt: Kedro's Slack organisation
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black
     :alt: Code style is Black
+
+.. image:: https://bestpractices.coreinfrastructure.org/projects/6711/badge
+    :target: https://bestpractices.coreinfrastructure.org/projects/6711
+    :alt: OpenSSF Best Practices Badge Program
 
 .. toctree::
    :maxdepth: 2
@@ -53,23 +57,14 @@ Welcome to Kedro's documentation!
 
    introduction/introduction
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Get started
 
-   get_started/prerequisites
    get_started/install
-   get_started/hello_kedro
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Make a project
-
+   get_started/kedro_concepts
    get_started/new_project
-   get_started/example_project
-   get_started/starters
-   get_started/standalone_use_of_datacatalog
+   get_started/summary
 
 .. toctree::
    :maxdepth: 2
@@ -78,16 +73,31 @@ Welcome to Kedro's documentation!
    tutorial/spaceflights_tutorial
    tutorial/tutorial_template
    tutorial/set_up_data
-   tutorial/create_pipelines
-   tutorial/visualise_pipeline
-   tutorial/namespace_pipelines
-   tutorial/set_up_experiment_tracking
+   tutorial/create_a_pipeline
+   tutorial/add_another_pipeline
    tutorial/package_a_project
+   tutorial/spaceflights_tutorial_faqs
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Visualisation with Kedro-Viz
+
+   visualisation/kedro-viz_visualisation
+   visualisation/visualise_charts_with_plotly
+   visualisation/experiment_tracking
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Notebooks & IPython users
+
+   notebooks_and_ipython/kedro_and_notebooks
+   notebooks_and_ipython/kedro_as_a_data_registry
 
 .. toctree::
    :maxdepth: 2
    :caption: Kedro project setup
 
+   kedro_project_setup/starters
    kedro_project_setup/dependencies
    kedro_project_setup/configuration
    kedro_project_setup/session
@@ -119,7 +129,6 @@ Welcome to Kedro's documentation!
    extend_kedro/common_use_cases
    extend_kedro/custom_datasets
    extend_kedro/plugins
-   extend_kedro/create_kedro_starters
 
 .. toctree::
    :maxdepth: 2
@@ -145,6 +154,8 @@ Welcome to Kedro's documentation!
    development/set_up_pycharm
    development/commands_reference
    development/debugging
+   development/automated_testing
+   development/linting
 
 .. toctree::
    :maxdepth: 2
@@ -165,10 +176,9 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tools integration
+   :caption: PySpark integration
 
    tools_integration/pyspark
-   tools_integration/ipython
 
 .. toctree::
    :maxdepth: 2

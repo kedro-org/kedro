@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Discord server
+  - name: Slack organisation
     about: Come chat with the community!
-    url: https://discord.gg/akJDeVaxnB
+    url: https://slack.kedro.org/
   - name: Documentation
     url: https://kedro.readthedocs.io/en/stable/
     about: To learn more about how Kedro works
-  - name: Case studies, articles and video tutorials
-    url: https://github.com/kedro-org/kedro-community
-    about: Community-generated content, project examples and video tutorials
+  - name: Website
+    url: https://kedro.org/
+    about: Learn about features, project examples and our demo

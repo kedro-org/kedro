@@ -25,7 +25,7 @@ with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
     version = result.group(1)
 
 # get the dependencies and installs
-with open("requirements.txt", encoding="utf-8") as f:
+with open("dependency/requirements.txt", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
 
 # get test dependencies and installs
@@ -53,7 +53,7 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10"]}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.10", "triad>=0.6.7, <1.0"]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
@@ -64,8 +64,8 @@ pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
     "pandas.ExcelDataSet": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
-    "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
-    "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
+    "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
+    "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <0.18.0"],
     "pandas.HDFDataSet": [
         PANDAS,
         "tables~=3.6.0; platform_system == 'Windows'",
@@ -78,7 +78,11 @@ pandas_require = {
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }
+pickle_require = {"pickle.PickleDataSet": ["compress-pickle[lz4]~=2.1.0"]}
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
+video_require = {
+    "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
+}
 plotly_require = {
     "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
     "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
@@ -90,6 +94,7 @@ spark_require = {
     "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
     "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark>=1.0, <3.0"],
 }
+svmlight_require = {"svmlight.SVMLightDataSet": ["scikit-learn~=1.0.2", "scipy~=1.7.3"]}
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
@@ -106,7 +111,7 @@ extras_require = {
     "docs": [
         "docutils==0.16",
         "sphinx~=3.4.3",
-        "sphinx_rtd_theme==0.4.1",
+        "sphinx_rtd_theme==1.1.1",
         "nbsphinx==0.8.1",
         "nbstripout~=0.4",
         "sphinx-autodoc-typehints==1.11.1",
@@ -114,16 +119,20 @@ extras_require = {
         "ipykernel>=5.3, <7.0",
         "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=0.17.2",
+        "Jinja2<3.1.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
     "pandas": _collect_requirements(pandas_require),
+    "pickle": _collect_requirements(pickle_require),
     "pillow": _collect_requirements(pillow_require),
+    "video": _collect_requirements(video_require),
     "plotly": _collect_requirements(plotly_require),
     "redis": _collect_requirements(redis_require),
     "spark": _collect_requirements(spark_require),
+    "svmlight": _collect_requirements(svmlight_require),
     "tensorflow": _collect_requirements(tensorflow_required),
     "yaml": _collect_requirements(yaml_require),
     **api_require,
@@ -134,9 +143,12 @@ extras_require = {
     **holoviews_require,
     **networkx_require,
     **pandas_require,
+    **pickle_require,
     **pillow_require,
+    **video_require,
     **plotly_require,
     **spark_require,
+    **svmlight_require,
     **tensorflow_required,
     **yaml_require,
 }

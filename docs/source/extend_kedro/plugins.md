@@ -44,7 +44,7 @@ kedro to_json
 ```
 
 ## Extend starter aliases
-It is possible to extend the list of starter aliases built into Kedro. This means that a [custom Kedro starter](create_kedro_starters.md) can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`.
+It is possible to extend the list of starter aliases built into Kedro. This means that a [custom Kedro starter](../kedro_project_setup/starters.md#how-to-create-a-kedro-starter) can be used directly through the `starter` argument in `kedro new` rather than needing to explicitly provide the `template` and `directory` arguments. A custom starter alias behaves in the same way as an official Kedro starter alias and is also picked up by `kedro starter list`.
 
 You need to extend the starters by providing a list of  `KedroStarterSpec`, in this example it is defined in a file called `plugin.py`.
 
@@ -84,7 +84,7 @@ setup(
 After that you can use this starter with `kedro new --starter=test_plugin_starter`.
 
 ```{note}
-If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.2.`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
+If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.3.`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
 ```
 
 ## Working with `click`
@@ -106,8 +106,7 @@ from kedro.framework.session import KedroSession
 
 
 project_path = Path.cwd()
-metadata = _get_project_metadata(project_path)
-session = KedroSession.create(metadata.package_name, project_path)
+session = KedroSession.create(project_path=project_path)
 context = session.load_context()
 ```
 
@@ -196,9 +195,12 @@ When you are ready to submit your code:
 
 ## Supported Kedro plugins
 
+- [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets), a collection of all of Kedro's data connectors. These data
+connectors are implementations of the `AbstractDataSet`
 - [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow), a tool for converting your Kedro project into an Airflow project
 - [Kedro-Viz](https://github.com/kedro-org/kedro-viz), a tool for visualising your Kedro pipelines
+
 
 ## Community-developed plugins
 

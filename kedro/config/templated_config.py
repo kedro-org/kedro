@@ -5,7 +5,7 @@ with the values from the passed dictionary.
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 import jmespath
 
@@ -92,6 +92,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         conf_source: str,
         env: str = None,
         runtime_params: Dict[str, Any] = None,
+        config_patterns: Dict[str, List[str]] = None,
         *,
         base_env: str = "base",
         default_run_env: str = "local",
@@ -104,6 +105,9 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             conf_source: Path to use as root directory for loading configuration.
             env: Environment that will take precedence over base.
             runtime_params: Extra parameters passed to a Kedro run.
+            config_patterns: Regex patterns that specify the naming convention for configuration
+                files so they can be loaded. Can be customised by supplying config_patterns as
+                in `CONFIG_LOADER_ARGS` in `settings.py`.
             base_env:
             default_run_env:
             globals_pattern: Optional keyword-only argument specifying a glob
@@ -114,6 +118,14 @@ class TemplatedConfigLoader(AbstractConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
+        self.config_patterns = {
+            "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
+            "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
+            "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
+            "logging": ["logging*", "logging*/**", "**/logging*"],
+        }
+        self.config_patterns.update(config_patterns or {})
+
         super().__init__(
             conf_source=conf_source, env=env, runtime_params=runtime_params
         )
@@ -132,12 +144,21 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         globals_dict = deepcopy(globals_dict) or {}
         self._config_mapping = {**self._config_mapping, **globals_dict}
 
+    def __getitem__(self, key):
+        return self.get(*self.config_patterns[key])
+
+    def __repr__(self):  # pragma: no cover
+        return (
+            f"TemplatedConfigLoader(conf_source={self.conf_source}, env={self.env}, "
+            f"config_patterns={self.config_patterns})"
+        )
+
     @property
     def conf_paths(self):
         """Property method to return deduplicated configuration paths."""
         return _remove_duplicates(self._build_conf_paths())
 
-    def get(self, *patterns: str) -> Dict[str, Any]:
+    def get(self, *patterns: str) -> Dict[str, Any]:  # type: ignore
         """Tries to resolve the template variables in the config dictionary
         provided by the ``ConfigLoader`` (super class) ``get`` method using the
         dictionary of replacement values obtained in the ``__init__`` method.

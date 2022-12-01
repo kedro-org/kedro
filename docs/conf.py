@@ -140,9 +140,21 @@ type_targets = {
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
+        "kedro.datasets.pandas.json_dataset.JSONDataSet",
         "pluggy._manager.PluginManager",
         "_DI",
         "_DO",
+        # The statements below were added after subclassing UserDict in AbstractConfigLoader.
+        "None.  Remove all items from D.",
+        "a shallow copy of D",
+        "a set-like object providing a view on D's items",
+        "a set-like object providing a view on D's keys",
+        "v, remove specified key and return the corresponding value.",
+        "None.  Update D from dict/iterable E and F.",
+        "an object providing a view on D's values",
+        "(k, v), remove and return some (key, value) pair",
+        "D.get(k,d), also set D[k]=d if k not in D",
+        "None.  Update D from mapping/iterable E and F.",
     ),
     "py:data": (
         "typing.Any",
@@ -322,6 +334,7 @@ KEDRO_MODULES = [
     "kedro.config",
     "kedro.extras.datasets",
     "kedro.extras.logging",
+    "kedro.datasets",
 ]
 
 

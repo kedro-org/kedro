@@ -17,6 +17,10 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class GeoJSONDataSet(
     AbstractVersionedDataSet[
@@ -37,10 +41,7 @@ class GeoJSONDataSet(
         >>>
         >>> data = gpd.GeoDataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])
-        >>> # data_set = GeoJSONDataSet(filepath="gcs://bucket/test.geojson",
-        >>>                                save_args=None)
-        >>> data_set = GeoJSONDataSet(filepath="test.geojson",
-        >>>                                save_args=None)
+        >>> data_set = GeoJSONDataSet(filepath="test.geojson", save_args=None)
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>>

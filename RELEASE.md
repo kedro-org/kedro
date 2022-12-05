@@ -51,6 +51,7 @@
 * Refactored `ShelveStore` to it's own module to ensure multiprocessing works with it.
 * `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.
 * Removed `attrs` upper bound to support newer versions of Airflow.
+* Bumped the lower bound for the `setuptools` dependency to <=61.5.1.
 
 ## Minor breaking changes to the API
 

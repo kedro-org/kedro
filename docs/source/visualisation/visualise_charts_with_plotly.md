@@ -10,7 +10,7 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
 
 You must update the `requirements.txt` file in your Kedro project and add the following datasets to enable Plotly for your project.
 
-`kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.3`
+`kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.4`
 
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
@@ -155,7 +155,7 @@ The MatplotlibWriter dataset converts Matplotlib objects to image files. This me
 You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.extras.datasets.matplotlib.MatplotlibWriter). You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```
-kedro[matplotlib.MatplotlibWriter]==0.18.3
+kedro[matplotlib.MatplotlibWriter]==0.18.4
 ```
 
 To use this dataset, configure your plot in your Kedro node. The below functions should be added to the `nodes.py` and `pipeline.py` files respectively.

@@ -8,7 +8,15 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.4
+# Upcoming Release 0.18.5
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+# Release 0.18.4
 
 ## Major features and improvements
 * Make Kedro instantiate datasets from `kedro_datasets` with higher priority than `kedro.extras.datasets`. `kedro_datasets` is the namespace for the new `kedro-datasets` python package.
@@ -33,7 +41,7 @@
 * Updated Experiment Tracking docs with working examples.
 * Updated MatplotlibWriter Dataset, TextDataset, plotly.PlotlyDataSet and plotly.JSONDataSet docs with working examples.
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
-* Refactored `ShelveStore` to it's own module to ensure multiprocessing works with it.
+* Refactored `ShelveStore` to its own module to ensure multiprocessing works with it.
 * `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.
 * Removed `attrs` upper bound to support newer versions of Airflow.
 * Bumped the lower bound for the `setuptools` dependency to <=61.5.1.

@@ -10,7 +10,7 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
 
 You must update the `requirements.txt` file in your Kedro project and add the following datasets to enable Plotly for your project.
 
-`kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.3`
+`kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]`
 
 
 You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.

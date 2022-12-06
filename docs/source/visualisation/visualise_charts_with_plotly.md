@@ -17,7 +17,7 @@ You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets.
 
 There are two types of Plotly datasets in Kedro: the `plotly.PlotlyDataSet` and `plotly.JSONDataSet`.
 
-### [`plotly.PlotlyDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.PlotlyDataSet.html#kedro.extras.datasets.plotly.PlotlyDataSet)
+### `plotly.PlotlyDataSet`
 
 To use this dataset, configure your plot in the `catalog.yml` file. This dataset only supports [Plotly Express](https://plotly.com/python/plotly-express).
 
@@ -68,7 +68,7 @@ shuttle_passenger_capacity_plot:
 ```
 
 
-### [`plotly.JSONDataSet`](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.plotly.JSONDataSet.html#kedro.extras.datasets.plotly.JSONDataSet)
+### `plotly.JSONDataSet`
 
 To use this dataset, configure your plot in your Kedro node. This dataset supports [Plotly Express](https://plotly.com/python/plotly-express) and [Plotly Graph Objects](https://plotly.com/python/graph-objects/).
 

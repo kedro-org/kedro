@@ -17,7 +17,7 @@ Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you r
 If you have not yet set up Kedro, do so by [following the guidelines to install Kedro](../get_started/install.md).
 
 ```{important}
-We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.3).
+We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.4).
 ```
 
 In your terminal window, navigate to the folder you want to store the project and type the following to create an empty project:

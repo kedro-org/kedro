@@ -155,7 +155,7 @@ The MatplotlibWriter dataset converts Matplotlib objects to image files. This me
 You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.extras.datasets.matplotlib.MatplotlibWriter). You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```
-kedro-datasets[matplotlib.MatplotlibWriter]==0.18.3
+kedro-datasets[matplotlib.MatplotlibWriter]
 ```
 
 To use this dataset, configure your plot in your Kedro node. The below functions should be added to the `nodes.py` and `pipeline.py` files respectively.

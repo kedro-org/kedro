@@ -73,7 +73,7 @@ The dependencies above might be sufficient for some projects, but for this tutor
 Add the following lines to your `src/requirements.txt` file:
 
 ```text
-kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.3   # Specify optional Kedro dependencies
+kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]  # Specify optional Kedro dependencies
 kedro-viz~=5.0                                                                 # Visualise your pipelines
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```

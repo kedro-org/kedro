@@ -290,7 +290,24 @@ def _clean_pycache(path: Path):
 
 def split_string(ctx, param, value):  # pylint: disable=unused-argument
     """Split string by comma."""
+    result = [item.strip() for item in value.split(",") if item.strip()]
     return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def safe_split_string(ctx, param, value): # pylint: disable=unused-argument
+    """Split string by comma, ignoring commas enclosed by .
+
+    Args:
+        ctx:
+        param:
+        value: the value to split safely
+
+    Returns:
+        A list containing the result of safe-splitting the string.
+    """
+    # Only split on commas with an even number of ' and " ahead
+    split_value = re.split(r""",(?=(?:[^'"]|'[^']*'|"[^"]*")*$)""", value)
+    return [item.strip() for item in split_value if item.strip()]
 
 
 def env_option(func_=None, **kwargs):

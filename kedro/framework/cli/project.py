@@ -22,6 +22,7 @@ from kedro.framework.cli.utils import (
     forward_command,
     python_call,
     split_string,
+    safe_split_string,
 )
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
@@ -315,16 +316,16 @@ def activate_nbstripout(
 
 @project_group.command()
 @click.option(
-    "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
+    "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=safe_split_string
 )
 @click.option(
-    "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=split_string
+    "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=safe_split_string
 )
 @click.option(
-    "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_string
+    "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=safe_split_string
 )
 @click.option(
-    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_string
+    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=safe_split_string
 )
 @click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
 @click.option(

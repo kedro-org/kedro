@@ -260,7 +260,6 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
 
     """
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,

@@ -17,8 +17,14 @@ authors:
   given-names: Tynan
 - family-names: Hoang
   given-names: Lim
+- family-names: Holzer
+  given-names: Jannic
 - family-names: Kanchwala
   given-names: Rashida
+- family-names: Katiyar
+  given-names: Ankita
+- family-names: Koh
+  given-names: Amanda
 - family-names: Mackay
   given-names: Andrew
 - family-names: Merali
@@ -33,9 +39,11 @@ authors:
   given-names: Nero
 - family-names: Schwarzmann
   given-names: Joel
+- family-names: Stichbury
+  given-names: Jo
 - family-names: Theisen
   given-names: Merel
 title: Kedro
-version: 0.18.3
-date-released: 2022-09-20
+version: 0.18.4
+date-released: 2022-12-05
 url: https://github.com/kedro-org/kedro

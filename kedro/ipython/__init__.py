@@ -61,8 +61,9 @@ def load_ipython_extension(ipython):
 )
 def magic_reload_kedro(line: str, local_ns: Dict[str, Any] = None):
     """
-    The `%reload_kedro` IPython line magic. See
-     https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
+    The `%reload_kedro` IPython line magic.
+    See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic # pylint: disable=line-too-long
+    for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
     reload_kedro(args.path, args.env, args.params, local_ns)

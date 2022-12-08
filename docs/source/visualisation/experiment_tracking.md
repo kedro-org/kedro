@@ -229,7 +229,7 @@ After running the pipeline with `kedro run`, the plot will be saved and you will
 
 ## View your metrics timeline
 
-Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab ![](../meta/images/pipeline_visualisation_icon.png). Clicking on any [MetricsDataset](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.tracking.MetricsDataSet.html) node will open a side panel displaying how the metric value has changed over time.
+Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab ![](../meta/images/pipeline_visualisation_icon.png). Clicking on any MetricsDataset node will open a side panel displaying how the metric value has changed over time.
 
 ![](../meta/images/pipeline_show_metrics.gif)
 

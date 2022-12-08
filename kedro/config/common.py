@@ -5,7 +5,7 @@ implementations.
 import logging
 from glob import iglob
 from pathlib import Path
-from typing import AbstractSet, Any, Dict, Iterable, List, Set
+from typing import AbstractSet, Any, Dict, Iterable, List, Set, Union
 from warnings import warn
 
 from yaml.parser import ParserError
@@ -71,9 +71,15 @@ def _get_config_from_patterns(
                 f"or is not a valid directory: {conf_path}"
             )
 
-        config_filepaths = _lookup_config_filepaths(
-            Path(conf_path), patterns, processed_files, _config_logger
+        config_files = _lookup_config_filepaths(Path(conf_path), patterns)
+        filtered_config_files = set()
+        for path in config_files:
+            if path.is_file() and path.suffix in SUPPORTED_EXTENSIONS:
+                filtered_config_files.add(path)
+        config_filepaths = _process_files(
+            filtered_config_files, processed_files, _config_logger
         )
+
         new_conf = _load_configs(
             config_filepaths=config_filepaths, ac_template=ac_template
         )
@@ -173,21 +179,31 @@ def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, 
 def _lookup_config_filepaths(
     conf_path: Path,
     patterns: Iterable[str],
-    processed_files: Set[Path],
-    logger: Any,
-    omegaconf: bool = False,
-) -> List[Path]:
-    config_files = _path_lookup(conf_path, patterns, omegaconf)
+) -> Set[Union[Path, Any]]:
+    config_files = set()
+    conf_path = conf_path.resolve()
 
-    seen_files = config_files & processed_files
+    for pattern in patterns:
+        # `Path.glob()` ignores the files if pattern ends with "**",
+        # therefore iglob is used instead
+        for each in iglob(str(conf_path / pattern), recursive=True):
+            path = Path(each).resolve()
+            config_files.add(path)
+    return config_files
+
+
+def _process_files(
+    filtered_config_files, processed_files: Set[Path], logger: Any
+) -> List[Path]:
+    seen_files = filtered_config_files & processed_files
     if seen_files:
         logger.warning(
             "Config file(s): %s already processed, skipping loading...",
             ", ".join(str(seen) for seen in sorted(seen_files)),
         )
-        config_files -= seen_files
+        filtered_config_files -= seen_files
 
-    return sorted(config_files)
+    return sorted(filtered_config_files)
 
 
 def _remove_duplicates(items: Iterable[str]):
@@ -221,37 +237,3 @@ def _check_duplicate_keys(
     if duplicates:
         dup_str = "\n- ".join(duplicates)
         raise ValueError(f"Duplicate keys found in {filepath} and:\n- {dup_str}")
-
-
-def _path_lookup(
-    conf_path: Path,
-    patterns: Iterable[str],
-    omegaconf: bool = False,
-) -> Set[Path]:
-    """Return a set of all configuration files from ``conf_path`` or
-    its subdirectories, which satisfy a given list of glob patterns.
-
-    Args:
-        conf_path: Path to configuration directory.
-        patterns: List of glob patterns to match the filenames against.
-
-    Returns:
-        A set of paths to configuration files.
-
-    """
-    config_files = set()
-    conf_path = conf_path.resolve()
-
-    for pattern in patterns:
-        # `Path.glob()` ignores the files if pattern ends with "**",
-        # therefore iglob is used instead
-        for each in iglob(str(conf_path / pattern), recursive=True):
-            path = Path(each).resolve()
-            if omegaconf:
-                if path.is_file() and path.suffix in [".yml", ".yaml", ".json"]:
-                    config_files.add(path)
-            else:
-                if path.is_file() and path.suffix in SUPPORTED_EXTENSIONS:
-                    config_files.add(path)
-
-    return config_files

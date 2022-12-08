@@ -13,6 +13,7 @@ from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.config.common import (
     _check_duplicate_keys,
     _lookup_config_filepaths,
+    _process_files,
     _remove_duplicates,
 )
 
@@ -190,8 +191,14 @@ def _get_config_from_patterns_omegaconf(
                 f"or is not a valid directory: {conf_path}"
             )
 
-        config_filepaths = _lookup_config_filepaths(
-            Path(conf_path), patterns, processed_files, _config_logger, True
+        config_files = _lookup_config_filepaths(Path(conf_path), patterns)
+        filtered_config_files = set()
+        for path in config_files:
+            if path.is_file() and path.suffix in [".yml", ".yaml", ".json"]:
+                filtered_config_files.add(path)
+
+        config_filepaths = _process_files(
+            filtered_config_files, processed_files, _config_logger
         )
 
         new_conf = _load_configs_omegaconf(config_filepaths=config_filepaths)

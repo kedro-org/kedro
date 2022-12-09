@@ -2,6 +2,7 @@
 or more configuration files of yaml or json type from specified paths through OmegaConf.
 """
 import logging
+from glob import iglob
 from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Set  # noqa
 
@@ -10,12 +11,7 @@ from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
-from kedro.config.common import (
-    _check_duplicate_keys,
-    _lookup_config_filepaths,
-    _process_files,
-    _remove_duplicates,
-)
+from kedro.config.common import _check_duplicate_keys
 
 _config_logger = logging.getLogger(__name__)
 
@@ -119,7 +115,31 @@ class OmegaConfLoader(AbstractConfigLoader):
         )
 
     def __getitem__(self, key):
-        return self.get(*self.config_patterns[key])
+        # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.
+        # It's easier to introduce them step by step, but removing them would be a breaking change.
+        _clear_omegaconf_resolvers()
+
+        # 1. Load base env
+        base_path = str(Path(self.conf_source) / self.base_env)
+        try:
+            base_config = load_config(base_path, [*self.config_patterns[key]])
+        except KeyError as exc:
+            raise KeyError("Key not found in patterns")
+
+        # 2. Load other env
+        run_env = self.env or self.default_run_env
+        env_path = str(Path(self.conf_source) / run_env)
+        env_config = load_config(env_path, [*self.config_patterns[key]])
+
+        # TODO: 3. Destructive Merge the two env dirs
+        merged_config = dict(OmegaConf.merge(base_config, env_config))
+
+        if not merged_config:
+            raise MissingConfigException(
+                f"No files of YAML or JSON format found in {base_path} or {env_path} matching the glob "
+                f"pattern(s): {[*self.config_patterns[key]]}"
+            )
+        return merged_config
 
     def __repr__(self):  # pragma: no cover
         return (
@@ -127,91 +147,40 @@ class OmegaConfLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
-    @property
-    def conf_paths(self):
-        """Property method to return deduplicated configuration paths."""
-        return _remove_duplicates(self._build_conf_paths())
 
-    def get(self, *patterns: str) -> Dict[str, Any]:  # type: ignore
-        return _get_config_from_patterns_omegaconf(
-            conf_paths=self.conf_paths, patterns=list(patterns)
-        )
-
-    def _build_conf_paths(self) -> Iterable[str]:
-        run_env = self.env or self.default_run_env
-        return [
-            str(Path(self.conf_source) / self.base_env),
-            str(Path(self.conf_source) / run_env),
-        ]
+def is_valid_path(path):
+    if path.is_file() and path.suffix in [".yml", ".yaml", ".json"]:
+        return True
+    return False
 
 
-def _get_config_from_patterns_omegaconf(
-    conf_paths: Iterable[str],
-    patterns: Iterable[str] = None,
-) -> Dict[str, Any]:
-    """Recursively scan for configuration files, load and merge them using OmegaConf, and
-    return them in the form of a config dictionary.
-
-    Args:
-        conf_paths: List of configuration paths to directories
-        patterns: Glob patterns to match. Files, which names match
-            any of the specified patterns, will be processed.
-
-    Raises:
-        ValueError: If 2 or more configuration files inside the same
-            config path (or its subdirectories) contain the same
-            top-level key.
-        MissingConfigException: If no configuration files exist within
-            a specified config path.
-        ParserError: If configuration is poorly formatted and
-            cannot be loaded.
-
-    Returns:
-        Dict[str, Any]:  A Python dictionary with the combined
-            configuration from all configuration files.
-    """
-
+def load_config(conf_path: str, patterns: Iterable[str] = None):
     if not patterns:
         raise ValueError(
             "'patterns' must contain at least one glob "
             "pattern to match config filenames against."
         )
 
-    # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.
-    # It's easier to introduce them step by step, but removing them would be a breaking change.
-    _clear_omegaconf_resolvers()
-
-    aggregate_config = []
-    processed_files = set()  # type: Set[Path]
-
-    for conf_path in conf_paths:
-        if not Path(conf_path).is_dir():
-            raise ValueError(
-                f"Given configuration path either does not exist "
-                f"or is not a valid directory: {conf_path}"
-            )
-
-        config_files = _lookup_config_filepaths(Path(conf_path), patterns)
-        filtered_config_files = set()
-        for path in config_files:
-            if path.is_file() and path.suffix in [".yml", ".yaml", ".json"]:
-                filtered_config_files.add(path)
-
-        config_filepaths = _process_files(
-            filtered_config_files, processed_files, _config_logger
+    if not Path(conf_path).is_dir():
+        raise ValueError(
+            f"Given configuration path either does not exist "
+            f"or is not a valid directory: {conf_path}"
         )
 
-        new_conf = _load_configs_omegaconf(config_filepaths=config_filepaths)
+    # TODO: try to write cleaner
+    paths = []
+    for pattern in patterns:
+        for each in iglob(f"{str(conf_path)}/{pattern}", recursive=True):
+            path = Path(each).resolve()
+            paths.append(path)
 
-        aggregate_config.append(new_conf)
-        processed_files |= set(config_filepaths)
+    # TODO: Should this be re-ordered?
+    deduplicated_paths = set(paths)
+    config_files = list(deduplicated_paths)
+    config_files_filtered = [path for path in config_files if is_valid_path(path)]
 
-    if not processed_files:
-        raise MissingConfigException(
-            f"No files of YAML or JSON format found in {conf_paths} matching the glob "
-            f"pattern(s): {patterns}"
-        )
-    return dict(OmegaConf.merge(*aggregate_config))
+    loaded_config = _load_configs_omegaconf(config_filepaths=config_files_filtered)
+    return loaded_config
 
 
 def _load_configs_omegaconf(config_filepaths: List[Path]) -> Dict[str, Any]:

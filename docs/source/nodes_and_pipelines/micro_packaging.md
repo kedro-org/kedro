@@ -71,7 +71,7 @@ You can pull a micro-package from a tar file by executing `kedro micropkg pull <
   * To place parameters from a different config environment, run `kedro micropkg pull <micropkg_name> --env <env_name>`
   * Unit tests in `src/tests/<micropkg_name>`
 * Kedro will also parse any requirements packaged with the micro-package and add them to project level `requirements.in`.
-* It is advised to do `kedro build-reqs` to compile the updated list of requirements after pulling a micro-package.
+* It is advised to compile an updated list of requirements after pulling a micro-package using [`pip-compile`](https://pypi.org/project/pip-tools/). 
 
 ```{note}
 If a micro-package has embedded requirements and a project `requirements.in` file does not already exist, it will be generated based on the project `requirements.txt` before appending the micro-package requirements.

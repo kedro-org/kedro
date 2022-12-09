@@ -5,21 +5,29 @@ Both `pip install kedro` and `conda install -c conda-forge kedro` install the co
 When you create a project, you then introduce additional dependencies for the tasks it performs.
 
 ## Project-specific dependencies
-You can use Kedro to specify a project's exact dependencies to make it easier for you and others to run your project in the future, and to avoid version conflicts downstream.
+You can specify a project's exact dependencies in the `src/requirements.txt` file to make it easier for you and others to run your project in the future, 
+and to avoid version conflicts downstream. This can be achieved with the help of [`pip-tools`](https://pypi.org/project/pip-tools/). 
+To install `pip-tools` in your virtual environment, run the following command:
+```bash
+pip install pip-tools
+```
 
 To add or remove dependencies to a project, edit the `src/requirements.txt` file, then run the following:
 
 ```bash
-kedro build-reqs
+pip-compile --output-file=<project_root>/src/requirements.txt --input-file=<project_root>/src/requirements.txt
 ```
 
-The `build-reqs` command will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in the `src/requirements.txt` file into a `src/requirements.lock` that specifies a list of pinned project dependencies (those with a strict version).
+This will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in 
+the `src/requirements.txt` file into a `src/requirements.lock` that specifies a list of pinned project dependencies 
+(those with a strict version). You can also use this command with additional CLI arguments such as `--generate-hashes`. 
+[Check out the `pip-tools` documentation](https://pypi.org/project/pip-tools/) for more information.
 
 ```{note}
 The `src/requirements.txt` file contains "source" requirements, while `src/requirements.lock` contains the compiled version of those and requires no manual updates.
 ```
 
-To further update the project requirements, modify the `src/requirements.txt` file (not `src/requirements.lock`) and re-run `kedro build-reqs`.
+To further update the project requirements, modify the `src/requirements.txt` file (not `src/requirements.lock`) and re-run the `pip-compile` command above.
 
 
 ## Install project-specific dependencies

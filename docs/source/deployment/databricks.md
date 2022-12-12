@@ -169,10 +169,10 @@ In your newly-created notebook, put each of the below code snippets into a separ
 %sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch main https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
 ```
 
-* Install the latest version of Kedro compatible with version `0.18.4`
+* Install Kedro and the latest compatible version of Kedro-Datasets.
 
 ```console
-%pip install "kedro[spark.SparkDataSet]~=0.18.4"
+%pip install "kedro==0.18.4" "kedro-datasets[spark.SparkDataSet]~=1.0.0"
 ```
 
 * Copy input data into DBFS

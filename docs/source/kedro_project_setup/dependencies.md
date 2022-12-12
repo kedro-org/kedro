@@ -20,7 +20,8 @@ pip-compile --output-file=<project_root>/src/requirements.txt --input-file=<proj
 
 This will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in 
 the `src/requirements.txt` file into a `src/requirements.lock` that specifies a list of pinned project dependencies 
-(those with a strict version). You can also use this command with additional CLI arguments such as `--generate-hashes` to use `pip`'s Hash Checking Mode. 
+(those with a strict version). You can also use this command with additional CLI arguments such as `--generate-hashes` 
+to use `pip`'s Hash Checking Mode or `--upgrade-package` to update specific packages to the latest or specific versions. 
 [Check out the `pip-tools` documentation](https://pypi.org/project/pip-tools/) for more information.
 
 ```{note}

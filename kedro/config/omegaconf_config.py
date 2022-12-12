@@ -126,7 +126,7 @@ class OmegaConfLoader(AbstractConfigLoader):
 
         Returns:
             Dict[str, Any]:  A Python dictionary with the combined
-               configuration from all configuration files. Configuration files will
+               configuration from all configuration files.
         """
 
         # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.

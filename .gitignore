@@ -161,3 +161,6 @@ tests/template/fake_project/
 
 default.profraw
 package-lock.json
+
+# Kedro-Datasets plugin
+kedro/datasets/*

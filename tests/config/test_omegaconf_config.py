@@ -1,3 +1,4 @@
+# pylint: disable=expression-not-assigned, pointless-statement
 import configparser
 import json
 import re
@@ -139,9 +140,9 @@ class TestOmegaConfLoader:
             r"Given configuration path either does not exist "
             r"or is not a valid directory\: {}"
         )
-        with pytest.raises(ValueError, match=pattern.format(".*base")):
+        with pytest.raises(MissingConfigException, match=pattern.format(".*base")):
             OmegaConfLoader(str(tmp_path))["catalog"]
-        with pytest.raises(ValueError, match=pattern.format(".*local")):
+        with pytest.raises(MissingConfigException, match=pattern.format(".*local")):
             proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
             _write_yaml(proj_catalog, base_config)
             OmegaConfLoader(str(tmp_path))["catalog"]
@@ -245,7 +246,6 @@ class TestOmegaConfLoader:
     def test_key_not_found_dict_get(self, tmp_path):
         """Check the error if no config files satisfy a given pattern"""
         with pytest.raises(KeyError):
-            # pylint: disable=expression-not-assigned
             OmegaConfLoader(str(tmp_path))["non-existent-pattern"]
 
     @use_config_dir
@@ -259,7 +259,6 @@ class TestOmegaConfLoader:
             r"\[\'credentials\*\', \'credentials\*/\**\', \'\**/credentials\*\'\]"
         )
         with pytest.raises(MissingConfigException, match=pattern):
-            # pylint: disable=expression-not-assigned
             OmegaConfLoader(str(tmp_path))["credentials"]
 
     def test_overlapping_patterns(self, tmp_path, caplog):

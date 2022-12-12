@@ -4,7 +4,7 @@ or more configuration files of yaml or json type from specified paths through Om
 import logging
 from glob import iglob
 from pathlib import Path
-from typing import AbstractSet, Any, Dict, Iterable, List, Set  # noqa
+from typing import AbstractSet, Any, Dict, Iterable, List  # noqa
 
 from omegaconf import OmegaConf
 from yaml.parser import ParserError
@@ -26,14 +26,12 @@ class OmegaConfLoader(AbstractConfigLoader):
     ``conf_source``. The optional ``env`` argument can be used to specify a
     subdirectory of ``conf_source`` to process as a config path after ``base``.
 
-    When the same top-level key appears in any 2 config files located in
+    When the same top-level key appears in any two config files located in
     the same (sub)directory, a ``ValueError`` is raised.
 
-    When the same key appears in any 2 config files located in different
+    When the same key appears in any two config files located in different
     (sub)directories, the last processed config path takes precedence
-    and overrides this key. You can find more information about how ``OmegaConf``
-    does merging of configuration in their documentation
-    https://omegaconf.readthedocs.io/en/2.2_branch/usage.html#merging-configurations
+    and overrides this key and any sub-keys.
 
     You can access the different configurations as follows:
     ::
@@ -93,9 +91,8 @@ class OmegaConfLoader(AbstractConfigLoader):
             base_env: Name of the base environment. Defaults to `"base"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths.
-            default_run_env: Name of the base environment. Defaults to `"local"`.
-                This is used in the `conf_paths` property method to construct
-                the configuration paths. Can be overriden by supplying the `env` argument.
+            default_run_env: Name of the default run environment. Defaults to `"local"`.
+                Can be overridden by supplying the `env` argument.
         """
         self.base_env = base_env
         self.default_run_env = default_run_env
@@ -114,12 +111,29 @@ class OmegaConfLoader(AbstractConfigLoader):
             runtime_params=runtime_params,
         )
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Dict[str, Any]:
+        """Get configuration files by key, load and merge them, and
+        return them in the form of a config dictionary.
+
+        Args:
+            key: Key of the configuration type to fetch.
+
+        Raises:
+            KeyError: If key provided isn't present in the config_patterns of this
+               OmegaConfLoader instance.
+            MissingConfigException: If no configuration files exist matching the patterns
+                mapped to the provided key.
+
+        Returns:
+            Dict[str, Any]:  A Python dictionary with the combined
+               configuration from all configuration files. Configuration files will
+        """
+
         # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.
         # It's easier to introduce them step by step, but removing them would be a breaking change.
         _clear_omegaconf_resolvers()
 
-        # 1. Load base env config
+        # Load base env config
         base_path = str(Path(self.conf_source) / self.base_env)
         try:
             base_config = load_and_merge_dir_config(
@@ -127,19 +141,14 @@ class OmegaConfLoader(AbstractConfigLoader):
             )
             config = base_config
         except KeyError as exc:
-            raise KeyError("Key not found in patterns")
+            raise KeyError("Key not found in patterns") from exc
 
-        # 2. Load chosen env config
+        # Load chosen env config
         run_env = self.env or self.default_run_env
         env_path = str(Path(self.conf_source) / run_env)
-        try:
-            env_config = load_and_merge_dir_config(
-                env_path, [*self.config_patterns[key]]
-            )
-        except KeyError as exc:
-            raise KeyError("Key not found in patterns")
+        env_config = load_and_merge_dir_config(env_path, [*self.config_patterns[key]])
 
-        # 3. Destructively merge the two env dirs. The chosen env will override base.
+        # Destructively merge the two env dirs. The chosen env will override base.
         common_keys = config.keys() & env_config.keys()
         if common_keys:
             sorted_keys = ", ".join(sorted(common_keys))
@@ -165,13 +174,7 @@ class OmegaConfLoader(AbstractConfigLoader):
         )
 
 
-def is_valid_path(path):
-    if path.is_file() and path.suffix in [".yml", ".yaml", ".json"]:
-        return True
-    return False
-
-
-def load_and_merge_dir_config(conf_path: str, patterns: Iterable[str] = None):
+def load_and_merge_dir_config(conf_path: str, patterns: Iterable[str]):
     """Recursively load and merge all configuration files in a directory using OmegaConf,
     which satisfy a given list of glob patterns from a specific path.
 
@@ -194,15 +197,15 @@ def load_and_merge_dir_config(conf_path: str, patterns: Iterable[str] = None):
             f"or is not a valid directory: {conf_path}"
         )
 
-    # TODO: try to write cleaner
-    paths = []
-    for pattern in patterns:
-        for each in iglob(f"{str(conf_path)}/{pattern}", recursive=True):
-            path = Path(each).resolve()
-            paths.append(path)
-
+    paths = [
+        Path(each).resolve()
+        for pattern in patterns
+        for each in iglob(f"{str(conf_path)}/{pattern}", recursive=True)
+    ]
     deduplicated_paths = set(paths)
-    config_files_filtered = [path for path in deduplicated_paths if is_valid_path(path)]
+    config_files_filtered = [
+        path for path in deduplicated_paths if _is_valid_config_path(path)
+    ]
 
     config = {}
     aggregate_config = []
@@ -240,3 +243,10 @@ def _clear_omegaconf_resolvers():
     OmegaConf.clear_resolver("oc.select")
     OmegaConf.clear_resolver("oc.dict.keys")
     OmegaConf.clear_resolver("oc.dict.values")
+
+
+def _is_valid_config_path(path):
+    """Check if given path is a file path and file type is yaml or json."""
+    if path.is_file() and path.suffix in [".yml", ".yaml", ".json"]:
+        return True
+    return False

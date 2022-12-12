@@ -92,7 +92,7 @@ use_proj_catalog = pytest.mark.usefixtures("proj_catalog")
 
 class TestOmegaConfLoader:
     @use_config_dir
-    def test_load_core_config_dict_get(self, tmp_path):
+    def test_load_core_config_dict_syntax(self, tmp_path):
         """Make sure core config can be fetched with a dict [] access."""
         conf = OmegaConfLoader(str(tmp_path))
         params = conf["parameters"]
@@ -100,17 +100,24 @@ class TestOmegaConfLoader:
 
         assert params["param1"] == 1
         assert catalog["trains"]["type"] == "MemoryDataSet"
-        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
-        assert catalog["boats"]["type"] == "MemoryDataSet"
-        assert not catalog["cars"]["save_args"]["index"]
 
     @use_config_dir
-    def test_load_local_config(self, tmp_path):
-        """Make sure that configs from `local/` override the ones
-        from `base/`"""
+    def test_load_core_config_get_syntax(self, tmp_path):
+        """Make sure core config can be fetched with .get()"""
         conf = OmegaConfLoader(str(tmp_path))
         params = conf.get("parameters")
         catalog = conf.get("catalog")
+
+        assert params["param1"] == 1
+        assert catalog["trains"]["type"] == "MemoryDataSet"
+
+    @use_config_dir
+    def test_load_local_config_overrides_base(self, tmp_path):
+        """Make sure that configs from `local/` override the ones
+        from `base/`"""
+        conf = OmegaConfLoader(str(tmp_path))
+        params = conf["parameters"]
+        catalog = conf["catalog"]
 
         assert params["param1"] == 1
         assert catalog["trains"]["type"] == "MemoryDataSet"

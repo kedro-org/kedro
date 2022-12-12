@@ -11,6 +11,7 @@
 # Upcoming Release 0.18.5
 
 ## Major features and improvements
+* Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations
 
 ## Bug fixes and other changes
 

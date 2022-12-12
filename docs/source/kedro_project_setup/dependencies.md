@@ -20,7 +20,7 @@ pip-compile --output-file=<project_root>/src/requirements.txt --input-file=<proj
 
 This will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in 
 the `src/requirements.txt` file into a `src/requirements.lock` that specifies a list of pinned project dependencies 
-(those with a strict version). You can also use this command with additional CLI arguments such as `--generate-hashes`. 
+(those with a strict version). You can also use this command with additional CLI arguments such as `--generate-hashes` to use `pip`'s Hash Checking Mode. 
 [Check out the `pip-tools` documentation](https://pypi.org/project/pip-tools/) for more information.
 
 ```{note}
@@ -40,7 +40,7 @@ pip install -r src/requirements.txt
 
 ## Workflow dependencies
 
-To install all of the dependencies recorded in Kedro's [`setup.py`](https://github.com/kedro-org/kedro/blob/develop/setup.py), run:
+To install all the dependencies recorded in Kedro's [`setup.py`](https://github.com/kedro-org/kedro/blob/develop/setup.py), run:
 
 ```bash
 pip install "kedro[all]"

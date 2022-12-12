@@ -11,10 +11,10 @@ You may select to use a distributed system if your Kedro pipelines are very comp
 
 For better dependency management, we encourage you to containerise the entire pipeline/project. We recommend using [Docker](https://www.docker.com/), but you're free to use any preferred container solution available to you. For the purpose of this walk-through, we are going to assume a `Docker` workflow.
 
-Firstly make sure your project requirements are up to date by running:
+Firstly make sure your [project requirements are up-to-date](../kedro_project_setup/dependencies.md) by running:
 
 ```bash
-kedro build-reqs
+pip-compile --output-file=<project_root>/src/requirements.txt --input-file=<project_root>/src/requirements.txt
 ```
 
 We then recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process of building the image. [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).

@@ -201,10 +201,8 @@ def load_and_merge_dir_config(conf_path: str, patterns: Iterable[str] = None):
             path = Path(each).resolve()
             paths.append(path)
 
-    # TODO: Should this be re-ordered?
     deduplicated_paths = set(paths)
-    config_files = list(deduplicated_paths)
-    config_files_filtered = [path for path in config_files if is_valid_path(path)]
+    config_files_filtered = [path for path in deduplicated_paths if is_valid_path(path)]
 
     config = {}
     aggregate_config = []

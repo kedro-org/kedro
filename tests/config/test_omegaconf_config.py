@@ -170,8 +170,9 @@ class TestOmegaConfLoader:
         _write_yaml(nested, base_config)
 
         pattern = (
-            r"Duplicate keys found in .*catalog\.yml "
-            r"and\:\n\- .*nested\.yml\: cars, trains"
+            r"Duplicate keys found in "
+            r"(.*catalog\.yml and\:\n\- .*nested\.yml|.*nested\.yml and\:\n\- .*catalog\.yml)"
+            r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
             OmegaConfLoader(str(tmp_path))["catalog"]
@@ -182,7 +183,7 @@ class TestOmegaConfLoader:
         conf_path.mkdir(parents=True, exist_ok=True)
         (conf_path / "catalog.yml").write_text("bad:\nconfig")
 
-        pattern = f"Invalid YAML file {conf_path}"
+        pattern = f"Invalid YAML or JSON file {conf_path}"
         with pytest.raises(ParserError, match=re.escape(pattern)):
             OmegaConfLoader(str(tmp_path))["catalog"]
 
@@ -192,7 +193,11 @@ class TestOmegaConfLoader:
         _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", data)
 
         conf = OmegaConfLoader(str(tmp_path))
-        pattern = r"^Duplicate keys found in .*catalog2\.yml and\:\n\- .*catalog1\.yml\: .*\.\.\.$"
+        pattern = (
+            r"Duplicate keys found in "
+            r"(.*catalog2\.yml and\:\n\- .*catalog1\.yml|.*catalog1\.yml and\:\n\- .*catalog2\.yml)"
+            r"\: .*\.\.\.$"
+        )
         with pytest.raises(ValueError, match=pattern):
             conf["catalog"]
 
@@ -204,22 +209,15 @@ class TestOmegaConfLoader:
         _write_json(dup_json, base_config)
 
         pattern = (
-            r"Duplicate keys found in .*catalog\.yml "
-            r"and\:\n\- .*catalog\.json\: cars, trains"
+            r"Duplicate keys found in "
+            r"(.*catalog\.yml and\:\n\- .*catalog\.json|.*catalog\.json and\:\n\- .*catalog\.yml)"
+            r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
             OmegaConfLoader(str(tmp_path))["catalog"]
 
     @use_config_dir
     def test_pattern_key_not_found(self, tmp_path):
-        """Check the error if no config files satisfy a given pattern"""
-        pattern = "Key not found in patterns"
-        with pytest.raises(KeyError, match=pattern):
-            OmegaConfLoader(str(tmp_path))["non-existent-pattern"]
-
-    # TODO: write this test
-    @use_config_dir
-    def test_no_files_found(self, tmp_path):
         """Check the error if no config files satisfy a given pattern"""
         pattern = "Key not found in patterns"
         with pytest.raises(KeyError, match=pattern):
@@ -243,13 +241,7 @@ class TestOmegaConfLoader:
             conf["db"]
 
     @use_config_dir
-    def test_key_not_found_dict_get(self, tmp_path):
-        """Check the error if no config files satisfy a given pattern"""
-        with pytest.raises(KeyError):
-            OmegaConfLoader(str(tmp_path))["non-existent-pattern"]
-
-    @use_config_dir
-    def test_no_files_found_dict_get(self, tmp_path):
+    def test_no_files_found(self, tmp_path):
         """Check the error if no config files satisfy a given pattern"""
         pattern = (
             r"No files of YAML or JSON format found in "
@@ -261,7 +253,7 @@ class TestOmegaConfLoader:
         with pytest.raises(MissingConfigException, match=pattern):
             OmegaConfLoader(str(tmp_path))["credentials"]
 
-    def test_overlapping_patterns(self, tmp_path, caplog):
+    def test_overlapping_patterns(self, tmp_path, mocker):
         """Check that same configuration file is not loaded more than once."""
         _write_yaml(
             tmp_path / _BASE_ENV / "catalog0.yml",
@@ -271,13 +263,19 @@ class TestOmegaConfLoader:
             tmp_path / "dev" / "catalog1.yml", {"env": "dev", "dev_specific": "wiz"}
         )
         _write_yaml(tmp_path / "dev" / "user1" / "catalog2.yml", {"user1_c2": True})
-        _write_yaml(tmp_path / "dev" / "user1" / "catalog3.yml", {"user1_c3": True})
 
-        # catalog = OmegaConfLoader(str(tmp_path), "dev").get(
-        #     "catalog*", "catalog*/**", "user1/catalog2*", "../**/catalog2*"
-        # )
+        catalog_patterns = {
+            "catalog": [
+                "catalog*",
+                "catalog*/**",
+                "../**/user1/catalog2*",
+                "../**/catalog2*",
+            ]
+        }
 
-        catalog = OmegaConfLoader(str(tmp_path), "dev")["catalog"]
+        catalog = OmegaConfLoader(
+            conf_source=str(tmp_path), env="dev", config_patterns=catalog_patterns
+        )["catalog"]
         expected_catalog = {
             "env": "dev",
             "common": "common",
@@ -286,12 +284,9 @@ class TestOmegaConfLoader:
         }
         assert catalog == expected_catalog
 
-        log_messages = [record.getMessage() for record in caplog.records]
+        mocked_load = mocker.patch("omegaconf.OmegaConf.load")
         expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
-        expected_message = (
-            f"Config file(s): {expected_path} already processed, skipping loading..."
-        )
-        assert expected_message in log_messages
+        assert mocked_load.called_once_with(expected_path)
 
     def test_yaml_parser_error(self, tmp_path):
         conf_path = tmp_path / _BASE_ENV
@@ -305,7 +300,10 @@ class TestOmegaConfLoader:
 
         (conf_path / "catalog.yml").write_text(example_catalog)
 
-        msg = f"Invalid YAML file {conf_path / 'catalog.yml'}, unable to read line 3, position 10."
+        msg = (
+            f"Invalid YAML or JSON file {conf_path / 'catalog.yml'}, unable to read"
+            f" line 3, position 10."
+        )
         with pytest.raises(ParserError, match=re.escape(msg)):
             OmegaConfLoader(str(tmp_path))["catalog"]
 
@@ -329,7 +327,7 @@ class TestOmegaConfLoader:
             "**/params*",
         ]
 
-    def test_merging_strategy_only_overwrites_specified_key(self, tmp_path):
+    def test_destructive_merging_strategy(self, tmp_path):
         mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
         base_mlflow = tmp_path / _BASE_ENV / "mlflow.yml"
         base_config = {
@@ -357,10 +355,8 @@ class TestOmegaConfLoader:
 
         assert conf == {
             "tracking": {
-                "disable_tracking": {"pipelines": "[on_exit_notification]"},
                 "experiment": {
                     "name": "name-of-prod-experiment",
                 },
-                "params": {"long_params_strategy": "tag"},
             }
         }

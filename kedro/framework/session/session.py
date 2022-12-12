@@ -7,7 +7,7 @@ import subprocess
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Union
+from typing import Any, Dict, Iterable, Union, Optional
 
 import click
 
@@ -99,10 +99,12 @@ class KedroSession:
         package_name: str = None,
         project_path: Union[Path, str] = None,
         save_on_close: bool = False,
+        conf_source: Optional[str] = None,
     ):
         self._project_path = Path(project_path or Path.cwd()).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
+        self._conf_source = conf_source
         self._package_name = package_name
         self._store = self._init_store()
         self._run_called = False
@@ -112,12 +114,15 @@ class KedroSession:
         _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
 
+        self._conf_source = conf_source or str(self._project_path / settings.CONF_SOURCE)
+
     @classmethod
     def create(  # pylint: disable=too-many-arguments
         cls,
         package_name: str = None,
         project_path: Union[Path, str] = None,
         save_on_close: bool = True,
+        conf_source: Optional[str] = None,
         env: str = None,
         extra_params: Dict[str, Any] = None,
     ) -> "KedroSession":
@@ -129,6 +134,7 @@ class KedroSession:
             project_path: Path to the project root directory. Default is
                 current working directory Path.cwd().
             save_on_close: Whether or not to save the session when it's closed.
+            conf_source: Path to a directory containing configuration
             env: Environment for the KedroContext.
             extra_params: Optional dictionary containing extra project parameters
                 for underlying KedroContext. If specified, will update (and therefore
@@ -145,6 +151,7 @@ class KedroSession:
             project_path=project_path,
             session_id=generate_timestamp(),
             save_on_close=save_on_close,
+            conf_source=conf_source,
         )
 
         # have to explicitly type session_data otherwise mypy will complain
@@ -268,7 +275,7 @@ class KedroSession:
 
         config_loader_class = settings.CONFIG_LOADER_CLASS
         return config_loader_class(
-            conf_source=str(self._project_path / settings.CONF_SOURCE),
+            conf_source=self._conf_source,
             env=env,
             runtime_params=extra_params,
             **settings.CONFIG_LOADER_ARGS,

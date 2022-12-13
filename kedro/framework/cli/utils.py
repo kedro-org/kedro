@@ -414,12 +414,12 @@ def _split_params(ctx, param, value):
         return value
     result = {}
     for item in split_string(ctx, param, value):
-        item = item.split(":", 1)
+        item = re.split(":|=", item)
         if len(item) != 2:
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "
                 f"Item `{item[0]}` must contain "
-                f"a key and a value separated by `:`."
+                f"a key and a value separated by `:` or `=`."
             )
         key = item[0].strip()
         if not key:

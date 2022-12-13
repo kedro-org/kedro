@@ -2,6 +2,7 @@
 
 import json
 import shutil
+import textwrap
 from pathlib import Path
 from time import time
 
@@ -621,3 +622,16 @@ def check_cell_conversion(context: behave.runner.Context):
         / "hello_world.py"
     )
     assert "Hello World!" in converted_file.read_text()
+
+
+@given("I have micro-packaging settings in pyproject.toml")
+def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
+    pyproject_toml_path = context.root_project_dir / "pyproject.toml"
+    project_toml_str = textwrap.dedent(
+        """
+                [tool.kedro.micropkg.package]
+                "pipelines.data_science" = {{alias = "ds"}}
+                """
+    )
+    with pyproject_toml_path.open(mode="a") as file:
+        file.write(project_toml_str)

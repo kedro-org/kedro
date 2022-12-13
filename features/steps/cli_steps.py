@@ -629,9 +629,9 @@ def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
     pyproject_toml_path = context.root_project_dir / "pyproject.toml"
     project_toml_str = textwrap.dedent(
         """
-                [tool.kedro.micropkg.package]
-                "pipelines.data_science" = {{alias = "ds"}}
-                """
+        [tool.kedro.micropkg.package]
+        "pipelines.data_science" = {alias = "ds"}
+        """
     )
     with pyproject_toml_path.open(mode="a") as file:
         file.write(project_toml_str)

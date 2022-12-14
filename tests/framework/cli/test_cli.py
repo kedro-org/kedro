@@ -650,6 +650,7 @@ class TestRunCommand:
                 "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
                 {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
             ),
+            ("foo=bar", {"foo": "bar"}),
         ],
     )
     def test_run_extra_params(
@@ -678,7 +679,7 @@ class TestRunCommand:
         )
         assert result.exit_code
         assert (
-            "Item `bad` must contain a key and a value separated by `:`"
+            "Item `bad` must contain a key and a value separated by `:` or `=`."
             in result.stdout
         )
 

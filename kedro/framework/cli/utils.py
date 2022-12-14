@@ -414,7 +414,7 @@ def _split_params(ctx, param, value):
         return value
     result = {}
     for item in split_string(ctx, param, value):
-        item = re.split(":|=", item)
+        item = re.split(":|=", item, maxsplit=1)
         if len(item) != 2:
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "

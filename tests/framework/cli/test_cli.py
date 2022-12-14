@@ -620,7 +620,7 @@ class TestRunCommand:
             pipeline_name="pipeline1",
         )
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, extra_params=expected
+            env=mocker.ANY, conf_source=None, extra_params=expected
         )
 
     @mark.parametrize(
@@ -669,7 +669,7 @@ class TestRunCommand:
 
         assert not result.exit_code
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, extra_params=expected_extra_params
+            env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
         )
 
     @mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])

@@ -1,5 +1,6 @@
 """This module provides context for Kedro project."""
 
+import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, Optional, Union
@@ -335,7 +336,10 @@ class KedroContext:
         """Getter for credentials specified in credentials directory."""
         try:
             conf_creds = self.config_loader["credentials"]
-        except MissingConfigException:
+        except MissingConfigException as exc:
+            logging.getLogger(__name__).debug(
+                f"Credentials not found in your Kedro project config.\n{str(exc)}"
+            )
             conf_creds = {}
         return conf_creds
 

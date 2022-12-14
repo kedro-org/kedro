@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import anyconfig
 import click
+import pytest
 from click.testing import CliRunner
 from pytest import fixture, mark, raises
 
@@ -28,6 +29,8 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
+
+from os import rename
 
 
 @click.group(name="stub_cli")
@@ -726,5 +729,24 @@ class TestRunCommand:
             f"Error: Expected the form of 'load_version' to be "
             f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
             f"found {load_version} instead\n"
+        )
+        assert expected_output in result.output
+
+    def test_run_with_conf_source(self, fake_project_cli, fake_metadata):
+        # check that Kedro runs successfully if target conf_source exists
+        rename("conf", "alternate_conf")
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--conf-source", "alternate_conf"], obj=fake_metadata
+        )
+        assert result.exit_code == 0
+
+        # check that an error is thrown if target conf_source doesn't exist
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--conf-source", "nonexistent_dir"], obj=fake_metadata
+        )
+        assert result.exit_code, result.output
+        expected_output = (
+            "Error: Invalid value for '--conf-source': Directory 'nonexistent_dir'"
+            " does not exist."
         )
         assert expected_output in result.output

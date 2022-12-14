@@ -60,6 +60,7 @@ To pass a nested dictionary as parameter, separate keys by '.', example:
 param_group.param1:value1."""
 INPUT_FILE_HELP = """Name of the requirements file to compile."""
 OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
+CONF_SOURCE_HELP = """Path of a directory where project configuration is stored"""
 
 
 # pylint: disable=missing-function-docstring
@@ -350,6 +351,11 @@ def activate_nbstripout(
     callback=_config_file_callback,
 )
 @click.option(
+    "--conf-source",
+    type=click.Path(exists=True, file_okay=False, resolve_path=True),
+    help=CONF_SOURCE_HELP,
+)
+@click.option(
     "--params",
     type=click.UNPROCESSED,
     default="",
@@ -370,15 +376,19 @@ def run(
     load_version,
     pipeline,
     config,
+    conf_source,
     params,
 ):
     """Run the pipeline."""
+
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
-    with KedroSession.create(env=env, extra_params=params) as session:
+    with KedroSession.create(
+        env=env, conf_source=conf_source, extra_params=params
+    ) as session:
         session.run(
             tags=tag,
             runner=runner(is_async=is_async),

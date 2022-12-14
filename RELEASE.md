@@ -13,7 +13,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Added `omegaconf` syntax as option for `--params`. Keys and values can now be separated by colons or equal signs.
+* Added `omegaconf` syntax as option for `--params`. Keys and values can now be separated by colons or equals signs.
 ## Breaking changes to the API
 
 # Release 0.18.4

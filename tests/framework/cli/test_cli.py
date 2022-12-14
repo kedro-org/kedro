@@ -730,8 +730,8 @@ class TestRunCommand:
         )
         assert expected_output in result.output
 
-    def test_run_with_conf_source(self, fake_project_cli, fake_metadata):
-        # check that Kedro runs successfully if target conf_source exists
+    def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):
+        # check that Kedro runs successfully with an alternative conf_source
         rename("conf", "alternate_conf")
         result = CliRunner().invoke(
             fake_project_cli,
@@ -740,6 +740,7 @@ class TestRunCommand:
         )
         assert result.exit_code == 0
 
+    def test_run_with_non_existent_conf_source(self, fake_project_cli, fake_metadata):
         # check that an error is thrown if target conf_source doesn't exist
         result = CliRunner().invoke(
             fake_project_cli,

@@ -145,6 +145,10 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         self._config_mapping = {**self._config_mapping, **globals_dict}
 
     def __getitem__(self, key):
+        # Allow bypassing of loading config from patterns if a key and value have been set
+        # explicitly on the ``TemplatedConfigLoader`` instance.
+        if key in self:
+            return super().__getitem__(key)
         return self.get(*self.config_patterns[key])
 
     def __repr__(self):  # pragma: no cover

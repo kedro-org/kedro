@@ -7,7 +7,7 @@ import subprocess
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Union, Optional
+from typing import Any, Dict, Iterable, Optional, Union
 
 import click
 
@@ -114,7 +114,9 @@ class KedroSession:
         _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
 
-        self._conf_source = conf_source or str(self._project_path / settings.CONF_SOURCE)
+        self._conf_source = conf_source or str(
+            self._project_path / settings.CONF_SOURCE
+        )
 
     @classmethod
     def create(  # pylint: disable=too-many-arguments

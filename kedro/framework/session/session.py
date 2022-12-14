@@ -69,6 +69,7 @@ class KedroSessionError(Exception):
     pass
 
 
+# pylint: disable=too-many-instance-attributes
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
@@ -93,6 +94,7 @@ class KedroSession:
 
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         session_id: str,

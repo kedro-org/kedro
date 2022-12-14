@@ -367,3 +367,22 @@ class TestOmegaConfLoader:
                 },
             }
         }
+
+    @use_config_dir
+    def test_adding_extra_keys_to_confloader(self, tmp_path):
+        """Make sure extra keys can be added directly to the config loader instance."""
+        conf = OmegaConfLoader(str(tmp_path))
+        catalog = conf["catalog"]
+        conf["spark"] = {"spark_config": "emr.blabla"}
+
+        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert conf["spark"] == {"spark_config": "emr.blabla"}
+
+    @use_config_dir
+    def test_bypass_catalog_config_loading(self, tmp_path):
+        """Make sure core config loading can be bypassed by setting the key and values
+        directly on the config loader instance."""
+        conf = OmegaConfLoader(str(tmp_path))
+        conf["catalog"] = {"catalog_config": "something_new"}
+
+        assert conf["catalog"] == {"catalog_config": "something_new"}

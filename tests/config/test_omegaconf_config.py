@@ -226,9 +226,10 @@ class TestOmegaConfLoader:
     @use_config_dir
     def test_pattern_key_not_found(self, tmp_path):
         """Check the error if no config files satisfy a given pattern"""
-        pattern = "Key not found in patterns"
+        key = "non-existent-pattern"
+        pattern = f"No config patterns were found for '{key}' in your config loader"
         with pytest.raises(KeyError, match=pattern):
-            OmegaConfLoader(str(tmp_path))["non-existent-pattern"]
+            OmegaConfLoader(str(tmp_path))[key]
 
     @use_config_dir
     def test_cannot_load_non_yaml_or_json_files(self, tmp_path):

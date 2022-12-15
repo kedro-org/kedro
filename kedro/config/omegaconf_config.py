@@ -105,6 +105,10 @@ class OmegaConfLoader(AbstractConfigLoader):
         }
         self.config_patterns.update(config_patterns or {})
 
+        # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.
+        # It's easier to introduce them step by step, but removing them would be a breaking change.
+        self._clear_omegaconf_resolvers()
+
         super().__init__(
             conf_source=conf_source,
             env=env,
@@ -134,26 +138,21 @@ class OmegaConfLoader(AbstractConfigLoader):
         if key in self:
             return super().__getitem__(key)
 
-        # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.
-        # It's easier to introduce them step by step, but removing them would be a breaking change.
-        self._clear_omegaconf_resolvers()
+        if key not in self.config_patterns:
+            raise KeyError(
+                f"No config patterns were found for '{key}' in your config loader"
+            )
+        patterns = [*self.config_patterns[key]]
 
         # Load base env config
         base_path = str(Path(self.conf_source) / self.base_env)
-        try:
-            base_config = self.load_and_merge_dir_config(
-                base_path, [*self.config_patterns[key]]
-            )
-            config = base_config
-        except KeyError as exc:
-            raise KeyError("Key not found in patterns") from exc
+        base_config = self.load_and_merge_dir_config(base_path, patterns)
+        config = base_config
 
         # Load chosen env config
         run_env = self.env or self.default_run_env
         env_path = str(Path(self.conf_source) / run_env)
-        env_config = self.load_and_merge_dir_config(
-            env_path, [*self.config_patterns[key]]
-        )
+        env_config = self.load_and_merge_dir_config(env_path, patterns)
 
         # Destructively merge the two env dirs. The chosen env will override base.
         common_keys = config.keys() & env_config.keys()
@@ -222,9 +221,8 @@ class OmegaConfLoader(AbstractConfigLoader):
                 single_config = OmegaConf.load(config_filepath)
                 config = single_config
             except (ParserError, ScannerError) as exc:
-                assert exc.problem_mark is not None
-                line = exc.problem_mark.line
-                cursor = exc.problem_mark.column
+                line = exc.problem_mark.line  # type: ignore
+                cursor = exc.problem_mark.column  # type: ignore
                 raise ParserError(
                     f"Invalid YAML or JSON file {config_filepath}, unable to read line {line}, "
                     f"position {cursor}."

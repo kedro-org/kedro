@@ -14,10 +14,11 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
+from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
 import importlib_metadata
+from omegaconf import OmegaConf
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -412,57 +413,25 @@ def _try_convert_to_numeric(value):
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
-    result = {}
+    dot_list = []
     for item in split_string(ctx, param, value):
-        item = re.split(":|=", item, maxsplit=1)
-        if len(item) != 2:
+        item = item.replace(":", "=", 1)
+        items = item.split("=", 1)
+        if len(items) != 2:
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "
-                f"Item `{item[0]}` must contain "
+                f"Item `{items[0]}` must contain "
                 f"a key and a value separated by `:` or `=`."
             )
-        key = item[0].strip()
+        key = items[0].strip()
         if not key:
             ctx.fail(
                 f"Invalid format of `{param.name}` option: Parameter key "
                 f"cannot be an empty string."
             )
-        value = item[1].strip()
-        result = _update_value_nested_dict(
-            result, _try_convert_to_numeric(value), key.split(".")
-        )
-    return result
-
-
-def _update_value_nested_dict(
-    nested_dict: Dict[str, Any], value: Any, walking_path: List[str]
-) -> Dict:
-    """Update nested dict with value using walking_path as a parse tree to walk
-    down the nested dict.
-
-    Example:
-    ::
-        >>> nested_dict = {"foo": {"hello": "world", "bar": 1}}
-        >>> _update_value_nested_dict(nested_dict, value=2, walking_path=["foo", "bar"])
-        >>> print(nested_dict)
-        >>> {'foo': {'hello': 'world', 'bar': 2}}
-
-    Args:
-        nested_dict: dict to be updated
-        value: value to update the nested_dict with
-        walking_path: list of nested keys to use to walk down the nested_dict
-
-    Returns:
-        nested_dict updated with value at path `walking_path`
-    """
-    key = walking_path.pop(0)
-    if not walking_path:
-        nested_dict[key] = value
-        return nested_dict
-    nested_dict[key] = _update_value_nested_dict(
-        nested_dict.get(key, {}), value, walking_path
-    )
-    return nested_dict
+        dot_list.append(item)
+    conf = OmegaConf.from_dotlist(dot_list)
+    return conf
 
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:

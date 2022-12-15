@@ -106,7 +106,6 @@ class KedroSession:
         self._project_path = Path(project_path or Path.cwd()).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
-        self._conf_source = conf_source
         self._package_name = package_name
         self._store = self._init_store()
         self._run_called = False

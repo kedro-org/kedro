@@ -34,7 +34,7 @@ Please ensure that your installed version of Kedro-Viz is at least version 4.1.1
 
 ### Set up tracking datasets
 
-Use either one of the [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) or [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet) in your data catalog. These datasets are versioned by default to ensure a historical record is kept of the logged data.
+Use either one of the [`tracking.MetricsDataSet`](/kedro.datasets.tracking.MetricsDataSet) or [`tracking.JSONDataSet`](/kedro.datasets.tracking.JSONDataSet) in your data catalog. These datasets are versioned by default to ensure a historical record is kept of the logged data.
 The `tracking.MetricsDataSet` should be used for tracking numerical metrics and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data. In Kedro-Viz these datasets will be visualised in the metadata side panel.
 
 Below is an example of how to add experiment tracking to your pipeline. Add a `tracking.MetricsDataSet` and/or `tracking.JSONDataSet` to your `catalog.yml`:

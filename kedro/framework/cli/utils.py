@@ -402,14 +402,6 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
     return load_versions_dict
 
 
-def _try_convert_to_numeric(value):
-    try:
-        value = float(value)
-    except ValueError:
-        return value
-    return int(value) if value.is_integer() else value
-
-
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value

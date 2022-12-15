@@ -406,6 +406,7 @@ def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
     dot_list = []
+    keys = []
     for item in split_string(ctx, param, value):
         item = item.replace(":", "=", 1)
         items = item.split("=", 1)
@@ -421,7 +422,12 @@ def _split_params(ctx, param, value):
                 f"Invalid format of `{param.name}` option: Parameter key "
                 f"cannot be an empty string."
             )
-        dot_list.append(item)
+        if key in keys:
+            idx = keys.index(key)
+            dot_list[idx] = item
+        else:
+            dot_list.append(item)
+            keys.append(key)
     conf = OmegaConf.from_dotlist(dot_list)
     return conf
 

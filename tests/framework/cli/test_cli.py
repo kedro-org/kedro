@@ -612,6 +612,7 @@ class TestRunCommand:
         "cli_arg,expected_extra_params",
         [
             ("foo:bar", {"foo": "bar"}),
+            ("foo=bar", {"foo": "bar"}),
             (
                 "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
                 {
@@ -628,6 +629,7 @@ class TestRunCommand:
                 "foo:bar, baz: https://example.com",
                 {"foo": "bar", "baz": "https://example.com"},
             ),
+            ("foo:bar, foo:fizz buzz", {"foo": "fizz buzz"}),
             ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
             ("foo.nested:bar", {"foo": {"nested": "bar"}}),
             ("foo.nested=123.45", {"foo": {"nested": 123.45}}),
@@ -635,7 +637,6 @@ class TestRunCommand:
                 "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
                 {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
             ),
-            ("foo=bar", {"foo": "bar"}),
         ],
     )
     def test_run_extra_params(

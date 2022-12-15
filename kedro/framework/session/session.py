@@ -125,9 +125,9 @@ class KedroSession:
         package_name: str = None,
         project_path: Union[Path, str] = None,
         save_on_close: bool = True,
-        conf_source: Optional[str] = None,
         env: str = None,
         extra_params: Dict[str, Any] = None,
+        conf_source: Optional[str] = None,
     ) -> "KedroSession":
         """Create a new instance of ``KedroSession`` with the session data.
 

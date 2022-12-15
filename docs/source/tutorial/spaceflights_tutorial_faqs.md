@@ -38,8 +38,8 @@ Are you seeing a message saying that an exception occurred?
 ```bash
 DataSetError: An exception occurred when parsing config for DataSet
 'data_processing.preprocessed_companies':
-Object 'ParquetDataSet' cannot be loaded from 'kedro.extras.datasets.pandas'. Please see the
-documentation on how to install relevant dependencies for kedro.extras.datasets.pandas.ParquetDataSet:
+Object 'ParquetDataSet' cannot be loaded from 'kedro_datasets.pandas'. Please see the
+documentation on how to install relevant dependencies for kedro_datasets.pandas.ParquetDataSet:
 https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html
 ```
 

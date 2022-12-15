@@ -214,7 +214,7 @@ preprocessed_shuttles:
   filepath: data/02_intermediate/preprocessed_shuttles.pq
 ```
 
-Adding the data to the catalog declares explicitly that Kedro should use [pandas.ParquetDataSet](/kedro.extras.datasets.pandas.ParquetDataSet) instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet). The [Data Catalog](../resources/glossary.md#data-catalog) automatically saves the datasets (in Parquet format) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
+Adding the data to the catalog declares explicitly that Kedro should use [pandas.ParquetDataSet](/kedro.datasets.pandas.ParquetDataSet) instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet). The [Data Catalog](../resources/glossary.md#data-catalog) automatically saves the datasets (in Parquet format) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
 We chose the [Apache Parquet](https://github.com/apache/parquet-format) format for working with processed and typed data, and we recommend getting your data out of CSV as soon as possible. Parquet supports things like compression, partitioning and types out of the box. While you lose the ability to view the file as text, the benefits greatly outweigh the drawbacks.
 

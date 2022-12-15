@@ -60,7 +60,7 @@ To pass a nested dictionary as parameter, separate keys by '.', example:
 param_group.param1:value1."""
 INPUT_FILE_HELP = """Name of the requirements file to compile."""
 OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
-CONF_SOURCE_HELP = """Path of a directory where project configuration is stored"""
+CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
 
 
 # pylint: disable=missing-function-docstring

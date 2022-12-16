@@ -84,7 +84,7 @@ setup(
 After that you can use this starter with `kedro new --starter=test_plugin_starter`.
 
 ```{note}
-If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.3.`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
+If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.4.`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
 ```
 
 ## Working with `click`
@@ -226,3 +226,4 @@ Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.
 - [kedro-airflow-k8s](https://github.com/getindata/kedro-airflow-k8s), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Airflow on a Kubernetes cluster
 - [kedro-vertexai](https://github.com/getindata/kedro-vertexai), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Vertex AI Pipelines service
 - [kedro-azureml](https://github.com/getindata/kedro-azureml), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Azure ML Pipelines service
+- [kedro-partitioned](https://github.com/ProjetaAi/kedro-partitioned), by [Gabriel Daiha Alves](https://github.com/gabrieldaiha) and [Nickolas da Rocha Machado](https://github.com/nickolasrm), extends the functionality on processing partitioned data.

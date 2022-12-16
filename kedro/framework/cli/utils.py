@@ -294,19 +294,18 @@ def split_string(ctx, param, value):  # pylint: disable=unused-argument
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def safe_split_string(ctx, param, value): # pylint: disable=unused-argument
-    """Split string by comma, ignoring commas enclosed by .
+def safe_split_string(ctx, param, to_split: str) -> List[str]: # pylint: disable=unused-argument
+    """Split string by comma, ignoring commas enclosed by an even number
+    of \" and \' characters.
 
     Args:
-        ctx:
-        param:
-        value: the value to split safely
+        to_split: the string to split safely
 
     Returns:
         A list containing the result of safe-splitting the string.
     """
     # Only split on commas with an even number of ' and " ahead
-    split_value = re.split(r""",(?=(?:[^'"]|'[^']*'|"[^"]*")*$)""", value)
+    split_value = re.split(r""",(?=(?:[^'"]|'[^']*'|"[^"]*")*$)""", to_split)
     return [item.strip() for item in split_value if item.strip()]
 
 

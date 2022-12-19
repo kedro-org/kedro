@@ -263,24 +263,30 @@ The `kedro.framework.context.KedroContext` class uses the approach above to load
 
 ### Specify parameters at runtime
 
-Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. To do so, use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. For example:
+Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. To do so, use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes.
+Each key-value pair is split on the first colon or equals sign. Following examples are both valid commands:
 
 ```bash
 kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
 ```
-
+```bash
+kedro run --params param_key1=value1,param_key2=2.0
+```
 Values provided in the CLI take precedence and overwrite parameters specified in configuration files. Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
 
 If any extra parameter key and/or value contains spaces, wrap the whole option contents in quotes:
 
 ```bash
-kedro run --params "key1:value with spaces,key2:value"
+kedro run --params "key1=value with spaces,key2=value"
 ```
 
-Since key-value pairs are split on the first colon, values can contain colons, but keys cannot. This is a valid CLI command:
+Since key-value pairs are split on the first colon or equals sign, values can contain colons/equals signs, but keys cannot. These are valid CLI commands:
 
 ```bash
 kedro run --params endpoint_url:https://endpoint.example.com
+```
+```bash
+kedro run --params endpoint_url=https://endpoint.example.com
 ```
 
 ### Use parameters

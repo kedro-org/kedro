@@ -23,7 +23,6 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
-    _update_value_nested_dict,
     forward_command,
     get_pkg_version,
 )
@@ -278,19 +277,6 @@ class TestCliUtils:
             mocker.call(pycache2, ignore_errors=True),
         ]
         assert mocked_rmtree.mock_calls == expected_calls
-
-    def test_update_value_nested_dict(self):
-        """Test `_update_value_nested_dict` utility function."""
-
-        nested_dict = {"foo": {"hello": "world", "bar": 1}}
-        value_for_nested_dict = 2
-        walking_path_for_nested_dict = ["foo", "bar"]
-
-        expected = {"foo": {"hello": "world", "bar": 2}}
-        actual = _update_value_nested_dict(
-            nested_dict, value_for_nested_dict, walking_path_for_nested_dict
-        )
-        assert actual == expected
 
 
 class TestEntryPoints:
@@ -627,26 +613,29 @@ class TestRunCommand:
         "cli_arg,expected_extra_params",
         [
             ("foo:bar", {"foo": "bar"}),
+            ("foo=bar", {"foo": "bar"}),
             (
                 "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
                 {
                     "foo": 123.45,
                     "bar": "1a",
-                    "baz": 678,
+                    "baz": 678.0,
                     "qux": 0.01,
                     "quux": 0,
-                    "quuz": "",
+                    "quuz": None,
                 },
             ),
             ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
+            ("foo=fizz:buzz", {"foo": "fizz:buzz"}),
+            ("foo:fizz=buzz", {"foo": "fizz=buzz"}),
             (
                 "foo:bar, baz: https://example.com",
                 {"foo": "bar", "baz": "https://example.com"},
             ),
+            ("foo:bar, foo:fizz buzz", {"foo": "fizz buzz"}),
             ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
-            ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
             ("foo.nested:bar", {"foo": {"nested": "bar"}}),
-            ("foo.nested:123.45", {"foo": {"nested": 123.45}}),
+            ("foo.nested=123.45", {"foo": {"nested": 123.45}}),
             (
                 "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
                 {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
@@ -679,7 +668,7 @@ class TestRunCommand:
         )
         assert result.exit_code
         assert (
-            "Item `bad` must contain a key and a value separated by `:`"
+            "Item `bad` must contain a key and a value separated by `:` or `=`."
             in result.stdout
         )
 

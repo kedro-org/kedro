@@ -56,17 +56,17 @@ The [Data Catalog](../data/data_catalog.md) is your way of interacting with diff
 Data types are broken into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of data types e.g.`pandas.CSVDataSet`, `pandas.ParquetDataSet` and more. You can install dependencies for an entire group of dependencies as follows:
 
 ```bash
-pip install "kedro[<group>]"
+pip install "kedro-datasets[<group>]"
 ```
 
-This installs Kedro and dependencies related to the data type group. An example of this could be a workflow that depends on the data types in `pandas`. Run `pip install "kedro[pandas]"` to install Kedro and the dependencies for the data types in the [`pandas` group](https://github.com/kedro-org/kedro/tree/develop/kedro/extras/datasets/pandas).
+This installs Kedro and dependencies related to the data type group. An example of this could be a workflow that depends on the data types in `pandas`. Run `pip install "kedro-datasets[pandas]"` to install Kedro and the dependencies for the data types in the [`pandas` group](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets/pandas).
 
 #### Install dependencies at a type-level
 
 To limit installation to dependencies specific to a data type:
 
 ```bash
-pip install "kedro[<group>.<dataset>]"
+pip install "kedro-datasets[<group>.<dataset>]"
 ```
 
-For example, your workflow might require use of the `pandas.ExcelDataSet`, so to install its dependencies, run `pip install "kedro[pandas.ExcelDataSet]"`.
+For example, your workflow might require use of the `pandas.ExcelDataSet`, so to install its dependencies, run `pip install "kedro-datasets[pandas.ExcelDataSet]"`.

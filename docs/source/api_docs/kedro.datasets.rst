@@ -43,8 +43,10 @@ kedro.datasets
    kedro.datasets.spark.SparkDataSet
    kedro.datasets.spark.SparkHiveDataSet
    kedro.datasets.spark.SparkJDBCDataSet
+   kedro.datasets.svmlight.SVMLightDataSet
    kedro.datasets.tensorflow.TensorFlowModelDataset
    kedro.datasets.text.TextDataSet
    kedro.datasets.tracking.JSONDataSet
    kedro.datasets.tracking.MetricsDataSet
+   kedro.datasets.video.VideoDataSet
    kedro.datasets.yaml.YAMLDataSet

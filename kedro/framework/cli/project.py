@@ -21,6 +21,7 @@ from kedro.framework.cli.utils import (
     env_option,
     forward_command,
     python_call,
+    split_string,
     split_node_names,
 )
 from kedro.framework.session import KedroSession

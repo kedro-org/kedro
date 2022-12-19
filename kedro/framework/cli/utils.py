@@ -410,6 +410,8 @@ def _split_params(ctx, param, value):
         equals_idx = item.find("=")
         colon_idx = item.find(":")
         if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
+            # For cases where key-value pair is separated by = and the value contains a colon
+            # which should not be replaced by =
             pass
         else:
             item = item.replace(":", "=", 1)

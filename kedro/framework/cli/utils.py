@@ -290,11 +290,12 @@ def _clean_pycache(path: Path):
 
 def split_string(ctx, param, value):  # pylint: disable=unused-argument
     """Split string by comma."""
-    result = [item.strip() for item in value.split(",") if item.strip()]
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def safe_split_string(ctx, param, to_split: str) -> List[str]: # pylint: disable=unused-argument
+def split_node_names(
+    ctx, param, to_split: str  # pylint: disable=unused-argument
+) -> List[str]:
     """Split string by comma, ignoring commas enclosed by an even number
     of \" and \' characters.
 
@@ -306,7 +307,11 @@ def safe_split_string(ctx, param, to_split: str) -> List[str]: # pylint: disable
     """
     # Only split on commas with an even number of ' and " ahead
     split_value = re.split(r""",(?=(?:[^'"]|'[^']*'|"[^"]*")*$)""", to_split)
-    return [item.strip() for item in split_value if item.strip()]
+    return [
+        item.strip().replace('"', "").replace("'", "")
+        for item in split_value
+        if item.strip()
+    ]
 
 
 def env_option(func_=None, **kwargs):

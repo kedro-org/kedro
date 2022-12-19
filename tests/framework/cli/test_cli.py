@@ -728,3 +728,34 @@ class TestRunCommand:
             f"found {load_version} instead\n"
         )
         assert expected_output in result.output
+
+    @mark.parametrize(
+        "command, expected",
+        [
+            ("--from-nodes=A,B,C", ["A", "B", "C"]),
+            ("--from-nodes=A,'B',C", ["A", "B", "C"]),
+            ("--from-nodes=A,\"B,\",'C,'", ["A", "B,", "C,"]),
+            ('--from-nodes=A,"B,C"', ["A", "B,C"]),
+            ('--from-nodes=A,"B,"D"C"', ["A", "B,DC"]),
+            (
+                '--from-nodes="two_inputs([A0,B0]) -> [C1]"',
+                ["two_inputs([A0,B0]) -> [C1]"],
+            ),
+        ],
+    )
+    def test_safe_split_option_arguments(
+        self, fake_project_cli, fake_metadata, fake_session, mocker, command, expected
+    ):
+        CliRunner().invoke(fake_project_cli, ["run", command], obj=fake_metadata)
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=expected,
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )

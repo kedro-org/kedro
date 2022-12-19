@@ -1,5 +1,6 @@
 from collections import namedtuple
 from itertools import cycle
+from os import rename
 from pathlib import Path
 from unittest.mock import patch
 
@@ -605,7 +606,7 @@ class TestRunCommand:
             pipeline_name="pipeline1",
         )
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, extra_params=expected
+            env=mocker.ANY, conf_source=None, extra_params=expected
         )
 
     @mark.parametrize(
@@ -657,7 +658,7 @@ class TestRunCommand:
 
         assert not result.exit_code
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, extra_params=expected_extra_params
+            env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
         )
 
     @mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
@@ -715,5 +716,29 @@ class TestRunCommand:
             f"Error: Expected the form of 'load_version' to be "
             f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
             f"found {load_version} instead\n"
+        )
+        assert expected_output in result.output
+
+    def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):
+        # check that Kedro runs successfully with an alternative conf_source
+        rename("conf", "alternate_conf")
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "alternate_conf"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0
+
+    def test_run_with_non_existent_conf_source(self, fake_project_cli, fake_metadata):
+        # check that an error is thrown if target conf_source doesn't exist
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "nonexistent_dir"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code, result.output
+        expected_output = (
+            "Error: Invalid value for '--conf-source': Directory 'nonexistent_dir'"
+            " does not exist."
         )
         assert expected_output in result.output

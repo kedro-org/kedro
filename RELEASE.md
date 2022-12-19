@@ -11,6 +11,7 @@
 # Upcoming Release 0.18.5
 
 ## Major features and improvements
+* Add the `--conf-source` option to `kedro run`, allowing users to specify a source for project configuration for the run.
 
 ## Bug fixes and other changes
 * Fix bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.

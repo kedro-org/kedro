@@ -4,14 +4,13 @@ or more configuration files of yaml or json type from specified paths through Om
 import logging
 from glob import iglob
 from pathlib import Path
-from typing import AbstractSet, Any, Dict, Iterable, List  # noqa
+from typing import Any, Dict, Iterable, List, Set  # noqa
 
 from omegaconf import OmegaConf
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
 from kedro.config import AbstractConfigLoader, MissingConfigException
-from kedro.config.common import _check_duplicate_keys
 
 _config_logger = logging.getLogger(__name__)
 
@@ -213,12 +212,12 @@ class OmegaConfLoader(AbstractConfigLoader):
         ]
 
         config = {}
-        aggregate_config = []
-        seen_file_to_keys = {}  # type: Dict[Path, AbstractSet[str]]
+        config_per_file = {}
 
         for config_filepath in config_files_filtered:
             try:
                 single_config = OmegaConf.load(config_filepath)
+                config_per_file[config_filepath] = single_config
                 config = single_config
             except (ParserError, ScannerError) as exc:
                 line = exc.problem_mark.line  # type: ignore
@@ -228,12 +227,11 @@ class OmegaConfLoader(AbstractConfigLoader):
                     f"position {cursor}."
                 ) from exc
 
-            _check_duplicate_keys(
-                seen_file_to_keys, config_filepath, dict(single_config)
-            )
-            seen_file_to_keys[config_filepath] = single_config.keys()
-            aggregate_config.append(single_config)
-
+        seen_file_to_keys = {
+            file: set(config.keys()) for file, config in config_per_file.items()
+        }
+        aggregate_config = config_per_file.values()
+        self._check_duplicates(seen_file_to_keys)
         if len(aggregate_config) > 1:
             return dict(OmegaConf.merge(*aggregate_config))
 
@@ -243,6 +241,30 @@ class OmegaConfLoader(AbstractConfigLoader):
     def _is_valid_config_path(path):
         """Check if given path is a file path and file type is yaml or json."""
         return path.is_file() and path.suffix in [".yml", ".yaml", ".json"]
+
+    @staticmethod
+    def _check_duplicates(seen_files_to_keys: Dict[Path, Set[Any]]):
+        duplicates = []
+
+        filepaths = list(seen_files_to_keys.keys())
+        for i, key1 in enumerate(filepaths, 1):
+            config1 = seen_files_to_keys[key1]
+            for key2 in filepaths[i:]:
+                config2 = seen_files_to_keys[key2]
+
+                overlapping_keys = config1 & config2
+
+                if overlapping_keys:
+                    sorted_keys = ", ".join(sorted(overlapping_keys))
+                    if len(sorted_keys) > 100:
+                        sorted_keys = sorted_keys[:100] + "..."
+                    duplicates.append(
+                        f"Duplicate keys found in {key1} and {key2}: {sorted_keys}"
+                    )
+
+        if duplicates:
+            dup_str = "\n".join(duplicates)
+            raise ValueError(f"{dup_str}")
 
     @staticmethod
     def _clear_omegaconf_resolvers():

@@ -178,11 +178,45 @@ class TestOmegaConfLoader:
 
         pattern = (
             r"Duplicate keys found in "
-            r"(.*catalog\.yml and\:\n\- .*nested\.yml|.*nested\.yml and\:\n\- .*catalog\.yml)"
+            r"(.*catalog\.yml and .*nested\.yml|.*nested\.yml and .*catalog\.yml)"
             r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
             OmegaConfLoader(str(tmp_path))["catalog"]
+
+    @use_config_dir
+    def test_multiple_nested_subdirs_duplicates(
+        self, tmp_path, base_config, local_config
+    ):
+        """Check the error when several config files from subdirectories contain
+        duplicate keys"""
+        nested = tmp_path / _BASE_ENV / "catalog" / "dir" / "nested.yml"
+        _write_yaml(nested, base_config)
+
+        local = tmp_path / _BASE_ENV / "catalog" / "dir" / "local.yml"
+        _write_yaml(local, local_config)
+
+        pattern_catalog_nested = (
+            r"Duplicate keys found in "
+            r"(.*catalog\.yml and .*nested\.yml|.*nested\.yml and .*catalog\.yml)"
+            r"\: cars, trains"
+        )
+        pattern_catalog_local = (
+            r"Duplicate keys found in "
+            r"(.*catalog\.yml and .*local\.yml|.*local\.yml and .*catalog\.yml)"
+            r"\: cars"
+        )
+        pattern_nested_local = (
+            r"Duplicate keys found in "
+            r"(.*nested\.yml and .*local\.yml|.*local\.yml and .*nested\.yml)"
+            r"\: cars"
+        )
+
+        with pytest.raises(ValueError) as exc:
+            OmegaConfLoader(str(tmp_path))["catalog"]
+        assert re.search(pattern_catalog_nested, str(exc.value))
+        assert re.search(pattern_catalog_local, str(exc.value))
+        assert re.search(pattern_nested_local, str(exc.value))
 
     @use_config_dir
     def test_bad_config_syntax(self, tmp_path):
@@ -202,7 +236,7 @@ class TestOmegaConfLoader:
         conf = OmegaConfLoader(str(tmp_path))
         pattern = (
             r"Duplicate keys found in "
-            r"(.*catalog2\.yml and\:\n\- .*catalog1\.yml|.*catalog1\.yml and\:\n\- .*catalog2\.yml)"
+            r"(.*catalog2\.yml and .*catalog1\.yml|.*catalog1\.yml and .*catalog2\.yml)"
             r"\: .*\.\.\.$"
         )
         with pytest.raises(ValueError, match=pattern):
@@ -217,7 +251,7 @@ class TestOmegaConfLoader:
 
         pattern = (
             r"Duplicate keys found in "
-            r"(.*catalog\.yml and\:\n\- .*catalog\.json|.*catalog\.json and\:\n\- .*catalog\.yml)"
+            r"(.*catalog\.yml and .*catalog\.json|.*catalog\.json and .*catalog\.yml)"
             r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):

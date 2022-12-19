@@ -319,14 +319,14 @@ def activate_nbstripout(
     type=str,
     default="",
     help=FROM_INPUTS_HELP,
-    callback=split_node_names,
+    callback=split_string,
 )
 @click.option(
     "--to-outputs",
     type=str,
     default="",
     help=TO_OUTPUTS_HELP,
-    callback=split_node_names,
+    callback=split_string,
 )
 @click.option(
     "--from-nodes",

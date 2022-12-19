@@ -625,6 +625,8 @@ class TestRunCommand:
                 },
             ),
             ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
+            ("foo=fizz:buzz", {"foo": "fizz:buzz"}),
+            ("foo:fizz=buzz", {"foo": "fizz=buzz"}),
             (
                 "foo:bar, baz: https://example.com",
                 {"foo": "bar", "baz": "https://example.com"},

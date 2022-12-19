@@ -407,7 +407,12 @@ def _split_params(ctx, param, value):
         return value
     dot_list = []
     for item in split_string(ctx, param, value):
-        item = item.replace(":", "=", 1)
+        equals_idx = item.find("=")
+        colon_idx = item.find(":")
+        if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
+            pass
+        else:
+            item = item.replace(":", "=", 1)
         items = item.split("=", 1)
         if len(items) != 2:
             ctx.fail(

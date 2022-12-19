@@ -293,9 +293,8 @@ def split_string(ctx, param, value):  # pylint: disable=unused-argument
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def split_node_names(
-    ctx, param, to_split: str  # pylint: disable=unused-argument
-) -> List[str]:
+# pylint: disable=unused-argument,missing-param-doc,missing-type-doc
+def split_node_names(ctx, param, to_split: str) -> List[str]:
     """Split string by comma, ignoring commas enclosed by an even number
     of \" and \' characters.
 

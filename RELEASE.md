@@ -11,7 +11,7 @@
 # Upcoming Release 0.18.5
 
 ## Major features and improvements
-* Add new `OmegaConfLoader` which uses `OmegaConf` for loading and merging configuration. 
+* Add new `OmegaConfLoader` which uses `OmegaConf` for loading and merging configuration.
 
 ## Bug fixes and other changes
 * Fix bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.

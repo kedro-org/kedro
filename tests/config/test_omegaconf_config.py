@@ -1,3 +1,4 @@
+# pylint: disable=expression-not-assigned, pointless-statement
 import configparser
 import json
 import re
@@ -8,7 +9,7 @@ import pytest
 import yaml
 from yaml.parser import ParserError
 
-from kedro.config import BadConfigException, ConfigLoader, MissingConfigException
+from kedro.config import MissingConfigException, OmegaConfLoader
 
 _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
@@ -66,13 +67,11 @@ def create_config_dir(tmp_path, base_config, local_config):
     proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
     local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
     parameters = tmp_path / _BASE_ENV / "parameters.json"
-    db_config_path = tmp_path / _BASE_ENV / "db.ini"
     project_parameters = dict(param1=1, param2=2)
 
     _write_yaml(proj_catalog, base_config)
     _write_yaml(local_catalog, local_config)
     _write_json(parameters, project_parameters)
-    _write_dummy_ini(db_config_path)
 
 
 @pytest.fixture
@@ -91,11 +90,32 @@ use_config_dir = pytest.mark.usefixtures("create_config_dir")
 use_proj_catalog = pytest.mark.usefixtures("proj_catalog")
 
 
-class TestConfigLoader:
+class TestOmegaConfLoader:
     @use_config_dir
-    def test_load_core_config_dict_get(self, tmp_path):
+    def test_load_core_config_dict_syntax(self, tmp_path):
         """Make sure core config can be fetched with a dict [] access."""
-        conf = ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)
+        conf = OmegaConfLoader(str(tmp_path))
+        params = conf["parameters"]
+        catalog = conf["catalog"]
+
+        assert params["param1"] == 1
+        assert catalog["trains"]["type"] == "MemoryDataSet"
+
+    @use_config_dir
+    def test_load_core_config_get_syntax(self, tmp_path):
+        """Make sure core config can be fetched with .get()"""
+        conf = OmegaConfLoader(str(tmp_path))
+        params = conf.get("parameters")
+        catalog = conf.get("catalog")
+
+        assert params["param1"] == 1
+        assert catalog["trains"]["type"] == "MemoryDataSet"
+
+    @use_config_dir
+    def test_load_local_config_overrides_base(self, tmp_path):
+        """Make sure that configs from `local/` override the ones
+        from `base/`"""
+        conf = OmegaConfLoader(str(tmp_path))
         params = conf["parameters"]
         catalog = conf["catalog"]
 
@@ -105,37 +125,20 @@ class TestConfigLoader:
         assert catalog["boats"]["type"] == "MemoryDataSet"
         assert not catalog["cars"]["save_args"]["index"]
 
-    @use_config_dir
-    def test_load_local_config(self, tmp_path):
-        """Make sure that configs from `local/` override the ones
-        from `base/`"""
-        conf = ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)
-        params = conf.get("parameters*")
-        db_conf = conf.get("db*")
-        catalog = conf.get("catalog*")
-
-        assert params["param1"] == 1
-        assert db_conf["prod"]["url"] == "postgresql://user:pass@url_prod/db"
-
-        assert catalog["trains"]["type"] == "MemoryDataSet"
-        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
-        assert catalog["boats"]["type"] == "MemoryDataSet"
-        assert not catalog["cars"]["save_args"]["index"]
-
     @use_proj_catalog
     def test_load_base_config(self, tmp_path, base_config):
         """Test config loading if `local/` directory is empty"""
         (tmp_path / _DEFAULT_RUN_ENV).mkdir(exist_ok=True)
-        catalog = ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV).get("catalog*.yml")
+        catalog = OmegaConfLoader(str(tmp_path))["catalog"]
         assert catalog == base_config
 
     @use_proj_catalog
     def test_duplicate_patterns(self, tmp_path, base_config):
         """Test config loading if the glob patterns cover the same file"""
         (tmp_path / _DEFAULT_RUN_ENV).mkdir(exist_ok=True)
-        conf = ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)
-        catalog1 = conf.get("catalog*.yml", "catalog*.yml")
-        catalog2 = conf.get("catalog*.yml", "catalog.yml")
+        conf = OmegaConfLoader(str(tmp_path))
+        catalog1 = conf["catalog"]
+        catalog2 = conf["catalog"]
         assert catalog1 == catalog2 == base_config
 
     def test_subdirs_dont_exist(self, tmp_path, base_config):
@@ -144,19 +147,23 @@ class TestConfigLoader:
             r"Given configuration path either does not exist "
             r"or is not a valid directory\: {}"
         )
-        with pytest.raises(ValueError, match=pattern.format(".*base")):
-            ConfigLoader(str(tmp_path)).get("catalog*")
-        with pytest.raises(ValueError, match=pattern.format(".*local")):
+        with pytest.raises(MissingConfigException, match=pattern.format(".*base")):
+            OmegaConfLoader(str(tmp_path))["catalog"]
+        with pytest.raises(MissingConfigException, match=pattern.format(".*local")):
             proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
             _write_yaml(proj_catalog, base_config)
-            ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV).get("catalog*")
+            OmegaConfLoader(str(tmp_path))["catalog"]
 
     @pytest.mark.usefixtures("create_config_dir", "proj_catalog", "proj_catalog_nested")
     def test_nested(self, tmp_path):
         """Test loading the config from subdirectories"""
-        config_loader = ConfigLoader(str(tmp_path))
-        config_loader.default_run_env = ""
-        catalog = config_loader.get("catalog*", "catalog*/**")
+        config_loader = OmegaConfLoader(str(tmp_path))
+        config_loader.default_run_env = "prod"
+
+        prod_catalog = tmp_path / "prod" / "catalog.yml"
+        _write_yaml(prod_catalog, {})
+
+        catalog = config_loader["catalog"]
         assert catalog.keys() == {"cars", "trains", "nested"}
         assert catalog["cars"]["type"] == "pandas.CSVDataSet"
         assert catalog["cars"]["save_args"]["index"] is True
@@ -170,50 +177,70 @@ class TestConfigLoader:
         _write_yaml(nested, base_config)
 
         pattern = (
-            r"Duplicate keys found in .*catalog\.yml "
-            r"and\:\n\- .*nested\.yml\: cars, trains"
+            r"Duplicate keys found in "
+            r"(.*catalog\.yml and .*nested\.yml|.*nested\.yml and .*catalog\.yml)"
+            r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
-            ConfigLoader(str(tmp_path)).get("catalog*", "catalog*/**")
+            OmegaConfLoader(str(tmp_path))["catalog"]
 
-    def test_ignore_hidden_keys(self, tmp_path):
-        """Check that the config key starting with `_` are ignored and also
-        don't cause a config merge error"""
-        _write_yaml(tmp_path / _BASE_ENV / "catalog1.yml", {"k1": "v1", "_k2": "v2"})
-        _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", {"k3": "v3", "_k2": "v4"})
+    @use_config_dir
+    def test_multiple_nested_subdirs_duplicates(
+        self, tmp_path, base_config, local_config
+    ):
+        """Check the error when several config files from subdirectories contain
+        duplicate keys"""
+        nested = tmp_path / _BASE_ENV / "catalog" / "dir" / "nested.yml"
+        _write_yaml(nested, base_config)
 
-        conf = ConfigLoader(str(tmp_path))
-        conf.default_run_env = ""
-        catalog = conf.get("**/catalog*")
-        assert catalog.keys() == {"k1", "k3"}
+        local = tmp_path / _BASE_ENV / "catalog" / "dir" / "local.yml"
+        _write_yaml(local, local_config)
 
-        _write_yaml(tmp_path / _BASE_ENV / "catalog3.yml", {"k1": "dup", "_k2": "v5"})
-        pattern = (
-            r"^Duplicate keys found in .*catalog3\.yml and\:\n\- .*catalog1\.yml\: k1$"
+        pattern_catalog_nested = (
+            r"Duplicate keys found in "
+            r"(.*catalog\.yml and .*nested\.yml|.*nested\.yml and .*catalog\.yml)"
+            r"\: cars, trains"
         )
-        with pytest.raises(ValueError, match=pattern):
-            conf.get("**/catalog*")
+        pattern_catalog_local = (
+            r"Duplicate keys found in "
+            r"(.*catalog\.yml and .*local\.yml|.*local\.yml and .*catalog\.yml)"
+            r"\: cars"
+        )
+        pattern_nested_local = (
+            r"Duplicate keys found in "
+            r"(.*nested\.yml and .*local\.yml|.*local\.yml and .*nested\.yml)"
+            r"\: cars"
+        )
 
+        with pytest.raises(ValueError) as exc:
+            OmegaConfLoader(str(tmp_path))["catalog"]
+        assert re.search(pattern_catalog_nested, str(exc.value))
+        assert re.search(pattern_catalog_local, str(exc.value))
+        assert re.search(pattern_nested_local, str(exc.value))
+
+    @use_config_dir
     def test_bad_config_syntax(self, tmp_path):
         conf_path = tmp_path / _BASE_ENV
         conf_path.mkdir(parents=True, exist_ok=True)
-        (conf_path / "catalog.yml").write_text("bad;config")
+        (conf_path / "catalog.yml").write_text("bad:\nconfig")
 
-        pattern = f"Couldn't load config file: {conf_path / 'catalog.yml'}"
-        with pytest.raises(BadConfigException, match=re.escape(pattern)):
-            ConfigLoader(str(tmp_path)).get("catalog*.yml")
+        pattern = f"Invalid YAML or JSON file {conf_path}"
+        with pytest.raises(ParserError, match=re.escape(pattern)):
+            OmegaConfLoader(str(tmp_path))["catalog"]
 
     def test_lots_of_duplicates(self, tmp_path):
-        """Check that the config key starting with `_` are ignored and also
-        don't cause a config merge error"""
         data = {str(i): i for i in range(100)}
         _write_yaml(tmp_path / _BASE_ENV / "catalog1.yml", data)
         _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", data)
 
-        conf = ConfigLoader(str(tmp_path))
-        pattern = r"^Duplicate keys found in .*catalog2\.yml and\:\n\- .*catalog1\.yml\: .*\.\.\.$"
+        conf = OmegaConfLoader(str(tmp_path))
+        pattern = (
+            r"Duplicate keys found in "
+            r"(.*catalog2\.yml and .*catalog1\.yml|.*catalog1\.yml and .*catalog2\.yml)"
+            r"\: .*\.\.\.$"
+        )
         with pytest.raises(ValueError, match=pattern):
-            conf.get("**/catalog*")
+            conf["catalog"]
 
     @use_config_dir
     def test_same_key_in_same_dir(self, tmp_path, base_config):
@@ -223,71 +250,52 @@ class TestConfigLoader:
         _write_json(dup_json, base_config)
 
         pattern = (
-            r"Duplicate keys found in .*catalog\.yml "
-            r"and\:\n\- .*catalog\.json\: cars, trains"
+            r"Duplicate keys found in "
+            r"(.*catalog\.yml and .*catalog\.json|.*catalog\.json and .*catalog\.yml)"
+            r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
-            ConfigLoader(str(tmp_path)).get("catalog*")
+            OmegaConfLoader(str(tmp_path))["catalog"]
 
     @use_config_dir
-    def test_empty_patterns(self, tmp_path):
-        """Check the error if no config patterns were specified"""
+    def test_pattern_key_not_found(self, tmp_path):
+        """Check the error if no config files satisfy a given pattern"""
+        key = "non-existent-pattern"
+        pattern = f"No config patterns were found for '{key}' in your config loader"
+        with pytest.raises(KeyError, match=pattern):
+            OmegaConfLoader(str(tmp_path))[key]
+
+    @use_config_dir
+    def test_cannot_load_non_yaml_or_json_files(self, tmp_path):
+        db_patterns = {"db": ["db*"]}
+        db_config_path = tmp_path / _BASE_ENV / "db.ini"
+        _write_dummy_ini(db_config_path)
+
+        conf = OmegaConfLoader(str(tmp_path), config_patterns=db_patterns)
         pattern = (
-            r"'patterns' must contain at least one glob pattern "
-            r"to match config filenames against"
+            r"No files of YAML or JSON format found in "
+            r".*base or "
+            r".*local "
+            r"matching the glob pattern\(s\): "
+            r"\[\'db\*\'\]"
         )
-        with pytest.raises(ValueError, match=pattern):
-            ConfigLoader(str(tmp_path)).get()
+        with pytest.raises(MissingConfigException, match=pattern):
+            conf["db"]
 
     @use_config_dir
     def test_no_files_found(self, tmp_path):
         """Check the error if no config files satisfy a given pattern"""
         pattern = (
-            r"No files found in "
-            r"\[\'.*base\', "
-            r"\'.*local\'\] "
-            r"matching the glob pattern\(s\): "
-            r"\[\'non\-existent\-pattern\'\]"
-        )
-        with pytest.raises(MissingConfigException, match=pattern):
-            ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV).get("non-existent-pattern")
-
-    @use_config_dir
-    def test_key_not_found_dict_get(self, tmp_path):
-        """Check the error if no config files satisfy a given pattern"""
-        with pytest.raises(KeyError):
-            # pylint: disable=expression-not-assigned
-            ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)["non-existent-pattern"]
-
-    @use_config_dir
-    def test_no_files_found_dict_get(self, tmp_path):
-        """Check the error if no config files satisfy a given pattern"""
-        pattern = (
-            r"No files found in "
-            r"\[\'.*base\', "
-            r"\'.*local\'\] "
+            r"No files of YAML or JSON format found in "
+            r".*base or "
+            r".*local "
             r"matching the glob pattern\(s\): "
             r"\[\'credentials\*\', \'credentials\*/\**\', \'\**/credentials\*\'\]"
         )
         with pytest.raises(MissingConfigException, match=pattern):
-            # pylint: disable=expression-not-assigned
-            ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)["credentials"]
+            OmegaConfLoader(str(tmp_path))["credentials"]
 
-    def test_duplicate_paths(self, tmp_path, caplog):
-        """Check that trying to load the same environment config multiple times logs a
-        warning and skips the reload"""
-        _write_yaml(tmp_path / _BASE_ENV / "catalog.yml", {"env": _BASE_ENV, "a": "a"})
-        config_loader = ConfigLoader(str(tmp_path), _BASE_ENV)
-
-        with pytest.warns(UserWarning, match="Duplicate environment detected"):
-            config_paths = config_loader.conf_paths
-        assert config_paths == [str(tmp_path / _BASE_ENV)]
-
-        config_loader.get("catalog*", "catalog*/**")
-        log_messages = [record.getMessage() for record in caplog.records]
-        assert not log_messages
-
-    def test_overlapping_patterns(self, tmp_path, caplog):
+    def test_overlapping_patterns(self, tmp_path, mocker):
         """Check that same configuration file is not loaded more than once."""
         _write_yaml(
             tmp_path / _BASE_ENV / "catalog0.yml",
@@ -297,11 +305,19 @@ class TestConfigLoader:
             tmp_path / "dev" / "catalog1.yml", {"env": "dev", "dev_specific": "wiz"}
         )
         _write_yaml(tmp_path / "dev" / "user1" / "catalog2.yml", {"user1_c2": True})
-        _write_yaml(tmp_path / "dev" / "user1" / "catalog3.yml", {"user1_c3": True})
 
-        catalog = ConfigLoader(str(tmp_path), "dev").get(
-            "catalog*", "catalog*/**", "user1/catalog2*", "../**/catalog2*"
-        )
+        catalog_patterns = {
+            "catalog": [
+                "catalog*",
+                "catalog*/**",
+                "../**/user1/catalog2*",
+                "../**/catalog2*",
+            ]
+        }
+
+        catalog = OmegaConfLoader(
+            conf_source=str(tmp_path), env="dev", config_patterns=catalog_patterns
+        )["catalog"]
         expected_catalog = {
             "env": "dev",
             "common": "common",
@@ -310,12 +326,9 @@ class TestConfigLoader:
         }
         assert catalog == expected_catalog
 
-        log_messages = [record.getMessage() for record in caplog.records]
+        mocked_load = mocker.patch("omegaconf.OmegaConf.load")
         expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
-        expected_message = (
-            f"Config file(s): {expected_path} already processed, skipping loading..."
-        )
-        assert expected_message in log_messages
+        assert mocked_load.called_once_with(expected_path)
 
     def test_yaml_parser_error(self, tmp_path):
         conf_path = tmp_path / _BASE_ENV
@@ -329,12 +342,15 @@ class TestConfigLoader:
 
         (conf_path / "catalog.yml").write_text(example_catalog)
 
-        msg = f"Invalid YAML file {conf_path / 'catalog.yml'}, unable to read line 3, position 10."
+        msg = (
+            f"Invalid YAML or JSON file {conf_path / 'catalog.yml'}, unable to read"
+            f" line 3, position 10."
+        )
         with pytest.raises(ParserError, match=re.escape(msg)):
-            ConfigLoader(str(tmp_path)).get("catalog*.yml")
+            OmegaConfLoader(str(tmp_path))["catalog"]
 
     def test_customised_config_patterns(self, tmp_path):
-        config_loader = ConfigLoader(
+        config_loader = OmegaConfLoader(
             conf_source=str(tmp_path),
             config_patterns={
                 "spark": ["spark*/"],
@@ -353,10 +369,44 @@ class TestConfigLoader:
             "**/params*",
         ]
 
+    def test_destructive_merging_strategy(self, tmp_path):
+        mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
+        base_mlflow = tmp_path / _BASE_ENV / "mlflow.yml"
+        base_config = {
+            "tracking": {
+                "disable_tracking": {"pipelines": "[on_exit_notification]"},
+                "experiment": {
+                    "name": "name-of-local-experiment",
+                },
+                "params": {"long_params_strategy": "tag"},
+            }
+        }
+        local_mlflow = tmp_path / _DEFAULT_RUN_ENV / "mlflow.yml"
+        local_config = {
+            "tracking": {
+                "experiment": {
+                    "name": "name-of-prod-experiment",
+                },
+            }
+        }
+
+        _write_yaml(base_mlflow, base_config)
+        _write_yaml(local_mlflow, local_config)
+
+        conf = OmegaConfLoader(str(tmp_path), config_patterns=mlflow_patterns)["mlflow"]
+
+        assert conf == {
+            "tracking": {
+                "experiment": {
+                    "name": "name-of-prod-experiment",
+                },
+            }
+        }
+
     @use_config_dir
     def test_adding_extra_keys_to_confloader(self, tmp_path):
         """Make sure extra keys can be added directly to the config loader instance."""
-        conf = ConfigLoader(str(tmp_path))
+        conf = OmegaConfLoader(str(tmp_path))
         catalog = conf["catalog"]
         conf["spark"] = {"spark_config": "emr.blabla"}
 
@@ -367,7 +417,7 @@ class TestConfigLoader:
     def test_bypass_catalog_config_loading(self, tmp_path):
         """Make sure core config loading can be bypassed by setting the key and values
         directly on the config loader instance."""
-        conf = ConfigLoader(str(tmp_path))
+        conf = OmegaConfLoader(str(tmp_path))
         conf["catalog"] = {"catalog_config": "something_new"}
 
         assert conf["catalog"] == {"catalog_config": "something_new"}

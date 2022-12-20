@@ -8,6 +8,7 @@ from .abstract_config import (
     MissingConfigException,
 )
 from .config import ConfigLoader
+from .omegaconf_config import OmegaConfLoader
 from .templated_config import TemplatedConfigLoader
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "ConfigLoader",
     "MissingConfigException",
     "TemplatedConfigLoader",
+    "OmegaConfLoader",
 ]

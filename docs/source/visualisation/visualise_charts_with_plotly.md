@@ -1,12 +1,9 @@
 # Visualise charts in Kedro-Viz
 
-Kedro-Viz supports integration with Plotly and MatPlotLib so that you can share your data insights while exploring your pipeline. This page describes how you can set it up to make interactive visualisations of your Kedro projects.
-
+This page describes how to make interactive visualisations of your Kedro projects with Kedro-Viz, which supports integration with [Plotly](https://plotly.com/python/) and [Matplotlib](https://matplotlib.org/).
+ 
 ## Visualisation with Plotly
 
-[Plotly](https://plotly.com/python/) is a free and open source Python library that combines with Kedro-Viz to output interactive charts as part of pipeline visualisation.
-
-### The spaceflights project
 We use the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and add a reporting pipeline that uses Plotly. Even if you have not yet worked through the tutorial, you can still follow this example; you'll need to use the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) to generate a copy of the project with working code in place:
 
 From your terminal:
@@ -15,19 +12,22 @@ From your terminal:
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout.
+When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout. 
 
 ### Update the dependencies
 
-You can view Plotly charts in Kedro-Viz when you use Kedro's plotly datasets. There are two types of Plotly datasets in Kedro: the `plotly.PlotlyDataSet` and `plotly.JSONDataSet`.
+There are two types of Plotly datasets supported by Kedro: 
 
-You must update the `requirements.txt` file in the `src` folder of your Kedro project and add the following datasets to enable Plotly for your project.
+* `plotly.PlotlyDataSet` which only supports [Plotly Express](https://plotly.com/python/plotly-express)
+* `plotly.JSONDataSet` which supports Plotly Express and [Plotly Graph Objects](https://plotly.com/python/graph-objects/)
+
+To use the Plotly datasets, you must update the `requirements.txt` file in the `src` folder of your Kedro project to add the following:
 
 ```text
-kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]
+kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]~=1.0.0
 ```
 
-Navigate to the root directory of the project and install the dependencies for the project:
+Navigate to the root directory of the project in your terminal and install the dependencies for the tutorial project:
 
 ```bash
 pip install -r src/requirements.txt
@@ -35,9 +35,7 @@ pip install -r src/requirements.txt
 
 ### Configure the Data Catalog
 
-The `plotly.PlotlyDataSet` dataset only supports [Plotly Express](https://plotly.com/python/plotly-express) while `plotly.JSONDataSet` supports Plotly Express and [Plotly Graph Objects](https://plotly.com/python/graph-objects/).
-
-To use the datasets, you need to add them to the Data Catalog by updating `conf/base/catalog.yml`:
+To use the datasets, add them to the Data Catalog by updating `conf/base/catalog.yml`:
 
 ```yaml
 shuttle_passenger_capacity_plot:
@@ -61,8 +59,7 @@ shuttle_passenger_capacity_plot:
 ```
 
 
-### Create the reporting pipeline and add the nodes
-
+### Create the template reporting pipeline 
 
 In the terminal, run the following command to generate a template for the reporting pipeline:
 
@@ -70,7 +67,9 @@ In the terminal, run the following command to generate a template for the report
 kedro pipeline create reporting
 ```
 
-Add the following to `nodes.py` in `src/kedro_tutorial/pipelines/reporting`:
+### Add the reporting nodes
+
+Add the following to `src/kedro_tutorial/pipelines/reporting/nodes.py`:
 
 ```python
 import plotly.express as px
@@ -81,7 +80,7 @@ def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
 
 
-# the below function uses plotly.express
+# This function uses plotly.express
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     fig = px.bar(
         data_frame=preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index(),
@@ -91,7 +90,7 @@ def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     return fig
 
 
-# the below function uses plotly.graph_objects
+# This function uses plotly.graph_objects
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     data_frame = preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
     fig = go.Figure(
@@ -105,8 +104,9 @@ def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     return fig
 ```
 
+### Update the reporting pipeline code
 
-Update `pipeline.py` to replace the existing code with the following:
+Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to replace the existing code with the following:
 
 ```python
 
@@ -127,10 +127,9 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 
 
-
 ### Run the pipeline
 
-Once the above setup is completed, run the pipelines:
+Now run the pipelines:
 
 ```bash
 kedro run
@@ -156,7 +155,7 @@ We have also used the Plotly integration to allow users to [visualise metrics fr
 
 ## Visualisation with Matplotlib
 
-[Matplotlib](https://matplotlib.org/) is a Python library for creating static, animated, and interactive visualisations. Integrating Matplotlib into Kedro-Viz allows you to output charts as part of your pipeline visualisation.
+Integrating Matplotlib into Kedro-Viz allows you to output charts as part of your pipeline visualisation.
 
 ```{note}
 The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.

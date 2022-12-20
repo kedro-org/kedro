@@ -1,6 +1,6 @@
 # Get started with Kedro-Viz
 
-[Kedro-Viz](https://github.com/kedro-org/kedro-viz) is a key part of Kedro. It displays data and nodes, and the connections between them, to visualise the structure of the pipelines in a Kedro project.
+[Kedro-Viz](https://github.com/kedro-org/kedro-viz) is a key part of Kedro. It visualises the pipelines in a Kedro project by showing data, nodes, and the connections between them.
 
 This section assumes you are familiar with the basic Kedro concepts described in the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). If you have not yet worked through the tutorial, you can still follow this example.
 
@@ -18,15 +18,21 @@ When your project is ready, navigate to the root directory of the project and in
 pip install -r src/requirements.txt
 ```
 
+Then run the full set of pipelines for the tutorial project:
+
+```bash
+kedro run
+```
+
 ## Visualise the spaceflights project
 
-To run Kedro-Viz, type the following into your terminal from the project directory:
+To start Kedro-Viz, type the following into your terminal from the project directory:
 
 ```bash
 kedro viz
 ```
 
-The command automatically opens a browser tab to serve the visualisation at http://127.0.0.1:4141/.
+The command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
 
 You should see the following:
 
@@ -114,7 +120,7 @@ The visualisation now includes the layers:
 
 ## Share a pipeline visualisation
 
-You can share a Kedro-Viz visualisation as a JSON file from the terminal:
+You can share a Kedro-Viz visualisation as a JSON file from the terminal. :
 
 ```bash
 kedro viz --save-file my_shareable_pipeline.json

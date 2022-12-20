@@ -73,8 +73,8 @@ class OmegaConfLoader(AbstractConfigLoader):
         conf_source: str,
         env: str = None,
         runtime_params: Dict[str, Any] = None,
-        config_patterns: Dict[str, List[str]] = None,
         *,
+        config_patterns: Dict[str, List[str]] = None,
         base_env: str = "base",
         default_run_env: str = "local",
     ):
@@ -211,14 +211,12 @@ class OmegaConfLoader(AbstractConfigLoader):
             path for path in deduplicated_paths if self._is_valid_config_path(path)
         ]
 
-        config = {}
         config_per_file = {}
 
         for config_filepath in config_files_filtered:
             try:
-                single_config = OmegaConf.load(config_filepath)
-                config_per_file[config_filepath] = single_config
-                config = single_config
+                config = OmegaConf.load(config_filepath)
+                config_per_file[config_filepath] = config
             except (ParserError, ScannerError) as exc:
                 line = exc.problem_mark.line  # type: ignore
                 cursor = exc.problem_mark.column  # type: ignore
@@ -232,10 +230,12 @@ class OmegaConfLoader(AbstractConfigLoader):
         }
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
-        if len(aggregate_config) > 1:
-            return dict(OmegaConf.merge(*aggregate_config))
 
-        return config
+        if aggregate_config:
+            if len(aggregate_config) > 1:
+                return dict(OmegaConf.merge(*aggregate_config))
+            return list(aggregate_config)[0]
+        return {}
 
     @staticmethod
     def _is_valid_config_path(path):
@@ -247,10 +247,10 @@ class OmegaConfLoader(AbstractConfigLoader):
         duplicates = []
 
         filepaths = list(seen_files_to_keys.keys())
-        for i, key1 in enumerate(filepaths, 1):
-            config1 = seen_files_to_keys[key1]
-            for key2 in filepaths[i:]:
-                config2 = seen_files_to_keys[key2]
+        for i, filepath1 in enumerate(filepaths, 1):
+            config1 = seen_files_to_keys[filepath1]
+            for filepath2 in filepaths[i:]:
+                config2 = seen_files_to_keys[filepath2]
 
                 overlapping_keys = config1 & config2
 
@@ -259,7 +259,7 @@ class OmegaConfLoader(AbstractConfigLoader):
                     if len(sorted_keys) > 100:
                         sorted_keys = sorted_keys[:100] + "..."
                     duplicates.append(
-                        f"Duplicate keys found in {key1} and {key2}: {sorted_keys}"
+                        f"Duplicate keys found in {filepath1} and {filepath2}: {sorted_keys}"
                     )
 
         if duplicates:

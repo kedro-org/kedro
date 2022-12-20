@@ -11,10 +11,12 @@
 # Upcoming Release 0.18.5
 
 ## Major features and improvements
-* Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations
+* Add the `--conf-source` option to `kedro run`, allowing users to specify a source for project configuration for the run.
 
 ## Bug fixes and other changes
 * Fix bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
+* Added `omegaconf` syntax as option for `--params`. Keys and values can now be separated by colons or equals signs.
+* Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
 
 ## Breaking changes to the API
 

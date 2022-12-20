@@ -161,13 +161,13 @@ Integrating Matplotlib into Kedro-Viz allows you to output charts as part of you
 The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
 ```
 
-You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.extras.datasets.matplotlib.MatplotlibWriter). 
+You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.datasets.matplotlib.MatplotlibWriter). 
 
 ### Update the dependencies
 
 You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
-```
+```bash
 kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
 ```
 

@@ -63,6 +63,7 @@ shuttle_passenger_capacity_plot:
 
 ### Create the reporting pipeline and add the nodes
 
+
 In the terminal, run the following command to generate a template for the reporting pipeline:
 
 ```bash
@@ -168,7 +169,7 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```
-kedro[matplotlib.MatplotlibWriter]==0.18.3
+kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
 ```
 
 ### Configure the Data Catalog and add nodes

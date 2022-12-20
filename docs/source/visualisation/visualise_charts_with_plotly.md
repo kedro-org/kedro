@@ -67,7 +67,7 @@ In the terminal, run the following command to generate a template for the report
 kedro pipeline create reporting
 ```
 
-### Add the reporting nodes
+### Add the Plotly reporting nodes
 
 Add the following to `src/kedro_tutorial/pipelines/reporting/nodes.py`:
 
@@ -150,8 +150,6 @@ You can view the larger visualisation of the chart by clicking the 'Expand Plotl
 
 ![](../meta/images/pipeline_visualisation_plotly_expand_1.png)
 
-We have also used the Plotly integration to allow users to [visualise metrics from experiments](../logging/experiment_tracking.md).
-
 
 ## Visualisation with Matplotlib
 
@@ -171,7 +169,7 @@ You must update the `src/requirements.txt` file in your Kedro project by adding 
 kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
 ```
 
-### Configure the Data Catalog and add nodes
+### Configure the Data Catalog
 You must also specify the output type in the `catalog.yml` file for the Data Catalog: 
 
 ```yaml
@@ -181,7 +179,8 @@ dummy_confusion_matrix:
   versioned: true
 ```
 
-To use this dataset, add the following to the `nodes.py` file in your reporting pipeline:
+### Add another node
+Add the following to `src/kedro_tutorial/pipelines/reporting/nodes.py`:
 
 ```python
 import matplotlib.pyplot as plt
@@ -206,7 +205,7 @@ You might have to execute `pip install seaborn` if the [seaborn library](https:/
 
 ### Update the pipeline
 
-Add the following to `create_pipeline` in `pipeline.py`:
+Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to add the following to `create_pipeline`:
 
 ```python
 

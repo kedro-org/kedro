@@ -153,7 +153,7 @@ def package(metadata: ProjectMetadata):
             "setup.py",
             "clean",
             "--all",
-            "bdist_e cgg",
+            "bdist_egg",
             "--dist-dir",
             "../dist",
         ],

@@ -1,7 +1,7 @@
 # Visualise charts in Kedro-Viz
 
 This page describes how to make interactive visualisations of your Kedro projects with Kedro-Viz, which supports integration with [Plotly](https://plotly.com/python/) and [Matplotlib](https://matplotlib.org/).
- 
+
 ## Visualisation with Plotly
 
 We use the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and add a reporting pipeline that uses Plotly. Even if you have not yet worked through the tutorial, you can still follow this example; you'll need to use the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) to generate a copy of the project with working code in place:
@@ -12,11 +12,11 @@ From your terminal:
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout. 
+When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout.
 
 ### Update the dependencies
 
-There are two types of Plotly datasets supported by Kedro: 
+There are two types of Plotly datasets supported by Kedro:
 
 * `plotly.PlotlyDataSet` which only supports [Plotly Express](https://plotly.com/python/plotly-express)
 * `plotly.JSONDataSet` which supports Plotly Express and [Plotly Graph Objects](https://plotly.com/python/graph-objects/)
@@ -59,7 +59,7 @@ shuttle_passenger_capacity_plot:
 ```
 
 
-### Create the template reporting pipeline 
+### Create the template reporting pipeline
 
 In the terminal, run the following command to generate a template for the reporting pipeline:
 
@@ -75,6 +75,7 @@ Add the following to `src/kedro_tutorial/pipelines/reporting/nodes.py`:
 import plotly.express as px
 import plotly.graph_objs as go
 import pandas as pd
+
 
 def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
     return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
@@ -109,9 +110,9 @@ def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
 Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to replace the existing code with the following:
 
 ```python
-
 from kedro.pipeline import Pipeline, node, pipeline
 from .nodes import compare_passenger_capacity
+
 
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
@@ -133,13 +134,13 @@ Now run the pipelines:
 
 ```bash
 kedro run
-``` 
+```
 
 Then visualise with `kedro viz`
 
 You will see a new dataset type as an icon:
 
-![](../meta/images/chart-icon.png). 
+![](../meta/images/chart-icon.png).
 
 Click on the node to see a small preview of your Plotly chart in the metadata panel.
 
@@ -159,7 +160,7 @@ Integrating Matplotlib into Kedro-Viz allows you to output charts as part of you
 The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
 ```
 
-You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.datasets.matplotlib.MatplotlibWriter). 
+You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWriter dataset](/kedro.datasets.matplotlib.MatplotlibWriter).
 
 ### Update the dependencies
 
@@ -170,7 +171,7 @@ kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
 ```
 
 ### Configure the Data Catalog
-You must also specify the output type in the `catalog.yml` file for the Data Catalog: 
+You must also specify the output type in the `catalog.yml` file for the Data Catalog:
 
 ```yaml
 dummy_confusion_matrix:
@@ -208,8 +209,8 @@ You might have to execute `pip install seaborn` if the [seaborn library](https:/
 Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to add the following to `create_pipeline`:
 
 ```python
-
 from .nodes import create_confusion_matrix
+
 
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
@@ -228,9 +229,9 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 Run the pipelines with `kedro run` and then visualise the result with `kedro viz`.
 
-Your Kedro-Viz pipeline will show a new dataset node with this icon 
+Your Kedro-Viz pipeline will show a new dataset node with this icon
 
-![](../meta/images/chart-icon.png). 
+![](../meta/images/chart-icon.png).
 
 Click on the node to see a small preview of your Matplotlib image in the metadata panel.
 

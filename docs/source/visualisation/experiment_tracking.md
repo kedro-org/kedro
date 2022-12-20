@@ -1,6 +1,6 @@
 # Set up experiment tracking
 
-Experiment tracking is the process of saving all machine-learning related experiment information so you can compare different runs. 
+Experiment tracking is the process of saving all machine-learning related experiment information so you can compare different runs.
 
 [Kedro-Viz](https://github.com/kedro-org/kedro-viz) supports native experiment tracking from [version 4.1.1](https://github.com/kedro-org/kedro-viz/releases/tag/v4.1.1) onwards. When experiment tracking is enabled in your Kedro project, you will be able to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-your-metrics-timeline).
 
@@ -12,7 +12,7 @@ Enabling experiment tracking features on Kedro-Viz relies on:
 * [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets)
 * [modifying your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
 
-This page describes the steps necessary to set up experiment tracking and access logged metrics, using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). 
+This page describes the steps necessary to set up experiment tracking and access logged metrics, using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md).
 
 
 [Further information is available in the experiment tracking section](../logging/experiment_tracking.md) for your Kedro project.

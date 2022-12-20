@@ -17,6 +17,7 @@
 
 ## Bug fixes and other changes
 * Fix bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
+* Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
 
 ## Breaking changes to the API
 

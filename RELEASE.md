@@ -18,7 +18,6 @@
 ## Bug fixes and other changes
 * Fix bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
 * Commas surrounded by an even number of `"` and `'` characters will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).
-* Added `omegaconf` syntax as option for `--params`. Keys and values can now be separated by colons or equals signs.
 * Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
 
 ## Breaking changes to the API

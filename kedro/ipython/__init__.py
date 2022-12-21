@@ -29,6 +29,8 @@ def load_ipython_extension(ipython):
     IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
+    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
+
     if _find_kedro_project(Path.cwd()) is None:
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
@@ -36,7 +38,6 @@ def load_ipython_extension(ipython):
         )
         return
 
-    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
     reload_kedro()
 
 

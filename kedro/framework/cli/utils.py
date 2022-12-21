@@ -305,13 +305,14 @@ def split_node_names(ctx, param, to_split: str) -> List[str]:
     Returns:
         A list containing the result of safe-splitting the string.
     """
-    # Only split on commas with an even number of ' and " ahead
+    # Only split on commas where " and ' chars ahead are balanced
     split_value = re.split(r""",(?=(?:[^'"]|'[^']*'|"[^"]*")*$)""", to_split)
-    return [
-        item.strip().replace('"', "").replace("'", "")
-        for item in split_value
-        if item.strip()
-    ]
+    result = []
+    for item in split_value:
+        item = item.strip().replace('"', "").replace("'", "")
+        if item:
+            result.append(item)
+    return result
 
 
 def env_option(func_=None, **kwargs):

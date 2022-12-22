@@ -301,9 +301,12 @@ def split_node_names(ctx, param, to_split: str) -> List[str]:
     default node names, which have the pattern
     <function_name>([<input_name>,...]) -> [<output_name>,...])
 
-    Note, `to_split` will have such commas if and only if it includes a
-    default node name. User-defined node names cannot include commas
-    or square brackets.
+    Note:
+        - `to_split` will have such commas if and only if it includes a
+        default node name. User-defined node names cannot include commas
+        or square brackets.
+        - This function will no longer be necessary from Kedro 0.19.*,
+        in which default node names will no longer contain commas
 
     Args:
         to_split: the string to split safely

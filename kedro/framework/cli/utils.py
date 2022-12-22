@@ -316,16 +316,16 @@ def split_node_names(ctx, param, to_split: str) -> List[str]:
     """
     result = []
     argument, match_state = "", 0
-    for c in to_split + ",":
-        if c == "[":
+    for char in to_split + ",":
+        if char == "[":
             match_state += 1
-        elif c == "]":
+        elif char == "]":
             match_state -= 1
-        if c == "," and match_state == 0 and argument:
+        if char == "," and match_state == 0 and argument:
             result.append(argument)
             argument = ""
         else:
-            argument += c
+            argument += char
     return result
 
 

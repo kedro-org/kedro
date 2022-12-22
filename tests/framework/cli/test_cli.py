@@ -722,9 +722,7 @@ class TestRunCommand:
     @mark.parametrize(
         "from_nodes, expected",
         [
-            (
-                ["--from-nodes", "A,B,C"],
-                ["A", "B", "C"]),
+            (["--from-nodes", "A,B,C"], ["A", "B", "C"]),
             (
                 ["--from-nodes", "two_inputs([A0,B0]) -> [C1]"],
                 ["two_inputs([A0,B0]) -> [C1]"],
@@ -744,7 +742,13 @@ class TestRunCommand:
         ],
     )
     def test_safe_split_option_arguments(
-        self, fake_project_cli, fake_metadata, fake_session, mocker, from_nodes, expected
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        from_nodes,
+        expected,
     ):
         CliRunner().invoke(fake_project_cli, ["run", *from_nodes], obj=fake_metadata)
 

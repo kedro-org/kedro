@@ -296,8 +296,14 @@ def split_string(ctx, param, value):  # pylint: disable=unused-argument
 
 # pylint: disable=unused-argument,missing-param-doc,missing-type-doc
 def split_node_names(ctx, param, to_split: str) -> List[str]:
-    """Split string by comma, ignoring commas enclosed by an even number
-    of \" and \' characters.
+    """Split string by comma, ignoring commas enclosed by square parentheses.
+    This avoids splitting the string of nodes names on commas included in
+    default node names, which have the pattern
+    <function_name>([<input_name>,...]) -> [<output_name>,...])
+
+    Note, `to_split` will have such commas if and only if it includes a
+    default node name. User-defined node names cannot include commas
+    or square brackets.
 
     Args:
         to_split: the string to split safely
@@ -305,13 +311,18 @@ def split_node_names(ctx, param, to_split: str) -> List[str]:
     Returns:
         A list containing the result of safe-splitting the string.
     """
-    # Only split on commas where " and ' chars ahead are balanced
-    split_value = re.split(r""",(?=(?:[^'"]|'[^']*'|"[^"]*")*$)""", to_split)
     result = []
-    for item in split_value:
-        item = item.strip().replace('"', "").replace("'", "")
-        if item:
-            result.append(item)
+    argument, match_state = "", 0
+    for c in to_split + ",":
+        if c == "[":
+            match_state += 1
+        elif c == "]":
+            match_state -= 1
+        if c == "," and match_state == 0 and argument:
+            result.append(argument)
+            argument = ""
+        else:
+            argument += c
     return result
 
 

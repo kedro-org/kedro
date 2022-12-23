@@ -442,14 +442,18 @@ def _run_node_async(
 
         save_futures = set()
 
+        future_dataset_mapping = {}
         for name, data in outputs.items():
             hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
-            save_futures.add(pool.submit(catalog.save, name, data))
+            future = pool.submit(catalog.save, name, data)
+            future_dataset_mapping[future] = (name, data)
+            save_futures.add(future)
 
         for future in as_completed(save_futures):
             exception = future.exception()
             if exception:
                 raise exception
+            name, data = future_dataset_mapping[future]
             hook_manager.hook.after_dataset_saved(
                 dataset_name=name, data=data  # pylint: disable=undefined-loop-variable
             )

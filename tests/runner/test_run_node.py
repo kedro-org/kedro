@@ -1,3 +1,5 @@
+import pytest
+
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.pipeline import node
 from kedro.runner import run_node
@@ -24,6 +26,14 @@ def generate_dict():
 
 
 class TestRunGeneratorNode:
+    def test_generator_fail_async(self, mocker, catalog):
+        fake_dataset = mocker.Mock()
+        catalog.add("result", fake_dataset)
+        n = node(generate_one, inputs=None, outputs="result")
+
+        with pytest.raises(Exception, match="nodes wrapping generator functions"):
+            run_node(n, catalog, _NullPluginManager(), is_async=True)
+
     def test_generator_node_one(self, mocker, catalog):
         fake_dataset = mocker.Mock()
         catalog.add("result", fake_dataset)

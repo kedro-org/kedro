@@ -23,6 +23,7 @@ from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
+import inspect
 
 
 class AbstractRunner(ABC):
@@ -301,7 +302,12 @@ def run_node(
         The node argument.
 
     """
-    if is_async:
+    if is_async and inspect.isgeneratorfunction(node.func):
+        raise TypeError(f"Async data loading and saving does not work with "
+                        f"nodes wrapping generator functions. Please make "
+                        f"sure you don't use yield anywhere in your function "
+                        f"in node {str(node)}")
+    elif is_async:
         node = _run_node_async(node, catalog, hook_manager, session_id)
     else:
         node = _run_node_sequential(node, catalog, hook_manager, session_id)

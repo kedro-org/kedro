@@ -406,6 +406,7 @@ def _run_node_sequential(
     return node
 
 
+# pylint: disable=too-many-locals
 def _run_node_async(
     node: Node,
     catalog: DataCatalog,
@@ -454,7 +455,5 @@ def _run_node_async(
             if exception:
                 raise exception
             name, data = future_dataset_mapping[future]
-            hook_manager.hook.after_dataset_saved(
-                dataset_name=name, data=data  # pylint: disable=undefined-loop-variable
-            )
+            hook_manager.hook.after_dataset_saved(dataset_name=name, data=data)
     return node

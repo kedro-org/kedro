@@ -399,8 +399,14 @@ class Node:
 
     def _outputs_to_dictionary(self, outputs):
         def _from_dict():
-            (result, ), iterator = (outputs, ), None if not inspect.isgenerator(outputs) else spy(outputs, 1)
+            (result, ), iterator = ((outputs, ), None) if not inspect.isgenerator(outputs) else spy(outputs, 1)
             keys = list(self._outputs.keys())
+            if not isinstance(result, dict):
+                raise ValueError(
+                    f"Failed to save outputs of node {self}.\n"
+                    f"The node output is a dictionary, whereas the "
+                    f"function output is not."
+                )
             if set(keys) != set(result.keys()):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"
@@ -415,7 +421,7 @@ class Node:
             return dict(zip([self._outputs[k] for k in keys], result))
 
         def _from_list():
-            (result, ), iterator = (outputs, ), None if not inspect.isgenerator(outputs) else spy(outputs, 1)
+            (result, ), iterator = ((outputs, ), None) if not inspect.isgenerator(outputs) else spy(outputs, 1)
             if not isinstance(result, (list, tuple)):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"
@@ -434,13 +440,6 @@ class Node:
             if iterator:
                 result = unzip(iterator)
             return dict(zip(self._outputs, result))
-
-        if isinstance(self._outputs, dict) and not isinstance(outputs, dict):
-            raise ValueError(
-                f"Failed to save outputs of node {self}.\n"
-                f"The node output is a dictionary, whereas the "
-                f"function output is not."
-            )
 
         if self._outputs is None:
             return {}

@@ -399,7 +399,11 @@ class Node:
 
     def _outputs_to_dictionary(self, outputs):
         def _from_dict():
-            (result, ), iterator = ((outputs, ), None) if not inspect.isgenerator(outputs) else spy(outputs, 1)
+            (result,), iterator = (
+                ((outputs,), None)
+                if not inspect.isgenerator(outputs)
+                else spy(outputs, 1)
+            )
             keys = list(self._outputs.keys())
             if not isinstance(result, dict):
                 raise ValueError(
@@ -414,14 +418,18 @@ class Node:
                     f"do not match with the returned output's keys {set(keys)}."
                 )
             if iterator:
-                exploded = map(lambda x: tuple((x[k] for k in keys)), iterator)
+                exploded = map(lambda x: tuple(x[k] for k in keys), iterator)
                 result = unzip(exploded)
             else:
-                result = tuple((result[k] for k in keys))
+                result = tuple(result[k] for k in keys)
             return dict(zip([self._outputs[k] for k in keys], result))
 
         def _from_list():
-            (result, ), iterator = ((outputs, ), None) if not inspect.isgenerator(outputs) else spy(outputs, 1)
+            (result,), iterator = (
+                ((outputs,), None)
+                if not inspect.isgenerator(outputs)
+                else spy(outputs, 1)
+            )
             if not isinstance(result, (list, tuple)):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"

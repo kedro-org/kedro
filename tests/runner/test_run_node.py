@@ -6,8 +6,7 @@ from kedro.runner import run_node
 
 
 def generate_one():
-    for i in range(10):
-        yield i
+    yield from range(10)
 
 
 def generate_tuple():
@@ -17,12 +16,12 @@ def generate_tuple():
 
 def generate_list():
     for i in range(10):
-        yield [i, i*i]
+        yield [i, i * i]
 
 
 def generate_dict():
     for i in range(10):
-        yield dict(idx=i, square=i*i)
+        yield dict(idx=i, square=i * i)
 
 
 class TestRunGeneratorNode:
@@ -53,7 +52,7 @@ class TestRunGeneratorNode:
         run_node(n, catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
-        expected_right = [((i*i,),) for i in range(10)]
+        expected_right = [((i * i,),) for i in range(10)]
         assert 10 == left.save.call_count
         assert left.save.call_args_list == expected_left
         assert 10 == right.save.call_count
@@ -68,7 +67,7 @@ class TestRunGeneratorNode:
         run_node(n, catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
-        expected_right = [((i*i,),) for i in range(10)]
+        expected_right = [((i * i,),) for i in range(10)]
         assert 10 == left.save.call_count
         assert left.save.call_args_list == expected_left
         assert 10 == right.save.call_count
@@ -79,14 +78,11 @@ class TestRunGeneratorNode:
         right = mocker.Mock()
         catalog.add("left", left)
         catalog.add("right", right)
-        n = node(generate_dict,
-                 inputs=None,
-                 outputs=dict(idx="left", square="right")
-                 )
+        n = node(generate_dict, inputs=None, outputs=dict(idx="left", square="right"))
         run_node(n, catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]
-        expected_right = [((i*i,),) for i in range(10)]
+        expected_right = [((i * i,),) for i in range(10)]
         assert 10 == left.save.call_count
         assert left.save.call_args_list == expected_left
         assert 10 == right.save.call_count

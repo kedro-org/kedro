@@ -2,6 +2,8 @@
 implementations.
 """
 
+import inspect
+import itertools as it
 import logging
 from abc import ABC, abstractmethod
 from collections import deque
@@ -12,18 +14,15 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Dict, Iterable, List, Set
+from typing import Any, Dict, Iterable, Iterator, List, Set
 
-from pluggy import PluginManager
-from typing import Iterator
 from more_itertools import interleave
-import itertools as it
+from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
-import inspect
 
 
 class AbstractRunner(ABC):
@@ -298,16 +297,23 @@ def run_node(
             asynchronously with threads. Defaults to False.
         session_id: The session id of the pipeline run.
 
+    Raises:
+        ValueError: Raised if is_async is set to True for nodes wrapping
+        generator functions.
+
     Returns:
         The node argument.
 
     """
     if is_async and inspect.isgeneratorfunction(node.func):
-        raise TypeError(f"Async data loading and saving does not work with "
-                        f"nodes wrapping generator functions. Please make "
-                        f"sure you don't use yield anywhere in your function "
-                        f"in node {str(node)}")
-    elif is_async:
+        raise ValueError(
+            f"Async data loading and saving does not work with "
+            f"nodes wrapping generator functions. Please make "
+            f"sure you don't use yield anywhere in your function "
+            f"in node {str(node)}"
+        )
+
+    if is_async:
         node = _run_node_async(node, catalog, hook_manager, session_id)
     else:
         node = _run_node_sequential(node, catalog, hook_manager, session_id)
@@ -408,9 +414,9 @@ def _run_node_sequential(
         node, catalog, inputs, is_async, hook_manager, session_id=session_id
     )
 
-    items = outputs.items()
+    items: Iterable = outputs.items()
     # if all outputs are iterators, then the node is a generator node
-    if all((isinstance(d, Iterator) for d in outputs.values())):
+    if all(isinstance(d, Iterator) for d in outputs.values()):
         # make sure we extract the keys and the chunk streams in the same order
         # [a, b, c]
         keys = list(outputs.keys())

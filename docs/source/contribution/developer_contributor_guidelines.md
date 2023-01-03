@@ -116,7 +116,7 @@ We will work with you to complete your contribution, but we reserve the right to
 
 ## Create a pull request
 
-Create your pull request with [a descriptive title](#pull-request-title-conventions). Before you submit it, consider the following:
+Create your pull request with a [descriptive title](#pull-request-title-conventions). Before you submit it, consider the following:
 
 * You should aim for cross-platform compatibility on Windows, macOS and Linux
 * We use [SemVer](https://semver.org/) for versioning

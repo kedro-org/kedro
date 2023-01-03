@@ -120,7 +120,7 @@ Create your pull request with [a descriptive title](#pull-request-title-conventi
 
 * You should aim for cross-platform compatibility on Windows, macOS and Linux
 * We use [SemVer](https://semver.org/) for versioning
-* We have designed our code to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
+* We have designed our code to be compatible with Python 3.7 onwards and our style guidelines are (in cascading order):
      * [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
      * [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments
      * [PEP 484 type hints](https://www.python.org/dev/peps/pep-0484/) for all user-facing functions / class methods e.g.

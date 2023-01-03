@@ -406,7 +406,6 @@ def _run_node_sequential(
     return node
 
 
-# pylint: disable=too-many-locals
 def _run_node_async(
     node: Node,
     catalog: DataCatalog,
@@ -441,16 +440,13 @@ def _run_node_async(
             node, catalog, inputs, is_async, hook_manager, session_id=session_id
         )
 
-        save_futures = set()
-
         future_dataset_mapping = {}
         for name, data in outputs.items():
             hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
             future = pool.submit(catalog.save, name, data)
             future_dataset_mapping[future] = (name, data)
-            save_futures.add(future)
 
-        for future in as_completed(save_futures):
+        for future in as_completed(future_dataset_mapping):
             exception = future.exception()
             if exception:
                 raise exception

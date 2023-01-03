@@ -589,7 +589,6 @@ class TestAsyncNodeDatasetHooks:
         # load mock context to instantiate Hooks
         mock_session.load_context()
 
-        # run the node asynchronously with an instance of `LogCatalog`
         after_dataset_saved_mock = mocker.patch.object(
             mock_session._hook_manager.hook, "after_dataset_saved"
         )

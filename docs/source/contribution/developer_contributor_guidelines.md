@@ -123,12 +123,12 @@ Create your pull request with [a descriptive title](#pull-request-title-conventi
 * We have designed our code to be compatible with Python 3.7 onwards and our style guidelines are (in cascading order):
      * [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
      * [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments
-     * [PEP 484 type hints](https://www.python.org/dev/peps/pep-0484/) for all user-facing functions / class methods e.g.
+     * [PEP 484 type hints](https://www.python.org/dev/peps/pep-0484/) for all user-facing functions/class methods; e.g.
 
-```
-def count_truthy(elements: List[Any]) -> int:
-    return sum(1 for elem in elements if element)
-```
+        ```python
+        def count_truthy(elements: List[Any]) -> int:
+            return sum(1 for elem in elements if element)
+        ```
 
 Ensure that your PR builds cleanly before you submit it, by running the CI/CD checks locally, as follows:
 * `make lint`: PEP-8 Standards (`pylint`, `flake8`)

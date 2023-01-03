@@ -105,6 +105,7 @@ pip install great-expectations
 
 * Implement `before_node_run` and `after_node_run` Hooks to validate inputs and outputs data respectively leveraging `Great Expectations`:
 
+### V2 API
 ```python
 # src/<package_name>/hooks.py
 from typing import Any, Dict
@@ -169,6 +170,90 @@ class DataValidationHooks:
 `Great Expectations` example report:
 
 ![](../meta/images/data_validation.png)
+
+### V3 API
+* Create new checkpoint:
+
+```bash
+great_expectations checkpoint new raw_companies_dataset_checkpoint
+```
+
+* Remove `data_connector_query` from the `batch_request` in the checkpoint config file: 
+
+```python
+yaml_config = f"""
+name: {my_checkpoint_name}
+config_version: 1.0
+class_name: SimpleCheckpoint
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: {my_datasource_name}
+      data_connector_name: default_runtime_data_connector_name
+      data_asset_name: {my_runtime_asset_name}
+      data_connector_query:
+        index: -1
+    expectation_suite_name: {my_expectation_suite_name}
+"""
+```
+
+```python
+# src/<package_name>/hooks.py
+from typing import Any, Dict
+
+from kedro.framework.hooks import hook_impl
+from kedro.io import DataCatalog
+
+import great_expectations as ge
+
+
+class DataValidationHooks:
+
+    # Map checkpoint to dataset
+    DATASET_CHECKPOINT_MAPPING = {
+        "companies": "raw_companies_dataset_checkpoint",
+    }
+
+    @hook_impl
+    def before_node_run(
+        self, catalog: DataCatalog, inputs: Dict[str, Any], session_id: str
+    ) -> None:
+        """Validate inputs data to a node based on using great expectation
+        if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
+        """
+        self._run_validation(catalog, inputs, session_id)
+
+    @hook_impl
+    def after_node_run(
+        self, catalog: DataCatalog, outputs: Dict[str, Any], session_id: str
+    ) -> None:
+        """Validate outputs data from a node based on using great expectation
+        if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
+        """
+        self._run_validation(catalog, outputs, session_id)
+
+    def _run_validation(
+        self, catalog: DataCatalog, data: Dict[str, Any], session_id: str
+    ):
+        for dataset_name, dataset_value in data.items():
+            if dataset_name not in self.DATASET_CHECKPOINT_MAPPING:
+                continue
+
+            data_context = ge.data_context.DataContext()
+
+            data_context.run_checkpoint(
+                checkpoint_name=self.DATASET_CHECKPOINT_MAPPING[dataset_name],
+                batch_request={
+                    "runtime_parameters": {
+                        "batch_data": dataset_value,
+                    },
+                    "batch_identifiers": {
+                        "runtime_batch_identifier_name": dataset_name
+                    }
+                },
+                run_name=session_id,
+            )
+```
 
 ## Add observability to your pipeline
 

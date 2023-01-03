@@ -526,6 +526,20 @@ def sample_node():
     return node(wait_and_identity, inputs="ds1", outputs="ds2", name="test-node")
 
 
+@pytest.fixture
+def sample_node_multiple_outputs():
+    def wait_and_identity(x: Any, y: Any):
+        time.sleep(0.1)
+        return (x, y)
+
+    return node(
+        wait_and_identity,
+        inputs=["ds1", "ds2"],
+        outputs=["ds3", "ds4"],
+        name="test-node",
+    )
+
+
 class LogCatalog(DataCatalog):
     def load(self, name: str, version: str = None) -> Any:
         dataset = super().load(name=name, version=version)
@@ -537,7 +551,9 @@ class LogCatalog(DataCatalog):
 def memory_catalog():
     ds1 = MemoryDataSet({"data": 42})
     ds2 = MemoryDataSet({"data": 42})
-    return LogCatalog({"ds1": ds1, "ds2": ds2})
+    ds3 = MemoryDataSet({"data": 42})
+    ds4 = MemoryDataSet({"data": 42})
+    return LogCatalog({"ds1": ds1, "ds2": ds2, "ds3": ds3, "ds4": ds4})
 
 
 class TestAsyncNodeDatasetHooks:
@@ -561,6 +577,36 @@ class TestAsyncNodeDatasetHooks:
         assert str(
             ["Before dataset loaded", "Catalog load", "After dataset loaded"]
         ).strip("[]") in str(hooks_log_messages).strip("[]")
+
+    def test_after_dataset_load_hook_async_multiple_outputs(
+        self,
+        mocker,
+        memory_catalog,
+        mock_session,
+        sample_node_multiple_outputs,
+        logs_listener,
+    ):
+        # load mock context to instantiate Hooks
+        mock_session.load_context()
+
+        # run the node asynchronously with an instance of `LogCatalog`
+        after_dataset_saved_mock = mocker.patch.object(
+            mock_session._hook_manager.hook, "after_dataset_saved"
+        )
+        _run_node_async(
+            node=sample_node_multiple_outputs,
+            catalog=memory_catalog,
+            hook_manager=mock_session._hook_manager,
+        )
+
+        after_dataset_saved_mock.assert_has_calls(
+            [
+                mocker.call(dataset_name="ds3", data={"data": 42}),
+                mocker.call(dataset_name="ds4", data={"data": 42}),
+            ],
+            any_order=True,
+        )
+        assert after_dataset_saved_mock.call_count == 2
 
 
 class TestKedroContextSpecsHook:

@@ -17,7 +17,7 @@ This page describes the steps necessary to set up experiment tracking and access
 
 [Further information is available in the experiment tracking section](../logging/experiment_tracking.md) for your Kedro project.
 
-You can also access a more detailed [Kedro-Viz live demo](https://kedro-viz-live-demo.hfa4c8ufrmn4u.eu-west-2.cs.amazonlightsail.com/).
+You can also access a more detailed [Kedro-Viz experiment tracking demo](https://demo.kedro.org/experiment-tracking).
 
 ## Set up a project
 

@@ -109,8 +109,8 @@ class TestNodeRunInvalidInput:
 
 class TestNodeRunInvalidOutput:
     def test_miss_matching_output_types(self, mocked_dataset):
-        pattern = r"The node output is a dictionary, whereas the function "
-        pattern += r"output is not\."
+        pattern = "The node output is a dictionary, whereas the function "
+        pattern += "output is <class 'kedro.io.lambda_dataset.LambdaDataSet'>."
         with pytest.raises(ValueError, match=pattern):
             node(one_in_one_out, "ds1", dict(a="ds")).run(dict(ds1=mocked_dataset))
 

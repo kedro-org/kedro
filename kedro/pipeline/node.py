@@ -422,6 +422,7 @@ class Node:
                 exploded = map(lambda x: tuple(x[k] for k in keys), iterator)
                 result = unzip(exploded)
             else:
+                # evaluate this eagerly so we can reuse variable name
                 result = tuple(result[k] for k in keys)
             return dict(zip(names, result))
 

@@ -399,11 +399,11 @@ class Node:
 
     def _outputs_to_dictionary(self, outputs):
         def _from_dict():
-            (result,), iterator = (
-                ((outputs,), None)
-                if not inspect.isgenerator(outputs)
-                else spy(outputs, 1)
-            )
+            result, iterator = outputs, None
+            # generator functions are lazy and we need a peek into their first output
+            if inspect.isgenerator(outputs):
+                (result,), iterator = spy(outputs)
+
             keys = list(self._outputs.keys())
             if not isinstance(result, dict):
                 raise ValueError(
@@ -425,11 +425,11 @@ class Node:
             return dict(zip([self._outputs[k] for k in keys], result))
 
         def _from_list():
-            (result,), iterator = (
-                ((outputs,), None)
-                if not inspect.isgenerator(outputs)
-                else spy(outputs, 1)
-            )
+            result, iterator = outputs, None
+            # generator functions are lazy and we need a peek into their first output
+            if inspect.isgenerator(outputs):
+                (result,), iterator = spy(outputs)
+
             if not isinstance(result, (list, tuple)):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"

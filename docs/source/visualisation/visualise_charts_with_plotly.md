@@ -4,15 +4,21 @@ This page describes how to make interactive visualisations of your Kedro project
 
 ## Visualisation with Plotly
 
-We use the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and add a reporting pipeline that uses Plotly. Even if you have not yet worked through the tutorial, you can still follow this example; you'll need to use the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) to generate a copy of the project with working code in place:
+We use the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) and add a reporting pipeline that uses Plotly. Even if you have not yet worked through the tutorial, you can still follow this example; you'll need to use the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) to generate a copy of the project with working code in place.
 
-From your terminal:
+If you haven't installed Kedro [follow the documentation to get set up](../get_started/install.md).
+
+Then, in your terminal window, navigate to the folder you want to store the project.
+
+Generate a copy of the spaceflights tutorial project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
 
 ```bash
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout.
+When prompted for a project name, you can enter anything, but we will assume `Kedro Tutorial` throughout.
+
+When your project is ready, navigate to the root directory of the project.
 
 ### Update the dependencies
 
@@ -112,6 +118,7 @@ Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to replace the exist
 from kedro.pipeline import Pipeline, node, pipeline
 from .nodes import compare_passenger_capacity_exp, compare_passenger_capacity_go
 
+
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a pair of plots"""
     return pipeline(
@@ -127,7 +134,8 @@ def create_pipeline(**kwargs) -> Pipeline:
                 outputs="shuttle_passenger_capacity_plot_go",
             ),
         ]
-    )```
+    )
+```
 
 
 ### Run the pipeline
@@ -169,6 +177,7 @@ You must update the `src/requirements.txt` file in your Kedro project by adding 
 
 ```bash
 kedro[matplotlib.MatplotlibWriter]==0.18.3
+seaborn~=0.12.1
 ```
 
 ### Configure the Data Catalog
@@ -201,10 +210,6 @@ def create_confusion_matrix(companies: pd.DataFrame):
     )
     sn.heatmap(confusion_matrix, annot=True)
     return plt
-```
-
-``` {note}
-You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
 ```
 
 ### Update the pipeline

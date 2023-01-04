@@ -4,13 +4,17 @@
 
 This section assumes you are familiar with the basic Kedro concepts described in the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). If you have not yet worked through the tutorial, you can still follow this example.
 
+If you haven't installed Kedro [follow the documentation to get set up](../get_started/install.md).
+
+Then, in your terminal window, navigate to the folder you want to store the project.
+
 Generate a copy of the spaceflights tutorial project with all the code in place by using the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights):
 
 ```bash
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, you can enter any name, but we will assume `Kedro Tutorial` throughout.
+When prompted for a project name, you can enter anything, but we will assume `Kedro Tutorial` throughout.
 
 When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro-Viz:
 
@@ -18,7 +22,7 @@ When your project is ready, navigate to the root directory of the project and in
 pip install -r src/requirements.txt
 ```
 
-Then run the full set of pipelines for the tutorial project:
+The next step is optional, but useful to check that all is working. Run the full set of pipelines for the tutorial project:
 
 ```bash
 kedro run
@@ -32,17 +36,13 @@ To start Kedro-Viz, type the following into your terminal from the project direc
 kedro viz
 ```
 
-The command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
+The command opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`.
 
 You should see the following:
 
 ![](../meta/images/pipeline_visualisation.png)
 
-If a visualisation panel opens up and a pipeline is not visible, then please check that your tutorial project code is complete if you've not generated it from the starter template.
-
-### Need help?
-
-If you still can't see the visualisation, the Kedro community can help!
+If a visualisation panel opens up and a pipeline is not visible, refresh the view, and check that your tutorial project code is complete if you've not generated it from the starter template. If you still don't see the visualisation, the Kedro community can help:
 
 * use the [#questions channel](https://slack.kedro.org/) on our Slack channel (which replaces our Discord server) to ask the community for help
 * search the [searchable archive of Discord discussions](https://linen-discord.kedro.org/)
@@ -120,15 +120,15 @@ The visualisation now includes the layers:
 
 ## Share a pipeline visualisation
 
-You can share a Kedro-Viz visualisation as a JSON file from the terminal. :
+You can share a the pipeline structure within a Kedro-Viz visualisation as a JSON file from the terminal:
 
 ```bash
 kedro viz --save-file my_shareable_pipeline.json
 ```
 
-This command will save a visualisation of the `__default__` pipeline as a JSON file called `my_shareable_pipeline.json`.
+This command will save a visualisation of the `__default__` pipeline as a JSON file called `my_shareable_pipeline.json`. It doesn't share data, such as that in the code panel, nor can you share images or charts.
 
-To visualise the JSON file, type the following to load it from the terminal:
+To visualise the shared file, type the following to load it from the terminal:
 
 ```bash
 kedro viz --load-file my_shareable_pipeline.json

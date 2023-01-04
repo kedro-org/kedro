@@ -54,18 +54,15 @@ There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.ext
 Set up two datasets to log `r2 scores` and `parameters` for each run by adding the following in the `conf/base/catalog.yml` file:
 
 ```yaml
-data_science.active_modelling_pipeline.metrics:
+active_modelling_pipeline.metrics:
   type: tracking.MetricsDataSet
   filepath: data/09_tracking/metrics.json
 
-data_processing.companies_columns:
+companies_columns:
   type: tracking.JSONDataSet
   filepath: data/09_tracking/companies_columns.json
 ```
 
-```{note}
-These two datasets include namespaces to correspond to the pipeline setup. If you have a project without namespaces, you can still use experiment tracking.
-```
 
 ## Set up your nodes and pipelines to log metrics
 
@@ -168,7 +165,7 @@ Here comes the fun part of accessing your run data on Kedro-Viz. Having ensured 
 kedro viz
 ```
 
-When you open the Kedro-Viz web app, you will see an experiment tracking icon ![](../meta/images/experiment-tracking-icon.png) on your left. Click the icon to go to the experiment tracking page (you can also access the page via `http://127.0.0.1:4141/runsList`), where you will now see the set of experiment data generated from your previous runs:
+When you open the Kedro-Viz web app, you will see an experiment tracking icon ![](../meta/images/experiment-tracking-icon.png) on your left. Click the icon to go to the experiment tracking page (you can also access the page via `http://127.0.0.1:4141/experiment-tracking`), where you will now see the set of experiment data generated from your previous runs:
 
 ![](../meta/images/experiment-tracking_runsList.png)
 
@@ -198,8 +195,6 @@ def create_confusion_matrix(companies: pd.DataFrame):
     sn.heatmap(confusion_matrix, annot=True)
     return plt
 ```
-
-> You might have to execute `pip install seaborn` if the [seaborn library](https://seaborn.pydata.org/) is not installed yet.
 
 And now add this node to the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/pipeline.py`)
 

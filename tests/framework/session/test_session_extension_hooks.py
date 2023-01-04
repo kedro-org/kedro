@@ -584,7 +584,6 @@ class TestAsyncNodeDatasetHooks:
         memory_catalog,
         mock_session,
         sample_node_multiple_outputs,
-        logs_listener,
     ):
         # load mock context to instantiate Hooks
         mock_session.load_context()

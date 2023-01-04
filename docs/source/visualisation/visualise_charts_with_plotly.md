@@ -21,10 +21,16 @@ There are two types of Plotly datasets supported by Kedro:
 * `plotly.PlotlyDataSet` which only supports [Plotly Express](https://plotly.com/python/plotly-express)
 * `plotly.JSONDataSet` which supports Plotly Express and [Plotly Graph Objects](https://plotly.com/python/graph-objects/)
 
-To use the Plotly datasets, you must update the `requirements.txt` file in the `src` folder of your Kedro project to add the following:
+To use the Plotly datasets, you must update the `requirements.txt` file in the `src` folder of your Kedro project to add the following dependencies:
+
+```{note}
+At the time of writing, the tutorial works up to Kedro version 0.18.3 so you need to pin the versions as shown.
+```
 
 ```text
-kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]~=1.0.0
+kedro==0.18.3
+kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.3
+kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.3
 ```
 
 Navigate to the root directory of the project in your terminal and install the dependencies for the tutorial project:
@@ -38,9 +44,10 @@ pip install -r src/requirements.txt
 To use the datasets, add them to the Data Catalog by updating `conf/base/catalog.yml`:
 
 ```yaml
-shuttle_passenger_capacity_plot:
+shuttle_passenger_capacity_plot_exp:
   type: plotly.PlotlyDataSet
-  filepath: data/08_reporting/shuttle_passenger_capacity_plot.json
+  filepath: data/08_reporting/shuttle_passenger_capacity_plot_exp.json
+  versioned: true
   plotly_args:
     type: bar
     fig:
@@ -52,10 +59,10 @@ shuttle_passenger_capacity_plot:
       yaxis_title: Average passenger capacity
       title: Shuttle Passenger capacity
 
-shuttle_passenger_capacity_plot:
+shuttle_passenger_capacity_plot_go:
   type: plotly.JSONDataSet
-  filepath: data/08_reporting/shuttle_passenger_capacity_plot.json
-
+  filepath: data/08_reporting/shuttle_passenger_capacity_plot_go.json
+  versioned: true
 ```
 
 
@@ -76,23 +83,14 @@ import plotly.express as px
 import plotly.graph_objs as go
 import pandas as pd
 
-
-def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
+# This function uses plotly.express
+def compare_passenger_capacity_exp(preprocessed_shuttles: pd.DataFrame):
     return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
 
 
-# This function uses plotly.express
-def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
-    fig = px.bar(
-        data_frame=preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index(),
-        x="shuttle_type",
-        y="passenger_capacity",
-    )
-    return fig
-
-
 # This function uses plotly.graph_objects
-def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
+def compare_passenger_capacity_go(preprocessed_shuttles: pd.DataFrame):
+
     data_frame = preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
     fig = go.Figure(
         [
@@ -102,6 +100,7 @@ def compare_passenger_capacity(preprocessed_shuttles: pd.DataFrame):
             )
         ]
     )
+
     return fig
 ```
 
@@ -111,21 +110,24 @@ Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to replace the exist
 
 ```python
 from kedro.pipeline import Pipeline, node, pipeline
-from .nodes import compare_passenger_capacity
-
+from .nodes import compare_passenger_capacity_exp, compare_passenger_capacity_go
 
 def create_pipeline(**kwargs) -> Pipeline:
-    """This is a simple pipeline which generates a plot"""
+    """This is a simple pipeline which generates a pair of plots"""
     return pipeline(
         [
             node(
-                func=compare_passenger_capacity,
+                func=compare_passenger_capacity_exp,
                 inputs="preprocessed_shuttles",
-                outputs="shuttle_passenger_capacity_plot",
+                outputs="shuttle_passenger_capacity_plot_exp",
+            ),
+            node(
+                func=compare_passenger_capacity_go,
+                inputs="preprocessed_shuttles",
+                outputs="shuttle_passenger_capacity_plot_go",
             ),
         ]
-    )
-```
+    )```
 
 
 ### Run the pipeline
@@ -138,16 +140,15 @@ kedro run
 
 Then visualise with `kedro viz`
 
-You will see a new dataset type as an icon:
+The generated charts are shown as follows:
 
 ![](../meta/images/chart-icon.png).
 
-Click on the node to see a small preview of your Plotly chart in the metadata panel.
+Click on each of see a small preview in the metadata panel:
 
 ![](../meta/images/pipeline_visualisation_plotly_1.png)
 
-
-You can view the larger visualisation of the chart by clicking the 'Expand Plotly Visualisation' button on the bottom of the metadata panel.
+View the larger visualisation of the chart by clicking the 'Expand Plotly Visualisation' button on the bottom of the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_plotly_expand_1.png)
 
@@ -167,7 +168,7 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```bash
-kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
+kedro[matplotlib.MatplotlibWriter]==0.18.3
 ```
 
 ### Configure the Data Catalog
@@ -186,6 +187,8 @@ Add the following to `src/kedro_tutorial/pipelines/reporting/nodes.py`:
 ```python
 import matplotlib.pyplot as plt
 import seaborn as sn
+
+...
 
 
 def create_confusion_matrix(companies: pd.DataFrame):
@@ -211,6 +214,8 @@ Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to add the following
 ```python
 from .nodes import create_confusion_matrix
 
+...
+
 
 def create_pipeline(**kwargs) -> Pipeline:
     """This is a simple pipeline which generates a plot"""
@@ -229,14 +234,10 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 Run the pipelines with `kedro run` and then visualise the result with `kedro viz`.
 
-Your Kedro-Viz pipeline will show a new dataset node with this icon
-
-![](../meta/images/chart-icon.png).
-
-Click on the node to see a small preview of your Matplotlib image in the metadata panel.
+Click to see a small preview of your Matplotlib image in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_matplotlib.png)
 
-You can view the larger visualisation of the chart by clicking the 'Expand Matplotlib Image' button on the bottom of the metadata panel.
+View the larger visualisation of the chart by clicking the 'Expand Matplotlib Image' button on the bottom of the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_matplotlib_expand.png)

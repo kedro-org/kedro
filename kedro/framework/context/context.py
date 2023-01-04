@@ -6,7 +6,6 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
-import omegaconf
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException

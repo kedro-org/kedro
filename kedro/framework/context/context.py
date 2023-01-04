@@ -6,6 +6,7 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
+import omegaconf
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -92,7 +93,7 @@ def _convert_paths_to_absolute_posix(
     for conf_key, conf_value in conf_dictionary.items():
 
         # if the conf_value is another dictionary, absolutify its paths first.
-        if isinstance(conf_value, dict):
+        if isinstance(conf_value, dict) or isinstance(conf_value, omegaconf.dictconfig.DictConfig):
             conf_dictionary[conf_key] = _convert_paths_to_absolute_posix(
                 project_path, conf_value
             )

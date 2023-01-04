@@ -417,11 +417,12 @@ def _run_node_sequential(
     items: Iterable = outputs.items()
     # if all outputs are iterators, then the node is a generator node
     if all(isinstance(d, Iterator) for d in outputs.values()):
-        # make sure we extract the keys and the chunk streams in the same order
+        # Python dictionaries are ordered so we are sure
+        # the keys and the chunk streams are in the same order
         # [a, b, c]
         keys = list(outputs.keys())
         # [Iterator[chunk_a], Iterator[chunk_b], Iterator[chunk_c]]
-        streams = [outputs[k] for k in outputs]
+        streams = list(outputs.values())
         # zip an endless cycle of the keys
         # with an interleaved iterator of the streams
         # [(a, chunk_a), (b, chunk_b), ...] until all outputs complete

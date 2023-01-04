@@ -421,7 +421,7 @@ class Node:
                 exploded = map(lambda x: tuple(x[k] for k in keys), iterator)
                 result = unzip(exploded)
             else:
-                result = tuple(result[k] for k in keys)
+                result = (result[k] for k in keys)
             return dict(zip([self._outputs[k] for k in keys], result))
 
         def _from_list():

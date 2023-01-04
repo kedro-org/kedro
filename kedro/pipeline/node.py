@@ -405,6 +405,7 @@ class Node:
                 (result,), iterator = spy(outputs)
 
             keys = list(self._outputs.keys())
+            names = list(self._outputs.values())
             if not isinstance(result, dict):
                 raise ValueError(
                     f"Failed to save outputs of node {self}.\n"
@@ -421,8 +422,8 @@ class Node:
                 exploded = map(lambda x: tuple(x[k] for k in keys), iterator)
                 result = unzip(exploded)
             else:
-                result = (result[k] for k in keys)
-            return dict(zip([self._outputs[k] for k in keys], result))
+                result = tuple(result[k] for k in keys)
+            return dict(zip(names, result))
 
         def _from_list():
             result, iterator = outputs, None

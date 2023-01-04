@@ -409,7 +409,7 @@ class Node:
                 raise ValueError(
                     f"Failed to save outputs of node {self}.\n"
                     f"The node output is a dictionary, whereas the "
-                    f"function output is not."
+                    f"function output is {type(result)}."
                 )
             if set(keys) != set(result.keys()):
                 raise ValueError(

@@ -309,8 +309,8 @@ def run_node(
         raise ValueError(
             f"Async data loading and saving does not work with "
             f"nodes wrapping generator functions. Please make "
-            f"sure you don't use yield anywhere in your function "
-            f"in node {str(node)}"
+            f"sure you don't use `yield` anywhere "
+            f"in node {str(node)}."
         )
 
     if is_async:

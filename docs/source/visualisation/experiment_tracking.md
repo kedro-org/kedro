@@ -9,7 +9,7 @@ Experiment tracking is the process of saving all machine-learning related experi
 Enabling experiment tracking features on Kedro-Viz relies on:
 
 * [setting up a session store to capture experiment metadata](#set-up-the-session-store),
-* [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets)
+* [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets),
 * [modifying your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
 
 This page describes the steps necessary to set up experiment tracking and access logged metrics, using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md).

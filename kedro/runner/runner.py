@@ -2,6 +2,8 @@
 implementations.
 """
 
+import inspect
+import itertools as it
 import logging
 from abc import ABC, abstractmethod
 from collections import deque
@@ -12,8 +14,9 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Dict, Iterable, List, Set
+from typing import Any, Dict, Iterable, Iterator, List, Set
 
+from more_itertools import interleave
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
@@ -294,10 +297,22 @@ def run_node(
             asynchronously with threads. Defaults to False.
         session_id: The session id of the pipeline run.
 
+    Raises:
+        ValueError: Raised if is_async is set to True for nodes wrapping
+        generator functions.
+
     Returns:
         The node argument.
 
     """
+    if is_async and inspect.isgeneratorfunction(node.func):
+        raise ValueError(
+            f"Async data loading and saving does not work with "
+            f"nodes wrapping generator functions. Please make "
+            f"sure you don't use `yield` anywhere "
+            f"in node {str(node)}."
+        )
+
     if is_async:
         node = _run_node_async(node, catalog, hook_manager, session_id)
     else:
@@ -399,7 +414,21 @@ def _run_node_sequential(
         node, catalog, inputs, is_async, hook_manager, session_id=session_id
     )
 
-    for name, data in outputs.items():
+    items: Iterable = outputs.items()
+    # if all outputs are iterators, then the node is a generator node
+    if all(isinstance(d, Iterator) for d in outputs.values()):
+        # Python dictionaries are ordered so we are sure
+        # the keys and the chunk streams are in the same order
+        # [a, b, c]
+        keys = list(outputs.keys())
+        # [Iterator[chunk_a], Iterator[chunk_b], Iterator[chunk_c]]
+        streams = list(outputs.values())
+        # zip an endless cycle of the keys
+        # with an interleaved iterator of the streams
+        # [(a, chunk_a), (b, chunk_b), ...] until all outputs complete
+        items = zip(it.cycle(keys), interleave(*streams))
+
+    for name, data in items:
         hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
         catalog.save(name, data)
         hook_manager.hook.after_dataset_saved(dataset_name=name, data=data)

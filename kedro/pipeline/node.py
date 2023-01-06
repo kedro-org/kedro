@@ -9,6 +9,8 @@ from collections import Counter
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 from warnings import warn
 
+from more_itertools import spy, unzip
+
 
 class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
@@ -402,38 +404,57 @@ class Node:
 
     def _outputs_to_dictionary(self, outputs):
         def _from_dict():
-            if set(self._outputs.keys()) != set(outputs.keys()):
+            result, iterator = outputs, None
+            # generator functions are lazy and we need a peek into their first output
+            if inspect.isgenerator(outputs):
+                (result,), iterator = spy(outputs)
+
+            keys = list(self._outputs.keys())
+            names = list(self._outputs.values())
+            if not isinstance(result, dict):
+                raise ValueError(
+                    f"Failed to save outputs of node {self}.\n"
+                    f"The node output is a dictionary, whereas the "
+                    f"function output is {type(result)}."
+                )
+            if set(keys) != set(result.keys()):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"
-                    f"The node's output keys {set(outputs.keys())} do not match with "
-                    f"the returned output's keys {set(self._outputs.keys())}."
+                    f"The node's output keys {set(result.keys())} "
+                    f"do not match with the returned output's keys {set(keys)}."
                 )
-            return {name: outputs[key] for key, name in self._outputs.items()}
+            if iterator:
+                exploded = map(lambda x: tuple(x[k] for k in keys), iterator)
+                result = unzip(exploded)
+            else:
+                # evaluate this eagerly so we can reuse variable name
+                result = tuple(result[k] for k in keys)
+            return dict(zip(names, result))
 
         def _from_list():
-            if not isinstance(outputs, (list, tuple)):
+            result, iterator = outputs, None
+            # generator functions are lazy and we need a peek into their first output
+            if inspect.isgenerator(outputs):
+                (result,), iterator = spy(outputs)
+
+            if not isinstance(result, (list, tuple)):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"
                     f"The node definition contains a list of "
                     f"outputs {self._outputs}, whereas the node function "
-                    f"returned a '{type(outputs).__name__}'."
+                    f"returned a '{type(result).__name__}'."
                 )
-            if len(outputs) != len(self._outputs):
+            if len(result) != len(self._outputs):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"
-                    f"The node function returned {len(outputs)} output(s), "
+                    f"The node function returned {len(result)} output(s), "
                     f"whereas the node definition contains {len(self._outputs)} "
                     f"output(s)."
                 )
 
-            return dict(zip(self._outputs, outputs))
-
-        if isinstance(self._outputs, dict) and not isinstance(outputs, dict):
-            raise ValueError(
-                f"Failed to save outputs of node {self}.\n"
-                f"The node output is a dictionary, whereas the "
-                f"function output is not."
-            )
+            if iterator:
+                result = unzip(iterator)
+            return dict(zip(self._outputs, result))
 
         if self._outputs is None:
             return {}

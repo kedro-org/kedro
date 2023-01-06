@@ -2,6 +2,7 @@
 import configparser
 import json
 import re
+import os
 from pathlib import Path
 from typing import Dict
 
@@ -84,6 +85,12 @@ def proj_catalog(tmp_path, base_config):
 def proj_catalog_nested(tmp_path):
     path = tmp_path / _BASE_ENV / "catalog" / "dir" / "nested.yml"
     _write_yaml(path, {"nested": {"type": "MemoryDataSet"}})
+
+
+@pytest.fixture
+def credentials_env_variables(tmp_path):
+    path = tmp_path / _DEFAULT_RUN_ENV / "credentials.yml"
+    _write_yaml(path, {"user": {"name": "${oc.env:TEST_USERNAME}", "key": "${oc.env:TEST_KEY}"}})
 
 
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
@@ -421,3 +428,12 @@ class TestOmegaConfLoader:
         conf["catalog"] = {"catalog_config": "something_new"}
 
         assert conf["catalog"] == {"catalog_config": "something_new"}
+
+    @use_config_dir
+    def test_load_credentials_from_env_variables(self, tmp_path, credentials_env_variables):
+        """Load credentials from environment variables"""
+        conf = OmegaConfLoader(str(tmp_path))
+        os.environ["TEST_USERNAME"] = "test_user"
+        os.environ["TEST_KEY"] = "test_key"
+        assert conf["credentials"]["user"]["name"] == "test_user"
+        assert conf["credentials"]["user"]["key"] == "test_key"

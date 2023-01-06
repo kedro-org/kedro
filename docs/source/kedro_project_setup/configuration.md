@@ -237,7 +237,7 @@ Although Jinja2 is a very powerful and extremely flexible template engine, which
 From Kedro 0.18.5 you can use the [`OmegaConfLoader`](/kedro.config.OmegaConfLoader) which uses `OmegaConf` under the hood to load data.
 
 ```{note}
-`OmegaConfLoader` is under active development and will be available from Kedro 0.18.5. New features will be added in future releases. Let us know if you have any feedback about the `OmegaConfLoader` or ideas for new features. 
+`OmegaConfLoader` is under active development and will be available from Kedro 0.18.5. New features will be added in future releases. Let us know if you have any feedback about the `OmegaConfLoader` or ideas for new features.
 ```
 
 The `OmegaConfLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
@@ -252,9 +252,9 @@ CONFIG_LOADER_CLASS = OmegaConfLoader
 
 ### Templating for parameters
 Templating or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation), as it's called in `OmegaConf`, for parameters works out of the box if one condition is met: the name of the file that contains the template values must follow the same config pattern specified for parameters.
-By default, the config pattern for parameters is: `["parameters*", "parameters*/**", "**/parameters*"]`. 
+By default, the config pattern for parameters is: `["parameters*", "parameters*/**", "**/parameters*"]`.
 Suppose you have one parameters file called `parameters.yml` containing parameters with `omegaconf` placeholders like this:
- 
+
 ```yaml
 model_options:
   test_size: ${data.size}
@@ -267,7 +267,7 @@ data:
   size: 0.2
 ```
 
-Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfLoader` will load the files and resolve the placeholders correctly. 
+Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfLoader` will load the files and resolve the placeholders correctly.
 
 
 ## Parameters

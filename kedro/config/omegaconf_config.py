@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Set  # noqa
 
 from omegaconf import OmegaConf
+from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
@@ -165,6 +166,9 @@ class OmegaConfLoader(AbstractConfigLoader):
 
         config.update(env_config)
 
+        if key == "credentials":
+            self._resolve_environment_variables(env_config)
+
         if not config:
             raise MissingConfigException(
                 f"No files of YAML or JSON format found in {base_path} or {env_path} matching"
@@ -265,6 +269,19 @@ class OmegaConfLoader(AbstractConfigLoader):
         if duplicates:
             dup_str = "\n".join(duplicates)
             raise ValueError(f"{dup_str}")
+
+    @staticmethod
+    def _resolve_environment_variables(config: Dict[str, Any]) -> None:
+        """Use the oc.env resolver to read environment variables and replace them
+        in-place, without leaving the resolver on.
+
+        Arguments:
+            config {Dict[str, Any]} -- The configuration dictionary to resolve.
+        """
+        if not OmegaConf.has_resolver("oc.env"):
+            OmegaConf.register_new_resolver("oc.env", oc.env)
+        OmegaConf.resolve(config)
+        OmegaConf.clear_resolver("oc.env")
 
     @staticmethod
     def _clear_omegaconf_resolvers():

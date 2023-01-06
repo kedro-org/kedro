@@ -1,13 +1,14 @@
 # pylint: disable=expression-not-assigned, pointless-statement
 import configparser
 import json
-import re
 import os
+import re
 from pathlib import Path
 from typing import Dict
 
 import pytest
 import yaml
+from omegaconf import OmegaConf
 from yaml.parser import ParserError
 
 from kedro.config import MissingConfigException, OmegaConfLoader
@@ -90,7 +91,9 @@ def proj_catalog_nested(tmp_path):
 @pytest.fixture
 def credentials_env_variables(tmp_path):
     path = tmp_path / _DEFAULT_RUN_ENV / "credentials.yml"
-    _write_yaml(path, {"user": {"name": "${oc.env:TEST_USERNAME}", "key": "${oc.env:TEST_KEY}"}})
+    _write_yaml(
+        path, {"user": {"name": "${oc.env:TEST_USERNAME}", "key": "${oc.env:TEST_KEY}"}}
+    )
 
 
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
@@ -430,10 +433,22 @@ class TestOmegaConfLoader:
         assert conf["catalog"] == {"catalog_config": "something_new"}
 
     @use_config_dir
-    def test_load_credentials_from_env_variables(self, tmp_path, credentials_env_variables):
+    def test_load_credentials_from_env_variables(
+        self, tmp_path, credentials_env_variables
+    ):
         """Load credentials from environment variables"""
         conf = OmegaConfLoader(str(tmp_path))
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"
         assert conf["credentials"]["user"]["name"] == "test_user"
         assert conf["credentials"]["user"]["key"] == "test_key"
+
+    @use_config_dir
+    def test_env_resolver_is_cleared_after_credentials_loading(
+        self, tmp_path, credentials_env_variables
+    ):
+        conf = OmegaConfLoader(str(tmp_path))
+        os.environ["TEST_USERNAME"] = "test_user"
+        os.environ["TEST_KEY"] = "test_key"
+        assert conf["credentials"]["user"]["name"] == "test_user"
+        assert not OmegaConf.has_resolver("oc.env")

@@ -236,6 +236,10 @@ Although Jinja2 is a very powerful and extremely flexible template engine, which
 [OmegaConf](https://omegaconf.readthedocs.io/) is a Python library for configuration. It is a YAML-based hierarchical configuration system with support for merging configurations from multiple sources.
 From Kedro 0.18.5 you can use the [`OmegaConfLoader`](/kedro.config.OmegaConfLoader) which uses `OmegaConf` under the hood to load data.
 
+```{note}
+`OmegaConfLoader` is under active development and will be available from Kedro 0.18.5. New features will be added in future releases. Let us know if you have any feedback about the `OmegaConfLoader` or ideas for new features. 
+```
+
 The `OmegaConfLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
 
 To use the `OmegaConfLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
@@ -265,9 +269,6 @@ data:
 
 Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfLoader` will load the files and resolve the placeholders correctly. 
 
-```{note}
-`OmegaConfLoader` is under active development and new features will be added in future releases. Let us know if you have any feedback about the `OmegaConfLoader` or ideas for new features. 
-```
 
 ## Parameters
 

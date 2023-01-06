@@ -9,8 +9,14 @@ import pytest
 from dynaconf.validator import Validator
 
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
-from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
+from kedro.framework.hooks import _create_hook_manager, hook_impl
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.framework.project import (
+    _ProjectPipelines,
+    _ProjectSettings,
+    pipelines,
+    settings,
+)
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import node, pipeline
@@ -556,6 +562,14 @@ def memory_catalog():
     return LogCatalog({"ds1": ds1, "ds2": ds2, "ds3": ds3, "ds4": ds4})
 
 
+@pytest.fixture
+def hook_manager():
+    hook_manager = _create_hook_manager()
+    _register_hooks(hook_manager, settings.HOOKS)
+    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+    return hook_manager
+
+
 class TestAsyncNodeDatasetHooks:
     @pytest.mark.usefixtures("mock_settings")
     def test_after_dataset_load_hook_async(
@@ -582,19 +596,17 @@ class TestAsyncNodeDatasetHooks:
         self,
         mocker,
         memory_catalog,
-        mock_session,
+        hook_manager,
         sample_node_multiple_outputs,
     ):
-        # load mock context to instantiate Hooks
-        mock_session.load_context()
-
         after_dataset_saved_mock = mocker.patch.object(
-            mock_session._hook_manager.hook, "after_dataset_saved"
+            hook_manager.hook, "after_dataset_saved"
         )
+
         _run_node_async(
             node=sample_node_multiple_outputs,
             catalog=memory_catalog,
-            hook_manager=mock_session._hook_manager,
+            hook_manager=hook_manager,
         )
 
         after_dataset_saved_mock.assert_has_calls(

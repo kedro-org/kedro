@@ -52,9 +52,9 @@ class PartitionedDataSet(AbstractDataSet):
           dataset:
             type: pandas.CSVDataSet
             load_args:
-              sep: '\t'
+              sep: '\\t'
             save_args:
-              sep: '\t'
+              sep: '\\t'
               index: true
           filename_suffix: '.dat'
 

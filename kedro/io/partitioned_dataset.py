@@ -42,7 +42,7 @@ class PartitionedDataSet(AbstractDataSet):
 
     Example using the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -58,7 +58,9 @@ class PartitionedDataSet(AbstractDataSet):
               index: true
           filename_suffix: '.dat'
 
-    Example using the `Python API <https://kedro.readthedocs.io/en/stable/data/data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    Example using the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> import pandas as pd
@@ -68,15 +70,17 @@ class PartitionedDataSet(AbstractDataSet):
         >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
         >>>
         >>> # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
-        >>> dict_df = {day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
-        ...            for day_of_month in df['DAY_OF_MONTH']}
+        >>> dict_df = {
+                day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
+                for day_of_month in df["DAY_OF_MONTH"]
+            }
         >>>
         >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
         >>> data_set = PartitionedDataSet(
-        ...     path="df_with_partition",
-        ...     dataset="pandas.CSVDataSet",
-        ...     filename_suffix=".csv"
-        ... )
+                path="df_with_partition",
+                dataset="pandas.CSVDataSet",
+                filename_suffix=".csv"
+            )
         >>> # This will create a folder `df_with_partition` and save multiple files
         >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
         >>> data_set.save(dict_df)
@@ -86,8 +90,8 @@ class PartitionedDataSet(AbstractDataSet):
         >>>
         >>> # Load all the partitions
         >>> for partition_id, partition_load_func in loaded.items():
-        ...     # The actual function that loads the data
-        ...     partition_data = partition_load_func()
+                # The actual function that loads the data
+                partition_data = partition_load_func()
         >>>
         >>> # Add the processing logic for individual partition HERE
         >>> print(partition_data)
@@ -104,20 +108,20 @@ class PartitionedDataSet(AbstractDataSet):
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
         >>> data_set = PartitionedDataSet(
-        ...     path="s3://bucket-name/path/to/folder",
-        ...     dataset="pandas.CSVDataSet",
-        ...     credentials=credentials
-        ... )
+                path="s3://bucket-name/path/to/folder",
+                dataset="pandas.CSVDataSet",
+                credentials=credentials
+            )
         >>> loaded = data_set.load()
         >>> # assert isinstance(loaded, dict)
         >>>
         >>> combine_all = pd.DataFrame()
         >>>
         >>> for partition_id, partition_load_func in loaded.items():
-        ...     partition_data = partition_load_func()
-        ...     combine_all = pd.concat(
-        ...         [combine_all, partition_data], ignore_index=True, sort=True
-        ...     )
+                partition_data = partition_load_func()
+                combine_all = pd.concat(
+                    [combine_all, partition_data], ignore_index=True, sort=True
+                )
         >>>
         >>> new_data = pd.DataFrame({"new": [1, 2]})
         >>> # creates "s3://bucket-name/path/to/folder/new/partition.csv"

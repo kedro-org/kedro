@@ -73,19 +73,19 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
 
     .. code-block:: yaml
 
-        >>> parquet_dataset:
-        >>>   type: dask.ParquetDataSet
-        >>>   filepath: "s3://bucket_name/path/to/folder"
-        >>>   credentials:
-        >>>     client_kwargs:
-        >>>       aws_access_key_id: YOUR_KEY
-        >>>       aws_secret_access_key: "YOUR SECRET"
-        >>>   save_args:
-        >>>     compression: GZIP
-        >>>     schema:
-        >>>       col1: [int32]
-        >>>       col2: [int32]
-        >>>       col3: [[int32]]
+        parquet_dataset:
+          type: dask.ParquetDataSet
+          filepath: "s3://bucket_name/path/to/folder"
+          credentials:
+            client_kwargs:
+              aws_access_key_id: YOUR_KEY
+              aws_secret_access_key: "YOUR SECRET"
+          save_args:
+            compression: GZIP
+            schema:
+              col1: [int32]
+              col2: [int32]
+              col3: [[int32]]
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]

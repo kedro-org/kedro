@@ -14,6 +14,9 @@
 * Added new `OmegaConfLoader` which uses `OmegaConf` for loading and merging configuration.
 * Added the `--conf-source` option to `kedro run`, allowing users to specify a source for project configuration for the run.
 * Added `omegaconf` syntax as option for `--params`. Keys and values can now be separated by colons or equals signs.
+* Added support for generator functions as nodes, i.e. using `yield` instead of return.
+  * Enable chunk-wise processing in nodes with generator functions.
+  * Save node outputs after every `yield` before proceeding with next chunk.
 
 ## Bug fixes and other changes
 * Fixed bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.

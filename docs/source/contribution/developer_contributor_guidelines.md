@@ -116,19 +116,19 @@ We will work with you to complete your contribution, but we reserve the right to
 
 ## Create a pull request
 
-Create your pull request with [a descriptive title](#pull-request-title-conventions). Before you submit it, consider the following:
+[Give your pull request a descriptive title](#pull-request-title-conventions). Before you submit it, consider the following:
 
 * You should aim for cross-platform compatibility on Windows, macOS and Linux
-* We use [SemVer](https://semver.org/) for versioning
-* We have designed our code to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
+* We use [Semantic Versioning](https://semver.org/) for versioning
+* We have designed our code to be compatible with Python 3.7 onwards and our style guidelines are (in cascading order):
      * [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
      * [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments
-     * [PEP 484 type hints](https://www.python.org/dev/peps/pep-0484/) for all user-facing functions / class methods e.g.
+     * [PEP 484 type hints](https://www.python.org/dev/peps/pep-0484/) for all user-facing functions/class methods; e.g.
 
-```
-def count_truthy(elements: List[Any]) -> int:
-    return sum(1 for elem in elements if element)
-```
+       ```python
+       def count_truthy(elements: List[Any]) -> int:
+           return sum(1 for elem in elements if element)
+       ```
 
 Ensure that your PR builds cleanly before you submit it, by running the CI/CD checks locally, as follows:
 * `make lint`: PEP-8 Standards (`pylint`, `flake8`)

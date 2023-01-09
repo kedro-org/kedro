@@ -273,15 +273,19 @@ class OmegaConfLoader(AbstractConfigLoader):
     @staticmethod
     def _resolve_environment_variables(config: Dict[str, Any]) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
-        them in-place, clearing the resolver after the operation is complete.
+        them in-place, clearing the resolver after the operation is complete if
+        it was not registered beforehand.
 
         Arguments:
             config {Dict[str, Any]} -- The configuration dictionary to resolve.
         """
+        clear_resolver = False
         if not OmegaConf.has_resolver("oc.env"):
             OmegaConf.register_new_resolver("oc.env", oc.env)
+            clear_resolver = True
         OmegaConf.resolve(config)
-        OmegaConf.clear_resolver("oc.env")
+        if clear_resolver:
+            OmegaConf.clear_resolver("oc.env")
 
     @staticmethod
     def _clear_omegaconf_resolvers():

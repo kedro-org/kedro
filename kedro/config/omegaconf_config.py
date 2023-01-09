@@ -4,7 +4,7 @@ or more configuration files of yaml or json type from specified paths through Om
 import logging
 from glob import iglob
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Set  # noqa
+from typing import Any, Dict, Iterable, List, Optional, Set  # noqa
 
 from omegaconf import OmegaConf
 from omegaconf.resolvers import oc
@@ -144,15 +144,21 @@ class OmegaConfLoader(AbstractConfigLoader):
             )
         patterns = [*self.config_patterns[key]]
 
+        read_environment_variables = key == "credentials"
+
         # Load base env config
         base_path = str(Path(self.conf_source) / self.base_env)
-        base_config = self.load_and_merge_dir_config(base_path, patterns)
+        base_config = self.load_and_merge_dir_config(
+            base_path, patterns, read_environment_variables
+        )
         config = base_config
 
         # Load chosen env config
         run_env = self.env or self.default_run_env
         env_path = str(Path(self.conf_source) / run_env)
-        env_config = self.load_and_merge_dir_config(env_path, patterns)
+        env_config = self.load_and_merge_dir_config(
+            env_path, patterns, read_environment_variables
+        )
 
         # Destructively merge the two env dirs. The chosen env will override base.
         common_keys = config.keys() & env_config.keys()
@@ -165,9 +171,6 @@ class OmegaConfLoader(AbstractConfigLoader):
             _config_logger.debug(msg, env_path, sorted_keys)
 
         config.update(env_config)
-
-        if key == "credentials":
-            self._resolve_environment_variables(env_config)
 
         if not config:
             raise MissingConfigException(
@@ -182,7 +185,12 @@ class OmegaConfLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
-    def load_and_merge_dir_config(self, conf_path: str, patterns: Iterable[str]):
+    def load_and_merge_dir_config(
+        self,
+        conf_path: str,
+        patterns: Iterable[str],
+        read_environment_variables: Optional[bool] = False,
+    ) -> Dict[str, Any]:
         """Recursively load and merge all configuration files in a directory using OmegaConf,
         which satisfy a given list of glob patterns from a specific path.
 
@@ -220,6 +228,8 @@ class OmegaConfLoader(AbstractConfigLoader):
         for config_filepath in config_files_filtered:
             try:
                 config = OmegaConf.load(config_filepath)
+                if read_environment_variables:
+                    self._resolve_environment_variables(config)
                 config_per_file[config_filepath] = config
             except (ParserError, ScannerError) as exc:
                 line = exc.problem_mark.line  # type: ignore

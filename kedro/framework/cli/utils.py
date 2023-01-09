@@ -294,6 +294,41 @@ def split_string(ctx, param, value):  # pylint: disable=unused-argument
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+# pylint: disable=unused-argument,missing-param-doc,missing-type-doc
+def split_node_names(ctx, param, to_split: str) -> List[str]:
+    """Split string by comma, ignoring commas enclosed by square parentheses.
+    This avoids splitting the string of nodes names on commas included in
+    default node names, which have the pattern
+    <function_name>([<input_name>,...]) -> [<output_name>,...])
+
+    Note:
+        - `to_split` will have such commas if and only if it includes a
+        default node name. User-defined node names cannot include commas
+        or square brackets.
+        - This function will no longer be necessary from Kedro 0.19.*,
+        in which default node names will no longer contain commas
+
+    Args:
+        to_split: the string to split safely
+
+    Returns:
+        A list containing the result of safe-splitting the string.
+    """
+    result = []
+    argument, match_state = "", 0
+    for char in to_split + ",":
+        if char == "[":
+            match_state += 1
+        elif char == "]":
+            match_state -= 1
+        if char == "," and match_state == 0 and argument:
+            result.append(argument)
+            argument = ""
+        else:
+            argument += char
+    return result
+
+
 def env_option(func_=None, **kwargs):
     """Add `--env` CLI option to a function."""
     default_args = dict(type=str, default=None, help=ENV_HELP)

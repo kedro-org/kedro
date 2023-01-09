@@ -332,3 +332,42 @@ class TestConfigLoader:
         msg = f"Invalid YAML file {conf_path / 'catalog.yml'}, unable to read line 3, position 10."
         with pytest.raises(ParserError, match=re.escape(msg)):
             ConfigLoader(str(tmp_path)).get("catalog*.yml")
+
+    def test_customised_config_patterns(self, tmp_path):
+        config_loader = ConfigLoader(
+            conf_source=str(tmp_path),
+            config_patterns={
+                "spark": ["spark*/"],
+                "parameters": ["params*", "params*/**", "**/params*"],
+            },
+        )
+        assert config_loader.config_patterns["catalog"] == [
+            "catalog*",
+            "catalog*/**",
+            "**/catalog*",
+        ]
+        assert config_loader.config_patterns["spark"] == ["spark*/"]
+        assert config_loader.config_patterns["parameters"] == [
+            "params*",
+            "params*/**",
+            "**/params*",
+        ]
+
+    @use_config_dir
+    def test_adding_extra_keys_to_confloader(self, tmp_path):
+        """Make sure extra keys can be added directly to the config loader instance."""
+        conf = ConfigLoader(str(tmp_path))
+        catalog = conf["catalog"]
+        conf["spark"] = {"spark_config": "emr.blabla"}
+
+        assert catalog["trains"]["type"] == "MemoryDataSet"
+        assert conf["spark"] == {"spark_config": "emr.blabla"}
+
+    @use_config_dir
+    def test_bypass_catalog_config_loading(self, tmp_path):
+        """Make sure core config loading can be bypassed by setting the key and values
+        directly on the config loader instance."""
+        conf = ConfigLoader(str(tmp_path))
+        conf["catalog"] = {"catalog_config": "something_new"}
+
+        assert conf["catalog"] == {"catalog_config": "something_new"}

@@ -8,12 +8,36 @@ from requests.auth import AuthBase
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> usda:
+        >>>   type: api.APIDataSet
+        >>>   url: https://quickstats.nass.usda.gov
+        >>>   params:
+        >>>     key: SOME_TOKEN,
+        >>>     format: JSON,
+        >>>     commodity_desc: CORN,
+        >>>     statisticcat_des: YIELD,
+        >>>     agg_level_desc: STATE,
+        >>>     year: 2000
+        >>>
+
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.api import APIDataSet

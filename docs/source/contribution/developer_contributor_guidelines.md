@@ -26,14 +26,14 @@ To work on the Kedro codebase, you will need to be set up with Git, and Make.
 If your development environment is Windows, you can use the `win_setup_conda` and `win_setup_env` commands from [Circle CI configuration](https://github.com/kedro-org/kedro/blob/main/.circleci/config.yml) to guide you in the correct way to do this.
 ```
 
-You will also need to create and activate virtual environment. If this is unfamiliar to you, read through our [pre-requisites documentation](../get_started/prerequisites.md).
+You will also need to create and activate virtual environment. If this is unfamiliar to you, read through our [pre-requisites documentation](../get_started/install.md#installation-prerequisites).
 
-Next, you'll need to fork the [Kedro source code from the Github repository](https://github.com/kedro-org/kedro):
+Next, you'll need to fork the [Kedro source code from the GitHub repository](https://github.com/kedro-org/kedro):
 
 * Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/kedro-org/kedro)
 * Choose your target account
 
-If you need further guidance, consult the [Github documentation about forking a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository).
+If you need further guidance, consult the [GitHub documentation about forking a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository).
 
 You are almost ready to go. In your terminal, navigate to the folder into which you forked the Kedro code.
 
@@ -61,13 +61,13 @@ Once you are ready to contribute, a good place to start is to take a look at the
 We focus on three areas for contribution: `core`, `extras` and `plugin`:
 
 - `core` refers to the primary Kedro library. Read the [`core` contribution process](#core-contribution-process) for details.
-- `extras` refers to features that could be added to `core` that do not introduce too many dependencies or require new Kedro CLI commands to be created e.g. [adding a new dataset](../extend_kedro/custom_datasets.md) to the `kedro.extras.dataset` data management module. All the datasets are placed under `kedro.extras.datasets` to separate heavy dependencies (e.g Pandas) from Kedro `core` components. Read the [`extras` contribution process](#extras-contribution-process) for more information.
-- [`plugin`](../extend_kedro/plugins.md) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality. The [`plugin` development documentation](../extend_kedro/plugins.md) contains guidance on how to design and develop a Kedro `plugin`.
+- `extras` refers to features that could be added to `core` that do not introduce too many dependencies or require new Kedro CLI commands to be created. Read the [`extras` contribution process](#extras-contribution-process) for more information.
+- [`plugin`](../extend_kedro/plugins.md) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality and [adding a new dataset](../extend_kedro/custom_datasets.md) to the `kedro-datasets` package. The [`plugin` development documentation](../extend_kedro/plugins.md) contains guidance on how to design and develop a Kedro `plugin`.
 
 
 ### `core` contribution process
 
-Typically, we only accept small contributions to the `core` Kedro library but we accept new features as plugins or additions to the [`extras`](https://github.com/kedro-org/kedro/tree/main/kedro/extras) module.
+Typically, we only accept small contributions to the `core` Kedro library, but we accept new features as plugins or additions to the [`extras`](https://github.com/kedro-org/kedro/tree/main/kedro/extras) module.
 
 To contribute:
 
@@ -114,29 +114,21 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 We will work with you to complete your contribution, but we reserve the right to take over abandoned PRs.
 ```
 
-```{note}
-There are two special considerations when contributing a dataset:
-
-   1. Add the dataset to :code:`kedro.extras.datasets.rst` so it shows up in the API documentation.
-   2. Add the dataset to :code:`static/jsonschema/kedro-catalog-X.json` for IDE validation.
-
-```
-
 ## Create a pull request
 
-Create your pull request with [a descriptive title](#pull-request-title-conventions). Before you submit it, consider the following:
+[Give your pull request a descriptive title](#pull-request-title-conventions). Before you submit it, consider the following:
 
 * You should aim for cross-platform compatibility on Windows, macOS and Linux
-* We use [SemVer](https://semver.org/) for versioning
-* We have designed our code to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
+* We use [Semantic Versioning](https://semver.org/) for versioning
+* We have designed our code to be compatible with Python 3.7 onwards and our style guidelines are (in cascading order):
      * [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
      * [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments
-     * [PEP 484 type hints](https://www.python.org/dev/peps/pep-0484/) for all user-facing functions / class methods e.g.
+     * [PEP 484 type hints](https://www.python.org/dev/peps/pep-0484/) for all user-facing functions/class methods; e.g.
 
-```
-def count_truthy(elements: List[Any]) -> int:
-    return sum(1 for elem in elements if element)
-```
+       ```python
+       def count_truthy(elements: List[Any]) -> int:
+           return sum(1 for elem in elements if element)
+       ```
 
 Ensure that your PR builds cleanly before you submit it, by running the CI/CD checks locally, as follows:
 * `make lint`: PEP-8 Standards (`pylint`, `flake8`)
@@ -202,4 +194,4 @@ Working on your first pull request? You can learn how from these resources:
 * [First timers only](https://www.firsttimersonly.com/)
 * [How to contribute to an open source project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
 
-Please check the Q&A on [GitHub discussions](https://github.com/kedro-org/kedro/discussions) and ask any new questions about the development process there too!
+Previous Q&A on [GitHub discussions](https://github.com/kedro-org/kedro/discussions) and our [searchable archive of Discord discussions](https://linen-discord.kedro.org). You can ask new questions about the development process on [Slack](https://slack.kedro.org) too!

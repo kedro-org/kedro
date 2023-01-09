@@ -16,6 +16,10 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class JSONDataSet(
     AbstractVersionedDataSet[go.Figure, Union[go.Figure, go.FigureWidget]]
@@ -23,7 +27,17 @@ class JSONDataSet(
     """``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS).
 
-    Example:
+    Example adding a catalog entry with YAML API:
+
+    .. code-block:: yaml
+
+        >>> scatter_plot:
+        >>>   type: plotly.JSONDataSet
+        >>>   filepath: data/08_reporting/scatter_plot.json
+        >>>   save_args:
+        >>>     engine: auto
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.plotly import JSONDataSet

@@ -80,6 +80,9 @@ class ConfigLoader(AbstractConfigLoader):
             conf_source: Path to use as root directory for loading configuration.
             env: Environment that will take precedence over base.
             runtime_params: Extra parameters passed to a Kedro run.
+            config_patterns: Regex patterns that specify the naming convention for configuration
+                files so they can be loaded. Can be customised by supplying config_patterns as
+                in `CONFIG_LOADER_ARGS` in `settings.py`.
             base_env: Name of the base environment. Defaults to `"base"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths.
@@ -105,7 +108,17 @@ class ConfigLoader(AbstractConfigLoader):
         )
 
     def __getitem__(self, key):
+        # Allow bypassing of loading config from patterns if a key and value have been set
+        # explicitly on the ``ConfigLoader`` instance.
+        if key in self:
+            return super().__getitem__(key)
         return self.get(*self.config_patterns[key])
+
+    def __repr__(self):  # pragma: no cover
+        return (
+            f"ConfigLoader(conf_source={self.conf_source}, env={self.env}, "
+            f"config_patterns={self.config_patterns})"
+        )
 
     @property
     def conf_paths(self):

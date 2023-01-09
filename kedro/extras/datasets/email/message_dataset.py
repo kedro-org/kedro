@@ -20,6 +20,10 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class EmailMessageDataSet(
     AbstractVersionedDataSet[Message, Message]
@@ -46,7 +50,6 @@ class EmailMessageDataSet(
         >>> msg["From"] = '"sin studly17"'
         >>> msg["To"] = '"strong bad"'
         >>>
-        >>> # data_set = EmailMessageDataSet(filepath="gcs://bucket/test")
         >>> data_set = EmailMessageDataSet(filepath="test")
         >>> data_set.save(msg)
         >>> reloaded = data_set.load()

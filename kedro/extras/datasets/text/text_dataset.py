@@ -15,19 +15,30 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class TextDataSet(AbstractVersionedDataSet[str, str]):
     """``TextDataSet`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 
-    Example:
+    Example adding a catalog entry with YAML API:
+
+    .. code-block:: yaml
+
+        >>> alice_book:
+        >>>   type: text.TextDataSet
+        >>>   filepath: data/01_raw/alice.txt
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.text import TextDataSet
         >>>
         >>> string_to_write = "This will go in a file."
         >>>
-        >>> # data_set = TextDataSet(filepath="gcs://bucket/test.md")
         >>> data_set = TextDataSet(filepath="test.md")
         >>> data_set.save(string_to_write)
         >>> reloaded = data_set.load()

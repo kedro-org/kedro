@@ -13,15 +13,29 @@ action=$1
 # When running on ReadTheDocs, sphinx-build would run directly on the original files,
 # but we don't care about the code state there.
 rm -rf docs/build
+rm -rf kedro/datasets
 mkdir docs/build/
 cp -r docs/_templates docs/conf.py docs/*.svg docs/*.json  docs/build/
 
+bash docs/kedro-datasets-docs.sh
+
 if [ "$action" == "linkcheck" ]; then
-  sphinx-build -c docs/ -WETan -j auto -D language=en -b linkcheck docs/build/ docs/build/html
+  sphinx-build -c docs/ -ETan -j auto -D language=en -b linkcheck docs/build/ docs/build/html
 elif [ "$action" == "docs" ]; then
-  sphinx-build -c docs/ -WETa -j auto -D language=en docs/build/ docs/build/html
+  sphinx-build -c docs/ -ETa -j auto -D language=en docs/build/ docs/build/html
 fi
 
 # Clean up build artefacts
 rm -rf docs/build/html/_sources
-rm -rf docs/build/[0-9][0-9]_*
+
+# Copy built HTML to temp directory, clean up build dir and replace with built docs only
+rm -rf docs/temp
+mkdir docs/temp/
+mkdir docs/temp/html
+cp -rf docs/build/html/* docs/temp/html
+
+rm -rf docs/build
+mkdir docs/build
+mkdir docs/build/html
+cp -rf docs/temp/html/* docs/build/html
+rm -rf docs/temp

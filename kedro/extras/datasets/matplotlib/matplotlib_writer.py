@@ -18,6 +18,10 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class MatplotlibWriter(
     AbstractVersionedDataSet[
@@ -27,51 +31,83 @@ class MatplotlibWriter(
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
-    Example:
+    Example adding a catalog entry with the `YAML API
+    <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> output_plot:
+        >>>   type: matplotlib.MatplotlibWriter
+        >>>   filepath: data/08_reporting/output_plot.png
+        >>>   save_args:
+        >>>     format: png
+        >>>
+
+    Example using the Python API:
+
     ::
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> # Saving single plot
         >>> fig = plt.figure()
-        >>> plt.plot([1, 2, 3], [4, 5, 6])
-        >>> single_plot_writer = MatplotlibWriter(
-        >>>     filepath="matplot_lib_single_plot.png"
+        >>> plt.plot([1, 2, 3])
+        >>> plot_writer = MatplotlibWriter(
+        >>>     filepath="data/08_reporting/output_plot.png"
         >>> )
         >>> plt.close()
-        >>> single_plot_writer.save(fig)
+        >>> plot_writer.save(fig)
+
+    Example saving a plot as a PDF file:
+
+    ::
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> # MatplotlibWriter can output other formats as well, such as PDF files.
-        >>> # For this, we need to specify the format:
         >>> fig = plt.figure()
-        >>> plt.plot([1, 2, 3], [4, 5, 6])
-        >>> single_plot_writer = MatplotlibWriter(
-        >>>     filepath="matplot_lib_single_plot.pdf",
+        >>> plt.plot([1, 2, 3])
+        >>> pdf_plot_writer = MatplotlibWriter(
+        >>>     filepath="data/08_reporting/output_plot.pdf",
         >>>     save_args={"format": "pdf"},
         >>> )
         >>> plt.close()
-        >>> single_plot_writer.save(fig)
+        >>> pdf_plot_writer.save(fig)
+
+
+    Example saving multiple plots in a folder, using a dictionary:
+
+    ::
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> # Saving dictionary of plots
         >>> plots_dict = dict()
         >>> for colour in ["blue", "green", "red"]:
-        >>>     plots_dict[colour] = plt.figure()
-        >>>     plt.plot([1, 2, 3], [4, 5, 6], color=colour)
+        >>>     plots_dict[f"{colour}.png"] = plt.figure()
+        >>>     plt.plot([1, 2, 3], color=colour)
+        >>>
         >>> plt.close("all")
         >>> dict_plot_writer = MatplotlibWriter(
-        >>>     filepath="matplotlib_dict"
+        >>>     filepath="data/08_reporting/plots"
         >>> )
         >>> dict_plot_writer.save(plots_dict)
+
+    Example saving multiple plots in a folder, using a list:
+
+    ::
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> # Saving list of plots
         >>> plots_list = []
-        >>> for index in range(5):
+        >>> for i in range(5):
         >>>     plots_list.append(plt.figure())
-        >>>     plt.plot([1,2,3],[4,5,6])
+        >>>     plt.plot([i, i + 1, i + 2])
         >>> plt.close("all")
         >>> list_plot_writer = MatplotlibWriter(
-        >>>     filepath="matplotlib_list"
+        >>>     filepath="data/08_reporting/plots"
         >>> )
         >>> list_plot_writer.save(plots_list)
 

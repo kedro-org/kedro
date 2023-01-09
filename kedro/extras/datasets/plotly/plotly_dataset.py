@@ -13,6 +13,10 @@ from kedro.io.core import Version
 
 from .json_dataset import JSONDataSet
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class PlotlyDataSet(JSONDataSet):
     """``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON
@@ -22,22 +26,44 @@ class PlotlyDataSet(JSONDataSet):
     ``PlotlyDataSet`` is a convenience wrapper for ``plotly.JSONDataSet``. It generates
     the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
-    Example configuration for a PlotlyDataSet in the catalog:
-    ::
+    Example adding a catalog entry with YAML API:
+
+    .. code-block:: yaml
 
         >>> bar_plot:
-        >>>     type: plotly.PlotlyDataSet
-        >>>     filepath: data/08_reporting/bar_plot.json
-        >>>     plotly_args:
-        >>>         type: bar
-        >>>         fig:
-        >>>             x: features
-        >>>             y: importance
-        >>>             orientation: h
-        >>>         layout:
-        >>>             xaxis_title: x
-        >>>             yaxis_title: y
-        >>>             title: Test
+        >>>   type: plotly.PlotlyDataSet
+        >>>   filepath: data/08_reporting/bar_plot.json
+        >>>   plotly_args:
+        >>>     type: bar
+        >>>     fig:
+        >>>         x: features
+        >>>         y: importance
+        >>>         orientation: h
+        >>>     layout:
+        >>>         xaxis_title: x
+        >>>         yaxis_title: y
+        >>>         title: Title
+
+    Example using Python API:
+    ::
+
+        >>> from kedro.extras.datasets.plotly import PlotlyDataSet
+        >>> import plotly.express as px
+        >>> import pandas as pd
+        >>>
+        >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=('x1', 'x2'))
+        >>>
+        >>> data_set = PlotlyDataSet(
+        >>>     filepath='scatter_plot.json',
+        >>>     plotly_args={
+        >>>         'type': 'scatter',
+        >>>         'fig': {'x': 'x1', 'y': 'x2'},
+        >>>     }
+        >>> )
+        >>> data_set.save(df_data)
+        >>> reloaded = data_set.load()
+        >>> assert px.scatter(df_data, x='x1', y='x2') == reloaded
+
     """
 
     # pylint: disable=too-many-arguments

@@ -154,9 +154,13 @@ kedro.db
 kedro/html
 docs/tmp-build-artifacts
 docs/build
+docs/temp
 docs/node_modules
 docs/source/04_user_guide/source/.ipynb
 tests/template/fake_project/
 
 default.profraw
 package-lock.json
+
+# Kedro-Datasets plugin
+kedro/datasets/*

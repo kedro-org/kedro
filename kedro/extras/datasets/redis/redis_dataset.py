@@ -11,6 +11,10 @@ import redis
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class PickleDataSet(AbstractDataSet[Any, Any]):
     """``PickleDataSet`` loads/saves data from/to a Redis database. The
@@ -43,6 +47,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     ::
 
         >>> from kedro.extras.datasets.redis import PickleDataSet
+        >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                       'col3': [5, 6]})

@@ -9,6 +9,10 @@ from kedro.io.core import AbstractDataSet, DataSetError
 
 __all__ = ["SparkJDBCDataSet"]
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
+
 
 class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     """``SparkJDBCDataSet`` loads data from a database table accessible

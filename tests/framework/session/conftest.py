@@ -21,6 +21,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.node import Node, node
 
 logger = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ def dummy_dataframe() -> pd.DataFrame:
 
 @pytest.fixture
 def mock_pipeline() -> Pipeline:
-    return Pipeline(
+    return modular_pipeline(
         [
             node(identity_node, "cars", "planes", name="node1"),
             node(identity_node, "boats", "ships", name="node2"),

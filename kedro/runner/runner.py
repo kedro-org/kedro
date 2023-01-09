@@ -299,7 +299,7 @@ def run_node(
 
     Raises:
         ValueError: Raised if is_async is set to True for nodes wrapping
-        generator functions.
+            generator functions.
 
     Returns:
         The node argument.

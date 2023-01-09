@@ -197,6 +197,7 @@ class OmegaConfLoader(AbstractConfigLoader):
         Args:
             conf_path: Path to configuration directory.
             patterns: List of glob patterns to match the filenames against.
+            read_environment_variables: Whether to resolve environment variables.
 
         Raises:
             MissingConfigException: If configuration path doesn't exist or isn't valid.

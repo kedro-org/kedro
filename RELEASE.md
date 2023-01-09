@@ -14,11 +14,16 @@
 * Added new `OmegaConfLoader` which uses `OmegaConf` for loading and merging configuration.
 * Added the `--conf-source` option to `kedro run`, allowing users to specify a source for project configuration for the run.
 * Added `omegaconf` syntax as option for `--params`. Keys and values can now be separated by colons or equals signs.
+* Added support for generator functions as nodes, i.e. using `yield` instead of return.
+  * Enable chunk-wise processing in nodes with generator functions.
+  * Save node outputs after every `yield` before proceeding with next chunk.
 
 ## Bug fixes and other changes
-* Fix bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
-* Fix bug causing `load_ipython_extension` not to register the `%reload_kedro` line magic when called in a directory that does not contain a Kedro project.
+* Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).
+* Fixed bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
+* Fixed bug causing `load_ipython_extension` not to register the `%reload_kedro` line magic when called in a directory that does not contain a Kedro project.
 * Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
+* Fixed bug causing the `after_dataset_saved` hook only to be called for one output dataset when multiple are saved in a single node and async saving is in use.
 
 ## Breaking changes to the API
 

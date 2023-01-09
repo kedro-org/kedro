@@ -233,8 +233,9 @@ class OmegaConfLoader(AbstractConfigLoader):
 
         if aggregate_config:
             if len(aggregate_config) > 1:
-                return dict(OmegaConf.merge(*aggregate_config))
-            return list(aggregate_config)[0]
+                merged_config = OmegaConf.merge(*aggregate_config)
+                return OmegaConf.to_container(merged_config)
+            return OmegaConf.to_container(list(aggregate_config)[0])
         return {}
 
     @staticmethod

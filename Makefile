@@ -19,6 +19,9 @@ test:
 test-no-spark:
 	pytest tests --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
 
+test-no-datasets:
+	pytest tests --no-cov --ignore tests/extras/datasets/ --numprocesses 4 --dist loadfile
+
 e2e-tests:
 	behave
 

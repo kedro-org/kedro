@@ -35,6 +35,7 @@
   * Save node outputs after every `yield` before proceeding with next chunk.
 
 ## Bug fixes and other changes
+* Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).
 * Fixed bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
 * Fixed bug causing `load_ipython_extension` not to register the `%reload_kedro` line magic when called in a directory that does not contain a Kedro project.
 * Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.

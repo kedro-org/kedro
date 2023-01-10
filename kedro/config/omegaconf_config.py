@@ -231,11 +231,11 @@ class OmegaConfLoader(AbstractConfigLoader):
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
 
-        if aggregate_config:
-            if len(aggregate_config) > 1:
-                return dict(OmegaConf.merge(*aggregate_config))
+        if not aggregate_config:
+            return {}
+        if len(aggregate_config) == 1:
             return list(aggregate_config)[0]
-        return {}
+        return dict(OmegaConf.merge(*aggregate_config))
 
     @staticmethod
     def _is_valid_config_path(path):

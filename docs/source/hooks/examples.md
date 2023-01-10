@@ -190,7 +190,7 @@ validations:
   - batch_request:
       datasource_name: {my_datasource_name}
       data_connector_name: default_runtime_data_connector_name
-      data_asset_name: {my_runtime_asset_name}
+      data_asset_name: my_runtime_asset_name
       data_connector_query:
         index: -1
     expectation_suite_name: {my_expectation_suite_name}

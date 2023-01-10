@@ -70,7 +70,10 @@ class TestCoreFunctions:
             ),
             (
                 "abfss://mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
-                {"protocol": "abfss", "path": "mycontainer@mystorageaccount.dfs.core.windows.net/mypath"},
+                {
+                    "protocol": "abfss",
+                    "path": "mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
+                },
             ),
             (
                 "hdfs://namenode:8020/file.txt",

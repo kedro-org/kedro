@@ -10,7 +10,7 @@ CONF_SOURCE = "new_conf"
 ```
 You can also specify a source directory for the configuration files at run time using the `--conf-source` flag with the `kedro run` command as follows:
 ```bash
-kedro run --conf-source = "new_conf"
+kedro run --conf-source = <path-to-new-conf-directory>
 ```
 ## Local and base configuration environments
 

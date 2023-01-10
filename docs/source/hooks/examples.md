@@ -178,7 +178,7 @@ class DataValidationHooks:
 great_expectations checkpoint new raw_companies_dataset_checkpoint
 ```
 
-* Remove `data_connector_query` from the `batch_request` in the checkpoint config file: 
+* Remove `data_connector_query` from the `batch_request` in the checkpoint config file:
 
 ```python
 yaml_config = f"""
@@ -249,7 +249,7 @@ class DataValidationHooks:
                     },
                     "batch_identifiers": {
                         "runtime_batch_identifier_name": dataset_name
-                    }
+                    },
                 },
                 run_name=session_id,
             )

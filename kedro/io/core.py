@@ -685,11 +685,12 @@ def _parse_filepath(filepath: str) -> Dict[str, str]:
 
     options = {"protocol": protocol, "path": path}
 
-    if parsed_path.netloc:
-        if protocol in CLOUD_PROTOCOLS:
-            host_with_port = parsed_path.netloc.rsplit("@", 1)[-1]
-            host = host_with_port.rsplit(":", 1)[0]
-            options["path"] = host + options["path"]
+    if parsed_path.netloc and protocol in CLOUD_PROTOCOLS:
+        host_with_port = parsed_path.netloc.rsplit("@", 1)[-1]
+        host = host_with_port.rsplit(":", 1)[0]
+        options["path"] = host + options["path"]
+        if protocol == "abfss" and parsed_path.username:
+            options["path"] = parsed_path.username + "@" + options["path"]
 
     return options
 

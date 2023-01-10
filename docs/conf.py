@@ -176,6 +176,7 @@ type_targets = {
         "CircularDependencyError",
         "OutputNotUniqueError",
         "ConfirmNotUniqueError",
+        "ParserError",
     ),
 }
 # https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote

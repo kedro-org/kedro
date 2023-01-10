@@ -8,7 +8,10 @@ We recommend that you keep all configuration files in the `conf` directory of a 
 ```python
 CONF_SOURCE = "new_conf"
 ```
-
+You can also specify a source directory for the configuration files at run time using the `--conf-source` flag with the `kedro run` command as follows:
+```bash
+kedro run --conf-source = "new_conf"
+```
 ## Local and base configuration environments
 
 Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loaded using the `ConfigLoader` class:

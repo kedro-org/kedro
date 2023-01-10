@@ -290,13 +290,12 @@ class OmegaConfLoader(AbstractConfigLoader):
         Arguments:
             config {Dict[str, Any]} -- The configuration dictionary to resolve.
         """
-        clear_resolver = False
         if not OmegaConf.has_resolver("oc.env"):
             OmegaConf.register_new_resolver("oc.env", oc.env)
-            clear_resolver = True
-        OmegaConf.resolve(config)
-        if clear_resolver:
+            OmegaConf.resolve(config)
             OmegaConf.clear_resolver("oc.env")
+        else:
+            OmegaConf.resolve(config)
 
     @staticmethod
     def _clear_omegaconf_resolvers():

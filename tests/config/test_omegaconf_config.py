@@ -9,6 +9,7 @@ from typing import Dict
 import pytest
 import yaml
 from omegaconf import OmegaConf, errors
+from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 
 from kedro.config import MissingConfigException, OmegaConfLoader
@@ -475,10 +476,12 @@ class TestOmegaConfLoader:
     @use_config_dir
     @use_credentials_env_variable_yml
     def test_env_resolver_is_registered_after_loading(self, tmp_path):
-        """Check that the ``oc.env`` resolver is reigstered after loading credentials
+        """Check that the ``oc.env`` resolver is registered after loading credentials
         in the case that it was registered beforehand"""
         conf = OmegaConfLoader(str(tmp_path))
+        OmegaConf.register_new_resolver("oc.env", oc.env)
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"
         assert conf["credentials"]["user"]["name"] == "test_user"
-        assert not OmegaConf.has_resolver("oc.env")
+        assert OmegaConf.has_resolver("oc.env")
+        OmegaConf.clear_resolver("oc.env")

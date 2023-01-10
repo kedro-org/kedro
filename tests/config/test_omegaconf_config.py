@@ -8,7 +8,7 @@ from typing import Dict
 
 import pytest
 import yaml
-from omegaconf import errors, OmegaConf
+from omegaconf import OmegaConf, errors
 from yaml.parser import ParserError
 
 from kedro.config import MissingConfigException, OmegaConfLoader
@@ -104,7 +104,9 @@ def proj_credentials_env_variable(tmp_path):
 
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
 use_proj_catalog = pytest.mark.usefixtures("proj_catalog")
-use_credentials_env_variable_yml = pytest.mark.usefixtures("proj_credentials_env_variable")
+use_credentials_env_variable_yml = pytest.mark.usefixtures(
+    "proj_credentials_env_variable"
+)
 use_catalog_env_variable_yml = pytest.mark.usefixtures("proj_catalog_env_variable")
 
 

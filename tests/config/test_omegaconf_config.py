@@ -453,16 +453,6 @@ class TestOmegaConfLoader:
         assert conf["credentials"]["user"]["key"] == "test_key"
 
     @use_config_dir
-    @use_credentials_env_variable_yml
-    def test_env_resolver_is_cleared_after_credentials_loading(self, tmp_path):
-        """Check that the oc.env resolver is cleared after loading credentials"""
-        conf = OmegaConfLoader(str(tmp_path))
-        os.environ["TEST_USERNAME"] = "test_user"
-        os.environ["TEST_KEY"] = "test_key"
-        assert conf["credentials"]["user"]["name"] == "test_user"
-        assert not OmegaConf.has_resolver("oc.env")
-
-    @use_config_dir
     @use_catalog_env_variable_yml
     def test_env_resolver_not_used_for_catalog(self, tmp_path):
         """Check that the oc.env resolver is not used for catalog loading"""
@@ -470,3 +460,25 @@ class TestOmegaConfLoader:
         os.environ["TEST_DATASET"] = "test_dataset"
         with pytest.raises(errors.UnsupportedInterpolationType):
             conf["catalog"]["test"]["file_path"]
+
+    @use_config_dir
+    @use_credentials_env_variable_yml
+    def test_env_resolver_is_cleared_after_loading(self, tmp_path):
+        """Check that the ``oc.env`` resolver is cleared after loading credentials
+        in the case that it was not registered beforehand."""
+        conf = OmegaConfLoader(str(tmp_path))
+        os.environ["TEST_USERNAME"] = "test_user"
+        os.environ["TEST_KEY"] = "test_key"
+        assert conf["credentials"]["user"]["name"] == "test_user"
+        assert not OmegaConf.has_resolver("oc.env")
+
+    @use_config_dir
+    @use_credentials_env_variable_yml
+    def test_env_resolver_is_registered_after_loading(self, tmp_path):
+        """Check that the ``oc.env`` resolver is reigstered after loading credentials
+        in the case that it was registered beforehand"""
+        conf = OmegaConfLoader(str(tmp_path))
+        os.environ["TEST_USERNAME"] = "test_user"
+        os.environ["TEST_KEY"] = "test_key"
+        assert conf["credentials"]["user"]["name"] == "test_user"
+        assert not OmegaConf.has_resolver("oc.env")

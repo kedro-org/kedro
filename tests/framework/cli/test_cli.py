@@ -719,6 +719,51 @@ class TestRunCommand:
         )
         assert expected_output in result.output
 
+    @mark.parametrize(
+        "from_nodes, expected",
+        [
+            (["--from-nodes", "A,B,C"], ["A", "B", "C"]),
+            (
+                ["--from-nodes", "two_inputs([A0,B0]) -> [C1]"],
+                ["two_inputs([A0,B0]) -> [C1]"],
+            ),
+            (
+                ["--from-nodes", "two_outputs([A0]) -> [B1,C1]"],
+                ["two_outputs([A0]) -> [B1,C1]"],
+            ),
+            (
+                ["--from-nodes", "multi_in_out([A0,B0]) -> [C1,D1]"],
+                ["multi_in_out([A0,B0]) -> [C1,D1]"],
+            ),
+            (
+                ["--from-nodes", "two_inputs([A0,B0]) -> [C1],X,Y,Z"],
+                ["two_inputs([A0,B0]) -> [C1]", "X", "Y", "Z"],
+            ),
+        ],
+    )
+    def test_safe_split_option_arguments(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        from_nodes,
+        expected,
+    ):
+        CliRunner().invoke(fake_project_cli, ["run", *from_nodes], obj=fake_metadata)
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=expected,
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
     def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):
         # check that Kedro runs successfully with an alternative conf_source
         rename("conf", "alternate_conf")

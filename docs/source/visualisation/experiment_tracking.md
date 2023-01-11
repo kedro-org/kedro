@@ -1,4 +1,4 @@
-# Set up experiment tracking
+# Experiment tracking in Kedro-Viz
 
 Experiment tracking is the process of saving all machine-learning related experiment information so you can compare different runs.
 
@@ -8,12 +8,11 @@ Experiment tracking is the process of saving all machine-learning related experi
 
 Enabling experiment tracking features on Kedro-Viz relies on:
 
-* [setting up a session store to capture experiment metadata](#set-up-the-session-store),
-* [experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets),
-* [modifying your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
+- [Setting up a session store to capture experiment metadata](#set-up-the-session-store),
+- [Experiment tracking datasets to let Kedro know what metrics should be tracked](#set-up-tracking-datasets),
+- [Modifying your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
 
 This page describes the steps necessary to set up experiment tracking and access logged metrics, using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md).
-
 
 [Further information is available in the experiment tracking section](../logging/experiment_tracking.md) for your Kedro project.
 
@@ -62,7 +61,6 @@ companies_columns:
   type: tracking.JSONDataSet
   filepath: data/09_tracking/companies_columns.json
 ```
-
 
 ## Set up your nodes and pipelines to log metrics
 
@@ -199,6 +197,8 @@ def create_confusion_matrix(companies: pd.DataFrame):
 And now add this node to the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/pipeline.py`)
 
 ```python
+from .nodes import create_confusion_matrix
+
 node(
     func=create_confusion_matrix,
     inputs="companies",
@@ -206,11 +206,9 @@ node(
 ),
 ```
 
-In the catalog add the `confusion_matrix` data definition, making sure to set the versioned flag to `true` within the project catalog to include the plot in experiment tracking.
+In the catalog (`conf/base/catalog.yml`) add the `confusion_matrix` data definition, making sure to set the versioned flag to `true` within the project catalog to include the plot in experiment tracking.
 
 ```yaml
-# conf/base/catalog.yml
-
 data_processing.confusion_matrix:
   type: matplotlib.MatplotlibWriter
   filepath: data/09_tracking/confusion_matrix.png
@@ -221,8 +219,17 @@ After running the pipeline with `kedro run`, the plot will be saved and you will
 
 ![](../meta/images/expand-plot-comparison-view.gif)
 
+## View and compare metrics data
 
-## View your metrics timeline
+From Kedro-Viz version 6.0.0 experiment tracking also supports the display and comparison of metrics data through two chart types: time series and parallel coordinates.
+
+Time series displays one metric per graph, showing how the metric value has changed over time.
+
+Parallel coordinates displays all metrics on a single graph, with each vertical line representing one metric with it's own scale. The metric values are positioned along those vertical lines and connected across each axis.
+
+When in comparison view, comparing runs will highlight your selections on the respective chart types, improving readability even in the event there is a multitude of data points.
+
+![](../meta/images/experiment-tracking_metrics-comparison.gif)
 
 Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab ![](../meta/images/pipeline_visualisation_icon.png). Clicking on any MetricsDataset node will open a side panel displaying how the metric value has changed over time.
 

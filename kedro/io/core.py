@@ -689,6 +689,8 @@ def _parse_filepath(filepath: str) -> Dict[str, str]:
         host_with_port = parsed_path.netloc.rsplit("@", 1)[-1]
         host = host_with_port.rsplit(":", 1)[0]
         options["path"] = host + options["path"]
+        # Azure Data Lake Storage Gen2 URIs can store the container name in the
+        # 'username' field of a URL (@ syntax), so we need to add it to the path
         if protocol == "abfss" and parsed_path.username:
             options["path"] = parsed_path.username + "@" + options["path"]
 

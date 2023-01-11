@@ -40,7 +40,7 @@ class PartitionedDataSet(AbstractDataSet):
     `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
     kedro_io.html#partitioned-dataset-lazy-saving>`_.
 
-    Example using the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
@@ -58,7 +58,7 @@ class PartitionedDataSet(AbstractDataSet):
               index: true
           filename_suffix: '.dat'
 
-    Example using the
+    Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::

@@ -20,7 +20,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
-    Example using the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
@@ -36,7 +36,7 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
               aws_access_key_id: YOUR_KEY
               aws_secret_access_key: YOUR_SECRET
 
-    Example using the
+    Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::

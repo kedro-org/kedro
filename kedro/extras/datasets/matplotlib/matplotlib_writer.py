@@ -31,21 +31,21 @@ class MatplotlibWriter(
     """``MatplotlibWriter`` saves one or more Matplotlib objects as
     image files to an underlying filesystem (e.g. local, S3, GCS).
 
-    Example adding a catalog entry with the `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> output_plot:
-        >>>   type: matplotlib.MatplotlibWriter
-        >>>   filepath: data/08_reporting/output_plot.png
-        >>>   save_args:
-        >>>     format: png
-        >>>
+        output_plot:
+          type: matplotlib.MatplotlibWriter
+          filepath: data/08_reporting/output_plot.png
+          save_args:
+            format: png
 
-    Example using the Python API:
-
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> import matplotlib.pyplot as plt
@@ -60,7 +60,6 @@ class MatplotlibWriter(
         >>> plot_writer.save(fig)
 
     Example saving a plot as a PDF file:
-
     ::
 
         >>> import matplotlib.pyplot as plt
@@ -75,9 +74,7 @@ class MatplotlibWriter(
         >>> plt.close()
         >>> pdf_plot_writer.save(fig)
 
-
     Example saving multiple plots in a folder, using a dictionary:
-
     ::
 
         >>> import matplotlib.pyplot as plt
@@ -95,7 +92,6 @@ class MatplotlibWriter(
         >>> dict_plot_writer.save(plots_dict)
 
     Example saving multiple plots in a folder, using a list:
-
     ::
 
         >>> import matplotlib.pyplot as plt

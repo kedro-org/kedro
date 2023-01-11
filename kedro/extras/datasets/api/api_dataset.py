@@ -34,7 +34,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
             agg_level_desc: STATE,
             year: 2000
 
-    Example using the
+    Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::

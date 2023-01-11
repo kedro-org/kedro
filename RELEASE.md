@@ -17,6 +17,7 @@
 * Added support for generator functions as nodes, i.e. using `yield` instead of return.
   * Enable chunk-wise processing in nodes with generator functions.
   * Save node outputs after every `yield` before proceeding with next chunk.
+* Added support for Azure Data Lake Storage Gen2 URIs in datasets.
 
 ## Bug fixes and other changes
 * Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).

@@ -114,7 +114,11 @@ The nodes are stored in `src/get_started/nodes.py`:
 
 This is a swift introduction to show how to visualise the project with Kedro-Viz. See the [visualisation documentation](../visualisation/kedro-viz_visualisation) for more detail. 
 
-Kedro-Viz package needs to be installed seperately as it is not part of standard Kedro installation.
+The Kedro-Viz package needs to be installed separately as it is not part of the standard Kedro installation:
+
+```bash
+pip install kedro-viz
+```
 
 In your terminal type the following:
 

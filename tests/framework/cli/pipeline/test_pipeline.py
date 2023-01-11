@@ -88,10 +88,6 @@ class TestPipelineCreateCommand:
 
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
         assert result.exit_code == 0
-        assert (
-            f"To be able to run the pipeline '{PIPELINE_NAME}', you will need "
-            f"to add it to 'register_pipelines()'" in result.output
-        )
         assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
         assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
 

@@ -107,30 +107,32 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     the data with no index. This is designed to make load and save methods
     symmetric.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> shuttles_table_dataset:
-        >>>   type: pandas.SQLTableDataSet
-        >>>   credentials: db_credentials
-        >>>   table_name: shuttles
-        >>>   load_args:
-        >>>     schema: dwschema
-        >>>   save_args:
-        >>>     schema: dwschema
-        >>>     if_exists: replace
+        shuttles_table_dataset:
+          type: pandas.SQLTableDataSet
+          credentials: db_credentials
+          table_name: shuttles
+          load_args:
+            schema: dwschema
+          save_args:
+            schema: dwschema
+            if_exists: replace
 
     Sample database credentials entry in ``credentials.yml``:
 
     .. code-block:: yaml
 
-            >>> db_credentials:
-            >>>     con: postgresql://scott:tiger@localhost/test
+        db_credentials:
+          con: postgresql://scott:tiger@localhost/test
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import SQLTableDataSet
@@ -305,7 +307,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     .. code-block:: yaml
 
         db_credentials:
-            con: postgresql://scott:tiger@localhost/test
+          con: postgresql://scott:tiger@localhost/test
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\

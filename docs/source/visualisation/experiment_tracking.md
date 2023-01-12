@@ -8,7 +8,7 @@ Experiment tracking is the process of saving all machine-learning related experi
 
 To enable the experiment tracking features of Kedro-Viz you need to:
 
-- [set up a session store to capture experiment metadata](#set-up-the-session-store),
+- [Set up a session store to capture experiment metadata](#set-up-the-session-store),
 - [set up experiment tracking datasets to list the metrics to track](#set-up-tracking-datasets),
 - [modify your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
 

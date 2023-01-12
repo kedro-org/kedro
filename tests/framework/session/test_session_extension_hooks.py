@@ -9,8 +9,14 @@ import pytest
 from dynaconf.validator import Validator
 
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
-from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
+from kedro.framework.hooks import _create_hook_manager, hook_impl
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.framework.project import (
+    _ProjectPipelines,
+    _ProjectSettings,
+    pipelines,
+    settings,
+)
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import node, pipeline
@@ -526,6 +532,20 @@ def sample_node():
     return node(wait_and_identity, inputs="ds1", outputs="ds2", name="test-node")
 
 
+@pytest.fixture
+def sample_node_multiple_outputs():
+    def wait_and_identity(x: Any, y: Any):
+        time.sleep(0.1)
+        return (x, y)
+
+    return node(
+        wait_and_identity,
+        inputs=["ds1", "ds2"],
+        outputs=["ds3", "ds4"],
+        name="test-node",
+    )
+
+
 class LogCatalog(DataCatalog):
     def load(self, name: str, version: str = None) -> Any:
         dataset = super().load(name=name, version=version)
@@ -537,7 +557,17 @@ class LogCatalog(DataCatalog):
 def memory_catalog():
     ds1 = MemoryDataSet({"data": 42})
     ds2 = MemoryDataSet({"data": 42})
-    return LogCatalog({"ds1": ds1, "ds2": ds2})
+    ds3 = MemoryDataSet({"data": 42})
+    ds4 = MemoryDataSet({"data": 42})
+    return LogCatalog({"ds1": ds1, "ds2": ds2, "ds3": ds3, "ds4": ds4})
+
+
+@pytest.fixture
+def hook_manager():
+    hook_manager = _create_hook_manager()
+    _register_hooks(hook_manager, settings.HOOKS)
+    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+    return hook_manager
 
 
 class TestAsyncNodeDatasetHooks:
@@ -561,6 +591,32 @@ class TestAsyncNodeDatasetHooks:
         assert str(
             ["Before dataset loaded", "Catalog load", "After dataset loaded"]
         ).strip("[]") in str(hooks_log_messages).strip("[]")
+
+    def test_after_dataset_load_hook_async_multiple_outputs(
+        self,
+        mocker,
+        memory_catalog,
+        hook_manager,
+        sample_node_multiple_outputs,
+    ):
+        after_dataset_saved_mock = mocker.patch.object(
+            hook_manager.hook, "after_dataset_saved"
+        )
+
+        _run_node_async(
+            node=sample_node_multiple_outputs,
+            catalog=memory_catalog,
+            hook_manager=hook_manager,
+        )
+
+        after_dataset_saved_mock.assert_has_calls(
+            [
+                mocker.call(dataset_name="ds3", data={"data": 42}),
+                mocker.call(dataset_name="ds4", data={"data": 42}),
+            ],
+            any_order=True,
+        )
+        assert after_dataset_saved_mock.call_count == 2
 
 
 class TestKedroContextSpecsHook:

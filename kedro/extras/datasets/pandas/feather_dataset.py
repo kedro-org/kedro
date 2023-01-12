@@ -32,28 +32,27 @@ class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     is supported by pandas, so it supports all allowed pandas options
     for loading and saving csv files.
 
-    Example adding a catalog entry with
-    `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: pandas.FeatherDataSet
-        >>>   filepath: data/01_raw/company/cars.feather
-        >>>   load_args:
-        >>>     columns: ['col1', 'col2', 'col3']
-        >>>     use_threads: True
-        >>>
-        >>> motorbikes:
-        >>>   type: pandas.FeatherDataSet
-        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.feather
-        >>>   credentials: dev_s3
-        >>>
+        cars:
+          type: pandas.FeatherDataSet
+          filepath: data/01_raw/company/cars.feather
+          load_args:
+            columns: ['col1', 'col2', 'col3']
+            use_threads: True
 
+        motorbikes:
+          type: pandas.FeatherDataSet
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.feather
+          credentials: dev_s3
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import FeatherDataSet

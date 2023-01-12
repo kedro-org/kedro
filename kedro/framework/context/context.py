@@ -338,7 +338,7 @@ class KedroContext:
             conf_creds = self.config_loader["credentials"]
         except MissingConfigException as exc:
             logging.getLogger(__name__).debug(
-                f"Credentials not found in your Kedro project config.\n{str(exc)}"
+                "Credentials not found in your Kedro project config.\n %s", str(exc)
             )
             conf_creds = {}
         return conf_creds

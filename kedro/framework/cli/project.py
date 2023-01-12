@@ -21,6 +21,7 @@ from kedro.framework.cli.utils import (
     env_option,
     forward_command,
     python_call,
+    split_node_names,
     split_string,
 )
 from kedro.framework.session import KedroSession
@@ -53,13 +54,14 @@ override the loaded ones."""
 PIPELINE_ARG_HELP = """Name of the registered pipeline to run.
 If not set, the '__default__' pipeline is run."""
 PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
-to the context initializer. Items must be separated by comma, keys - by colon,
-example: param1:value1,param2:value2. Each parameter is split by the first comma,
+to the context initialiser. Items must be separated by comma, keys - by colon or equals sign,
+example: param1=value1,param2=value2. Each parameter is split by the first comma,
 so parameter values are allowed to contain colons, parameter keys are not.
 To pass a nested dictionary as parameter, separate keys by '.', example:
 param_group.param1:value1."""
 INPUT_FILE_HELP = """Name of the requirements file to compile."""
 OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
+CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
 
 
 # pylint: disable=missing-function-docstring
@@ -315,16 +317,28 @@ def activate_nbstripout(
 
 @project_group.command()
 @click.option(
-    "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
+    "--from-inputs",
+    type=str,
+    default="",
+    help=FROM_INPUTS_HELP,
+    callback=split_string,
 )
 @click.option(
-    "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=split_string
+    "--to-outputs",
+    type=str,
+    default="",
+    help=TO_OUTPUTS_HELP,
+    callback=split_string,
 )
 @click.option(
-    "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_string
+    "--from-nodes",
+    type=str,
+    default="",
+    help=FROM_NODES_HELP,
+    callback=split_node_names,
 )
 @click.option(
-    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_string
+    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
 )
 @click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
 @click.option(
@@ -350,6 +364,11 @@ def activate_nbstripout(
     callback=_config_file_callback,
 )
 @click.option(
+    "--conf-source",
+    type=click.Path(exists=True, file_okay=False, resolve_path=True),
+    help=CONF_SOURCE_HELP,
+)
+@click.option(
     "--params",
     type=click.UNPROCESSED,
     default="",
@@ -370,15 +389,19 @@ def run(
     load_version,
     pipeline,
     config,
+    conf_source,
     params,
 ):
     """Run the pipeline."""
+
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
-    with KedroSession.create(env=env, extra_params=params) as session:
+    with KedroSession.create(
+        env=env, conf_source=conf_source, extra_params=params
+    ) as session:
         session.run(
             tags=tag,
             runner=runner(is_async=is_async),

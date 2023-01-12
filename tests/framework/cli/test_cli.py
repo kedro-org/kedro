@@ -1,5 +1,6 @@
 from collections import namedtuple
 from itertools import cycle
+from os import rename
 from pathlib import Path
 from unittest.mock import patch
 
@@ -22,7 +23,6 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
-    _update_value_nested_dict,
     forward_command,
     get_pkg_version,
 )
@@ -277,19 +277,6 @@ class TestCliUtils:
             mocker.call(pycache2, ignore_errors=True),
         ]
         assert mocked_rmtree.mock_calls == expected_calls
-
-    def test_update_value_nested_dict(self):
-        """Test `_update_value_nested_dict` utility function."""
-
-        nested_dict = {"foo": {"hello": "world", "bar": 1}}
-        value_for_nested_dict = 2
-        walking_path_for_nested_dict = ["foo", "bar"]
-
-        expected = {"foo": {"hello": "world", "bar": 2}}
-        actual = _update_value_nested_dict(
-            nested_dict, value_for_nested_dict, walking_path_for_nested_dict
-        )
-        assert actual == expected
 
 
 class TestEntryPoints:
@@ -619,33 +606,36 @@ class TestRunCommand:
             pipeline_name="pipeline1",
         )
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, extra_params=expected
+            env=mocker.ANY, conf_source=None, extra_params=expected
         )
 
     @mark.parametrize(
         "cli_arg,expected_extra_params",
         [
             ("foo:bar", {"foo": "bar"}),
+            ("foo=bar", {"foo": "bar"}),
             (
                 "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
                 {
                     "foo": 123.45,
                     "bar": "1a",
-                    "baz": 678,
+                    "baz": 678.0,
                     "qux": 0.01,
                     "quux": 0,
-                    "quuz": "",
+                    "quuz": None,
                 },
             ),
             ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
+            ("foo=fizz:buzz", {"foo": "fizz:buzz"}),
+            ("foo:fizz=buzz", {"foo": "fizz=buzz"}),
             (
                 "foo:bar, baz: https://example.com",
                 {"foo": "bar", "baz": "https://example.com"},
             ),
+            ("foo:bar, foo:fizz buzz", {"foo": "fizz buzz"}),
             ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
-            ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
             ("foo.nested:bar", {"foo": {"nested": "bar"}}),
-            ("foo.nested:123.45", {"foo": {"nested": 123.45}}),
+            ("foo.nested=123.45", {"foo": {"nested": 123.45}}),
             (
                 "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
                 {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
@@ -668,7 +658,7 @@ class TestRunCommand:
 
         assert not result.exit_code
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, extra_params=expected_extra_params
+            env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
         )
 
     @mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
@@ -678,7 +668,7 @@ class TestRunCommand:
         )
         assert result.exit_code
         assert (
-            "Item `bad` must contain a key and a value separated by `:`"
+            "Item `bad` must contain a key and a value separated by `:` or `=`."
             in result.stdout
         )
 
@@ -726,5 +716,74 @@ class TestRunCommand:
             f"Error: Expected the form of 'load_version' to be "
             f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
             f"found {load_version} instead\n"
+        )
+        assert expected_output in result.output
+
+    @mark.parametrize(
+        "from_nodes, expected",
+        [
+            (["--from-nodes", "A,B,C"], ["A", "B", "C"]),
+            (
+                ["--from-nodes", "two_inputs([A0,B0]) -> [C1]"],
+                ["two_inputs([A0,B0]) -> [C1]"],
+            ),
+            (
+                ["--from-nodes", "two_outputs([A0]) -> [B1,C1]"],
+                ["two_outputs([A0]) -> [B1,C1]"],
+            ),
+            (
+                ["--from-nodes", "multi_in_out([A0,B0]) -> [C1,D1]"],
+                ["multi_in_out([A0,B0]) -> [C1,D1]"],
+            ),
+            (
+                ["--from-nodes", "two_inputs([A0,B0]) -> [C1],X,Y,Z"],
+                ["two_inputs([A0,B0]) -> [C1]", "X", "Y", "Z"],
+            ),
+        ],
+    )
+    def test_safe_split_option_arguments(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        from_nodes,
+        expected,
+    ):
+        CliRunner().invoke(fake_project_cli, ["run", *from_nodes], obj=fake_metadata)
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=expected,
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
+    def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):
+        # check that Kedro runs successfully with an alternative conf_source
+        rename("conf", "alternate_conf")
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "alternate_conf"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0
+
+    def test_run_with_non_existent_conf_source(self, fake_project_cli, fake_metadata):
+        # check that an error is thrown if target conf_source doesn't exist
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "nonexistent_dir"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code, result.output
+        expected_output = (
+            "Error: Invalid value for '--conf-source': Directory 'nonexistent_dir'"
+            " does not exist."
         )
         assert expected_output in result.output

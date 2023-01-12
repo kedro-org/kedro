@@ -9,7 +9,7 @@ import toml
 import yaml
 
 from kedro import __version__ as kedro_version
-from kedro.config import AbstractConfigLoader, ConfigLoader
+from kedro.config import AbstractConfigLoader, ConfigLoader, OmegaConfLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     ValidationError,
@@ -86,6 +86,16 @@ def mock_settings_custom_config_loader_class(mocker):
     class MockSettings(_ProjectSettings):
         _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
             "CONFIG_LOADER_CLASS", default=lambda *_: MyConfigLoader
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_omega_config_loader_class(mocker):
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
+            "CONFIG_LOADER_CLASS", default=lambda *_: OmegaConfLoader
         )
 
     return _mock_imported_settings_paths(mocker, MockSettings())
@@ -876,6 +886,23 @@ def fake_project_with_logging_file_handler(fake_project):
 
 @pytest.mark.usefixtures("mock_settings")
 def test_setup_logging_using_absolute_path(
+    fake_project_with_logging_file_handler, mocker, mock_package_name
+):
+    mocked_logging = mocker.patch("logging.config.dictConfig")
+    KedroSession.create(mock_package_name, fake_project_with_logging_file_handler)
+
+    mocked_logging.assert_called_once()
+    call_args = mocked_logging.call_args[0][0]
+
+    expected_log_filepath = (
+        fake_project_with_logging_file_handler / "logs" / "info.log"
+    ).as_posix()
+    actual_log_filepath = call_args["handlers"]["info_file_handler"]["filename"]
+    assert actual_log_filepath == expected_log_filepath
+
+
+@pytest.mark.usefixtures("mock_settings_omega_config_loader_class")
+def test_setup_logging_using_omega_config_loader_class(
     fake_project_with_logging_file_handler, mocker, mock_package_name
 ):
     mocked_logging = mocker.patch("logging.config.dictConfig")

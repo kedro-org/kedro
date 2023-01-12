@@ -30,6 +30,12 @@ kedro run
 
 ## Visualise the spaceflights project
 
+The Kedro-Viz package needs to be installed separately as it is not part of the standard Kedro installation:
+
+```bash
+pip install kedro-viz
+```
+
 To start Kedro-Viz, type the following into your terminal from the project directory:
 
 ```bash

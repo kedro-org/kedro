@@ -307,14 +307,11 @@ class TestKedroContext:
         env_credentials.unlink()
 
         _ = dummy_context.catalog
-        
+
         # check the logs
         log_messages = [record.getMessage() for record in caplog.records]
-        expected_msg = (
-            "Credentials not found in your Kedro project config."
-        )
+        expected_msg = "Credentials not found in your Kedro project config."
         assert any(expected_msg in log_message for log_message in log_messages)
-         
 
 
 @pytest.mark.parametrize(

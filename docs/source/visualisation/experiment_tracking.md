@@ -20,7 +20,7 @@ You can also access a more detailed [Kedro-Viz experiment tracking demo](https:/
 
 ## Set up a project
 
-We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). To set up a new project using the spaceflights starter, run:
+We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). Before proceeding, ensure you're using Kedro-Viz `>=4.1.1` (you can confirm your Kedro-Viz version by running `kedro info`). To set up a new project using the spaceflights starter, run:
 
 ```bash
 kedro new --starter=spaceflights
@@ -157,7 +157,7 @@ Try to execute `kedro run` a few times to generate a larger set of experiment da
 
 ## Access run data and compare runs
 
-Here comes the fun part of accessing your run data on Kedro-Viz. Having ensured that you are using Kedro-Viz `>=4.1.1` (you can confirm your Kedro-Viz version by running `kedro info`), run:
+Here comes the fun part of accessing your run data on Kedro-Viz. Having generated some run data, execute the following command:
 
 ```bash
 kedro viz

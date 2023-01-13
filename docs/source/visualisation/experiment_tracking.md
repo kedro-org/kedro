@@ -67,7 +67,7 @@ Please ensure that your installed version of Kedro-Viz `>=4.1.1`. This step is c
 
 There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data like boolean or text-based data.
 
-Set up two datasets to log the columns used in the companies dataset (`companies_columns`) and experiment metrics for the `active_modelling_pipeline` (`active_modelling_pipeline.metrics`) like the coefficient of determination (`r2 score`),  max error (`me`) and mean absolute error (`mae`) by adding the following in the `conf/base/catalog.yml` file:
+Set up two datasets to log the columns used in the companies dataset (`companies_columns`) and experiment metrics for the data science pipeline (`metrics`) like the coefficient of determination (`r2 score`),  max error (`me`) and mean absolute error (`mae`) by adding the following in the `conf/base/catalog.yml` file:
 
 ```yaml
 metrics:

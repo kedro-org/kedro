@@ -110,12 +110,6 @@ def create_pipeline(
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
 
-    click.secho(
-        f"To be able to run the pipeline '{name}', you will need to add it "
-        f"""to 'register_pipelines()' in '{package_dir / "pipeline_registry.py"}'.""",
-        fg="yellow",
-    )
-
 
 @command_with_verbosity(pipeline, "delete")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)

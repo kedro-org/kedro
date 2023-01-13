@@ -242,7 +242,7 @@ node(
 In the catalog (`conf/base/catalog.yml`) add the `confusion_matrix` data definition, making sure to set the versioned flag to `true` within the project catalog to include the plot in experiment tracking.
 
 ```yaml
-data_processing.confusion_matrix:
+confusion_matrix:
   type: matplotlib.MatplotlibWriter
   filepath: data/09_tracking/confusion_matrix.png
   versioned: true

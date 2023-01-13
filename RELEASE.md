@@ -24,6 +24,7 @@
 * Fixed bug causing `load_ipython_extension` not to register the `%reload_kedro` line magic when called in a directory that does not contain a Kedro project.
 * Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
 * Fixed bug causing the `after_dataset_saved` hook only to be called for one output dataset when multiple are saved in a single node and async saving is in use.
+* Log level for "Credentials not found in your Kedro project config" was changed from `WARNING` to `DEBUG`.
 
 ## Breaking changes to the API
 

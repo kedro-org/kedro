@@ -70,7 +70,7 @@ There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.ext
 Set up two datasets to log the columns used in the companies dataset (`companies_columns`) and experiment metrics for the `active_modelling_pipeline` (`active_modelling_pipeline.metrics`) like the coefficient of determination (`r2 score`),  max error (`me`) and mean absolute error (`mae`) by adding the following in the `conf/base/catalog.yml` file:
 
 ```yaml
-active_modelling_pipeline.metrics:
+metrics:
   type: tracking.MetricsDataSet
   filepath: data/09_tracking/metrics.json
 

@@ -484,6 +484,16 @@ run:
   env: env1
 ```
 
+It's important to note that the syntax for the options are different when you're using the CLI compared to the configuration file. Where in the CLI you would use dashes, for example for `kedro run --from-nodes ...`, you have to use an underscore in the configuration file:
+
+```yaml
+run:
+  from_nodes: ...
+```
+
+This is because further down the process the configuration file gets parsed by [Click](https://click.palletsprojects.com/en/8.1.x/), a python package to create command line interfaces. Click passes the options defined in the configuration file directly to a python function and so the option names need to match the argument names in that function.
+Variable names and argument in Python can only contain alpha-numeric characters and underscores, so it's not possible to have a dash in the option names when using the configuration file.
+
 ```{note}
 If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
 ```

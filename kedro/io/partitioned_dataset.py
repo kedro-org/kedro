@@ -40,68 +40,63 @@ class PartitionedDataSet(AbstractDataSet):
     `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
     kedro_io.html#partitioned-dataset-lazy-saving>`_.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> cv_results_partitioned: # example to save results to multiple partitions
-        >>>   type: PartitionedDataSet
-        >>>   dataset:
-        >>>     type: pandas.CSVDataSet
-        >>>     save_args:
-        >>>       index: False
-        >>>   path: data/04_cv/
-        >>>   filename_suffix: ".csv"
+        station_data:
+          type: PartitionedDataSet
+          path: data/03_primary/station_data
+          dataset:
+            type: pandas.CSVDataSet
+            load_args:
+              sep: '\\t'
+            save_args:
+              sep: '\\t'
+              index: true
+          filename_suffix: '.dat'
 
-        >>> downloaded_data: # example with data available in multiple partitions
-        >>>   type: PartitionedDataSet
-        >>>   path: demo/01_raw/downloaded_station_data
-        >>>   dataset:
-        >>>     type: pandas.CSVDataSet
-        >>>     load_args:
-        >>>       sep: ','
-        >>>       index_col: 0
-        >>>   filename_suffix: '.csv'
-
-
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> import pandas as pd
         >>> from kedro.io import PartitionedDataSet
         >>>
-        # Create a fake pandas dataframe with 10 rows of data
+        >>> # Create a fake pandas dataframe with 10 rows of data
         >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
         >>>
-        # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
-        >>> dict_df = {day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
-                       for day_of_month in df['DAY_OF_MONTH']}
+        >>> # Convert it to a dict of pd.DataFrame with DAY_OF_MONTH as the dict key
+        >>> dict_df = {
+                day_of_month: df[df["DAY_OF_MONTH"] == day_of_month]
+                for day_of_month in df["DAY_OF_MONTH"]
+            }
         >>>
-        # Save it as small paritions with DAY_OF_MONTH as the partition key
+        >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
         >>> data_set = PartitionedDataSet(
-        >>> path="df_with_partition",
-        >>> dataset="pandas.CSVDataSet",
-        >>> filename_suffix=".csv"
-
-        )
-        # This will create a folder `df_with_partition` and save multiple files
-        # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
+                path="df_with_partition",
+                dataset="pandas.CSVDataSet",
+                filename_suffix=".csv"
+            )
+        >>> # This will create a folder `df_with_partition` and save multiple files
+        >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
         >>> data_set.save(dict_df)
-
-        # This will create lazy load functions instead of loading data into memory immediately.
+        >>>
+        >>> # This will create lazy load functions instead of loading data into memory immediately.
         >>> loaded = data_set.load()
-
-        # Load all the partitions
+        >>>
+        >>> # Load all the partitions
         >>> for partition_id, partition_load_func in loaded.items():
-            # The actual function that loads the data
-            partition_data = partition_load_func()
+                # The actual function that loads the data
+                partition_data = partition_load_func()
+        >>>
+        >>> # Add the processing logic for individual partition HERE
+        >>> print(partition_data)
 
-            # Add the processing logic for individual partition HERE
-            print(partition_data)
-
-    In reality, you may load multiple partitions from a remote storage and combine them
+    You can also load multiple partitions from a remote storage and combine them
     like this:
     ::
 
@@ -113,25 +108,24 @@ class PartitionedDataSet(AbstractDataSet):
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
         >>> data_set = PartitionedDataSet(
-        >>>     path="s3://bucket-name/path/to/folder",
-        >>>     dataset="pandas.CSVDataSet",
-        >>>     credentials=credentials
-        >>> )
+                path="s3://bucket-name/path/to/folder",
+                dataset="pandas.CSVDataSet",
+                credentials=credentials
+            )
         >>> loaded = data_set.load()
         >>> # assert isinstance(loaded, dict)
         >>>
         >>> combine_all = pd.DataFrame()
         >>>
         >>> for partition_id, partition_load_func in loaded.items():
-        >>>     partition_data = partition_load_func()
-        >>>     combine_all = pd.concat(
-        >>>         [combine_all, partition_data], ignore_index=True, sort=True
-        >>>     )
+                partition_data = partition_load_func()
+                combine_all = pd.concat(
+                    [combine_all, partition_data], ignore_index=True, sort=True
+                )
         >>>
         >>> new_data = pd.DataFrame({"new": [1, 2]})
         >>> # creates "s3://bucket-name/path/to/folder/new/partition.csv"
         >>> data_set.save({"new/partition.csv": new_data})
-        >>>
 
     """
 

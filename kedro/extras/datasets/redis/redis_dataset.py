@@ -22,28 +22,30 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     all allowed options for instantiating the redis app ``from_url`` and setting
     a value.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> my_python_object: # simple example
-        >>>   type: redis.PickleDataSet
-        >>>   key: my_object
-        >>>   from_url_args:
-        >>>     url: redis://127.0.0.1:6379
-        >>>
-        >>> final_python_object: # example with save args
-        >>>   type: redis.PickleDataSet
-        >>>   key: my_final_object
-        >>>   from_url_args:
-        >>>     url: redis://127.0.0.1:6379
-        >>>     db: 1
-        >>>   save_args:
-        >>>     ex: 10
+        my_python_object: # simple example
+          type: redis.PickleDataSet
+          key: my_object
+          from_url_args:
+            url: redis://127.0.0.1:6379
 
-    Example using Python API:
+        final_python_object: # example with save args
+          type: redis.PickleDataSet
+          key: my_final_object
+          from_url_args:
+            url: redis://127.0.0.1:6379
+            db: 1
+          save_args:
+            ex: 10
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.redis import PickleDataSet

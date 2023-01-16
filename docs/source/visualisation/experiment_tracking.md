@@ -10,13 +10,13 @@ We started adding in the missing pieces from [Kedro-Viz `>=4.1.1`](https://githu
 
 ## When should I use experiment tracking in Kedro?
 
-The choice of experiment tracking tool depends on your use case. We can present the possibilities for Kedro, MLflow and Neptune: 
+The choice of experiment tracking tool depends on your use case. We can present the possibilities for Kedro, MLflow and Neptune:
 
- - **Kedro** - If you need experiment tracking, are looking for improved metrics visualisation and want a lightweight tool created to leverage existing functionality in Kedro. Kedro does not support a model registry. 
- - **MLflow** - You can combine MLFlow with Kedro by using [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/en/stable/) if you require experiment tracking, model registry and/or model serving capabilities or have access to Managed MLflow within the Databricks ecosystem.  
- - **Neptune** - If you require experiment tracking and model registry functionality, improved visualisation of metrics and support for collaborative data science. Leverage [`kedro-neptune`](https://docs.neptune.ai/integrations/kedro/) for your workflow. 
+- **Kedro** - If you need experiment tracking, are looking for improved metrics visualisation and want a lightweight tool created to leverage existing functionality in Kedro. Kedro does not support a model registry.
+- **MLflow** - You can combine MLFlow with Kedro by using [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/en/stable/) if you require experiment tracking, model registry and/or model serving capabilities or have access to Managed MLflow within the Databricks ecosystem.
+- **Neptune** - If you require experiment tracking and model registry functionality, improved visualisation of metrics and support for collaborative data science. Leverage [`kedro-neptune`](https://docs.neptune.ai/integrations/kedro/) for your workflow.
 
-We support [a growing list of integrations](../extend_kedro/plugins.md), so be sure to look out for the ever increasing range of tools. 
+We support [a growing list of integrations](../extend_kedro/plugins.md), so be sure to look out for the ever increasing range of tools.
 
 ## Set up a project
 
@@ -67,7 +67,7 @@ Please ensure that your installed version of Kedro-Viz `>=4.1.1`. This step is c
 
 There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data like boolean or text-based data.
 
-Set up two datasets to log the columns used in the companies dataset (`companies_columns`) and experiment metrics for the data science pipeline (`metrics`) like the coefficient of determination (`r2 score`),  max error (`me`) and mean absolute error (`mae`) by adding the following in the `conf/base/catalog.yml` file:
+Set up two datasets to log the columns used in the companies dataset (`companies_columns`) and experiment metrics for the data science pipeline (`metrics`) like the coefficient of determination (`r2 score`), max error (`me`) and mean absolute error (`mae`) by adding the following in the `conf/base/catalog.yml` file:
 
 ```yaml
 metrics:
@@ -190,18 +190,19 @@ You can now access, compare and pin your runs by toggling the `Compare runs` but
 
 ## View and compare plots
 
-From Kedro-Viz `>=5.0.0` experiment tracking also supports the display and comparison of plots, such as Plotly and Matplotlib. This section will show you how to enable this functionality to leverage Matplotlib. [Similar instructions can be followed for Plotly](../visualisation/visualise_charts_with_plotly.md). 
+From Kedro-Viz `>=5.0.0` experiment tracking also supports the display and comparison of plots, such as Plotly and Matplotlib. This section will show you how to enable this functionality to leverage Matplotlib. [Similar instructions can be followed for Plotly](../visualisation/visualise_charts_with_plotly.md).
 
 ### Update the dependencies
 
 You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```bash
-kedro[matplotlib.MatplotlibWriter]==0.18.3
+kedro[matplotlib.MatplotlibWriter]
 seaborn~=0.12.1
 ```
 
 And install the requirements with:
+
 ```
 pip install -r src/requirements.txt
 ```

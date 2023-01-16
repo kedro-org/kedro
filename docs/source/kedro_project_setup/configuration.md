@@ -8,7 +8,10 @@ We recommend that you keep all configuration files in the `conf` directory of a 
 ```python
 CONF_SOURCE = "new_conf"
 ```
-
+You can also specify a source directory for the configuration files at run time using the [`kedro run` CLI command](../development/commands_reference.md#modifying-a-kedro-run) with the `--conf-source` flag as follows:
+```bash
+kedro run --conf-source = <path-to-new-conf-directory>
+```
 ## Local and base configuration environments
 
 Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loaded using the `ConfigLoader` class:
@@ -52,13 +55,26 @@ CONFIG_LOADER_ARGS = {
 }
 ```
 
+You can also bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, credentials, and logging) as well as additional configuration.
+
+```python
+from kedro.config import ConfigLoader
+from kedro.framework.project import settings
+
+conf_path = str(project_path / settings.CONF_SOURCE)
+conf_loader = ConfigLoader(conf_source=conf_path, env="local")
+
+# Bypass configuration patterns by setting the key and values directly on the config loader instance.
+conf_loader["catalog"] = {"catalog_config": "something_new"}
+```
+
 Configuration information from files stored in `base` or `local` that match these rules is merged at runtime and returned as a config dictionary:
 
 * If any two configuration files located inside the same environment path (`conf/base/` or `conf/local/` in this example) contain the same top-level key, `load_config` will raise a `ValueError` indicating that the duplicates are not allowed.
 
 * If two configuration files have duplicate top-level keys but are in different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get` will not raise any errors - however, a `DEBUG` level log message will be emitted with information on the overridden keys.
 
-Any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/).
+Any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors).
 
 ## Additional configuration environments
 
@@ -217,6 +233,44 @@ The output Python dictionary will look as follows:
 ```{warning}
 Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do not recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
 ```
+
+## Configuration with OmegaConf
+
+[OmegaConf](https://omegaconf.readthedocs.io/) is a Python library for configuration. It is a YAML-based hierarchical configuration system with support for merging configurations from multiple sources.
+From Kedro 0.18.5 you can use the [`OmegaConfLoader`](/kedro.config.OmegaConfLoader) which uses `OmegaConf` under the hood to load data.
+
+```{note}
+`OmegaConfLoader` is under active development and will be available from Kedro 0.18.5. New features will be added in future releases. Let us know if you have any feedback about the `OmegaConfLoader` or ideas for new features.
+```
+
+The `OmegaConfLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
+
+To use the `OmegaConfLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
+
+```python
+from kedro.config import OmegaConfLoader  # new import
+
+CONFIG_LOADER_CLASS = OmegaConfLoader
+```
+
+### Templating for parameters
+Templating or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation), as it's called in `OmegaConf`, for parameters works out of the box if one condition is met: the name of the file that contains the template values must follow the same config pattern specified for parameters.
+By default, the config pattern for parameters is: `["parameters*", "parameters*/**", "**/parameters*"]`.
+Suppose you have one parameters file called `parameters.yml` containing parameters with `omegaconf` placeholders like this:
+
+```yaml
+model_options:
+  test_size: ${data.size}
+  random_state: 3
+```
+
+and a file containing the template values called `parameters_globals.yml`:
+```yaml
+data:
+  size: 0.2
+```
+
+Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfLoader` will load the files and resolve the placeholders correctly.
 
 
 ## Parameters
@@ -429,6 +483,17 @@ run:
     - node2
   env: env1
 ```
+
+The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes ...`, but you have to use an underscore in the configuration file:
+
+```yaml
+run:
+  from_nodes: ...
+```
+
+This is because the configuration file gets parsed by [Click](https://click.palletsprojects.com/en/8.1.x/), a Python package to handle command line interfaces. Click passes the options defined in the configuration file to a Python function. The option names need to match the argument names in that function.
+
+Variable names and arguments in Python may only contain alpha-numeric characters and underscores, so it's not possible to have a dash in the option names when using the configuration file.
 
 ```{note}
 If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.

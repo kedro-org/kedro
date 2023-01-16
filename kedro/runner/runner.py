@@ -299,7 +299,7 @@ def run_node(
 
     Raises:
         ValueError: Raised if is_async is set to True for nodes wrapping
-        generator functions.
+            generator functions.
 
     Returns:
         The node argument.
@@ -469,17 +469,16 @@ def _run_node_async(
             node, catalog, inputs, is_async, hook_manager, session_id=session_id
         )
 
-        save_futures = set()
-
+        future_dataset_mapping = {}
         for name, data in outputs.items():
             hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
-            save_futures.add(pool.submit(catalog.save, name, data))
+            future = pool.submit(catalog.save, name, data)
+            future_dataset_mapping[future] = (name, data)
 
-        for future in as_completed(save_futures):
+        for future in as_completed(future_dataset_mapping):
             exception = future.exception()
             if exception:
                 raise exception
-            hook_manager.hook.after_dataset_saved(
-                dataset_name=name, data=data  # pylint: disable=undefined-loop-variable
-            )
+            name, data = future_dataset_mapping[future]
+            hook_manager.hook.after_dataset_saved(dataset_name=name, data=data)
     return node

@@ -164,41 +164,43 @@ class KedroHdfsInsecureClient(InsecureClient):
 class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     """``SparkDataSet`` loads and saves Spark dataframes.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> weather:
-        >>>   type: spark.SparkDataSet
-        >>>   filepath: s3a://your_bucket/data/01_raw/weather/*
-        >>>   file_format: csv
-        >>>   load_args:
-        >>>     header: True
-        >>>     inferSchema: True
-        >>>   save_args:
-        >>>     sep: '|'
-        >>>     header: True
-        >>>
-        >>> weather_schema:
-        >>>   type: spark.SparkDataSet
-        >>>   filepath: s3a://your_bucket/data/01_raw/weather/*
-        >>>   file_format: csv
-        >>>   load_args:
-        >>>     header: True
-        >>>     schema:
-        >>>       filepath: path/to/schema.json
-        >>>   save_args:
-        >>>     sep: '|'
-        >>>     header: True
-        >>>
-        >>> weather_cleaned:
-        >>>   type: spark.SparkDataSet
-        >>>   filepath: data/02_intermediate/data.parquet
-        >>>   file_format: parquet
+        weather:
+          type: spark.SparkDataSet
+          filepath: s3a://your_bucket/data/01_raw/weather/*
+          file_format: csv
+          load_args:
+            header: True
+            inferSchema: True
+          save_args:
+            sep: '|'
+            header: True
 
-    Example using Python API:
+        weather_with_schema:
+          type: spark.SparkDataSet
+          filepath: s3a://your_bucket/data/01_raw/weather/*
+          file_format: csv
+          load_args:
+            header: True
+            schema:
+              filepath: path/to/schema.json
+          save_args:
+            sep: '|'
+            header: True
+
+        weather_cleaned:
+          type: spark.SparkDataSet
+          filepath: data/02_intermediate/data.parquet
+          file_format: parquet
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from pyspark.sql import SparkSession

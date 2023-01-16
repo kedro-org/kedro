@@ -1,12 +1,15 @@
 # pylint: disable=expression-not-assigned, pointless-statement
 import configparser
 import json
+import os
 import re
 from pathlib import Path
 from typing import Dict
 
 import pytest
 import yaml
+from omegaconf import OmegaConf, errors
+from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 
 from kedro.config import MissingConfigException, OmegaConfLoader
@@ -86,8 +89,26 @@ def proj_catalog_nested(tmp_path):
     _write_yaml(path, {"nested": {"type": "MemoryDataSet"}})
 
 
+@pytest.fixture
+def proj_catalog_env_variable(tmp_path):
+    path = tmp_path / _BASE_ENV / "catalog" / "dir" / "nested.yml"
+    _write_yaml(path, {"test": {"file_path": "${oc.env:TEST_FILE_PATH}"}})
+
+
+@pytest.fixture
+def proj_credentials_env_variable(tmp_path):
+    path = tmp_path / _DEFAULT_RUN_ENV / "credentials.yml"
+    _write_yaml(
+        path, {"user": {"name": "${oc.env:TEST_USERNAME}", "key": "${oc.env:TEST_KEY}"}}
+    )
+
+
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
 use_proj_catalog = pytest.mark.usefixtures("proj_catalog")
+use_credentials_env_variable_yml = pytest.mark.usefixtures(
+    "proj_credentials_env_variable"
+)
+use_catalog_env_variable_yml = pytest.mark.usefixtures("proj_catalog_env_variable")
 
 
 class TestOmegaConfLoader:
@@ -421,3 +442,46 @@ class TestOmegaConfLoader:
         conf["catalog"] = {"catalog_config": "something_new"}
 
         assert conf["catalog"] == {"catalog_config": "something_new"}
+
+    @use_config_dir
+    @use_credentials_env_variable_yml
+    def test_load_credentials_from_env_variables(self, tmp_path):
+        """Load credentials from environment variables"""
+        conf = OmegaConfLoader(str(tmp_path))
+        os.environ["TEST_USERNAME"] = "test_user"
+        os.environ["TEST_KEY"] = "test_key"
+        assert conf["credentials"]["user"]["name"] == "test_user"
+        assert conf["credentials"]["user"]["key"] == "test_key"
+
+    @use_config_dir
+    @use_catalog_env_variable_yml
+    def test_env_resolver_not_used_for_catalog(self, tmp_path):
+        """Check that the oc.env resolver is not used for catalog loading"""
+        conf = OmegaConfLoader(str(tmp_path))
+        os.environ["TEST_DATASET"] = "test_dataset"
+        with pytest.raises(errors.UnsupportedInterpolationType):
+            conf["catalog"]["test"]["file_path"]
+
+    @use_config_dir
+    @use_credentials_env_variable_yml
+    def test_env_resolver_is_cleared_after_loading(self, tmp_path):
+        """Check that the ``oc.env`` resolver is cleared after loading credentials
+        in the case that it was not registered beforehand."""
+        conf = OmegaConfLoader(str(tmp_path))
+        os.environ["TEST_USERNAME"] = "test_user"
+        os.environ["TEST_KEY"] = "test_key"
+        assert conf["credentials"]["user"]["name"] == "test_user"
+        assert not OmegaConf.has_resolver("oc.env")
+
+    @use_config_dir
+    @use_credentials_env_variable_yml
+    def test_env_resolver_is_registered_after_loading(self, tmp_path):
+        """Check that the ``oc.env`` resolver is registered after loading credentials
+        in the case that it was registered beforehand"""
+        conf = OmegaConfLoader(str(tmp_path))
+        OmegaConf.register_new_resolver("oc.env", oc.env)
+        os.environ["TEST_USERNAME"] = "test_user"
+        os.environ["TEST_KEY"] = "test_key"
+        assert conf["credentials"]["user"]["name"] == "test_user"
+        assert OmegaConf.has_resolver("oc.env")
+        OmegaConf.clear_resolver("oc.env")

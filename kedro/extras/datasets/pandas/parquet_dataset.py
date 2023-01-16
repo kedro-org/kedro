@@ -31,35 +31,37 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``ParquetDataSet`` loads/saves data from/to a Parquet file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> boats:
-        >>>   type: pandas.ParquetDataSet
-        >>>   filepath: data/01_raw/boats.parquet
-        >>>   load_args:
-        >>>     engine: pyarrow
-        >>>     use_nullable_dtypes: True
-        >>>   save_args:
-        >>>     file_scheme: hive
-        >>>     has_nulls: False
-        >>>     engine: pyarrow
-        >>>
-        >>> trucks:
-        >>>   type: pandas.ParquetDataSet
-        >>>   filepath: abfs://container/02_intermediate/trucks.parquet
-        >>>   credentials: dev_abs
-        >>>   load_args:
-        >>>     columns: [name, gear, disp, wt]
-        >>>     index: name
-        >>>   save_args:
-        >>>     compression: GZIP
-        >>>     partition_on: [name]
+        boats:
+          type: pandas.ParquetDataSet
+          filepath: data/01_raw/boats.parquet
+          load_args:
+            engine: pyarrow
+            use_nullable_dtypes: True
+          save_args:
+            file_scheme: hive
+            has_nulls: False
+            engine: pyarrow
 
-    Example using Python API:
+        trucks:
+          type: pandas.ParquetDataSet
+          filepath: abfs://container/02_intermediate/trucks.parquet
+          credentials: dev_abs
+          load_args:
+            columns: [name, gear, disp, wt]
+            index: name
+          save_args:
+            compression: GZIP
+            partition_on: [name]
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import ParquetDataSet

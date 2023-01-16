@@ -21,26 +21,27 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     ``pyspark.sql.DataFrameReader`` and ``pyspark.sql.DataFrameWriter``
     internally, so it supports all allowed PySpark options on ``jdbc``.
 
-
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> weather:
-        >>>   type: spark.SparkJDBCDataSet
-        >>>   table: weather_table
-        >>>   url: jdbc:postgresql://localhost/test
-        >>>   credentials: db_credentials
-        >>>   load_args:
-        >>>     properties:
-        >>>       driver: org.postgresql.Driver
-        >>>   save_args:
-        >>>     properties:
-        >>>       driver: org.postgresql.Driver
+        weather:
+          type: spark.SparkJDBCDataSet
+          table: weather_table
+          url: jdbc:postgresql://localhost/test
+          credentials: db_credentials
+          load_args:
+            properties:
+              driver: org.postgresql.Driver
+          save_args:
+            properties:
+              driver: org.postgresql.Driver
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> import pandas as pd

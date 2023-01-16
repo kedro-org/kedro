@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
+from attrs import field, frozen
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -160,65 +161,42 @@ def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> N
                 old_dict[key] = value
 
 
+def _expand_full_path(project_path: Union[str, Path]) -> Path:
+    return Path(project_path).expanduser().resolve()
+
+
+@frozen
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
     """
 
-    def __init__(
-        self,
-        package_name: str,
-        project_path: Union[Path, str],
-        config_loader: ConfigLoader,
-        hook_manager: PluginManager,
-        env: str = None,
-        extra_params: Dict[str, Any] = None,
-    ):  # pylint: disable=too-many-arguments
-        """Create a context object by providing the root of a Kedro project and
-        the environment configuration subfolders
-        (see ``kedro.config.ConfigLoader``)
+    _package_name: str
+    project_path: Path = field(converter=_expand_full_path)
+    config_loader: ConfigLoader
+    _hook_manager: PluginManager
+    env: Optional[str] = None
+    _extra_params: Optional[Dict[str, Any]] = field(default=None, converter=deepcopy)
 
-        Raises:
-            KedroContextError: If there is a mismatch
-                between Kedro project version and package version.
+    """Create a context object by providing the root of a Kedro project and
+    the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
 
-        Args:
-            package_name: Package name for the Kedro project the context is
-                created for.
-            project_path: Project path to define the context for.
-            hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
-            env: Optional argument for configuration default environment to be used
-                for running the pipeline. If not specified, it defaults to "local".
-            extra_params: Optional dictionary containing extra project parameters.
-                If specified, will update (and therefore take precedence over)
-                the parameters retrieved from the project configuration.
-        """
-        self._project_path = Path(project_path).expanduser().resolve()
-        self._package_name = package_name
-        self._config_loader = config_loader
-        self._env = env
-        self._extra_params = deepcopy(extra_params)
-        self._hook_manager = hook_manager
+    Raises:
+        KedroContextError: If there is a mismatch
+            between Kedro project version and package version.
 
-    @property  # type: ignore
-    def env(self) -> Optional[str]:
-        """Property for the current Kedro environment.
-
-        Returns:
-            Name of the current Kedro environment.
-
-        """
-        return self._env
-
-    @property
-    def project_path(self) -> Path:
-        """Read-only property containing Kedro's root project directory.
-
-        Returns:
-            Project directory.
-
-        """
-        return self._project_path
+    Args:
+        package_name: Package name for the Kedro project the context is
+            created for.
+        project_path: Project path to define the context for.
+        config_loader: Kedro's ``ConfigLoader`` for loading the configuration files.
+        hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
+        env: Optional argument for configuration default environment to be used
+            for running the pipeline. If not specified, it defaults to "local".
+        extra_params: Optional dictionary containing extra project parameters.
+            If specified, will update (and therefore take precedence over)
+            the parameters retrieved from the project configuration.
+    """
 
     @property
     def catalog(self) -> DataCatalog:
@@ -247,17 +225,6 @@ class KedroContext:
             params = {}
         _update_nested_dict(params, self._extra_params or {})
         return params
-
-    @property
-    def config_loader(self):
-        """Read-only property referring to Kedro's ``ConfigLoader`` for this
-        context.
-        Returns:
-            Instance of `ConfigLoader`.
-        Raises:
-            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
-        """
-        return self._config_loader
 
     def _get_catalog(
         self,

@@ -35,26 +35,30 @@ class ExcelDataSet(
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 
-    Example adding a catalog entry with the ``YAML API``:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> rockets:
-        >>>   type: pandas.ExcelDataSet
-        >>>   filepath: gcs://your_bucket/rockets.xlsx
-        >>>   fs_args:
-        >>>     project: my-project
-        >>>   credentials: my_gcp_credentials
-        >>>   save_args:
-        >>>     sheet_name: Sheet1
-        >>>   load_args:
-        >>>     sheet_name: Sheet1
-        >>>
-        >>> shuttles:
-        >>>   type: pandas.ExcelDataSet
-        >>>   filepath: data/01_raw/shuttles.xlsx
+        rockets:
+          type: pandas.ExcelDataSet
+          filepath: gcs://your_bucket/rockets.xlsx
+          fs_args:
+            project: my-project
+          credentials: my_gcp_credentials
+          save_args:
+            sheet_name: Sheet1
+          load_args:
+            sheet_name: Sheet1
 
-    Example using Python API:
+        shuttles:
+          type: pandas.ExcelDataSet
+          filepath: data/01_raw/shuttles.xlsx
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import ExcelDataSet
@@ -68,21 +72,27 @@ class ExcelDataSet(
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
 
-    Note: To save a multi-sheet Excel file, no special ``save_args`` are required.
+    To save a multi-sheet Excel file, no special ``save_args`` are required.
     Instead, return a dictionary of ``Dict[str, pd.DataFrame]`` where the string
     keys are your sheet names.
 
-    Example adding a catalog entry for multi-sheet Excel file with the ``YAML API``:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_
+    for a multi-sheet Excel file:
 
     .. code-block:: yaml
 
-        >>> trains:
-        >>>   type: pandas.ExcelDataSet
-        >>>   filepath: data/02_intermediate/company/trains.xlsx
-        >>>   load_args:
-        >>>     sheet_name: [Sheet1, Sheet2, Sheet3]
+        trains:
+          type: pandas.ExcelDataSet
+          filepath: data/02_intermediate/company/trains.xlsx
+          load_args:
+            sheet_name: [Sheet1, Sheet2, Sheet3]
 
-    Example multi-sheet Excel file using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_
+    for a multi-sheet Excel file:
     ::
 
         >>> from kedro.extras.datasets.pandas import ExcelDataSet

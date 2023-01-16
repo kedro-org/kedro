@@ -23,25 +23,29 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
     of the existing file/partition.
 
     This DataSet has some key assumptions:
+
     - Schemas do not change during the pipeline run (defined PKs must be present for the
     duration of the pipeline)
     - Tables are not being externally modified during upserts. The upsert method is NOT ATOMIC
+
     to external changes to the target table while executing.
     Upsert methodology works by leveraging Spark DataFrame execution plan checkpointing.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> hive_dataset:
-        >>>   type: spark.SparkHiveDataSet
-        >>>   database: hive_database
-        >>>   table: table_name
-        >>>   write_mode: overwrite
+        hive_dataset:
+          type: spark.SparkHiveDataSet
+          database: hive_database
+          table: table_name
+          write_mode: overwrite
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from pyspark.sql import SparkSession

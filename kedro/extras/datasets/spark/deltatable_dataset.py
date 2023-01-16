@@ -22,44 +22,46 @@ from kedro.io.core import AbstractDataSet, DataSetError
 class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
     """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
-        Example adding a catalog entry with
-        `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-            01_data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
-        .. code-block:: yaml
+    .. code-block:: yaml
 
-            >>> weather@spark:
-            >>>   type: spark.SparkDataSet
-            >>>   filepath: data/02_intermediate/data.parquet
-            >>>   file_format: "delta"
-            >>>
-            >>> weather@delta:
-            >>>   type: spark.DeltaTableDataSet
-            >>>   filepath: data/02_intermediate/data.parquet
+        weather@spark:
+          type: spark.SparkDataSet
+          filepath: data/02_intermediate/data.parquet
+          file_format: "delta"
 
-        Example using Python API:
-        ::
+        weather@delta:
+          type: spark.DeltaTableDataSet
+          filepath: data/02_intermediate/data.parquet
 
-            >>> from pyspark.sql import SparkSession
-            >>> from pyspark.sql.types import (StructField, StringType,
-            >>>                                IntegerType, StructType)
-            >>>
-            >>> from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
-            >>>
-            >>> schema = StructType([StructField("name", StringType(), True),
-            >>>                      StructField("age", IntegerType(), True)])
-            >>>
-            >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
-            >>>
-            >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
-            >>>
-            >>> data_set = SparkDataSet(filepath="test_data", file_format="delta")
-            >>> data_set.save(spark_df)
-            >>> deltatable_dataset = DeltaTableDataSet(filepath="test_data")
-            >>> delta_table = deltatable_dataset.load()
-            >>>
-            >>> delta_table.update()
-        """
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    ::
+
+        >>> from pyspark.sql import SparkSession
+        >>> from pyspark.sql.types import (StructField, StringType,
+        >>>                                IntegerType, StructType)
+        >>>
+        >>> from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
+        >>>
+        >>> schema = StructType([StructField("name", StringType(), True),
+        >>>                      StructField("age", IntegerType(), True)])
+        >>>
+        >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
+        >>>
+        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+        >>>
+        >>> data_set = SparkDataSet(filepath="test_data", file_format="delta")
+        >>> data_set.save(spark_df)
+        >>> deltatable_dataset = DeltaTableDataSet(filepath="test_data")
+        >>> delta_table = deltatable_dataset.load()
+        >>>
+        >>> delta_table.update()
+    """
 
     # this dataset cannot be used with ``ParallelRunner``,
     # therefore it has the attribute ``_SINGLE_PROCESS = True``

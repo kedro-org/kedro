@@ -33,6 +33,7 @@
 * Added support for generator functions as nodes, i.e. using `yield` instead of return.
   * Enable chunk-wise processing in nodes with generator functions.
   * Save node outputs after every `yield` before proceeding with next chunk.
+* Fixed incorrect parsing of Azure Data Lake Storage Gen2 URIs used in datasets.
 * Added support for loading credentials from environment variables using OmegaConfLoader.
 
 ## Bug fixes and other changes

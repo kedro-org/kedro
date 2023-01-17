@@ -1,10 +1,12 @@
 # Experiment tracking in Kedro-Viz
 
-Experiment tracking is a way to record all information you need to compare machine-learning experiments and recreate these experiments. All experiment data (parameters, metrics, models, plots and other dataset types) can be searched using a timestamp. View a detailed [Kedro-Viz experiment tracking demo](https://demo.kedro.org/experiment-tracking).
+Experiment tracking is a way to record all information you need to compare machine-learning experiments and recreate those experiments. All experiment data (parameters, metrics, models, plots and other dataset types) can be searched using a timestamp. 
 
-In the past, Kedro had limited support for this functionality. For example, it was possible to version parameters as part of your codebase with a version control system like `git` and [snapshot models, datasets and plots with Kedro’s dataset versioning capabilities](../data/data_catalog.md#version-datasets-and-ml-models). However, Kedro needed a way to log metrics and capture all this logged data as a timestamped run of an experiment. It also needed a way for users to visualise, discover and compare this data.
+> View a detailed [Kedro-Viz experiment tracking demo](https://demo.kedro.org/experiment-tracking).
 
-We started adding in the missing pieces from [Kedro-Viz `>=4.1.1`](https://github.com/kedro-org/kedro-viz/releases/tag/v4.1.1). When experiment tracking is enabled in your Kedro project, you will be able to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
+In the past, Kedro had limited support for experiment tracking functionality. For example, it was possible to version parameters as part of your codebase with a version control system like `git` and [snapshot models, datasets and plots with Kedro’s dataset versioning capabilities](../data/data_catalog.md#version-datasets-and-ml-models). However, Kedro needed a way to log metrics and capture all this logged data as a timestamped run of an experiment. It also needed a way for users to visualise, discover and compare this data.
+
+We started adding in the missing pieces from [Kedro-Viz `>=4.1.1`](https://github.com/kedro-org/kedro-viz/releases/tag/v4.1.1). Now, when experiment tracking is enabled in your Kedro project, you will be able to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 
 ![](../meta/images/experiment-tracking_demo_small.gif)
 
@@ -16,7 +18,7 @@ The choice of experiment tracking tool depends on your use case. We can present 
 - **MLflow** - You can combine MLFlow with Kedro by using [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/en/stable/) if you require experiment tracking, model registry and/or model serving capabilities or have access to Managed MLflow within the Databricks ecosystem.
 - **Neptune** - If you require experiment tracking and model registry functionality, improved visualisation of metrics and support for collaborative data science. Leverage [`kedro-neptune`](https://docs.neptune.ai/integrations/kedro/) for your workflow.
 
-We support [a growing list of integrations](../extend_kedro/plugins.md), so be sure to look out for the ever increasing range of tools.
+We support [a growing list of integrations](../extend_kedro/plugins.md).
 
 ## Set up a project
 
@@ -85,11 +87,10 @@ Now that you have set up the tracking datasets to log experiment tracking data, 
 
 Set up the data to be logged for the metrics dataset - under `nodes.py` of your `data_science` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_science/nodes.py`), add three different metrics to your `evaluate_model` function to log `r2_score`, `mae` and `me` and return these 3 metrics as key-value pairs.
 
-The new `evaluate_model` function would look like this:
+The new `evaluate_model` function should look like this:
 
 ```python
 from sklearn.metrics import mean_absolute_error, max_error
-
 
 def evaluate_model(
     regressor: LinearRegression, X_test: pd.DataFrame, y_test: pd.Series
@@ -127,7 +128,6 @@ Repeat the same steps to set up the `companies_column` dataset. For this dataset
 
 ```python
 from typing import Tuple, Dict
-
 
 def preprocess_companies(companies: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
     """Preprocesses the data for companies.
@@ -190,20 +190,20 @@ You can now access, compare and pin your runs by toggling the `Compare runs` but
 
 ## View and compare plots
 
-From Kedro-Viz `>=5.0.0` experiment tracking also supports the display and comparison of plots, such as Plotly and Matplotlib. This section will show you how to enable this functionality to leverage Matplotlib. [Similar instructions can be followed for Plotly](../visualisation/visualise_charts_with_plotly.md).
+From Kedro-Viz `>=5.0.0` experiment tracking also supports the display and comparison of plots, such as Plotly and Matplotlib. This section will show you how to enable this functionality with Matplotlib. [Similar instructions can be followed for Plotly](../visualisation/visualise_charts_with_plotly.md).
 
 ### Update the dependencies
 
 You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
-```bash
-kedro[matplotlib.MatplotlibWriter]
+```text
+kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
 seaborn~=0.12.1
 ```
 
 And install the requirements with:
 
-```
+```bash
 pip install -r src/requirements.txt
 ```
 
@@ -214,7 +214,6 @@ Add a new node to the `data_processing` nodes (`src/kedro-experiment-tracking-tu
 ```python
 import matplotlib.pyplot as plt
 import seaborn as sn
-
 
 def create_confusion_matrix(companies: pd.DataFrame):
     actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]
@@ -228,7 +227,7 @@ def create_confusion_matrix(companies: pd.DataFrame):
     return plt
 ```
 
-And now add this node to the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/pipeline.py`)
+And now add this node to the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/pipeline.py`):
 
 ```python
 from .nodes import create_confusion_matrix
@@ -240,7 +239,7 @@ node(
 ),
 ```
 
-In the catalog (`conf/base/catalog.yml`) add the `confusion_matrix` data definition, making sure to set the versioned flag to `true` within the project catalog to include the plot in experiment tracking.
+In the catalog (`conf/base/catalog.yml`) add the `confusion_matrix` data definition, making sure to set the versioned flag to `true` within the project catalog to include the plot in experiment tracking:
 
 ```yaml
 confusion_matrix:
@@ -259,7 +258,7 @@ From Kedro-Viz `>=6.0.0` experiment tracking also supports the display and compa
 
 Time series displays one metric per graph, showing how the metric value has changed over time.
 
-Parallel coordinates displays all metrics on a single graph, with each vertical line representing one metric with it's own scale. The metric values are positioned along those vertical lines and connected across each axis.
+Parallel coordinates displays all metrics on a single graph, with each vertical line representing one metric with its own scale. The metric values are positioned along those vertical lines and connected across each axis.
 
 When in comparison view, comparing runs will highlight your selections on the respective chart types, improving readability even in the event there is a multitude of data points.
 

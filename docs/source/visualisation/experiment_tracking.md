@@ -1,6 +1,6 @@
 # Experiment tracking in Kedro-Viz
 
-Experiment tracking is a way to record all information you need to compare machine-learning experiments and recreate those experiments. All experiment data (parameters, metrics, models, plots and other dataset types) can be searched using a timestamp. 
+Experiment tracking is a way to record all information you need to compare machine-learning experiments and recreate those experiments. All experiment data (parameters, metrics, models, plots and other dataset types) can be searched using a timestamp.
 
 > View a detailed [Kedro-Viz experiment tracking demo](https://demo.kedro.org/experiment-tracking).
 
@@ -92,6 +92,7 @@ The new `evaluate_model` function should look like this:
 ```python
 from sklearn.metrics import mean_absolute_error, max_error
 
+
 def evaluate_model(
     regressor: LinearRegression, X_test: pd.DataFrame, y_test: pd.Series
 ) -> Dict[str, float]:
@@ -128,6 +129,7 @@ Repeat the same steps to set up the `companies_column` dataset. For this dataset
 
 ```python
 from typing import Tuple, Dict
+
 
 def preprocess_companies(companies: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
     """Preprocesses the data for companies.
@@ -214,6 +216,7 @@ Add a new node to the `data_processing` nodes (`src/kedro-experiment-tracking-tu
 ```python
 import matplotlib.pyplot as plt
 import seaborn as sn
+
 
 def create_confusion_matrix(companies: pd.DataFrame):
     actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]

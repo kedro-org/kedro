@@ -144,7 +144,6 @@ Welcome to Kedro's documentation!
    :caption: Logging
 
    logging/logging
-   logging/experiment_tracking
 
 .. toctree::
    :maxdepth: 2

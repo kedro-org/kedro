@@ -95,7 +95,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     if "project_version" in metadata_dict:
         warnings.warn("project_version is deprecated, use kedro_init_version instead", DeprecationWarning)
         kedro_init_version = metadata_dict["project_version"]
-        mandatory_keys.append("kedro_init_version")
+        mandatory_keys.append("project_version")
         # check the match for major and minor version (skip patch version)
         if kedro_init_version.split(".")[:2] != kedro_version.split(".")[:2]:
             raise ValueError(_version_mismatch_error(metadata_dict["project_version"]))

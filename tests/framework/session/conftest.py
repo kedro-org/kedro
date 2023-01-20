@@ -86,7 +86,7 @@ def config_dir(tmp_path, local_config):
     payload = {
         "tool": {
             "kedro": {
-                "project_version": kedro_version,
+                "kedro_init_version": kedro_version,
                 "project_name": "test hooks",
                 "package_name": "test_hooks",
             }

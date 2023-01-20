@@ -37,7 +37,7 @@ def fake_metadata(tmp_path):
         config_file=tmp_path / "pyproject.toml",
         package_name=PACKAGE_NAME,
         project_name=PROJECT_NAME,
-        project_version=PROJECT_VERSION,
+        kedro_init_version=PROJECT_VERSION,
         project_path=tmp_path,
     )
     return metadata

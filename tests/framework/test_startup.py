@@ -92,7 +92,7 @@ class TestGetProjectMetadata:
             config_file=self.project_path / "pyproject.toml",
             package_name="fake_package_name",
             project_name="fake_project_name",
-            project_version=kedro_version,
+            kedro_init_version=kedro_version,
             project_path=self.project_path,
         )
         assert actual == expected
@@ -113,7 +113,7 @@ class TestGetProjectMetadata:
         pattern = (
             "Found unexpected keys in 'pyproject.toml'. Make sure it "
             "only contains the following keys: ['package_name', "
-            "'project_name', 'project_version', 'source_dir']."
+            "'project_name', 'kedro_init_version', 'source_dir']."
         )
 
         with pytest.raises(RuntimeError, match=re.escape(pattern)):
@@ -242,7 +242,7 @@ class TestBootstrapProject:
             "package_name": "fake_package_name",
             "project_name": "fake_project_name",
             "project_path": tmp_path,
-            "project_version": kedro_version,
+            "kedro_init_version": kedro_version,
             "source_dir": src_dir,
         }
         assert result == ProjectMetadata(**expected_metadata)

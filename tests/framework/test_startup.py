@@ -79,7 +79,7 @@ class TestGetProjectMetadata:
                 "kedro": {
                     "package_name": "fake_package_name",
                     "project_name": "fake_project_name",
-                    "project_version": kedro_version,
+                    "kedro_init_version": kedro_version,
                 }
             }
         }
@@ -97,6 +97,32 @@ class TestGetProjectMetadata:
         )
         assert actual == expected
 
+        # Temporary test for coverage to be removed in 0.19.0 when project_version is removed
+        def test_valid_toml_file_with_project_version(self, mocker):
+            mocker.patch.object(Path, "is_file", return_value=True)
+            pyproject_toml_payload = {
+                "tool": {
+                    "kedro": {
+                        "package_name": "fake_package_name",
+                        "project_name": "fake_project_name",
+                        "project_version": kedro_version,
+                    }
+                }
+            }
+            mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+
+            actual = _get_project_metadata(self.project_path)
+
+            expected = ProjectMetadata(
+                source_dir=self.project_path / "src",  # default
+                config_file=self.project_path / "pyproject.toml",
+                package_name="fake_package_name",
+                project_name="fake_project_name",
+                kedro_init_version=kedro_version,
+                project_path=self.project_path,
+            )
+            assert actual == expected
+
     def test_toml_file_with_extra_keys(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
         pyproject_toml_payload = {
@@ -104,7 +130,7 @@ class TestGetProjectMetadata:
                 "kedro": {
                     "package_name": "fake_package_name",
                     "project_name": "fake_project_name",
-                    "project_version": kedro_version,
+                    "kedro_init_version": kedro_version,
                     "unexpected_key": "hello",
                 }
             }
@@ -123,7 +149,10 @@ class TestGetProjectMetadata:
         mocker.patch.object(Path, "is_file", return_value=True)
         pyproject_toml_payload = {
             "tool": {
-                "kedro": {"project_version": kedro_version, "unexpected_key": "hello"}
+                "kedro": {
+                    "kedro_init_version": kedro_version,
+                    "unexpected_key": "hello",
+                }
             }
         }
         mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
@@ -153,7 +182,7 @@ class TestGetProjectMetadata:
                     "source_dir": source_dir,
                     "package_name": "fake_package_name",
                     "project_name": "fake_project_name",
-                    "project_version": kedro_version,
+                    "kedro_init_version": kedro_version,
                 }
             }
         }
@@ -174,7 +203,7 @@ class TestGetProjectMetadata:
                     "source_dir": "source_dir",
                     "package_name": "fake_package_name",
                     "project_name": "fake_project_name",
-                    "project_version": invalid_version,
+                    "kedro_init_version": invalid_version,
                 }
             }
         }
@@ -226,7 +255,7 @@ class TestBootstrapProject:
                 "kedro": {
                     "package_name": "fake_package_name",
                     "project_name": "fake_project_name",
-                    "project_version": kedro_version,
+                    "kedro_init_version": kedro_version,
                 }
             }
         }

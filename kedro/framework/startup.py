@@ -92,6 +92,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     if missing_keys:
         raise RuntimeError(f"Missing required keys {missing_keys} from '{_PYPROJECT}'.")
 
+    # Temporary solution to keep project_version backwards compatible to be removed in 0.19.0
     if "project_version" in metadata_dict:
         warnings.warn(
             "project_version is deprecated, use kedro_init_version instead",

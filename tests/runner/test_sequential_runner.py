@@ -6,7 +6,8 @@ import pytest
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog, DataSetError, LambdaDataSet
-from kedro.pipeline import node, pipeline
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
 from tests.runner.conftest import exception_fn, identity, sink, source
 
@@ -147,7 +148,7 @@ class LoggingDataSet(AbstractDataSet):
 class TestSequentialRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):
         log = []
-        test_pipeline = pipeline(
+        test_pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
         catalog = DataCatalog(
@@ -164,7 +165,7 @@ class TestSequentialRunnerRelease:
 
     def test_release_at_earliest_opportunity(self, is_async):
         log = []
-        test_pipeline = pipeline(
+        test_pipeline = modular_pipeline(
             [
                 node(source, None, "first"),
                 node(identity, "first", "second"),
@@ -189,7 +190,7 @@ class TestSequentialRunnerRelease:
 
     def test_count_multiple_loads(self, is_async):
         log = []
-        test_pipeline = pipeline(
+        test_pipeline = modular_pipeline(
             [
                 node(source, None, "dataset"),
                 node(sink, "dataset", None, name="bob"),
@@ -204,7 +205,7 @@ class TestSequentialRunnerRelease:
 
     def test_release_transcoded(self, is_async):
         log = []
-        test_pipeline = pipeline(
+        test_pipeline = modular_pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
         catalog = DataCatalog(
@@ -222,8 +223,8 @@ class TestSequentialRunnerRelease:
     @pytest.mark.parametrize(
         "test_pipeline",
         [
-            pipeline([node(identity, "ds1", "ds2", confirms="ds1")]),
-            pipeline(
+            modular_pipeline([node(identity, "ds1", "ds2", confirms="ds1")]),
+            modular_pipeline(
                 [
                     node(identity, "ds1", "ds2"),
                     node(identity, "ds2", None, confirms="ds1"),
@@ -260,8 +261,8 @@ class TestSuggestResumeScenario:
     ):
         nodes = {n.name: n for n in two_branches_crossed_pipeline.nodes}
         for name in failing_node_names:
-            two_branches_crossed_pipeline -= pipeline([nodes[name]])
-            two_branches_crossed_pipeline += pipeline(
+            two_branches_crossed_pipeline -= modular_pipeline([nodes[name]])
+            two_branches_crossed_pipeline += modular_pipeline(
                 [nodes[name]._copy(func=exception_fn)]
             )
         with pytest.raises(Exception):

@@ -93,20 +93,31 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
         raise RuntimeError(f"Missing required keys {missing_keys} from '{_PYPROJECT}'.")
 
     if "project_version" in metadata_dict:
-        warnings.warn("project_version is deprecated, use kedro_init_version instead", DeprecationWarning)
+        warnings.warn(
+            "project_version is deprecated, use kedro_init_version instead",
+            DeprecationWarning,
+        )
         kedro_init_version = metadata_dict["project_version"]
-        mandatory_keys.append("project_version")
+        del metadata_dict["project_version"]
+        metadata_dict["kedro_init_version"] = kedro_init_version
+        mandatory_keys.append("kedro_init_version")
         # check the match for major and minor version (skip patch version)
         if kedro_init_version.split(".")[:2] != kedro_version.split(".")[:2]:
-            raise ValueError(_version_mismatch_error(metadata_dict["project_version"]))
+            raise ValueError(
+                _version_mismatch_error(metadata_dict["kedro_init_version"])
+            )
     elif "kedro_init_version" in metadata_dict:
         kedro_init_version = metadata_dict["kedro_init_version"]
         mandatory_keys.append("kedro_init_version")
         # check the match for major and minor version (skip patch version)
         if kedro_init_version.split(".")[:2] != kedro_version.split(".")[:2]:
-            raise ValueError(_version_mismatch_error(metadata_dict["kedro_init_version"]))
+            raise ValueError(
+                _version_mismatch_error(metadata_dict["kedro_init_version"])
+            )
     else:
-        raise RuntimeError(f"Missing required key kedro_init_version from '{_PYPROJECT}'.")
+        raise RuntimeError(
+            f"Missing required key kedro_init_version from '{_PYPROJECT}'."
+        )
 
     source_dir = Path(metadata_dict.get("source_dir", "src")).expanduser()
     source_dir = (project_path / source_dir).resolve()

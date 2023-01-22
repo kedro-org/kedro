@@ -25,7 +25,7 @@
 * Fixed bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
 * Fixed bug causing `load_ipython_extension` not to register the `%reload_kedro` line magic when called in a directory that does not contain a Kedro project.
 * Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
-* Change reference to `kedro.pipeline.Pipeline` object throughout test suite (less `tests_spark_dataset.py`) with `kedro.modular_pipeline.pipeline` factory.
+* Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 * Fixed bug causing the `after_dataset_saved` hook only to be called for one output dataset when multiple are saved in a single node and async saving is in use.
 * Log level for "Credentials not found in your Kedro project config" was changed from `WARNING` to `DEBUG`.
 

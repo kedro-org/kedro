@@ -774,7 +774,7 @@ class TestMicropkgPullCommand:
             TarInfo(name=tar_name) for tar_name in tar_members
         ]
         path = Path(path_name)
-        with pytest.raises(Exception, match="Attempted Path Traversal in Tar File"):
+        with pytest.raises(Exception, match="Failed to safely extract tar file."):
             safe_extract(tar, path)
 
 

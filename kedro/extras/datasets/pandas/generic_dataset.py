@@ -39,37 +39,39 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
 
-    Example using `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: pandas.GenericDataSet
-        >>>   file_format: csv
-        >>>   filepath: s3://data/01_raw/company/cars.csv
-        >>>   load_args:
-        >>>     sep: ","
-        >>>     na_values: ["#NA", NA]
-        >>>   save_args:
-        >>>     index: False
-        >>>     date_format: "%Y-%m-%d"
+        cars:
+          type: pandas.GenericDataSet
+          file_format: csv
+          filepath: s3://data/01_raw/company/cars.csv
+          load_args:
+            sep: ","
+            na_values: ["#NA", NA]
+          save_args:
+            index: False
+            date_format: "%Y-%m-%d"
 
-    This second example is able to load a SAS7BDAT file via the :code:`pd.read_sas` method.
-    Trying to save this dataset will raise a `DataSetError` since pandas does not provide an
-    equivalent :code:`pd.DataFrame.to_sas` write method.
+    This second example is able to load a SAS7BDAT file via the ``pd.read_sas`` method.
+    Trying to save this dataset will raise a ``DataSetError`` since pandas does not provide an
+    equivalent ``pd.DataFrame.to_sas`` write method.
 
     .. code-block:: yaml
 
-        >>> flights:
-        >>>    type: pandas.GenericDataSet
-        >>>    file_format: sas
-        >>>    filepath: data/01_raw/airplanes.sas7bdat
-        >>>    load_args:
-        >>>       format: sas7bdat
+        flights:
+           type: pandas.GenericDataSet
+           file_format: sas
+           filepath: data/01_raw/airplanes.sas7bdat
+           load_args:
+              format: sas7bdat
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import GenericDataSet

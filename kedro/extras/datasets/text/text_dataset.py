@@ -24,15 +24,19 @@ class TextDataSet(AbstractVersionedDataSet[str, str]):
     """``TextDataSet`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 
-    Example adding a catalog entry with YAML API:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> alice_book:
-        >>>   type: text.TextDataSet
-        >>>   filepath: data/01_raw/alice.txt
+        alice_book:
+          type: text.TextDataSet
+          filepath: data/01_raw/alice.txt
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.text import TextDataSet

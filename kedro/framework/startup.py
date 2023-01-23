@@ -20,8 +20,16 @@ class ProjectMetadata(NamedTuple):
     package_name: str
     project_name: str
     project_path: Path
-    kedro_init_version: str = project_version
+    project_version: str
     source_dir: Path
+
+    @property
+    def kedro_init_version(self):
+        return self.project_version
+
+    @kedro_init_version.setter
+    def kedro_init_version(self, value: str) -> None:
+        self.project_version = value
 
 
 def _version_mismatch_error(kedro_init_version) -> str:

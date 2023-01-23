@@ -299,20 +299,22 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
         return None
 
 
+def _is_within_directory(directory, target):
+    abs_directory = directory.resolve()
+    abs_target = target.resolve()
+    return abs_directory in abs_target.parents
+
+
+def safe_extract(tar, path):
+    for member in tar.getmembers():
+        member_path = path / member.name
+        if not _is_within_directory(path, member_path):
+            raise Exception("Attempted Path Traversal in Tar File")
+    tar.extractall(path)
+
+
 def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> None:
     filesystem = _get_fsspec_filesystem(location, fs_args)
-
-    def is_within_directory(directory, target):
-        abs_directory = directory.resolve()
-        abs_target = target.resolve()
-        return abs_directory in abs_target.parents
-
-    def safe_extract(tar, path):
-        for member in tar.getmembers():
-            member_path = path / member.name
-            if not is_within_directory(path, member_path):
-                raise Exception("Attempted Path Traversal in Tar File")
-        tar.extractall(path)
 
     if location.endswith(".tar.gz") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:

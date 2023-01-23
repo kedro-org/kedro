@@ -2,6 +2,8 @@ import filecmp
 import shutil
 import textwrap
 from pathlib import Path
+from tarfile import TarInfo
+from unittest.mock import Mock
 
 import pytest
 import toml
@@ -9,7 +11,7 @@ import yaml
 from click import ClickException
 from click.testing import CliRunner
 
-from kedro.framework.cli.micropkg import _get_sdist_name
+from kedro.framework.cli.micropkg import _get_sdist_name, safe_extract
 from kedro.framework.project import settings
 
 PIPELINE_NAME = "my_pipeline"
@@ -753,6 +755,27 @@ class TestMicropkgPullCommand:
         assert exception_message in result.output
         assert "Trying to use 'pip download'..." in result.output
         assert error_message in result.output
+
+    @pytest.mark.parametrize(
+        "tar_members,path_name",
+        [
+            (["../tarmember", "tarmember"], "destination"),
+            (["tarmember", "../tarmember"], "destination"),
+        ],
+    )
+    def test_path_traversal(
+        self,
+        tar_members,
+        path_name,
+    ):
+        """Test for checking path traversal attempt in tar file"""
+        tar = Mock()
+        tar.getmembers.return_value = [
+            TarInfo(name=tar_name) for tar_name in tar_members
+        ]
+        path = Path(path_name)
+        with pytest.raises(Exception, match="Attempted Path Traversal in Tar File"):
+            safe_extract(tar, path)
 
 
 @pytest.mark.usefixtures(

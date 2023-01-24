@@ -103,7 +103,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
         metadata_dict["kedro_init_version"] = kedro_init_version
         mandatory_keys.append("kedro_init_version")
         # check the match for major and minor version (skip patch version)
-        if project_version.split(".")[:2] != kedro_version.split(".")[:2]:
+        if kedro_init_version.split(".")[:2] != kedro_version.split(".")[:2]:
             raise ValueError(
                 _version_mismatch_error(metadata_dict["kedro_init_version"])
             )

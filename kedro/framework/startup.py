@@ -20,8 +20,7 @@ class ProjectMetadata(NamedTuple):
     package_name: str
     project_name: str
     project_path: Path
-    kedro_init_version: str = ""
-    project_version: str = kedro_init_version
+    kedro_init_version: str
     source_dir: Path
 
 

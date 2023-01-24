@@ -520,7 +520,7 @@ The `DataCatalog` will create a versioned `CSVDataSet` called `cars.csv`. The ac
 You can run the pipeline with a particular versioned data set with `--load-version` flag as follows:
 
 ```bash
-kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
+kedro run --load-version=cars.csv:YYYY-MM-DDThh.mm.ss.sssZ
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 

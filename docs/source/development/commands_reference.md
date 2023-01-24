@@ -325,26 +325,26 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 
 | CLI command                                                          | Description                                                                                                                                                                                                                                             | Multiple instances allowed? |
 |----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| `kedro run --from-inputs <dataset_name1>,<dataset_name2>`            | A list of dataset names which should be used as a starting point                                                                                                                                                                                        | No                          |
-| `kedro run --from-nodes <node_name1>,<node_name2>`                   | A list of node names which should be used as a starting point                                                                                                                                                                                           | No                          |
-| `kedro run --to-nodes <node_name1>,<node_name1>`                     | A list of node names which should be used as an end point                                                                                                                                                                                               | No                          |
-| `kedro run --node <node_name1>,<node_name2>`                         | Run only nodes with specified names                                                                                                                                                                                                                     | Yes                         |
-| `kedro run --runner <runner_name>`                                   | Run the pipeline with a specific runner                                                                                                                                                                                                                 | No                          |
-| `kedro run --env <env_name>`                                         | Run the pipeline in the env_name environment. Defaults to local if not provided                                                                                                                                                                         | No                          |
-| `kedro run --tag <tag_name1>,<tag_name2>`                            | Run only nodes which have any of these tags attached                                                                                                                                                                                                    | Yes                         |
-| `kedro run --load-version="<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ"` | Specify a particular dataset version (timestamp) for loading                                                                                                                                                                                            | Yes                         |
-| `kedro run --pipeline <pipeline_name>`                               | Run the whole pipeline by its name                                                                                                                                                                                                                      | No                          |
-| `kedro run --config <config_file_name>.yml`                          | Specify all command line options in a named YAML configuration file                                                                                                                                                                              | No                          |
-| `kedro run --conf-source <path_to_config_directory>`                 | Specify a new source directory for configuration files                                                                                                                                                                                                  | No                          |
-| `kedro run --params <param_key1>:<value1>,<param_key2>:<value2>`     | Does a parametrised kedro run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` | Yes                         |
+| `kedro run --from-inputs=<dataset_name1>,<dataset_name2>`            | A list of dataset names which should be used as a starting point                                                                                                                                                                                        | No                          |
+| `kedro run --from-nodes=<node_name1>,<node_name2>`                   | A list of node names which should be used as a starting point                                                                                                                                                                                           | No                          |
+| `kedro run --to-nodes=<node_name1>,<node_name1>`                     | A list of node names which should be used as an end point                                                                                                                                                                                               | No                          |
+| `kedro run --node=<node_name1>,<node_name2>`                         | Run only nodes with specified names                                                                                                                                                                                                                     | Yes                         |
+| `kedro run --runner=<runner_name>`                                   | Run the pipeline with a specific runner                                                                                                                                                                                                                 | No                          |
+| `kedro run --env=<env_name>`                                         | Run the pipeline in the env_name environment. Defaults to local if not provided                                                                                                                                                                         | No                          |
+| `kedro run --tag=<tag_name1>,<tag_name2>`                            | Run only nodes which have any of these tags attached                                                                                                                                                                                                    | Yes                         |
+| `kedro run --load-version=<dataset_name>:YYYY-MM-DDThh.mm.ss.sssZ` | Specify a particular dataset version (timestamp) for loading                                                                                                                                                                                            | Yes                         |
+| `kedro run --pipeline=<pipeline_name>`                               | Run the whole pipeline by its name                                                                                                                                                                                                                      | No                          |
+| `kedro run --config=<config_file_name>.yml`                          | Specify all command line options in a named YAML configuration file                                                                                                                                                                              | No                          |
+| `kedro run --conf-source=<path_to_config_directory>`                 | Specify a new source directory for configuration files                                                                                                                                                                                                  | No                          |
+| `kedro run --params=<param_key1>:<value1>,<param_key2>:<value2>`     | Does a parametrised kedro run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` | Yes                         |
 
 You can also combine these options together, so the following command runs all the nodes from `split` to `predict` and `report`:
 
 ```bash
-kedro run --from-nodes split --to-nodes predict,report
+kedro run --from-nodes=split --to-nodes=predict,report
 ```
 
-This functionality is extended to the `kedro run --config config.yml` command, which allows you to [specify run commands in a configuration file](../kedro_project_setup/configuration.md#configure-kedro-run-arguments).
+This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../kedro_project_setup/configuration.md#configure-kedro-run-arguments).
 
 A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../kedro_project_setup/configuration.md#parameters).
 
@@ -481,7 +481,7 @@ The results include datasets that are/aren't used by a specific pipeline.
 The command also accepts an optional `--pipeline` argument that allows you to specify the pipeline name(s) (comma-separated values) in order to filter datasets used only by those named pipeline(s). For example:
 
 ```bash
-kedro catalog list --pipeline "ds,de"
+kedro catalog list --pipeline=ds,de
 ```
 
 #### Data Catalog
@@ -491,7 +491,7 @@ kedro catalog list --pipeline "ds,de"
 The following command creates a Data Catalog YAML configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
 
 ```bash
-kedro catalog create --pipeline <pipeline_name>
+kedro catalog create --pipeline=<pipeline_name>
 ```
 
 The command also accepts an optional `--env` argument that allows you to specify a configuration environment (defaults to `base`).

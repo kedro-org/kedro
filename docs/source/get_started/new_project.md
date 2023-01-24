@@ -46,7 +46,7 @@ python_package: test_kedro
 To create this new project:
 
 ```bash
-kedro new --config <path>/config.yml
+kedro new --config=<path>/config.yml
 ```
 
 ## Create a new project containing example code

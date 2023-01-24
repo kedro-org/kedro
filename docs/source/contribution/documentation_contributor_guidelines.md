@@ -78,6 +78,7 @@ If you are unsure of our preferred style, just do what you can in your documenta
 * Use Markdown formatting
 * Mark code blocks with the appropriate language to enable syntax highlighting
 * We use a `bash` lexer for all codeblocks that represent the terminal, and we don't include the prompt
+* We use the format `kedro <command> --<flag>=<value1>,<value2>` for command examples and suggestions
 
 ### Links
 * Make hyperlink descriptions as descriptive as you can. This is a good description:

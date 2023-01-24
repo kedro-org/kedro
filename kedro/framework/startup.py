@@ -23,14 +23,6 @@ class ProjectMetadata(NamedTuple):
     project_version: str
     source_dir: Path
 
-    @property
-    def kedro_init_version(self):
-        return self.project_version
-
-    @kedro_init_version.setter
-    def kedro_init_version(self, value: str) -> None:
-        self.project_version = value
-
 
 def _version_mismatch_error(kedro_init_version) -> str:
     return (
@@ -106,12 +98,10 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             "project_version is deprecated, use kedro_init_version instead",
             DeprecationWarning,
         )
-        kedro_init_version = metadata_dict["project_version"]
-        del metadata_dict["project_version"]
-        metadata_dict["kedro_init_version"] = kedro_init_version
-        mandatory_keys.append("kedro_init_version")
+        project_version = metadata_dict["project_version"]
+        mandatory_keys.append("project_version")
         # check the match for major and minor version (skip patch version)
-        if kedro_init_version.split(".")[:2] != kedro_version.split(".")[:2]:
+        if project_version.split(".")[:2] != kedro_version.split(".")[:2]:
             raise ValueError(
                 _version_mismatch_error(metadata_dict["kedro_init_version"])
             )

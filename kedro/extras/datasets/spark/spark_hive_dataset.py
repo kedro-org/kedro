@@ -25,7 +25,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
     This DataSet has some key assumptions:
 
     - Schemas do not change during the pipeline run (defined PKs must be present for the
-    duration of the pipeline)
+      duration of the pipeline)
     - Tables are not being externally modified during upserts. The upsert method is NOT ATOMIC
 
     to external changes to the target table while executing.

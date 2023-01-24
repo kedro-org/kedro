@@ -29,14 +29,10 @@ There are two types of Plotly datasets supported by Kedro:
 
 To use the Plotly datasets, you must update the `requirements.txt` file in the `src` folder of your Kedro project to add the following dependencies:
 
-```{note}
-At the time of writing, the tutorial works up to Kedro version 0.18.3 so you need to pin the versions as shown.
-```
 
 ```text
-kedro==0.18.3
-kedro[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]==0.18.3
-kedro[plotly.PlotlyDataSet, plotly.JSONDataSet]==0.18.3
+kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.0.0
+kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]~=1.0.0
 ```
 
 Navigate to the root directory of the project in your terminal and install the dependencies for the tutorial project:
@@ -91,13 +87,21 @@ import pandas as pd
 
 # This function uses plotly.express
 def compare_passenger_capacity_exp(preprocessed_shuttles: pd.DataFrame):
-    return preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
+    return (
+        preprocessed_shuttles.groupby(["shuttle_type"])
+        .mean(numeric_only=True)
+        .reset_index()
+    )
 
 
 # This function uses plotly.graph_objects
 def compare_passenger_capacity_go(preprocessed_shuttles: pd.DataFrame):
 
-    data_frame = preprocessed_shuttles.groupby(["shuttle_type"]).mean().reset_index()
+    data_frame = (
+        preprocessed_shuttles.groupby(["shuttle_type"])
+        .mean(numeric_only=True)
+        .reset_index()
+    )
     fig = go.Figure(
         [
             go.Bar(
@@ -176,7 +180,7 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```bash
-kedro[matplotlib.MatplotlibWriter]==0.18.3
+kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
 seaborn~=0.12.1
 ```
 

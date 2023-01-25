@@ -17,13 +17,17 @@
 * Added support for generator functions as nodes, i.e. using `yield` instead of return.
   * Enable chunk-wise processing in nodes with generator functions.
   * Save node outputs after every `yield` before proceeding with next chunk.
+* Fixed incorrect parsing of Azure Data Lake Storage Gen2 URIs used in datasets.
+* Added support for loading credentials from environment variables using OmegaConfLoader.
 
 ## Bug fixes and other changes
 * Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).
 * Fixed bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
 * Fixed bug causing `load_ipython_extension` not to register the `%reload_kedro` line magic when called in a directory that does not contain a Kedro project.
 * Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
+* Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 * Fixed bug causing the `after_dataset_saved` hook only to be called for one output dataset when multiple are saved in a single node and async saving is in use.
+* Log level for "Credentials not found in your Kedro project config" was changed from `WARNING` to `DEBUG`.
 
 ## Breaking changes to the API
 

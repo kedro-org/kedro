@@ -43,30 +43,34 @@ class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
     This format is used as the default format for both svmlight and the
     libsvm command line programs.
 
-    Example adding a catalog entry with the ``YAML API``:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> svm_dataset:
-        >>>   type: svmlight.SVMLightDataSet
-        >>>   filepath: data/01_raw/location.svm
-        >>>   load_args:
-        >>>     zero_based: False
-        >>>   save_args:
-        >>>     zero_based: False
-        >>>
-        >>> cars:
-        >>>   type: svmlight.SVMLightDataSet
-        >>>   filepath: gcs://your_bucket/cars.svm
-        >>>   fs_args:
-        >>>     project: my-project
-        >>>   credentials: my_gcp_credentials
-        >>>   load_args:
-        >>>     zero_based: False
-        >>>   save_args:
-        >>>     zero_based: False
+        svm_dataset:
+          type: svmlight.SVMLightDataSet
+          filepath: data/01_raw/location.svm
+          load_args:
+            zero_based: False
+          save_args:
+            zero_based: False
 
-    Example using Python API:
+        cars:
+          type: svmlight.SVMLightDataSet
+          filepath: gcs://your_bucket/cars.svm
+          fs_args:
+            project: my-project
+          credentials: my_gcp_credentials
+          load_args:
+            zero_based: False
+          save_args:
+            zero_based: False
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.svmlight import SVMLightDataSet

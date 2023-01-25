@@ -8,7 +8,10 @@ We recommend that you keep all configuration files in the `conf` directory of a 
 ```python
 CONF_SOURCE = "new_conf"
 ```
-
+You can also specify a source directory for the configuration files at run time using the [`kedro run` CLI command](../development/commands_reference.md#modifying-a-kedro-run) with the `--conf-source` flag as follows:
+```bash
+kedro run --conf-source = <path-to-new-conf-directory>
+```
 ## Local and base configuration environments
 
 Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loaded using the `ConfigLoader` class:
@@ -480,6 +483,17 @@ run:
     - node2
   env: env1
 ```
+
+The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes ...`, but you have to use an underscore in the configuration file:
+
+```yaml
+run:
+  from_nodes: ...
+```
+
+This is because the configuration file gets parsed by [Click](https://click.palletsprojects.com/en/8.1.x/), a Python package to handle command line interfaces. Click passes the options defined in the configuration file to a Python function. The option names need to match the argument names in that function.
+
+Variable names and arguments in Python may only contain alpha-numeric characters and underscores, so it's not possible to have a dash in the option names when using the configuration file.
 
 ```{note}
 If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.

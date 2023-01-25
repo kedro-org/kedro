@@ -30,10 +30,6 @@ class MemoryProfilingHooks:
     def __init__(self):
         self._mem_usage = {}
 
-    @property
-    def _logger(self):
-        return logging.getLogger(self.__class__.__name__)
-
     @hook_impl
     def before_dataset_loaded(self, dataset_name: str) -> None:
         before_mem_usage = memory_usage(
@@ -58,7 +54,7 @@ class MemoryProfilingHooks:
         # memory_profiler < 0.56.0 returns list instead of float
         after_mem_usage = _normalise_mem_usage(after_mem_usage)
 
-        self._logger.info(
+        logging.getLogger(__name__).info(
             "Loading %s consumed %2.2fMiB memory",
             dataset_name,
             after_mem_usage - self._mem_usage[dataset_name],
@@ -82,13 +78,19 @@ The output should look similar to the following:
 
 ```
 ...
-2021-10-05 12:02:34,946 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
-2021-10-05 12:02:43,358 - MemoryProfilingHooks - INFO - Loading shuttles consumed 82.67MiB memory
-2021-10-05 12:02:43,358 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
-2021-10-05 12:02:43,440 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (MemoryDataSet)...
-2021-10-05 12:02:43,446 - kedro.runner.sequential_runner - INFO - Completed 1 out of 2 tasks
-2021-10-05 12:02:43,559 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
-2021-10-05 12:02:43,727 - MemoryProfilingHooks - INFO - Loading companies consumed 4.16MiB memory
+[01/25/23 21:38:23] INFO     Loading data from 'example_iris_data' (CSVDataSet)...                                                                                                                                                                                    data_catalog.py:343
+                    INFO     Loading example_iris_data consumed 0.99MiB memory                                                                                                                                                                                                hooks.py:67
+                    INFO     Loading data from 'parameters' (MemoryDataSet)...                                                                                                                                                                                        data_catalog.py:343
+                    INFO     Loading parameters consumed 0.48MiB memory                                                                                                                                                                                                       hooks.py:67
+                    INFO     Running node: split: split_data([example_iris_data,parameters]) -> [X_train,X_test,y_train,y_test]                                                                                                                                               node.py:327
+                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                                                                                                                                                                              data_catalog.py:382
+                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                                                                                                                                                                               data_catalog.py:382
+                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                                                                                                                                                                              data_catalog.py:382
+                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                                                                                                                                                                               data_catalog.py:382
+                    INFO     Completed 1 out of 3 tasks                                                                                                                                                                                                           sequential_runner.py:85
+                    INFO     Loading data from 'X_train' (MemoryDataSet)...                                                                                                                                                                                           data_catalog.py:343
+                    INFO     Loading X_train consumed 0.49MiB memory                                                                                                                                                                                                          hooks.py:67
+                    INFO     Loading data from 'X_test' (MemoryDataSet)...                                                            
 ...
 ```
 

@@ -284,7 +284,9 @@ dev_s3:
     aws_secret_access_key: ${oc.env:AWS_SECRET_ACCESS_KEY}
 ```
 
+```{note}
 Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials. 
+```
 
 ## Parameters
 

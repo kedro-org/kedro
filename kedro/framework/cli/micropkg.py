@@ -299,13 +299,27 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
         return None
 
 
+def _is_within_directory(directory, target):
+    abs_directory = directory.resolve()
+    abs_target = target.resolve()
+    return abs_directory in abs_target.parents
+
+
+def safe_extract(tar, path):
+    for member in tar.getmembers():
+        member_path = path / member.name
+        if not _is_within_directory(path, member_path):
+            raise Exception("Failed to safely extract tar file.")
+    tar.extractall(path)
+
+
 def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> None:
     filesystem = _get_fsspec_filesystem(location, fs_args)
 
     if location.endswith(".tar.gz") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
             with tarfile.open(fileobj=fs_file, mode="r:gz") as tar_file:
-                tar_file.extractall(destination)
+                safe_extract(tar_file, destination)
     else:
         python_call(
             "pip", ["download", "--no-deps", "--dest", str(destination), location]
@@ -320,7 +334,7 @@ def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> N
                 f"There has to be exactly one source distribution file."
             )
         with tarfile.open(sdist_file[0], "r:gz") as fs_file:
-            fs_file.extractall(destination)
+            safe_extract(fs_file, destination)
 
 
 def _rename_files(conf_source: Path, old_name: str, new_name: str):

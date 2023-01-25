@@ -274,7 +274,7 @@ Since both of the file names (`parameters.yml` and `parameters_globals.yml`) mat
 
 
 ### Environment variables for credentials
-The [`OmegaConfLoader`](/kedro.config.OmegaConfLoader) enables you to load credentials from environment variables. To achieve this you have to use the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env). 
+The [`OmegaConfLoader`](/kedro.config.OmegaConfLoader) enables you to load credentials from environment variables. To achieve this you have to use the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
 This is an example of how you can access credentials from environment variables in `credentials.yml`:
 
 ```yaml
@@ -285,7 +285,7 @@ dev_s3:
 ```
 
 ```{note}
-Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials. 
+Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials.
 ```
 
 ## Parameters

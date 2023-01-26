@@ -21,15 +21,8 @@ class ProjectMetadata(NamedTuple):
     project_name: str
     project_path: Path
     project_version: str
+    kedro_init_version: str
     source_dir: Path
-
-    @property
-    def kedro_init_version(self) -> str:
-        return self.project_version
-
-    @kedro_init_version.setter
-    def kedro_init_version(self, value):
-        self.project_version = value
 
 
 def _version_mismatch_error(kedro_init_version) -> str:
@@ -107,7 +100,6 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             DeprecationWarning,
         )
         kedro_init_version = metadata_dict["project_version"]
-        del metadata_dict["project_version"]
         metadata_dict["kedro_init_version"] = kedro_init_version
         mandatory_keys.append("kedro_init_version")
         # check the match for major and minor version (skip patch version)
@@ -117,6 +109,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             )
     elif "kedro_init_version" in metadata_dict:
         kedro_init_version = metadata_dict["kedro_init_version"]
+        metadata_dict["project_version"] = kedro_init_version
         mandatory_keys.append("kedro_init_version")
         # check the match for major and minor version (skip patch version)
         if kedro_init_version.split(".")[:2] != kedro_version.split(".")[:2]:

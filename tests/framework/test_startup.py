@@ -92,6 +92,7 @@ class TestGetProjectMetadata:
             config_file=self.project_path / "pyproject.toml",
             package_name="fake_package_name",
             project_name="fake_project_name",
+            project_version=kedro_version,
             kedro_init_version=kedro_version,
             project_path=self.project_path,
         )
@@ -118,6 +119,7 @@ class TestGetProjectMetadata:
             config_file=self.project_path / "pyproject.toml",
             package_name="fake_package_name",
             project_name="fake_project_name",
+            project_version=kedro_version,
             kedro_init_version=kedro_version,
             project_path=self.project_path,
         )
@@ -313,6 +315,7 @@ class TestBootstrapProject:
             "package_name": "fake_package_name",
             "project_name": "fake_project_name",
             "project_path": tmp_path,
+            "project_version": kedro_version,
             "kedro_init_version": kedro_version,
             "source_dir": src_dir,
         }

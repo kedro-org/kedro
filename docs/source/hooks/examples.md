@@ -39,7 +39,7 @@ class MemoryProfilingHooks:
             include_children=True,
         )
         before_mem_usage = _normalise_mem_usage(before_mem_usage)
-        self._mem_usage[dataset_name] = before_mem_usage        
+        self._mem_usage[dataset_name] = before_mem_usage
 
     @hook_impl
     def after_dataset_loaded(self, dataset_name: str) -> None:
@@ -88,7 +88,7 @@ The output should look similar to the following:
                     INFO     Completed 1 out of 3 tasks                                                                                                                                                                                                           sequential_runner.py:85
                     INFO     Loading data from 'X_train' (MemoryDataSet)...                                                                                                                                                                                           data_catalog.py:343
                     INFO     Loading X_train consumed 0.49MiB memory                                                                                                                                                                                                          hooks.py:67
-                    INFO     Loading data from 'X_test' (MemoryDataSet)...                                                            
+                    INFO     Loading data from 'X_test' (MemoryDataSet)...
 ...
 ```
 

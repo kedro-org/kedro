@@ -27,6 +27,10 @@ class ProjectMetadata(NamedTuple):
     def kedro_init_version(self) -> str:
         return self.project_version
 
+    @kedro_init_version.setter
+    def kedro_init_version(self, value):
+        self.project_version = value
+
 
 def _version_mismatch_error(kedro_init_version) -> str:
     return (

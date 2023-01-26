@@ -12,13 +12,12 @@ pip install memory_profiler
 
 * Implement `before_dataset_loaded` and `after_dataset_loaded`
 
-<details>
-<summary><b>Click to expand</b></summary>
-
 ```python
-...
-from memory_profiler import memory_usage
+# src/<package_name>/hooks.py
 import logging
+
+from kedro.framework.hooks import hook_impl
+from memory_profiler import memory_usage
 
 
 def _normalise_mem_usage(mem_usage):
@@ -60,7 +59,6 @@ class MemoryProfilingHooks:
             after_mem_usage - self._mem_usage[dataset_name],
         )
 ```
-</details>
 
 * Register Hooks implementation by updating the `HOOKS` variable in `settings.py` as follows:
 
@@ -380,6 +378,7 @@ If the `before_node_run` hook is implemented _and_ returns a dictionary, that di
 For example, if a pipeline contains a node named `my_node`, which takes 2 inputs: `first_input` and `second_input`, to overwrite the value of `first_input` that is passed to `my_node`, we can implement the following hook:
 
 ```python
+# src/<package_name>/hooks.py
 from typing import Any, Dict, Optional
 
 from kedro.framework.hooks import hook_impl

@@ -32,11 +32,9 @@ To package your project, run the following in your project root directory:
 kedro package
 ```
 
-Kedro builds the package into the `dist` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
+Kedro builds the package into the `dist` folder of your project. It creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/) and a `tar.gz` file containing the project configuration.
 
-The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
-
-We recommend that you document the configuration required (parameters and catalog) in the local `README.md` file for any project recipients.
+The resulting `.egg` and `.whl` packages only contain the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
 
 ### Package recipients
 

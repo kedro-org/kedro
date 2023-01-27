@@ -350,7 +350,7 @@ A parameterised run is best used for dynamic parameters, i.e. running the same p
 
 ### Deploy the project
 
-The following packages your application as one `.egg` file  and one `.whl` file within the `dist/` folder of your project:
+The following packages your application as one `.egg` file  and one `.whl` file within the `dist/` folder of your project. It packages the project configuration separately in a `tar.gz` file:
 
 ```bash
 kedro package

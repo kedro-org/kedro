@@ -24,6 +24,7 @@ from kedro.framework.cli.utils import (
     split_node_names,
     split_string,
 )
+from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from kedro.utils import load_obj
@@ -145,7 +146,7 @@ def ipython(
 @project_group.command()
 @click.pass_obj  # this will pass the metadata as first argument
 def package(metadata: ProjectMetadata):
-    """Package the project as a Python egg and wheel."""
+    """Package the project as a Python egg and wheel and package the project config as tar.gz."""
     source_path = metadata.source_dir
     call(
         [
@@ -170,6 +171,22 @@ def package(metadata: ProjectMetadata):
             "../dist",
         ],
         cwd=str(source_path),
+    )
+
+    directory = (
+        str(Path(settings.CONF_SOURCE).parent)
+        if settings.CONF_SOURCE != "conf"
+        else metadata.project_path
+    )
+    call(
+        [
+            "tar",
+            "--exclude=./local",
+            "-cf",
+            f"dist/conf-{metadata.package_name}.tar.gz",
+            f"--directory={directory}",
+            str(Path(settings.CONF_SOURCE).stem),
+        ]
     )
 
 

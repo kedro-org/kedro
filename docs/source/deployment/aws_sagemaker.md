@@ -320,7 +320,7 @@ if __name__ == "__main__":
 
 You are now ready to run your project! To do that, execute the following CLI command:
 ```bash
-kedro run --env sagemaker
+kedro run --env=sagemaker
 ```
 
 The first 4 nodes of the pipeline will still run locally, but then you should see a similar output in the terminal:

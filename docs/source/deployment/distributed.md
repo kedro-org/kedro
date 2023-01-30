@@ -33,7 +33,7 @@ To perform the conversion programmatically, you will need to develop a script. M
 A `node` typically corresponds to a unit of compute, which can be run by parameterising the basic `kedro run`:
 
  ```bash
-kedro run --node <node_name>
+kedro run --node=<node_name>
 ```
 
 We encourage you to play with different ways of parameterising your runs as you see fit. Use names, tags, custom flags, in preference to making a code change to execute different behaviour. All your jobs/tasks/operators/etc. should have the same version of the code, i.e. same Docker image, to run on.

@@ -10,7 +10,7 @@ CONF_SOURCE = "new_conf"
 ```
 You can also specify a source directory for the configuration files at run time using the [`kedro run` CLI command](../development/commands_reference.md#modifying-a-kedro-run) with the `--conf-source` flag as follows:
 ```bash
-kedro run --conf-source = <path-to-new-conf-directory>
+kedro run --conf-source=<path-to-new-conf-directory>
 ```
 ## Local and base configuration environments
 
@@ -336,26 +336,26 @@ Kedro also allows you to specify runtime parameters for the `kedro run` CLI comm
 Each key-value pair is split on the first colon or equals sign. Following examples are both valid commands:
 
 ```bash
-kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
+kedro run --params=param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
 ```
 ```bash
-kedro run --params param_key1=value1,param_key2=2.0
+kedro run --params=param_key1=value1,param_key2=2.0
 ```
 Values provided in the CLI take precedence and overwrite parameters specified in configuration files. Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
 
 If any extra parameter key and/or value contains spaces, wrap the whole option contents in quotes:
 
 ```bash
-kedro run --params "key1=value with spaces,key2=value"
+kedro run --params="key1=value with spaces,key2=value"
 ```
 
 Since key-value pairs are split on the first colon or equals sign, values can contain colons/equals signs, but keys cannot. These are valid CLI commands:
 
 ```bash
-kedro run --params endpoint_url:https://endpoint.example.com
+kedro run --params=endpoint_url:https://endpoint.example.com
 ```
 ```bash
-kedro run --params endpoint_url=https://endpoint.example.com
+kedro run --params=endpoint_url=https://endpoint.example.com
 ```
 
 ### Use parameters
@@ -480,7 +480,7 @@ When you work with AWS credentials on datasets, you are not required to store AW
 An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../development/commands_reference.md#run-the-project). However, instead of specifying all the command line options in a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
 
 ```console
-$ kedro run --config config.yml
+$ kedro run --config=config.yml
 ```
 
 where `config.yml` is formatted as below (for example):
@@ -499,7 +499,7 @@ run:
   env: env1
 ```
 
-The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes ...`, but you have to use an underscore in the configuration file:
+The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes=...`, but you have to use an underscore in the configuration file:
 
 ```yaml
 run:

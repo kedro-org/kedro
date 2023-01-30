@@ -12,7 +12,7 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 To use AWS Batch, ensure you have the following prerequisites in place:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
-- A `name` attribute is set for each [Kedro node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node <node_name>`.
+- A `name` attribute is set for each [Kedro node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node=<node_name>`.
 - [All node input/output `DataSets` must be configured in `catalog.yml`](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api) and refer to an external location (e.g. AWS S3). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
 <details>
@@ -224,7 +224,7 @@ Next you will want to add the implementation of the `_submit_job()` method refer
 
 * Correctly specified upstream dependencies
 * A unique job name
-* The corresponding command to run, namely `kedro run --node <node_name>`.
+* The corresponding command to run, namely `kedro run --node=<node_name>`.
 
 Once submitted, the method tracks progress and surfaces any errors if the jobs end in `FAILED` state.
 
@@ -348,7 +348,7 @@ def _instantiate_runner(runner, is_async, project_context):
 You're now ready to trigger the run. Execute the following command:
 
 ```bash
-kedro run --env aws_batch --runner kedro_tutorial.runner.AWSBatchRunner
+kedro run --env=aws_batch --runner=kedro_tutorial.runner.AWSBatchRunner
 ```
 
 You should start seeing jobs appearing on your Jobs dashboard, under the `Runnable` tab - meaning they're ready to start as soon as the resources are provisioned in the compute environment.

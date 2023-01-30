@@ -21,8 +21,8 @@ class ProjectMetadata(NamedTuple):
     project_name: str
     project_path: Path
     project_version: str
-    kedro_init_version: str
     source_dir: Path
+    kedro_init_version: str
 
 
 def _version_mismatch_error(kedro_init_version) -> str:

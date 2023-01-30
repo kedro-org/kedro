@@ -87,8 +87,8 @@ def fake_metadata(fake_root_dir):
         "CLI Testing Project",
         fake_root_dir / REPO_NAME,
         kedro_version,
-        kedro_version,
         fake_root_dir / REPO_NAME / "src",
+        kedro_version
     )
     return metadata
 

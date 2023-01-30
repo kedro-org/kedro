@@ -174,7 +174,7 @@ def register_pipelines():
 Then, from the command line, execute the following:
 
 ```bash
-kedro run --pipeline my_pipeline
+kedro run --pipeline=my_pipeline
 ```
 
 ```{note}

@@ -474,6 +474,27 @@ def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
 
 
+def _is_within_directory(directory, target):
+    abs_directory = directory.resolve()
+    abs_target = target.resolve()
+    return abs_directory in abs_target.parents
+
+
+def safe_extract(archive, path):
+    """Safely extract tar or zip files."""
+    if isinstance(archive, tarfile.TarFile):
+        for member in archive.getmembers():
+            member_path = Path(path) / member.name
+            if not _is_within_directory(path, member_path):
+                raise Exception("Failed to safely extract tar file.")
+    if isinstance(archive, zipfile.ZipFile):
+        for member in archive.namelist():
+            member_path = Path(path) / member
+            if not _is_within_directory(path, member_path):
+                raise Exception("Failed to safely extract zip file.")
+    archive.extractall(path)
+
+
 def _conf_source_callback(ctx, param, value):
     if value and value.endswith(".zip"):
         with zipfile.ZipFile(value, "r") as zip_ref:

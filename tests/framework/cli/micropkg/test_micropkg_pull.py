@@ -1,5 +1,6 @@
 import filecmp
 import shutil
+import tarfile
 import textwrap
 from pathlib import Path
 from tarfile import TarInfo
@@ -763,13 +764,9 @@ class TestMicropkgPullCommand:
             (["tarmember", "../tarmember"], "destination"),
         ],
     )
-    def test_path_traversal(
-        self,
-        tar_members,
-        path_name,
-    ):
+    def test_path_traversal(self, tar_members, path_name):
         """Test for checking path traversal attempt in tar file"""
-        tar = Mock()
+        tar = Mock(spec=tarfile.TarFile)
         tar.getmembers.return_value = [
             TarInfo(name=tar_name) for tar_name in tar_members
         ]

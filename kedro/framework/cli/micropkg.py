@@ -29,6 +29,7 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
     env_option,
     python_call,
+    safe_extract,
 )
 from kedro.framework.startup import ProjectMetadata
 
@@ -297,20 +298,6 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
         click.secho(str(exc), fg="red")
         click.secho("Trying to use 'pip download'...", fg="red")
         return None
-
-
-def _is_within_directory(directory, target):
-    abs_directory = directory.resolve()
-    abs_target = target.resolve()
-    return abs_directory in abs_target.parents
-
-
-def safe_extract(tar, path):
-    for member in tar.getmembers():
-        member_path = path / member.name
-        if not _is_within_directory(path, member_path):
-            raise Exception("Failed to safely extract tar file.")
-    tar.extractall(path)
 
 
 def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> None:

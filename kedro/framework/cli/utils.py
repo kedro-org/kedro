@@ -6,9 +6,11 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tarfile
 import textwrap
 import traceback
 import warnings
+import zipfile
 from collections import defaultdict
 from contextlib import contextmanager
 from importlib import import_module
@@ -470,3 +472,18 @@ def _split_params(ctx, param, value):
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
+
+
+def _conf_source_callback(ctx, param, value):
+    if value.endswith(".zip"):
+        with zipfile.ZipFile(value, "r") as zip_ref:
+            conf_path = zip_ref.namelist()[0]
+            zip_ref.extractall()
+            return conf_path
+    elif value.endswith(".tar.gz"):
+        with tarfile.open(value) as tar_file:
+            conf_path = tar_file.getnames()[0]
+            tar_file.extractall()
+            return conf_path
+    else:
+        return value

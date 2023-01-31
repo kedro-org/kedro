@@ -12,6 +12,7 @@ import click
 from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
+    _conf_source_callback,
     _config_file_callback,
     _get_values_as_tuple,
     _reformat_load_versions,
@@ -365,8 +366,9 @@ def activate_nbstripout(
 )
 @click.option(
     "--conf-source",
-    type=click.Path(exists=True, file_okay=False, resolve_path=True),
+    type=click.Path(exists=True, file_okay=True, resolve_path=True),
     help=CONF_SOURCE_HELP,
+    callback=_conf_source_callback,
 )
 @click.option(
     "--params",
@@ -398,6 +400,7 @@ def run(
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
+    print("Conf source is ... ", conf_source)
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params

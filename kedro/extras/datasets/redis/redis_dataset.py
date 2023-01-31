@@ -94,14 +94,14 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
             load_args: Pickle options for loading pickle files.
                 You can pass in arguments that the backend load function specified accepts, e.g:
                 pickle.loads: https://docs.python.org/3/library/pickle.html#pickle.loads
-                dill.loads: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.loads
+                dill.loads: https://dill.readthedocs.io/en/latest/index.html#dill.loads
                 compress_pickle.loads:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.loads
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 You can pass in arguments that the backend dump function specified accepts, e.g:
                 pickle.dumps: https://docs.python.org/3/library/pickle.html#pickle.dump
-                dill.dumps: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dumps
+                dill.dumps: https://dill.readthedocs.io/en/latest/index.html#dill.dumps
                 compress_pickle.dumps:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dumps
                 All defaults are preserved.

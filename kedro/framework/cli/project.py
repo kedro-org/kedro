@@ -400,7 +400,6 @@ def run(
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
-    print("Conf source is ... ", conf_source)
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params

@@ -112,7 +112,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 You can pass in arguments that the backend load function specified accepts, e.g:
                 pickle.load: https://docs.python.org/3/library/pickle.html#pickle.load
                 joblib.load: https://joblib.readthedocs.io/en/latest/generated/joblib.load.html
-                dill.load: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.load
+                dill.load: https://dill.readthedocs.io/en/latest/index.html#dill.load
                 compress_pickle.load:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 All defaults are preserved.
@@ -120,7 +120,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 You can pass in arguments that the backend dump function specified accepts, e.g:
                 pickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump
                 joblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html
-                dill.dump: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dump
+                dill.dump: https://dill.readthedocs.io/en/latest/index.html#dill.dump
                 compress_pickle.dump:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
                 All defaults are preserved.

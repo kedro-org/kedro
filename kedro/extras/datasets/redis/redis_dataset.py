@@ -157,7 +157,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
         )
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(key=self._key, **self._redis_from_url_args)
+        return {"key": self._key, **self._redis_from_url_args}
 
     # `redis_db` mypy does not work since it is optional and optional is not
     # accepted by pickle.loads.

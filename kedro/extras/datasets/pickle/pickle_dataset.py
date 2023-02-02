@@ -112,7 +112,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 You can pass in arguments that the backend load function specified accepts, e.g:
                 pickle.load: https://docs.python.org/3/library/pickle.html#pickle.load
                 joblib.load: https://joblib.readthedocs.io/en/latest/generated/joblib.load.html
-                dill.load: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.load
+                dill.load: https://dill.readthedocs.io/en/latest/index.html#dill.load
                 compress_pickle.load:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 All defaults are preserved.
@@ -120,7 +120,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 You can pass in arguments that the backend dump function specified accepts, e.g:
                 pickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump
                 joblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html
-                dill.dump: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dump
+                dill.dump: https://dill.readthedocs.io/en/latest/index.html#dill.dump
                 compress_pickle.dump:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
                 All defaults are preserved.
@@ -197,14 +197,14 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
         self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            backend=self._backend,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "backend": self._backend,
+            "protocol": self._protocol,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)

@@ -421,7 +421,7 @@ class TestMicropkgPullCommand:
         )
 
         mocked_filesystem.assert_called_once_with(
-            "file", fs_arg_1=1, fs_arg_2=dict(fs_arg_2_nested_1=2)
+            "file", fs_arg_1=1, fs_arg_2={"fs_arg_2_nested_1": 2}
         )
 
     def test_pull_two_egg_info(

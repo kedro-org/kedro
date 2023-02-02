@@ -4,7 +4,9 @@ import logging
 import logging.config
 import os
 import subprocess
+import tarfile
 import traceback
+import zipfile
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
@@ -27,6 +29,7 @@ from kedro.framework.project import (
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.utils import safe_extract
 
 
 def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
@@ -60,6 +63,21 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
         "command_name": ctx.command.name,
         "command_path": ctx.command_path,
     }
+
+
+def resolve_conf_source(value):
+    """Resolve the configuration source path"""
+    if value and value.endswith(".zip"):
+        with zipfile.ZipFile(value, "r") as zip_ref:
+            conf_path = value.replace(".zip", "")
+            safe_extract(zip_ref, conf_path)
+        return conf_path
+    if value and value.endswith(".tar.gz"):
+        with tarfile.open(value) as tar_file:
+            conf_path = value.replace(".tar.gz", "")
+            safe_extract(tar_file, conf_path)
+        return conf_path
+    return value
 
 
 class KedroSessionError(Exception):
@@ -116,8 +134,8 @@ class KedroSession:
         _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
 
-        self._conf_source = conf_source or str(
-            self._project_path / settings.CONF_SOURCE
+        self._conf_source = resolve_conf_source(conf_source) or str(
+            self._project_path / resolve_conf_source(settings.CONF_SOURCE)
         )
 
     @classmethod

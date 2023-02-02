@@ -107,4 +107,4 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         return True
 
     def _describe(self):
-        return dict(filepath=str(self._filepath), fs_prefix=self._fs_prefix)
+        return {"filepath": str(self._filepath), "fs_prefix": self._fs_prefix}

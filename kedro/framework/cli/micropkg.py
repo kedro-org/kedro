@@ -790,9 +790,11 @@ def _generate_setup_file(
 ) -> Path:
     setup_file = output_dir / "setup.py"
 
-    setup_file_context = dict(
-        name=package_name, version=version, install_requires=install_requires
-    )
+    setup_file_context = {
+        "name": package_name,
+        "version": version,
+        "install_requires": install_requires,
+    }
 
     setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
     return setup_file

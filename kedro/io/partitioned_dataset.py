@@ -313,11 +313,11 @@ class PartitionedDataSet(AbstractDataSet):
             if isinstance(self._dataset_config, dict)
             else self._dataset_config
         )
-        return dict(
-            path=self._path,
-            dataset_type=self._dataset_type.__name__,
-            dataset_config=clean_dataset_config,
-        )
+        return {
+            "path": self._path,
+            "dataset_type": self._dataset_type.__name__,
+            "dataset_config": clean_dataset_config,
+        }
 
     def _invalidate_caches(self):
         self._partition_cache.clear()

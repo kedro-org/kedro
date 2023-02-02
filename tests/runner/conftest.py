@@ -138,7 +138,7 @@ def saving_none_pipeline():
 def unfinished_outputs_pipeline():
     return pipeline(
         [
-            node(identity, dict(arg="ds4"), "ds8", name="node1"),
+            node(identity, {"arg": "ds4"}, "ds8", name="node1"),
             node(sink, "ds7", None, name="node2"),
             node(multi_input_list_output, ["ds3", "ds4"], ["ds6", "ds7"], name="node3"),
             node(identity, "ds2", "ds5", name="node4"),

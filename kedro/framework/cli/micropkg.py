@@ -29,9 +29,9 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
     env_option,
     python_call,
-    safe_extract,
 )
 from kedro.framework.startup import ProjectMetadata
+from kedro.utils import safe_extract
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
 from setuptools import setup, find_packages

@@ -12,7 +12,6 @@ import click
 from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
-    _conf_source_callback,
     _config_file_callback,
     _get_values_as_tuple,
     _reformat_load_versions,
@@ -368,7 +367,6 @@ def activate_nbstripout(
     "--conf-source",
     type=click.Path(exists=True, file_okay=True, resolve_path=True),
     help=CONF_SOURCE_HELP,
-    callback=_conf_source_callback,
 )
 @click.option(
     "--params",

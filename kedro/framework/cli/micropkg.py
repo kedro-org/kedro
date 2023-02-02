@@ -309,6 +309,7 @@ def safe_extract(tar, path):
     for member in tar.getmembers():
         member_path = path / member.name
         if not _is_within_directory(path, member_path):
+            # pylint: disable=broad-exception-raised
             raise Exception("Failed to safely extract tar file.")
     tar.extractall(path)
 

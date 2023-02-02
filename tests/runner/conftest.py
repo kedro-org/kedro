@@ -24,7 +24,7 @@ def fan_in(*args):
 
 
 def exception_fn(*args):
-    raise Exception("test exception")
+    raise Exception("test exception")  # pylint: disable=broad-exception-raised
 
 
 def return_none(arg):

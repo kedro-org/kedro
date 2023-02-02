@@ -369,13 +369,13 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 ) from exc
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._fs_prefix + str(self._filepath),
-            file_format=self._file_format,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._fs_prefix + str(self._filepath),
+            "file_format": self._file_format,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     @staticmethod
     def _get_spark():

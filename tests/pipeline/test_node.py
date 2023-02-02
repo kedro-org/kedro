@@ -31,11 +31,11 @@ def simple_tuple_node_list():
         (biconcat, ["A", "B"], "C"),
         (identity, "C", ["D", "E"]),
         (biconcat, ["H", "I"], ["J", "K"]),
-        (identity, "J", dict(result="K")),
-        (biconcat, ["J", "K"], dict(result="L")),
-        (identity, dict(input1="J"), "L"),
-        (identity, dict(input1="J"), ["L", "M"]),
-        (identity, dict(input1="J"), dict(result="K")),
+        (identity, "J", {"result": "K"}),
+        (biconcat, ["J", "K"], {"result": "L"}),
+        (identity, {"input1": "J"}, "L"),
+        (identity, {"input1": "J"}, ["L", "M"]),
+        (identity, {"input1": "J"}, {"result": "K"}),
         (constant_output, None, "M"),
         (biconcat, ["N", "O"], None),
         (lambda x: None, "F", "G"),
@@ -67,7 +67,7 @@ class TestValidNode:
             biconcat, inputs=["input1", "input2"], outputs="output", name="myname"
         )
         actual = dummy_node(input1="in1", input2="in2")
-        expected = dummy_node.run(dict(input1="in1", input2="in2"))
+        expected = dummy_node.run({"input1": "in1", "input2": "in2"})
         assert actual == expected
 
     def test_call_with_non_keyword_arguments(self):
@@ -80,14 +80,14 @@ class TestValidNode:
 
     def test_run_with_duplicate_inputs_list(self):
         dummy_node = node(func=biconcat, inputs=["input1", "input1"], outputs="output")
-        actual = dummy_node.run(dict(input1="in1"))
+        actual = dummy_node.run({"input1": "in1"})
         assert actual == {"output": "in1in1"}
 
     def test_run_with_duplicate_inputs_dict(self):
         dummy_node = node(
             func=biconcat, inputs={"input1": "in1", "input2": "in1"}, outputs="output"
         )
-        actual = dummy_node.run(dict(in1="hello"))
+        actual = dummy_node.run({"in1": "hello"})
         assert actual == {"output": "hellohello"}
 
     def test_no_input(self):
@@ -241,11 +241,11 @@ def no_input_or_output_node():
 
 
 def input_same_as_output_node():
-    return biconcat, ["A", "B"], dict(a="A")
+    return biconcat, ["A", "B"], {"a": "A"}
 
 
 def duplicate_output_dict_node():
-    return identity, "A", dict(a="A", b="A")
+    return identity, "A", {"a": "A", "b": "A"}
 
 
 def duplicate_output_list_node():
@@ -426,7 +426,7 @@ class TestNames:
     def test_updated_partial_dict_inputs(self):
         n = node(
             update_wrapper(partial(biconcat, input1=["in1"]), biconcat),
-            dict(input2="in2"),
+            {"input2": "in2"},
             ["out"],
         )
         assert str(n) == "biconcat([in2]) -> [out]"

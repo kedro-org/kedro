@@ -161,9 +161,12 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
             save_properties.pop("password", None)
             save_args = {**save_args, "properties": save_properties}
 
-        return dict(
-            url=self._url, table=self._table, load_args=load_args, save_args=save_args
-        )
+        return {
+            "url": self._url,
+            "table": self._table,
+            "load_args": load_args,
+            "save_args": save_args,
+        }
 
     @staticmethod
     def _get_spark():

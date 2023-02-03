@@ -263,4 +263,8 @@ class TestMicropkgRequirements:
             obj=fake_metadata,
         )
         assert result.exit_code == 1
-        assert "InvalidRequirement: Parse error" in result.output
+        assert (
+            "InvalidRequirement: Expected package name at the start of dependency specifier"
+            in result.output
+            or "InvalidRequirement: Expected end or semicolon" in result.output
+        )

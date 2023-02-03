@@ -287,6 +287,17 @@ def exec_kedro_target(context, command):
     cmd = [context.kedro] + split_command
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
+@given('I have executed and print the kedro command "{command}"')
+@when('I execute and print the kedro command "{command}"')
+def exec_kedro_target(context, command):
+    """Execute Kedro target."""
+    dist_dir = context.root_project_dir / "dist"
+    (whl_file,) = dist_dir.glob("*.tar.gz")
+    print(str(whl_file))
+    split_command = command.split()
+    cmd = [context.kedro] + split_command
+    context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+
 
 @when("I execute the installed project package")
 def exec_project(context):

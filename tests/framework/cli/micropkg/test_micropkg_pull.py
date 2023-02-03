@@ -1,8 +1,8 @@
 import filecmp
 import shutil
-import tarfile
 import textwrap
 from pathlib import Path
+from tarfile import TarInfo
 from unittest.mock import Mock
 
 import pytest
@@ -421,7 +421,7 @@ class TestMicropkgPullCommand:
         )
 
         mocked_filesystem.assert_called_once_with(
-            "file", fs_arg_1=1, fs_arg_2=dict(fs_arg_2_nested_1=2)
+            "file", fs_arg_1=1, fs_arg_2={"fs_arg_2_nested_1": 2}
         )
 
     def test_pull_two_egg_info(
@@ -763,10 +763,16 @@ class TestMicropkgPullCommand:
             (["tarmember", "../tarmember"], "destination"),
         ],
     )
-    def test_path_traversal(self, tar_members, path_name):
+    def test_path_traversal(
+        self,
+        tar_members,
+        path_name,
+    ):
         """Test for checking path traversal attempt in tar file"""
-        tar = Mock(spec=tarfile.TarFile)
-        tar.getnames.return_value = tar_members
+        tar = Mock()
+        tar.getmembers.return_value = [
+            TarInfo(name=tar_name) for tar_name in tar_members
+        ]
         path = Path(path_name)
         with pytest.raises(Exception, match="Failed to safely extract tar file."):
             safe_extract(tar, path)

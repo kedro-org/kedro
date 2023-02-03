@@ -36,6 +36,15 @@ Feature: Run Project
     Then I should get a successful exit code
     And the logs should show that 1 nodes were run
 
+  Scenario: Run kedro run with config from archive
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter "default"
+    When I execute the kedro command "package"
+    Then I should get a successful exit code
+    When I execute and print the kedro command "run --conf-source dist/conf-project_dummy.tar.gz"
+    Then I should get a successful exit code
+    And the logs should show that 1 nodes were run
+
   Scenario: Run kedro run with config file and override option
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"

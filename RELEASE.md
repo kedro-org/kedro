@@ -19,7 +19,6 @@
   * Save node outputs after every `yield` before proceeding with next chunk.
 * Fixed incorrect parsing of Azure Data Lake Storage Gen2 URIs used in datasets.
 * Added support for loading credentials from environment variables using OmegaConfLoader.
-* Added support for loading config from tar.gz and zip files.
 
 ## Bug fixes and other changes
 * Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).

@@ -31,7 +31,6 @@ from kedro.framework.cli.utils import (
     python_call,
 )
 from kedro.framework.startup import ProjectMetadata
-from kedro.utils import safe_extract
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
@@ -298,6 +297,21 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
         click.secho(str(exc), fg="red")
         click.secho("Trying to use 'pip download'...", fg="red")
         return None
+
+
+def _is_within_directory(directory, target):
+    abs_directory = directory.resolve()
+    abs_target = target.resolve()
+    return abs_directory in abs_target.parents
+
+
+def safe_extract(tar, path):
+    for member in tar.getmembers():
+        member_path = path / member.name
+        if not _is_within_directory(path, member_path):
+            # pylint: disable=broad-exception-raised
+            raise Exception("Failed to safely extract tar file.")
+    tar.extractall(path)
 
 
 def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> None:
@@ -777,9 +791,11 @@ def _generate_setup_file(
 ) -> Path:
     setup_file = output_dir / "setup.py"
 
-    setup_file_context = dict(
-        name=package_name, version=version, install_requires=install_requires
-    )
+    setup_file_context = {
+        "name": package_name,
+        "version": version,
+        "install_requires": install_requires,
+    }
 
     setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
     return setup_file

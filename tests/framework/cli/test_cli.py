@@ -1,4 +1,3 @@
-import shutil
 from collections import namedtuple
 from itertools import cycle
 from os import rename
@@ -784,27 +783,7 @@ class TestRunCommand:
         )
         assert result.exit_code, result.output
         expected_output = (
-            "Error: Invalid value for '--conf-source': Path 'nonexistent_dir'"
+            "Error: Invalid value for '--conf-source': Directory 'nonexistent_dir'"
             " does not exist."
         )
         assert expected_output in result.output
-
-    def test_run_with_tar_config(self, fake_project_cli, fake_metadata):
-        # check that Kedro runs with tar.gz config
-        shutil.make_archive("tar_conf", "gztar", "alternate_conf")
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["run", "--conf-source", "tar_conf.tar.gz"],
-            obj=fake_metadata,
-        )
-        assert result.exit_code == 0
-
-    def test_run_with_zip_config(self, fake_project_cli, fake_metadata):
-        # check that Kedro runs with zip config
-        shutil.make_archive("zip_conf", "zip", "alternate_conf")
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["run", "--conf-source", "zip_conf.zip"],
-            obj=fake_metadata,
-        )
-        assert result.exit_code == 0

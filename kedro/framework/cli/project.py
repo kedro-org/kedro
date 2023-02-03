@@ -181,7 +181,8 @@ def package(metadata: ProjectMetadata):
     call(
         [
             "tar",
-            "--exclude=./local",
+            # "--exclude=./local",
+            "--exclude=local/*.yml",
             "-cf",
             f"dist/conf-{metadata.package_name}.tar.gz",
             f"--directory={directory}",

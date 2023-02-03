@@ -249,7 +249,6 @@ class TestMicropkgRequirements:
     def test_complex_requirements(
         self, requirement, fake_project_cli, fake_metadata, fake_package_path
     ):
-        # pylint: disable=condition-evals-to-constant
         """Options that are valid in requirements.txt but cannot be packaged using
         setup.py."""
         self.call_pipeline_create(fake_project_cli, fake_metadata)
@@ -266,5 +265,6 @@ class TestMicropkgRequirements:
         assert result.exit_code == 1
         assert (
             "InvalidRequirement: Expected package name at the start of dependency specifier"
+            in result.output
             or "InvalidRequirement: Expected end or semicolon" in result.output
         )

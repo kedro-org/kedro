@@ -175,7 +175,7 @@ pyproject_toml_payload = {
     "tool": {
         "kedro": {
             "project_name": "mock_project_name",
-            "project_version": kedro_version,
+            "kedro_init_version": kedro_version,
             "package_name": MOCK_PACKAGE_NAME,
         }
     }

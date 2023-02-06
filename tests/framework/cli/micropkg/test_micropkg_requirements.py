@@ -267,4 +267,5 @@ class TestMicropkgRequirements:
             "InvalidRequirement: Expected package name at the start of dependency specifier"
             in result.output
             or "InvalidRequirement: Expected end or semicolon" in result.output
+            or "InvalidRequirement: Parse error" in result.output
         )

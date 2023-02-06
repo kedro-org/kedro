@@ -32,6 +32,9 @@
 
 ## Breaking changes to the API
 
+## Upcoming deprecations for Kedro 0.19.0
+* `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.
+
 # Release 0.18.4
 
 ## Major features and improvements

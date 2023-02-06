@@ -28,7 +28,7 @@ pip @ https://github.com/pypa/pip/archive/1.3.1.zip#sha1=da9234ees
 
 # These requirements can be used in requirements.txt but not in METADATA Requires-Dist.
 # They cannot be parsed by pkg_resources.
-COMPLEX_REQUIREMENTS = """--extra-index-url https://this.wont.work.surely
+COMPLEX_REQUIREMENTS = """--extra-index-url https://this.wont.work
 -r other_requirements.txt
 ./path/to/package.whl
 http://some.website.com/package.whl
@@ -267,4 +267,5 @@ class TestMicropkgRequirements:
             "InvalidRequirement: Expected package name at the start of dependency specifier"
             in result.output
             or "InvalidRequirement: Expected end or semicolon" in result.output
+            or "InvalidRequirement: Parse error" in result.output
         )

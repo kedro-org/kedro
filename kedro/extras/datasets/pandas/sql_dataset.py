@@ -243,11 +243,11 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         save_args = copy.deepcopy(self._save_args)
         del load_args["table_name"]
         del save_args["name"]
-        return dict(
-            table_name=self._load_args["table_name"],
-            load_args=load_args,
-            save_args=save_args,
-        )
+        return {
+            "table_name": self._load_args["table_name"],
+            "load_args": load_args,
+            "save_args": save_args,
+        }
 
     def _load(self) -> pd.DataFrame:
         engine = self.engines[self._connection_str]  # type:ignore
@@ -440,12 +440,12 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
-        return dict(
-            sql=str(load_args.pop("sql", None)),
-            filepath=str(self._filepath),
-            load_args=str(load_args),
-            execution_options=str(self._execution_options),
-        )
+        return {
+            "sql": str(load_args.pop("sql", None)),
+            "filepath": str(self._filepath),
+            "load_args": str(load_args),
+            "execution_options": str(self._execution_options),
+        }
 
     def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)

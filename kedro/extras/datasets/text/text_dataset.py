@@ -105,11 +105,11 @@ class TextDataSet(AbstractVersionedDataSet[str, str]):
         self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "version": self._version,
+        }
 
     def _load(self) -> str:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)

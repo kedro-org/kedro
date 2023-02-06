@@ -55,7 +55,7 @@ class _SharedMemoryDataSet:
         """Calls save method of a shared MemoryDataSet in SyncManager."""
         try:
             self.shared_memory_dataset.save(data)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             # Checks if the error is due to serialisation or not
             try:
                 pickle.dumps(data)
@@ -64,8 +64,7 @@ class _SharedMemoryDataSet:
                     f"{str(data.__class__)} cannot be serialised. ParallelRunner "
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
-            else:
-                raise exc
+            raise exc
 
 
 class ParallelRunnerManager(SyncManager):

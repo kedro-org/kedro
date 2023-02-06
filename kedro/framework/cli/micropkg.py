@@ -309,6 +309,7 @@ def safe_extract(tar, path):
     for member in tar.getmembers():
         member_path = path / member.name
         if not _is_within_directory(path, member_path):
+            # pylint: disable=broad-exception-raised
             raise Exception("Failed to safely extract tar file.")
     tar.extractall(path)
 
@@ -790,9 +791,11 @@ def _generate_setup_file(
 ) -> Path:
     setup_file = output_dir / "setup.py"
 
-    setup_file_context = dict(
-        name=package_name, version=version, install_requires=install_requires
-    )
+    setup_file_context = {
+        "name": package_name,
+        "version": version,
+        "install_requires": install_requires,
+    }
 
     setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
     return setup_file

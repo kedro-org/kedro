@@ -118,12 +118,12 @@ class YAMLDataSet(AbstractVersionedDataSet[Dict, Dict]):
         self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> Dict:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)

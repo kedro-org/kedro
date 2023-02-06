@@ -111,26 +111,26 @@ def pipeline_with_dicts():
         "nodes": [
             node(triconcat, ["H", "I", "M"], "N", name="node1"),
             node(identity, "H", "I", name="node2"),
-            node(identity, "F", dict(M="M", N="G"), name="node3"),
-            node(identity, "E", dict(O="F", P="H"), name="node4"),  # NOQA
-            node(identity, dict(input1="D"), None, name="node5"),
+            node(identity, "F", {"M": "M", "N": "G"}, name="node3"),
+            node(identity, "E", {"O": "F", "P": "H"}, name="node4"),  # NOQA
+            node(identity, {"input1": "D"}, None, name="node5"),
             node(identity, "C", "D", name="node6", tags=["foo"]),
-            node(identity, "B", dict(P="C", Q="E"), name="node7", tags=["foo"]),
-            node(identity, "A", dict(R="B", S="L"), name="node8"),
+            node(identity, "B", {"P": "C", "Q": "E"}, name="node7", tags=["foo"]),
+            node(identity, "A", {"R": "B", "S": "L"}, name="node8"),
             node(constant_output, None, "A", name="node9"),
         ],
         "expected": [
             {node(constant_output, None, "A", name="node9")},
-            {node(identity, "A", dict(R="B", S="L"), name="node8")},
-            {node(identity, "B", dict(P="C", Q="E"), name="node7", tags=["foo"])},
+            {node(identity, "A", {"R": "B", "S": "L"}, name="node8")},
+            {node(identity, "B", {"P": "C", "Q": "E"}, name="node7", tags=["foo"])},
             {
                 node(identity, "C", "D", name="node6", tags=["foo"]),
-                node(identity, "E", dict(O="F", P="H"), name="node4"),  # NOQA
+                node(identity, "E", {"O": "F", "P": "H"}, name="node4"),  # NOQA
             },
             {
-                node(identity, dict(input1="D"), None, name="node5"),
+                node(identity, {"input1": "D"}, None, name="node5"),
                 node(identity, "H", "I", name="node2"),
-                node(identity, "F", dict(M="M", N="G"), name="node3"),
+                node(identity, "F", {"M": "M", "N": "G"}, name="node3"),
             },
             {node(triconcat, ["H", "I", "M"], "N", name="node1")},
         ],
@@ -323,7 +323,7 @@ def non_unique_node_outputs():
         node(identity, "A", ["B", "C"], name="node1"),
         node(identity, "C", ["D", "E", "F"], name="node2"),
         # D, E non-unique
-        node(identity, "B", dict(out1="D", out2="E"), name="node3"),
+        node(identity, "B", {"out1": "D", "out2": "E"}, name="node3"),
         node(identity, "D", ["E"], name="node4"),  # E non-unique
     ]
 

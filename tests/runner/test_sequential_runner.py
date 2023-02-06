@@ -14,7 +14,7 @@ from tests.runner.conftest import exception_fn, identity, sink, source
 
 class TestValidSequentialRunner:
     def test_run_with_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -22,7 +22,7 @@ class TestValidSequentialRunner:
         assert result["Z"] == (42, 42, 42)
 
     def test_run_without_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)

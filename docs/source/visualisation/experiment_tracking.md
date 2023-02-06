@@ -1,22 +1,31 @@
 # Experiment tracking in Kedro-Viz
 
-Experiment tracking is a way to record all information you need to compare machine-learning experiments and recreate those experiments. All experiment data (parameters, metrics, models, plots and other dataset types) can be searched using a timestamp.
+Experiment tracking is the process of saving all the metadata related to an experiment each time you run it. It enables you to compare different runs of a machine-learning model as part of your experimentation.
+
+The metadata you store may include:
+
+* Scripts used for running the experiment
+* Environment configuration files
+* Versions of the data used for training and evaluation
+* Evaluation metrics
+* Model weights
+* Plots and other visualisations
+
+Early versions of Kedro had limited support for experiment tracking. For example, it was possible to version parameters as part of your codebase with a version control system like `git` and [snapshot models, datasets and plots with Kedro’s dataset versioning capabilities](../data/data_catalog.md#version-datasets-and-ml-models).
+
+Later versions of Kedro and Kedro-Viz introduced metadata capture, visualisation, discovery and comparison, enabling you to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 
 > View a detailed [Kedro-Viz experiment tracking demo](https://demo.kedro.org/experiment-tracking).
-
-In the past, Kedro had limited support for experiment tracking functionality. For example, it was possible to version parameters as part of your codebase with a version control system like `git` and [snapshot models, datasets and plots with Kedro’s dataset versioning capabilities](../data/data_catalog.md#version-datasets-and-ml-models). However, Kedro needed a way to log metrics and capture all this logged data as a timestamped run of an experiment. It also needed a way for users to visualise, discover and compare this data.
-
-We started adding in the missing pieces from [Kedro-Viz `>=4.1.1`](https://github.com/kedro-org/kedro-viz/releases/tag/v4.1.1). Now, when experiment tracking is enabled in your Kedro project, you will be able to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 
 ![](../meta/images/experiment-tracking_demo_small.gif)
 
 ## When should I use experiment tracking in Kedro?
 
-The choice of experiment tracking tool depends on your use case. We can present the possibilities for Kedro, MLflow and Neptune:
+The choice of experiment tracking tool depends on your use case and choice of complementary tools, such as MLflow and Neptune:
 
-- **Kedro** - If you need experiment tracking, are looking for improved metrics visualisation and want a lightweight tool created to leverage existing functionality in Kedro. Kedro does not support a model registry.
+- **Kedro** - If you need experiment tracking, are looking for improved metrics visualisation and want a lightweight tool to work alongside existing functionality in Kedro. Kedro does not support a model registry.
 - **MLflow** - You can combine MLFlow with Kedro by using [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/en/stable/) if you require experiment tracking, model registry and/or model serving capabilities or have access to Managed MLflow within the Databricks ecosystem.
-- **Neptune** - If you require experiment tracking and model registry functionality, improved visualisation of metrics and support for collaborative data science. Leverage [`kedro-neptune`](https://docs.neptune.ai/integrations/kedro/) for your workflow.
+- **Neptune** - If you require experiment tracking and model registry functionality, improved visualisation of metrics and support for collaborative data science, you may consider [`kedro-neptune`](https://docs.neptune.ai/integrations/kedro/) for your workflow.
 
 We support [a growing list of integrations](../extend_kedro/plugins.md).
 
@@ -24,13 +33,13 @@ We support [a growing list of integrations](../extend_kedro/plugins.md).
 
 To enable the experiment tracking features of Kedro-Viz you need to:
 
-- [Set up a session store to capture experiment metadata](#set-up-the-session-store),
-- [Set up experiment tracking datasets to list the metrics to track](#set-up-tracking-datasets),
-- [Modify your nodes and pipelines to output those metrics](#set-up-your-nodes-and-pipelines-to-log-metrics).
+- [Set up a session store to capture experiment metadata](#set-up-the-session-store)
+- [Set up experiment tracking datasets to list the metrics to track](#set-up-experiment-tracking-datasets)
+- [Modify your nodes and pipelines to output those metrics](#modify-your-nodes-and-pipelines-to-log-metrics)
 
 This page describes the steps necessary to set up experiment tracking and access logged metrics, using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md).
 
-We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). Before proceeding, ensure you're using Kedro-Viz `>=4.1.1` (you can confirm your Kedro-Viz version by running `kedro info`). To set up a new project using the spaceflights starter, from the terminal run:
+We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). Before proceeding, ensure you're using Kedro-Viz `>=5.2.1` (you can confirm your Kedro-Viz version by running `kedro info`). To set up a new project using the spaceflights starter, from the terminal run:
 
 ```bash
 kedro new --starter=spaceflights
@@ -63,9 +72,9 @@ SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data")}
 
 This will specify the creation of the `SQLiteStore` under the `data/` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin.
 
-Please ensure that your installed version of Kedro-Viz `>=4.1.1`. This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-tracking-datasets) or [set up your nodes and pipelines to log metrics](#set-up-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable, but both should be completed to get a working experiment tracking setup.
+Please ensure that your installed version of Kedro-Viz `>=5.2.1`. This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-experiment-tracking-datasets) or [set up your nodes and pipelines to log metrics](#modify-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable, but both should be completed to get a working experiment tracking setup.
 
-## Set up tracking datasets
+## Set up experiment tracking datasets
 
 There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data like boolean or text-based data.
 
@@ -81,7 +90,7 @@ companies_columns:
   filepath: data/09_tracking/companies_columns.json
 ```
 
-## Set up your nodes and pipelines to log metrics
+## Modify your nodes and pipelines to log metrics
 
 Now that you have set up the tracking datasets to log experiment tracking data, next ensure that the data is returned from your nodes.
 
@@ -257,7 +266,7 @@ After running the pipeline with `kedro run`, the plot will be saved and you will
 
 ## View and compare metrics data
 
-From Kedro-Viz `>=6.0.0` experiment tracking also supports the display and comparison of metrics data through two chart types: time series and parallel coordinates.
+From Kedro-Viz `>=5.2.1` experiment tracking also supports the display and comparison of metrics data through two chart types: time series and parallel coordinates.
 
 Time series displays one metric per graph, showing how the metric value has changed over time.
 

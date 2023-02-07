@@ -2,10 +2,10 @@
 or more configuration files of yaml or json type from specified paths through OmegaConf.
 """
 import logging
-from glob import iglob
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set  # noqa
 
+import fsspec
 from omegaconf import OmegaConf
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
@@ -108,6 +108,13 @@ class OmegaConfLoader(AbstractConfigLoader):
         # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.
         # It's easier to introduce them step by step, but removing them would be a breaking change.
         self._clear_omegaconf_resolvers()
+        if conf_source.endswith(".zip"):
+            self._protocol = "zip"
+        elif conf_source.endswith("tar.gz"):
+            self._protocol = "tar"
+        else:
+            self._protocol = "file"
+        self._fs = fsspec.filesystem(protocol=self._protocol, fo=conf_source)
 
         super().__init__(
             conf_source=conf_source,
@@ -147,7 +154,10 @@ class OmegaConfLoader(AbstractConfigLoader):
         read_environment_variables = key == "credentials"
 
         # Load base env config
-        base_path = str(Path(self.conf_source) / self.base_env)
+        if self._protocol == "file":
+            base_path = str(Path(self.conf_source) / self.base_env)
+        else:
+            base_path = str(Path(self._fs.ls("")[0]) / self.base_env)
         base_config = self.load_and_merge_dir_config(
             base_path, patterns, read_environment_variables
         )
@@ -155,7 +165,10 @@ class OmegaConfLoader(AbstractConfigLoader):
 
         # Load chosen env config
         run_env = self.env or self.default_run_env
-        env_path = str(Path(self.conf_source) / run_env)
+        if self._protocol == "file":
+            env_path = str(Path(self.conf_source) / run_env)
+        else:
+            env_path = str(Path(self._fs.ls("")[0]) / run_env)
         env_config = self.load_and_merge_dir_config(
             env_path, patterns, read_environment_variables
         )
@@ -208,16 +221,17 @@ class OmegaConfLoader(AbstractConfigLoader):
             Resulting configuration dictionary.
 
         """
-        if not Path(conf_path).is_dir():
+
+        if not self._fs.isdir(Path(conf_path)):
             raise MissingConfigException(
                 f"Given configuration path either does not exist "
                 f"or is not a valid directory: {conf_path}"
             )
 
         paths = [
-            Path(each).resolve()
+            Path(each)
             for pattern in patterns
-            for each in iglob(f"{str(conf_path)}/{pattern}", recursive=True)
+            for each in self._fs.glob(f"{str(conf_path)}/{pattern}")
         ]
         deduplicated_paths = set(paths)
         config_files_filtered = [
@@ -228,7 +242,7 @@ class OmegaConfLoader(AbstractConfigLoader):
 
         for config_filepath in config_files_filtered:
             try:
-                config = OmegaConf.load(config_filepath)
+                config = OmegaConf.load(self._fs.open(config_filepath))
                 if read_environment_variables:
                     self._resolve_environment_variables(config)
                 config_per_file[config_filepath] = config
@@ -252,10 +266,9 @@ class OmegaConfLoader(AbstractConfigLoader):
             return list(aggregate_config)[0]
         return dict(OmegaConf.merge(*aggregate_config))
 
-    @staticmethod
-    def _is_valid_config_path(path):
+    def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""
-        return path.is_file() and path.suffix in [".yml", ".yaml", ".json"]
+        return self._fs.isfile(path) and path.suffix in [".yml", ".yaml", ".json"]
 
     @staticmethod
     def _check_duplicates(seen_files_to_keys: Dict[Path, Set[Any]]):

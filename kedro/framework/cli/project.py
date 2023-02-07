@@ -364,7 +364,7 @@ def activate_nbstripout(
 )
 @click.option(
     "--conf-source",
-    type=click.Path(exists=True, file_okay=False, resolve_path=True),
+    type=click.Path(exists=True, file_okay=True, resolve_path=True),
     help=CONF_SOURCE_HELP,
 )
 @click.option(

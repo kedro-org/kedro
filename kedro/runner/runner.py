@@ -433,7 +433,7 @@ def _run_node_sequential(
     for name, data in items:
         hook_manager.hook.before_dataset_saved(dataset_name=name, data=data, node=node)
         catalog.save(name, data)
-        hook_manager.hook.after_dataset_saved(dataset_name=name, data=data)
+        hook_manager.hook.after_dataset_saved(dataset_name=name, data=data, node=node)
     return node
 
 

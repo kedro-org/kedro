@@ -203,7 +203,7 @@ When you open the Kedro-Viz web app, you will see an experiment tracking icon on
 
 ![](../meta/images/experiment-tracking-icon.png)
 
-Click the icon to go to the experiment tracking page (you can also access the page via [http://127.0.0.1:4141/experiment-tracking](http://127.0.0.1:4141/experiment-tracking)), where you can see the sets of experiment data generated from all previous runs:
+Click the icon to go to the experiment tracking page (you can also access the page from your browser at `http://127.0.0.1:4141/experiment-tracking`), where you can see the sets of experiment data generated from all previous runs:
 
 ![](../meta/images/experiment-tracking-runs-list.png)
 

@@ -295,8 +295,12 @@ When in comparison view, comparing runs highlights your selections on the respec
 The following graphic is taken from the [Kedro-Viz experiment tracking demo](https://demo.kedro.org/experiment-tracking) (it is not a visualisation from the example code you created above).
 ```
 
-![](../meta/images/experiment-tracking_metrics-comparison.gif)
+![](../meta/images/experiment-tracking-metrics-comparison.gif)
 
-Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab which you can access by following the icon on the left-hand side of the screen. Clicking on any `MetricsDataset` node opens a side panel displaying how the metric value has changed over time:
+Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab which you can access by following the icon on the left-hand side of the screen.
 
 ![](../meta/images/pipeline_visualisation_icon.png)
+
+Clicking on any `MetricsDataset` node opens a side panel displaying how the metric value has changed over time:
+
+![](../meta/images/pipeline_show_metrics.gif)

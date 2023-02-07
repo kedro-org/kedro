@@ -399,9 +399,11 @@ def _run_node_sequential(
     inputs = {}
 
     for name in node.inputs:
-        hook_manager.hook.before_dataset_loaded(dataset_name=name)
+        hook_manager.hook.before_dataset_loaded(dataset_name=name, node=node)
         inputs[name] = catalog.load(name)
-        hook_manager.hook.after_dataset_loaded(dataset_name=name, data=inputs[name])
+        hook_manager.hook.after_dataset_loaded(
+            dataset_name=name, data=inputs[name], node=node
+        )
 
     is_async = False
 
@@ -429,7 +431,7 @@ def _run_node_sequential(
         items = zip(it.cycle(keys), interleave(*streams))
 
     for name, data in items:
-        hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
+        hook_manager.hook.before_dataset_saved(dataset_name=name, data=data, node=node)
         catalog.save(name, data)
         hook_manager.hook.after_dataset_saved(dataset_name=name, data=data)
     return node
@@ -444,10 +446,10 @@ def _run_node_async(
     def _synchronous_dataset_load(dataset_name: str):
         """Minimal wrapper to ensure Hooks are run synchronously
         within an asynchronous dataset load."""
-        hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name)
+        hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)
         return_ds = catalog.load(dataset_name)
         hook_manager.hook.after_dataset_loaded(
-            dataset_name=dataset_name, data=return_ds
+            dataset_name=dataset_name, data=return_ds, node=node
         )
         return return_ds
 
@@ -471,7 +473,9 @@ def _run_node_async(
 
         future_dataset_mapping = {}
         for name, data in outputs.items():
-            hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
+            hook_manager.hook.before_dataset_saved(
+                dataset_name=name, data=data, node=node
+            )
             future = pool.submit(catalog.save, name, data)
             future_dataset_mapping[future] = (name, data)
 
@@ -480,5 +484,7 @@ def _run_node_async(
             if exception:
                 raise exception
             name, data = future_dataset_mapping[future]
-            hook_manager.hook.after_dataset_saved(dataset_name=name, data=data)
+            hook_manager.hook.after_dataset_saved(
+                dataset_name=name, data=data, node=node
+            )
     return node

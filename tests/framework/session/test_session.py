@@ -194,7 +194,7 @@ def fake_project(tmp_path, mock_package_name):
     payload = {
         "tool": {
             "kedro": {
-                "project_version": kedro_version,
+                "kedro_init_version": kedro_version,
                 "project_name": _FAKE_PROJECT_NAME,
                 "package_name": mock_package_name,
             }

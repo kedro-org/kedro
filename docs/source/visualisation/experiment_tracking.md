@@ -279,6 +279,7 @@ confusion_matrix:
 After running the pipeline with `kedro run`, the plot is saved and you can see it in the experiment tracking panel when you execute `kedro viz`. Clicking on a plot expands it. When in comparison view, expanding a plot shows all the plots in that view for side-by-side comparison.
 
 ![](../meta/images/experiment-tracking-plots-comparison.png)
+
 ![](../meta/images/experiment-tracking-plots-comparison-expanded.png)
 
 ## View and compare metrics data

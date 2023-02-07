@@ -12,7 +12,7 @@ from omegaconf import OmegaConf, errors
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 
-from kedro.config import MissingConfigException, OmegaConfLoader
+from kedro.config import MissingConfigException, OmegaConfigLoader
 
 _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
@@ -111,11 +111,11 @@ use_credentials_env_variable_yml = pytest.mark.usefixtures(
 use_catalog_env_variable_yml = pytest.mark.usefixtures("proj_catalog_env_variable")
 
 
-class TestOmegaConfLoader:
+class TestOmegaConfigLoader:
     @use_config_dir
     def test_load_core_config_dict_syntax(self, tmp_path):
         """Make sure core config can be fetched with a dict [] access."""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         params = conf["parameters"]
         catalog = conf["catalog"]
 
@@ -125,7 +125,7 @@ class TestOmegaConfLoader:
     @use_config_dir
     def test_load_core_config_get_syntax(self, tmp_path):
         """Make sure core config can be fetched with .get()"""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         params = conf.get("parameters")
         catalog = conf.get("catalog")
 
@@ -136,7 +136,7 @@ class TestOmegaConfLoader:
     def test_load_local_config_overrides_base(self, tmp_path):
         """Make sure that configs from `local/` override the ones
         from `base/`"""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         params = conf["parameters"]
         catalog = conf["catalog"]
 
@@ -150,14 +150,14 @@ class TestOmegaConfLoader:
     def test_load_base_config(self, tmp_path, base_config):
         """Test config loading if `local/` directory is empty"""
         (tmp_path / _DEFAULT_RUN_ENV).mkdir(exist_ok=True)
-        catalog = OmegaConfLoader(str(tmp_path))["catalog"]
+        catalog = OmegaConfigLoader(str(tmp_path))["catalog"]
         assert catalog == base_config
 
     @use_proj_catalog
     def test_duplicate_patterns(self, tmp_path, base_config):
         """Test config loading if the glob patterns cover the same file"""
         (tmp_path / _DEFAULT_RUN_ENV).mkdir(exist_ok=True)
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         catalog1 = conf["catalog"]
         catalog2 = conf["catalog"]
         assert catalog1 == catalog2 == base_config
@@ -169,16 +169,16 @@ class TestOmegaConfLoader:
             r"or is not a valid directory\: {}"
         )
         with pytest.raises(MissingConfigException, match=pattern.format(".*base")):
-            OmegaConfLoader(str(tmp_path))["catalog"]
+            OmegaConfigLoader(str(tmp_path))["catalog"]
         with pytest.raises(MissingConfigException, match=pattern.format(".*local")):
             proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
             _write_yaml(proj_catalog, base_config)
-            OmegaConfLoader(str(tmp_path))["catalog"]
+            OmegaConfigLoader(str(tmp_path))["catalog"]
 
     @pytest.mark.usefixtures("create_config_dir", "proj_catalog", "proj_catalog_nested")
     def test_nested(self, tmp_path):
         """Test loading the config from subdirectories"""
-        config_loader = OmegaConfLoader(str(tmp_path))
+        config_loader = OmegaConfigLoader(str(tmp_path))
         config_loader.default_run_env = "prod"
 
         prod_catalog = tmp_path / "prod" / "catalog.yml"
@@ -203,7 +203,7 @@ class TestOmegaConfLoader:
             r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
-            OmegaConfLoader(str(tmp_path))["catalog"]
+            OmegaConfigLoader(str(tmp_path))["catalog"]
 
     @use_config_dir
     def test_multiple_nested_subdirs_duplicates(
@@ -234,7 +234,7 @@ class TestOmegaConfLoader:
         )
 
         with pytest.raises(ValueError) as exc:
-            OmegaConfLoader(str(tmp_path))["catalog"]
+            OmegaConfigLoader(str(tmp_path))["catalog"]
         assert re.search(pattern_catalog_nested, str(exc.value))
         assert re.search(pattern_catalog_local, str(exc.value))
         assert re.search(pattern_nested_local, str(exc.value))
@@ -247,14 +247,14 @@ class TestOmegaConfLoader:
 
         pattern = f"Invalid YAML or JSON file {conf_path}"
         with pytest.raises(ParserError, match=re.escape(pattern)):
-            OmegaConfLoader(str(tmp_path))["catalog"]
+            OmegaConfigLoader(str(tmp_path))["catalog"]
 
     def test_lots_of_duplicates(self, tmp_path):
         data = {str(i): i for i in range(100)}
         _write_yaml(tmp_path / _BASE_ENV / "catalog1.yml", data)
         _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", data)
 
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         pattern = (
             r"Duplicate keys found in "
             r"(.*catalog2\.yml and .*catalog1\.yml|.*catalog1\.yml and .*catalog2\.yml)"
@@ -276,7 +276,7 @@ class TestOmegaConfLoader:
             r"\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
-            OmegaConfLoader(str(tmp_path))["catalog"]
+            OmegaConfigLoader(str(tmp_path))["catalog"]
 
     @use_config_dir
     def test_pattern_key_not_found(self, tmp_path):
@@ -284,7 +284,7 @@ class TestOmegaConfLoader:
         key = "non-existent-pattern"
         pattern = f"No config patterns were found for '{key}' in your config loader"
         with pytest.raises(KeyError, match=pattern):
-            OmegaConfLoader(str(tmp_path))[key]
+            OmegaConfigLoader(str(tmp_path))[key]
 
     @use_config_dir
     def test_cannot_load_non_yaml_or_json_files(self, tmp_path):
@@ -292,7 +292,7 @@ class TestOmegaConfLoader:
         db_config_path = tmp_path / _BASE_ENV / "db.ini"
         _write_dummy_ini(db_config_path)
 
-        conf = OmegaConfLoader(str(tmp_path), config_patterns=db_patterns)
+        conf = OmegaConfigLoader(str(tmp_path), config_patterns=db_patterns)
         pattern = (
             r"No files of YAML or JSON format found in "
             r".*base or "
@@ -314,7 +314,7 @@ class TestOmegaConfLoader:
             r"\[\'credentials\*\', \'credentials\*/\**\', \'\**/credentials\*\'\]"
         )
         with pytest.raises(MissingConfigException, match=pattern):
-            OmegaConfLoader(str(tmp_path))["credentials"]
+            OmegaConfigLoader(str(tmp_path))["credentials"]
 
     def test_overlapping_patterns(self, tmp_path, mocker):
         """Check that same configuration file is not loaded more than once."""
@@ -336,7 +336,7 @@ class TestOmegaConfLoader:
             ]
         }
 
-        catalog = OmegaConfLoader(
+        catalog = OmegaConfigLoader(
             conf_source=str(tmp_path), env="dev", config_patterns=catalog_patterns
         )["catalog"]
         expected_catalog = {
@@ -368,10 +368,10 @@ class TestOmegaConfLoader:
             f" line 3, position 10."
         )
         with pytest.raises(ParserError, match=re.escape(msg)):
-            OmegaConfLoader(str(tmp_path))["catalog"]
+            OmegaConfigLoader(str(tmp_path))["catalog"]
 
     def test_customised_config_patterns(self, tmp_path):
-        config_loader = OmegaConfLoader(
+        config_loader = OmegaConfigLoader(
             conf_source=str(tmp_path),
             config_patterns={
                 "spark": ["spark*/"],
@@ -414,7 +414,9 @@ class TestOmegaConfLoader:
         _write_yaml(base_mlflow, base_config)
         _write_yaml(local_mlflow, local_config)
 
-        conf = OmegaConfLoader(str(tmp_path), config_patterns=mlflow_patterns)["mlflow"]
+        conf = OmegaConfigLoader(str(tmp_path), config_patterns=mlflow_patterns)[
+            "mlflow"
+        ]
 
         assert conf == {
             "tracking": {
@@ -427,7 +429,7 @@ class TestOmegaConfLoader:
     @use_config_dir
     def test_adding_extra_keys_to_confloader(self, tmp_path):
         """Make sure extra keys can be added directly to the config loader instance."""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         catalog = conf["catalog"]
         conf["spark"] = {"spark_config": "emr.blabla"}
 
@@ -438,7 +440,7 @@ class TestOmegaConfLoader:
     def test_bypass_catalog_config_loading(self, tmp_path):
         """Make sure core config loading can be bypassed by setting the key and values
         directly on the config loader instance."""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         conf["catalog"] = {"catalog_config": "something_new"}
 
         assert conf["catalog"] == {"catalog_config": "something_new"}
@@ -447,7 +449,7 @@ class TestOmegaConfLoader:
     @use_credentials_env_variable_yml
     def test_load_credentials_from_env_variables(self, tmp_path):
         """Load credentials from environment variables"""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"
         assert conf["credentials"]["user"]["name"] == "test_user"
@@ -457,7 +459,7 @@ class TestOmegaConfLoader:
     @use_catalog_env_variable_yml
     def test_env_resolver_not_used_for_catalog(self, tmp_path):
         """Check that the oc.env resolver is not used for catalog loading"""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         os.environ["TEST_DATASET"] = "test_dataset"
         with pytest.raises(errors.UnsupportedInterpolationType):
             conf["catalog"]["test"]["file_path"]
@@ -467,7 +469,7 @@ class TestOmegaConfLoader:
     def test_env_resolver_is_cleared_after_loading(self, tmp_path):
         """Check that the ``oc.env`` resolver is cleared after loading credentials
         in the case that it was not registered beforehand."""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"
         assert conf["credentials"]["user"]["name"] == "test_user"
@@ -478,7 +480,7 @@ class TestOmegaConfLoader:
     def test_env_resolver_is_registered_after_loading(self, tmp_path):
         """Check that the ``oc.env`` resolver is registered after loading credentials
         in the case that it was registered beforehand"""
-        conf = OmegaConfLoader(str(tmp_path))
+        conf = OmegaConfigLoader(str(tmp_path))
         OmegaConf.register_new_resolver("oc.env", oc.env)
         os.environ["TEST_USERNAME"] = "test_user"
         os.environ["TEST_KEY"] = "test_key"

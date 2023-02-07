@@ -297,7 +297,7 @@ The following graphic is taken from the [Kedro-Viz experiment tracking demo](htt
 
 ![](../meta/images/experiment-tracking-metrics-comparison.gif)
 
-Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab which you can access by following the icon on the left-hand side of the screen.
+Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab which you can access by following the icon on the left-hand side of the screen. 
 
 ![](../meta/images/pipeline_visualisation_icon.png)
 

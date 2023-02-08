@@ -467,9 +467,11 @@ def _split_params(ctx, param, value):
     conf = OmegaConf.from_dotlist(dot_list)
     return conf
 
+
 def _split_load_versions(ctx, param, value):
     lv_tuple = _get_values_as_tuple([value])
     return _reformat_load_versions(ctx, param, lv_tuple) if value else {}
+
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))

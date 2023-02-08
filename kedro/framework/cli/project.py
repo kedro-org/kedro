@@ -15,8 +15,8 @@ from kedro.framework.cli.utils import (
     _config_file_callback,
     _get_values_as_tuple,
     _reformat_load_versions,
-    _split_params,
     _split_load_versions,
+    _split_params,
     call,
     command_with_verbosity,
     env_option,
@@ -341,14 +341,28 @@ def activate_nbstripout(
     "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
 )
 @click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
-@click.option("--nodes", "nodes_names", type=str, default="", help=NODE_ARG_HELP, callback=split_node_names,)
+@click.option(
+    "--nodes",
+    "nodes_names",
+    type=str,
+    default="",
+    help=NODE_ARG_HELP,
+    callback=split_node_names,
+)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
 @env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
-@click.option("--tags", "-t", type=str, default="", help=TAG_ARG_HELP, callback=split_string,)
+@click.option(
+    "--tags",
+    "-t",
+    type=str,
+    default="",
+    help=TAG_ARG_HELP,
+    callback=split_string,
+)
 @click.option(
     "--load-version",
     "-lv",
@@ -413,11 +427,13 @@ def run(
 
     # temporary duplicates for the plural flags
     tags = _get_values_as_tuple(tags) if tags else tuple(tags)
-    nodes_names = _get_values_as_tuple(nodes_names) if nodes_names else tuple(nodes_names)
-    
-    tag = tag+tags
-    node_names = node_names+nodes_names
-    load_version = {**load_version,**load_versions}
+    nodes_names = (
+        _get_values_as_tuple(nodes_names) if nodes_names else tuple(nodes_names)
+    )
+
+    tag = tag + tags
+    node_names = node_names + nodes_names
+    load_version = {**load_version, **load_versions}
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params

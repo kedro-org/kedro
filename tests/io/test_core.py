@@ -30,7 +30,7 @@ class MyDataSet(AbstractDataSet):
         self.var = var
 
     def _describe(self):
-        return dict(var=self.var)
+        return {"var": self.var}
 
     def _load(self):
         pass  # pragma: no cover

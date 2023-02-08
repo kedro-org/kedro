@@ -139,11 +139,11 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         return fs_args
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
+        return {
+            "filepath": self._filepath,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+        }
 
     def _load(self) -> dd.DataFrame:
         return dd.read_parquet(

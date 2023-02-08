@@ -20,7 +20,7 @@ import click
 import importlib_metadata
 from omegaconf import OmegaConf
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
 
@@ -79,10 +79,10 @@ def forward_command(group, name=None, forward_help=False):
         func = command_with_verbosity(
             group,
             name=name,
-            context_settings=dict(
-                ignore_unknown_options=True,
-                help_option_names=[] if forward_help else ["-h", "--help"],
-            ),
+            context_settings={
+                "ignore_unknown_options": True,
+                "help_option_names": [] if forward_help else ["-h", "--help"],
+            },
         )(func)
         return func
 
@@ -331,7 +331,7 @@ def split_node_names(ctx, param, to_split: str) -> List[str]:
 
 def env_option(func_=None, **kwargs):
     """Add `--env` CLI option to a function."""
-    default_args = dict(type=str, default=None, help=ENV_HELP)
+    default_args = {"type": str, "default": None, "help": ENV_HELP}
     kwargs = {**default_args, **kwargs}
     opt = click.option("--env", "-e", **kwargs)
     return opt(func_) if func_ else opt

@@ -131,12 +131,12 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
         )
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            dataset=self._dataset,
-            table_name=self._table_name,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
+        return {
+            "dataset": self._dataset,
+            "table_name": self._table_name,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+        }
 
     def _load(self) -> pd.DataFrame:
         sql = f"select * from {self._dataset}.{self._table_name}"  # nosec

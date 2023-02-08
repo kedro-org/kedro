@@ -350,7 +350,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
             writer.release()
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(filepath=self._filepath, protocol=self._protocol)
+        return {"filepath": self._filepath, "protocol": self._protocol}
 
     def _exists(self) -> bool:
         return self._fs.exists(self._filepath)

@@ -67,7 +67,7 @@ def create_config_dir(tmp_path, base_config, local_config):
     local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
     parameters = tmp_path / _BASE_ENV / "parameters.json"
     db_config_path = tmp_path / _BASE_ENV / "db.ini"
-    project_parameters = dict(param1=1, param2=2)
+    project_parameters = {"param1": 1, "param2": 2}
 
     _write_yaml(proj_catalog, base_config)
     _write_yaml(local_catalog, local_config)

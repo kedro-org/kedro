@@ -68,10 +68,10 @@ class MemoryDataSet(AbstractDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         if self._data is not _EMPTY:
-            return dict(data=f"<{type(self._data).__name__}>")
+            return {"data": f"<{type(self._data).__name__}>"}
         # the string representation of datasets leaves out __init__
         # arguments that are empty/None, equivalent here is _EMPTY
-        return dict(data=None)  # pragma: no cover
+        return {"data": None}  # pragma: no cover
 
 
 def _infer_copy_mode(data: Any) -> str:

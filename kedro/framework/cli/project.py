@@ -89,8 +89,7 @@ def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-a
         raise KedroCliError(
             NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(source_path))
         ) from exc
-    else:
-        python_call("pytest", args)
+    python_call("pytest", args)
 
 
 @command_with_verbosity(project_group)

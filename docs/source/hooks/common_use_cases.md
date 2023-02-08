@@ -113,3 +113,59 @@ def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
     end = time.time()
     self._logger.info("Loading dataset %s ended at %0.3f", dataset_name, end)
 ```
+
+## Use Hooks to load external credentials
+We recommend using the `after_context_created` Hook to add credentials to the session's config loader instance. In this example we show how to load credentials from Azure KeyVault. 
+
+Here is the example KeyVault instance, note the KeyVault and secret names:
+
+![](../meta/images/example_azure_keyvault.png)
+
+These credentials will be used to access the following datasets in the data catalog:
+
+```yaml
+weather:
+ type: spark.SparkDataSet
+ filepath: s3a://your_bucket/data/01_raw/weather*
+ file_format: csv
+ credentials: s3_creds
+
+cars:
+ type: pandas.CSVDataSet
+ filepath: https://your_data_store.blob.core.windows.net/data/01_raw/cars.csv
+ file_format: csv
+ credentials: abs_creds
+```
+
+We can then use the following hook implementation to fetch and inject these credentials:
+
+```python
+# hooks.py
+
+from kedro.framework.hooks import hook_impl
+from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
+
+class AzureSecretsHook:
+    @hook_impl
+    def after_context_created(self, context) -> None:
+        keyVaultName = "keyvault-0542abb" # or os.environ["KEY_VAULT_NAME"] if you would like to provide it through environment variables
+        KVUri = f"https://{keyVaultName}.vault.azure.net"
+        
+        my_credential = DefaultAzureCredential()
+        client = SecretClient(vault_url=KVUri, credential=my_credential)
+
+        secrets = {'abs_creds':'azure-blob-store', 's3_creds':'s3-bucket-creds',}
+        azure_creds = {cred_name: client.get_secret(secret_name).value for cred_name,secret_name in secrets.items()}
+
+        context.config_loader['credentials'] = {**context.config_loader['credentials'], **azure_creds}
+```
+
+And finally, don't forget to add the hook to your `settings.py` file
+
+```python
+from my_project.hooks import AzureSecretsHook
+HOOKS = (AzureSecretsHook(),)
+```
+
+Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storasge accounts. For more information please see [Azure's documentation](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).

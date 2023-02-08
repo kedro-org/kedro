@@ -115,7 +115,7 @@ def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
 ```
 
 ## Use Hooks to load external credentials
-We recommend using the `after_context_created` Hook to add credentials to the session's config loader instance. In this example we show how to load credentials from Azure KeyVault. 
+We recommend using the `after_context_created` Hook to add credentials to the session's config loader instance. In this example we show how to load credentials from Azure KeyVault.
 
 Here is the example KeyVault instance, note the KeyVault and secret names:
 
@@ -146,25 +146,36 @@ from kedro.framework.hooks import hook_impl
 from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
 
+
 class AzureSecretsHook:
     @hook_impl
     def after_context_created(self, context) -> None:
-        keyVaultName = "keyvault-0542abb" # or os.environ["KEY_VAULT_NAME"] if you would like to provide it through environment variables
+        keyVaultName = "keyvault-0542abb"  # or os.environ["KEY_VAULT_NAME"] if you would like to provide it through environment variables
         KVUri = f"https://{keyVaultName}.vault.azure.net"
-        
+
         my_credential = DefaultAzureCredential()
         client = SecretClient(vault_url=KVUri, credential=my_credential)
 
-        secrets = {'abs_creds':'azure-blob-store', 's3_creds':'s3-bucket-creds',}
-        azure_creds = {cred_name: client.get_secret(secret_name).value for cred_name,secret_name in secrets.items()}
+        secrets = {
+            "abs_creds": "azure-blob-store",
+            "s3_creds": "s3-bucket-creds",
+        }
+        azure_creds = {
+            cred_name: client.get_secret(secret_name).value
+            for cred_name, secret_name in secrets.items()
+        }
 
-        context.config_loader['credentials'] = {**context.config_loader['credentials'], **azure_creds}
+        context.config_loader["credentials"] = {
+            **context.config_loader["credentials"],
+            **azure_creds,
+        }
 ```
 
 And finally, don't forget to add the hook to your `settings.py` file
 
 ```python
 from my_project.hooks import AzureSecretsHook
+
 HOOKS = (AzureSecretsHook(),)
 ```
 

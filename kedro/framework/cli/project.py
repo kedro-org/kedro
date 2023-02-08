@@ -16,6 +16,7 @@ from kedro.framework.cli.utils import (
     _get_values_as_tuple,
     _reformat_load_versions,
     _split_params,
+    _split_load_versions,
     call,
     command_with_verbosity,
     env_option,
@@ -340,12 +341,14 @@ def activate_nbstripout(
     "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
 )
 @click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
+@click.option("--nodes", "nodes_names", type=str, default="", help=NODE_ARG_HELP, callback=split_node_names,)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
 @env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
+@click.option("--tags", "-t", type=str, default="", help=TAG_ARG_HELP, callback=split_string,)
 @click.option(
     "--load-version",
     "-lv",
@@ -353,6 +356,13 @@ def activate_nbstripout(
     multiple=True,
     help=LOAD_VERSION_HELP,
     callback=_reformat_load_versions,
+)
+@click.option(
+    "--load-versions",
+    type=str,
+    default="",
+    help=LOAD_VERSION_HELP,
+    callback=_split_load_versions,
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
 @click.option(
@@ -377,15 +387,18 @@ def activate_nbstripout(
 # pylint: disable=too-many-arguments,unused-argument
 def run(
     tag,
+    tags,
     env,
     runner,
     is_async,
     node_names,
+    nodes_names,
     to_nodes,
     from_nodes,
     from_inputs,
     to_outputs,
     load_version,
+    load_versions,
     pipeline,
     config,
     conf_source,
@@ -397,6 +410,14 @@ def run(
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
+
+    # temporary duplicates for the plural flags
+    tags = _get_values_as_tuple(tags) if tags else tuple(tags)
+    nodes_names = _get_values_as_tuple(nodes_names) if nodes_names else tuple(nodes_names)
+    
+    tag = tag+tags
+    node_names = node_names+nodes_names
+    load_version = {**load_version,**load_versions}
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params

@@ -11,14 +11,14 @@
 # Upcoming Release 0.18.5
 
 ## Major features and improvements
-* Added new `OmegaConfLoader` which uses `OmegaConf` for loading and merging configuration.
+* Added new `OmegaConfigLoader` which uses `OmegaConf` for loading and merging configuration.
 * Added the `--conf-source` option to `kedro run`, allowing users to specify a source for project configuration for the run.
 * Added `omegaconf` syntax as option for `--params`. Keys and values can now be separated by colons or equals signs.
 * Added support for generator functions as nodes, i.e. using `yield` instead of return.
   * Enable chunk-wise processing in nodes with generator functions.
   * Save node outputs after every `yield` before proceeding with next chunk.
 * Fixed incorrect parsing of Azure Data Lake Storage Gen2 URIs used in datasets.
-* Added support for loading credentials from environment variables using OmegaConfLoader.
+* Added support for loading credentials from environment variables using `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
 * Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).

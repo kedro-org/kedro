@@ -121,7 +121,7 @@ Here is the example KeyVault instance, note the KeyVault and secret names:
 
 ![](../meta/images/example_azure_keyvault.png)
 
-These credentials will be used to access the following datasets in the data catalog:
+These credentials will be used to access these datasets in the data catalog:
 
 ```yaml
 weather:
@@ -171,7 +171,7 @@ class AzureSecretsHook:
         }
 ```
 
-And finally, don't forget to add the hook to your `settings.py` file
+And finally, don't forget to add the hook to your `settings.py` file:
 
 ```python
 from my_project.hooks import AzureSecretsHook

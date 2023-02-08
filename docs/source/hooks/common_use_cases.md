@@ -171,7 +171,7 @@ class AzureSecretsHook:
         }
 ```
 
-And finally, don't forget to add the hook to your `settings.py` file:
+Finally, add the hook to your `settings.py` file:
 
 ```python
 from my_project.hooks import AzureSecretsHook
@@ -179,4 +179,4 @@ from my_project.hooks import AzureSecretsHook
 HOOKS = (AzureSecretsHook(),)
 ```
 
-Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storasge accounts. For more information please see [Azure's documentation](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
+Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).

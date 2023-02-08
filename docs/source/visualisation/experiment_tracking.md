@@ -11,11 +11,16 @@ The metadata you store may include:
 * Model weights
 * Plots and other visualisations
 
-Early versions of Kedro supported parameter versioning (as part of your codebase with a version control system like `git`) and Kedro’s dataset versioning capabilities enabled you to [snapshot models, datasets and plots](../data/data_catalog.md#version-datasets-and-ml-models).
+## Kedro versions supporting experiment tracking
+Kedro has always supported parameter versioning (as part of your codebase with a version control system like `git`) and Kedro’s dataset versioning capabilities enabled you to [snapshot models, datasets and plots](../data/data_catalog.md#version-datasets-and-ml-models).
 
-More recent versions of Kedro and Kedro-Viz introduce metadata capture, visualisation, discovery and comparison, enabling you to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
+Kedro-Viz version 4.1.1 introduced metadata capture, visualisation, discovery and comparison, enabling you to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 
-Take a look at the [Kedro-Viz experiment tracking demo](https://demo.kedro.org/experiment-tracking) for further information.
+Kedro-Viz version 5.0 also supports the [display and comparison of plots, such as Plotly and Matplotlib](../visualisation/visualise_charts_with_plotly.md). Support for metric plots (timeseries and parellel coords) was added to Kedro-Viz version 5.2.1.
+
+## Experiment tracking demonstration using Kedro-Viz
+
+We have made an [experiment tracking demo](https://demo.kedro.org/experiment-tracking) to enable you to explore the capabilities of Kedro-Viz further.
 
 ![](../meta/images/experiment-tracking_demo.gif)
 
@@ -33,15 +38,18 @@ The choice of experiment tracking tool depends on your use case and choice of co
 
 This section describes the steps necessary to set up experiment tracking and access logged metrics, using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) with a version of Kedro equal to or higher than 0.18.4, and a version of Kedro-Viz equal to or higher than 5.2.
 
-
 There are three steps to enable experiment tracking features with Kedro-Viz. We illustrate how to:
 
 - [Set up a session store to capture experiment metadata](#set-up-the-session-store)
 - [Set up experiment tracking datasets to list the metrics to track](#set-up-experiment-tracking-datasets)
 - [Modify your nodes and pipelines to output those metrics](#modify-your-nodes-and-pipelines-to-log-metrics)
 
-### Prerequisites
-We assume that you have already [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). Before proceeding, ensure you're using Kedro-Viz `>=5.2.1` (you can confirm your Kedro-Viz version by running `kedro info`).
+### Install Kedro and Kedro-Viz
+To use this tutorial code, you must already have [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). You can confirm the versions you have installed by running `kedro info`
+
+```{note}
+The example code uses a version of Kedro-Viz `>=5.2.1`.
+```
 
 Create a new project using the spaceflights starter. From the terminal run:
 
@@ -217,7 +225,7 @@ You can now access, compare and pin your runs by toggling the `Compare runs` but
 
 ## View and compare plots
 
-From Kedro-Viz `>=5.0.0` experiment tracking also supports the [display and comparison of plots, such as Plotly and Matplotlib](../visualisation/visualise_charts_with_plotly.md). In this section, we illustrate how to compare Matplotlib plots across experimental runs.
+In this section, we illustrate how to compare Matplotlib plots across experimental runs (functionality available since Kedro-Viz version 5.0).
 
 ### Update the dependencies
 
@@ -298,7 +306,7 @@ The following graphic is taken from the [Kedro-Viz experiment tracking demo](htt
 
 ![](../meta/images/experiment-tracking-metrics-comparison.gif)
 
-Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab which you can access by following the icon on the left-hand side of the screen. 
+Additionally, you can monitor the changes to metrics over time from the pipeline visualisation tab which you can access by following the icon on the left-hand side of the screen.
 
 ![](../meta/images/pipeline_visualisation_icon.png)
 

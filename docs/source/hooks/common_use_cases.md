@@ -115,7 +115,7 @@ def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
 ```
 
 ## Use Hooks to load external credentials
-We recommend using the `after_context_created` Hook to add credentials to the session's config loader instance. In this example we show how to load credentials from Azure KeyVault.
+We recommend using the `after_context_created` Hook to add credentials to the session's config loader instance from any external credentials manager. In this example we show how to load credentials from [Azure KeyVault](https://learn.microsoft.com/en-us/azure/key-vault/general/).
 
 Here is the example KeyVault instance, note the KeyVault and secret names:
 
@@ -179,4 +179,4 @@ from my_project.hooks import AzureSecretsHook
 HOOKS = (AzureSecretsHook(),)
 ```
 
-Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
+> Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).

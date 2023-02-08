@@ -398,7 +398,7 @@ def activate_nbstripout(
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-# pylint: disable=too-many-arguments,unused-argument
+# pylint: disable=too-many-arguments,unused-argument, too-many-locals
 def run(
     tag,
     tags,

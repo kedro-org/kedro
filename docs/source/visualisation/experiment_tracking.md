@@ -11,18 +11,18 @@ The metadata you store may include:
 * Model weights
 * Plots and other visualisations
 
+### Experiment tracking demonstration using Kedro-Viz
+
+We have made an [experiment tracking demo](https://demo.kedro.org/experiment-tracking) to enable you to explore the capabilities of Kedro-Viz further.
+
+![](../meta/images/experiment-tracking_demo.gif)
+
 ## Kedro versions supporting experiment tracking
 Kedro has always supported parameter versioning (as part of your codebase with a version control system like `git`) and Kedro’s dataset versioning capabilities enabled you to [snapshot models, datasets and plots](../data/data_catalog.md#version-datasets-and-ml-models).
 
 Kedro-Viz version 4.1.1 introduced metadata capture, visualisation, discovery and comparison, enabling you to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 
 Kedro-Viz version 5.0 also supports the [display and comparison of plots, such as Plotly and Matplotlib](../visualisation/visualise_charts_with_plotly.md). Support for metric plots (timeseries and parellel coords) was added to Kedro-Viz version 5.2.1.
-
-## Experiment tracking demonstration using Kedro-Viz
-
-We have made an [experiment tracking demo](https://demo.kedro.org/experiment-tracking) to enable you to explore the capabilities of Kedro-Viz further.
-
-![](../meta/images/experiment-tracking_demo.gif)
 
 ## When should I use experiment tracking in Kedro?
 

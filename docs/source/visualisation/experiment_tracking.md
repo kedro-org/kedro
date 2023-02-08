@@ -83,7 +83,7 @@ This specifies the creation of the `SQLiteStore` under the `data/` subfolder, us
 This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-experiment-tracking-datasets) or [set up your nodes and pipelines to log metrics](#modify-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable, but both should be completed to get a working experiment tracking setup.
 
 ```{note}
-Please ensure that your installed version of Kedro-Viz `>=5.2.1`.
+Please ensure that your installed version of Kedro-Viz is `>=5.2.1`.
 ```
 
 ## Set up experiment tracking datasets

@@ -426,6 +426,7 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
     load_versions_dict = {}
 
     for load_version in value:
+        load_version = load_version.strip()
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:
             raise KedroCliError(

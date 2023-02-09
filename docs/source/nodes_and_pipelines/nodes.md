@@ -187,9 +187,7 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 Generator functions are useful for providing lazy iterators to search for items without storing in memory. We can wrap generator functions in a Kedro pipeline and save the result by calling the dataset's `save` method separately for each chunk.
 The following example will show you how to utilise `pandas chunksize` generator to process large datasets:
 
-Firstly, we need to create a [custom dataset](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html) with `_load` having `chunksize` parameter for `pd.read_csv()` and `_save` should save the data in append-or-create mode, `a+`.
-<details>
-<summary><b>Click to expand</b></summary>
+We need to create a [custom dataset](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html) with `_load` having `chunksize` parameter for `pd.read_csv()` and `_save` should save the data in append-or-create mode, `a+`.
 
 ```python
 def _load(self) -> pd.DataFrame:
@@ -205,12 +203,8 @@ def _save(self, data: pd.DataFrame) -> None:
     with self._fs.open(save_path, mode="a+") as fs_file:
         fs_file.write(buf.getvalue())
 ```
-</details>
 
 Using the `pandas-iris` starter as an example we will repurpose `split_dataset` function to process chunk-wise data:
-
-<details>
-<summary><b>Click to expand</b></summary>
 
 ```python
 def split_data(
@@ -237,4 +231,22 @@ def split_data(
         y_test = data_test[parameters["target_column"]]
         yield X_train, X_test, y_train, y_test
 ```
-</details>
+
+When we now do `kedro run` the output should now be saving `X_train`, `X_test`, `y_train`, `y_test`in chunks:
+
+```
+...
+[02/09/23 13:21:57] INFO     Loading data from 'example_iris_data' (CustomDataSet)...                                                                                data_catalog.py:343
+                    INFO     Loading data from 'parameters' (MemoryDataSet)...                                                                                     data_catalog.py:343
+                    INFO     Running node: split: split_data([example_iris_data,parameters]) -> [X_train,X_test,y_train,y_test]                                            node.py:329
+                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                                                                           data_catalog.py:382
+                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                                                                            data_catalog.py:382
+                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                                                                           data_catalog.py:382
+                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                                                                            data_catalog.py:382
+                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                                                                           data_catalog.py:382
+                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                                                                            data_catalog.py:382
+                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                                                                           data_catalog.py:382
+                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                                                                            data_catalog.py:382
+                    INFO     Completed 1 out of 3 tasks                                                                                                        sequential_runner.py:85
+...
+```

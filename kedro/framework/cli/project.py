@@ -357,7 +357,6 @@ def activate_nbstripout(
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
     "--tags",
-    "-t",
     type=str,
     default="",
     help=TAG_ARG_HELP,

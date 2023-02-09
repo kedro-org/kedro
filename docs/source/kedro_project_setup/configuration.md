@@ -237,20 +237,20 @@ Although Jinja2 is a very powerful and extremely flexible template engine, which
 ## Configuration with OmegaConf
 
 [OmegaConf](https://omegaconf.readthedocs.io/) is a Python library for configuration. It is a YAML-based hierarchical configuration system with support for merging configurations from multiple sources.
-From Kedro 0.18.5 you can use the [`OmegaConfLoader`](/kedro.config.OmegaConfLoader) which uses `OmegaConf` under the hood to load data.
+From Kedro 0.18.5 you can use the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) which uses `OmegaConf` under the hood to load data.
 
 ```{note}
-`OmegaConfLoader` is under active development and will be available from Kedro 0.18.5. New features will be added in future releases. Let us know if you have any feedback about the `OmegaConfLoader` or ideas for new features.
+`OmegaConfigLoader` is under active development and will be available from Kedro 0.18.5. New features will be added in future releases. Let us know if you have any feedback about the `OmegaConfigLoader` or ideas for new features.
 ```
 
-The `OmegaConfLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
+The `OmegaConfigLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
 
-To use the `OmegaConfLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
+To use the `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
 
 ```python
-from kedro.config import OmegaConfLoader  # new import
+from kedro.config import OmegaConfigLoader  # new import
 
-CONFIG_LOADER_CLASS = OmegaConfLoader
+CONFIG_LOADER_CLASS = OmegaConfigLoader
 ```
 
 ### Templating for parameters
@@ -270,11 +270,11 @@ data:
   size: 0.2
 ```
 
-Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfLoader` will load the files and resolve the placeholders correctly.
+Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
 
 ### Environment variables for credentials
-The [`OmegaConfLoader`](/kedro.config.OmegaConfLoader) enables you to load credentials from environment variables. To achieve this you have to use the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
+The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
 This is an example of how you can access credentials from environment variables in `credentials.yml`:
 
 ```yaml

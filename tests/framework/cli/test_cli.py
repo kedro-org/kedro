@@ -517,7 +517,44 @@ class TestRunCommand:
         assert isinstance(runner, SequentialRunner)
         assert not runner._is_async
 
-        assert True
+    @mark.parametrize(
+        "tags_input, tags_expected",
+        [
+            ["tag1", ("tag1",)],
+            ["tag1,tag2", ("tag1", "tag2")],
+            ["tag1, tag2", ("tag1", "tag2")],
+        ],
+    )
+    def test_run_with_tags(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        tags_input,
+        tags_expected,
+    ):
+        tags_command = "--tags=" + tags_input
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", tags_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=tags_expected,
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
 
     def test_run_with_pipeline_filters(
         self, fake_project_cli, fake_metadata, fake_session, mocker

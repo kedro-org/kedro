@@ -483,11 +483,18 @@ def _deprecate_options(ctx, param, value):
         "tag": "--tags",
         "load_version": "--load-versions",
     }
+    shorthand_flag = {
+        "node_names": "-n",
+        "tag": "-t",
+        "load_version": "-lv",
+    }
     if value:
         deprecation_message = (
             f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
             "and will not be available from Kedro 0.19.0. "
-            f"Use the flag '{new_flag[param.name]}' instead. "
+            f"Use the flag '{new_flag[param.name]}' instead. Shorthand "
+            f"'{shorthand_flag[param.name]}' will be updated to use "
+            f"'{new_flag[param.name]}' in Kedro 0.19.0."
         )
         click.secho(deprecation_message, fg="red")
     return value

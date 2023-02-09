@@ -7,22 +7,21 @@ Kedro also has an advanced feature which supports packaging on a pipeline level 
 
 ## Add documentation to your project
 
-Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) and creates a `docs` directory that builds a basic template for project-specific documentation. We recommend that you add your project-specific documentation as markdown in `docs/source`
+Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) to build markdown documentation that you create about your project, in combination with any [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) that are defined in your code.
 
-If you want to customise your documentation beyond the basic template, refer to the [Sphinx documentation](https://www.sphinx-doc.org/en/master/usage/configuration.html) for details of how to extend `docs/source/conf.py`.
+Within the Kedro project structure there is a `docs` directory for Sphinx configuration files and to store project-specific markdown documentation.
 
-Once you have added any documentation you need, run the following from the project root directory:
+Add the documentation you need, and update `docs/source/index.rst` to define a table of contents
+
+Next, run the following from the project root directory:
 
 ```bash
-kedro build-docs --open
+sphinx-build -M html docs/source docs/build -a
 ```
 
-The HTML documention is built to `docs/build/html` and opens automatically in a browser tab.
+The command is configured to build the documentation as HTML, taking `docs/source` as the `sourcedir` and `/docs/build` as the `outputdir`.
 
-```{note}
-The `build-docs` command creates documentation based on the code structure of your project. Documentation includes any [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) defined in your code.
-```
-
+Consult the Sphinx project documentation for [additional options to pass to `sphinx-build`](https://www.sphinx-doc.org/en/master/man/sphinx-build.html). To customise your documentation beyond the basic template, you'll need to adjust the [Sphinx configuration settings](https://www.sphinx-doc.org/en/master/usage/configuration.html) which are stored in `docs/source/conf.py` file.
 
 ## Package your project
 

@@ -181,3 +181,60 @@ Out[2]: {'sum': 5}
 ```{note}
 You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
 ```
+
+## How to use generator functions in a node
+
+Generator functions are useful for providing lazy iterators to search for items without storing in memory. We can wrap generator functions in a Kedro pipeline and save the result by calling the dataset's `save` method separately for each chunk.
+The following example will show you how to utilise `pandas chunksize` generator to process large datasets:
+
+Firstly, we need to create a [custom dataset](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html) with `_load` having `chunksize` parameter for `pd.read_csv()` and `_save` should save the data in append-or-create mode, `a+`.
+<details>
+<summary><b>Click to expand</b></summary>
+
+```python
+def _load(self) -> pd.DataFrame:
+    load_path = str(self._get_load_path())
+    return pd.read_csv(load_path, **self._load_args, chunksize=50)
+
+def _save(self, data: pd.DataFrame) -> None:
+    save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+    buf = BytesIO()
+    data.to_csv(path_or_buf=buf, **self._save_args)
+
+    with self._fs.open(save_path, mode="a+") as fs_file:
+        fs_file.write(buf.getvalue())
+```
+</details>
+
+Using the `pandas-iris` starter as an example we will repurpose `split_dataset` function to process chunk-wise data:
+
+<details>
+<summary><b>Click to expand</b></summary>
+
+```python
+def split_data(
+    data: pd.DataFrame, parameters: Dict[str, Any]
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    """Splits data into features and target training and test sets.
+
+    Args:
+        data: Data containing features and target.
+        parameters: Parameters defined in parameters.yml.
+    Returns:
+        Split data.
+    """
+    for chunk in data:
+        full_data = pd.concat([chunk])
+        data_train = full_data.sample(
+            frac=parameters["train_fraction"], random_state=parameters["random_state"]
+        )
+        data_test = full_data.drop(data_train.index)
+
+        X_train = data_train.drop(columns=parameters["target_column"])
+        X_test = data_test.drop(columns=parameters["target_column"])
+        y_train = data_train[parameters["target_column"]]
+        y_test = data_test[parameters["target_column"]]
+        yield X_train, X_test, y_train, y_test
+```
+</details>

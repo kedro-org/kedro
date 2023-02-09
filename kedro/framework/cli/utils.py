@@ -322,6 +322,7 @@ def split_node_names(ctx, param, to_split: str) -> List[str]:
         elif char == "]":
             match_state -= 1
         if char == "," and match_state == 0 and argument:
+            argument = argument.strip()
             result.append(argument)
             argument = ""
         else:

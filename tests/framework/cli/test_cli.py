@@ -478,12 +478,53 @@ class TestRunCommand:
         assert isinstance(runner, SequentialRunner)
         assert not runner._is_async
 
+    @mark.parametrize(
+        "nodes_input, nodes_expected",
+        [
+            ["splitting_data", ("splitting_data",)],
+            ["splitting_data,training_model", ("splitting_data", "training_model")],
+            ["splitting_data, training_model", ("splitting_data", "training_model")],
+        ],
+    )
+    def test_run_specific_nodes(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        nodes_input,
+        nodes_expected,
+    ):
+        nodes_command = "--nodes=" + nodes_input
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", nodes_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=nodes_expected,
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
+
+        assert True
+
     def test_run_with_pipeline_filters(
         self, fake_project_cli, fake_metadata, fake_session, mocker
     ):
         from_nodes = ["--from-nodes", "splitting_data"]
         to_nodes = ["--to-nodes", "training_model"]
-        tags = ["--tag", "de"]
+        tags = ["--tags", "de"]
         result = CliRunner().invoke(
             fake_project_cli, ["run", *from_nodes, *to_nodes, *tags], obj=fake_metadata
         )

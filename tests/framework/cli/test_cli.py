@@ -23,6 +23,7 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
+    _split_load_versions,
     forward_command,
     get_pkg_version,
 )
@@ -783,10 +784,55 @@ class TestRunCommand:
             pipeline_name=None,
         )
 
+    @mark.parametrize(
+        "lv_input",
+        [
+            "dataset1:time1",
+            "dataset1:time1,dataset2:time2",
+            "dataset1:time1, dataset2:time2",
+        ],
+    )
+    def test_split_load_versions(
+        self, fake_project_cli, fake_metadata, fake_session, lv_input, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--load-versions", lv_input], obj=fake_metadata
+        )
+        assert not result.exit_code, result.output
+
+        load_versions = _split_load_versions(None, None, lv_input)
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions=load_versions,
+            pipeline_name=None,
+        )
+
     def test_fail_reformat_load_versions(self, fake_project_cli, fake_metadata):
         load_version = "2020-05-12T12.00.00"
         result = CliRunner().invoke(
             fake_project_cli, ["run", "-lv", load_version], obj=fake_metadata
+        )
+        assert result.exit_code, result.output
+
+        expected_output = (
+            f"Error: Expected the form of 'load_version' to be "
+            f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
+            f"found {load_version} instead\n"
+        )
+        assert expected_output in result.output
+
+    def test_fail_split_load_versions(self, fake_project_cli, fake_metadata):
+        load_version = "2020-05-12T12.00.00"
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--load-versions", load_version],
+            obj=fake_metadata,
         )
         assert result.exit_code, result.output
 

@@ -355,7 +355,7 @@ def activate_nbstripout(
     callback=_reformat_load_versions,
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
-@click.option("--namespace", "--ns", type=str, default=None, help=NAMESPACE_ARG_HELP)
+@click.option("--namespace", "-ns", type=str, default=None, help=NAMESPACE_ARG_HELP)
 @click.option(
     "--config",
     "-c",

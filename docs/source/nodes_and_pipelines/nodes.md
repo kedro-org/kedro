@@ -318,7 +318,7 @@ def split_data(
         yield X_train, X_test, y_train, y_test
 ```
 
-We can now `kedro run` in the terminal where the output will be saving `X_train`, `X_test`, `y_train`, `y_test` in chunks:
+We can now `kedro run` in the terminal. The output shows `X_train`, `X_test`, `y_train`, `y_test` saved in chunks:
 
 ```
 ...

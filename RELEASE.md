@@ -29,12 +29,18 @@
 * Fixed bug causing the `after_dataset_saved` hook only to be called for one output dataset when multiple are saved in a single node and async saving is in use.
 * Log level for "Credentials not found in your Kedro project config" was changed from `WARNING` to `DEBUG`.
 * Added safe extraction of tar files in `micropkg pull` to fix vulnerability caused by [CVE-2007-4559](https://github.com/advisories/GHSA-gw9q-c7gh-j9vm).
-* Added example for loading external credentials to the Hooks documentation.
+* Documentation improvements
+    * Bug fix in table font size
+    * Updated API docs links for datasets
+    * Improved CLI docs for `kedro run`
+    * Revised documentation for visualisation to build plots and for experiment tracking
+    * Added example for loading external credentials to the Hooks documentation
 
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.
+* Deprecated `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
 
 # Release 0.18.4
 

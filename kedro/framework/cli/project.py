@@ -351,7 +351,6 @@ def activate_nbstripout(
 )
 @click.option("--runner", "-r", type=str, default=None, help=RUNNER_ARG_HELP)
 @click.option("--async", "is_async", is_flag=True, help=ASYNC_ARG_HELP)
-
 @env_option
 @click.option(
     "--tag",

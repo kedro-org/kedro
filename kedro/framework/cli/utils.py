@@ -423,7 +423,9 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
     """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
-    _deprecate_options(ctx, param, value)
+    if param.name != "load_versions":
+        _deprecate_options(ctx, param, value)
+
     load_versions_dict = {}
     for load_version in value:
         load_version = load_version.strip()

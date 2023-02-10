@@ -785,22 +785,32 @@ class TestRunCommand:
         )
 
     @mark.parametrize(
-        "lv_input",
+        "lv_input, lv_dict",
         [
-            "dataset1:time1",
-            "dataset1:time1,dataset2:time2",
-            "dataset1:time1, dataset2:time2",
+            [
+                "dataset1:time1",
+                {
+                    "dataset1": "time1",
+                },
+            ],
+            [
+                "dataset1:time1,dataset2:time2",
+                {"dataset1": "time1", "dataset2": "time2"},
+            ],
+            [
+                "dataset1:time1, dataset2:time2",
+                {"dataset1": "time1", "dataset2": "time2"},
+            ],
         ],
     )
     def test_split_load_versions(
-        self, fake_project_cli, fake_metadata, fake_session, lv_input, mocker
+        self, fake_project_cli, fake_metadata, fake_session, lv_input, lv_dict, mocker
     ):
         result = CliRunner().invoke(
             fake_project_cli, ["run", "--load-versions", lv_input], obj=fake_metadata
         )
         assert not result.exit_code, result.output
 
-        load_versions = _split_load_versions(None, None, lv_input)
         fake_session.run.assert_called_once_with(
             tags=(),
             runner=mocker.ANY,
@@ -809,7 +819,7 @@ class TestRunCommand:
             to_nodes=[],
             from_inputs=[],
             to_outputs=[],
-            load_versions=load_versions,
+            load_versions=lv_dict,
             pipeline_name=None,
         )
 

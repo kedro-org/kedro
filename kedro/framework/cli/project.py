@@ -349,7 +349,7 @@ def activate_nbstripout(
     multiple=True,
     help=NODE_ARG_HELP,
     callback=_deprecate_options,
-)  
+)
 @click.option(
     "--nodes",
     "nodes_names",

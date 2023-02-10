@@ -13,6 +13,7 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
     _config_file_callback,
+    _deprecate_options,
     _get_values_as_tuple,
     _reformat_load_versions,
     _split_params,
@@ -339,11 +340,26 @@ def activate_nbstripout(
 @click.option(
     "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
 )
-@click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
+@click.option(
+    "--node",
+    "-n",
+    "node_names",
+    type=str,
+    multiple=True,
+    help=NODE_ARG_HELP,
+    callback=_deprecate_options,
+)
 @click.option("--runner", "-r", type=str, default=None, help=RUNNER_ARG_HELP)
 @click.option("--async", "is_async", is_flag=True, help=ASYNC_ARG_HELP)
 @env_option
-@click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
+@click.option(
+    "--tag",
+    "-t",
+    type=str,
+    multiple=True,
+    help=TAG_ARG_HELP,
+    callback=_deprecate_options,
+)
 @click.option(
     "--load-version",
     "-lv",

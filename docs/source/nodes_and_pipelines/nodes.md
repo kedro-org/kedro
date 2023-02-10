@@ -184,11 +184,14 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 ## How to use generator functions in a node
 
-Generator functions are useful for providing lazy iterators over big number of items without storing all of them in memory at once. We can wrap generator functions in a Kedro pipeline, the Kedro runner will make sure to save the result by calling the dataset's `save` method separately for each chunk.
+[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255). They are a special kind of function that returns a lazy iterators but do not store their entire contents in memory all at once.
 
-The following tutorial will show you how to utilise `pandas chunksize` generator to process large datasets, we will demonstrate this using the [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) [starter](https://kedro.readthedocs.io/en/stable/kedro_project_setup/starters.html):
+The following code uses a `pandas chunksize` generator to process large datasets within the [`pandas-iris` starter](../kedro_project_setup/starters.md):
 
-Create a [custom dataset](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html) called `ChunkWiseCSVDataSet` in `src/YOUR_PROJECT_NAME/extras/datasets/chunkwise_datasets.py` for your `pandas-iris` project. This dataset is a simplified version of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `a+`. 
+Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataSet` in `src/YOUR_PROJECT_NAME/extras/datasets/chunkwise_datasets.py` for your `pandas-iris` project. This dataset is a simplified version of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `a+`. 
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 from copy import deepcopy
@@ -274,8 +277,9 @@ class ChunkWiseCSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         with self._fs.open(save_path, mode="a+") as fs_file:
             fs_file.write(buf.getvalue())
 ```
+</details>
 
-Modify `example_iris_data` in the `catalog.yml` by changing `type` to the custom dataset we created above and adding `chunksize: 100` to `load_args` which will return an iterable object. The `chunksize` parameter itself refers to the number of rows in each chunk.
+Modify `example_iris_data` in `catalog.yml` by changing `type` to the custom dataset you created above. Add `chunksize: 100` to `load_args` which will return an iterable object. The `chunksize` parameter refers to the number of rows in each chunk.
 
 ```yaml
 example_iris_data:
@@ -285,7 +289,7 @@ example_iris_data:
     chunksize: 100
 ```
 
-In `nodes.py` we will repurpose the [`split_data`](https://github.com/kedro-org/kedro-starters/blob/dacdd56f1c1afde00a03a1e342fc0f44e1567a1e/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/nodes.py#L13) function to process chunk-wise data:
+Next, in `nodes.py` we repurpose the [`split_data`](https://github.com/kedro-org/kedro-starters/blob/dacdd56f1c1afde00a03a1e342fc0f44e1567a1e/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/nodes.py#L13) function to process chunk-wise data:
 
 ```python
 def split_data(

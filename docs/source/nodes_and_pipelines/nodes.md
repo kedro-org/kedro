@@ -186,9 +186,9 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 Generator functions are useful for providing lazy iterators over big number of items without storing all of them in memory at once. We can wrap generator functions in a Kedro pipeline, the Kedro runner will make sure to save the result by calling the dataset's `save` method separately for each chunk.
 
-The following tutorial will show you how to utilise `pandas chunksize` generator to process large datasets we will demonstrate this using the [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) [starter](https://kedro.readthedocs.io/en/stable/kedro_project_setup/starters.html):
+The following tutorial will show you how to utilise `pandas chunksize` generator to process large datasets, we will demonstrate this using the [`pandas-iris`](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) [starter](https://kedro.readthedocs.io/en/stable/kedro_project_setup/starters.html):
 
-Create a [custom dataset](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html) called `ChunkWiseCSVDataSet` in `src/YOUR_PROJECT_NAME/extras/datasets/chunkwise_datasets.py` for your `pandas-iris` project . This dataset is a simplified version of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `a+`. 
+Create a [custom dataset](https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html) called `ChunkWiseCSVDataSet` in `src/YOUR_PROJECT_NAME/extras/datasets/chunkwise_datasets.py` for your `pandas-iris` project. This dataset is a simplified version of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `a+`. 
 
 ```python
 from copy import deepcopy

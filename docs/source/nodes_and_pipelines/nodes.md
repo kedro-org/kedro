@@ -188,7 +188,7 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 The following code uses a `pandas chunksize` generator to process large datasets within the [`pandas-iris` starter](../kedro_project_setup/starters.md). Going forward we will assume you have already set up a Kedro `pandas-iris` starter project. If you have not yet, do so by following the [Kedro starters guidelines](../kedro_project_setup/starters.md).
 
-Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataSet` in `src/YOUR_PROJECT_NAME/extras/datasets/chunkwise_datasets.py` for your `pandas-iris` project. This dataset is a simplified version of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `a+`. 
+Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataSet` in `src/YOUR_PROJECT_NAME/extras/datasets/chunkwise_dataset.py` for your `pandas-iris` project. This dataset is a simplified version of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `a+`. 
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -315,7 +315,7 @@ def split_data(
         X_test = data_test.drop(columns=parameters["target_column"])
         y_train = data_train[parameters["target_column"]]
         y_test = data_test[parameters["target_column"]]
-        yield X_train, X_test, y_train, y_test
+        yield X_train, X_test, y_train, y_test # Use yield instead of return to get the generator object
 ```
 
 We can now `kedro run` in the terminal. The output shows `X_train`, `X_test`, `y_train`, `y_test` saved in chunks:

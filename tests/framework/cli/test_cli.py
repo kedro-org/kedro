@@ -23,7 +23,6 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
-    _split_load_versions,
     forward_command,
     get_pkg_version,
 )

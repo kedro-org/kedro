@@ -9,7 +9,7 @@ import toml
 import yaml
 
 from kedro import __version__ as kedro_version
-from kedro.config import AbstractConfigLoader, ConfigLoader, OmegaConfLoader
+from kedro.config import AbstractConfigLoader, ConfigLoader, OmegaConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     ValidationError,
@@ -95,7 +95,7 @@ def mock_settings_custom_config_loader_class(mocker):
 def mock_settings_omega_config_loader_class(mocker):
     class MockSettings(_ProjectSettings):
         _CONFIG_LOADER_CLASS = _HasSharedParentClassValidator(
-            "CONFIG_LOADER_CLASS", default=lambda *_: OmegaConfLoader
+            "CONFIG_LOADER_CLASS", default=lambda *_: OmegaConfigLoader
         )
 
     return _mock_imported_settings_paths(mocker, MockSettings())

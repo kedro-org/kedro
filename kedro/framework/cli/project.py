@@ -340,10 +340,8 @@ def activate_nbstripout(
     "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_node_names
 )
 @click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
-@click.option(
-    "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
-)
-@click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
+@click.option("--runner", "-r", type=str, default=None, help=RUNNER_ARG_HELP)
+@click.option("--async", "is_async", is_flag=True, help=ASYNC_ARG_HELP)
 @env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(

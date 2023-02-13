@@ -435,14 +435,12 @@ def run(
 
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
 
-    tag = _get_values_as_tuple(tag) if tag else tag
-    node_names = _get_values_as_tuple(node_names) if node_names else node_names
+    tag = _get_values_as_tuple(tag)
+    node_names = _get_values_as_tuple(node_names)
 
     # temporary duplicates for the plural flags
-    tags = _get_values_as_tuple(tags) if tags else tuple(tags)
-    nodes_names = (
-        _get_values_as_tuple(nodes_names) if nodes_names else tuple(nodes_names)
-    )
+    tags = _get_values_as_tuple(tags)
+    nodes_names = _get_values_as_tuple(nodes_names)
 
     tag = tag + tags
     node_names = node_names + nodes_names

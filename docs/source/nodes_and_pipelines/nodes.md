@@ -184,9 +184,9 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 ## How to use generator functions in a node
 
-[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255). They are a special kind of function that returns a lazy iterators but do not store their entire contents in memory all at once.
+[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255). They are a special kind of function that returns lazy iterators but do not store their entire contents in memory all at once.
 
-The following code uses a `pandas chunksize` generator to process large datasets within the [`pandas-iris` starter](../kedro_project_setup/starters.md). Going forward we will assume you have already set up a Kedro `pandas-iris` starter project. If you have not yet, do so by following the [Kedro starters guidelines](../kedro_project_setup/starters.md).
+The following code uses a `pandas chunksize` generator to process large datasets within the [`pandas-iris` starter](../kedro_project_setup/starters.md). First set up a project by following the [get started guide](../get_started/new_project.md#create-the-example-project) to create a Kedro project with the `pandas-iris` starter example code.
 
 Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataSet` in `src/YOUR_PROJECT_NAME/extras/datasets/chunkwise_dataset.py` for your `pandas-iris` project. This dataset is a simplified version of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `a+`. 
 

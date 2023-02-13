@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 from collections import namedtuple
 from itertools import cycle
 from os import rename

@@ -4,24 +4,81 @@ This section explains how to build your project documentation, and how to bundle
 
 Kedro also has an advanced feature which supports packaging on a pipeline level allowing you share and reuse pipelines across projects! To read more about this please look at the [section on micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 
-
 ## Add documentation to your project
 
-Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) to build markdown documentation that you create about your project, in combination with any [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) that are defined in your code.
+Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) to build markdown documentation that you create about your project.
 
-Within the Kedro project structure there is a `docs` directory for Sphinx configuration files and to store project-specific markdown documentation.
-
-Add the documentation you need, and update `docs/source/index.rst` to define a table of contents
-
-Next, run the following from the project root directory:
+Run the following from the project root directory:
 
 ```bash
-sphinx-build -M html docs/source docs/build -a
+pip install sphinx
 ```
 
-The command is configured to build the documentation as HTML, taking `docs/source` as the `sourcedir` and `/docs/build` as the `outputdir`.
+### Set up the Sphinx project files
+Navigate to the `docs` directory of your Kedro project. Before Kedro version 0.19, this directory was pre-populated with Sphinx configuration files `conf.py`, and `index.rst` which the original `kedro build-docs` command needed. As that command is deprecated, if those files have been created with your Kedro project you should delete them (they will be removed from Kedro version 0.19 onwards), leaving your project's `docs` directory empty.
 
+In the terminal, run the following command from the `docs` folder:
+
+```bash
+sphinx-quickstart
+```
+
+In the instructions below, we assume that you select `y` to separate the documentation configuration files from the source files, but you can choose either option safely. Enter any additional information that Sphinx requests such as the project name and the documentation language (which defaults to English).
+
+
+### Build HTML documentation
+When the quickstart process is complete, run the following from the `docs` directory to build project documentation:
+
+```bash
+make html
+```
+
+Your documentation will be built within an `docs/build/html` directory.
+
+You may add project-specific markdown documentation within the `docs/source` folder of your Kedro project and update `docs/source/index.rst` to add it to the table of contents.
+
+### Documentation from docstrings
+If you wish to add documentation built from [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) within your project, you need to make the following changes to the Sphinx configuration files found in the `docs/source` directory to use [automatic documentation generation from code](https://www.sphinx-doc.org/en/master/tutorial/automatic-doc-generation.html).
+
+Add the following to the top of the `docs/source/conf.py` file:
+
+```python
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
+```
+
+Also in `conf.py`, Ensure that the `sphinx.ext.autodoc` and `sphinx.ext.autosummary` extensions are specified, and `autosummary_generate` is enabled:
+
+```python
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary"]
+autosummary_generate = True
+```
+
+Finally, ensure that you include the autodoc modules in your build by creating a separate file called `api.rst` in `docs/source`. Replace `project_name` with the name of your project:
+
+```text
+
+.. autosummary::
+   :toctree: generated
+
+   <project_name>
+```
+
+Finally, add this to `docs/src/index.rst`
+```text
+.. toctree::
+
+   api
+```
+
+You can now run `make html` from the `docs` folder to build a full set of documentation that automatically includes docstrings.
+
+
+```{note}
 Consult the Sphinx project documentation for [additional options to pass to `sphinx-build`](https://www.sphinx-doc.org/en/master/man/sphinx-build.html). To customise your documentation beyond the basic template, you'll need to adjust the [Sphinx configuration settings](https://www.sphinx-doc.org/en/master/usage/configuration.html) which are stored in `docs/source/conf.py` file.
+```
 
 ## Package your project
 

@@ -245,7 +245,7 @@ class DatasetSpecs:
 
         Args:
             dataset_name: name of the dataset to be loaded from the catalog.
-            node: node: The ``Node`` to ran.
+            node: The ``Node`` to run.
         """
         pass
 
@@ -256,7 +256,7 @@ class DatasetSpecs:
         Args:
             dataset_name: name of the dataset that was loaded from the catalog.
             data: the actual data that was loaded from the catalog.
-            node: The ``Node`` to ran.
+            node: The ``Node`` to run.
         """
         pass
 

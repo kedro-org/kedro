@@ -19,6 +19,7 @@
   * Save node outputs after every `yield` before proceeding with next chunk.
 * Fixed incorrect parsing of Azure Data Lake Storage Gen2 URIs used in datasets.
 * Added support for loading credentials from environment variables using `OmegaConfigLoader`.
+* Added a new argument `node` for all four dataset hooks.
 
 ## Bug fixes and other changes
 * Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).
@@ -40,6 +41,7 @@
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.
+* Deprecated `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
 
 # Release 0.18.4
 

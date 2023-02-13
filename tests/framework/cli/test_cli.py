@@ -922,7 +922,7 @@ class TestRunCommand:
         assert expected_output in result.output
 
     # the following tests should be deleted in 0.19.0
-    
+
     def test_both_node_flags(
         self,
         fake_project_cli,
@@ -987,9 +987,11 @@ class TestRunCommand:
 
         load_version_command = "--load-version=" + lv_input[0]
         load_versions_command = "--load-versions=" + lv_input[1]
-        
+
         result = CliRunner().invoke(
-            fake_project_cli, ["run", load_version_command, load_versions_command], obj=fake_metadata
+            fake_project_cli,
+            ["run", load_version_command, load_versions_command],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.output
 

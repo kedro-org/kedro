@@ -107,6 +107,7 @@ from kedro.pipeline.node import Node
 
 class LoggingHook:
     """A hook that logs how many time it takes to load each dataset."""
+
     def __init__(self):
         self._timers = {}
 

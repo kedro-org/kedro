@@ -20,7 +20,7 @@ Welcome to Kedro's documentation!
     :alt: CircleCI - Develop Branch
 
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
-    :target: https://opensource.org/licenses/Apache-2.0
+    :target: https://opensource.org/license/apache2-0-php/
     :alt: License is Apache 2.0
 
 .. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg

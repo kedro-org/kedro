@@ -145,7 +145,7 @@ Note that the `inputs` statements for `companies` and `shuttles` refer to the da
 Run the following command in your terminal window to test the node named `preprocess_companies_node`:
 
 ```bash
-kedro run --node=preprocess_companies_node
+kedro run --nodes=preprocess_companies_node
 ```
 
 You should see output similar to the below:

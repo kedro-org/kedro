@@ -13,7 +13,7 @@ kedro.config
 
    kedro.config.ConfigLoader
    kedro.config.TemplatedConfigLoader
-   kedro.config.OmegaConfLoader
+   kedro.config.OmegaConfigLoader
 
 .. rubric:: Exceptions
 

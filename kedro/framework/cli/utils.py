@@ -20,7 +20,7 @@ import click
 import importlib_metadata
 from omegaconf import OmegaConf
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
 
@@ -79,10 +79,10 @@ def forward_command(group, name=None, forward_help=False):
         func = command_with_verbosity(
             group,
             name=name,
-            context_settings=dict(
-                ignore_unknown_options=True,
-                help_option_names=[] if forward_help else ["-h", "--help"],
-            ),
+            context_settings={
+                "ignore_unknown_options": True,
+                "help_option_names": [] if forward_help else ["-h", "--help"],
+            },
         )(func)
         return func
 
@@ -331,7 +331,7 @@ def split_node_names(ctx, param, to_split: str) -> List[str]:
 
 def env_option(func_=None, **kwargs):
     """Add `--env` CLI option to a function."""
-    default_args = dict(type=str, default=None, help=ENV_HELP)
+    default_args = {"type": str, "default": None, "help": ENV_HELP}
     kwargs = {**default_args, **kwargs}
     opt = click.option("--env", "-e", **kwargs)
     return opt(func_) if func_ else opt
@@ -422,8 +422,8 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
     """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
+    _deprecate_options(ctx, param, value)
     load_versions_dict = {}
-
     for load_version in value:
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:
@@ -470,3 +470,31 @@ def _split_params(ctx, param, value):
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
+
+
+def _deprecate_options(ctx, param, value):
+    deprecated_flag = {
+        "node_names": "--node",
+        "tag": "--tag",
+        "load_version": "--load-version",
+    }
+    new_flag = {
+        "node_names": "--nodes",
+        "tag": "--tags",
+        "load_version": "--load-versions",
+    }
+    shorthand_flag = {
+        "node_names": "-n",
+        "tag": "-t",
+        "load_version": "-lv",
+    }
+    if value:
+        deprecation_message = (
+            f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
+            "and will not be available from Kedro 0.19.0. "
+            f"Use the flag '{new_flag[param.name]}' instead. Shorthand "
+            f"'{shorthand_flag[param.name]}' will be updated to use "
+            f"'{new_flag[param.name]}' in Kedro 0.19.0."
+        )
+        click.secho(deprecation_message, fg="red")
+    return value

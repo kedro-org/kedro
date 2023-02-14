@@ -21,7 +21,7 @@ def generate_list():
 
 def generate_dict():
     for i in range(10):
-        yield dict(idx=i, square=i * i)
+        yield {"idx": i, "square": i * i}
 
 
 class TestRunGeneratorNode:
@@ -78,7 +78,7 @@ class TestRunGeneratorNode:
         right = mocker.Mock()
         catalog.add("left", left)
         catalog.add("right", right)
-        n = node(generate_dict, inputs=None, outputs=dict(idx="left", square="right"))
+        n = node(generate_dict, inputs=None, outputs={"idx": "left", "square": "right"})
         run_node(n, catalog, _NullPluginManager())
 
         expected_left = [((i,),) for i in range(10)]

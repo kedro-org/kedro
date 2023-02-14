@@ -144,13 +144,12 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
             self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())

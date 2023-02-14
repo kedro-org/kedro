@@ -555,10 +555,15 @@ workflows:
     jobs:
       - build_docs
       - docs_linkcheck
+      - lint:
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
       - all_circleci_checks_succeeded:
           requires:
             - build_docs
             - docs_linkcheck
+            - lint
 
   build_code_and_docs:
     when:

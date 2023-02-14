@@ -116,7 +116,7 @@ def conflicting_feed_dict():
 class BadDataSet(AbstractDataSet):  # pragma: no cover
     def __init__(self, filepath):
         self.filepath = filepath
-        raise Exception("Naughty!")
+        raise Exception("Naughty!")  # pylint: disable=broad-exception-raised
 
     def _load(self):
         return None

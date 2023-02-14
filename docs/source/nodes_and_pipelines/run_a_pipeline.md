@@ -62,6 +62,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
+from pluggy import PluginManager
 
 
 class DryRunner(AbstractRunner):
@@ -82,7 +83,11 @@ class DryRunner(AbstractRunner):
         return MemoryDataSet()
 
     def _run(
-        self, pipeline: Pipeline, catalog: DataCatalog, session_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager = None,
+        session_id: str = None,
     ) -> None:
         """The method implementing dry pipeline running.
         Example logs output using this implementation:
@@ -95,6 +100,7 @@ class DryRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         """
@@ -168,7 +174,7 @@ def register_pipelines():
 Then, from the command line, execute the following:
 
 ```bash
-kedro run --pipeline my_pipeline
+kedro run --pipeline=my_pipeline
 ```
 
 ```{note}

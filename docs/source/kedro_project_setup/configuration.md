@@ -10,7 +10,7 @@ CONF_SOURCE = "new_conf"
 ```
 You can also specify a source directory for the configuration files at run time using the [`kedro run` CLI command](../development/commands_reference.md#modifying-a-kedro-run) with the `--conf-source` flag as follows:
 ```bash
-kedro run --conf-source = <path-to-new-conf-directory>
+kedro run --conf-source=<path-to-new-conf-directory>
 ```
 ## Local and base configuration environments
 
@@ -237,20 +237,20 @@ Although Jinja2 is a very powerful and extremely flexible template engine, which
 ## Configuration with OmegaConf
 
 [OmegaConf](https://omegaconf.readthedocs.io/) is a Python library for configuration. It is a YAML-based hierarchical configuration system with support for merging configurations from multiple sources.
-From Kedro 0.18.5 you can use the [`OmegaConfLoader`](/kedro.config.OmegaConfLoader) which uses `OmegaConf` under the hood to load data.
+From Kedro 0.18.5 you can use the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) which uses `OmegaConf` under the hood to load data.
 
 ```{note}
-`OmegaConfLoader` is under active development and will be available from Kedro 0.18.5. New features will be added in future releases. Let us know if you have any feedback about the `OmegaConfLoader` or ideas for new features.
+`OmegaConfigLoader` is under active development and will be available from Kedro 0.18.5. New features will be added in future releases. Let us know if you have any feedback about the `OmegaConfigLoader` or ideas for new features.
 ```
 
-The `OmegaConfLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
+The `OmegaConfigLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
 
-To use the `OmegaConfLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
+To use the `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
 
 ```python
-from kedro.config import OmegaConfLoader  # new import
+from kedro.config import OmegaConfigLoader  # new import
 
-CONFIG_LOADER_CLASS = OmegaConfLoader
+CONFIG_LOADER_CLASS = OmegaConfigLoader
 ```
 
 ### Templating for parameters
@@ -270,8 +270,23 @@ data:
   size: 0.2
 ```
 
-Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfLoader` will load the files and resolve the placeholders correctly.
+Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
+
+### Environment variables for credentials
+The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
+This is an example of how you can access credentials from environment variables in `credentials.yml`:
+
+```yaml
+dev_s3:
+  client_kwargs:
+    aws_access_key_id: ${oc.env:AWS_ACCESS_KEY_ID}
+    aws_secret_access_key: ${oc.env:AWS_SECRET_ACCESS_KEY}
+```
+
+```{note}
+Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials.
+```
 
 ## Parameters
 
@@ -321,26 +336,26 @@ Kedro also allows you to specify runtime parameters for the `kedro run` CLI comm
 Each key-value pair is split on the first colon or equals sign. Following examples are both valid commands:
 
 ```bash
-kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
+kedro run --params=param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
 ```
 ```bash
-kedro run --params param_key1=value1,param_key2=2.0
+kedro run --params=param_key1=value1,param_key2=2.0
 ```
 Values provided in the CLI take precedence and overwrite parameters specified in configuration files. Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
 
 If any extra parameter key and/or value contains spaces, wrap the whole option contents in quotes:
 
 ```bash
-kedro run --params "key1=value with spaces,key2=value"
+kedro run --params="key1=value with spaces,key2=value"
 ```
 
 Since key-value pairs are split on the first colon or equals sign, values can contain colons/equals signs, but keys cannot. These are valid CLI commands:
 
 ```bash
-kedro run --params endpoint_url:https://endpoint.example.com
+kedro run --params=endpoint_url:https://endpoint.example.com
 ```
 ```bash
-kedro run --params endpoint_url=https://endpoint.example.com
+kedro run --params=endpoint_url=https://endpoint.example.com
 ```
 
 ### Use parameters
@@ -465,7 +480,7 @@ When you work with AWS credentials on datasets, you are not required to store AW
 An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../development/commands_reference.md#run-the-project). However, instead of specifying all the command line options in a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
 
 ```console
-$ kedro run --config config.yml
+$ kedro run --config=config.yml
 ```
 
 where `config.yml` is formatted as below (for example):
@@ -484,7 +499,7 @@ run:
   env: env1
 ```
 
-The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes ...`, but you have to use an underscore in the configuration file:
+The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes=...`, but you have to use an underscore in the configuration file:
 
 ```yaml
 run:

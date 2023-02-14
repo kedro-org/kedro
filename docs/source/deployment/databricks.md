@@ -9,7 +9,7 @@ If you are using [Databricks Repos](https://docs.databricks.com/repos/index.html
 ## Prerequisites
 
 * New or existing [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/) with administrative privileges
-* Active [Databricks deployment](https://docs.databricks.com/getting-started/account-setup.html) on AWS (Databricks Community Edition won't suffice as it doesn't allow you to provision personal tokens)
+* Active [Databricks deployment](https://docs.databricks.com/getting-started/index.html) on AWS (Databricks Community Edition won't suffice as it doesn't allow you to provision personal tokens)
 * [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine
 * An account on [GitHub](https://github.com/) (free tier or above)
 * [Git installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your local machine
@@ -36,7 +36,7 @@ conda activate iris_databricks
 # install Kedro and create a new project
 pip install "kedro~=0.18.4"
 # name your project Iris Databricks when prompted for it
-kedro new --starter pyspark-iris
+kedro new --starter=pyspark-iris
 ```
 
 ### 2. Install dependencies and run locally

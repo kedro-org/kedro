@@ -42,7 +42,7 @@ class TestValidParallelRunner:
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
@@ -50,7 +50,7 @@ class TestValidParallelRunner:
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run_with_plugin_manager(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = ParallelRunner(is_async=is_async).run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -107,7 +107,7 @@ class TestMaxWorkers:
             wraps=ProcessPoolExecutor,
         )
 
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = ParallelRunner(
             max_workers=user_specified_number, is_async=is_async
         ).run(fan_out_fan_in, catalog)
@@ -134,13 +134,13 @@ class TestMaxWorkers:
 class TestInvalidParallelRunner:
     def test_task_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise the lambda function."""
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         pipeline = modular_pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_task_exception(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(feed_dict=dict(A=42))
+        catalog.add_feed_dict(feed_dict={"A": 42})
         pipeline = modular_pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
@@ -150,7 +150,7 @@ class TestInvalidParallelRunner:
         created MemoryDataSets.
         """
         pipeline = modular_pipeline([fan_out_fan_in])
-        catalog = DataCatalog({"C": MemoryDataSet()}, dict(A=42))
+        catalog = DataCatalog({"C": MemoryDataSet()}, {"A": 42})
         with pytest.raises(AttributeError, match="['C']"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
@@ -185,7 +185,7 @@ class TestInvalidParallelRunner:
         """Memory dataset cannot be serialisable because of data it stores."""
         data = return_not_serialisable(None)
         pipeline = modular_pipeline([node(return_not_serialisable, "A", "B")])
-        catalog.add_feed_dict(feed_dict=dict(A=42))
+        catalog.add_feed_dict(feed_dict={"A": 42})
         pattern = (
             rf"{str(data.__class__)} cannot be serialised. ParallelRunner implicit "
             rf"memory datasets can only be used with serialisable data"
@@ -200,7 +200,7 @@ class TestInvalidParallelRunner:
         """Test the error raised when `futures` variable is empty,
         but `todo_nodes` is not (can barely happen in real life).
         """
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         runner = ParallelRunner(is_async=is_async)
 
         real_node_deps = fan_out_fan_in.node_dependencies

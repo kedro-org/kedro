@@ -16,7 +16,7 @@ from kedro.config import AbstractConfigLoader, MissingConfigException
 _config_logger = logging.getLogger(__name__)
 
 
-class OmegaConfLoader(AbstractConfigLoader):
+class OmegaConfigLoader(AbstractConfigLoader):
     """Recursively scan directories (config paths) contained in ``conf_source`` for
     configuration files with a ``yaml``, ``yml`` or ``json`` extension, load and merge
     them through ``OmegaConf`` (https://omegaconf.readthedocs.io/)
@@ -37,11 +37,11 @@ class OmegaConfLoader(AbstractConfigLoader):
     ::
 
         >>> import logging.config
-        >>> from kedro.config import OmegaConfLoader
+        >>> from kedro.config import OmegaConfigLoader
         >>> from kedro.framework.project import settings
         >>>
         >>> conf_path = str(project_path / settings.CONF_SOURCE)
-        >>> conf_loader = OmegaConfLoader(conf_source=conf_path, env="local")
+        >>> conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
         >>>
         >>> conf_logging = conf_loader["logging"]
         >>> logging.config.dictConfig(conf_logging)  # set logging conf
@@ -51,9 +51,9 @@ class OmegaConfLoader(AbstractConfigLoader):
 
     ``OmegaConf`` supports variable interpolation in configuration
     https://omegaconf.readthedocs.io/en/2.2_branch/usage.html#merging-configurations. It is
-    recommended to use this instead of yaml anchors with the ``OmegaConfLoader``.
+    recommended to use this instead of yaml anchors with the ``OmegaConfigLoader``.
 
-    This version of the ``OmegaConfLoader`` does not support any of the built-in ``OmegaConf``
+    This version of the ``OmegaConfigLoader`` does not support any of the built-in ``OmegaConf``
     resolvers. Support for resolvers might be added in future versions.
 
     To use this class, change the setting for the `CONFIG_LOADER_CLASS` constant
@@ -63,9 +63,9 @@ class OmegaConfLoader(AbstractConfigLoader):
     ::
 
         >>> # in settings.py
-        >>> from kedro.config import OmegaConfLoader
+        >>> from kedro.config import OmegaConfigLoader
         >>>
-        >>> CONFIG_LOADER_CLASS = OmegaConfLoader
+        >>> CONFIG_LOADER_CLASS = OmegaConfigLoader
 
     """
 
@@ -79,7 +79,7 @@ class OmegaConfLoader(AbstractConfigLoader):
         base_env: str = "base",
         default_run_env: str = "local",
     ):
-        """Instantiates a ``OmegaConfLoader``.
+        """Instantiates a ``OmegaConfigLoader``.
 
         Args:
             conf_source: Path to use as root directory for loading configuration.
@@ -105,7 +105,7 @@ class OmegaConfLoader(AbstractConfigLoader):
         }
         self.config_patterns.update(config_patterns or {})
 
-        # In the first iteration of the OmegaConfLoader we'll keep the resolver turned-off.
+        # In the first iteration of the OmegaConfigLoader we'll keep the resolver turned-off.
         # It's easier to introduce them step by step, but removing them would be a breaking change.
         self._clear_omegaconf_resolvers()
 
@@ -124,7 +124,7 @@ class OmegaConfLoader(AbstractConfigLoader):
 
         Raises:
             KeyError: If key provided isn't present in the config_patterns of this
-               OmegaConfLoader instance.
+               ``OmegaConfigLoader`` instance.
             MissingConfigException: If no configuration files exist matching the patterns
                 mapped to the provided key.
 
@@ -134,7 +134,7 @@ class OmegaConfLoader(AbstractConfigLoader):
         """
 
         # Allow bypassing of loading config from patterns if a key and value have been set
-        # explicitly on the ``OmegaConfLoader`` instance.
+        # explicitly on the ``OmegaConfigLoader`` instance.
         if key in self:
             return super().__getitem__(key)
 
@@ -181,7 +181,7 @@ class OmegaConfLoader(AbstractConfigLoader):
 
     def __repr__(self):  # pragma: no cover
         return (
-            f"OmegaConfLoader(conf_source={self.conf_source}, env={self.env}, "
+            f"OmegaConfigLoader(conf_source={self.conf_source}, env={self.env}, "
             f"config_patterns={self.config_patterns})"
         )
 

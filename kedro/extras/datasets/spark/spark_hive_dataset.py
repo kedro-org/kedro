@@ -126,14 +126,14 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         self._eager_checkpoint = self._save_args.pop("eager_checkpoint", None) or True
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            database=self._database,
-            table=self._table,
-            write_mode=self._write_mode,
-            table_pk=self._table_pk,
-            partition_by=self._save_args.get("partitionBy"),
-            format=self._format,
-        )
+        return {
+            "database": self._database,
+            "table": self._table,
+            "write_mode": self._write_mode,
+            "table_pk": self._table_pk,
+            "partition_by": self._save_args.get("partitionBy"),
+            "format": self._format,
+        }
 
     @staticmethod
     def _get_spark() -> SparkSession:

@@ -97,19 +97,106 @@ We recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `befor
 For example, you can add logging about the dataset load runtime as follows:
 
 ```python
-@property
-def _logger(self):
-    return logging.getLogger(self.__class__.__name__)
+import logging
+import time
+from typing import Any
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
 
 
-@hook_impl
-def before_dataset_loaded(self, dataset_name: str) -> None:
-    start = time.time()
-    self._logger.info("Loading dataset %s started at %0.3f", dataset_name, start)
+class LoggingHook:
+    """A hook that logs how many time it takes to load each dataset."""
+
+    def __init__(self):
+        self._timers = {}
+
+    @property
+    def _logger(self):
+        return logging.getLogger(__name__)
+
+    @hook_impl
+    def before_dataset_loaded(self, dataset_name: str, node: Node) -> None:
+        start = time.time()
+        self._timers[dataset_name] = start
+
+    @hook_impl
+    def after_dataset_loaded(self, dataset_name: str, data: Any, node: Node) -> None:
+        start = self._timers[dataset_name]
+        end = time.time()
+        self._logger.info(
+            "Loading dataset %s before node '%s' takes %0.2f seconds",
+            dataset_name,
+            node.name,
+            end - start,
+        )
+```
+
+## Use Hooks to load external credentials
+We recommend using the `after_context_created` Hook to add credentials to the session's config loader instance from any external credentials manager. In this example we show how to load credentials from [Azure KeyVault](https://learn.microsoft.com/en-us/azure/key-vault/general/).
+
+Here is the example KeyVault instance, note the KeyVault and secret names:
+
+![](../meta/images/example_azure_keyvault.png)
+
+These credentials will be used to access these datasets in the data catalog:
+
+```yaml
+weather:
+ type: spark.SparkDataSet
+ filepath: s3a://your_bucket/data/01_raw/weather*
+ file_format: csv
+ credentials: s3_creds
+
+cars:
+ type: pandas.CSVDataSet
+ filepath: https://your_data_store.blob.core.windows.net/data/01_raw/cars.csv
+ file_format: csv
+ credentials: abs_creds
+```
+
+We can then use the following hook implementation to fetch and inject these credentials:
+
+```python
+# hooks.py
+
+from kedro.framework.hooks import hook_impl
+from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
 
 
-@hook_impl
-def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
-    end = time.time()
-    self._logger.info("Loading dataset %s ended at %0.3f", dataset_name, end)
+class AzureSecretsHook:
+    @hook_impl
+    def after_context_created(self, context) -> None:
+        keyVaultName = "keyvault-0542abb"  # or os.environ["KEY_VAULT_NAME"] if you would like to provide it through environment variables
+        KVUri = f"https://{keyVaultName}.vault.azure.net"
+
+        my_credential = DefaultAzureCredential()
+        client = SecretClient(vault_url=KVUri, credential=my_credential)
+
+        secrets = {
+            "abs_creds": "azure-blob-store",
+            "s3_creds": "s3-bucket-creds",
+        }
+        azure_creds = {
+            cred_name: client.get_secret(secret_name).value
+            for cred_name, secret_name in secrets.items()
+        }
+
+        context.config_loader["credentials"] = {
+            **context.config_loader["credentials"],
+            **azure_creds,
+        }
+```
+
+Finally, [register the hook](https://kedro.readthedocs.io/en/stable/hooks/introduction.html#registering-your-hook-implementations-with-kedro) in your `settings.py` file:
+
+```python
+from my_project.hooks import AzureSecretsHook
+
+HOOKS = (AzureSecretsHook(),)
+```
+
+```{note}
+Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
 ```

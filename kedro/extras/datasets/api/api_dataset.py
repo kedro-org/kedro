@@ -116,7 +116,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         }
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(**self._request_args)
+        return {**self._request_args}
 
     def _execute_request(self) -> requests.Response:
         try:

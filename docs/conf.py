@@ -227,6 +227,7 @@ linkcheck_ignore = [
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
     "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving",  # Until 0.18.4
+    "https://opensource.org/license/apache2-0-php/",
 ]
 
 # retry before render a link broken (fix for "too many requests")

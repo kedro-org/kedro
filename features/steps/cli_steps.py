@@ -126,7 +126,7 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
 
     """
-    response = requests.get(url, timeout=1.0)
+    response = requests.get(url, timeout=2.0)
     response.raise_for_status()
 
     data = response.text

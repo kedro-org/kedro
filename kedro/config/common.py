@@ -3,7 +3,6 @@ implementations.
 """
 
 import logging
-from glob import iglob
 from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Set
 from warnings import warn
@@ -26,10 +25,14 @@ _config_logger = logging.getLogger(__name__)
 
 def _get_config_from_patterns(
     conf_paths: Iterable[str],
+    fs_file,
+    protocol: str,
     patterns: Iterable[str] = None,
     ac_template: bool = False,
     ac_context: Dict[str, Any] = None,
 ) -> Dict[str, Any]:
+    # pylint: disable=too-many-arguments
+
     """Recursively scan for configuration files, load and merge them, and
     return them in the form of a config dictionary.
 
@@ -68,19 +71,29 @@ def _get_config_from_patterns(
     processed_files = set()  # type: Set[Path]
 
     for conf_path in conf_paths:
-        if not Path(conf_path).is_dir():
-            raise ValueError(
-                f"Given configuration path either does not exist "
-                f"or is not a valid directory: {conf_path}"
-            )
+        conf_path_obj = Path(conf_path)
+        if protocol == "file":
+            if not conf_path_obj.is_dir():
+                raise ValueError(
+                    f"Given configuration path either does not exist "
+                    f"or is not a valid directory: {conf_path}"
+                )
+        else:
+            if not fs_file.isdir(conf_path_obj.as_posix()):
+                raise ValueError(
+                    f"Given configuration path either does not exist "
+                    f"or is not a valid directory: {conf_path}"
+                )
 
         config_filepaths = _lookup_config_filepaths(
-            Path(conf_path), patterns, processed_files, _config_logger
+            Path(conf_path), patterns, processed_files, _config_logger, fs_file
         )
         new_conf = _load_configs(
+            conf_source=conf_path,
             config_filepaths=config_filepaths,
             ac_template=ac_template,
             ac_context=ac_context,
+            fs_file=fs_file,
         )
 
         common_keys = config.keys() & new_conf.keys()
@@ -104,7 +117,11 @@ def _get_config_from_patterns(
 
 
 def _load_config_file(
-    config_file: Path, ac_template: bool = False, ac_context: Dict[str, Any] = None
+    conf_source: str,
+    config_file: Path,
+    fs_file,
+    ac_template: bool = False,
+    ac_context: Dict[str, Any] = None,
 ) -> Dict[str, Any]:
     """Load an individual config file using `anyconfig` as a backend.
 
@@ -127,29 +144,42 @@ def _load_config_file(
 
     try:
         # Default to UTF-8, which is Python 3 default encoding, to decode the file
-        with open(config_file, encoding="utf8") as yml:
-            _config_logger.debug("Loading config file: '%s'", config_file)
-            return {
-                k: v
-                for k, v in anyconfig.load(
-                    yml, ac_template=ac_template, ac_context=ac_context
-                ).items()
-                if not k.startswith("_")
-            }
+        yml = fs_file.open(str(config_file.as_posix()))
+        parser = _extract_config_parser(config_file)
+        _config_logger.debug("Loading config file: '%s'", config_file)
+        return {
+            k: v
+            for k, v in anyconfig.load(
+                yml, ac_template=ac_template, ac_context=ac_context, ac_parser=parser
+            ).items()
+            if not k.startswith("_")
+        }
     except AttributeError as exc:
-        raise BadConfigException(f"Couldn't load config file: {config_file}") from exc
+        raise BadConfigException(
+            f"Couldn't load config file: {Path(conf_source, config_file.name).as_posix()}"
+        ) from exc
 
     except ParserError as exc:
         assert exc.problem_mark is not None
         line = exc.problem_mark.line
         cursor = exc.problem_mark.column
         raise ParserError(
-            f"Invalid YAML file {config_file}, unable to read line {line}, position {cursor}."
+            f"Invalid YAML file {Path(conf_source, config_file.name).as_posix()}, "
+            f"unable to read line {line}, position {cursor}."
         ) from exc
 
 
+def _extract_config_parser(config_file):
+    parser = config_file.suffix.strip(".")
+    return "yaml" if parser == "yml" else parser
+
+
 def _load_configs(
-    config_filepaths: List[Path], ac_template: bool, ac_context: Dict[str, Any] = None
+    conf_source: str,
+    config_filepaths: List[Path],
+    ac_template: bool,
+    fs_file,
+    ac_context: Dict[str, Any] = None,
 ) -> Dict[str, Any]:
     """Recursively load all configuration files, which satisfy
     a given list of glob patterns from a specific path.
@@ -177,7 +207,11 @@ def _load_configs(
 
     for config_filepath in config_filepaths:
         single_config = _load_config_file(
-            config_filepath, ac_template=ac_template, ac_context=ac_context
+            conf_source,
+            config_filepath,
+            ac_template=ac_template,
+            ac_context=ac_context,
+            fs_file=fs_file,
         )
         _check_duplicate_keys(seen_file_to_keys, config_filepath, single_config)
         seen_file_to_keys[config_filepath] = single_config.keys()
@@ -191,18 +225,34 @@ def _lookup_config_filepaths(
     patterns: Iterable[str],
     processed_files: Set[Path],
     logger: Any,
+    fs_file,
 ) -> List[Path]:
-    config_files = _path_lookup(conf_path, patterns)
+    conf_path = conf_path.resolve()
+
+    paths = [
+        Path(each.path)
+        for pattern in patterns
+        for each in fs_file.glob(f"**/{Path(conf_path).name}/{pattern}")
+    ]
+    config_files_filtered = [
+        path for path in paths if _is_valid_config_path(path, fs_file)
+    ]
+    config_files = set(config_files_filtered)
 
     seen_files = config_files & processed_files
     if seen_files:
         logger.warning(
             "Config file(s): %s already processed, skipping loading...",
-            ", ".join(str(seen) for seen in sorted(seen_files)),
+            ", ".join(f"{conf_path.parent}{seen}" for seen in sorted(seen_files)),
         )
         config_files -= seen_files
-
     return sorted(config_files)
+
+
+def _is_valid_config_path(path, fs_file):
+    """Check if given path is a file path and file type is yaml or json."""
+    posix_path = path.as_posix()
+    return fs_file.isfile(str(posix_path)) and path.suffix in SUPPORTED_EXTENSIONS
 
 
 def _remove_duplicates(items: Iterable[str]):
@@ -236,29 +286,3 @@ def _check_duplicate_keys(
     if duplicates:
         dup_str = "\n- ".join(duplicates)
         raise ValueError(f"Duplicate keys found in {filepath} and:\n- {dup_str}")
-
-
-def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> Set[Path]:
-    """Return a set of all configuration files from ``conf_path`` or
-    its subdirectories, which satisfy a given list of glob patterns.
-
-    Args:
-        conf_path: Path to configuration directory.
-        patterns: List of glob patterns to match the filenames against.
-
-    Returns:
-        A set of paths to configuration files.
-
-    """
-    config_files = set()
-    conf_path = conf_path.resolve()
-
-    for pattern in patterns:
-        # `Path.glob()` ignores the files if pattern ends with "**",
-        # therefore iglob is used instead
-        for each in iglob(str(conf_path / pattern), recursive=True):
-            path = Path(each).resolve()
-            if path.is_file() and path.suffix in SUPPORTED_EXTENSIONS:
-                config_files.add(path)
-
-    return config_files

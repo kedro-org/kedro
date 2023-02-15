@@ -9,7 +9,7 @@ Feature: Jupyter targets in new project
     Then jupyter notebook should run on port 
 
   Scenario: Execute jupyter-lab target
-    When I execute the kedro jupyter command "lab --no-browser"
+    When I execute the kedro jupyter command "lab --no-browser  --port=8888"
     Then Jupyter Lab should run on port 8888
 
   Scenario: Execute node convert into Python files

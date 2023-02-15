@@ -4,7 +4,7 @@ import json
 import shutil
 import textwrap
 from pathlib import Path
-from time import time
+from time import time, sleep
 
 import behave
 import requests
@@ -133,7 +133,7 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
             break
         except Exception as ex:
             print("waiting...")
-            time.sleep(10)
+            sleep(10)
             continue
     response.raise_for_status()
 

@@ -2,6 +2,7 @@
 
 import json
 import shutil
+import socket
 import textwrap
 from pathlib import Path
 from time import time, sleep
@@ -126,6 +127,7 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
 
     """
+    print(socket.gethostname())
     response = ""
     while response == "":
         try:

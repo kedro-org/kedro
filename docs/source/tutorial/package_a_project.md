@@ -66,10 +66,11 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary"]
 autosummary_generate = True
 ```
 
-Finally, to ensure that you include the autodoc modules in your build, run the following command once:
+Finally, to ensure that you include the autodoc modules in your build, run the following command once **from the `docs` folder**:
 
 ```bash
-sphinx-apidoc --module-first -o docs/source ./src/<project_name>
+sphinx-apidoc --module-first -o source ../src/<project_name>
+
 ```
 
 This will generate a `docs/src/modules.rst` file, as well as other files containing references to your docstrings. To include those in your documentation, make sure your `docs/src/index.rst` has a `modules` entry in the table of contents:
@@ -80,7 +81,17 @@ This will generate a `docs/src/modules.rst` file, as well as other files contain
    modules
 ```
 
-**Run `make html` from the `docs` folder** to build a full set of documentation that automatically includes docstrings.
+**From the `docs` folder** run the following:
+
+```text
+pip install -e ../src
+```
+
+Finally, **from the `docs folder`**, run this command to build a full set of documentation that automatically includes docstrings:
+
+```text
+make html
+```
 
 ```{note}
 Consult the Sphinx project documentation for [additional options to pass to `sphinx-build`](https://www.sphinx-doc.org/en/master/man/sphinx-build.html). To customise your documentation beyond the basic template, you'll need to adjust the [Sphinx configuration settings](https://www.sphinx-doc.org/en/master/usage/configuration.html) which are stored in `docs/source/conf.py` file.

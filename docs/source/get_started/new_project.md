@@ -132,4 +132,4 @@ You should see the following, which you can explore to learn more about the pipe
 
 ![](../meta/images/pipeline_visualisation.png)
 
-To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.

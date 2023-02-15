@@ -6,23 +6,23 @@ Kedro also has an advanced feature which supports packaging on a pipeline level 
 
 ## Add documentation to your project
 
-Kedro uses the [Sphinx framework](https://www.sphinx-doc.org) to build any documentation that you create about your project.
+There are several documentation frameworks for Python projects, with [Sphinx](https://www.sphinx-doc.org) being among the most popular ones. You can leverage Sphinx to build the documentation of your Kedro project.
 
-To install a compatible version of Sphinx, run the following from the project root directory:
+To install Sphinx, run the following:
 
 ```bash
 pip install sphinx
 ```
 
 ### Set up the Sphinx project files
-Navigate to the `docs` directory of your Kedro project. Before Kedro version 0.19, the `docs/source` subdirectory was pre-populated with two Sphinx configuration files (`conf.py`, and `index.rst`) which the `kedro build-docs` command needed.
 
-From Kedro version 0.19 that command is deprecated, and those files will no longer exist. If you have used an earlier version of Kedro to create your project, and want to follow the following instructions to build the documentation without using `kedro build-docs`, you should delete the two files and the `source` subdirectory so that your project's `docs` directory is empty.
+.. warning::
+   At the moment, Kedro projects are created with a `docs/source` subdirectory, which gets pre-populated with two Sphinx configuration files (`conf.py`, and `index.rst`), needed by the `kedro build-docs command`. This command is deprecated, and starting with Kedro 0.19, it will no longer exist. Before proceeding with these instructions, backup the contents of `docs/source/index.rst` and remove both `docs/source/conf.py` and `docs/source/index.rst`.
 
-Navigate to the empty `docs` directory in the terminal, and run the following command:
+First, run the following command:
 
 ```bash
-sphinx-quickstart
+sphinx-quickstart docs
 ```
 
 Sphinx will ask a series of configuration questions. The first is as follows:
@@ -35,57 +35,45 @@ or you separate "source" and "build" directories within the root path.
 > Separate source and build directories (y/n)? [n]:
 ```
 
-In the following instructions, we assume that you select `y` to separate the built files from the source files, but you can choose either option safely and continue to follow the process.
-
-Enter any additional information that Sphinx requests such as the project name and the documentation language (which defaults to English).
-
+Select `y` to separate the built files from the source files, and enter any additional information that Sphinx requests such as the project name and the documentation language (which defaults to English).
 
 ### Build HTML documentation
-When the quickstart process is complete, you may add project-specific markdown documentation within the `docs/source` folder of your Kedro project and update `docs/source/index.rst` to add it to the table of contents.
 
-To build the documentation, run the following **from the `docs` directory**:
+.. warning::
+   If you had backed up the contents of `index.rst`, restore them before proceeding.
+
+After the quickstart process is complete, you can build the documentation by **navigating to the `docs` directory** and running the following:
 
 ```bash
 make html
 ```
 
-Your project documentation is built to the `docs/build/html` directory.
+Your project documentation will be written to the `docs/build/html` directory.
+
+You may want to add project-specific Markdown documentation within the `docs/source` folder of your Kedro project. To be able to build it, follow `the introduction instructions of MyST-Parser <https://myst-parser.readthedocs.io/en/stable/intro.html>`_ and update your `docs/source/index.rst` file to add your newly created documents to the table of contents.
 
 ### Documentation from docstrings
-If you wish to add documentation built from [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) within your project, you need to make the following changes to the Sphinx configuration files found in the `docs/source` directory to use [automatic documentation generation from code](https://www.sphinx-doc.org/en/master/tutorial/automatic-doc-generation.html).
+If you wish to add documentation built from [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) within your project, you need to make some changes to the Sphinx configuration files found in the `docs/source` directory to use [automatic documentation generation from code](https://www.sphinx-doc.org/en/master/tutorial/automatic-doc-generation.html).
 
-Add the following to the beginning of the `docs/source/conf.py` file:
-
-```python
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
-```
-
-Also in `conf.py`, add the following to ensure that the `sphinx.ext.autodoc` and `sphinx.ext.autosummary` extensions are specified, and `autosummary_generate` is enabled:
+In `conf.py`, add the following to ensure that the `sphinx.ext.autodoc` and `sphinx.ext.autosummary` extensions are specified, and `autosummary_generate` is enabled:
 
 ```python
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary"]
 autosummary_generate = True
 ```
 
-Finally, to ensure that you include the autodoc modules in your build, create a separate file called `api.rst` in `docs/source`. You must replace `project_name` with the name of your project:
+Finally, to ensure that you include the autodoc modules in your build, run the following command once:
 
-```text
-
-.. autosummary::
-   :toctree: generated
-
-   <project_name>
+```bash
+sphinx-apidoc --module-first -o docs/source ./src/<project_name>
 ```
 
-Add the new file to `docs/src/index.rst` to include the automatically built documentation in the table of contents:
+This will generate a `docs/src/modules.rst` file, as well as other files containing references to your docstrings. To include those in your documentation, make sure your `docs/src/index.rst` has a `modules` entry in the table of contents:
 
 ```text
 .. toctree::
 
-   api
+   modules
 ```
 
 **Run `make html` from the `docs` folder** to build a full set of documentation that automatically includes docstrings.

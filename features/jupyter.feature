@@ -5,8 +5,8 @@ Feature: Jupyter targets in new project
     And I have run a non-interactive kedro new with starter "default"
 
   Scenario: Execute jupyter-notebook target
-    When I execute the kedro jupyter command "notebook --no-browser"
-    Then jupyter notebook should run on port 8888
+    When I execute the kedro jupyter command "notebook --no-browser --port=8888"
+    Then jupyter notebook should run on port 
 
   Scenario: Execute jupyter-lab target
     When I execute the kedro jupyter command "lab --no-browser"

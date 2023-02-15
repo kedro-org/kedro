@@ -13,6 +13,7 @@ from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 
 from kedro.config import MissingConfigException, OmegaConfigLoader
+from kedro.framework.cli.utils import call
 
 _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
@@ -487,3 +488,20 @@ class TestOmegaConfigLoader:
         assert conf["credentials"]["user"]["name"] == "test_user"
         assert OmegaConf.has_resolver("oc.env")
         OmegaConf.clear_resolver("oc.env")
+
+    @use_config_dir
+    def test_load_config_from_tar_file(self, tmp_path):
+        call(
+            [
+                "tar",
+                "--exclude=local/*.yml",
+                "-cf",
+                f"{tmp_path}/tar_conf.tar.gz",
+                f"--directory={str(tmp_path.parent)}",
+                f"{tmp_path.name}",
+            ]
+        )
+
+        conf = OmegaConfigLoader(conf_source=f"{tmp_path}/tar_conf.tar.gz")
+        catalog = conf["catalog"]
+        assert catalog["trains"]["type"] == "MemoryDataSet"

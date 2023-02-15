@@ -9,6 +9,7 @@ import yaml
 from yaml.parser import ParserError
 
 from kedro.config import BadConfigException, ConfigLoader, MissingConfigException
+from kedro.framework.cli.utils import call
 
 _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
@@ -376,3 +377,20 @@ class TestConfigLoader:
         conf["catalog"] = {"catalog_config": "something_new"}
 
         assert conf["catalog"] == {"catalog_config": "something_new"}
+
+    @use_config_dir
+    def test_load_config_from_tar_file(self, tmp_path):
+        call(
+            [
+                "tar",
+                "--exclude=local/*.yml",
+                "-cf",
+                f"{tmp_path}/tar_conf.tar.gz",
+                f"--directory={str(tmp_path.parent)}",
+                f"{tmp_path.name}",
+            ]
+        )
+
+        conf = ConfigLoader(conf_source=f"{tmp_path}/tar_conf.tar.gz")
+        catalog = conf["catalog"]
+        assert catalog["trains"]["type"] == "MemoryDataSet"

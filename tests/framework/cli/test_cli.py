@@ -23,8 +23,9 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
+    call,
     forward_command,
-    get_pkg_version, call,
+    get_pkg_version,
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -791,13 +792,7 @@ class TestRunCommand:
     def test_run_with_tar_config(self, fake_project_cli, fake_metadata):
         # check that Kedro runs with tar.gz config
         call(
-            [
-                "tar",
-                "--exclude=local/*.yml",
-                "-cf",
-                "tar_conf.tar.gz",
-                "alternate_conf"
-            ]
+            ["tar", "--exclude=local/*.yml", "-cf", "tar_conf.tar.gz", "alternate_conf"]
         )
         result = CliRunner().invoke(
             fake_project_cli,
@@ -808,14 +803,7 @@ class TestRunCommand:
 
     def test_run_with_zip_config(self, fake_project_cli, fake_metadata):
         # check that Kedro runs with zip config
-        call(
-            [
-                "zip",
-                "-r",
-                "zip_conf.zip",
-                "alternate_conf"
-            ]
-        )
+        call(["zip", "-r", "zip_conf.zip", "alternate_conf"])
         result = CliRunner().invoke(
             fake_project_cli,
             ["run", "--conf-source", "zip_conf.zip"],

@@ -158,7 +158,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if self._protocol == "file":
             base_path = str(Path(self.conf_source) / self.base_env)
         else:
-            base_path = str(Path(self._fs.ls("")[0]) / self.base_env)
+            base_path = str(Path(self._fs.listdir("")[0]) / self.base_env)
         base_config = self.load_and_merge_dir_config(
             base_path, patterns, read_environment_variables
         )
@@ -169,7 +169,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if self._protocol == "file":
             env_path = str(Path(self.conf_source) / run_env)
         else:
-            env_path = str(Path(self._fs.ls("")[0]) / run_env)
+            env_path = str(Path(self._fs.listdir("")[0]) / run_env)
         env_config = self.load_and_merge_dir_config(
             env_path, patterns, read_environment_variables
         )

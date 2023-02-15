@@ -24,7 +24,7 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     forward_command,
-    get_pkg_version,
+    get_pkg_version, call,
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -783,7 +783,42 @@ class TestRunCommand:
         )
         assert result.exit_code, result.output
         expected_output = (
-            "Error: Invalid value for '--conf-source': Directory 'nonexistent_dir'"
+            "Error: Invalid value for '--conf-source': Path 'nonexistent_dir'"
             " does not exist."
         )
         assert expected_output in result.output
+
+    def test_run_with_tar_config(self, fake_project_cli, fake_metadata):
+        # check that Kedro runs with tar.gz config
+        call(
+            [
+                "tar",
+                "--exclude=local/*.yml",
+                "-cf",
+                "tar_conf.tar.gz",
+                "alternate_conf"
+            ]
+        )
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "tar_conf.tar.gz"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0
+
+    def test_run_with_zip_config(self, fake_project_cli, fake_metadata):
+        # check that Kedro runs with zip config
+        call(
+            [
+                "zip",
+                "-r",
+                "zip_conf.zip",
+                "alternate_conf"
+            ]
+        )
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "zip_conf.zip"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0

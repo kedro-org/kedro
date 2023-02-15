@@ -562,6 +562,8 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
 
     """
     url = f"http://localhost:{port}"
+    myHostName = socket.gethostname()
+    print("Name of the localhost is {}".format(myHostName))
     try:
         _check_service_up(context, url, "Jupyter Notebook")
     finally:

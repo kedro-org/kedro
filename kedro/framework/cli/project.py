@@ -16,6 +16,7 @@ from kedro.framework.cli.utils import (
     _deprecate_options,
     _get_values_as_tuple,
     _reformat_load_versions,
+    _split_load_versions,
     _split_params,
     call,
     command_with_verbosity,
@@ -349,6 +350,14 @@ def activate_nbstripout(
     help=NODE_ARG_HELP,
     callback=_deprecate_options,
 )
+@click.option(
+    "--nodes",
+    "nodes_names",
+    type=str,
+    default="",
+    help=NODE_ARG_HELP,
+    callback=split_node_names,
+)
 @click.option("--runner", "-r", type=str, default=None, help=RUNNER_ARG_HELP)
 @click.option("--async", "is_async", is_flag=True, help=ASYNC_ARG_HELP)
 @env_option
@@ -361,12 +370,26 @@ def activate_nbstripout(
     callback=_deprecate_options,
 )
 @click.option(
+    "--tags",
+    type=str,
+    default="",
+    help=TAG_ARG_HELP,
+    callback=split_string,
+)
+@click.option(
     "--load-version",
     "-lv",
     type=str,
     multiple=True,
     help=LOAD_VERSION_HELP,
     callback=_reformat_load_versions,
+)
+@click.option(
+    "--load-versions",
+    type=str,
+    default="",
+    help=LOAD_VERSION_HELP,
+    callback=_split_load_versions,
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
 @click.option(
@@ -388,18 +411,21 @@ def activate_nbstripout(
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-# pylint: disable=too-many-arguments,unused-argument
+# pylint: disable=too-many-arguments,unused-argument, too-many-locals
 def run(
     tag,
+    tags,
     env,
     runner,
     is_async,
     node_names,
+    nodes_names,
     to_nodes,
     from_nodes,
     from_inputs,
     to_outputs,
     load_version,
+    load_versions,
     pipeline,
     config,
     conf_source,
@@ -409,8 +435,16 @@ def run(
 
     runner = load_obj(runner or "SequentialRunner", "kedro.runner")
 
-    tag = _get_values_as_tuple(tag) if tag else tag
-    node_names = _get_values_as_tuple(node_names) if node_names else node_names
+    tag = _get_values_as_tuple(tag)
+    node_names = _get_values_as_tuple(node_names)
+
+    # temporary duplicates for the plural flags
+    tags = _get_values_as_tuple(tags)
+    nodes_names = _get_values_as_tuple(nodes_names)
+
+    tag = tag + tags
+    node_names = node_names + nodes_names
+    load_version = {**load_version, **load_versions}
 
     with KedroSession.create(
         env=env, conf_source=conf_source, extra_params=params

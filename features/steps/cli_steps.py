@@ -558,7 +558,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     myHostName = socket.gethostname()
     print("Name of the localhost is {}".format(myHostName))
     try:
-        until.wait_for(
+        util.wait_for(
             func=_check_service_up,
             timeout_=15,
             context=context,
@@ -581,7 +581,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        until.wait_for(
+        util.wait_for(
             func=_check_service_up,
             timeout_=20,
             context=context,

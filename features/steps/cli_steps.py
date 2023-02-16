@@ -126,7 +126,7 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
 
     """
-    response = requests.get(url, timeout=2.0)
+    response = requests.get(url, timeout=1.0)
     response.raise_for_status()
 
     data = response.text
@@ -558,7 +558,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
             context=context,
             url=url,
             string="Jupyter Notebook",
-            timeout_=60,
+            timeout_=15,
             print_error=True,
         )
     finally:
@@ -578,7 +578,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     try:
         util.wait_for(
             func=_check_service_up,
-            timeout_=60,
+            timeout_=20,
             context=context,
             url=url,
             string='<a href="/lab"',

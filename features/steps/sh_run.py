@@ -84,7 +84,7 @@ class ChildTerminatingPopen(subprocess.Popen):
 
         """
         super().__init__(  # type: ignore
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
+            cmd, **kwargs
         )
 
     def terminate(self) -> None:

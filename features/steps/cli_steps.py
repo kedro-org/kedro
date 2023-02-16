@@ -129,20 +129,11 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
 
     """
-    print(socket.gethostname())
-    response = ""
-    while response == "":
-        try:
-            response = requests.get(url)
-            break
-        except Exception as ex:
-            print("waiting...")
-            sleep(10)
-            continue
+    response = requests.get(url, timeout=1.0)
     response.raise_for_status()
 
     data = response.text
-    print(data)
+    assert string in data
     assert context.result.poll() is None
 
 
@@ -336,7 +327,7 @@ def exec_notebook(context, command):
 
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
-    context.result = subprocess.Popen(
+    context.result = ChildTerminatingPopen(
         cmd, env=context.env, cwd=str(context.root_project_dir)
     )
 
@@ -567,7 +558,14 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     myHostName = socket.gethostname()
     print("Name of the localhost is {}".format(myHostName))
     try:
-        _check_service_up(context, url, "Jupyter Notebook")
+        until.wait_for(
+            func=_check_service_up,
+            timeout_=15,
+            context=context,
+            url=url,
+            string="Jupyter Notebook",
+            print_error=True,
+        )
     finally:
         context.result.terminate()
 
@@ -583,7 +581,14 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        _check_service_up(context, url, '<a href="/lab"')
+        until.wait_for(
+            func=_check_service_up,
+            timeout_=20,
+            context=context,
+            url=url,
+            string='<a href="/lab"',
+            print_error=True,
+        )
     finally:
         context.result.terminate()
 

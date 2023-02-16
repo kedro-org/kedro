@@ -178,6 +178,7 @@ Currently, the core Kedro team consists of
 [Jannic Holzer](https://github.com/jmholzer),
 [Jo Stichbury](https://github.com/stichbury),
 [Joel Schwarzmann](https://github.com/datajoely),
+[Juan Luis Cano](https://github.com/astrojuanlu),
 [Lim Hoang](https://github.com/limdauto),
 [Merel Theisen](https://github.com/merelcht),
 [Nero Okwa](https://github.com/NeroOkwa),

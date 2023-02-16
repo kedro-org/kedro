@@ -42,13 +42,13 @@
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 
-* [michalbrys](https://github.com/michalbrys)
-* [corymaklin](https://github.com/corymaklin)
 * [adamfrly](https://github.com/adamfrly)
+* [corymaklin](https://github.com/corymaklin)
+* [Emiliopb](https://github.com/Emiliopb)
 * [grhaonan](https://github.com/grhaonan)
 * [JStumpp](https://github.com/JStumpp)
-* [Emiliopb](https://github.com/Emiliopb)
-
+* [michalbrys](https://github.com/michalbrys)
+* [sbrugman](https://github.com/sbrugman)
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.

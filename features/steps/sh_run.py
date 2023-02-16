@@ -74,32 +74,32 @@ class ChildTerminatingPopen(subprocess.Popen):
         dies (so-called orphan processes)
     """
 
-    # def __init__(self, cmd: List[str], **kwargs) -> None:
-    #     """
-    #     Initializer pipes stderr and stdout.
+    def __init__(self, cmd: List[str], **kwargs) -> None:
+        """
+        Initializer pipes stderr and stdout.
 
-    #     Args:
-    #         cmd: command to be run.
-    #         **kwargs: keyword arguments such as env and cwd
+        Args:
+            cmd: command to be run.
+            **kwargs: keyword arguments such as env and cwd
 
-    #     """
-        # super().__init__(  # type: ignore
-        #     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
-        # )
+        """
+        super().__init__(  # type: ignore
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
+        )
 
-    def terminate(self) -> None:
-        """Terminate process and children."""
-        try:
-            proc = psutil.Process(self.pid)
-            procs = [proc] + proc.children(recursive=True)
-        except psutil.NoSuchProcess:
-            pass
-        else:
-            for proc in reversed(procs):
-                try:
-                    proc.terminate()
-                except psutil.NoSuchProcess:
-                    pass
-            alive = psutil.wait_procs(procs, timeout=3)[1]
-            for proc in alive:
-                proc.kill()
+    # def terminate(self) -> None:
+    #     """Terminate process and children."""
+    #     try:
+    #         proc = psutil.Process(self.pid)
+    #         procs = [proc] + proc.children(recursive=True)
+    #     except psutil.NoSuchProcess:
+    #         pass
+    #     else:
+    #         for proc in reversed(procs):
+    #             try:
+    #                 proc.terminate()
+    #             except psutil.NoSuchProcess:
+    #                 pass
+    #         alive = psutil.wait_procs(procs, timeout=3)[1]
+    #         for proc in alive:
+    #             proc.kill()

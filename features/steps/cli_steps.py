@@ -17,6 +17,8 @@ import kedro
 from features.steps import util
 from features.steps.sh_run import ChildTerminatingPopen, check_run, run
 
+import subprocess
+
 OK_EXIT_CODE = 0
 
 
@@ -334,7 +336,7 @@ def exec_notebook(context, command):
 
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
-    context.result = ChildTerminatingPopen(
+    context.result = subprocess.Popen(
         cmd, env=context.env, cwd=str(context.root_project_dir)
     )
 

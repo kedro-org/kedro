@@ -322,6 +322,7 @@ def split_node_names(ctx, param, to_split: str) -> List[str]:
         elif char == "]":
             match_state -= 1
         if char == "," and match_state == 0 and argument:
+            argument = argument.strip()
             result.append(argument)
             argument = ""
         else:
@@ -422,9 +423,12 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
     """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
-    _deprecate_options(ctx, param, value)
+    if param.name == "load_version":
+        _deprecate_options(ctx, param, value)
+
     load_versions_dict = {}
     for load_version in value:
+        load_version = load_version.strip()
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:
             raise KedroCliError(
@@ -466,6 +470,11 @@ def _split_params(ctx, param, value):
         dot_list.append(item)
     conf = OmegaConf.from_dotlist(dot_list)
     return conf
+
+
+def _split_load_versions(ctx, param, value):
+    lv_tuple = _get_values_as_tuple([value])
+    return _reformat_load_versions(ctx, param, lv_tuple) if value else {}
 
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:

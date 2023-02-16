@@ -38,7 +38,7 @@ or you separate "source" and "build" directories within the root path.
 > Separate source and build directories (y/n)? [n]:
 ```
 
-Select `y` to separate the built files from the source files, and enter any additional information that Sphinx requests such as the project name and the documentation language, which defaults to English.
+Select `y` to separate the build files from the source files, and enter any additional information that Sphinx requests such as the project name and the documentation language, which defaults to English.
 
 ### Build HTML documentation
 

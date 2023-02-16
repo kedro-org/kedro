@@ -523,21 +523,20 @@ class TestBeforeNodeRunHookWithInputUpdates:
             mock_session_with_broken_before_node_run_hooks.run(runner=ParallelRunner())
 
 
+def wait_and_identity(*args: Any):
+    time.sleep(0.1)
+    if len(args) == 1:
+        return args[0]
+    return args
+
+
 @pytest.fixture
 def sample_node():
-    def wait_and_identity(x: Any):
-        time.sleep(0.1)
-        return x
-
     return node(wait_and_identity, inputs="ds1", outputs="ds2", name="test-node")
 
 
 @pytest.fixture
 def sample_node_multiple_outputs():
-    def wait_and_identity(x: Any, y: Any):
-        time.sleep(0.1)
-        return (x, y)
-
     return node(
         wait_and_identity,
         inputs=["ds1", "ds2"],
@@ -611,8 +610,16 @@ class TestAsyncNodeDatasetHooks:
 
         after_dataset_saved_mock.assert_has_calls(
             [
-                mocker.call(dataset_name="ds3", data={"data": 42}),
-                mocker.call(dataset_name="ds4", data={"data": 42}),
+                mocker.call(
+                    dataset_name="ds3",
+                    data={"data": 42},
+                    node=sample_node_multiple_outputs,
+                ),
+                mocker.call(
+                    dataset_name="ds4",
+                    data={"data": 42},
+                    node=sample_node_multiple_outputs,
+                ),
             ],
             any_order=True,
         )

@@ -11,7 +11,7 @@ The metadata you store may include:
 * Model weights
 * Plots and other visualisations
 
-### Experiment tracking demonstration using Kedro-Viz
+## Experiment tracking demonstration using Kedro-Viz
 
 We have made an [experiment tracking demo](https://demo.kedro.org/experiment-tracking) to enable you to explore the capabilities of Kedro-Viz further.
 

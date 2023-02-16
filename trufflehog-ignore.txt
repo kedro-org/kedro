@@ -1,6 +1,7 @@
 docs/package.json
 docs/package-lock.json
 docs/source/meta/images/KedroArchitecture.drawio
+docs/source/nodes_and_pipelines/nodes.md
 static/img/kedro_gitflow.svg
 .idea/
 .git/

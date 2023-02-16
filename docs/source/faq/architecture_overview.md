@@ -1,4 +1,4 @@
-# Kedro architecture overview
+# What is the basic Kedro  architecture?
 
 ![Kedro architecture diagram](../meta/images/kedro_architecture.png)
 

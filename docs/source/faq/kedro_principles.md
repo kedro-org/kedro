@@ -1,4 +1,4 @@
-# Kedro Principles
+# What are Kedro's core principles?
 
 After a long discussion, we wrote this set of principles to summarise our development philosophy and to guide us through future decisions about Kedro.
 

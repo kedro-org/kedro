@@ -53,8 +53,7 @@ command arguments from. If command line arguments are provided, they will
 override the loaded ones."""
 PIPELINE_ARG_HELP = """Name of the registered pipeline to run.
 If not set, the '__default__' pipeline is run."""
-NAMESPACE_ARG_HELP = """Name of the namespace to run.
-If not set, no namespace is used."""
+NAMESPACE_ARG_HELP = """Name of the node namespace to run."""
 PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
 to the context initialiser. Items must be separated by comma, keys - by colon or equals sign,
 example: param1=value1,param2=value2. Each parameter is split by the first comma,

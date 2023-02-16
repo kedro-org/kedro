@@ -2,10 +2,9 @@
 
 import json
 import shutil
-import socket
 import textwrap
 from pathlib import Path
-from time import time, sleep
+from time import time
 
 import behave
 import requests
@@ -16,8 +15,6 @@ from behave import given, then, when
 import kedro
 from features.steps import util
 from features.steps.sh_run import ChildTerminatingPopen, check_run, run
-
-import subprocess
 
 OK_EXIT_CODE = 0
 
@@ -555,15 +552,13 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
 
     """
     url = f"http://localhost:{port}"
-    myHostName = socket.gethostname()
-    print("Name of the localhost is {}".format(myHostName))
     try:
         util.wait_for(
             func=_check_service_up,
-            timeout_=15,
             context=context,
             url=url,
             string="Jupyter Notebook",
+            timeout_=15,
             print_error=True,
         )
     finally:

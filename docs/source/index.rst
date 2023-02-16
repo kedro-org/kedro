@@ -9,7 +9,7 @@
     :class: kedro-logo
 
 Welcome to Kedro's documentation!
-=============================================
+=================================
 
 .. image:: https://img.shields.io/circleci/build/github/kedro-org/kedro/main?label=main
     :target: https://circleci.com/gh/kedro-org/kedro/tree/main

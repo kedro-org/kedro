@@ -39,6 +39,17 @@
 
 ## Breaking changes to the API
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [michalbrys](https://github.com/michalbrys)
+* [corymaklin](https://github.com/corymaklin)
+* [adamfrly](https://github.com/adamfrly)
+* [grhaonan](https://github.com/grhaonan)
+* [JStumpp](https://github.com/JStumpp)
+* [Emiliopb](https://github.com/Emiliopb)
+
+
 ## Upcoming deprecations for Kedro 0.19.0
 * `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.
 * Deprecated `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.

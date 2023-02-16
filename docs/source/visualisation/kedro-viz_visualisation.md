@@ -56,7 +56,7 @@ If a visualisation panel opens up and a pipeline is not visible, refresh the vie
 
 ### Exit an open visualisation
 
-To exit the visualisation, close the browser tab. To regain control of the terminal, enter `⌘+c` on Mac or `Ctrl+c` on Windows or Linux machines.
+To exit the visualisation, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 
 ## Automatic visualisation updates
 

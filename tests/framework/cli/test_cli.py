@@ -513,6 +513,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -552,6 +553,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -831,6 +833,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions=lv_dict,
             pipeline_name=None,
+            namespace=None,
         )
 
     def test_fail_reformat_load_versions(self, fake_project_cli, fake_metadata):
@@ -961,6 +964,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
     def test_both_tag_flags(
@@ -989,6 +993,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
     def test_both_load_version_flags(
@@ -1017,4 +1022,5 @@ class TestRunCommand:
             to_outputs=[],
             load_versions=lv_dict,
             pipeline_name=None,
+            namespace=None,
         )

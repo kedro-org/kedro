@@ -670,32 +670,33 @@ workflows:
             branches:
               only: main
 
-  # Python version that are *only* supported on `develop`.
-  nightly_build_develop:
-    when:
-      and:
-        - <<pipeline.parameters.run_nightly>>
-        - not: <<pipeline.parameters.release_kedro>>
-        - not: <<pipeline.parameters.run_hourly>>
-    jobs:
-      - build_docker_image:
-          context:
-            - kedro-ecr-publish
-          matrix:
-            parameters:
-              python_version: []
-          filters:
-            branches:
-              only: develop
-      - build_kedro:
-          matrix:
-            parameters:
-              python_version: []
-          requires:
-            - build_docker_image-<<matrix.python_version>>
-          filters:
-            branches:
-              only: develop
+  # Python versions that are *only* supported on `develop`.
+  # If `develop` supports the same versions as `main`, comment this out.
+  # nightly_build_develop:
+  #   when:
+  #     and:
+  #       - <<pipeline.parameters.run_nightly>>
+  #       - not: <<pipeline.parameters.release_kedro>>
+  #       - not: <<pipeline.parameters.run_hourly>>
+  #   jobs:
+  #     - build_docker_image:
+  #         context:
+  #           - kedro-ecr-publish
+  #         matrix:
+  #           parameters:
+  #             python_version: []
+  #         filters:
+  #           branches:
+  #             only: develop
+  #     - build_kedro:
+  #         matrix:
+  #           parameters:
+  #             python_version: []
+  #         requires:
+  #           - build_docker_image-<<matrix.python_version>>
+  #         filters:
+  #           branches:
+  #             only: develop
 
   kedro_release:
     when:

@@ -2,55 +2,6 @@
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different question which isn't answered here, check out the [searchable archive of Discord discussions](https://linen-discord.kedro.org/)(https://linen-discord.kedro.org) or post a new query on the [Slack organisation](https://slack.kedro.org).
 
-## What is Kedro?
-
-Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It borrows concepts from software engineering and applies them to machine-learning code; applied concepts include modularity, separation of concerns and versioning. Kedro is hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
-
-For the source code, take a look at the [Kedro repository on GitHub](https://github.com/kedro-org/kedro).
-
-## What are the primary advantages of Kedro?
-
-If you're a Data Scientist, then you should be interested in Kedro because it enables you to:
-
-- **Write cleaner code,** so that your Python code is easy to maintain and re-run in future; it does this by applying standardisation and software-engineering best practices
-- **Make a seamless transition from development to production,** as you can write quick, throw-away exploratory code and
- transition to maintainable, easy-to-share, code experiments quickly
-- **Stay current in machine learning operations [(MLOps)](https://en.wikipedia.org/wiki/MLOps),** as Kedro takes care
- of the principles you need to create data science code that lasts; you'll always be two steps in front of industry standards
-- **Integrate with your data science workflow,** and use tools in the data science ecosystem, like Tensorflow, SciKit-Learn or Jupyter notebooks for experimentation. You can also take advantage of tools to produce for producing
-  quality code like Sphinx (documentation); `black`, `isort` and `flake8` (code linting and formatting); and,`pytest` (unit tests)
-
-If you're a Machine-Learning Engineer or Data Engineer, then you should be interested in Kedro because:
-
-- **Standardisation creates efficiency,** establishing proper analytics code foundations can save up to 80% of your hours down the road when putting models in production
-- **You can focus on solving problems, not setting up projects,** Kedro provides the scaffolding to build more
- complex data and machine-learning pipelines. There's a focus on spending less time on the tedious "plumbing" required to maintain analytics code; this means that you have more time to solve new problems
-- **A data-driven framework makes pipelines easy,** by permitting data versioning, incremental computing and automatic pipeline running order resolution
-- **It is platform-agnostic,** allowing you to choose what compute or platform to run your Kedro workflow; Databricks
- and products like Kubeflow, Argo, Prefect and Airflow are deployment targets
-- **It is easy to extend**, by using Hooks to add in tools like [MLFlow](https://mlflow.org/) (experiment tracking), [Great Expectations](https://greatexpectations.io/) (data validation and profiling) and [Grafana](https://grafana.com/) (pipeline monitoring)
-
-If you're a Project Lead, then you should be interested in Kedro because:
-
-- **It allows for effortless teamwork and an ability to scale analytics across an organisation.** Kedro standardises team workflows; the modular structure of Kedro facilitates a higher level of collaboration when teams solve problems together
-- We stand for **no more fire drills.**  You can remove long delays created because you have to refactor a data
- science proof of concept into production
-- **You don't need to start from scratch,** standardisation and separation of concerns makes it possible to reuse analytics code
-- **See your project like never before,** Kedro’s pipeline visualization plugin lets you see a blueprint of your team's developing workflows and better collaborate with business stakeholders
-
-## How does Kedro compare to other projects?
-
-Some of our open-source users have called Kedro, the [React](https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4) or Django for data science code and we think it's a
- suitable framing for who we are. We exist to standardise how data science code is created.
-
-Everyone sees the pipeline abstraction in Kedro and gets excited, thinking that we're similar to orchestrators like
- Airflow, Luigi, Prefect, Dagster, Flyte, Kubeflow and more. We focus on a different problem, which is the process of
-  _authoring_ pipelines, as opposed to _running, scheduling and monitoring_ them.
-
-The responsibility of _"What time will this pipeline run?"_, _"How do I manage my compute?"_ and _"How will I know if it
- failed?"_ is left to the orchestrators. We also have deployment guidelines for using orchestrators as deployment
-  targets and are working in collaboration with the maintainers of some of those tools to make the deployment experience as enjoyable as possible.
-
 ## What is the typical Kedro project development workflow?
 
 When you build a Kedro project, you will typically follow a standard development workflow:
@@ -155,11 +106,6 @@ pip uninstall kedro -y
 pip install kedro
 ```
 
-## How can I find out more about Kedro?
-
-There are a host of articles, podcasts, talks and Kedro showcase projects in the [`kedro-community`](https://github.com/kedro-org/kedro-community) repository.
-
-Our preferred channel for feedback is through [GitHub issues](https://github.com/kedro-org/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the GitHub repository](https://github.com/kedro-org/kedro/blob/develop/RELEASE.md).
 
 ## Who maintains Kedro?
 
@@ -170,7 +116,6 @@ Currently, the core Kedro team consists of
 [Andrew Mackay](https://github.com/Mackay031),
 [Ankita Katiyar](https://github.com/ankatiyar),
 [Antony Milne](https://github.com/AntonyMilneQB),
-[Cvetanka Nechevska](https://github.com/cvetankanechevska),
 [Deepyaman Datta](https://github.com/deepyaman),
 [Gabriel Comym](https://github.com/comym),
 [Huong Nguyen](https://github.com/Huongg),
@@ -179,7 +124,6 @@ Currently, the core Kedro team consists of
 [Jo Stichbury](https://github.com/stichbury),
 [Joel Schwarzmann](https://github.com/datajoely),
 [Juan Luis Cano](https://github.com/astrojuanlu),
-[Lim Hoang](https://github.com/limdauto),
 [Merel Theisen](https://github.com/merelcht),
 [Nero Okwa](https://github.com/NeroOkwa),
 [Nok Lam Chan](https://github.com/noklam),
@@ -191,6 +135,7 @@ Currently, the core Kedro team consists of
 Former core team members with significant contributions include:
 [Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
 [Anton Kirilenko](https://github.com/Flid),
+[Cvetanka Nechevska](https://github.com/cvetankanechevska),
 [Dmitrii Deriabin](https://github.com/dmder),
 [Gordon Wrigley](https://github.com/tolomea),
 [Hamza Oza](https://github.com/hamzaoza),
@@ -199,6 +144,7 @@ Former core team members with significant contributions include:
 [Kiyohito Kunii](https://github.com/921kiyo),
 [Laís Carvalho](https://github.com/laisbsc),
 [Liam Brummitt](https://github.com/bru5),
+[Lim Hoang](https://github.com/limdauto),
 [Lorena Bălan](https://github.com/lorenabalan),
 [Nasef Khan](https://github.com/nakhan98),
 [Richard Westenra](https://github.com/richardwestenra),

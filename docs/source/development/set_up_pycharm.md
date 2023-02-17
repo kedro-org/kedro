@@ -40,7 +40,7 @@ Finally, in the **Project Explorer** right-click on `src` and then go to **Mark 
 
 [PyCharm Run configurations](https://www.jetbrains.com/help/pycharm/creating-run-debug-configuration-for-tests.html) allow you to execute preconfigured scripts rapidly in your IDE with a click of a button. This may be useful for testing, running and packaging your Kedro projects.
 
-Here we will walk you through an example of how to setup Run configuration for Kedro CLI `run` command, however it is also applicable to other Kedro commands: `test`, `install`, `package`, `build-docs`.
+Here we will walk you through an example of how to set up Run configuration for the Kedro CLI `run` command. It is also applicable to other Kedro commands, such as `test` or `install`.
 
 Go to **Run | Edit Configurations**:
 

@@ -21,6 +21,7 @@
 * Added support for loading credentials from environment variables using `OmegaConfigLoader`.
 * Added new `--namespace` flag to `kedro run` to enable filtering by node namespace.
 * Added a new argument `node` for all four dataset hooks.
+* Added the `kedro run` flags `--nodes`, `--tags`, and `--load-versions` to replace `--node`, `--tag`, and `--load-version`.
 
 ## Bug fixes and other changes
 * Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).
@@ -39,6 +40,17 @@
     * Added example for loading external credentials to the Hooks documentation
 
 ## Breaking changes to the API
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [adamfrly](https://github.com/adamfrly)
+* [corymaklin](https://github.com/corymaklin)
+* [Emiliopb](https://github.com/Emiliopb)
+* [grhaonan](https://github.com/grhaonan)
+* [JStumpp](https://github.com/JStumpp)
+* [michalbrys](https://github.com/michalbrys)
+* [sbrugman](https://github.com/sbrugman)
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.

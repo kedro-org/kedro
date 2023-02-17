@@ -565,7 +565,6 @@ class TestRunCommand:
     ):
         from_nodes = ["--from-nodes", "splitting_data"]
         to_nodes = ["--to-nodes", "training_model"]
-        tags = ["--tag", "de"]
         namespace = ["--namespace", "fake_namespace"]
         tags = ["--tags", "de"]
         result = CliRunner().invoke(

@@ -55,6 +55,7 @@ command arguments from. If command line arguments are provided, they will
 override the loaded ones."""
 PIPELINE_ARG_HELP = """Name of the registered pipeline to run.
 If not set, the '__default__' pipeline is run."""
+NAMESPACE_ARG_HELP = """Name of the node namespace to run."""
 PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
 to the context initialiser. Items must be separated by comma, keys - by colon or equals sign,
 example: param1=value1,param2=value2. Each parameter is split by the first comma,
@@ -392,6 +393,7 @@ def activate_nbstripout(
     callback=_split_load_versions,
 )
 @click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
+@click.option("--namespace", "-ns", type=str, default=None, help=NAMESPACE_ARG_HELP)
 @click.option(
     "--config",
     "-c",
@@ -411,7 +413,7 @@ def activate_nbstripout(
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-# pylint: disable=too-many-arguments,unused-argument, too-many-locals
+# pylint: disable=too-many-arguments,unused-argument,too-many-locals
 def run(
     tag,
     tags,
@@ -430,6 +432,7 @@ def run(
     config,
     conf_source,
     params,
+    namespace,
 ):
     """Run the pipeline."""
 
@@ -459,4 +462,5 @@ def run(
             to_outputs=to_outputs,
             load_versions=load_version,
             pipeline_name=pipeline,
+            namespace=namespace,
         )

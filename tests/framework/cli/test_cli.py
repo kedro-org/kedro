@@ -460,6 +460,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -499,6 +500,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -538,6 +540,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -549,9 +552,12 @@ class TestRunCommand:
     ):
         from_nodes = ["--from-nodes", "splitting_data"]
         to_nodes = ["--to-nodes", "training_model"]
+        namespace = ["--namespace", "fake_namespace"]
         tags = ["--tags", "de"]
         result = CliRunner().invoke(
-            fake_project_cli, ["run", *from_nodes, *to_nodes, *tags], obj=fake_metadata
+            fake_project_cli,
+            ["run", *from_nodes, *to_nodes, *tags, *namespace],
+            obj=fake_metadata,
         )
         assert not result.exit_code
 
@@ -565,6 +571,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace="fake_namespace",
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -588,6 +595,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -627,6 +635,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            namespace=None,
         )
 
     @mark.parametrize(
@@ -670,6 +679,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            namespace=None,
         )
         mock_session_create.assert_called_once_with(
             env=mocker.ANY, conf_source=None, extra_params=expected
@@ -769,6 +779,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={ds: t},
             pipeline_name=None,
+            namespace=None,
         )
 
     @mark.parametrize(
@@ -808,6 +819,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions=lv_dict,
             pipeline_name=None,
+            namespace=None,
         )
 
     def test_fail_reformat_load_versions(self, fake_project_cli, fake_metadata):
@@ -883,6 +895,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
     def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):
@@ -937,6 +950,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
     def test_both_tag_flags(
@@ -965,6 +979,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
     def test_both_load_version_flags(
@@ -993,4 +1008,5 @@ class TestRunCommand:
             to_outputs=[],
             load_versions=lv_dict,
             pipeline_name=None,
+            namespace=None,
         )

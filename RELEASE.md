@@ -35,6 +35,7 @@
   * Save node outputs after every `yield` before proceeding with next chunk.
 * Fixed incorrect parsing of Azure Data Lake Storage Gen2 URIs used in datasets.
 * Added support for loading credentials from environment variables using `OmegaConfigLoader`.
+* Added new `--namespace` flag to `kedro run` to enable filtering by node namespace.
 * Added a new argument `node` for all four dataset hooks.
 * Added the `kedro run` flags `--nodes`, `--tags`, and `--load-versions` to replace `--node`, `--tag`, and `--load-version`.
 

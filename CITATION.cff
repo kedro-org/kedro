@@ -37,6 +37,8 @@ authors:
   given-names: Huong
 - family-names: Okwa
   given-names: Nero
+- family-names: Rodríguez
+  given-names: Juan Luis Cano
 - family-names: Schwarzmann
   given-names: Joel
 - family-names: Stichbury
@@ -44,6 +46,6 @@ authors:
 - family-names: Theisen
   given-names: Merel
 title: Kedro
-version: 0.18.4
-date-released: 2022-12-05
+version: 0.18.5
+date-released: 2023-02-20
 url: https://github.com/kedro-org/kedro

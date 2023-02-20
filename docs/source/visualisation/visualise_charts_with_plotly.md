@@ -31,8 +31,8 @@ To use the Plotly datasets, you must update the `requirements.txt` file in the `
 
 
 ```text
-kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.0.0
-kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]~=1.0.0
+kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.0.2
+kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]~=1.0.2
 ```
 
 Navigate to the root directory of the project in your terminal and install the dependencies for the tutorial project:
@@ -180,7 +180,7 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```bash
-kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
+kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.2
 seaborn~=0.12.1
 ```
 

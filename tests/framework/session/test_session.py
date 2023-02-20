@@ -623,6 +623,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "namespace": None,
             "runner": mock_runner.__name__,
         }
 
@@ -692,6 +693,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "namespace": None,
             "runner": mock_runner.__name__,
         }
 
@@ -779,6 +781,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "namespace": None,
             "runner": mock_runner.__name__,
         }
 
@@ -846,6 +849,7 @@ class TestKedroSession:
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
+            "namespace": None,
             "runner": broken_runner.__name__,
         }
 

@@ -649,7 +649,7 @@ class TestPipelineDescribe:
             "#### Pipeline execution order ####",
             "Inputs: input1, input2",
             "",
-            "node1: biconcat([input1,input2]) -> [input3]",
+            "node1: biconcat([input1;input2]) -> [input3]",
             "node2: identity([input3]) -> [input4]",
             "",
             "Outputs: input4",

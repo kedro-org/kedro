@@ -296,25 +296,30 @@ class LoggingHooks:
         )
 
     @hook_impl
-    def before_dataset_loaded(self, dataset_name: str) -> None:
-        logger.info("Before dataset loaded", extra={"dataset_name": dataset_name})
-
-    @hook_impl
-    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_loaded(self, dataset_name: str, node: Node) -> None:
         logger.info(
-            "After dataset loaded", extra={"dataset_name": dataset_name, "data": data}
+            "Before dataset loaded", extra={"dataset_name": dataset_name, "node": node}
         )
 
     @hook_impl
-    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def after_dataset_loaded(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "Before dataset saved", extra={"dataset_name": dataset_name, "data": data}
+            "After dataset loaded",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
     @hook_impl
-    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
+            "Before dataset saved",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
+        )
+
+    @hook_impl
+    def after_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
+        logger.info(
+            "After dataset saved",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
     @hook_impl

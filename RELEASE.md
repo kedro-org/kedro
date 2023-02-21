@@ -8,7 +8,15 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.5
+# Upcoming Release 0.18.6
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+# Release 0.18.5
 
 ## Major features and improvements
 * Added new `OmegaConfigLoader` which uses `OmegaConf` for loading and merging configuration.
@@ -19,12 +27,15 @@
   * Save node outputs after every `yield` before proceeding with next chunk.
 * Fixed incorrect parsing of Azure Data Lake Storage Gen2 URIs used in datasets.
 * Added support for loading credentials from environment variables using `OmegaConfigLoader`.
+* Added new `--namespace` flag to `kedro run` to enable filtering by node namespace.
+* Added a new argument `node` for all four dataset hooks.
+* Added the `kedro run` flags `--nodes`, `--tags`, and `--load-versions` to replace `--node`, `--tag`, and `--load-version`.
 
 ## Bug fixes and other changes
 * Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).
 * Fixed bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
 * Fixed bug causing `load_ipython_extension` not to register the `%reload_kedro` line magic when called in a directory that does not contain a Kedro project.
-* Added anyconfig's `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
+* Added `anyconfig`'s `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
 * Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
 * Fixed bug causing the `after_dataset_saved` hook only to be called for one output dataset when multiple are saved in a single node and async saving is in use.
 * Log level for "Credentials not found in your Kedro project config" was changed from `WARNING` to `DEBUG`.
@@ -38,8 +49,20 @@
 
 ## Breaking changes to the API
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [adamfrly](https://github.com/adamfrly)
+* [corymaklin](https://github.com/corymaklin)
+* [Emiliopb](https://github.com/Emiliopb)
+* [grhaonan](https://github.com/grhaonan)
+* [JStumpp](https://github.com/JStumpp)
+* [michalbrys](https://github.com/michalbrys)
+* [sbrugman](https://github.com/sbrugman)
+
 ## Upcoming deprecations for Kedro 0.19.0
 * `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.
+* Deprecated `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
 
 # Release 0.18.4
 

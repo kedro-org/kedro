@@ -11,7 +11,7 @@ The metadata you store may include:
 * Model weights
 * Plots and other visualisations
 
-### Experiment tracking demonstration using Kedro-Viz
+## Experiment tracking demonstration using Kedro-Viz
 
 We have made an [experiment tracking demo](https://demo.kedro.org/experiment-tracking) to enable you to explore the capabilities of Kedro-Viz further.
 
@@ -232,7 +232,7 @@ In this section, we illustrate how to compare Matplotlib plots across experiment
 Update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```text
-kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.0
+kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.2
 seaborn~=0.12.1
 ```
 

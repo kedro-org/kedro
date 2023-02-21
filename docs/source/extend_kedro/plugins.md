@@ -228,4 +228,4 @@ Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.
 - [kedro-azureml](https://github.com/getindata/kedro-azureml), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Azure ML Pipelines service
 - [kedro-sagemaker](https://github.com/getindata/kedro-sagemaker), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Amazon SageMaker service
 - [kedro-partitioned](https://github.com/ProjetaAi/kedro-partitioned), by [Gabriel Daiha Alves](https://github.com/gabrieldaiha) and [Nickolas da Rocha Machado](https://github.com/nickolasrm), extends the functionality on processing partitioned data.
-- [kedro-auto-catalog], by [Waylon Walker](https://github.com/WaylonWalker) A configurable replacement for `kedro catalog create` that allows you to create default dataset types other than MemoryDataset.
+- [kedro-auto-catalog](https://github.com/WaylonWalker/kedro-auto-catalog), by [Waylon Walker](https://github.com/WaylonWalker) A configurable replacement for `kedro catalog create` that allows you to create default dataset types other than MemoryDataset.

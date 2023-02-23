@@ -1,4 +1,5 @@
 # pylint: disable=too-many-lines
+import subprocess
 from collections import namedtuple
 from itertools import cycle
 from os import rename
@@ -24,7 +25,6 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
-    call,
     forward_command,
     get_pkg_version,
 )
@@ -1027,8 +1027,14 @@ class TestRunCommand:
 
     def test_run_with_tar_config(self, fake_project_cli, fake_metadata):
         # check that Kedro runs with tar.gz config
-        call(
-            ["tar", "--exclude=local/*.yml", "-czf", "tar_conf.tar.gz", "alternate_conf"]
+        subprocess.run(  # pylint: disable=subprocess-run-check
+            [
+                "tar",
+                "--exclude=local/*.yml",
+                "-czf",
+                "tar_conf.tar.gz",
+                "alternate_conf",
+            ]
         )
         result = CliRunner().invoke(
             fake_project_cli,
@@ -1039,7 +1045,9 @@ class TestRunCommand:
 
     def test_run_with_zip_config(self, fake_project_cli, fake_metadata):
         # check that Kedro runs with zip config
-        call(["zip", "-r", "zip_conf.zip", "alternate_conf"])
+        subprocess.run(  # pylint: disable=subprocess-run-check
+            ["zip", "-r", "zip_conf.zip", "alternate_conf"]
+        )
         result = CliRunner().invoke(
             fake_project_cli,
             ["run", "--conf-source", "zip_conf.zip"],

@@ -1,6 +1,7 @@
 import configparser
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Dict
 
@@ -9,7 +10,6 @@ import yaml
 from yaml.parser import ParserError
 
 from kedro.config import BadConfigException, ConfigLoader, MissingConfigException
-from kedro.framework.cli.utils import call
 
 _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
@@ -381,7 +381,7 @@ class TestConfigLoader:
 
     @use_config_dir
     def test_load_config_from_tar_file(self, tmp_path):
-        call(
+        subprocess.run(  # pylint: disable=subprocess-run-check
             [
                 "tar",
                 "--exclude=local/*.yml",

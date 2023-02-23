@@ -3,6 +3,7 @@ import configparser
 import json
 import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Dict
 
@@ -13,7 +14,6 @@ from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 
 from kedro.config import MissingConfigException, OmegaConfigLoader
-from kedro.framework.cli.utils import call
 
 _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
@@ -491,7 +491,7 @@ class TestOmegaConfigLoader:
 
     @use_config_dir
     def test_load_config_from_tar_file(self, tmp_path):
-        call(
+        subprocess.run(  # pylint: disable=subprocess-run-check
             [
                 "tar",
                 "--exclude=local/*.yml",

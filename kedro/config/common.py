@@ -157,7 +157,10 @@ def _load_config_file(
             return {
                 k: v
                 for k, v in anyconfig.load(
-                    tmp_fo, ac_template=ac_template, ac_context=ac_context, ac_parser=parser
+                    tmp_fo,
+                    ac_template=ac_template,
+                    ac_context=ac_context,
+                    ac_parser=parser,
                 ).items()
                 if not k.startswith("_")
             }

@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 from collections import namedtuple
 from itertools import cycle
 from os import rename
@@ -473,6 +474,87 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
+
+    @mark.parametrize(
+        "nodes_input, nodes_expected",
+        [
+            ["splitting_data", ("splitting_data",)],
+            ["splitting_data,training_model", ("splitting_data", "training_model")],
+            ["splitting_data, training_model", ("splitting_data", "training_model")],
+        ],
+    )
+    def test_run_specific_nodes(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        nodes_input,
+        nodes_expected,
+    ):
+        nodes_command = "--nodes=" + nodes_input
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", nodes_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=nodes_expected,
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
+
+    @mark.parametrize(
+        "tags_input, tags_expected",
+        [
+            ["tag1", ("tag1",)],
+            ["tag1,tag2", ("tag1", "tag2")],
+            ["tag1, tag2", ("tag1", "tag2")],
+        ],
+    )
+    def test_run_with_tags(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        tags_input,
+        tags_expected,
+    ):
+        tags_command = "--tags=" + tags_input
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", tags_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=tags_expected,
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -484,9 +566,12 @@ class TestRunCommand:
     ):
         from_nodes = ["--from-nodes", "splitting_data"]
         to_nodes = ["--to-nodes", "training_model"]
-        tags = ["--tag", "de"]
+        namespace = ["--namespace", "fake_namespace"]
+        tags = ["--tags", "de"]
         result = CliRunner().invoke(
-            fake_project_cli, ["run", *from_nodes, *to_nodes, *tags], obj=fake_metadata
+            fake_project_cli,
+            ["run", *from_nodes, *to_nodes, *tags, *namespace],
+            obj=fake_metadata,
         )
         assert not result.exit_code
 
@@ -500,6 +585,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace="fake_namespace",
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -523,6 +609,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -562,6 +649,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            namespace=None,
         )
 
     @mark.parametrize(
@@ -605,6 +693,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            namespace=None,
         )
         mock_session_create.assert_called_once_with(
             env=mocker.ANY, conf_source=None, extra_params=expected
@@ -704,12 +793,69 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={ds: t},
             pipeline_name=None,
+            namespace=None,
+        )
+
+    @mark.parametrize(
+        "lv_input, lv_dict",
+        [
+            [
+                "dataset1:time1",
+                {
+                    "dataset1": "time1",
+                },
+            ],
+            [
+                "dataset1:time1,dataset2:time2",
+                {"dataset1": "time1", "dataset2": "time2"},
+            ],
+            [
+                "dataset1:time1, dataset2:time2",
+                {"dataset1": "time1", "dataset2": "time2"},
+            ],
+        ],
+    )
+    def test_split_load_versions(
+        self, fake_project_cli, fake_metadata, fake_session, lv_input, lv_dict, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--load-versions", lv_input], obj=fake_metadata
+        )
+        assert not result.exit_code, result.output
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions=lv_dict,
+            pipeline_name=None,
+            namespace=None,
         )
 
     def test_fail_reformat_load_versions(self, fake_project_cli, fake_metadata):
         load_version = "2020-05-12T12.00.00"
         result = CliRunner().invoke(
             fake_project_cli, ["run", "-lv", load_version], obj=fake_metadata
+        )
+        assert result.exit_code, result.output
+
+        expected_output = (
+            f"Error: Expected the form of 'load_version' to be "
+            f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
+            f"found {load_version} instead\n"
+        )
+        assert expected_output in result.output
+
+    def test_fail_split_load_versions(self, fake_project_cli, fake_metadata):
+        load_version = "2020-05-12T12.00.00"
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--load-versions", load_version],
+            obj=fake_metadata,
         )
         assert result.exit_code, result.output
 
@@ -763,6 +909,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
     def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):
@@ -788,6 +935,95 @@ class TestRunCommand:
             " does not exist."
         )
         assert expected_output in result.output
+
+    # the following tests should be deleted in 0.19.0
+
+    def test_both_node_flags(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+    ):
+        nodes_input = ["splitting_data", "training_model"]
+        nodes_expected = ("splitting_data", "training_model")
+        node_command = "--node=" + nodes_input[0]
+        nodes_command = "--nodes=" + nodes_input[1]
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", node_command, nodes_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=nodes_expected,
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
+        )
+
+    def test_both_tag_flags(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+    ):
+        tags_input = ["tag1", "tag2"]
+        tags_expected = ("tag1", "tag2")
+        tag_command = "--tag=" + tags_input[0]
+        tags_command = "--tags=" + tags_input[1]
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", tag_command, tags_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=tags_expected,
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
+        )
+
+    def test_both_load_version_flags(
+        self, fake_project_cli, fake_metadata, fake_session, mocker
+    ):
+        lv_input = ["dataset1:time1", "dataset2:time2"]
+        lv_dict = {"dataset1": "time1", "dataset2": "time2"}
+
+        load_version_command = "--load-version=" + lv_input[0]
+        load_versions_command = "--load-versions=" + lv_input[1]
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", load_version_command, load_versions_command],
+            obj=fake_metadata,
+        )
+        assert not result.exit_code, result.output
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions=lv_dict,
+            pipeline_name=None,
+            namespace=None,
+        )
 
     def test_run_with_tar_config(self, fake_project_cli, fake_metadata):
         # check that Kedro runs with tar.gz config

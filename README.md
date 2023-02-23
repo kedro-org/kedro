@@ -72,7 +72,7 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 
 ## The humans behind Kedro
 
-Kedro is maintained by [a product team](https://kedro.readthedocs.io/en/stable/faq/faq.html) and a number of [contributors from across the world](https://github.com/kedro-org/kedro/releases).
+The [Kedro product team](https://kedro.readthedocs.io/en/stable/faq/faq.html#who-maintains-kedro) and a number of [open source contributors from across the world](https://github.com/kedro-org/kedro/releases) maintain Kedro.
 
 
 ## Can I contribute?

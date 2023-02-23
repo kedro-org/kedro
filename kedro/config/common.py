@@ -147,20 +147,20 @@ def _load_config_file(
 
     try:
         # Default to UTF-8, which is Python 3 default encoding, to decode the file
-        open_config = fs_file.open(str(config_file.as_posix()))
-        tmp_fo = io.StringIO(open_config.read().decode("utf8"))
-        parser = _extract_config_parser(config_file)
+        with fs_file.open(str(config_file.as_posix())) as open_config:
+            tmp_fo = io.StringIO(open_config.read().decode("utf8"))
+            parser = _extract_config_parser(config_file)
 
-        # yml = fs_file.open(str(config_file.as_posix()))
-        # parser = _extract_config_parser(config_file)
-        _config_logger.debug("Loading config file: '%s'", config_file)
-        return {
-            k: v
-            for k, v in anyconfig.load(
-                tmp_fo, ac_template=ac_template, ac_context=ac_context, ac_parser=parser
-            ).items()
-            if not k.startswith("_")
-        }
+            # yml = fs_file.open(str(config_file.as_posix()))
+            # parser = _extract_config_parser(config_file)
+            _config_logger.debug("Loading config file: '%s'", config_file)
+            return {
+                k: v
+                for k, v in anyconfig.load(
+                    tmp_fo, ac_template=ac_template, ac_context=ac_context, ac_parser=parser
+                ).items()
+                if not k.startswith("_")
+            }
     except AttributeError as exc:
         raise BadConfigException(
             f"Couldn't load config file: {Path(conf_source, config_file.name).as_posix()}"

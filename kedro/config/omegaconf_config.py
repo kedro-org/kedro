@@ -241,12 +241,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
         config_per_file = {}
         for config_filepath in config_files_filtered:
             try:
-                open_config = self._fs.open(str(config_filepath.as_posix()))
-                tmp_fo = io.StringIO(open_config.read().decode("utf8"))
-                config = OmegaConf.load(tmp_fo)
-                if read_environment_variables:
-                    self._resolve_environment_variables(config)
-                config_per_file[config_filepath] = config
+                with self._fs.open(str(config_filepath.as_posix())) as open_config:
+                    tmp_fo = io.StringIO(open_config.read().decode("utf8"))
+                    config = OmegaConf.load(tmp_fo)
+                    if read_environment_variables:
+                        self._resolve_environment_variables(config)
+                    config_per_file[config_filepath] = config
             except (ParserError, ScannerError) as exc:
                 line = exc.problem_mark.line  # type: ignore
                 cursor = exc.problem_mark.column  # type: ignore

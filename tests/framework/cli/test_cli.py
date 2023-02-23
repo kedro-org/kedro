@@ -1028,7 +1028,7 @@ class TestRunCommand:
     def test_run_with_tar_config(self, fake_project_cli, fake_metadata):
         # check that Kedro runs with tar.gz config
         call(
-            ["tar", "--exclude=local/*.yml", "-cf", "tar_conf.tar.gz", "alternate_conf"]
+            ["tar", "--exclude=local/*.yml", "-czf", "tar_conf.tar.gz", "alternate_conf"]
         )
         result = CliRunner().invoke(
             fake_project_cli,

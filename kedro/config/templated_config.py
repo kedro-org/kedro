@@ -7,7 +7,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
-import fs
+import fsspec
 import jmespath
 
 from kedro.config import AbstractConfigLoader
@@ -128,13 +128,11 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         self.config_patterns.update(config_patterns or {})
         if conf_source.endswith(".zip"):
             self._protocol = "zip"
-            self._fs = fs.open_fs(f"{self._protocol}://{conf_source}")
         elif conf_source.endswith("tar.gz"):
             self._protocol = "tar"
-            self._fs = fs.open_fs(f"{self._protocol}://{conf_source}")
         else:
             self._protocol = "file"
-            self._fs = fs.open_fs(conf_source)
+        self._fs = fsspec.filesystem(protocol=self._protocol, fo=conf_source)
 
         super().__init__(
             conf_source=conf_source, env=env, runtime_params=runtime_params
@@ -148,7 +146,6 @@ class TemplatedConfigLoader(AbstractConfigLoader):
                 patterns=[globals_pattern],
                 ac_template=False,
                 fs_file=self._fs,
-                protocol=self._protocol,
             )
             if globals_pattern
             else {}
@@ -198,7 +195,6 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             patterns=patterns,
             ac_template=True,
             fs_file=self._fs,
-            protocol=self._protocol,
         )
         return _format_object(config_raw, self._config_mapping)
 
@@ -210,8 +206,8 @@ class TemplatedConfigLoader(AbstractConfigLoader):
                 str(Path(self.conf_source) / run_env),
             ]
         return [
-            str(Path(self._fs.listdir("")[0]) / self.base_env),
-            str(Path(self._fs.listdir("")[0]) / run_env),
+            str(Path(self._fs.ls("")[0]) / self.base_env),
+            str(Path(self._fs.ls("")[0]) / run_env),
         ]
 
 

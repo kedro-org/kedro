@@ -4,7 +4,7 @@ or more configuration files from specified paths.
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
-import fs
+import fsspec
 
 from kedro.config import AbstractConfigLoader
 from kedro.config.common import _get_config_from_patterns, _remove_duplicates
@@ -104,13 +104,11 @@ class ConfigLoader(AbstractConfigLoader):
         self.config_patterns.update(config_patterns or {})
         if conf_source.endswith(".zip"):
             self._protocol = "zip"
-            self._fs = fs.open_fs(f"{self._protocol}://{conf_source}")
         elif conf_source.endswith("tar.gz"):
             self._protocol = "tar"
-            self._fs = fs.open_fs(f"{self._protocol}://{conf_source}")
         else:
             self._protocol = "file"
-            self._fs = fs.open_fs(conf_source)
+        self._fs = fsspec.filesystem(protocol=self._protocol, fo=conf_source)
 
         super().__init__(
             conf_source=conf_source,
@@ -141,7 +139,6 @@ class ConfigLoader(AbstractConfigLoader):
             conf_paths=self.conf_paths,
             patterns=list(patterns),
             fs_file=self._fs,
-            protocol=self._protocol,
         )
 
     def _build_conf_paths(self) -> Iterable[str]:
@@ -152,6 +149,6 @@ class ConfigLoader(AbstractConfigLoader):
                 str(Path(self.conf_source) / run_env),
             ]
         return [
-            str(Path(self._fs.listdir("")[0]) / self.base_env),
-            str(Path(self._fs.listdir("")[0]) / run_env),
+            str(Path(self._fs.ls("")[0]) / self.base_env),
+            str(Path(self._fs.ls("")[0]) / run_env),
         ]

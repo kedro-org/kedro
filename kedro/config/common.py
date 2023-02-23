@@ -1,7 +1,7 @@
 """This module contains methods and facade interfaces for various ConfigLoader
 implementations.
 """
-
+import io
 import logging
 from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Set
@@ -26,7 +26,6 @@ _config_logger = logging.getLogger(__name__)
 def _get_config_from_patterns(
     conf_paths: Iterable[str],
     fs_file,
-    protocol: str,
     patterns: Iterable[str] = None,
     ac_template: bool = False,
     ac_context: Dict[str, Any] = None,
@@ -71,19 +70,23 @@ def _get_config_from_patterns(
     processed_files = set()  # type: Set[Path]
 
     for conf_path in conf_paths:
-        conf_path_obj = Path(conf_path)
-        if protocol == "file":
-            if not conf_path_obj.is_dir():
-                raise ValueError(
-                    f"Given configuration path either does not exist "
-                    f"or is not a valid directory: {conf_path}"
-                )
-        else:
-            if not fs_file.isdir(conf_path_obj.as_posix()):
-                raise ValueError(
-                    f"Given configuration path either does not exist "
-                    f"or is not a valid directory: {conf_path}"
-                )
+        if not fs_file.isdir(conf_path):
+            raise ValueError(
+                f"Given configuration path either does not exist "
+                f"or is not a valid directory: {conf_path}"
+            )
+        # if protocol == "file":
+        #     if not conf_path_obj.is_dir():
+        #         raise ValueError(
+        #             f"Given configuration path either does not exist "
+        #             f"or is not a valid directory: {conf_path}"
+        #         )
+        # else:
+        #     if not fs_file.isdir(conf_path_obj.as_posix()):
+        #         raise ValueError(
+        #             f"Given configuration path either does not exist "
+        #             f"or is not a valid directory: {conf_path}"
+        #         )
 
         config_filepaths = _lookup_config_filepaths(
             Path(conf_path), patterns, processed_files, _config_logger, fs_file
@@ -144,13 +147,17 @@ def _load_config_file(
 
     try:
         # Default to UTF-8, which is Python 3 default encoding, to decode the file
-        yml = fs_file.open(str(config_file.as_posix()))
+        open_config = fs_file.open(str(config_file.as_posix()))
+        tmp_fo = io.StringIO(open_config.read().decode("utf8"))
         parser = _extract_config_parser(config_file)
+
+        # yml = fs_file.open(str(config_file.as_posix()))
+        # parser = _extract_config_parser(config_file)
         _config_logger.debug("Loading config file: '%s'", config_file)
         return {
             k: v
             for k, v in anyconfig.load(
-                yml, ac_template=ac_template, ac_context=ac_context, ac_parser=parser
+                tmp_fo, ac_template=ac_template, ac_context=ac_context, ac_parser=parser
             ).items()
             if not k.startswith("_")
         }
@@ -227,13 +234,13 @@ def _lookup_config_filepaths(
     logger: Any,
     fs_file,
 ) -> List[Path]:
-    conf_path = conf_path.resolve()
 
     paths = [
-        Path(each.path)
+        Path(each)
         for pattern in patterns
-        for each in fs_file.glob(f"**/{Path(conf_path).name}/{pattern}")
+        for each in fs_file.glob(f"{str(conf_path)}/{pattern}")
     ]
+
     config_files_filtered = [
         path for path in paths if _is_valid_config_path(path, fs_file)
     ]
@@ -251,8 +258,9 @@ def _lookup_config_filepaths(
 
 def _is_valid_config_path(path, fs_file):
     """Check if given path is a file path and file type is yaml or json."""
-    posix_path = path.as_posix()
-    return fs_file.isfile(str(posix_path)) and path.suffix in SUPPORTED_EXTENSIONS
+    # posix_path = path.as_posix()
+    # return fs_file.isfile(str(posix_path)) and path.suffix in SUPPORTED_EXTENSIONS
+    return fs_file.isfile(path) and path.suffix in SUPPORTED_EXTENSIONS
 
 
 def _remove_duplicates(items: Iterable[str]):

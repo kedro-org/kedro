@@ -1,11 +1,12 @@
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files of yaml or json type from specified paths through OmegaConf.
 """
+import io
 import logging
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set  # noqa
 
-import fs
+import fsspec
 from omegaconf import OmegaConf
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
@@ -110,13 +111,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._clear_omegaconf_resolvers()
         if conf_source.endswith(".zip"):
             self._protocol = "zip"
-            self._fs = fs.open_fs(f"{self._protocol}://{conf_source}")
         elif conf_source.endswith("tar.gz"):
             self._protocol = "tar"
-            self._fs = fs.open_fs(f"{self._protocol}://{conf_source}")
         else:
             self._protocol = "file"
-            self._fs = fs.open_fs(conf_source)
+        self._fs = fsspec.filesystem(protocol=self._protocol, fo=conf_source)
 
         super().__init__(
             conf_source=conf_source,
@@ -158,7 +157,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if self._protocol == "file":
             base_path = str(Path(self.conf_source) / self.base_env)
         else:
-            base_path = str(Path(self._fs.listdir("")[0]) / self.base_env)
+            base_path = str(Path(self._fs.ls("")[0]) / self.base_env)
         base_config = self.load_and_merge_dir_config(
             base_path, patterns, read_environment_variables
         )
@@ -169,7 +168,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if self._protocol == "file":
             env_path = str(Path(self.conf_source) / run_env)
         else:
-            env_path = str(Path(self._fs.listdir("")[0]) / run_env)
+            env_path = str(Path(self._fs.ls("")[0]) / run_env)
         env_config = self.load_and_merge_dir_config(
             env_path, patterns, read_environment_variables
         )
@@ -224,24 +223,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         # pylint: disable=too-many-locals
 
-        conf_path_obj = Path(conf_path)
-        if self._protocol == "file":
-            if not conf_path_obj.is_dir():
-                raise MissingConfigException(
-                    f"Given configuration path either does not exist "
-                    f"or is not a valid directory: {conf_path}"
-                )
-        else:
-            if not self._fs.isdir(conf_path_obj.as_posix()):
-                raise MissingConfigException(
-                    f"Given configuration path either does not exist "
-                    f"or is not a valid directory: {conf_path}"
-                )
+        if not self._fs.isdir(conf_path):
+            raise MissingConfigException(
+                f"Given configuration path either does not exist "
+                f"or is not a valid directory: {conf_path}"
+            )
 
         paths = [
-            Path(each.path)
+            Path(each)
             for pattern in patterns
-            for each in self._fs.glob(f"**/{Path(conf_path).name}/{pattern}")
+            for each in self._fs.glob(f"{str(conf_path)}/{pattern}")
         ]
         config_files_filtered = [
             path for path in set(paths) if self._is_valid_config_path(path)
@@ -251,7 +242,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         for config_filepath in config_files_filtered:
             try:
                 open_config = self._fs.open(str(config_filepath.as_posix()))
-                config = OmegaConf.load(open_config)
+                tmp_fo = io.StringIO(open_config.read().decode("utf8"))
+                config = OmegaConf.load(tmp_fo)
                 if read_environment_variables:
                     self._resolve_environment_variables(config)
                 config_per_file[config_filepath] = config
@@ -277,8 +269,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""
-        posix_path = path.as_posix()
-        return self._fs.isfile(str(posix_path)) and path.suffix in [
+        return self._fs.isfile(path) and path.suffix in [
             ".yml",
             ".yaml",
             ".json",

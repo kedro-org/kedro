@@ -13,6 +13,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
 
 ## Breaking changes to the API
 

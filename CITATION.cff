@@ -15,8 +15,6 @@ authors:
   given-names: Deepyaman
 - family-names: DeBold
   given-names: Tynan
-- family-names: Hoang
-  given-names: Lim
 - family-names: Holzer
   given-names: Jannic
 - family-names: Kanchwala
@@ -31,12 +29,13 @@ authors:
   given-names: Ahdra
 - family-names: Milne
   given-names: Antony
-- family-names: Nechevska
-  given-names: Cvetanka
 - family-names: Nguyen
   given-names: Huong
 - family-names: Okwa
   given-names: Nero
+- family-names: Cano Rodríguez
+  given-names: Juan Luis
+  orcid: https://orcid.org/0000-0002-2187-161X
 - family-names: Schwarzmann
   given-names: Joel
 - family-names: Stichbury
@@ -44,6 +43,6 @@ authors:
 - family-names: Theisen
   given-names: Merel
 title: Kedro
-version: 0.18.4
-date-released: 2022-12-05
+version: 0.18.5
+date-released: 2023-02-20
 url: https://github.com/kedro-org/kedro

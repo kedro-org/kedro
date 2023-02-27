@@ -29,7 +29,7 @@ from sphinxcontrib.mermaid import mermaid
 
 from kedro import __version__ as release
 
-MERMAID_JS_URL = "https://unpkg.com/mermaid/dist/mermaid.min.js"
+MERMAID_JS_URL = "https://unpkg.com/mermaid@9.4.0/dist/mermaid.min.js"
 
 # -- Project information -----------------------------------------------------
 

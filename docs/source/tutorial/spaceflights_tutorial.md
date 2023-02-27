@@ -2,11 +2,8 @@
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 
-In the text, we assume you have started with an empty Kedro project and we show the steps necessary to convert it into a working project. The tutorial guides you to copy and paste example code into the Kedro project. It takes approximately **one hour** to complete.
+The tutorial takes approximately **30 minutes** to complete.
 
-```{note}
-You may prefer to get up and running more swiftly. We also provide the example as a [Kedro starter](../kedro_project_setup/starters.md) so you can follow along without copy/pasting.
-```
 
 ## Scenario
 
@@ -14,26 +11,22 @@ You may prefer to get up and running more swiftly. We also provide the example a
 
 ***Project***: *You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight.*
 
-
 ![](../meta/images/moon-rocket.png)
 
 Photo by <a href="https://unsplash.com/@ivvndiaz">Ivan Diaz</a> on <a href="https://unsplash.com/s/photos/spaceship">Unsplash</a>
 
 
 ## Get help
-If you hit an issue with the tutorial, the Kedro community can help!
+If you hit an issue with the tutorial:
 
-Things you can do:
-
-* check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already
-* use the spaceflights starter to [create a new, separate project which contains working example code](./tutorial_template.md#create-a-new-project), and compare that project with your own
-* use [Kedro-Viz](../visualisation/kedro-viz_visualisation) to visualise your project to better understand how the datasets, nodes and pipelines fit together
-* use the [#questions channel](https://slack.kedro.org/) on our Slack channel (which replaces our Discord server) to ask the community for help
-* search the [searchable archive of Discord discussions](https://linen-discord.kedro.org/)
+* Check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already.
+* Use [Kedro-Viz](../visualisation/kedro-viz_visualisation) to visualise your project to better understand how the datasets, nodes and pipelines fit together.
+* Use the [#questions channel](https://slack.kedro.org/) on our Slack channel to ask the community for help.
+* Search the [searchable archive of Discord discussions](https://linen-discord.kedro.org/).
 
 ## Terminology
 
-We will explain any Kedro-specific terminology we use in the tutorial as we introduce it. We use additional terminology that may not be familiar to some readers, such as the concepts below.
+We will explain any Kedro-specific terminology we use in the tutorial as we introduce it, and you can find out more from the [glossary](../resources/glossary.md). We use additional terminology that may not be familiar to some readers, such as the concepts below.
 
 ### Project root directory
 Also known as the "root directory", this is the parent folder for the entire project. It is the top-level folder that contains all other files and directories associated with the project.
@@ -64,50 +57,3 @@ When you build a Kedro project, you will typically follow a [standard developmen
     * Package the project for distribution
 
 
-### Optional: source control with `git`
-
-You don't need to do this section for the tutorial, but you may want to familiarise yourself with the use of `git` for source control.
-
-``` {note}
-For further information about this topic, check out [this post about version control for data scientists](https://flatironschool.com/blog/version-control-for-data-scientists/)
-```
-
-<details>
-<summary><b>Click to expand</b></summary>
-
-If you want to learn more about a typical `git` workflow, we suggest you look into [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
-Navigate to the project root directory and create a `git` repository on your machine (a local repository) for the project:
-
-```bash
-git init
-git remote add origin https://github.com/<your-repo>
-```
-
-#### Submit your changes to GitHub
-
-If you work on a project as part of a team, you will share the `git` repository via GitHub, which stores a shared copy of the repository. You should periodically save your changes to your local repository and merge them into the GitHub repository.
-
-Within your team, we suggest that you each develop your code on a branch and create pull requests to submit it to the `develop` or `main` branches:
-
-```bash
-# create a new feature branch called 'feature/project-template'
-git checkout -b feature/project-template
-# stage all the files you have changed
-git add .
-# commit changes to git with an instructive message
-git commit -m 'Create project template'
-# push changes to remote branch
-git push origin feature/project-template
-```
-
-It isn't necessary to branch, but if everyone in a team works on the same branch (e.g. `main`), you might have to resolve merge conflicts more often. Here is an example of working directly on `main`:
-
-```bash
-# stage all files
-git add .
-# commit changes to git with an instructive message
-git commit -m 'Create project template'
-# push changes to remote main
-git push origin main
-```
-</details>

@@ -5,6 +5,7 @@ This page introduces the most basic elements of Kedro. You can find further info
 You may prefer to skip to the next section to [create a Kedro project for hands-on Kedro experience](./new_project.md).
 
 ## Summary
+
 * Kedro nodes are the building blocks of pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.
 * A pipeline organises the dependencies and execution order of a collection of nodes.
 * Kedro has a registry of all data sources the project can use called the Data Catalog. There is inbuilt support for various file types and file systems.
@@ -58,9 +59,9 @@ The Kedro Data Catalog is the registry of all data sources that the project can 
 
 ## Kedro project directory structure
 
-Kedro projects follow a default template that uses specific folders to store datasets, notebooks, configuration and source code. We advise you to retain the structure to make it easy to share your projects with other Kedro users, but you can adapt the folder structure if you need to.
+One of the main advantages of working with Kedro projects is that they follow a default template that makes collaboration straightforward. Kedro uses semantic naming to set up a default project with specific folders to store datasets, notebooks, configuration and source code. We advise you to retain the default Kedro project structure to make it easy to share your projects with other Kedro users, although you can adapt the folder structure if you need to.
 
-A standard Kedro project structure is as follows:
+The default Kedro project structure is as follows:
 
 ```
 project-dir         # Parent directory of the template

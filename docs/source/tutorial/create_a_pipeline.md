@@ -1,18 +1,11 @@
 # Create a data processing pipeline
 
-```{note}
-Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you run into problems, or [ask the community for help](spaceflights_tutorial.md#get-help) if you need it!
-```
-
 This section explains the following:
 
 * How to create a Kedro node from a Python function
 * How to construct a Kedro pipeline from a set of nodes
 * How to run the pipeline
 
-```{note}
-If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files described.
-```
 
 ## Data processing pipeline
 

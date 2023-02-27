@@ -1,20 +1,12 @@
 # Create a data science pipeline
 
-```{note}
-Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you run into problems, or [ask the community for help](spaceflights_tutorial.md#get-help) if you need it!
-```
-
 This section explains the following:
 
 * How to add a second Kedro pipeline for data science code that extends the default project pipeline
-* How to 'slice' the project and run just part of the default pipeline
+* How to 'slice' the project to run just part of the entire pipeline
 * (Optional) How to make a [modular pipeline](../nodes_and_pipelines/modular_pipelines.md)
 * (Optional) How to specify the way the pipeline nodes are run: sequentially or in parallel
 
-
-```{note}
-If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files described.
-```
 
 ## Data science pipeline
 
@@ -238,7 +230,7 @@ As you can see we successfully ran both the `data_processing` and `data_science`
 
 #### Slice a pipeline
 
-When you created your project with `kedro new`, one of the files generated was `src/<project_name>/pipeline_registry.py` which constructs the `__default__` pipeline from every pipeline in the project, so you do not need to manually instruct Kedro to run each pipeline.
+When you created your project with `kedro new`, one of the files generated was `src/<project_name>/pipeline_registry.py` which constructs a `__default__` pipeline that includes every pipeline in the project. You do not need to manually instruct Kedro to run each pipeline.
 
 However, there may be occasions when you want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
 
@@ -264,7 +256,7 @@ Modular pipelines are easier to develop, test and maintain. They are reusable wi
 We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline` in order to test the model using different combinations of features.
 
 ``` {note}
-This is optional code so is **not** provided in the spaceflights starter. Unlike the rest of the tutorial, if you want to see this in action, you need to copy and paste the code as instructed.
+This is optional code so is **not** provided in the spaceflights starter. If you want to see this in action, you need to copy and paste the code as instructed.
 ```
 
 
@@ -531,8 +523,7 @@ kedro run --runner=ThreadRunner
 kedro run --runner=module.path.to.my.runner
 ```
 
-```{note}
 `ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../tools_integration/pyspark.md) and [Dask](/kedro.datasets.dask.ParquetDataSet).
-```
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
+atasets to work with different data formats (including CSV, Excel, and Parquet)

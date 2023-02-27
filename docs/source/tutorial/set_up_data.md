@@ -1,19 +1,11 @@
 # Set up the data
 
-```{note}
-Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you run into problems, or [ask the community for help](spaceflights_tutorial.md#get-help) if you need it!
-```
-
 In this section, we discuss the data setup phase, which is the second part of the standard development workflow. The steps are as follows:
 
 * Add datasets to your `data` folder, according to [data engineering convention](../faq/faq.md#what-is-data-engineering-convention)
 * Register the datasets with the Kedro Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
 
 You can find further information about the [Data Catalog](../data/data_catalog.md) in specific documentation covering advanced usage.
-
-```{note}
-If you are using the tutorial created by the spaceflights starter, you can omit the copy/paste steps below, but it is worth reviewing the files described.
-```
 
 ## Download datasets
 

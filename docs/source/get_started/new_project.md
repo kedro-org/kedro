@@ -119,7 +119,9 @@ You have completed the section on Kedro project creation for new users. You can 
 
 * If you prefer to get hands-on with a tutorial, move on to the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). The tutorial illustrates how to set up a working project and add dependencies, create nodes, register pipelines, set up the Data Catalog, add documentation and package the project.
 
-* After the tutorial, you'll learn how to [visualise a Kedro project](../visualisation/kedro-viz_visualisation.md) and learn more about [combining Kedro with a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md).
+* In the documentation sections that follow the tutorial, you'll learn how to [visualise a Kedro project](../visualisation/kedro-viz_visualisation.md) and learn more about [combining Kedro with a Jupyter notebook](../notebooks_and_ipython/kedro_and_notebooks.md). 
+
+If you've worked through the documentation listed and are unsure where to go next, we recommend you take a look at the [Kedro repositories on GitHub](https://github.com/kedro-org) and ask any questions you may have on [Kedro's Slack channels](https://slack.kedro.org).
 
 
 ## More information about the `pandas-iris` example project

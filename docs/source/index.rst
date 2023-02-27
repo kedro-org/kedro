@@ -181,17 +181,11 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: FAQs
-
-   faq/faq
-   faq/architecture_overview
-   faq/kedro_principles
-
-.. toctree::
-   :maxdepth: 2
    :caption: Resources
 
    resources/glossary
+   faq/architecture_overview
+   faq/kedro_principles
 
 .. toctree::
    :maxdepth: 2

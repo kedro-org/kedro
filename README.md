@@ -72,7 +72,51 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 
 ## The humans behind Kedro
 
-Kedro is maintained by [a product team](https://kedro.readthedocs.io/en/stable/faq/faq.html) and a number of [contributors from across the world](https://github.com/kedro-org/kedro/releases).
+Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at QuantumBlack to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
+
+Kedro is maintained by a product team and is an incubating project within [LF AI & Data](https://lfaidata.foundation/).
+
+Currently, the core Kedro team consists of
+[Ahdra Merali](https://github.com/AhdraMeraliQB),
+[Andrew Mackay](https://github.com/Mackay031),
+[Ankita Katiyar](https://github.com/ankatiyar),
+[Antony Milne](https://github.com/AntonyMilneQB),
+[Deepyaman Datta](https://github.com/deepyaman),
+[Gabriel Comym](https://github.com/comym),
+[Huong Nguyen](https://github.com/Huongg),
+[Ivan Danov](https://github.com/idanov),
+[Jannic Holzer](https://github.com/jmholzer),
+[Jo Stichbury](https://github.com/stichbury),
+[Joel Schwarzmann](https://github.com/datajoely),
+[Juan Luis Cano](https://github.com/astrojuanlu),
+[Merel Theisen](https://github.com/merelcht),
+[Nero Okwa](https://github.com/NeroOkwa),
+[Nok Lam Chan](https://github.com/noklam),
+[Rashida Kanchwala](https://github.com/rashidakanchwala),
+[Sajid Alam](https://github.com/SajidAlamQB),
+[Tynan DeBold](https://github.com/tynandebold) and
+[Yetunde Dada](https://github.com/yetudada).
+
+Former core team members with significant contributions include:
+[Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
+[Anton Kirilenko](https://github.com/Flid),
+[Cvetanka Nechevska](https://github.com/cvetankanechevska),
+[Dmitrii Deriabin](https://github.com/dmder),
+[Gordon Wrigley](https://github.com/tolomea),
+[Hamza Oza](https://github.com/hamzaoza),
+[Ignacio Paricio](https://github.com/ignacioparicio),
+[Jiri Klein](https://github.com/jiriklein),
+[Kiyohito Kunii](https://github.com/921kiyo),
+[Laís Carvalho](https://github.com/laisbsc),
+[Liam Brummitt](https://github.com/bru5),
+[Lim Hoang](https://github.com/limdauto),
+[Lorena Bălan](https://github.com/lorenabalan),
+[Nasef Khan](https://github.com/nakhan98),
+[Richard Westenra](https://github.com/richardwestenra),
+[Susanna Wong](https://github.com/studioswong) and
+[Zain Patel](https://github.com/mzjp2).
+
+And last, but not least, all the open-source contributors whose work goes into [Kedro releases](https://github.com/kedro-org/kedro/releases).
 
 
 ## Can I contribute?

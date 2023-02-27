@@ -69,5 +69,3 @@ After waiting for your cluster to restart, you should verify that your modified 
   ]
 }
 ```
-
-

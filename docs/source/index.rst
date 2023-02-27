@@ -191,7 +191,6 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Resources
 
-   resources/logos
    resources/glossary
 
 .. toctree::

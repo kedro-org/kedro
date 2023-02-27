@@ -1,6 +1,16 @@
 # Kedro concepts
 
-It is time to introduce the most basic elements of Kedro. You can find further information about these and more advanced Kedro concepts in the [Kedro glossary](../resources/glossary.md).
+This page introduces the most basic elements of Kedro. You can find further information about these and more advanced Kedro concepts in the [Kedro glossary](../resources/glossary.md).
+
+You may prefer to skip to the next section to [create a Kedro project for hands-on Kedro experience](./new_project.md).
+
+## Summary
+* Kedro nodes are the building blocks of pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.
+* A pipeline organises the dependencies and execution order of a collection of nodes.
+* Kedro has a registry of all data sources the project can use called the Data Catalog. There is inbuilt support for various file types and file systems.
+* Kedro projects follow a default template that uses specific folders to store datasets, notebooks, configuration and source code.
+
+
 ## Node
 
 In Kedro, a node is a wrapper for a [pure Python function](../resources/glossary.md#node) that names the inputs and outputs of that function. Nodes are the building block of a pipeline, and the output of one node can be the input of another.

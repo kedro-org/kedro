@@ -59,16 +59,15 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Get started
+   :caption: First steps: Set up
 
    get_started/install
-   get_started/kedro_concepts
    get_started/new_project
-   get_started/summary
+   get_started/kedro_concepts
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorial
+   :caption: Next steps: Tutorial
 
    tutorial/spaceflights_tutorial
    tutorial/tutorial_template

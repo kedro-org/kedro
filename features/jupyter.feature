@@ -4,6 +4,10 @@ Feature: Jupyter targets in new project
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
 
+  Scenario: Execute jupyter-init target
+    When I execute the kedro jupyter command "notebook --no-browser"
+    Then I should get a successful exit code
+
   Scenario: Execute jupyter-notebook target
     When I execute the kedro jupyter command "notebook --no-browser"
     Then jupyter notebook should run on port 8888

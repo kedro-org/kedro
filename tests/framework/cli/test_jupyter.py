@@ -28,6 +28,33 @@ def create_kernel_mock(mocker):
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "create_kernel_mock", "python_call_mock"
 )
+class TestJupyterInitCommand:
+    def test_happy_path(self, fake_project_cli, fake_metadata, create_kernel_mock):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["jupyter", "init"],
+            obj=fake_metadata,
+        )
+        assert not result.exit_code, result.stdout
+        kernel_name = f"kedro_{fake_metadata.package_name}"
+        display_name = f"Kedro ({fake_metadata.package_name})"
+        create_kernel_mock.assert_called_once_with(kernel_name, display_name)
+
+    def test_fail_no_jupyter(self, fake_project_cli, mocker):
+        mocker.patch.dict("sys.modules", {"notebook": None})
+        result = CliRunner().invoke(fake_project_cli, ["jupyter", "notebook"])
+
+        assert result.exit_code
+        error = (
+            "Module 'notebook' not found. Make sure to install required project "
+            "dependencies by running the 'pip install -r src/requirements.txt' command first."
+        )
+        assert error in result.output
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "create_kernel_mock", "python_call_mock"
+)
 class TestJupyterNotebookCommand:
     def test_happy_path(
         self, python_call_mock, fake_project_cli, fake_metadata, create_kernel_mock

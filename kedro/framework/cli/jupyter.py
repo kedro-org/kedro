@@ -6,11 +6,12 @@ import os
 import shutil
 import sys
 from collections import Counter
+from enum import IntEnum
 from glob import iglob
 from pathlib import Path
 from typing import Any, Dict
 from warnings import warn
-from enum import IntEnum
+
 import click
 from click import secho
 
@@ -32,9 +33,12 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
-JupyterCommandGroupOrder = IntEnum('order', ['init', 'notebook', 'lab','convert'])
+JupyterCommandGroupOrder = IntEnum("order", ["init", "notebook", "lab", "convert"])
+
+
 class JupyterGroup(click.Group):
-    """ A custom class for ordering the `kedro jupyter` command groups"""
+    """A custom class for ordering the `kedro jupyter` command groups"""
+
     def __init__(self, name=None, commands=None, **attrs):
         super().__init__(name, commands, **attrs)
         #: the registered subcommands by their exported names.
@@ -42,8 +46,9 @@ class JupyterGroup(click.Group):
 
     def list_commands(self, ctx):
         """List commands according to a custom order"""
-        return sorted(self.commands, key= lambda x:getattr(JupyterCommandGroupOrder, x))
+        return sorted(self.commands, key=lambda x: getattr(JupyterCommandGroupOrder, x))
         return self.commands
+
 
 # pylint: disable=missing-function-docstring
 @click.group(name="Kedro")
@@ -56,6 +61,7 @@ def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.
     """
+
 
 @forward_command(jupyter, "init", forward_help=True)
 @env_option
@@ -72,10 +78,7 @@ def init(
 
     kernel_name = f"kedro_{metadata.package_name}"
     kernel_path = _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
-    click.secho(
-        f"\nThe kernel has been created successfully at {kernel_path}"
-    )
-
+    click.secho(f"\nThe kernel has been created successfully at {kernel_path}")
 
 
 @forward_command(jupyter, "notebook", forward_help=True)
@@ -200,7 +203,6 @@ def _create_kernel(kernel_name: str, display_name: str) -> str:
     return kernel_path
 
 
-
 @command_with_verbosity(jupyter, "convert")
 @click.option("--all", "-a", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
 @click.option("-y", "overwrite_flag", is_flag=True, help=OVERWRITE_HELP)
@@ -278,6 +280,7 @@ def convert_notebook(
             _export_nodes(notebook, output_path)
 
     secho("Done!", color="green")  # type: ignore
+
 
 def _export_nodes(filepath: Path, output_path: Path) -> None:
     """Copy code from Jupyter cells into nodes in src/<package_name>/nodes/,

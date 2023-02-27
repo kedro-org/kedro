@@ -10,7 +10,7 @@ from glob import iglob
 from pathlib import Path
 from typing import Any, Dict
 from warnings import warn
-
+from enum import IntEnum
 import click
 from click import secho
 
@@ -32,17 +32,50 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
+JupyterCommandGroupOrder = IntEnum('order', ['init', 'notebook', 'lab','convert'])
+class JupyterGroup(click.Group):
+    """ A custom class for ordering the `kedro jupyter` command groups"""
+    def __init__(self, name=None, commands=None, **attrs):
+        super().__init__(name, commands, **attrs)
+        #: the registered subcommands by their exported names.
+        self.commands = commands or {}
+
+    def list_commands(self, ctx):
+        """List commands according to a custom order"""
+        return sorted(self.commands, key= lambda x:getattr(JupyterCommandGroupOrder, x))
+        return self.commands
+
 # pylint: disable=missing-function-docstring
 @click.group(name="Kedro")
 def jupyter_cli():  # pragma: no cover
     pass
 
 
-@jupyter_cli.group()
+@jupyter_cli.group(cls=JupyterGroup)
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.
     """
+
+@forward_command(jupyter, "init", forward_help=True)
+@env_option
+@click.pass_obj  # this will pass the metadata as first argument
+def init(
+    metadata: ProjectMetadata,
+    env,
+    args,
+    **kwargs,
+):  # pylint: disable=unused-argument
+    """Initialise the Jupyter Kernel for a kedro project."""
+    _check_module_importable("notebook")
+    validate_settings()
+
+    kernel_name = f"kedro_{metadata.package_name}"
+    kernel_path = _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
+    click.secho(
+        f"\nThe kernel has been created successfully at {kernel_path}"
+    )
+
 
 
 @forward_command(jupyter, "notebook", forward_help=True)
@@ -96,7 +129,7 @@ def jupyter_lab(
     )
 
 
-def _create_kernel(kernel_name: str, display_name: str) -> None:
+def _create_kernel(kernel_name: str, display_name: str) -> str:
     """Creates an IPython kernel for the kedro project. If one with the same kernel_name
     exists already it will be replaced.
 
@@ -164,6 +197,8 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
         raise KedroCliError(
             f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
         ) from exc
+    return kernel_path
+
 
 
 @command_with_verbosity(jupyter, "convert")
@@ -243,7 +278,6 @@ def convert_notebook(
             _export_nodes(notebook, output_path)
 
     secho("Done!", color="green")  # type: ignore
-
 
 def _export_nodes(filepath: Path, output_path: Path) -> None:
     """Copy code from Jupyter cells into nodes in src/<package_name>/nodes/,

@@ -36,7 +36,7 @@ overwrite its contents."""
 JupyterCommandGroupOrder = IntEnum("order", ["init", "notebook", "lab", "convert"])
 
 
-class JupyterGroup(click.Group):
+class JupyterCommandGroup(click.Group):
     """A custom class for ordering the `kedro jupyter` command groups"""
 
     def __init__(self, name=None, commands=None, **attrs):
@@ -47,7 +47,6 @@ class JupyterGroup(click.Group):
     def list_commands(self, ctx):
         """List commands according to a custom order"""
         return sorted(self.commands, key=lambda x: getattr(JupyterCommandGroupOrder, x))
-        return self.commands
 
 
 # pylint: disable=missing-function-docstring
@@ -56,7 +55,7 @@ def jupyter_cli():  # pragma: no cover
     pass
 
 
-@jupyter_cli.group(cls=JupyterGroup)
+@jupyter_cli.group(cls=JupyterCommandGroup)
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.

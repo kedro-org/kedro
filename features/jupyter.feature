@@ -5,7 +5,7 @@ Feature: Jupyter targets in new project
     And I have run a non-interactive kedro new with starter "default"
 
   Scenario: Execute jupyter-init target
-    When I execute the kedro jupyter command "notebook --no-browser"
+    When I execute the kedro jupyter command "init"
     Then I should get a successful exit code
 
   Scenario: Execute jupyter-notebook target

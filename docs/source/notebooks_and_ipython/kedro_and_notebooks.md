@@ -18,7 +18,7 @@ The custom kernel automatically loads `kedro.ipython`, which is an [IPython exte
 
 ## Iris dataset example
 
-Create a sample Kedro project with the [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) as we showed in the [get started documentation](../get_started/new_project.md#create-the-example-project):
+Create a sample Kedro project with the [`pandas-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris) as we showed in the [get started documentation](../get_started/new_project.md#create-a-new-project-containing-example-code):
 
 ```bash
 kedro new --starter=pandas-iris

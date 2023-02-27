@@ -43,7 +43,7 @@ With the setup complete, you can use `databricks-build`. Navigate to the parent 
 make databricks-build
 ```
 
-You should see a stream of messages be written to your terminal. Behind the scenes, `build-databricks` does the following:
+You should see a stream of messages being written to your terminal. Behind the scenes, `build-databricks` does the following:
 
 1. Builds a wheel file of your modified version of Kedro.
 2. Uninstalls any library on your Databricks cluster with the same wheel file name.
@@ -51,4 +51,23 @@ You should see a stream of messages be written to your terminal. Behind the scen
 4. Queues your updated wheel file for installation
 5. Restarts your cluster to apply the changes.
 
-Note that your cluster will be unavailable while it is restarting.
+Note that your cluster will be unavailable while it is restarting. You can poll the status of your cluster using the Databricks CLI command `databricks clusters get --cluster-id <your-cluster-id> | grep state` (macOS, Linux).
+
+After waiting for your cluster to restart, you should verify that your modified version of Kedro has installed correctly. To do this, run `databricks libraries list --cluster-id <your-cluster-id>`. If installation was successful, you should see output similar to the following:
+
+```bash
+{
+  "cluster_id": "<your-cluster-id>",
+  "library_statuses": [
+    {
+      "library": {
+        "whl": "dbfs:/tmp/kedro-builds/kedro-0.18.5-py3-none-any.whl"
+      },
+      "status": "INSTALLED",
+      "is_library_for_all_clusters": false
+    }
+  ]
+}
+```
+
+

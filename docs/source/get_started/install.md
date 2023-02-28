@@ -43,7 +43,9 @@ We suggest you create a new Python virtual environment for *each* new Kedro proj
 [Read more about Python virtual environments](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 ```
 
-Depending on your preferred Python installation, you can alternatively create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`, as described in the [FAQ](../faq/faq.md)
+```{note}
+Depending on your preferred Python installation, you can alternatively create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`.
+```
 
 #### Create a new Python virtual environment using `conda`
 
@@ -95,7 +97,7 @@ You should see an ASCII art graphic and the Kedro version number: for example,
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../faq/faq.md), check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org), or post a new query on the [Slack organisation](https://slack.kedro.org).
+If you do not see the graphic displayed, or have any issues with your installation, see the [searchable archive of past community support discussions](https://linen-discord.kedro.org), or post a new query on [Kedro's Slack organisation](https://slack.kedro.org).
 
 ### How do I upgrade Kedro?
 

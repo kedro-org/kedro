@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 from collections import Counter
-from enum import IntEnum
 from glob import iglob
 from pathlib import Path
 from typing import Any, Dict
@@ -33,7 +32,9 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 jupyter_command_group_order = ["init", "notebook", "lab", "convert"]
-jupyter_command_group_order = {command: order for order, command in enumerate(jupyter_command_group_order)}
+jupyter_command_group_order = {
+    command: order for order, command in enumerate(jupyter_command_group_order)
+}
 
 
 class JupyterCommandGroup(click.Group):
@@ -164,6 +165,9 @@ def _create_kernel(kernel_name: str, display_name: str) -> str:
     Args:
         kernel_name: Name of the kernel to create.
         display_name: Kernel name as it is displayed in the UI.
+
+    Returns:
+        String of the path of the created kernel.
 
     Raises:
         KedroCliError: When kernel cannot be setup.

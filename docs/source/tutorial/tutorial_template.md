@@ -17,7 +17,7 @@ Don't forget to check the [tutorial FAQ](spaceflights_tutorial_faqs.md) if you r
 If you have not yet set up Kedro, do so by [following the guidelines to install Kedro](../get_started/install.md).
 
 ```{important}
-We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.4).
+We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.5).
 ```
 
 In your terminal window, navigate to the folder you want to store the project and type the following to create an empty project:
@@ -73,8 +73,8 @@ The dependencies above might be sufficient for some projects, but for this tutor
 Add the following lines to your `src/requirements.txt` file:
 
 ```text
-kedro==0.18.4
-kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.0.0  # Specify Kedro-Datasets dependencies
+kedro==0.18.5
+kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.0.2  # Specify Kedro-Datasets dependencies
 kedro-viz~=5.0                                                                 # Visualise your pipelines
 scikit-learn~=1.0                                                              # For modelling in the data science pipeline
 ```

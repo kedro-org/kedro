@@ -3,7 +3,7 @@ data pipelines by providing uniform project templates, data abstraction,
 configuration and pipeline assembly.
 """
 
-__version__ = "0.18.4"
+__version__ = "0.18.5"
 
 
 import logging

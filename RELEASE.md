@@ -13,6 +13,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Added a guide and tooling for developing Kedro for Databricks.
 
 ## Breaking changes to the API
 

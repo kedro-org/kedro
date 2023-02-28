@@ -6,7 +6,7 @@ Feature: Jupyter targets in new project
 
   Scenario: Execute jupyter-init target
     When I execute the kedro jupyter command "init"
-    Then I should get a successful exit code
+    Then I should get a message including "The kernel has been created successfully at"
 
   Scenario: Execute jupyter-notebook target
     When I execute the kedro jupyter command "notebook --no-browser"

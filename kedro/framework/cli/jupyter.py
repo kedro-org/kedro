@@ -32,8 +32,8 @@ including sub-folders."""
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
-
-JupyterCommandGroupOrder = IntEnum("order", ["init", "notebook", "lab", "convert"])
+jupyter_command_group_order = ["init", "notebook", "lab", "convert"]
+jupyter_command_group_order = {command: order for order, command in enumerate(jupyter_command_group_order)}
 
 
 class JupyterCommandGroup(click.Group):
@@ -46,7 +46,7 @@ class JupyterCommandGroup(click.Group):
 
     def list_commands(self, ctx):
         """List commands according to a custom order"""
-        return sorted(self.commands, key=lambda x: getattr(JupyterCommandGroupOrder, x))
+        return sorted(self.commands, key=lambda k: jupyter_command_group_order[k])
 
 
 # pylint: disable=missing-function-docstring

@@ -3,6 +3,7 @@ import configparser
 import json
 import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Dict
 
@@ -487,3 +488,20 @@ class TestOmegaConfigLoader:
         assert conf["credentials"]["user"]["name"] == "test_user"
         assert OmegaConf.has_resolver("oc.env")
         OmegaConf.clear_resolver("oc.env")
+
+    @use_config_dir
+    def test_load_config_from_tar_file(self, tmp_path):
+        subprocess.run(  # pylint: disable=subprocess-run-check
+            [
+                "tar",
+                "--exclude=local/*.yml",
+                "-czf",
+                f"{tmp_path}/tar_conf.tar.gz",
+                f"--directory={str(tmp_path.parent)}",
+                f"{tmp_path.name}",
+            ]
+        )
+
+        conf = OmegaConfigLoader(conf_source=f"{tmp_path}/tar_conf.tar.gz")
+        catalog = conf["catalog"]
+        assert catalog["trains"]["type"] == "MemoryDataSet"

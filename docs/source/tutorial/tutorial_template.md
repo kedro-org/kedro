@@ -71,12 +71,18 @@ pip install -r src/requirements.txt
 You can learn more about [project dependencies](../kedro_project_setup/dependencies.md) in the Kedro documentation.
 
 
-## Optional: configuration and logging
+## Optional: logging and configuration
 
-You may want to store credentials such as usernames and passwords if they are needed for specific data sources used by the project.
+You might want to [set up logging](../logging/logging.md) at this stage of the workflow, but we do not use it in this tutorial.
+
+You may also want to store credentials such as usernames and passwords if they are needed for specific data sources used by the project.
 
 To do this, add them to `conf/local/credentials.yml` (some examples are included in that file for illustration).
 
-You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
+### Configuration best practice to avoid leaking confidential data?
 
-You might also want to [set up logging](../logging/logging.md) at this stage of the workflow, but we do not use it in this tutorial.
+* Do not commit data to version control.
+* Do not commit notebook output cells (data can easily sneak into notebooks when you don't delete output cells).
+* Do not commit credentials in `conf/`. Use only the `conf/local/` folder for sensitive information like access credentials.
+
+You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).

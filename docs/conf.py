@@ -29,7 +29,7 @@ from sphinxcontrib.mermaid import mermaid
 
 from kedro import __version__ as release
 
-MERMAID_JS_URL = "https://unpkg.com/mermaid/dist/mermaid.min.js"
+MERMAID_JS_URL = "https://unpkg.com/mermaid@9.4.0/dist/mermaid.min.js"
 
 # -- Project information -----------------------------------------------------
 
@@ -220,13 +220,11 @@ linkcheck_ignore = [
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
-    "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
-    "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
-    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-lazy-saving",  # Until 0.18.4
+    "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
 ]
 

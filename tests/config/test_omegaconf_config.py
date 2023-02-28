@@ -246,7 +246,7 @@ class TestOmegaConfigLoader:
         conf_path.mkdir(parents=True, exist_ok=True)
         (conf_path / "catalog.yml").write_text("bad:\nconfig")
 
-        pattern = f"Invalid YAML or JSON file {conf_path}"
+        pattern = f"Invalid YAML or JSON file {conf_path.as_posix()}"
         with pytest.raises(ParserError, match=re.escape(pattern)):
             OmegaConfigLoader(str(tmp_path))["catalog"]
 
@@ -365,7 +365,7 @@ class TestOmegaConfigLoader:
         (conf_path / "catalog.yml").write_text(example_catalog)
 
         msg = (
-            f"Invalid YAML or JSON file {conf_path / 'catalog.yml'}, unable to read"
+            f"Invalid YAML or JSON file {Path(conf_path, 'catalog.yml').as_posix()}, unable to read"
             f" line 3, position 10."
         )
         with pytest.raises(ParserError, match=re.escape(msg)):

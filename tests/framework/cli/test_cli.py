@@ -930,7 +930,7 @@ class TestRunCommand:
         )
         assert result.exit_code, result.output
         expected_output = (
-            "Error: Invalid value for '--conf-source': Directory 'nonexistent_dir'"
+            "Error: Invalid value for '--conf-source': Path 'nonexistent_dir'"
             " does not exist."
         )
         assert expected_output in result.output

@@ -1,10 +1,10 @@
-# Setup for developing Kedro on Databricks
+# Developing Kedro for Databricks
 
-[Databricks](https://www.databricks.com/) is a cloud-based platform for data engineering and data science that many Kedro users deploy their Kedro projects to. Extending and improving the Kedro experience on Databricks is important to a large part of Kedro's user base. 
+[Databricks](https://www.databricks.com/) is a cloud-based platform for data engineering and data science that many Kedro users deploy their Kedro projects to. Extending and improving the Kedro experience on Databricks is important to a large part of Kedro's user base.
 
 ## Introduction
 
-This page describes how to set up your development environment for Kedro on Databricks so that you can manually test new features and fixes as part of a build-and-test development cycle.
+This page describes how to efficiently develop features and fixes for Kedro on Databricks. Using this guide, you will be able to quickly test your locally modified version of Kedro on Databricks as part of a build-and-test development cycle.
 
 ## Prerequisites
 
@@ -17,11 +17,11 @@ You will need the following prerequisites to follow this guide:
 5. [`git` installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 6. A local clone of the [Kedro](https://github.com/kedro-org/kedro) repository for you to edit.
 
-## Installing Kedro development builds on Databricks
+## Installing your Kedro builds on Databricks
 
 The development workflow for Kedro on Databricks is similar to the one for Kedro in general. The main difference comes when manually testing your changes on Databricks. You can develop and test your changes locally, but you will need to build and deploy the wheel file to Databricks to test it on a cluster.
 
-To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` target named `databricks-build` that automates the process of building a wheel file and installing this on your databricks cluster. This is the recommended way of developing for Databricks because of the amount of time it saves.
+To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` target named `databricks-build` that automates the process of building a wheel file and installing this on your Databricks cluster. This is the recommended way of developing for Databricks because of the amount of time it saves.
 
 ### Setup
 

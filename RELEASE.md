@@ -14,6 +14,7 @@
 * Added new Kedro CLI `kedro jupyter-init` to setup Jupyter Kernel for Kedro.
 
 ## Bug fixes and other changes
+* Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
 
 ## Breaking changes to the API
 

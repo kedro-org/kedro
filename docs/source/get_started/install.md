@@ -43,7 +43,9 @@ We suggest you create a new Python virtual environment for *each* new Kedro proj
 [Read more about Python virtual environments](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 ```
 
-Depending on your preferred Python installation, you can alternatively create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`, as described in the [FAQ](../faq/faq.md)
+```{note}
+Depending on your preferred Python installation, you can alternatively create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`.
+```
 
 #### Create a new Python virtual environment using `conda`
 
@@ -95,8 +97,46 @@ You should see an ASCII art graphic and the Kedro version number: for example,
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../faq/faq.md), check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org), or post a new query on the [Slack organisation](https://slack.kedro.org).
+If you do not see the graphic displayed, or have any issues with your installation, see the [searchable archive of past community support discussions](https://linen-discord.kedro.org), or post a new query on [Kedro's Slack organisation](https://slack.kedro.org).
 
-## Install a development version
+### How do I upgrade Kedro?
 
-To try out a development version of Kedro direct from the [Kedro GitHub repository](https://github.com/kedro-org/kedro), follow [these steps](../faq/faq.md#how-can-i-use-a-development-version-of-kedro).
+We use [Semantic Versioning](https://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/kedro-org/kedro/blob/main/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
+
+Once Kedro is installed, you can check your version as follows:
+
+```
+kedro --version
+```
+
+To later upgrade Kedro to a different version, simply run:
+
+```
+pip install kedro -U
+```
+
+When migrating an existing project to a newer Kedro version, make sure you also update the `project_version` in your `pyproject.toml` file from the project root directory or, for projects generated with Kedro<0.17.0, in your `ProjectContext`, which is found in `src/<package_name>/run.py`.
+
+
+## Install a development version of Kedro
+
+This section explains how to try out a development version of Kedro direct from the [Kedro GitHub repository](https://github.com/kedro-org/kedro).
+
+```{important}
+The development version of Kedro is not guaranteed to be bug-free and/or compatible with any of the [stable versions](https://pypi.org/project/kedro/#history). We do not recommend that you use a development version of Kedro in any production systems. Please install and use with caution.
+```
+
+To try out latest, unreleased functionality, run the following installation command:
+
+```console
+pip install git+https://github.com/kedro-org/kedro.git@develop
+```
+
+This will install Kedro from the `develop` branch of the GitHub repository, which is always the most up to date. This command will install Kedro from source, unlike `pip install kedro` which installs Kedro from PyPI.
+
+If you want to roll back to a stable version of Kedro, execute the following in your environment:
+
+```console
+pip uninstall kedro -y
+pip install kedro
+```

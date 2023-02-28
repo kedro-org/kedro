@@ -76,7 +76,7 @@ The `autoreload` flag reflects changes to the project as they happen. For exampl
 
 By convention, a [pipeline can be defined as having different layers](../resources/glossary.md#layers-data-engineering-convention) according to how data is processed, which makes it easier to collaborate.
 
-For example, the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
+For example, the [data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71#the-kedro-data-layers) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
 You can add a `layer` attribute to the datasets in the Data Catalog, which is reflected in the Kedro-Viz visualisation.
 

@@ -2,7 +2,7 @@
 
 The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers.
 
-The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development. We keep a list [Kedro's current and past maintainers](https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro) on GitHub.
+The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development. We list [Kedro's current and past maintainers](https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro) on GitHub.
 
 In this section, we describe:
 

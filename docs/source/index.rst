@@ -184,8 +184,6 @@ Welcome to Kedro's documentation!
    :caption: Resources
 
    resources/glossary
-   resources/architecture_overview
-   resources/kedro_principles
 
 .. toctree::
    :maxdepth: 2

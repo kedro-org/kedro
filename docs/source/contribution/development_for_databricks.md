@@ -1,4 +1,4 @@
-# Setup for developing and extending Kedro on Databricks
+# Setup for developing Kedro on Databricks
 
 [Databricks](https://www.databricks.com/) is a cloud-based platform for data engineering and data science that many Kedro users deploy their Kedro projects to. Extending and improving the Kedro experience on Databricks is important to a large part of Kedro's user base. 
 
@@ -17,7 +17,7 @@ You will need the following prerequisites to follow this guide:
 5. [`git` installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 6. A local clone of the [Kedro](https://github.com/kedro-org/kedro) repository for you to edit.
 
-## Installing Kedro Development Builds on Databricks
+## Installing Kedro development builds on Databricks
 
 The development workflow for Kedro on Databricks is similar to the one for Kedro in general. The main difference comes when manually testing your changes on Databricks. You can develop and test your changes locally, but you will need to build and deploy the wheel file to Databricks to test it on a cluster.
 
@@ -53,7 +53,7 @@ You should see a stream of messages being written to your terminal. Behind the s
 
 Note that your cluster will be unavailable while it is restarting. You can poll the status of your cluster using the Databricks CLI command `databricks clusters get --cluster-id <your-cluster-id> | grep state` (macOS, Linux).
 
-After waiting for your cluster to restart, you should verify that your modified version of Kedro has installed correctly. To do this, run `databricks libraries list --cluster-id <your-cluster-id>`. If installation was successful, you should see output similar to the following:
+After waiting for your cluster to restart, you should verify that your modified version of Kedro has installed correctly. To do this, run `databricks libraries list --cluster-id <your-cluster-id>`. If installation was successful, you should see the following output:
 
 ```bash
 {
@@ -61,7 +61,7 @@ After waiting for your cluster to restart, you should verify that your modified 
   "library_statuses": [
     {
       "library": {
-        "whl": "dbfs:/tmp/kedro-builds/kedro-0.18.5-py3-none-any.whl"
+        "whl": "dbfs:/tmp/kedro-builds/kedro-<version>-py3-none-any.whl"
       },
       "status": "INSTALLED",
       "is_library_for_all_clusters": false
@@ -69,3 +69,5 @@ After waiting for your cluster to restart, you should verify that your modified 
   ]
 }
 ```
+
+Any runs of a Kedro project on this cluster will now reflect your latest local changes to Kedro.

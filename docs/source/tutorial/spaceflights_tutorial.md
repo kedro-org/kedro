@@ -55,5 +55,3 @@ When you build a Kedro project, you will typically follow a standard development
 4. Package the project
     * Build the project documentation
     * Package the project for distribution
-
-

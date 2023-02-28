@@ -36,28 +36,28 @@ The spaceflights project dependencies are stored in `src/requirements.txt`(you m
 
 ```text
 # code quality packages
-black==22.0  
-flake8>=3.7.9, <5.0 
-ipython>=7.31.1, <8.0 
-isort~=5.0 
-nbstripout~=0.4 
+black==22.0
+flake8>=3.7.9, <5.0
+ipython>=7.31.1, <8.0
+isort~=5.0
+nbstripout~=0.4
 
 # notebook tooling
-jupyter~=1.0 
-jupyterlab~=3.0 
+jupyter~=1.0
+jupyterlab~=3.0
 jupyterlab_server>=2.11.1, <2.16.0
 
 # Pytest + useful extensions
-pytest-cov~=3.0 
-pytest-mock>=1.7.1, <2.0 
-pytest~=7.2 
+pytest-cov~=3.0
+pytest-mock>=1.7.1, <2.0
+pytest~=7.2
 
 # Kedro dependencies and datasets to work with different data formats (including CSV, Excel, and Parquet)
 kedro~=0.18.5
 kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.0.0
 kedro-telemetry~=0.2.0
 kedro-viz~=5.0 # Visualise your pipelines
- 
+
 # For modelling in the data science pipeline
 scikit-learn~=1.0
 ```
@@ -68,7 +68,7 @@ To install all the project-specific dependencies, run the following from the pro
 pip install -r src/requirements.txt
 ```
 
-You can learn more about [project dependencies](../kedro_project_setup/dependencies.md) in the Kedro documentation.
+[You can learn more about dependencies in the project setup documentation](../kedro_project_setup/dependencies.md).
 
 
 ## Optional: logging and configuration

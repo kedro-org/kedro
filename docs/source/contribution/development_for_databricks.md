@@ -1,4 +1,4 @@
-# Developing Kedro for Databricks
+# How to deploy a development version of Kedro to Databricks
 
 [Databricks](https://www.databricks.com/) is a cloud-based platform for data engineering and data science that many Kedro users deploy their Kedro projects to. Extending and improving the Kedro experience on Databricks is important to a large part of Kedro's user base.
 

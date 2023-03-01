@@ -101,7 +101,7 @@ If you do not see the graphic displayed, or have any issues with your installati
 
 ### How do I upgrade Kedro?
 
-We use [Semantic Versioning](https://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/kedro-org/kedro/blob/main/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
+The best way to safely upgrade is to check our [release notes](https://github.com/kedro-org/kedro/blob/main/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
 
 Once Kedro is installed, you can check your version as follows:
 
@@ -115,7 +115,10 @@ To later upgrade Kedro to a different version, simply run:
 pip install kedro -U
 ```
 
-When migrating an existing project to a newer Kedro version, make sure you also update the `project_version` in your `pyproject.toml` file from the project root directory or, for projects generated with Kedro<0.17.0, in your `ProjectContext`, which is found in `src/<package_name>/run.py`.
+When migrating an existing project to a newer Kedro version, make sure you also update the `project_version`:
+
+* For projects generated with versions of Kedro > 0.17.0, you'll do this in the `pyproject.toml` file from the project root directory.
+* If your project was generated with a version of Kedro <0.17.0, you will instead need to update the `ProjectContext`, which is found in `src/<package_name>/run.py`.
 
 
 ## Install a development version of Kedro
@@ -126,7 +129,7 @@ This section explains how to try out a development version of Kedro direct from 
 The development version of Kedro is not guaranteed to be bug-free and/or compatible with any of the [stable versions](https://pypi.org/project/kedro/#history). We do not recommend that you use a development version of Kedro in any production systems. Please install and use with caution.
 ```
 
-To try out latest, unreleased functionality, run the following installation command:
+To try out latest, unreleased functionality from the `develop` branch of the Kedro GitHub repository, run the following installation command:
 
 ```console
 pip install git+https://github.com/kedro-org/kedro.git@develop

@@ -19,4 +19,4 @@ rich~=13.3
 rope~=1.7.0  # subject to LGPLv3 license
 setuptools>=65.5.1
 toml~=0.10
-toposort~=1.9  # Needs to be at least 1.5 to be able to raise CircularDependencyError
+toposort~=1.10  # Needs to be at least 1.5 to be able to raise CircularDependencyError

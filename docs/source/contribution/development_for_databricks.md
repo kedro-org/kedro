@@ -31,12 +31,24 @@ To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` ta
 
 Before you use `make databricks-build`, you must [set up the Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).
 
-The only remaining step is to create and environment variable with the ID of the cluster you are using to test your Kedro build. You can find the ID by executing the Databricks CLI command `databricks cluster list` and looking for the name of your chosen cluster.
-
-Once you have found the cluster ID, you must export it to an environment variable named `DATABRICKS_CLUSTER_ID`, on Linux or macOS:
+The only remaining step is to create and environment variable with the ID of the cluster you are using to test your Kedro build. You can find the ID by executing the Databricks CLI command `databricks clusters list` and looking for the Cluster ID to the left of the name of your chosen cluster, for instance:
 
 ```bash
+$ databricks clusters list
+1234-567890-abcd1234  General Cluster             TERMINATED
+0987-654321-9876xywz  Kedro Test Cluster          TERMINATED
+```
+
+In this case, the cluster ID of `Kedro Test Cluster` is `0987-654321-9876xywz`.
+
+Once you have determined the cluster ID, you must export it to an environment variable named `DATABRICKS_CLUSTER_ID`:
+
+```bash
+# Linux or macOS
 export DATABRICKS_CLUSTER_ID=<your-cluster-id>
+
+# Windows
+set DATABRICKS_CLUSTER_ID=<your-cluster-id>
 ```
 
 ### Using `make databricks-build`

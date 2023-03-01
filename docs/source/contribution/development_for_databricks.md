@@ -19,7 +19,7 @@ You will need the following to follow this guide:
 * Access to a Databricks workspace with an [existing cluster](https://docs.databricks.com/clusters/create-cluster.html).
 * [GNU `make`](https://www.gnu.org/software/make/).
 * [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
-* A local clone of the [Kedro](https://github.com/kedro-org/kedro) repository for you to edit.
+* A local clone of the [Kedro git repository](https://github.com/kedro-org/kedro).
 
 ## Installing your Kedro builds on Databricks
 

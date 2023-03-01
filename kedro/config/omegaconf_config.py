@@ -117,8 +117,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             if file_mimetype == "application/x-tar":
                 self._protocol = "tar"
-            elif file_mimetype == "application/zip":
-                self._protocol = "zip"
+            # It's extremely complicated to create a zip file with a temporary directory, which
+            # we use in our unit tests. That's why the following two lines aren't covered in tests.
+            # The functionality has been tested manually.
+            elif file_mimetype == "application/zip":   # pragma: no cover
+                self._protocol = "zip"  # pragma: no cover
         self._fs = fsspec.filesystem(protocol=self._protocol, fo=conf_source)
 
         super().__init__(

@@ -51,7 +51,7 @@ export DATABRICKS_CLUSTER_ID=<your-cluster-id>
 set DATABRICKS_CLUSTER_ID=<your-cluster-id>
 ```
 
-### Using `make databricks-build`
+### How to use `make databricks-build` to test your Kedro build
 
 With the setup complete, you can use `databricks-build`. In your terminal, navigate to the parent directory of your Kedro development repository and run:
 

@@ -86,4 +86,4 @@ Once the cluster has restarted, you should verify that your modified version of 
 }
 ```
 
-Any runs of a Kedro project on this cluster will now reflect your latest local changes to Kedro. You can now use your cluster to run a Kedro project and test your changes to Kedro.
+Any runs of a Kedro project on this cluster will now reflect your latest local changes to Kedro. You can now test your changes to Kedro by using your cluster to run a Kedro project.

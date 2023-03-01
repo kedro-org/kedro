@@ -53,7 +53,7 @@ set DATABRICKS_CLUSTER_ID=<your-cluster-id>
 
 ### Using `make databricks-build`
 
-With the setup complete, you can use `databricks-build`. Navigate to the parent directory of your Kedro development repository and run:
+With the setup complete, you can use `databricks-build`. In your terminal, navigate to the parent directory of your Kedro development repository and run:
 
 ```bash
 make databricks-build

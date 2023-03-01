@@ -14,7 +14,7 @@ This guide describes how to efficiently develop features and fixes for Kedro on 
 
 You will need the following to follow this guide:
 
-* Python **>=3.8** installed.
+* Python **version >=3.8**.
 * An activated Python virtual environment into which you have installed the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) with [authentication for your workspace](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).
 * Access to a Databricks workspace with an [existing cluster](https://docs.databricks.com/clusters/create-cluster.html).
 * [GNU `make`](https://www.gnu.org/software/make/).

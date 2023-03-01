@@ -17,7 +17,7 @@ You will need the following prerequisites to follow this guide:
 5. [`git` installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 6. A local clone of the [Kedro](https://github.com/kedro-org/kedro) repository for you to edit.
 
-## Installing your Kedro builds on Databricks
+## How to install a build of Kedro onto Databricks
 
 The development workflow for Kedro on Databricks is similar to the one for Kedro in general. The main difference comes when manually testing your changes on Databricks. You can develop and test your changes locally, but you will need to build and deploy the wheel file to Databricks to test it on a cluster.
 

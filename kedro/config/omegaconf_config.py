@@ -120,7 +120,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             # It's extremely complicated to create a zip file with a temporary directory, which
             # we use in our unit tests. That's why the following two lines aren't covered in tests.
             # The functionality has been tested manually.
-            elif file_mimetype == "application/zip":   # pragma: no cover
+            elif file_mimetype == "application/zip":  # pragma: no cover
                 self._protocol = "zip"  # pragma: no cover
         self._fs = fsspec.filesystem(protocol=self._protocol, fo=conf_source)
 
@@ -230,7 +230,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         # pylint: disable=too-many-locals
 
-        if not self._fs.isdir(conf_path):
+        if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
                 f"Given configuration path either does not exist "
                 f"or is not a valid directory: {conf_path}"
@@ -239,7 +239,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         paths = [
             Path(each)
             for pattern in patterns
-            for each in self._fs.glob(f"{str(conf_path)}/{pattern}")
+            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix())
         ]
         deduplicated_paths = set(paths)
         config_files_filtered = [
@@ -277,7 +277,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""
-        return self._fs.isfile(path) and path.suffix in [
+        posix_path = path.as_posix()
+        return self._fs.isfile(str(posix_path)) and path.suffix in [
             ".yml",
             ".yaml",
             ".json",

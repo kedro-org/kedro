@@ -69,7 +69,7 @@ You should see a stream of messages being written to your terminal. Behind the s
 
 Note that your cluster will be unavailable while it restarts. You can poll the status of the cluster using the Databricks CLI command `databricks clusters get --cluster-id <your-cluster-id> | grep state` (macOS, Linux).
 
-After waiting for your cluster to restart, you should verify that your modified version of Kedro has installed correctly. To do this, run `databricks libraries list --cluster-id <your-cluster-id>`. If installation was successful, you should see the following output:
+Once the cluster has restarted, you should verify that your modified version of Kedro has been correctly installed. Run `databricks libraries list --cluster-id <your-cluster-id>`. If installation was successful, you should see the following output:
 
 ```bash
 {

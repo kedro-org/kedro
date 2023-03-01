@@ -21,7 +21,7 @@ You will need the following prerequisites to follow this guide:
 
 The development workflow for Kedro on Databricks is similar to the one for Kedro in general, when you develop and test your changes locally. The main difference comes when manually testing your changes on Databricks, since you will need to build and deploy the wheel file to Databricks to test it on a cluster.
 
-To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` target named `databricks-build` that automates the process of building a wheel file and installing this on your Databricks cluster. This is the recommended way of developing for Databricks because of the amount of time it saves.
+To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` target named `databricks-build` that automates the process of building a wheel file and installing this on your Databricks cluster to save development time.
 
 ### Setup
 

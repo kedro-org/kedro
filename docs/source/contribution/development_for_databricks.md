@@ -15,10 +15,10 @@ This guide describes how to efficiently develop features and fixes for Kedro on 
 You will need the following to follow this guide:
 
 * Python **>=3.8** installed.
-* A Python virtual environment activated in which the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) is installed with [authentication for your workspace](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).
+* An activated Python virtual environment into which you have installed the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) with [authentication for your workspace](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).
 * Access to a Databricks workspace with an [existing cluster](https://docs.databricks.com/clusters/create-cluster.html).
-* [GNU `make`](https://www.gnu.org/software/make/) installed.
-* [`git` installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+* [GNU `make`](https://www.gnu.org/software/make/).
+* [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 * A local clone of the [Kedro](https://github.com/kedro-org/kedro) repository for you to edit.
 
 ## Installing your Kedro builds on Databricks

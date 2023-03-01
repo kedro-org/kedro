@@ -23,7 +23,7 @@ The development workflow for Kedro on Databricks is similar to the one for Kedro
 
 To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` target named `databricks-build` that automates the process of building a wheel file and installing this on your Databricks cluster to save development time.
 
-### Setup
+### Setup the Databricks CLI to test a Kedro build
 
 In order to use `databricks-build`, you must have completed the [setup of the Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).
 

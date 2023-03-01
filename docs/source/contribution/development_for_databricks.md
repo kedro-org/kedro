@@ -67,7 +67,7 @@ You should see a stream of messages being written to your terminal. Behind the s
 4. Queues your updated wheel file for installation
 5. Restarts your cluster to apply the changes.
 
-Note that your cluster will be unavailable while it is restarting. You can poll the status of your cluster using the Databricks CLI command `databricks clusters get --cluster-id <your-cluster-id> | grep state` (macOS, Linux).
+Note that your cluster will be unavailable while it restarts. You can poll the status of the cluster using the Databricks CLI command `databricks clusters get --cluster-id <your-cluster-id> | grep state` (macOS, Linux).
 
 After waiting for your cluster to restart, you should verify that your modified version of Kedro has installed correctly. To do this, run `databricks libraries list --cluster-id <your-cluster-id>`. If installation was successful, you should see the following output:
 

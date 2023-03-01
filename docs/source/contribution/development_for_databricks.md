@@ -12,7 +12,7 @@ This guide describes how to efficiently develop features and fixes for Kedro on 
 
 ## Prerequisites
 
-You will need the following prerequisites to follow this guide:
+You will need the following to follow this guide:
 
 1. Python **version >=3.8** installed.
 2. A Python virtual environment activated in which the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) is installed with [authentication for your workspace](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).

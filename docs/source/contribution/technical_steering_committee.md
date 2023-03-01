@@ -1,11 +1,8 @@
 # Join the Technical Steering Committee
 
-The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers.
+The term "Technical Steering Committee (TSC)" describes the group of people that maintain Kedro. The TSC has many responsibilities surrounding the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members on the TSC as this fuels Kedro's continued development. You can see [a list of Kedro's current and past maintainers](../faq/faq.md#who-maintains-kedro).
 
-The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development. We list [Kedro's current and past maintainers](https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro) on GitHub.
-
-In this section, we describe:
-
+In this section, we detail:
 - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
 - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
 - [Application process](#application-process)
@@ -62,6 +59,4 @@ GitHub discussions is used to host votes on issues, proposals and changes affect
 
 ### Adding or removing maintainers
 
-The decision to add or remove a maintainer is made based on TSC members votes in that pull request. Additions and removals of maintainers require **a 2/3 majority**.
-
-The act of adding or removing maintainers onto the list requires a pull request against [Kedro's README.md file](https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro).
+Adding or removing maintainers requires a pull request against [our team list](../faq/faq.md#who-maintains-kedro). The decision is made based on TSC members votes in that pull request. Additions and removals of maintainers require **a 2/3 majority**.

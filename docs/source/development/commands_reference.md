@@ -316,7 +316,7 @@ Call the `run()` method of the `KedroSession` defined in `kedro.framework.sessio
 kedro run
 ```
 
-`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext`, you need to set `context_path` in the `pyproject.toml` configuration file.
+`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext`, you need to set `context_path` in the [`pyproject.toml` configuration file](../faq/architecture_overview.md#kedro-project).
 
 #### Modifying a `kedro run`
 

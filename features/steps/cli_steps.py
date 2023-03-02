@@ -551,7 +551,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
         port: Port to check
 
     """
-    url = f"http://127.0.0.1:{port}"
+    url = f"http://localhost:{port}"
     try:
         util.wait_for(
             func=_check_service_up,
@@ -574,7 +574,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
         port: Port to check
 
     """
-    url = f"http://127.0.0.1:{port}"
+    url = f"http://localhost:{port}"
     try:
         util.wait_for(
             func=_check_service_up,

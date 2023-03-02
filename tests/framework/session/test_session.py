@@ -925,7 +925,14 @@ def test_setup_logging_using_omega_config_loader_class(
     assert actual_log_filepath == expected_log_filepath
 
 
-@pytest.mark.parametrize("params", ["a=1,b.c=2", "a=1,b=2,c=3"])
+def get_all_values(mapping: Mapping):
+    for value in mapping.values():
+        yield value
+        if isinstance(value, Mapping):
+            yield from get_all_values(value)
+
+
+@pytest.mark.parametrize("params", ["a=1,b.c=2", "a=1,b=2,c=3", ""])
 def test_no_DictConfig_in_store(
     params,
     mock_package_name,
@@ -935,12 +942,6 @@ def test_no_DictConfig_in_store(
     session = KedroSession.create(
         mock_package_name, fake_project, extra_params=extra_params
     )
-
-    def get_all_values(mapping: Mapping):
-        for value in mapping.values():
-            yield value
-            if isinstance(value, Mapping):
-                yield from get_all_values(value)
 
     assert not any(
         OmegaConf.is_config(value) for value in get_all_values(session._store)

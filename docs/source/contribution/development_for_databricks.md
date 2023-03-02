@@ -59,7 +59,7 @@ With the setup complete, you can use `make databricks-build`. In your terminal, 
 make databricks-build
 ```
 
-You should see a stream of messages being written to your terminal. Behind the scenes, `build-databricks` does the following:
+You should see a stream of messages being written to your terminal. Behind the scenes, `databricks-build` does the following:
 
 1. Builds a wheel file of your modified version of Kedro.
 2. Uninstalls any library on your Databricks cluster with the same wheel file name.

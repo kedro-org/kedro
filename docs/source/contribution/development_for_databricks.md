@@ -7,7 +7,7 @@
 This guide describes how to efficiently develop features and fixes for Kedro on Databricks. Using this guide, you will be able to quickly test your locally modified version of Kedro on Databricks as part of a build-and-test development cycle.
 
 ```{note}
-This page is for people developing Kedro, users working on their own Kedro projects should see the documentation for [deploying Kedro projects on Databricks](../deployment/databricks.md).
+This page is for people developing changes to Kedro that need to test them on Databricks. If you are working on a Kedro project and need more information about project-deployment, consult the [documentation for deploying Kedro projects on Databricks](../deployment/databricks.md).
 ```
 
 ## Prerequisites
@@ -31,7 +31,7 @@ To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` ta
 
 Before you use `make databricks-build`, you must [set up the Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).
 
-The only remaining step is to create and environment variable with the ID of the cluster you are using to test your Kedro build. You can find the ID by executing the Databricks CLI command `databricks clusters list` and looking for the Cluster ID to the left of the name of your chosen cluster, for instance:
+Next, create and environment variable with the ID of the cluster you are using to test your Kedro build. You can find the ID by executing the Databricks CLI command `databricks clusters list` and looking for the Cluster ID to the left of the name of your chosen cluster, for instance:
 
 ```bash
 $ databricks clusters list
@@ -53,7 +53,7 @@ $Env:DATABRICKS_CLUSTER_ID = '<your-cluster-id>'
 
 ### How to use `make databricks-build` to test your Kedro build
 
-With the setup complete, you can use `databricks-build`. In your terminal, navigate to the parent directory of your Kedro development repository and run:
+With the setup complete, you can use `make databricks-build`. In your terminal, navigate to the parent directory of your Kedro development repository and run:
 
 ```bash
 make databricks-build

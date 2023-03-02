@@ -250,7 +250,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return {}
         if len(aggregate_config) == 1:
             return list(aggregate_config)[0]
-        return dict(OmegaConf.merge(*aggregate_config))
+        return OmegaConf.to_container(OmegaConf.merge(*aggregate_config))
 
     @staticmethod
     def _is_valid_config_path(path):

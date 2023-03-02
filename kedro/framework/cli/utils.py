@@ -468,8 +468,8 @@ def _split_params(ctx, param, value):
                 f"cannot be an empty string."
             )
         dot_list.append(item)
-    conf = OmegaConf.from_dotlist(dot_list)
-    return conf
+        conf = OmegaConf.from_dotlist(dot_list)
+    return OmegaConf.to_container(conf)
 
 
 def _split_load_versions(ctx, param, value):

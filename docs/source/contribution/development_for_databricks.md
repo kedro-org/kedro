@@ -47,8 +47,8 @@ Once you have determined the cluster ID, you must export it to an environment va
 # Linux or macOS
 export DATABRICKS_CLUSTER_ID=<your-cluster-id>
 
-# Windows
-set DATABRICKS_CLUSTER_ID=<your-cluster-id>
+# Windows (PowerShell)
+$Env:DATABRICKS_CLUSTER_ID = '<your-cluster-id>'
 ```
 
 ### How to use `make databricks-build` to test your Kedro build
@@ -67,7 +67,15 @@ You should see a stream of messages being written to your terminal. Behind the s
 4. Queues your updated wheel file for installation
 5. Restarts your cluster to apply the changes.
 
-Note that your cluster will be unavailable while it restarts. You can poll the status of the cluster using the Databricks CLI command `databricks clusters get --cluster-id <your-cluster-id> | grep state` (macOS, Linux).
+Note that your cluster will be unavailable while it restarts. You can poll the status of the cluster using the Databricks CLI:
+
+```bash
+# Linux or macOS
+databricks clusters get --cluster-id $DATABRICKS_CLUSTER_ID | grep state
+
+# Windows (PowerShell)
+databricks clusters get --cluster-id $Env:DATABRICKS_CLUSTER_ID | Select-String state
+```
 
 Once the cluster has restarted, you should verify that your modified version of Kedro has been correctly installed. Run `databricks libraries list --cluster-id <your-cluster-id>`. If installation was successful, you should see the following output:
 

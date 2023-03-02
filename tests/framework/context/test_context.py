@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 import toml
 import yaml
+from omegaconf import OmegaConf
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
@@ -162,7 +163,6 @@ expected_message_middle = (
     "argument to your previous command:\n"
     '  --from-nodes "nodes3"'
 )
-
 
 expected_message_head = (
     "There are 4 nodes that have not run.\n"
@@ -483,6 +483,11 @@ def test_validate_layers_error(layers, conflicting_datasets, mocker):
             {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3}}},
             {"a": {"a.c": {"a.c.b": 4}}},
             {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3, "a.c.b": 4}}},
+        ),
+        (
+            {"a": OmegaConf.create({"b": 1}), "x": 3},
+            {"a": {"c": 2}},
+            {"a": {"b": 1, "c": 2}, "x": 3},
         ),
     ],
 )

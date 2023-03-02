@@ -5,7 +5,7 @@
 ## Introduction
 
 ```{note}
-This page is for people developing Kedro, users working on their own Kedro projects should see the documentation for [deploying Kedro projects on Databricks](../deployment/databricks.md).
+This page is for people developing changes to Kedro that need to test them on Databricks. If you are working on a Kedro project and need more information about project-deployment, consult the [documentation for deploying Kedro projects on Databricks](../deployment/databricks.md).
 ```
 
 This guide describes how to efficiently develop features and fixes for Kedro on Databricks. Using this guide, you will be able to quickly test your locally modified version of Kedro on Databricks as part of a build-and-test development cycle.

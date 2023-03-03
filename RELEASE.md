@@ -30,11 +30,6 @@ A regression introduced in Kedro version `0.18.5` caused the `Kedro-Viz` console
 
 Thanks to Kedroids tomohiko kato, [tsanikgr](https://github.com/tsanikgr) and [maddataanalyst](https://github.com/maddataanalyst) for very detailed reports about the bug.
 
-## Upcoming deprecations for Kedro 0.19.0
-* `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.
-* Deprecated `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
-
-
 # Release 0.18.5
 
 ## Major features and improvements

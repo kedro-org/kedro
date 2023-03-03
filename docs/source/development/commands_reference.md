@@ -408,7 +408,7 @@ _This command will be deprecated from Kedro version 0.19.0._
 kedro lint
 ```
 
-Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
+Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://github.com/PyCQA/flake8) and [`isort`](https://github.com/PyCQA/isort).
 
 
 #### Test your project

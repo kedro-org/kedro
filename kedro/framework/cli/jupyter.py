@@ -32,9 +32,6 @@ including sub-folders."""
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
-jupyter_command_group_order = ["init", "notebook", "lab", "convert"]
-jupyter_command_group_order = {command: order for order, command in enumerate(jupyter_command_group_order)}
-
 
 class JupyterCommandGroup(click.Group):
     """A custom class for ordering the `kedro jupyter` command groups"""
@@ -46,7 +43,7 @@ class JupyterCommandGroup(click.Group):
 
     def list_commands(self, ctx):
         """List commands according to a custom order"""
-        return sorted(self.commands, key=lambda k: jupyter_command_group_order[k])
+        return ["init", "notebook", "lab", "convert"]
 
 
 # pylint: disable=missing-function-docstring
@@ -62,17 +59,13 @@ def jupyter():
     """
 
 
-@forward_command(jupyter, "init", forward_help=True)
-@env_option
+@forward_command(jupyter, "setup", forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
-def init(
+def setup(
     metadata: ProjectMetadata,
-    env,
-    args,
-    **kwargs,
 ):  # pylint: disable=unused-argument
     """Initialise the Jupyter Kernel for a kedro project."""
-    _check_module_importable("notebook")
+    _check_module_importable("ipykernel")
     validate_settings()
 
     kernel_name = f"kedro_{metadata.package_name}"

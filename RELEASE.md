@@ -11,7 +11,7 @@
 # Upcoming Release 0.18.6
 
 ## Major features and improvements
-* Added new Kedro CLI `kedro jupyter-init` to setup Jupyter Kernel for Kedro.
+* Added new Kedro CLI `kedro jupyter setup` to setup Jupyter Kernel for Kedro.
 
 ## Bug fixes and other changes
 

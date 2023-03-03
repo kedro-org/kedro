@@ -417,9 +417,7 @@ def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-def _reformat_load_versions(
-    ctx, param, value
-) -> Dict[str, str]:
+def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
     """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """

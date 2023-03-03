@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 from collections import Counter
-from enum import IntEnum
 from glob import iglob
 from pathlib import Path
 from typing import Any, Dict
@@ -157,6 +156,9 @@ def _create_kernel(kernel_name: str, display_name: str) -> str:
     Args:
         kernel_name: Name of the kernel to create.
         display_name: Kernel name as it is displayed in the UI.
+
+    Returns:
+        String of the path of the created kernel.
 
     Raises:
         KedroCliError: When kernel cannot be setup.

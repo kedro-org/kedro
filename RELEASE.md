@@ -6,7 +6,22 @@
 
 ## Breaking changes to the API
 
+### DataSets
+* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+
+### CLI
+* Removed deprecated `kedro docs` command.
+
+### Other
+* Removed deprecated `kedro.extras.ColorHandler`.
+* The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
+* Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
+
 ## Migration guide from Kedro 0.18.* to 0.19.*
+
+### DataSets
+* If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
+
 
 # Upcoming Release 0.18.6
 
@@ -16,6 +31,7 @@
 * Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
 
 ## Breaking changes to the API
+
 
 # Release 0.18.5
 
@@ -189,6 +205,7 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
+* `KedroContext` is now an `attrs`'s frozen class and `config_loader` is available as public attribute.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Updated [Databricks documentation](https://kedro.readthedocs.io/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.
@@ -201,6 +218,10 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro docs` will be removed in 0.19.0.
+
 
 # Release 0.18.0
 

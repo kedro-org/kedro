@@ -8,14 +8,25 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.6
+# Upcoming Release 0.18.7
 
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
 
 ## Breaking changes to the API
+
+# Release 0.18.6
+
+## Bug fixes and other changes
+* Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
+* Fixed bug with overriding nested parameters using the `--params` flag
+* Fixed bug that made session store incompatible with `Kedro-Viz` experiment tracking
+
+## Migration guide from Kedro 0.18.5 to 0.18.6
+If you have encountered the bug mentioned above while using `Kedro-Viz` experiment tracking
+with Kedro version `0.18.5`, you will need to delete the erroneous session entries from your
+Kedro project stored at `<project-path>/data/session_store.py`.
 
 # Release 0.18.5
 

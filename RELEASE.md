@@ -24,9 +24,16 @@
 * Fixed bug that made session store incompatible with `Kedro-Viz` experiment tracking
 
 ## Migration guide from Kedro 0.18.5 to 0.18.6
-If you have encountered the bug mentioned above while using `Kedro-Viz` experiment tracking
-with Kedro version `0.18.5`, you will need to delete the erroneous session entries from your
-Kedro project stored at `<project-path>/data/session_store.py`.
+If you have encountered the bug mentioned above while using `Kedro-Viz` experiment tracking with Kedro version `0.18.5`, you will need to:
+* upgrade to Kedro version `0.18.6` 
+* delete the erroneous session entries created with Kedro 0.18.5 from yoursession_store.db stored at `<project-path>/data/session_store.db`.
+
+Thanks to Kedroids tomohiko kato, [tsanikgr](https://github.com/tsanikgr) and [maddataanalyst](https://github.com/maddataanalyst) for very detailed reports about the bug.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.
+* Deprecated `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
+
 
 # Release 0.18.5
 

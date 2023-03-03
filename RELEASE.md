@@ -26,7 +26,7 @@
 ## Migration guide from Kedro 0.18.5 to 0.18.6
 A regression introduced in Kedro version `0.18.5` caused the `Kedro-Viz` console to crash when experiment tracking was selected. If you experienced this issue, you will need to:
 * upgrade to Kedro version `0.18.6` 
-* delete any erroneous session entries created with Kedro 0.18.5 from yoursession_store.db stored at `<project-path>/data/session_store.db`.
+* delete any erroneous session entries created with Kedro 0.18.5 from your session_store.db stored at `<project-path>/data/session_store.db`.
 
 Thanks to Kedroids tomohiko kato, [tsanikgr](https://github.com/tsanikgr) and [maddataanalyst](https://github.com/maddataanalyst) for very detailed reports about the bug.
 

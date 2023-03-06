@@ -36,7 +36,7 @@ conda create --name iris_databricks python=3.9 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.18.6"
+pip install "kedro~=0.18.5"
 # name your project Iris Databricks when prompted for it
 kedro new --starter=pyspark-iris
 ```
@@ -199,6 +199,20 @@ Congratulations, you are now ready to run your Kedro project from Databricks!
 Before running your Kedro pipeline, make sure to install the project dependencies from your `src/requirements.txt` using `%pip install <project_root/src/requirements.txt>`, where `<project_root>` is the path to the repo inside the workspace. 
 
 In your newly-created notebook, put each of the below code snippets into a separate cell, then [run all cells](https://docs.databricks.com/notebooks/run-notebook.html):
+
+* Clone your project from GitHub
+
+```console
+%sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch main https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
+```
+
+* Install Kedro and the latest compatible version of Kedro-Datasets.
+
+```console
+%pip install "kedro==0.18.5" "kedro-datasets[spark.SparkDataSet]~=1.0.2"
+```
+
+* Copy input data into DBFS
 
 ```python
 import logging

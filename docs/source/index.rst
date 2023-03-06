@@ -203,6 +203,7 @@ Welcome to Kedro's documentation!
    contribution/backwards_compatibility
    contribution/documentation_contributor_guidelines
    contribution/technical_steering_committee
+   contribution/development_for_databricks
 
 API documentation
 =================

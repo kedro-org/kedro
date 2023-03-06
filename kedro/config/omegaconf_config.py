@@ -112,10 +112,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._clear_omegaconf_resolvers()
 
         file_mimetype, _ = mimetypes.guess_type(conf_source)
-        print(file_mimetype)
         if file_mimetype == "application/x-tar":
             self._protocol = "tar"
-        elif file_mimetype == "application/zip":
+        elif file_mimetype in (
+            "application/zip",
+            "application/x-zip-compressed",
+            "application/zip-compressed",
+        ):
             self._protocol = "zip"
         else:
             self._protocol = "file"

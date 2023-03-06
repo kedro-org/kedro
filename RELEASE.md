@@ -32,6 +32,8 @@ Thanks to Kedroids tomohiko kato, [tsanikgr](https://github.com/tsanikgr) and [m
 
 # Release 0.18.5
 
+> This release introduced a bug that causes a failure in experiment tracking within the `Kedro-Viz` console. We recommend that you use Kedro version `0.18.6` in preference.
+
 ## Major features and improvements
 * Added new `OmegaConfigLoader` which uses `OmegaConf` for loading and merging configuration.
 * Added the `--conf-source` option to `kedro run`, allowing users to specify a source for project configuration for the run.

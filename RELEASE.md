@@ -11,6 +11,7 @@
 # Upcoming Release 0.18.7
 
 ## Major features and improvements
+* Added functionality to the `OmegaConfigLoader` to load configuration from compressed files of `zip` or `tar` format. This feature requires `fsspec>=2023.1.0`.
 
 ## Bug fixes and other changes
 

@@ -225,7 +225,6 @@ def instantiate_client(project_name: str):
 if __name__ == "__main__":
     prefect_deploy()
 ```
-```
 
 ```{note}
 The script launches a [local agent](https://docs.prefect.io/orchestration/agents/local.html). Remember to stop the agent with Ctrl-C when you complete.

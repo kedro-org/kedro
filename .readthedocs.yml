@@ -11,6 +11,8 @@ build:
   tools:
     python: "3.7"
     nodejs: "19"
+  apt_packages:
+    - libasound2
   jobs:
     post_create_environment:
       - npm install -g @mermaid-js/mermaid-cli

@@ -8,7 +8,7 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.6
+# Upcoming Release 0.18.7
 
 ## Major features and improvements
 
@@ -16,9 +16,26 @@
 * Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
 * Added a guide and tooling for developing Kedro for Databricks.
 
+
 ## Breaking changes to the API
 
+# Release 0.18.6
+
+## Bug fixes and other changes
+* Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
+* Fixed bug with overriding nested parameters using the `--params` flag
+* Fixed bug that made session store incompatible with `Kedro-Viz` experiment tracking
+
+## Migration guide from Kedro 0.18.5 to 0.18.6
+A regression introduced in Kedro version `0.18.5` caused the `Kedro-Viz` console to fail to show experiment tracking correctly. If you experienced this issue, you will need to:
+* upgrade to Kedro version `0.18.6`
+* delete any erroneous session entries created with Kedro 0.18.5 from your session_store.db stored at `<project-path>/data/session_store.db`.
+
+Thanks to Kedroids tomohiko kato, [tsanikgr](https://github.com/tsanikgr) and [maddataanalyst](https://github.com/maddataanalyst) for very detailed reports about the bug.
+
 # Release 0.18.5
+
+> This release introduced a bug that causes a failure in experiment tracking within the `Kedro-Viz` console. We recommend that you use Kedro version `0.18.6` in preference.
 
 ## Major features and improvements
 * Added new `OmegaConfigLoader` which uses `OmegaConf` for loading and merging configuration.

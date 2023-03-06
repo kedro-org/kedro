@@ -265,3 +265,4 @@ In [2]: %run_viz
 DBFS is a distributed file system mounted into a DataBricks workspace and accessible on a DataBricks cluster. It maps cloud object storage URIs to relative paths so as to simplify the process of persisting files. With DBFS, libraries can read from or write to distributed storage as if it's a local file.
 To use datasets like `SparkDataSet` with DBFS, the file path must be prefixed with `/dbfs`.
 > **Note**: Datasets that use the local filesystem, such as Kedro's Pandas datasets, will return a `DataSetError` if the code tries to load files from a remote DBFS save location. Do not use the `/dbfs` prefix for these datasets.
+

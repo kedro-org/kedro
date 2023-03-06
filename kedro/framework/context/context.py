@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
+from omegaconf import DictConfig
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -154,7 +155,9 @@ def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> N
         if key not in old_dict:
             old_dict[key] = value
         else:
-            if isinstance(old_dict[key], dict) and isinstance(value, dict):
+            if isinstance(old_dict[key], (dict, DictConfig)) and isinstance(
+                value, (dict, DictConfig)
+            ):
                 _update_nested_dict(old_dict[key], value)
             else:
                 old_dict[key] = value
@@ -322,8 +325,7 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             feed_dict[key] = param_value
-
-            if isinstance(param_value, dict):
+            if isinstance(param_value, (dict, DictConfig)):
                 for key, val in param_value.items():
                     _add_param_to_feed_dict(f"{param_name}.{key}", val)
 

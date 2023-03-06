@@ -571,3 +571,5 @@ myst_heading_anchors = 5
 
 # https://github.com/kedro-org/kedro/issues/1772
 mermaid_output_format = "svg"
+# https://github.com/mermaidjs/mermaid.cli#linux-sandbox-issue
+mermaid_params = ["-p", here / "puppeteer-config.json"]

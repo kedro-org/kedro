@@ -7,8 +7,8 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
-from omegaconf import DictConfig
 from attrs import field, frozen
+from omegaconf import DictConfig
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException

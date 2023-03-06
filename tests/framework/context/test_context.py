@@ -10,8 +10,8 @@ import pandas as pd
 import pytest
 import toml
 import yaml
-from omegaconf import OmegaConf
 from attrs.exceptions import FrozenInstanceError
+from omegaconf import OmegaConf
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version

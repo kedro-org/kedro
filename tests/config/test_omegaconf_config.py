@@ -4,6 +4,7 @@ import json
 import os
 import re
 import subprocess
+import zipfile
 from pathlib import Path
 from typing import Dict
 
@@ -503,5 +504,29 @@ class TestOmegaConfigLoader:
         )
 
         conf = OmegaConfigLoader(conf_source=f"{tmp_path}/tar_conf.tar.gz")
+        catalog = conf["catalog"]
+        assert catalog["trains"]["type"] == "MemoryDataSet"
+
+    @use_config_dir
+    def test_load_config_from_zip_file(self, tmp_path):
+        def zipdir(path, ziph):
+            # This is a helper method to zip up a directory without keeping the complete directory
+            # structure with all parent paths.
+            # ziph is zipfile handle
+            for root, _, files in os.walk(path):
+                for file in files:
+                    ziph.write(
+                        os.path.join(root, file),
+                        os.path.relpath(
+                            os.path.join(root, file), os.path.join(path, "..")
+                        ),
+                    )
+
+        with zipfile.ZipFile(
+            f"{tmp_path}/Python.zip", "w", zipfile.ZIP_DEFLATED
+        ) as zipf:
+            zipdir(tmp_path, zipf)
+
+        conf = OmegaConfigLoader(conf_source=f"{tmp_path}/Python.zip")
         catalog = conf["catalog"]
         assert catalog["trains"]["type"] == "MemoryDataSet"

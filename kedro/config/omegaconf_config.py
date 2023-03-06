@@ -112,13 +112,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._clear_omegaconf_resolvers()
 
         file_mimetype, _ = mimetypes.guess_type(conf_source)
-        if not file_mimetype:
-            self._protocol = "file"
+        print(file_mimetype)
+        if file_mimetype == "application/x-tar":
+            self._protocol = "tar"
+        elif file_mimetype == "application/zip":
+            self._protocol = "zip"
         else:
-            if file_mimetype == "application/x-tar":
-                self._protocol = "tar"
-            elif file_mimetype == "application/zip":
-                self._protocol = "zip"
+            self._protocol = "file"
         self._fs = fsspec.filesystem(protocol=self._protocol, fo=conf_source)
 
         super().__init__(
@@ -247,6 +247,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         for config_filepath in config_files_filtered:
             try:
                 with self._fs.open(str(config_filepath.as_posix())) as open_config:
+                    # As fsspec doesn't allow the file to be read as StringIO,
+                    # this is a workaround to read it as a binary file and decode it back to utf8.
                     tmp_fo = io.StringIO(open_config.read().decode("utf8"))
                     config = OmegaConf.load(tmp_fo)
                 if read_environment_variables:

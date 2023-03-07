@@ -7,11 +7,15 @@ version: 2
 
 # .readthedocs.yml hook to copy kedro-datasets to kedro.datasets before building the docs
 build:
-  os: ubuntu-20.04
+  os: ubuntu-22.04
   tools:
     python: "3.7"
+    nodejs: "19"
+  apt_packages:
+    - libasound2
   jobs:
     post_create_environment:
+      - npm install -g @mermaid-js/mermaid-cli
       - ./docs/kedro-datasets-docs.sh
 
 # Build documentation in the docs/ directory with Sphinx
@@ -23,10 +27,6 @@ sphinx:
 # Build documentation with MkDocs
 # mkdocs:
 # configuration: mkdocs.yml
-
-# Optionally build your docs in additional formats such as PDF and ePub
-formats:
-  - pdf
 
 # Optionally set the version of Python and requirements required to build your docs
 python:

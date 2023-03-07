@@ -114,7 +114,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.18.5
+v0.18.6
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -408,7 +408,7 @@ _This command will be deprecated from Kedro version 0.19.0._
 kedro lint
 ```
 
-Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
+Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://github.com/PyCQA/flake8) and [`isort`](https://github.com/PyCQA/isort).
 
 
 #### Test your project

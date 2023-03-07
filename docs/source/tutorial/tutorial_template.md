@@ -13,7 +13,7 @@ In this section, we discuss the project set-up phase, which is the first part of
 If you have not yet set up Kedro, do so by [following the guidelines to install Kedro](../get_started/install.md).
 
 ```{important}
-We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.5).
+We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.6).
 ```
 
 In your terminal window, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) - your project will be populated with a complete set of working example code:
@@ -62,6 +62,8 @@ kedro-viz~=5.0 # Visualise your pipelines
 scikit-learn~=1.0
 ```
 
+### Install the dependencies
+
 To install all the project-specific dependencies, run the following from the project root directory:
 
 ```bash
@@ -69,7 +71,6 @@ pip install -r src/requirements.txt
 ```
 
 [You can learn more about dependencies in the project setup documentation](../kedro_project_setup/dependencies.md).
-
 
 ## Optional: configuration and logging
 

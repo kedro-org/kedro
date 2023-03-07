@@ -6,6 +6,10 @@ This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org
 If you are using [Databricks Repos](https://docs.databricks.com/repos/index.html) to run a Kedro project then you should [disable file-based logging](../logging/logging.md#disable-file-based-logging). This prevents Kedro from attempting to write to the read-only file system.
 ```
 
+```{note}
+If you are a Kedro contributor looking for information on deploying a custom build of Kedro to Databricks, see the [development guide](../contribution/development_for_databricks.md).
+```
+
 ## Prerequisites
 
 * New or existing [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/) with administrative privileges
@@ -34,7 +38,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.18.5"
+pip install "kedro~=0.18.6"
 # name your project Iris Databricks when prompted for it
 kedro new --starter=pyspark-iris
 ```
@@ -172,7 +176,7 @@ In your newly-created notebook, put each of the below code snippets into a separ
 * Install Kedro and the latest compatible version of Kedro-Datasets.
 
 ```console
-%pip install "kedro==0.18.5" "kedro-datasets[spark.SparkDataSet]~=1.0.2"
+%pip install "kedro==0.18.6" "kedro-datasets[spark.SparkDataSet]~=1.0.2"
 ```
 
 * Copy input data into DBFS

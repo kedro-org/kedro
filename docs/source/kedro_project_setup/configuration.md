@@ -16,9 +16,33 @@ kedro run --conf-source=<path-to-new-conf-directory>
 If you're using the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) you can also read configuration from a compressed file in `zip` or `tar` format. The two commands below are examples of how to reference a `tar.gz` or `zip` file:
 
  ```bash
-kedro run --conf-source=<path-to-compressed-file>/conf.tar.gz
+kedro run --conf-source=<path-to-compressed-file>.tar.gz
 
-kedro run --conf-source=<path-to-compressed-file>/conf.zip
+kedro run --conf-source=<path-to-compressed-file>.zip
+```
+
+To compress your configuration you can either leverage Kedro's `kedro package` command which builds the package into the `dist/` folder of your project, and creates one `.egg` file, one `.whl` file, as well as a `tar.gz` file containing the project configuration. This compressed version of the config files excludes any files inside your `local` directory.
+Alternatively you can run the command below to create a `tar.gz` file:
+
+```bash
+tar --exclude=local/*.yml -czf <my_conf_name>.tar.gz --directory=<path-to-conf-dir> <conf-dir>
+```
+
+Or the following command to create a `zip` file:
+
+```bash
+zip -x <conf-dir>/local/** -r <my_conf_name>.zip <conf-dir>
+```
+
+Note that for both the `tar.gz` and `zip` file the following structure is expected:
+
+```text
+<conf_dir>
+├── base               <-- the files inside be different, but this is an example of a standard Kedro structure.
+│   └── parameters.yml
+│   └── catalog.yml
+└── local              <-- the top level local directory is required, but no files should be inside when distributed.
+└── README.md          <-- optional but included with the default Kedro conf structure.
 ```
 
 ## Local and base configuration environments

@@ -11,10 +11,10 @@
 # Upcoming Release 0.18.7
 
 ## Major features and improvements
+* `kedro package` now includes the project configuration in a compressed `tar.gz` file.
 * Added functionality to the `OmegaConfigLoader` to load configuration from compressed files of `zip` or `tar` format. This feature requires `fsspec>=2023.1.0`.
 
 ## Bug fixes and other changes
-* Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
 * Added a guide and tooling for developing Kedro for Databricks.
 
 

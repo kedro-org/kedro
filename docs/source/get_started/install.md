@@ -20,7 +20,7 @@ If you encounter any problems as you install Kedro, you can ask for help on Kedr
 
 We strongly recommend [installing `conda` as your virtual environment manager](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) if you don't already use it.
 
-``` {note}
+``` {tip}
 [Read more about Python virtual environments](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 ```
 

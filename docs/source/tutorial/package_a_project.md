@@ -109,7 +109,7 @@ Kedro builds the package into the `dist` folder of your project, and creates one
 
 The resulting `.egg` and `.whl` packages only contain the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
 
-The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside your `local` directory. 
+The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside your `local` directory.
 
 ### Package recipients
 

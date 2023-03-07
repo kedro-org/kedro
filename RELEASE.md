@@ -11,9 +11,9 @@
 # Upcoming Release 0.18.7
 
 ## Major features and improvements
+* `kedro package` now includes the project configuration in a compressed `tar.gz` file.
 
 ## Bug fixes and other changes
-* Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
 * Added a guide and tooling for developing Kedro for Databricks.
 
 

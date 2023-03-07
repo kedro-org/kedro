@@ -264,7 +264,7 @@ Kedro-Viz can then be launched in a new browser tab with the `%run_viz` line mag
 In [2]: %run_viz
 ```
 
-### How to use Datasets stored on Databricks DBFS
+## How to use datasets stored on Databricks DBFS
 
 DBFS is a distributed file system mounted into a DataBricks workspace and accessible on a DataBricks cluster. It maps cloud object storage URIs to relative paths so as to simplify the process of persisting files. With DBFS, libraries can read from or write to distributed storage as if it's a local file.
 To use datasets with DBFS, the file path passed to the dataset **must** be prefixed with `/dbfs/`. This applies to all datasets, including `SparkDataSet`.

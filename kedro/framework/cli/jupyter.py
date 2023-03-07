@@ -42,7 +42,7 @@ class JupyterCommandGroup(click.Group):
 
     def list_commands(self, ctx):
         """List commands according to a custom order"""
-        return ["init", "notebook", "lab", "convert"]
+        return ["setup", "notebook", "lab", "convert"]
 
 
 # pylint: disable=missing-function-docstring
@@ -60,9 +60,7 @@ def jupyter():
 
 @forward_command(jupyter, "setup", forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
-def setup(
-    metadata: ProjectMetadata,
-):  # pylint: disable=unused-argument
+def setup(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-argument
     """Initialise the Jupyter Kernel for a kedro project."""
     _check_module_importable("ipykernel")
     validate_settings()

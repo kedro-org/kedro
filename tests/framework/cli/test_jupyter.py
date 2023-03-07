@@ -28,11 +28,11 @@ def create_kernel_mock(mocker):
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "create_kernel_mock", "python_call_mock"
 )
-class TestJupyterInitCommand:
+class TestJupyterSetupCommand:
     def test_happy_path(self, fake_project_cli, fake_metadata, create_kernel_mock):
         result = CliRunner().invoke(
             fake_project_cli,
-            ["jupyter", "init"],
+            ["jupyter", "setup"],
             obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout

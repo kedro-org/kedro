@@ -183,7 +183,9 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Resources
 
+   faq/faq
    resources/glossary
+
 
 .. toctree::
    :maxdepth: 2

@@ -59,7 +59,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: First steps: Set up
+   :caption: First steps: Set up Kedro
 
    get_started/install
    get_started/new_project

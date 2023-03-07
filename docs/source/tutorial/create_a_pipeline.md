@@ -23,7 +23,7 @@ kedro pipeline create data_processing
 
 This command generates all the files you need for the pipeline:
 
-* Two python files within `src/kedro_tutorial/pipelines/data_processing`
+* Two python files within `src/spaceflights/pipelines/data_processing`
     * `nodes.py` (for the node functions that form the data processing)
     * `pipeline.py` (to build the pipeline)
 * A yaml file: `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
@@ -34,7 +34,7 @@ This command generates all the files you need for the pipeline:
 ### Add node functions
 
 
-Open `src/kedro_tutorial/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each takes a raw DataFrame as input, convert the data in several columns to different types, and output a DataFrame containing the preprocessed data:
+Open `src/spaceflights/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each takes a raw DataFrame as input, convert the data in several columns to different types, and output a DataFrame containing the preprocessed data:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -102,7 +102,7 @@ from kedro.pipeline import Pipeline, node, pipeline
 from .nodes import preprocess_companies, preprocess_shuttles
 ```
 
-Next, add the following to `src/kedro_tutorial/pipelines/data_processing/pipeline.py`, so the `create_pipeline()` function is as follows:
+Next, add the following to `src/spaceflights/pipelines/data_processing/pipeline.py`, so the `create_pipeline()` function is as follows:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -147,7 +147,6 @@ You should see output similar to the below:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[08/09/22 16:43:10] INFO     Kedro project kedro-tutorial                                         session.py:346
 [08/09/22 16:43:11] INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
@@ -171,7 +170,6 @@ You should see output similar to the following:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[08/09/22 16:45:46] INFO     Kedro project kedro-tutorial                                         session.py:346
                     INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
@@ -218,7 +216,7 @@ The next step in the tutorial is to add another node for a function that joins t
 * Kedro uses the `preprocessed_shuttles`, `preprocessed_companies`, and `reviews` datasets as inputs
 * Kedro saves the output as a dataset called `model_input_table`
 
-First, add the `create_model_input_table()` function from the snippet below to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
+First, add the `create_model_input_table()` function from the snippet below to `src/spaceflights/pipelines/data_processing/nodes.py`.
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -247,7 +245,7 @@ def create_model_input_table(
 
 </details>
 
-Add an import statement for `create_model_input_table` at the top of `src/kedro_tutorial/pipelines/data_processing/pipeline.py`:
+Add an import statement for `create_model_input_table` at the top of `src/spaceflights/pipelines/data_processing/pipeline.py`:
 
 ```python
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
@@ -289,7 +287,6 @@ You should see output similar to the following:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[08/09/22 17:00:54] INFO     Kedro project kedro-tutorial                                         session.py:346
 [08/09/22 17:01:10] INFO     Reached after_catalog_created hook                                     plugin.py:17
                     INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327

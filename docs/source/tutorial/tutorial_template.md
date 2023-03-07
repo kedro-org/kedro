@@ -1,6 +1,6 @@
 # Set up the spaceflights tutorial project
 
-In this section, we discuss the project set-up phase, which is the first part of the standard development workflow. The setup steps are as follows:
+In this section, we set up the project by following these steps:
 
 * Create a new project with `kedro new`
 * Install project dependencies with `pip install -r src/requirements.txt`
@@ -10,22 +10,24 @@ In this section, we discuss the project set-up phase, which is the first part of
 
 ## Create a new project
 
-If you have not yet set up Kedro, do so by [following the guidelines to install Kedro](../get_started/install.md).
+You first need to [install Kedro](../get_started/install.md) if you have not already done so.
 
 ```{important}
-We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.6).
+We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.6). To check the version installed, type `kedro -V` in your terminal window.
 ```
 
-In your terminal window, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) - your project will be populated with a complete set of working example code:
+In your terminal window, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) - your project will be populated with a complete set of working example code:
 
 ```bash
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, enter `Kedro Tutorial`. When Kedro has created your project, you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
+When prompted for a project name, you should accept the default choice (`Spaceflights`) as the rest of this tutorial assumes that project name.
+
+When Kedro has created your project, you can navigate to the [project root directory](./spaceflights_tutorial.md#project-root-directory):
 
 ```bash
-cd kedro-tutorial
+cd spaceflights
 ```
 
 ## Install project dependencies

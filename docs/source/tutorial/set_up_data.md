@@ -1,8 +1,8 @@
 # Set up the data
 
-In this section, we discuss the data setup phase, which is the second part of the standard development workflow. The steps are as follows:
+In this section, we discuss data setup. The steps are as follows:
 
-* Add datasets to your `data` folder, according to [data engineering convention](../faq/faq.md#what-is-data-engineering-convention)
+* Add datasets to your `data` folder.
 * Register the datasets with the Kedro Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
 
 You can find further information about the [Data Catalog](../data/data_catalog.md) in specific documentation covering advanced usage.

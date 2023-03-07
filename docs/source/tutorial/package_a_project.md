@@ -121,10 +121,10 @@ A recipient can install the project by calling:
 pip install <path-to-wheel-file>
 ```
 
-An executable, `kedro-tutorial`, is placed in the `bin` subfolder of the Python install folder, so the project can be run as follows:
+An executable, `spaceflights`, is placed in the `bin` subfolder of the Python install folder, so the project can be run as follows:
 
 ```bash
-python -m kedro_tutorial
+python -m spaceflights
 ```
 
 ```{note}
@@ -134,7 +134,7 @@ The recipient will need to add a `conf` subfolder. They also need to add `data` 
 Once your project is installed, to run your pipelines from any Python code, simply import it:
 
 ```python
-from kedro_tutorial.__main__ import main
+from spaceflights.__main__ import main
 
 main(
     ["--pipeline", "__default__"]

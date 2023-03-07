@@ -53,7 +53,6 @@ To successfully run the pipeline, all required input datasets must already exist
 ```bash
 kedro run --pipeline=data_science
 
-2019-10-04 12:36:12,135 - root - INFO - ** Kedro project kedro-tutorial
 2019-10-04 12:36:12,158 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataSet)...
 2019-10-04 12:36:12,158 - kedro.runner.sequential_runner - WARNING - There are 3 nodes that have not run.
 You can resume the pipeline run with the following command:

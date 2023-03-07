@@ -21,7 +21,7 @@ Run the following command to create the `data_science` pipeline.
 kedro pipeline create data_science
 ```
 
-Add the following code to the `src/kedro_tutorial/pipelines/data_science/nodes.py` file:
+Add the following code to the `src/spaceflights/pipelines/data_science/nodes.py` file:
 
 
 <details>
@@ -114,7 +114,7 @@ More information about [parameters](../kedro_project_setup/configuration.md#para
 
 ### Assemble the data science pipeline
 
-To create a modular pipeline for the price prediction model, replace the contents of `src/kedro_tutorial/pipelines/data_science/pipeline.py` with the following:
+To create a modular pipeline for the price prediction model, replace the contents of `src/spaceflights/pipelines/data_science/pipeline.py` with the following:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -178,7 +178,6 @@ You should see output similar to the following:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[08/09/22 16:56:00] INFO     Kedro project kedro-tutorial                                         session.py:346
                     INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
@@ -234,7 +233,7 @@ When you created your project with `kedro new`, one of the files generated was `
 
 However, there may be occasions when you want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
 
-You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
+You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
 ```bash
 kedro run --pipeline=data_science
@@ -364,12 +363,6 @@ After executing `kedro run`, you should see output as follows:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[11/02/22 10:41:06] WARNING  /Users/<username>/opt/anaconda3/envs/py38/lib/python3.8/site-packages/plotly/graph_objects/ warnings.py:109
-                             __init__.py:288: DeprecationWarning: distutils Version classes are deprecated. Use
-                             packaging.version instead.
-                               if LooseVersion(ipywidgets.__version__) >= LooseVersion("7.0.0"):
-
-[11/02/22 10:41:07] INFO     Kedro project kedro-tutorial                                                                   session.py:340
 [11/02/22 10:41:08] INFO     Loading data from 'companies' (CSVDataSet)...                                             data_catalog.py:343
                     INFO     Running node: preprocess_companies_node: preprocess_companies([companies]) ->                     node.py:327
                              [preprocessed_companies]
@@ -378,12 +371,6 @@ After executing `kedro run`, you should see output as follows:
                     INFO     Loading data from 'shuttles' (ExcelDataSet)...                                            data_catalog.py:343
 [11/02/22 10:41:13] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) ->                        node.py:327
                              [preprocessed_shuttles]
-                    WARNING  /Users/<username>/Documents/kedro-projects/kedro-tutorial/src/kedro_tutorial/pipelines/data warnings.py:109
-                             _processing/nodes.py:19: FutureWarning: The default value of regex will change from True to
-                             False in a future version. In addition, single character regular expressions will *not* be
-                             treated as literal strings when regex=True.
-                               x = x.str.replace("$", "").str.replace(",", "")
-
                     INFO     Saving data to 'preprocessed_shuttles' (ParquetDataSet)...                                data_catalog.py:382
                     INFO     Completed 2 out of 9 tasks                                                            sequential_runner.py:85
                     INFO     Loading data from 'preprocessed_shuttles' (ParquetDataSet)...                             data_catalog.py:343
@@ -515,7 +502,7 @@ There are three different Kedro runners that can run the pipeline:
 * `ParallelRunner` - runs your nodes in parallel; independent nodes are able to run at the same time, which is more efficient when there are independent branches in your pipeline and enables you to take advantage of multiple CPU cores.
 * `ThreadRunner` - runs your nodes in parallel, similarly to `ParallelRunner`, but uses multithreading instead of multiprocessing.
 
-By default, Kedro uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the command line. If you decide to use `ParallelRunner`, `ThreadRunner` or a custom runner, you can do so through the `--runner` flag as follows:
+By default, Kedro uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the terminal. If you decide to use `ParallelRunner`, `ThreadRunner` or a custom runner, you can do so through the `--runner` flag as follows:
 
 ```bash
 kedro run --runner=ParallelRunner

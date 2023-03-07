@@ -1,57 +1,28 @@
-# Install Kedro
+# Set up Kedro
 
 ## Summary
 
 * Kedro can be used on Windows, macOS or Linux
-* Installation prerequisites include Python 3.7+, `git` and `conda`
-* You should install Kedro using `pip install kedro` or `conda install -c conda-forge kedro`
+* Installation prerequisites include Python 3.7+, a virtual environment manager like `conda` and `git`
+* You should install Kedro using `pip install kedro`
 
 If you encounter any problems as you install Kedro, you can ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or [search the archives for a solution](https://linen-discord.kedro.org).
 
 
 ## Installation prerequisites
+* **Python**: Kedro supports macOS, Linux, and Windows and is built for Python 3.7+. You'll select a version of Python when you create a virtual environment for your Kedro project.
 
-### Python
-Kedro supports macOS, Linux, and Windows and is built for Python 3.7+.
+* **Python virtual environment**: We suggest you create a new Python virtual environment for *each* new Kedro project you work on to isolate its dependencies from those of other projects.
 
-To confirm that a valid version of Python is installed, type the following in your terminal (macOS and Linux):
+* **git**: You will need to install `git` onto your machine if you do not already have it. To confirm it is installed, type `git -v` into your terminal window. You should see the version of `git` available or an error message. You can download it from the official  [`git`](https://git-scm.com/) website.
 
-```bash
-python3 --version
-```
-On Windows, type the following into the command prompt:
+## Create a Python virtual environment for your Kedro project
 
-```bash
-python --version
-```
-
-You should see the version of Python installed on your machine:
-
-```bash
-Python 3.8.13
-```
-
-If you see an error message or need to install a later version of Python, you can download it from the [official Python website](https://www.python.org/downloads/).
-
-### `git`
-You will need to install `git` onto your machine if you do not already have it. To check if it is installed:
-
-```bash
-git -v
-```
-
-You should see the version of `git` available or an error message if it is not installed. You can download it from the official  [`git`](https://git-scm.com/) website.
-
-### Virtual environment manager
-We suggest you create a new Python virtual environment for *each* new Kedro project you work on to isolate its dependencies from those of other projects. We strongly recommend [installing `conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) if you don't already use it.
+We strongly recommend [installing `conda` as your virtual environment manager](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) if you don't already use it.
 
 ``` {note}
 [Read more about Python virtual environments](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 ```
-
-Depending on your preferred Python installation, you can alternatively create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`, as described in the [FAQ](../faq/faq.md)
-
-#### Create a new Python virtual environment using `conda`
 
 To create a new virtual environment called `kedro-environment` using `conda`:
 
@@ -61,14 +32,22 @@ conda create --name kedro-environment python=3.10 -y
 
 In this example, we use Python 3.10, but you can opt for a different version if you need it for your particular project.
 
-To activate the new environment:
+The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory:
 
 ```bash
 conda activate kedro-environment
 ```
 
-```{note}
-The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory.
+To confirm that a valid version of Python is installed in your virtual environment, type the following in your terminal (macOS and Linux):
+
+```bash
+python3 --version
+```
+
+On Windows:
+
+```bash
+python --version
 ```
 
 To exit `kedro-environment`:
@@ -77,7 +56,72 @@ To exit `kedro-environment`:
 conda deactivate
 ```
 
-## Install Kedro using `pip` or `conda`
+### Create a new Python virtual environment without using `conda`
+
+Depending on your preferred Python installation, you can create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`.
+
+<details>
+<summary><b>Click to expand instructions for <code>venv</code></b></summary>
+
+If you use Python 3, you should already have the `venv` module installed with the standard library. Create a directory for working with your project and navigate to it. For example:
+
+```bash
+mkdir kedro-environment && cd kedro-environment
+```
+
+Next, create a new virtual environment in this directory with `venv`:
+
+```bash
+python -m venv env/kedro-environment  # macOS / Linux
+python -m venv env\kedro-environment  # Windows
+```
+
+Activate this virtual environment:
+
+```bash
+source env/kedro-environment/bin/activate # macOS / Linux
+.\env\kedro-environment\Scripts\activate  # Windows
+```
+
+To exit the environment:
+
+```bash
+deactivate
+```
+</details>
+
+<details>
+<summary><b>Click to expand instructions for <code>pipenv</code></b></summary>
+
+Install `pipenv` as follows:
+
+```bash
+pip install pipenv
+```
+
+Create a directory for working with your project and navigate to it. For example:
+
+```bash
+mkdir kedro-environment && cd kedro-environment
+```
+
+To start a session with the correct virtual environment activated:
+
+```bash
+pipenv shell
+```
+
+To exit the shell session:
+
+```bash
+exit
+```
+
+</details>
+
+
+
+## Install Kedro using `pip`
 
 To install Kedro from the Python Package Index (PyPI):
 
@@ -86,10 +130,10 @@ pip install kedro
 ```
 
 ```{note}
-It is also possible to install Kedro using `conda install -c conda-forge kedro`, but we recommend you use `pip` at this point to eliminate any potential dependency issues:
+While we recommend you to use `pip`, it is also possible to install Kedro using `conda install -c conda-forge kedro`.
 ```
 
-### Verify a successful installation
+## Verify your Kedro installation
 
 To check that Kedro is installed:
 
@@ -101,7 +145,7 @@ You should see an ASCII art graphic and the Kedro version number: for example,
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../faq/faq.md), check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org), or post a new query on the [Slack organisation](https://slack.kedro.org).
+If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org), or post a new query on the [Slack organisation](https://slack.kedro.org).
 
 ## Install a development version
 

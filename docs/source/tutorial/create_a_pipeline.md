@@ -6,22 +6,9 @@ This section explains the following:
 * How to construct a Kedro pipeline from a set of nodes
 * How to run the pipeline
 
+## Introduction
 
-## Data processing pipeline
-
-You will use the data to train a model to predict the price of shuttle hire, but before you get to train the model, you need to prepare the data for model building by combining the files to create a model input table.
-
-You previously registered the raw datasets for your Kedro project, so you can now create nodes to preprocess two of the datasets, `companies.csv`, and `shuttles.xlsx`, to prepare the data for modelling.
-
-### Generate a new pipeline template
-
-In the terminal, run the following command to generate a new pipeline for data processing:
-
-```bash
-kedro pipeline create data_processing
-```
-
-This command generates all the files you need for the pipeline:
+The data processing pipeline prepares the data for model building by combining the datasets to create a model input table. The data processing pipeline is made up of the following:
 
 * Two python files within `src/spaceflights/pipelines/data_processing`
     * `nodes.py` (for the node functions that form the data processing)
@@ -30,9 +17,13 @@ This command generates all the files you need for the pipeline:
 * A folder for test code: `src/tests/pipelines/data_processing`
 * `__init__.py` files in the required folders to ensure that Python can import the pipeline
 
+```{note}
+Kedro provides the `kedro pipeline create` command to add the skeleton code for a new pipeline. If you are writing a project from scratch and want to add a new pipeline, run the following from the terminal: `kedro pipeline create <pipeline_name>`. You do **not** need to do this in the spaceflights example as it is already supplied by the starter project.
+```
 
 ### Add node functions
 
+The first step is to preprocess two of the datasets, `companies.csv`, and `shuttles.xlsx`.
 
 Open `src/spaceflights/pipelines/data_processing/nodes.py` and add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each takes a raw DataFrame as input, convert the data in several columns to different types, and output a DataFrame containing the preprocessed data:
 

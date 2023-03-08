@@ -23,16 +23,14 @@ Download and save the files to the `data/01_raw` folder of your project:
 
 ## Register the datasets
 
-You now need to register the datasets so they can be loaded by Kedro. All Kedro projects have a `conf/base/catalog.yml` file, and you register each dataset by adding a named entry into the `.yml` file that includes the following:
+The following information about a dataset must be registered before Kedro can load it:
 
 * File location (path)
 * Parameters for the given dataset
 * Type of data
 * Versioning
 
-### Register `csv` data
-
-First, for the spaceflights data, register the two `csv` datasets by adding this snippet to the end of the `conf/base/catalog.yml` file and saving it:
+Open `conf/base/catalog.yml` for the spaceflights project to inspect the contents. The two `csv` datasets are registered as follows:
 
 ```yaml
 companies:
@@ -44,9 +42,7 @@ reviews:
   filepath: data/01_raw/reviews.csv
 ```
 
-### Register `xlsx` data
-
-Now register the `xlsx` dataset by adding this snippet to the end of the `conf/base/catalog.yml` file, and saving it:
+Likewise for the `xlsx` dataset:
 
 ```yaml
 shuttles:
@@ -56,9 +52,9 @@ shuttles:
     engine: openpyxl # Use modern Excel engine (the default since Kedro 0.18.0)
 ```
 
-This registration has an additional line: `load_args`, which is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the equivalent output is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
+The additional line, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the equivalent output is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
 
-### Test that Kedro can load the `csv` data
+### Test that Kedro can load the data
 
 Open a `kedro ipython` session in your terminal from the project root directory:
 
@@ -66,7 +62,7 @@ Open a `kedro ipython` session in your terminal from the project root directory:
 kedro ipython
 ```
 
-Then type the following into the IPython prompt:
+Then type the following into the IPython prompt to test load some `csv` data:
 
 ```python
 companies = catalog.load("companies")
@@ -88,9 +84,8 @@ Out[1]:
 
 ```
 
-### Test that Kedro can load the `xlsx` data
 
-To test that everything works as expected, load the dataset within IPython and display its first five rows:
+Similarly, to test that the `xlsx` data is loaded as expected:
 
 ```python
 shuttles = catalog.load("shuttles")

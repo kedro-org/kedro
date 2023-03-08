@@ -10,13 +10,13 @@ In this section, we set up the project by following these steps:
 
 ## Create a new project
 
-You first need to [install Kedro](../get_started/install.md) if you have not already done so.
+You first need to [set up Kedro](../get_started/install.md) if you have not already done so.
 
 ```{important}
 We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.6). To check the version installed, type `kedro -V` in your terminal window.
 ```
 
-In your terminal window, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) - your project will be populated with a complete set of working example code:
+In your terminal window, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights). Your project will be populated with a complete set of working example code:
 
 ```bash
 kedro new --starter=spaceflights

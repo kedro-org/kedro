@@ -1,4 +1,4 @@
-# Set up the spaceflights tutorial project
+# Set up the spaceflights project
 
 In this section, we set up the project by following these steps:
 

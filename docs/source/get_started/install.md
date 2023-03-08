@@ -2,11 +2,11 @@
 
 ## Summary
 
-* Kedro can be used on Windows, macOS or Linux
-* Installation prerequisites include Python 3.7+, a virtual environment manager like `conda` and `git`
-* You should install Kedro using `pip install kedro`
+* Kedro can be used on Windows, macOS or Linux.
+* Installation prerequisites include Python 3.7+, a virtual environment manager like `conda`, and `git`.
+* You should install Kedro using `pip install kedro`.
 
-If you encounter any problems as you install Kedro, you can ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or [search the archives for a solution](https://linen-discord.kedro.org).
+If you encounter any problems as you set up Kedro, you can ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or [search the archives for a solution](https://linen-discord.kedro.org).
 
 
 ## Installation prerequisites
@@ -14,7 +14,7 @@ If you encounter any problems as you install Kedro, you can ask for help on Kedr
 
 * **Python virtual environment**: We suggest you create a new Python virtual environment for *each* new Kedro project you work on to isolate its dependencies from those of other projects.
 
-* **git**: You will need to install `git` onto your machine if you do not already have it. To confirm it is installed, type `git -v` into your terminal window. You should see the version of `git` available or an error message. You can download it from the official  [`git`](https://git-scm.com/) website.
+* **git**: You must install `git` onto your machine if you do not already have it. Type `git -v` into your terminal window to confirm it is installed. You should see the version of `git` available or an error message. You can download it from the official  [`git`](https://git-scm.com/) website.
 
 ## Create a Python virtual environment for your Kedro project
 
@@ -129,9 +129,7 @@ To install Kedro from the Python Package Index (PyPI):
 pip install kedro
 ```
 
-```{note}
 While we recommend you to use `pip`, it is also possible to install Kedro using `conda install -c conda-forge kedro`.
-```
 
 ## Verify your Kedro installation
 
@@ -141,7 +139,7 @@ To check that Kedro is installed:
 kedro info
 ```
 
-You should see an ASCII art graphic and the Kedro version number: for example,
+You should see an ASCII art graphic and the Kedro version number. For example:
 
 ![](../meta/images/kedro_graphic.png)
 

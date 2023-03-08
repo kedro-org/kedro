@@ -1,4 +1,4 @@
-# Kedro spaceflights tutorial
+# Introducing spaceflights
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 

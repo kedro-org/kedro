@@ -13,7 +13,7 @@ You can also specify a source directory for the configuration files at run time 
 kedro run --conf-source=<path-to-new-conf-directory>
 ```
 
-If you're using the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) you can also read configuration from a compressed file in `zip` or `tar` format. The two commands below are examples of how to reference a `tar.gz` or `zip` file:
+If you're using the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) you can also read configuration from a compressed file in `tar.gz` or `zip` format. The two commands below are examples of how to reference a `tar.gz` or `zip` file:
 
  ```bash
 kedro run --conf-source=<path-to-compressed-file>.tar.gz

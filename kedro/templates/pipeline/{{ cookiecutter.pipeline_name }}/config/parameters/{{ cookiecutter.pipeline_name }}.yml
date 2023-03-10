@@ -2,4 +2,4 @@
 # using Kedro {{ cookiecutter.kedro_version }}.
 #
 # Documentation for this file format can be found in "Parameters"
-# Link: https://kedro.readthedocs.io/en/{{ cookiecutter.kedro_version }}/kedro_project_setup/configuration.html#parameters
+# Link: https://docs.kedro.org/en/{{ cookiecutter.kedro_version }}/kedro_project_setup/configuration.html#parameters

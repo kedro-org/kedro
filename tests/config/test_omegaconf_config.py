@@ -3,6 +3,8 @@ import configparser
 import json
 import os
 import re
+import subprocess
+import zipfile
 from pathlib import Path
 from typing import Dict
 
@@ -245,7 +247,7 @@ class TestOmegaConfigLoader:
         conf_path.mkdir(parents=True, exist_ok=True)
         (conf_path / "catalog.yml").write_text("bad:\nconfig")
 
-        pattern = f"Invalid YAML or JSON file {conf_path}"
+        pattern = f"Invalid YAML or JSON file {conf_path.as_posix()}"
         with pytest.raises(ParserError, match=re.escape(pattern)):
             OmegaConfigLoader(str(tmp_path))["catalog"]
 
@@ -364,7 +366,7 @@ class TestOmegaConfigLoader:
         (conf_path / "catalog.yml").write_text(example_catalog)
 
         msg = (
-            f"Invalid YAML or JSON file {conf_path / 'catalog.yml'}, unable to read"
+            f"Invalid YAML or JSON file {Path(conf_path, 'catalog.yml').as_posix()}, unable to read"
             f" line 3, position 10."
         )
         with pytest.raises(ParserError, match=re.escape(msg)):
@@ -487,3 +489,44 @@ class TestOmegaConfigLoader:
         assert conf["credentials"]["user"]["name"] == "test_user"
         assert OmegaConf.has_resolver("oc.env")
         OmegaConf.clear_resolver("oc.env")
+
+    @use_config_dir
+    def test_load_config_from_tar_file(self, tmp_path):
+        subprocess.run(  # pylint: disable=subprocess-run-check
+            [
+                "tar",
+                "--exclude=local/*.yml",
+                "-czf",
+                f"{tmp_path}/tar_conf.tar.gz",
+                f"--directory={str(tmp_path.parent)}",
+                f"{tmp_path.name}",
+            ]
+        )
+
+        conf = OmegaConfigLoader(conf_source=f"{tmp_path}/tar_conf.tar.gz")
+        catalog = conf["catalog"]
+        assert catalog["trains"]["type"] == "MemoryDataSet"
+
+    @use_config_dir
+    def test_load_config_from_zip_file(self, tmp_path):
+        def zipdir(path, ziph):
+            # This is a helper method to zip up a directory without keeping the complete directory
+            # structure with all parent paths.
+            # ziph is zipfile handle
+            for root, _, files in os.walk(path):
+                for file in files:
+                    ziph.write(
+                        os.path.join(root, file),
+                        os.path.relpath(
+                            os.path.join(root, file), os.path.join(path, "..")
+                        ),
+                    )
+
+        with zipfile.ZipFile(
+            f"{tmp_path}/Python.zip", "w", zipfile.ZIP_DEFLATED
+        ) as zipf:
+            zipdir(tmp_path, zipf)
+
+        conf = OmegaConfigLoader(conf_source=f"{tmp_path}/Python.zip")
+        catalog = conf["catalog"]
+        assert catalog["trains"]["type"] == "MemoryDataSet"

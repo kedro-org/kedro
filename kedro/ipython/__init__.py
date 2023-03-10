@@ -29,6 +29,8 @@ def load_ipython_extension(ipython):
     IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
+    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
+
     if _find_kedro_project(Path.cwd()) is None:
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
@@ -36,7 +38,6 @@ def load_ipython_extension(ipython):
         )
         return
 
-    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
     reload_kedro()
 
 
@@ -61,8 +62,9 @@ def load_ipython_extension(ipython):
 )
 def magic_reload_kedro(line: str, local_ns: Dict[str, Any] = None):
     """
-    The `%reload_kedro` IPython line magic. See
-     https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
+    The `%reload_kedro` IPython line magic.
+    See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic # pylint: disable=line-too-long
+    for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
     reload_kedro(args.path, args.env, args.params, local_ns)

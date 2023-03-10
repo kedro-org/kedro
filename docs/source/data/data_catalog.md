@@ -2,7 +2,7 @@
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
-All supported data connectors are available in [`kedro.extras.datasets`](/kedro.extras.datasets).
+All supported data connectors are available in [`kedro-datasets`](/kedro.datasets).
 
 ## Use the Data Catalog within Kedro configuration
 
@@ -261,7 +261,7 @@ scooters_query:
     index_col: [name]
 ```
 
-When you use [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+When you use [`pandas.SQLTableDataSet`](/kedro.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
 
 ### Example 14: Loads data from an API endpoint, example US corn yield data from USDA
@@ -509,18 +509,18 @@ Making a simple addition to your Data Catalog allows you to perform versioning o
 Consider the following versioned dataset defined in the `catalog.yml`:
 
 ```yaml
-cars.csv:
+cars:
   type: pandas.CSVDataSet
   filepath: data/01_raw/company/cars.csv
   versioned: True
 ```
 
-The `DataCatalog` will create a versioned `CSVDataSet` called `cars.csv`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
+The `DataCatalog` will create a versioned `CSVDataSet` called `cars`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
 
 You can run the pipeline with a particular versioned data set with `--load-version` flag as follows:
 
 ```bash
-kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
+kedro run --load-version=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
@@ -535,11 +535,11 @@ The code API allows you to:
 
 ### Configure a Data Catalog
 
-In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using a number of pre-built data loaders documented in the [API reference documentation](/kedro.extras.datasets).
+In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using several pre-built data loaders documented in the [API reference documentation](/kedro.datasets).
 
 ```python
 from kedro.io import DataCatalog
-from kedro.extras.datasets.pandas import (
+from kedro_datasets.pandas import (
     CSVDataSet,
     SQLTableDataSet,
     SQLQueryDataSet,

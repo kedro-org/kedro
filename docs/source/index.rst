@@ -20,7 +20,7 @@ Welcome to Kedro's documentation!
     :alt: CircleCI - Develop Branch
 
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
-    :target: https://opensource.org/licenses/Apache-2.0
+    :target: https://opensource.org/license/apache2-0-php/
     :alt: License is Apache 2.0
 
 .. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg
@@ -57,23 +57,14 @@ Welcome to Kedro's documentation!
 
    introduction/introduction
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Get started
 
-   get_started/prerequisites
    get_started/install
-   get_started/hello_kedro
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Make a project
-
+   get_started/kedro_concepts
    get_started/new_project
-   get_started/example_project
-   get_started/starters
-   get_started/standalone_use_of_datacatalog
+   get_started/summary
 
 .. toctree::
    :maxdepth: 2
@@ -95,11 +86,18 @@ Welcome to Kedro's documentation!
    visualisation/visualise_charts_with_plotly
    visualisation/experiment_tracking
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Notebooks & IPython users
+
+   notebooks_and_ipython/kedro_and_notebooks
+   notebooks_and_ipython/kedro_as_a_data_registry
 
 .. toctree::
    :maxdepth: 2
    :caption: Kedro project setup
 
+   kedro_project_setup/starters
    kedro_project_setup/dependencies
    kedro_project_setup/configuration
    kedro_project_setup/session
@@ -131,7 +129,6 @@ Welcome to Kedro's documentation!
    extend_kedro/common_use_cases
    extend_kedro/custom_datasets
    extend_kedro/plugins
-   extend_kedro/create_kedro_starters
 
 .. toctree::
    :maxdepth: 2
@@ -147,7 +144,6 @@ Welcome to Kedro's documentation!
    :caption: Logging
 
    logging/logging
-   logging/experiment_tracking
 
 .. toctree::
    :maxdepth: 2
@@ -179,10 +175,9 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tools integration
+   :caption: PySpark integration
 
    tools_integration/pyspark
-   tools_integration/ipython
 
 .. toctree::
    :maxdepth: 2
@@ -208,6 +203,7 @@ Welcome to Kedro's documentation!
    contribution/backwards_compatibility
    contribution/documentation_contributor_guidelines
    contribution/technical_steering_committee
+   contribution/development_for_databricks
 
 API documentation
 =================

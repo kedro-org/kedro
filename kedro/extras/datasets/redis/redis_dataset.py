@@ -22,28 +22,30 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     all allowed options for instantiating the redis app ``from_url`` and setting
     a value.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> my_python_object: # simple example
-        >>>   type: redis.PickleDataSet
-        >>>   key: my_object
-        >>>   from_url_args:
-        >>>     url: redis://127.0.0.1:6379
-        >>>
-        >>> final_python_object: # example with save args
-        >>>   type: redis.PickleDataSet
-        >>>   key: my_final_object
-        >>>   from_url_args:
-        >>>     url: redis://127.0.0.1:6379
-        >>>     db: 1
-        >>>   save_args:
-        >>>     ex: 10
+        my_python_object: # simple example
+          type: redis.PickleDataSet
+          key: my_object
+          from_url_args:
+            url: redis://127.0.0.1:6379
 
-    Example using Python API:
+        final_python_object: # example with save args
+          type: redis.PickleDataSet
+          key: my_final_object
+          from_url_args:
+            url: redis://127.0.0.1:6379
+            db: 1
+          save_args:
+            ex: 10
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.redis import PickleDataSet
@@ -92,14 +94,14 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
             load_args: Pickle options for loading pickle files.
                 You can pass in arguments that the backend load function specified accepts, e.g:
                 pickle.loads: https://docs.python.org/3/library/pickle.html#pickle.loads
-                dill.loads: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.loads
+                dill.loads: https://dill.readthedocs.io/en/latest/index.html#dill.loads
                 compress_pickle.loads:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.loads
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 You can pass in arguments that the backend dump function specified accepts, e.g:
                 pickle.dumps: https://docs.python.org/3/library/pickle.html#pickle.dump
-                dill.dumps: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dumps
+                dill.dumps: https://dill.readthedocs.io/en/latest/index.html#dill.dumps
                 compress_pickle.dumps:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dumps
                 All defaults are preserved.
@@ -155,7 +157,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
         )
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(key=self._key, **self._redis_from_url_args)
+        return {"key": self._key, **self._redis_from_url_args}
 
     # `redis_db` mypy does not work since it is optional and optional is not
     # accepted by pickle.loads.

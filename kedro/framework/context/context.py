@@ -1,11 +1,13 @@
 """This module provides context for Kedro project."""
 
+import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
+from omegaconf import DictConfig
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -153,7 +155,9 @@ def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> N
         if key not in old_dict:
             old_dict[key] = value
         else:
-            if isinstance(old_dict[key], dict) and isinstance(value, dict):
+            if isinstance(old_dict[key], (dict, DictConfig)) and isinstance(
+                value, (dict, DictConfig)
+            ):
                 _update_nested_dict(old_dict[key], value)
             else:
                 old_dict[key] = value
@@ -321,8 +325,7 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             feed_dict[key] = param_value
-
-            if isinstance(param_value, dict):
+            if isinstance(param_value, (dict, DictConfig)):
                 for key, val in param_value.items():
                     _add_param_to_feed_dict(f"{param_name}.{key}", val)
 
@@ -336,7 +339,9 @@ class KedroContext:
         try:
             conf_creds = self.config_loader["credentials"]
         except MissingConfigException as exc:
-            warn(f"Credentials not found in your Kedro project config.\n{str(exc)}")
+            logging.getLogger(__name__).debug(
+                "Credentials not found in your Kedro project config.\n %s", str(exc)
+            )
             conf_creds = {}
         return conf_creds
 

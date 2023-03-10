@@ -8,7 +8,83 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.4
+# Upcoming Release 0.18.7
+
+## Major features and improvements
+* `kedro package` now includes the project configuration in a compressed `tar.gz` file.
+* Added functionality to the `OmegaConfigLoader` to load configuration from compressed files of `zip` or `tar` format. This feature requires `fsspec>=2023.1.0`.
+
+## Bug fixes and other changes
+* Added a guide and tooling for developing Kedro for Databricks.
+
+
+## Breaking changes to the API
+
+# Release 0.18.6
+
+## Bug fixes and other changes
+* Fixed bug that didn't allow to read or write datasets with `s3a` or `s3n` filepaths
+* Fixed bug with overriding nested parameters using the `--params` flag
+* Fixed bug that made session store incompatible with `Kedro-Viz` experiment tracking
+
+## Migration guide from Kedro 0.18.5 to 0.18.6
+A regression introduced in Kedro version `0.18.5` caused the `Kedro-Viz` console to fail to show experiment tracking correctly. If you experienced this issue, you will need to:
+* upgrade to Kedro version `0.18.6`
+* delete any erroneous session entries created with Kedro 0.18.5 from your session_store.db stored at `<project-path>/data/session_store.db`.
+
+Thanks to Kedroids tomohiko kato, [tsanikgr](https://github.com/tsanikgr) and [maddataanalyst](https://github.com/maddataanalyst) for very detailed reports about the bug.
+
+# Release 0.18.5
+
+> This release introduced a bug that causes a failure in experiment tracking within the `Kedro-Viz` console. We recommend that you use Kedro version `0.18.6` in preference.
+
+## Major features and improvements
+* Added new `OmegaConfigLoader` which uses `OmegaConf` for loading and merging configuration.
+* Added the `--conf-source` option to `kedro run`, allowing users to specify a source for project configuration for the run.
+* Added `omegaconf` syntax as option for `--params`. Keys and values can now be separated by colons or equals signs.
+* Added support for generator functions as nodes, i.e. using `yield` instead of return.
+  * Enable chunk-wise processing in nodes with generator functions.
+  * Save node outputs after every `yield` before proceeding with next chunk.
+* Fixed incorrect parsing of Azure Data Lake Storage Gen2 URIs used in datasets.
+* Added support for loading credentials from environment variables using `OmegaConfigLoader`.
+* Added new `--namespace` flag to `kedro run` to enable filtering by node namespace.
+* Added a new argument `node` for all four dataset hooks.
+* Added the `kedro run` flags `--nodes`, `--tags`, and `--load-versions` to replace `--node`, `--tag`, and `--load-version`.
+
+## Bug fixes and other changes
+* Commas surrounded by square brackets (only possible for nodes with default names) will no longer split the arguments to `kedro run` options which take a list of nodes as inputs (`--from-nodes` and `--to-nodes`).
+* Fixed bug where `micropkg` manifest section in `pyproject.toml` isn't recognised as allowed configuration.
+* Fixed bug causing `load_ipython_extension` not to register the `%reload_kedro` line magic when called in a directory that does not contain a Kedro project.
+* Added `anyconfig`'s `ac_context` parameter to `kedro.config.commons` module functions for more flexible `ConfigLoader` customizations.
+* Change reference to `kedro.pipeline.Pipeline` object throughout test suite with `kedro.modular_pipeline.pipeline` factory.
+* Fixed bug causing the `after_dataset_saved` hook only to be called for one output dataset when multiple are saved in a single node and async saving is in use.
+* Log level for "Credentials not found in your Kedro project config" was changed from `WARNING` to `DEBUG`.
+* Added safe extraction of tar files in `micropkg pull` to fix vulnerability caused by [CVE-2007-4559](https://github.com/advisories/GHSA-gw9q-c7gh-j9vm).
+* Documentation improvements
+    * Bug fix in table font size
+    * Updated API docs links for datasets
+    * Improved CLI docs for `kedro run`
+    * Revised documentation for visualisation to build plots and for experiment tracking
+    * Added example for loading external credentials to the Hooks documentation
+
+## Breaking changes to the API
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [adamfrly](https://github.com/adamfrly)
+* [corymaklin](https://github.com/corymaklin)
+* [Emiliopb](https://github.com/Emiliopb)
+* [grhaonan](https://github.com/grhaonan)
+* [JStumpp](https://github.com/JStumpp)
+* [michalbrys](https://github.com/michalbrys)
+* [sbrugman](https://github.com/sbrugman)
+
+## Upcoming deprecations for Kedro 0.19.0
+* `project_version` will be deprecated in `pyproject.toml` please use `kedro_init_version` instead.
+* Deprecated `kedro run` flags `--node`, `--tag`, and `--load-version` in favour of `--nodes`, `--tags`, and `--load-versions`.
+
+# Release 0.18.4
 
 ## Major features and improvements
 * Make Kedro instantiate datasets from `kedro_datasets` with higher priority than `kedro.extras.datasets`. `kedro_datasets` is the namespace for the new `kedro-datasets` python package.
@@ -22,6 +98,7 @@
 | `video.VideoDataSet`                 | Read and write video files from a filesystem                               | `kedro.extras.datasets.video` |
 | `video.video_dataset.SequenceVideo`  | Create a video object from an iterable sequence to use with `VideoDataSet` | `kedro.extras.datasets.video` |
 | `video.video_dataset.GeneratorVideo` | Create a video object from a generator to use with `VideoDataSet`          | `kedro.extras.datasets.video` |
+* Implemented support for a functional definition of schema in `dask.ParquetDataSet` to work with the `dask.to_parquet` API.
 
 ## Bug fixes and other changes
 * Fixed `kedro micropkg pull` for packages on PyPI.
@@ -30,16 +107,29 @@
 * Added support for `tf.device` in `TensorFlowModelDataset`.
 * Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 * Updated Experiment Tracking docs with working examples.
-* Updated MatplotlibWriter Dataset docs with working examples.
+* Updated MatplotlibWriter Dataset, TextDataset, plotly.PlotlyDataSet and plotly.JSONDataSet docs with working examples.
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
-* Refactored `ShelveStore` to it's own module to ensure multiprocessing works with it.
+* Refactored `ShelveStore` to its own module to ensure multiprocessing works with it.
 * `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.
+* Removed `attrs` upper bound to support newer versions of Airflow.
+* Bumped the lower bound for the `setuptools` dependency to <=61.5.1.
 
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro test` and `kedro lint` will be deprecated.
 
+## Documentation
+* Revised the Introduction to shorten it
+* Revised the Get Started section to remove unnecessary information and clarify the learning path
+* Updated the spaceflights tutorial to simplify the later stages and clarify what the reader needed to do in each phase
+* Moved some pages that covered advanced materials into more appropriate sections
+* Moved visualisation into its own section
+* Fixed a bug that degraded user experience: the table of contents is now sticky when you navigate between pages
+* Added redirects where needed on ReadTheDocs for legacy links and bookmarks
+
+## Contributions from the Kedroid community
+We are grateful to the following for submitting PRs that contributed to this release: [jstammers](https://github.com/jstammers), [FlorianGD](https://github.com/FlorianGD), [yash6318](https://github.com/yash6318), [carlaprv](https://github.com/carlaprv), [dinotuku](https://github.com/dinotuku), [williamcaicedo](https://github.com/williamcaicedo), [avan-sh](https://github.com/avan-sh), [Kastakin](https://github.com/Kastakin), [amaralbf](https://github.com/amaralbf), [BSGalvan](https://github.com/BSGalvan), [levimjoseph](https://github.com/levimjoseph), [daniel-falk](https://github.com/daniel-falk), [clotildeguinard](https://github.com/clotildeguinard), [avsolatorio](https://github.com/avsolatorio), and [picklejuicedev](https://github.com/picklejuicedev) for comments and input to documentation changes
 
 # Release 0.18.3
 

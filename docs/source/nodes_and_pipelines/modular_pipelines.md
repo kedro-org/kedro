@@ -239,6 +239,7 @@ final_pipeline = (
 * Visualising the `final_pipeline` highlights how namespaces become 'super nodes' which encapsulate the wrapped pipeline.
 * This example demonstrates how we can reuse the same `cook_pipeline` with slightly different arguments.
 * Namespaces can also be arbitrarily nested with the `.` character.
+* `kedro run --namespace=<namespace>` could be used to only run nodes with a specific namespace.
 
 ```{note}
 Parameter references (`params:` and `parameters`) will not be namespaced.

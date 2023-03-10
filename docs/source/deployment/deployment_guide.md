@@ -2,7 +2,7 @@
 
 ## Deployment choices
 
-Your choice of deployment method will depend on a number of factors. In this section we provide a number of guides for different approaches.
+Your choice of deployment method will depend on various factors. In this section we provide guides for different approaches.
 
 If you decide to deploy your Kedro project on a single machine, you should consult our [guide to single-machine deployment](single_machine.md), and decide whether to [use Docker for container-based deployment](./single_machine.md#container-based) or to use [package-based deployment](./single_machine.md#package-based) or to [use the CLI to clone and deploy](./single_machine.md#cli-based) your codebase to a server.
 

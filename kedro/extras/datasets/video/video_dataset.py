@@ -196,25 +196,24 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
     """``VideoDataSet`` loads / save video data from a given filepath as sequence
     of PIL.Image.Image using OpenCV.
 
-    Example adding a catalog entry with
-    `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
-        >>> cars:
-        >>>   type: video.VideoDataSet
-        >>>   filepath: data/01_raw/cars.mp4
-        >>>
-        >>> cars:
-        >>>   type: video.VideoDataSet
-        >>>   filepath: data/01_raw/cars.mp4
-        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.mp4
-        >>>   credentials: dev_s3
-        >>>
 
+        cars:
+          type: video.VideoDataSet
+          filepath: data/01_raw/cars.mp4
 
-    Example using Python API:
+        motorbikes:
+          type: video.VideoDataSet
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.mp4
+          credentials: dev_s3
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.video import VideoDataSet
@@ -242,7 +241,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
         >>> video.save(SequenceVideo(imgs, fps=25))
 
 
-    Example creating a video from numpy frames using a generator and Python API:
+    Example creating a video from numpy frames using a generator and the Python API:
     ::
 
         >>> from kedro.extras.datasets.video.video_dataset import VideoDataSet, GeneratorVideo
@@ -260,7 +259,6 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
 
     """
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
@@ -352,7 +350,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
             writer.release()
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(filepath=self._filepath, protocol=self._protocol)
+        return {"filepath": self._filepath, "protocol": self._protocol}
 
     def _exists(self) -> bool:
         return self._fs.exists(self._filepath)

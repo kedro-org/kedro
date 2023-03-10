@@ -108,6 +108,10 @@ class ConfigLoader(AbstractConfigLoader):
         )
 
     def __getitem__(self, key):
+        # Allow bypassing of loading config from patterns if a key and value have been set
+        # explicitly on the ``ConfigLoader`` instance.
+        if key in self:
+            return super().__getitem__(key)
         return self.get(*self.config_patterns[key])
 
     def __repr__(self):  # pragma: no cover

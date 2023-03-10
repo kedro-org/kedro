@@ -30,7 +30,7 @@ class MyDataSet(AbstractDataSet):
         self.var = var
 
     def _describe(self):
-        return dict(var=self.var)
+        return {"var": self.var}
 
     def _load(self):
         pass  # pragma: no cover
@@ -67,6 +67,13 @@ class TestCoreFunctions:
             (
                 "abfss://bucket/file.txt",
                 {"protocol": "abfss", "path": "bucket/file.txt"},
+            ),
+            (
+                "abfss://mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
+                {
+                    "protocol": "abfss",
+                    "path": "mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
+                },
             ),
             (
                 "hdfs://namenode:8020/file.txt",

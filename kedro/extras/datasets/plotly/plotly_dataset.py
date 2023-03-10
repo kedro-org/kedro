@@ -26,23 +26,48 @@ class PlotlyDataSet(JSONDataSet):
     ``PlotlyDataSet`` is a convenience wrapper for ``plotly.JSONDataSet``. It generates
     the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
-    Example configuration for a PlotlyDataSet in the catalog:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> bar_plot:
-        >>>   type: plotly.PlotlyDataSet
-        >>>   filepath: data/08_reporting/bar_plot.json
-        >>>   plotly_args:
-        >>>     type: bar
-        >>>     fig:
-        >>>         x: features
-        >>>         y: importance
-        >>>         orientation: h
-        >>>     layout:
-        >>>         xaxis_title: x
-        >>>         yaxis_title: y
-        >>>         title: Title
+        bar_plot:
+          type: plotly.PlotlyDataSet
+          filepath: data/08_reporting/bar_plot.json
+          plotly_args:
+            type: bar
+            fig:
+              x: features
+              y: importance
+              orientation: h
+            layout:
+              xaxis_title: x
+              yaxis_title: y
+              title: Title
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    ::
+
+        >>> from kedro.extras.datasets.plotly import PlotlyDataSet
+        >>> import plotly.express as px
+        >>> import pandas as pd
+        >>>
+        >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=('x1', 'x2'))
+        >>>
+        >>> data_set = PlotlyDataSet(
+        >>>     filepath='scatter_plot.json',
+        >>>     plotly_args={
+        >>>         'type': 'scatter',
+        >>>         'fig': {'x': 'x1', 'y': 'x2'},
+        >>>     }
+        >>> )
+        >>> data_set.save(df_data)
+        >>> reloaded = data_set.load()
+        >>> assert px.scatter(df_data, x='x1', y='x2') == reloaded
+
     """
 
     # pylint: disable=too-many-arguments

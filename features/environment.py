@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import venv
 from pathlib import Path
-from typing import Set
+from typing import Set  # noqa
 
 from features.steps.sh_run import run
 
@@ -105,7 +105,7 @@ def _setup_minimal_env(context):
             "install",
             "-U",
             "pip>=21.2",
-            "setuptools>=38.0",
+            "setuptools>=65.5.1",
             "wheel",
         ],
         env=context.env,

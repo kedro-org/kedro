@@ -14,12 +14,13 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
+from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
 import importlib_metadata
+from omegaconf import OmegaConf
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
 
@@ -78,10 +79,10 @@ def forward_command(group, name=None, forward_help=False):
         func = command_with_verbosity(
             group,
             name=name,
-            context_settings=dict(
-                ignore_unknown_options=True,
-                help_option_names=[] if forward_help else ["-h", "--help"],
-            ),
+            context_settings={
+                "ignore_unknown_options": True,
+                "help_option_names": [] if forward_help else ["-h", "--help"],
+            },
         )(func)
         return func
 
@@ -293,9 +294,45 @@ def split_string(ctx, param, value):  # pylint: disable=unused-argument
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+# pylint: disable=unused-argument,missing-param-doc,missing-type-doc
+def split_node_names(ctx, param, to_split: str) -> List[str]:
+    """Split string by comma, ignoring commas enclosed by square parentheses.
+    This avoids splitting the string of nodes names on commas included in
+    default node names, which have the pattern
+    <function_name>([<input_name>,...]) -> [<output_name>,...])
+
+    Note:
+        - `to_split` will have such commas if and only if it includes a
+        default node name. User-defined node names cannot include commas
+        or square brackets.
+        - This function will no longer be necessary from Kedro 0.19.*,
+        in which default node names will no longer contain commas
+
+    Args:
+        to_split: the string to split safely
+
+    Returns:
+        A list containing the result of safe-splitting the string.
+    """
+    result = []
+    argument, match_state = "", 0
+    for char in to_split + ",":
+        if char == "[":
+            match_state += 1
+        elif char == "]":
+            match_state -= 1
+        if char == "," and match_state == 0 and argument:
+            argument = argument.strip()
+            result.append(argument)
+            argument = ""
+        else:
+            argument += char
+    return result
+
+
 def env_option(func_=None, **kwargs):
     """Add `--env` CLI option to a function."""
-    default_args = dict(type=str, default=None, help=ENV_HELP)
+    default_args = {"type": str, "default": None, "help": ENV_HELP}
     kwargs = {**default_args, **kwargs}
     opt = click.option("--env", "-e", **kwargs)
     return opt(func_) if func_ else opt
@@ -386,9 +423,12 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
     """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
-    load_versions_dict = {}
+    if param.name == "load_version":
+        _deprecate_options(ctx, param, value)
 
+    load_versions_dict = {}
     for load_version in value:
+        load_version = load_version.strip()
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:
             raise KedroCliError(
@@ -401,69 +441,69 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
     return load_versions_dict
 
 
-def _try_convert_to_numeric(value):
-    try:
-        value = float(value)
-    except ValueError:
-        return value
-    return int(value) if value.is_integer() else value
-
-
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
-    result = {}
+    dot_list = []
     for item in split_string(ctx, param, value):
-        item = item.split(":", 1)
-        if len(item) != 2:
+        equals_idx = item.find("=")
+        colon_idx = item.find(":")
+        if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
+            # For cases where key-value pair is separated by = and the value contains a colon
+            # which should not be replaced by =
+            pass
+        else:
+            item = item.replace(":", "=", 1)
+        items = item.split("=", 1)
+        if len(items) != 2:
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "
-                f"Item `{item[0]}` must contain "
-                f"a key and a value separated by `:`."
+                f"Item `{items[0]}` must contain "
+                f"a key and a value separated by `:` or `=`."
             )
-        key = item[0].strip()
+        key = items[0].strip()
         if not key:
             ctx.fail(
                 f"Invalid format of `{param.name}` option: Parameter key "
                 f"cannot be an empty string."
             )
-        value = item[1].strip()
-        result = _update_value_nested_dict(
-            result, _try_convert_to_numeric(value), key.split(".")
-        )
-    return result
+        dot_list.append(item)
+    conf = OmegaConf.from_dotlist(dot_list)
+    return OmegaConf.to_container(conf)
 
 
-def _update_value_nested_dict(
-    nested_dict: Dict[str, Any], value: Any, walking_path: List[str]
-) -> Dict:
-    """Update nested dict with value using walking_path as a parse tree to walk
-    down the nested dict.
-
-    Example:
-    ::
-        >>> nested_dict = {"foo": {"hello": "world", "bar": 1}}
-        >>> _update_value_nested_dict(nested_dict, value=2, walking_path=["foo", "bar"])
-        >>> print(nested_dict)
-        >>> {'foo': {'hello': 'world', 'bar': 2}}
-
-    Args:
-        nested_dict: dict to be updated
-        value: value to update the nested_dict with
-        walking_path: list of nested keys to use to walk down the nested_dict
-
-    Returns:
-        nested_dict updated with value at path `walking_path`
-    """
-    key = walking_path.pop(0)
-    if not walking_path:
-        nested_dict[key] = value
-        return nested_dict
-    nested_dict[key] = _update_value_nested_dict(
-        nested_dict.get(key, {}), value, walking_path
-    )
-    return nested_dict
+def _split_load_versions(ctx, param, value):
+    lv_tuple = _get_values_as_tuple([value])
+    return _reformat_load_versions(ctx, param, lv_tuple) if value else {}
 
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
+
+
+def _deprecate_options(ctx, param, value):
+    deprecated_flag = {
+        "node_names": "--node",
+        "tag": "--tag",
+        "load_version": "--load-version",
+    }
+    new_flag = {
+        "node_names": "--nodes",
+        "tag": "--tags",
+        "load_version": "--load-versions",
+    }
+    shorthand_flag = {
+        "node_names": "-n",
+        "tag": "-t",
+        "load_version": "-lv",
+    }
+    if value:
+        deprecation_message = (
+            f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
+            "and will not be available from Kedro 0.19.0. "
+            f"Use the flag '{new_flag[param.name]}' instead. Shorthand "
+            f"'{shorthand_flag[param.name]}' will be updated to use "
+            f"'{new_flag[param.name]}' in Kedro 0.19.0."
+        )
+        click.secho(deprecation_message, fg="red")
+    return value

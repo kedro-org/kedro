@@ -25,22 +25,22 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 
-    Example adding a catalog entry with the ``YAML API``:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> json_dataset:
-        >>>   type: json.JSONDataSet
-        >>>   filepath: data/01_raw/location.json
-        >>>
-        >>> cars:
-        >>>   type: json.JSONDataSet
-        >>>   filepath: gcs://your_bucket/cars.json
-        >>>   fs_args:
-        >>>     project: my-project
-        >>>   credentials: my_gcp_credentials
+        cars:
+          type: json.JSONDataSet
+          filepath: gcs://your_bucket/cars.json
+          fs_args:
+            project: my-project
+          credentials: my_gcp_credentials
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.json import JSONDataSet
@@ -121,12 +121,12 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
         self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)

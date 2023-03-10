@@ -29,21 +29,25 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
 
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
     .. code-block:: yaml
 
-        >>> tensorflow_model:
-        >>>   type: tensorflow.TensorFlowModelDataset
-        >>>   filepath: data/06_models/tensorflow_model.h5
-        >>>   load_args:
-        >>>     compile: False
-        >>>   save_args:
-        >>>     overwrite: True
-        >>>     include_optimizer: False
-        >>>   credentials: tf_creds
-        >>>
+        tensorflow_model:
+          type: tensorflow.TensorFlowModelDataset
+          filepath: data/06_models/tensorflow_model.h5
+          load_args:
+            compile: False
+          save_args:
+            overwrite: True
+            include_optimizer: False
+          credentials: tf_creds
 
-
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
@@ -170,13 +174,12 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
         return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _release(self) -> None:
         super()._release()

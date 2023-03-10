@@ -5,7 +5,8 @@ import pytest
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ThreadRunner
 from tests.runner.conftest import exception_fn, identity, return_none, sink, source
 
@@ -16,13 +17,13 @@ class TestValidThreadRunner:
         assert isinstance(data_set, MemoryDataSet)
 
     def test_thread_run(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
     def test_thread_run_with_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = ThreadRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -63,7 +64,7 @@ class TestMaxWorkers:
             wraps=ThreadPoolExecutor,
         )
 
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = ThreadRunner(max_workers=user_specified_number).run(
             fan_out_fan_in, catalog
         )
@@ -79,7 +80,7 @@ class TestMaxWorkers:
 
 class TestIsAsync:
     def test_thread_run(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         pattern = (
             "'ThreadRunner' doesn't support loading and saving the "
             "node inputs and outputs asynchronously with threads. "
@@ -93,13 +94,15 @@ class TestIsAsync:
 
 class TestInvalidThreadRunner:
     def test_task_exception(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(feed_dict=dict(A=42))
-        pipeline = Pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
+        catalog.add_feed_dict(feed_dict={"A": 42})
+        pipeline = modular_pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
             ThreadRunner().run(pipeline, catalog)
 
     def test_node_returning_none(self):
-        pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
+        pipeline = modular_pipeline(
+            [node(identity, "A", "B"), node(return_none, "B", "C")]
+        )
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         pattern = "Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DataSetError, match=pattern):
@@ -131,7 +134,7 @@ class TestThreadRunnerRelease:
     def test_dont_release_inputs_and_outputs(self):
         log = []
 
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
         catalog = DataCatalog(
@@ -150,7 +153,7 @@ class TestThreadRunnerRelease:
         runner = ThreadRunner()
         log = []
 
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [
                 node(source, None, "first"),
                 node(identity, "first", "second"),
@@ -177,7 +180,7 @@ class TestThreadRunnerRelease:
         runner = ThreadRunner()
         log = []
 
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [
                 node(source, None, "dataset"),
                 node(sink, "dataset", None, name="bob"),
@@ -197,7 +200,7 @@ class TestThreadRunnerRelease:
     def test_release_transcoded(self):
         log = []
 
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
         catalog = DataCatalog(

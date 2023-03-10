@@ -6,7 +6,8 @@ from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
 from kedro.io import DataCatalog, DataSetError
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
 
 
@@ -80,7 +81,7 @@ class TestDeltaTableDataSet:
 
         delta_ds = DeltaTableDataSet(filepath="")
         catalog = DataCatalog(data_sets={"delta_in": delta_ds})
-        pipeline = Pipeline([node(no_output, "delta_in", None)])
+        pipeline = modular_pipeline([node(no_output, "delta_in", None)])
         pattern = (
             r"The following data sets cannot be used with "
             r"multiprocessing: \['delta_in'\]"

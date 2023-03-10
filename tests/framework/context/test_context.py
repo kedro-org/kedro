@@ -1,5 +1,6 @@
 import configparser
 import json
+import logging
 import re
 import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
@@ -9,6 +10,7 @@ import pandas as pd
 import pytest
 import toml
 import yaml
+from omegaconf import OmegaConf
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
@@ -162,7 +164,6 @@ expected_message_middle = (
     '  --from-nodes "nodes3"'
 )
 
-
 expected_message_head = (
     "There are 4 nodes that have not run.\n"
     "You can resume the pipeline run by adding the following "
@@ -173,7 +174,7 @@ pyproject_toml_payload = {
     "tool": {
         "kedro": {
             "project_name": "mock_project_name",
-            "project_version": kedro_version,
+            "kedro_init_version": kedro_version,
             "package_name": MOCK_PACKAGE_NAME,
         }
     }
@@ -297,15 +298,20 @@ class TestKedroContext:
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             _ = dummy_context.catalog
 
-    def test_missing_credentials(self, dummy_context):
+    def test_missing_credentials(self, dummy_context, caplog):
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
         env_credentials = (
             dummy_context.project_path / "conf" / "local" / "credentials.yml"
         )
         env_credentials.unlink()
 
-        pattern = "Credentials not found in your Kedro project config."
-        with pytest.warns(UserWarning, match=re.escape(pattern)):
-            _ = dummy_context.catalog
+        _ = dummy_context.catalog
+
+        # check the logs
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_msg = "Credentials not found in your Kedro project config."
+        assert any(expected_msg in log_message for log_message in log_messages)
 
 
 @pytest.mark.parametrize(
@@ -477,6 +483,11 @@ def test_validate_layers_error(layers, conflicting_datasets, mocker):
             {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3}}},
             {"a": {"a.c": {"a.c.b": 4}}},
             {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3, "a.c.b": 4}}},
+        ),
+        (
+            {"a": OmegaConf.create({"b": 1}), "x": 3},
+            {"a": {"c": 2}},
+            {"a": {"b": 1, "c": 2}, "x": 3},
         ),
     ],
 )

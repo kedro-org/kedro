@@ -21,6 +21,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.node import Node, node
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ def config_dir(tmp_path, local_config):
     payload = {
         "tool": {
             "kedro": {
-                "project_version": kedro_version,
+                "kedro_init_version": kedro_version,
                 "project_name": "test hooks",
                 "package_name": "test_hooks",
             }
@@ -110,7 +111,7 @@ def dummy_dataframe() -> pd.DataFrame:
 
 @pytest.fixture
 def mock_pipeline() -> Pipeline:
-    return Pipeline(
+    return modular_pipeline(
         [
             node(identity_node, "cars", "planes", name="node1"),
             node(identity_node, "boats", "ships", name="node2"),
@@ -295,25 +296,30 @@ class LoggingHooks:
         )
 
     @hook_impl
-    def before_dataset_loaded(self, dataset_name: str) -> None:
-        logger.info("Before dataset loaded", extra={"dataset_name": dataset_name})
-
-    @hook_impl
-    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_loaded(self, dataset_name: str, node: Node) -> None:
         logger.info(
-            "After dataset loaded", extra={"dataset_name": dataset_name, "data": data}
+            "Before dataset loaded", extra={"dataset_name": dataset_name, "node": node}
         )
 
     @hook_impl
-    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def after_dataset_loaded(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "Before dataset saved", extra={"dataset_name": dataset_name, "data": data}
+            "After dataset loaded",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
     @hook_impl
-    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
+            "Before dataset saved",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
+        )
+
+    @hook_impl
+    def after_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
+        logger.info(
+            "After dataset saved",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
     @hook_impl

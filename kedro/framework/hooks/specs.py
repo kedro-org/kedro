@@ -240,41 +240,45 @@ class DatasetSpecs:
     """Namespace that defines all specifications for a dataset's lifecycle hooks."""
 
     @hook_spec
-    def before_dataset_loaded(self, dataset_name: str) -> None:
+    def before_dataset_loaded(self, dataset_name: str, node: Node) -> None:
         """Hook to be invoked before a dataset is loaded from the catalog.
 
         Args:
             dataset_name: name of the dataset to be loaded from the catalog.
+            node: The ``Node`` to run.
         """
         pass
 
     @hook_spec
-    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+    def after_dataset_loaded(self, dataset_name: str, data: Any, node: Node) -> None:
         """Hook to be invoked after a dataset is loaded from the catalog.
 
         Args:
             dataset_name: name of the dataset that was loaded from the catalog.
             data: the actual data that was loaded from the catalog.
+            node: The ``Node`` to run.
         """
         pass
 
     @hook_spec
-    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         """Hook to be invoked before a dataset is saved to the catalog.
 
         Args:
             dataset_name: name of the dataset to be saved to the catalog.
             data: the actual data to be saved to the catalog.
+            node: The ``Node`` that ran.
         """
         pass
 
     @hook_spec
-    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def after_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         """Hook to be invoked after a dataset is saved in the catalog.
 
         Args:
             dataset_name: name of the dataset that was saved to the catalog.
             data: the actual data that was saved to the catalog.
+            node: The ``Node`` that ran.
         """
         pass
 

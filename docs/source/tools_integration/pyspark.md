@@ -66,10 +66,10 @@ HOOKS = (SparkHooks(),)
 
 We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
-* [spark.DeltaTableDataSet](/kedro.extras.datasets.spark.DeltaTableDataSet)
-* [spark.SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)
-* [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)
-* [spark.SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
+* [spark.DeltaTableDataSet](/kedro.datasets.spark.DeltaTableDataSet)
+* [spark.SparkDataSet](/kedro.datasets.spark.SparkDataSet)
+* [spark.SparkJDBCDataSet](/kedro.datasets.spark.SparkJDBCDataSet)
+* [spark.SparkHiveDataSet](/kedro.datasets.spark.SparkHiveDataSet)
 
 The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
 
@@ -91,7 +91,7 @@ Or using the Python API:
 ```python
 import pyspark.sql
 from kedro.io import DataCatalog
-from kedro.extras.datasets.spark import SparkDataSet
+from kedro_datasets.spark import SparkDataSet
 
 spark_ds = SparkDataSet(
     filepath="s3a://your_bucket/data/01_raw/weather*",

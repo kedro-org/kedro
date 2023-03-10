@@ -1,6 +1,6 @@
 # Custom datasets
 
-[Kedro supports many datasets](/kedro.extras.datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
+[Kedro supports many datasets](/kedro.datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## Scenario
 
@@ -504,7 +504,7 @@ You may also want to consult the [in-depth documentation about the Versioning AP
 
 Kedro datasets should work with the [SequentialRunner](/kedro.runner.SequentialRunner) and the [ParallelRunner](/kedro.runner.ParallelRunner), so they must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
 
-There is one dataset that is an exception: [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet). The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that leverages Spark please consider the alternative [ThreadRunner](/kedro.runner.ThreadRunner).
+There is one dataset that is an exception: [SparkDataSet](/kedro.datasets.spark.SparkDataSet). The explanation for this exception is that [Apache Spark](https://spark.apache.org/) uses its own parallelism and therefore doesn't work with Kedro [ParallelRunner](/kedro.runner.ParallelRunner). For parallelism within a Kedro project that leverages Spark please consider the alternative [ThreadRunner](/kedro.runner.ThreadRunner).
 
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an iPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 
@@ -562,7 +562,7 @@ class ImageDataSet(AbstractVersionedDataSet):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)'s implementation.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro.datasets.spark.SparkDataSet)'s implementation.
 
 
 ## How to contribute a custom dataset implementation
@@ -592,7 +592,7 @@ kedro-plugins/kedro-datasets/kedro_datasets/image
 ```{note}
 There are two special considerations when contributing a dataset:
 
-   1. Add the dataset to `kedro.extras.datasets.rst` so it shows up in the API documentation.
+   1. Add the dataset to `kedro.datasets.rst` so it shows up in the API documentation.
    2. Add the dataset to `static/jsonschema/kedro-catalog-X.json` for IDE validation.
 
 ```

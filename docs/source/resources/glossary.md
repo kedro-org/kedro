@@ -48,7 +48,11 @@ In many typical Kedro projects, a single (“main”) pipeline increases in comp
 [Further information about modular pipelines](../nodes_and_pipelines/modular_pipelines.md)
 
 ## Node
-A Kedro node is a wrapper for a Python function that names the inputs and outputs of that function. It is the building block of a pipeline. Nodes can be linked when the output of one node is the input of another.
+A Kedro node is a wrapper for a pure Python function that names the inputs and outputs of that function.
+
+(A [pure function](https://realpython.com/python-functional-programming/#what-is-functional-programming) is a one whose output value follows solely from its input values, without any observable side effects such as changes to state or mutable data).
+
+Nodes are the building block of a pipeline. Nodes can be linked when the output of one node is the input of another.
 
 [Further information about nodes](../nodes_and_pipelines/nodes.md)
 
@@ -85,7 +89,7 @@ Runners are different execution mechanisms to run pipelines with the specified d
 ## Starters
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused. A Kedro starter is a [Cookiecutter template](https://cookiecutter.readthedocs.io/) that contains the boilerplate code for a Kedro project.
 
-[Further information about Kedro starters](../get_started/starters.md)
+[Further information about Kedro starters](../kedro_project_setup/starters.md)
 
 ## Tags
 You can apply tags to nodes or pipelines as a means of filtering which are executed.

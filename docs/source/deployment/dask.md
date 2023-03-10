@@ -10,7 +10,7 @@ Dask offers both a default, single-machine scheduler and a more sophisticated, d
 
 ## Prerequisites
 
-The only additional requirement, beyond what was already required by your Kedro pipeline, is to [install `dask.distributed`](http://distributed.dask.org/en/stable/install.html). To review the full installation instructions, including how to set up Python virtual environments, see our [Get Started guide](../get_started/prerequisites.md).
+The only additional requirement, beyond what was already required by your Kedro pipeline, is to [install `dask.distributed`](http://distributed.dask.org/en/stable/install.html). To review the full installation instructions, including how to set up Python virtual environments, see our [Get Started guide](../get_started/install.md#installation-prerequisites).
 
 ## How to distribute your Kedro pipeline using Dask
 
@@ -291,7 +291,7 @@ def _instantiate_runner(runner, is_async, project_context):
 You're now ready to trigger the run. Without any further configuration, the underlying Dask [`Client`](http://distributed.dask.org/en/stable/api.html#distributed.Client) creates a [`LocalCluster`](http://distributed.dask.org/en/stable/api.html#distributed.LocalCluster) in the background and connects to that:
 
 ```bash
-kedro run --runner kedro_tutorial.runner.DaskRunner
+kedro run --runner=kedro_tutorial.runner.DaskRunner
 ```
 
 #### Set up Dask and related configuration
@@ -321,7 +321,7 @@ The above code snippet assumes each worker is started from the root directory of
 You're once again ready to trigger the run. Execute the following command:
 
 ```bash
-kedro run --env dask --runner kedro_tutorial.runner.DaskRunner
+kedro run --env=dask --runner=kedro_tutorial.runner.DaskRunner
 ```
 
 You should start seeing tasks appearing on [Dask's diagnostics dashboard](http://127.0.0.1:8787/status):

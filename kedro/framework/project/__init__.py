@@ -144,8 +144,7 @@ def _load_data_wrapper(func):
 class _ProjectPipelines(MutableMapping):
     """A read-only lazy dictionary-like object to hold the project pipelines.
     On configure it will store the pipelines module.
-    On first data access, e.g. through __getitem__, it will load the registered pipelines and merge
-    them with pipelines defined from hooks.
+    On first data access, e.g. through __getitem__, it will load the registered pipelines
     """
 
     def __init__(self) -> None:
@@ -184,22 +183,15 @@ class _ProjectPipelines(MutableMapping):
         self._is_data_loaded = False
         self._content = {}
 
-    def keys(self):
-        self._load_data()
-        return self._content.keys()
-    def values(self):
-        self._load_data()
-        return self._content.values()
-    def items(self):
-        self._load_data()
-        return self._content.items()
-
     # Dict-like interface
     __getitem__ = _load_data_wrapper(operator.getitem)
     __setitem__ = _load_data_wrapper(operator.setitem)
     __delitem__ = _load_data_wrapper(operator.delitem)
     __iter__ = _load_data_wrapper(iter)
     __len__ = _load_data_wrapper(len)
+    keys = _load_data_wrapper(operator.methodcaller("keys"))
+    values = _load_data_wrapper(operator.methodcaller("values"))
+    items = _load_data_wrapper(operator.methodcaller("items"))
 
     # Presentation methods
     __repr__ = _load_data_wrapper(repr)

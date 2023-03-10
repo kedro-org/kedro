@@ -311,7 +311,7 @@ def safe_extract(tar, path):
         if not _is_within_directory(path, member_path):
             # pylint: disable=broad-exception-raised
             raise Exception("Failed to safely extract tar file.")
-    tar.extractall(path)
+    tar.extractall(path)  # nosec B202
 
 
 def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> None:

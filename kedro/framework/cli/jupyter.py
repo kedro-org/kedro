@@ -35,11 +35,6 @@ overwrite its contents."""
 class JupyterCommandGroup(click.Group):
     """A custom class for ordering the `kedro jupyter` command groups"""
 
-    def __init__(self, name=None, commands=None, **attrs):
-        super().__init__(name, commands, **attrs)
-        #: the registered subcommands by their exported names.
-        self.commands = commands or {}
-
     def list_commands(self, ctx):
         """List commands according to a custom order"""
         return ["setup", "notebook", "lab", "convert"]

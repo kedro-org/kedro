@@ -349,4 +349,3 @@ Variable names and arguments in Python may only contain alpha-numeric characters
 ```{note}
 If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
 ```
-    

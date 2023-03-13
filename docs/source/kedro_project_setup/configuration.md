@@ -580,37 +580,3 @@ Credentials configuration can then be used on its own or [fed into the `DataCata
 ### AWS credentials
 
 When you work with AWS credentials on datasets, you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
-
-## Configure `kedro run` arguments
-
-An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../development/commands_reference.md#run-the-project). However, instead of specifying all the command line options in a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
-
-```console
-$ kedro run --config=config.yml
-```
-
-where `config.yml` is formatted as below (for example):
-
-```yaml
-run:
-  tags: tag1, tag2, tag3
-  pipeline: pipeline1
-  parallel: true
-  nodes_names: node1, node2
-  env: env1
-```
-
-The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes=...`, but you have to use an underscore in the configuration file:
-
-```yaml
-run:
-  from_nodes: ...
-```
-
-This is because the configuration file gets parsed by [Click](https://click.palletsprojects.com/en/8.1.x/), a Python package to handle command line interfaces. Click passes the options defined in the configuration file to a Python function. The option names need to match the argument names in that function.
-
-Variable names and arguments in Python may only contain alpha-numeric characters and underscores, so it's not possible to have a dash in the option names when using the configuration file.
-
-```{note}
-If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
-```

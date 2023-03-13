@@ -63,7 +63,7 @@ This recursively scans for configuration files firstly in the `conf/base/` (`bas
 * *Either* of the following is true:
   * filename starts with `catalog`
   * file is located in a sub-directory whose name is prefixed with `catalog`
-* *And* file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties`
+* *And* file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties` for the `ConfigLoader` and `TemplatedConfigLoader` or `yaml`, `yml`, or `json` for the `OmegaConfigLoader`.
 
 This logic is specified by `config_patterns` in the [ConfigLoader](/kedro.config.ConfigLoader) and [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) classes. By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
 
@@ -107,7 +107,7 @@ Configuration information from files stored in `base` or `local` that match thes
 
 * If two configuration files have duplicate top-level keys but are in different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get` will not raise any errors - however, a `DEBUG` level log message will be emitted with information on the overridden keys.
 
-Any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors).
+When using the default `ConfigLoader` or the `TemplatedConfigLoader`, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors).
 
 ## Additional configuration environments
 
@@ -119,7 +119,35 @@ kedro run --env=test
 
 If no `env` option is specified, this will default to using the `local` environment to overwrite `conf/base`.
 
-If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<package_name>/settings.py` under the `CONTEXT_CLASS` key.
+If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise the configuration loader you're using to take `default_run_env="base"` in the constructor and then specify your custom config loader subclass in `src/<package_name>/settings.py` under the `CONFIG_LOADER_CLASS` key.
+Below is an example of such a custom class. If you're using the `TemplatedConfigLoader` or the `OmegaConfigLoader` you need to use either of those as the class you are subclassing.
+
+```python
+from kedro.config import ConfigLoader
+from typing import Any, Dict
+
+
+class CustomConfigLoader(ConfigLoader):
+    def __init__(
+        self,
+        conf_source: str,
+        env: str = None,
+        runtime_params: Dict[str, Any] = None,
+        default_run_env: str = "base",
+    ):
+        super().__init__(
+            conf_source=conf_source,
+            env=env,
+            runtime_params=runtime_params,
+            default_run_env=default_run_env,
+        )
+```
+
+```python
+from my_project.custom_configloader import CustomConfigLoader
+
+CONFIG_LOADER_CLASS = CustomConfigLoader
+```
 
 If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
 

@@ -305,6 +305,49 @@ data:
 
 Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
+### Custom template resolvers
+`Omegaconf` provides functionality to [register custom resolvers](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#resolvers) for templated values. You can leverage this functionality within Kedro by extending the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) class.
+The example below showcases how you could do this:
+
+```python
+from kedro.config import OmegaConfigLoader
+from omegaconf import OmegaConf
+from typing import Any, Dict
+
+
+class CustomOmegaConfigLoader(OmegaConfigLoader):
+    def __init__(
+        self,
+        conf_source: str,
+        env: str = None,
+        runtime_params: Dict[str, Any] = None,
+    ):
+        super().__init__(
+            conf_source=conf_source, env=env, runtime_params=runtime_params
+        )
+
+        # Register a customer resolver that adds up numbers.
+        self.register_custom_resolver("add", lambda *numbers: sum(numbers))
+
+    @staticmethod
+    def register_custom_resolver(name, function):
+        """
+        Helper method that checks if the resolver has already been registered and registers the
+        resolver if it's new. The check is needed, because omegaconf will throw an error
+        if a resolver with the same name is registered twice.
+        Alternatively, you can call `register_new_resolver()` with  `replace=True`.
+        """
+        if not OmegaConf.has_resolver(name):
+            OmegaConf.register_new_resolver(name, function)
+```
+
+You can then use the custom "add" resolver in your `parameters.yml` as follows:
+
+```yaml
+model_options:
+  test_size: ${add:1,2,3}
+  random_state: 3
+```
 
 ### Environment variables for credentials
 The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).

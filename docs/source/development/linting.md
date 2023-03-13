@@ -8,7 +8,7 @@ consistent.
 
 ## Set up linting tools
 There are a variety of linting tools available to use with your Kedro projects. This guide shows you how to use
-[`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8), and
+[`black`](https://github.com/psf/black), [`flake8`](https://github.com/PyCQA/flake8), and
 [`isort`](https://github.com/PyCQA/isort) to lint your Kedro projects.
 - **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
 check for styling inconsistencies and reformat your files in place.

@@ -36,7 +36,7 @@ Welcome to Kedro's documentation!
     :alt: Conda package version
 
 .. image:: https://readthedocs.org/projects/kedro/badge/?version=stable
-    :target: https://kedro.readthedocs.io/
+    :target: https://docs.kedro.org/
     :alt: Docs build status
 
 .. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack
@@ -203,6 +203,7 @@ Welcome to Kedro's documentation!
    contribution/backwards_compatibility
    contribution/documentation_contributor_guidelines
    contribution/technical_steering_committee
+   contribution/development_for_databricks
 
 API documentation
 =================

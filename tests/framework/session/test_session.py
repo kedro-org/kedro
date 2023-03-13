@@ -2,14 +2,17 @@ import logging
 import re
 import subprocess
 import textwrap
+from collections.abc import Mapping
 from pathlib import Path
 
 import pytest
 import toml
 import yaml
+from omegaconf import OmegaConf
 
 from kedro import __version__ as kedro_version
 from kedro.config import AbstractConfigLoader, ConfigLoader, OmegaConfigLoader
+from kedro.framework.cli.utils import _split_params
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     ValidationError,
@@ -920,3 +923,26 @@ def test_setup_logging_using_omega_config_loader_class(
     ).as_posix()
     actual_log_filepath = call_args["handlers"]["info_file_handler"]["filename"]
     assert actual_log_filepath == expected_log_filepath
+
+
+def get_all_values(mapping: Mapping):
+    for value in mapping.values():
+        yield value
+        if isinstance(value, Mapping):
+            yield from get_all_values(value)
+
+
+@pytest.mark.parametrize("params", ["a=1,b.c=2", "a=1,b=2,c=3", ""])
+def test_no_DictConfig_in_store(
+    params,
+    mock_package_name,
+    fake_project,
+):
+    extra_params = _split_params(None, None, params)
+    session = KedroSession.create(
+        mock_package_name, fake_project, extra_params=extra_params
+    )
+
+    assert not any(
+        OmegaConf.is_config(value) for value in get_all_values(session._store)
+    )

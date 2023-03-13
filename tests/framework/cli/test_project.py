@@ -317,6 +317,16 @@ class TestPackageCommand:
                     ],
                     cwd=str(fake_repo_path / "src"),
                 ),
+                mocker.call(
+                    [
+                        "tar",
+                        "--exclude=local/*.yml",
+                        "-czf",
+                        f"dist/conf-{fake_metadata.package_name}.tar.gz",
+                        f"--directory={fake_metadata.project_path}",
+                        "conf",
+                    ],
+                ),
             ]
         )
 

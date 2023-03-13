@@ -5,7 +5,7 @@ Feature: Jupyter targets in new project
     And I have run a non-interactive kedro new with starter "default"
 
   Scenario: Execute jupyter setup target
-    When I execute the kedro jupyter command "setup"
+    When I execute the kedro command "jupyter setup"
     Then I should get a message including "The kernel has been created successfully at"
 
   Scenario: Execute jupyter notebook target

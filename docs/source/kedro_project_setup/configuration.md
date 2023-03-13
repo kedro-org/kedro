@@ -396,7 +396,8 @@ Note that you can only use the resolver in `credentials.yml` and not in catalog 
 
 ### Load parameters
 
-Parameters project configuration can be loaded with the help of the `ConfigLoader` class:
+Parameters project configuration can be loaded with the help of any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
+The following examples will all make use of the default `ConfigLoader` class.
 
 ```python
 from kedro.config import ConfigLoader
@@ -537,7 +538,8 @@ You can use `add_feed_dict()` to inject any other entries into your `DataCatalog
 
 For security reasons, we strongly recommend you to *not* commit any credentials or other secrets to the Version Control System. Hence, by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
 
-Credentials configuration can be loaded the same way as any other project configuration using the `ConfigLoader` class:
+Credentials configuration can be loaded the same way as any other project configuration using any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
+The following examples will all make use of the default `ConfigLoader` class.
 
 ```python
 from kedro.config import ConfigLoader

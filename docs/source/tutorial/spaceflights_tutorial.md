@@ -2,7 +2,7 @@
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 
-The tutorial takes approximately **30 minutes** to complete.
+The tutorial takes approximately **30 minutes** to complete. You will work in the terminal and by inspecting project files in an IDE or text editor. There is no Jupyter notebook for the project.
 
 
 ## Scenario

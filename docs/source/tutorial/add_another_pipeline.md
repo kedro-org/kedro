@@ -8,20 +8,20 @@ This section explains the following:
 * (Optional) How to specify the way the pipeline nodes are run: sequentially or in parallel
 
 
-## Data science pipeline
+## Data science nodes
 
 The data science pipeline uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
-### Generate a new pipeline template
+The data science pipeline is made up of the following:
 
-Run the following command to create the `data_science` pipeline.
+* Two python files within `src/spaceflights/pipelines/data_science`
+    * `nodes.py` (for the node functions that form the data processing)
+    * `pipeline.py` (to build the pipeline)
+* A yaml file: `conf/base/parameters/data_science.yml` to define the parameters used when running the pipeline
+* `__init__.py` files in the required folders to ensure that Python can import the pipeline
 
 
-```bash
-kedro pipeline create data_science
-```
-
-Add the following code to the `src/spaceflights/pipelines/data_science/nodes.py` file:
+First, take a look at the functions for the data science nodes in `src/spaceflights/pipelines/data_science/nodes.py`:
 
 
 <details>
@@ -87,11 +87,12 @@ def evaluate_model(
 
 </details>
 
-### Configure the input parameters
+## Input parameter configuration
 
-You now need to add some parameters that are used by the `DataCatalog` when the pipeline executes.
+Parameters that are used by the `DataCatalog` when the pipeline executes are stored in `conf/base/parameters/data_science.yml`:
 
-Add the following to `conf/base/parameters/data_science.yml`:
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```yaml
 model_options:
@@ -107,14 +108,29 @@ model_options:
     - company_rating
     - review_scores_rating
 ```
+</details>
 
 Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
 
-More information about [parameters](../kedro_project_setup/configuration.md#parameters) is available in later documentation for advanced usage.
+More information about [parameters is available in the configuration documentation](../kedro_project_setup/configuration.md#parameters).
 
-### Assemble the data science pipeline
+## Model registration
 
-To create a modular pipeline for the price prediction model, replace the contents of `src/spaceflights/pipelines/data_science/pipeline.py` with the following:
+The following definition in `conf/base/catalog.yml` registers the dataset that saves the trained model:
+
+```yaml
+regressor:
+  type: pickle.PickleDataSet
+  filepath: data/06_models/regressor.pickle
+  versioned: true
+```
+
+By setting `versioned` to `true`, versioning is enabled for `regressor`. This means that the pickled output of the `regressor` is saved every time the pipeline runs, which stores the history of the models built using this pipeline. You can learn more in the [Versioning section](../data/kedro_io.md#versioning).
+
+
+## Data science pipeline
+
+The data science pipeline is defined in `src/spaceflights/pipelines/data_science/pipeline.py`:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -151,22 +167,12 @@ def create_pipeline(**kwargs) -> Pipeline:
 ```
 </details>
 
-### Register the dataset
 
-The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
+## Test the pipelines
 
-```yaml
-regressor:
-  type: pickle.PickleDataSet
-  filepath: data/06_models/regressor.pickle
-  versioned: true
-```
+When you created your project with `kedro new`, one of the files generated was `src/<project_name>/pipeline_registry.py` which constructs a `__default__` pipeline that includes every pipeline in the project.
 
-By setting `versioned` to `true`, versioning is enabled for `regressor`. This means that the pickled output of the `regressor` is saved every time the pipeline runs, which stores the history of the models built using this pipeline. You can learn more in the [Versioning section](../data/kedro_io.md#versioning).
-
-### Test the pipelines
-
-You can now instruct Kedro to run the default pipeline, which automatically executes the data processing and then data science pipeline in turn.
+This means that you do not need to manually instruct Kedro to run each pipeline, but can execute the default pipeline, which consists of the data processing and then data science pipeline in turn.
 
 ```bash
 kedro run
@@ -224,14 +230,12 @@ You should see output similar to the following:
 
 </details>
 
-As you can see we successfully ran both the `data_processing` and `data_science` pipelines, generating a model and evaluating it.
+As you can see, we successfully ran both the `data_processing` and `data_science` pipelines, generating a model and evaluating it.
 
 
-#### Slice a pipeline
+### Slice a pipeline
 
-When you created your project with `kedro new`, one of the files generated was `src/<project_name>/pipeline_registry.py` which constructs a `__default__` pipeline that includes every pipeline in the project. You do not need to manually instruct Kedro to run each pipeline.
-
-However, there may be occasions when you want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
+There may be occasions when you want to run just part of the default pipeline. For example, you could skip `data_processing` execution and run only the `data_science` pipeline to tune the hyperparameters of the price prediction model.
 
 You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` option. For example, to only run the pipeline named `data_science` (as labelled automatically in `register_pipelines`), execute the following command:
 
@@ -239,27 +243,24 @@ You can 'slice' the pipeline and specify just the portion you want to run by usi
 kedro run --pipeline=data_science
 ```
 
-``` {note}
-This will only work if you have persisted the input to the `data_science` pipeline, which is the `model_input_table`. This was an optional step in the previous chapter.
-```
-
 There are a range of options to run sections of the default pipeline as described in the [pipeline slicing documentation](../nodes_and_pipelines/slice_a_pipeline.md) and the ``kedro run`` [CLI documentation](../development/commands_reference.md#modifying-a-kedro-run).
 
-## Optional: modular pipelines
+## Modular pipelines
 
 In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create [modular pipelines](../nodes_and_pipelines/modular_pipelines.md), which are logically isolated and can be reused. You can instantiate a modular pipeline multiple times as a "template" pipeline that can run with different inputs/outputs/parameters.
 
-Modular pipelines are easier to develop, test and maintain. They are reusable within the same codebase but also portable across projects via [micro-packaging](../nodes_and_pipelines/micro_packaging.md). This is a scalable way to use Kedro, and will change how you think about Kedro pipelines.
+Modular pipelines are easier to develop, test and maintain. They are reusable within the same codebase but also portable across projects via [micro-packaging](../nodes_and_pipelines/micro_packaging.md) as a scalable way to use Kedro pipelines.
 
-### Extend the project with namespacing and a modular pipeline
-We first add some namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline` in order to test the model using different combinations of features.
-
-``` {note}
+### Optional: Extend the project with namespacing and a modular pipeline
 This is optional code so is **not** provided in the spaceflights starter. If you want to see this in action, you need to copy and paste the code as instructed.
-```
+
+First, add namespaces to the modelling component of the data science pipeline to instantiate it as a template with different parameters for an `active_modelling_pipeline` and a `candidate_modelling_pipeline` to test the model using different combinations of features.
 
 
 1. Update your catalog to add namespaces to the outputs of each instance. Replace the `regressor` key with the following two new dataset keys in the `conf/base/catalog.yml` file:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```yaml
 active_modelling_pipeline.regressor:
@@ -273,9 +274,12 @@ candidate_modelling_pipeline.regressor:
   versioned: true
 
 ```
+</details><br/>
 
 2. Update the parameters file for the data science pipeline in `conf/base/parameters/data_science.yml` to replace the existing contents for `model_options` with the following for the two instances of the template pipeline:
 
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```yaml
 active_modelling_pipeline:
@@ -302,7 +306,7 @@ candidate_modelling_pipeline:
         - crew
         - review_scores_rating
 ```
-
+</details><br/>
 
 3. Replace the code in `pipelines/data_science/pipeline.py` with the snippet below:
 
@@ -353,11 +357,9 @@ def create_pipeline(**kwargs) -> Pipeline:
     return ds_pipeline_1 + ds_pipeline_2
 ```
 
-</details>
+</details><br/>
 
-<br/>
-
-After executing `kedro run`, you should see output as follows:
+4. Execute `kedro run` from the terminal. You should see output as follows:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -435,9 +437,9 @@ After executing `kedro run`, you should see output as follows:
                     INFO     Completed 9 out of 9 tasks                                                            sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.
 ```
-</details>
+</details> <br />
 
-#### How it works: the modular `pipeline()` wrapper
+### How it works: the modular `pipeline()` wrapper
 
 The import you added to the code introduces the pipeline wrapper, which enables you to instantiate multiple instances of pipelines with static structure, but dynamic inputs/outputs/parameters:
 
@@ -458,6 +460,9 @@ The `pipeline()` wrapper method takes the following arguments:
 
 You can see this snippet as part of the code you added to the example:
 
+<details>
+<summary><b>Click to expand</b></summary>
+
 ```python
 ...
 
@@ -473,6 +478,7 @@ ds_pipeline_2 = pipeline(
     namespace="candidate_modelling_pipeline",
 )
 ```
+</details>
 
 We instantiate the template_pipeline twice but pass in different parameters. The `pipeline_instance` variable is the template pipeline, and `ds_pipeline_1` and `ds_pipeline_2` are the two separately parameterised instantiations.
 

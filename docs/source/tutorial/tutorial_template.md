@@ -1,16 +1,10 @@
 # Set up the spaceflights project
 
-In this section, we set up the project by following these steps:
-
-* Create a new project with `kedro new`
-* Install project dependencies with `pip install -r src/requirements.txt`
-* Configure the following in the `conf` folder:
-	* Credentials and any other sensitive information
-	* Logging
+In this section, we create a new project (with `kedro new` using the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights)) and install project dependencies (with `pip install -r src/requirements.txt`).
 
 ## Create a new project
 
-You first need to [set up Kedro](../get_started/install.md) if you have not already done so.
+[Set up Kedro](../get_started/install.md) if you have not already done so.
 
 ```{important}
 We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.6). To check the version installed, type `kedro -V` in your terminal window.
@@ -76,7 +70,7 @@ pip install -r src/requirements.txt
 
 ## Optional: configuration and logging
 
-You may want to store credentials such as usernames and passwords if they are needed for specific data sources used by the project.
+In your Kedro projects, you may want to store credentials such as usernames and passwords if they are needed for specific data sources.
 
 To do this, add them to `conf/local/credentials.yml` (some examples are included in that file for illustration).
 

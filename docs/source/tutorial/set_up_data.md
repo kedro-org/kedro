@@ -1,13 +1,8 @@
 # Set up the data
 
-In this section, we discuss data setup. The steps are as follows:
+In this section, we add datasets to the project's `data` folder and review how the datasets are registered in [Kedro's Data Catalog](../data/data_catalog.md), which is the registry of all data sources available for use by the project.
 
-* Add datasets to your `data` folder.
-* Register the datasets with the Kedro Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
-
-You can find further information about the [Data Catalog](../data/data_catalog.md) in specific documentation covering advanced usage.
-
-## Download datasets
+## Project datasets
 
 The spaceflights tutorial makes use of three fictional datasets of companies shuttling customers to the Moon and back. The data comes in two different formats: `.csv` and `.xlsx`:
 
@@ -15,13 +10,9 @@ The spaceflights tutorial makes use of three fictional datasets of companies shu
 * `reviews.csv` is a set of reviews from customers for categories, such as comfort and price
 * `shuttles.xlsx` is a set of attributes for spacecraft across the fleet, such as their engine type and passenger capacity
 
-Download and save the files to the `data/01_raw` folder of your project:
+The spaceflights starter has already added the datasets to the `data/01_raw` folder of your project.
 
-* [companies.csv](https://kedro-org.github.io/kedro/companies.csv)
-* [reviews.csv](https://kedro-org.github.io/kedro/reviews.csv)
-* [shuttles.xlsx](https://kedro-org.github.io/kedro/shuttles.xlsx)
-
-## Register the datasets
+## Dataset registration
 
 The following information about a dataset must be registered before Kedro can load it:
 
@@ -32,6 +23,9 @@ The following information about a dataset must be registered before Kedro can lo
 
 Open `conf/base/catalog.yml` for the spaceflights project to inspect the contents. The two `csv` datasets are registered as follows:
 
+<details>
+<summary><b>Click to expand</b></summary>
+
 ```yaml
 companies:
   type: pandas.CSVDataSet
@@ -41,8 +35,12 @@ reviews:
   type: pandas.CSVDataSet
   filepath: data/01_raw/reviews.csv
 ```
+</details> <br />
 
 Likewise for the `xlsx` dataset:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```yaml
 shuttles:
@@ -51,6 +49,7 @@ shuttles:
   load_args:
     engine: openpyxl # Use modern Excel engine (the default since Kedro 0.18.0)
 ```
+</details> <br />
 
 The additional line, `load_args`, is passed to the excel file read method (`pd.read_excel`) as a [keyword argument](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html). Although not specified here, the equivalent output is `save_args` and the value would be passed to [`pd.DataFrame.to_excel` method](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html).
 
@@ -72,6 +71,9 @@ companies.head()
 * The first command creates a variable (`companies`), which is of type `pandas.DataFrame` and loads the dataset (also named `companies` as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv`.
 * The `head` method from `pandas` displays the first five rows of the DataFrame.
 
+<details>
+<summary><b>Click to expand</b></summary>
+
 ```
 INFO     Loading data from 'companies' (CSVDataSet)
 Out[1]:
@@ -83,7 +85,7 @@ Out[1]:
 4  30342            NaN  Sao Tome and Principe                2.0             t
 
 ```
-
+</details> <br />
 
 Similarly, to test that the `xlsx` data is loaded as expected:
 
@@ -93,6 +95,9 @@ shuttles.head()
 ```
 
 You should see output such as the following:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```
 INFO     Loading data from 'shuttles' (ExcelDataSet)
@@ -105,6 +110,7 @@ Out[1]:
 4  10036  Sao Tome and Principe      Type V2      Plasma  ...                f                        f  $2,820.0      30342
 
 ```
+</details> <br />
 
 When you have finished, close `ipython` session with `exit()`.
 

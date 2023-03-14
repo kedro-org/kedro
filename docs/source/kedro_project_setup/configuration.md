@@ -123,6 +123,8 @@ If, for some reason, your project does not have any other environments apart fro
 Below is an example of such a custom class. If you're using the `TemplatedConfigLoader` or the `OmegaConfigLoader` you need to use either of those as the class you are subclassing.
 
 ```python
+# src/<package_name>/custom_config.py
+
 from kedro.config import ConfigLoader
 from typing import Any, Dict
 
@@ -147,7 +149,7 @@ And then you can import your `CustomConfigLoader` from `settings.py`:
 
 ```python
 # settings.py
-from my_project.custom_configloader import CustomConfigLoader
+from package_name.custom_configloader import CustomConfigLoader
 
 CONFIG_LOADER_CLASS = CustomConfigLoader
 ```

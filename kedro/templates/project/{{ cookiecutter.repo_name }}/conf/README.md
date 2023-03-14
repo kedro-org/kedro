@@ -21,6 +21,6 @@ WARNING: Please do not put access credentials in the base configuration folder.
 
 
 
+## Need help?
 
-## Find out more
-You can find out more about configuration from the [user guide documentation](https://kedro.readthedocs.io/en/stable/04_user_guide/03_configuration.html).
+[Find out more about configuration from the Kedro documentation](https://docs.kedro.org/en/stable/kedro_project_setup/configuration.html).

@@ -143,9 +143,19 @@ def _load_data_wrapper(func):
 
 class _ProjectPipelines(MutableMapping):
     """A read-only lazy dictionary-like object to hold the project pipelines.
-    On configure it will store the pipelines module.
-    On first data access, e.g. through __getitem__, it will load the registered pipelines and merge
-    them with pipelines defined from hooks.
+    When configured, it stores the pipelines module.
+    On first data access, e.g. through __getitem__, it will load the registered pipelines
+
+    This object is initialized lazily for a few reasons:
+
+    1. To support an unified way of importing via `from kedro.framework.project import pipelines`.
+       The pipelines object is initializedlazily since the framework doesn't have knowledge about
+       the project until `bootstrap_project` is run.
+    2. To speed up Kedro CLI performance. Loading the pipelines incurs overhead, as all related
+       modules need to be imported.
+    3. To ensure Kedro CLI remains functional when pipelines are broken. During development, broken
+       pipelines are common, but they shouldn't prevent other parts of Kedro CLI from functioning
+       properly (e.g. `kedro -h`).
     """
 
     def __init__(self) -> None:
@@ -190,6 +200,9 @@ class _ProjectPipelines(MutableMapping):
     __delitem__ = _load_data_wrapper(operator.delitem)
     __iter__ = _load_data_wrapper(iter)
     __len__ = _load_data_wrapper(len)
+    keys = _load_data_wrapper(operator.methodcaller("keys"))
+    values = _load_data_wrapper(operator.methodcaller("values"))
+    items = _load_data_wrapper(operator.methodcaller("items"))
 
     # Presentation methods
     __repr__ = _load_data_wrapper(repr)

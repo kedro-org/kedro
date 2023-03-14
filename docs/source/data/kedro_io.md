@@ -112,7 +112,7 @@ cars:
 
 The `DataCatalog` will create a versioned `CSVDataSet` called `cars`. The actual csv file location will look like `data/01_raw/company/car_data.csv/<version>/car_data.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`. Every time the `DataCatalog` is instantiated, it generates a new global save version, which is propagated to all versioned datasets it contains.
 
-The `catalog.yml` file only allows you to version your datasets, but does not allow you to choose which version to load or save. This is deliberate because we have chosen to separate the data catalog from any runtime configuration. If you need to pin a dataset version, you can either [specify the versions in a separate `yml` file and call it at runtime](../kedro_project_setup/configuration.md#configure-kedro-run-arguments) or [instantiate your versioned datasets using Code API and define a version parameter explicitly](#versioning-using-the-code-api).
+The `catalog.yml` file only allows you to version your datasets, but does not allow you to choose which version to load or save. This is deliberate because we have chosen to separate the data catalog from any runtime configuration. If you need to pin a dataset version, you can either [specify the versions in a separate `yml` file and call it at runtime](../nodes_and_pipelines/run_a_pipeline.md#configure-kedro-run-arguments) or [instantiate your versioned datasets using Code API and define a version parameter explicitly](#versioning-using-the-code-api).
 
 By default, the `DataCatalog` will load the latest version of the dataset. However, you can also specify an exact load version. In order to do that, pass a dictionary with exact load versions to `DataCatalog.from_config`:
 

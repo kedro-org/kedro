@@ -344,7 +344,7 @@ You can also combine these options together, so the following command runs all t
 kedro run --from-nodes=split --to-nodes=predict,report
 ```
 
-This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../kedro_project_setup/configuration.md#configure-kedro-run-arguments).
+This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../nodes_and_pipelines/run_a_pipeline.md#configure-kedro-run-arguments).
 
 A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../kedro_project_setup/configuration.md#parameters).
 

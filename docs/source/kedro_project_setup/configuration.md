@@ -143,7 +143,10 @@ class CustomConfigLoader(ConfigLoader):
         )
 ```
 
+And then you can import your `CustomConfigLoader` from `settings.py`:
+
 ```python
+# settings.py
 from my_project.custom_configloader import CustomConfigLoader
 
 CONFIG_LOADER_CLASS = CustomConfigLoader

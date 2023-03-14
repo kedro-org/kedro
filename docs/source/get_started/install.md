@@ -24,13 +24,15 @@ We strongly recommend [installing `conda` as your virtual environment manager](h
 [Read more about Python virtual environments](https://realpython.com/python-virtual-environments-a-primer/) or [watch an explainer video about them](https://youtu.be/YKfAwIItO7M).
 ```
 
-To create a new virtual environment called `kedro-environment` using `conda`:
+### How to create a new virtual environment using `conda`
+
+This is our recommended approach. From your terminal:
 
 ```bash
 conda create --name kedro-environment python=3.10 -y
 ```
 
-In this example, we use Python 3.10, but you can opt for a different version if you need it for your particular project.
+In this example, we use Python 3.10, and create a virtual environment called `kedro-environment`. You can opt for a different version of Python if you need it for your particular project, and name it anything you choose.
 
 The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory:
 
@@ -56,7 +58,7 @@ To exit `kedro-environment`:
 conda deactivate
 ```
 
-### Create a new Python virtual environment without using `conda`
+### How to create a new Python virtual environment without using `conda`
 
 Depending on your preferred Python installation, you can create virtual environments to work with Kedro using `venv` or `pipenv` instead of `conda`.
 
@@ -120,7 +122,6 @@ exit
 </details>
 
 
-
 ## Install Kedro using `pip`
 
 To install Kedro from the Python Package Index (PyPI):
@@ -145,6 +146,47 @@ You should see an ASCII art graphic and the Kedro version number. For example:
 
 If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org), or post a new query on the [Slack organisation](https://slack.kedro.org).
 
-## Install a development version
+## How to upgrade Kedro
 
-To try out a development version of Kedro direct from the [Kedro GitHub repository](https://github.com/kedro-org/kedro), follow [these steps](../faq/faq.md#how-can-i-use-a-development-version-of-kedro).
+The best way to safely upgrade is to check our [release notes](https://github.com/kedro-org/kedro/blob/main/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
+
+Once Kedro is installed, you can check your version as follows:
+
+```bash
+kedro --version
+```
+
+To later upgrade Kedro to a different version, simply run:
+
+```bash
+pip install kedro -U
+```
+
+When migrating an existing project to a newer Kedro version, make sure you also update the `project_version`:
+
+* For projects generated with versions of Kedro > 0.17.0, you'll do this in the `pyproject.toml` file from the project root directory.
+* If your project was generated with a version of Kedro <0.17.0, you will instead need to update the `ProjectContext`, which is found in `src/<package_name>/run.py`.
+
+
+## How to install a development version of Kedro
+
+This section explains how to try out a development version of Kedro direct from the [Kedro GitHub repository](https://github.com/kedro-org/kedro).
+
+```{important}
+The development version of Kedro is not guaranteed to be bug-free and/or compatible with any of the [stable versions](https://pypi.org/project/kedro/#history). We do not recommend that you use a development version of Kedro in any production systems. Please install and use with caution.
+```
+
+To try out latest, unreleased functionality from the `develop` branch of the Kedro GitHub repository, run the following installation command:
+
+```bash
+pip install git+https://github.com/kedro-org/kedro.git@develop
+```
+
+This will install Kedro from the `develop` branch of the GitHub repository, which is always the most up to date. This command will install Kedro from source, unlike `pip install kedro` which installs Kedro from PyPI.
+
+If you want to roll back to a stable version of Kedro, execute the following in your environment:
+
+```bash
+pip uninstall kedro -y
+pip install kedro
+```

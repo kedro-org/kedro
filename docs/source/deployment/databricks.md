@@ -94,7 +94,6 @@ You should get a similar output:
 ```console
 ...
 [08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
-                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
@@ -231,7 +230,7 @@ from kedro.framework.startup import bootstrap_project
 
 bootstrap_project(project_root)
 
-with KedroSession.create(project_path=project_root) as session:
+with KedroSession.create(project_path=project_root, env="databricks") as session:
     session.run()
 ```
 

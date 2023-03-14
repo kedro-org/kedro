@@ -60,22 +60,20 @@ You should get a similar output:
 ```console
 ...
 [08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
-                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 ### 3. Create a Databricks cluster
 
-If you already have an active cluster with runtime version `7.1`, you can skip this step. Here is [how to find clusters in your Databricks workspace](https://docs.databricks.com/clusters/clusters-manage.html).
+If you already have an active cluster with runtime version `7.3`, you can skip this step. Here is [how to find clusters in your Databricks workspace](https://docs.databricks.com/clusters/clusters-manage.html).
 
 Follow the [Databricks official guide to create a new cluster](https://docs.databricks.com/clusters/create-cluster.html). For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
-* Runtime: `7.1 (Scala 2.12, Spark 3.0.0)`
+* Runtime: `7.3 (Scala 2.12, Spark 3.0.1)`
 * Enable autoscaling: `off`
 * Terminate after 120 minutes of inactivity: `on`
-* Worker type: `m4.large`
+* Worker type: `Standard_DS3_v2`
 * Driver Type: `Same as worker`
 * Workers: `2`
-* Advanced options -> Instances -> # Volumes: `1`
 
 While your cluster is being provisioned, you can continue to the next step.
 
@@ -213,7 +211,7 @@ from kedro.framework.startup import bootstrap_project
 
 bootstrap_project(project_root)
 
-with KedroSession.create(project_path=project_root) as session:
+with KedroSession.create(project_path=project_root, env="databricks") as session:
     session.run()
 ```
 

@@ -123,6 +123,8 @@ If, for some reason, your project does not have any other environments apart fro
 Below is an example of such a custom class. If you're using the `TemplatedConfigLoader` or the `OmegaConfigLoader` you need to use either of those as the class you are subclassing.
 
 ```python
+# src/<package_name>/custom_config.py
+
 from kedro.config import ConfigLoader
 from typing import Any, Dict
 
@@ -143,8 +145,11 @@ class CustomConfigLoader(ConfigLoader):
         )
 ```
 
+And then you can import your `CustomConfigLoader` from `settings.py`:
+
 ```python
-from my_project.custom_configloader import CustomConfigLoader
+# settings.py
+from package_name.custom_configloader import CustomConfigLoader
 
 CONFIG_LOADER_CLASS = CustomConfigLoader
 ```
@@ -334,8 +339,8 @@ data:
 Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
 ### Custom template resolvers
-`Omegaconf` provides functionality to [register custom resolvers](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#resolvers) for templated values. You can leverage this functionality within Kedro by extending the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) class.
-The example below showcases how you could do this:
+`Omegaconf` provides functionality to [register custom resolvers](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#resolvers) for templated values. You can use these custom resolves within Kedro by extending the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) class.
+The example below illustrates this:
 
 ```python
 from kedro.config import OmegaConfigLoader
@@ -396,7 +401,7 @@ Note that you can only use the resolver in `credentials.yml` and not in catalog 
 
 ### Load parameters
 
-Parameters project configuration can be loaded with the help of any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
+Parameters project configuration can be loaded by any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 The following examples will all make use of the default `ConfigLoader` class.
 
 ```python

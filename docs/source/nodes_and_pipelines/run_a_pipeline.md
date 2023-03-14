@@ -318,7 +318,10 @@ except FileNotFoundError:
 
 ## Configure `kedro run` arguments
 
-An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../development/commands_reference.md#run-the-project). However, instead of specifying all the command line options in a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
+The [Kedro CLI documentation](../development/commands_reference.md#run-the-project) lists the available CLI options for `kedro run`. You can alternatively supply a configuration file that contains the arguments to `kedro run`.
+
+Here is an example file named `config.yml`, but you can choose any name for the file:
+
 
 ```console
 $ kedro run --config=config.yml

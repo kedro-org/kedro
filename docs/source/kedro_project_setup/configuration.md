@@ -125,10 +125,22 @@ When using the default `ConfigLoader` or the `TemplatedConfigLoader`, any top-le
 In addition to the two built-in local and base configuration environments, you can create your own. Your project loads `conf/base/` as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create, such as `conf/server/` or `conf/test/`. To use additional configuration environments, run the following command:
 
 ```bash
-kedro run --env=test
+kedro run --env=<your-environment>
 ```
 
 If no `env` option is specified, this will default to using the `local` environment to overwrite `conf/base`.
+
+If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
+
+```bash
+export KEDRO_ENV=<your-environment>
+```
+
+```{note}
+If you both specify the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
+```
+
+#### Using only one configuration environment
 
 If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise the configuration loader you're using to take `default_run_env="base"` in the constructor and then specify your custom config loader subclass in `src/<package_name>/settings.py` under the `CONFIG_LOADER_CLASS` key.
 Below is an example of such a custom class. If you're using the `TemplatedConfigLoader` or the `OmegaConfigLoader` you need to use either of those as the class you are subclassing.
@@ -158,16 +170,6 @@ class CustomConfigLoader(ConfigLoader):
 from my_project.custom_configloader import CustomConfigLoader
 
 CONFIG_LOADER_CLASS = CustomConfigLoader
-```
-
-If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
-
-```bash
-export KEDRO_ENV=test
-```
-
-```{note}
-If you both specify the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
 ```
 
 

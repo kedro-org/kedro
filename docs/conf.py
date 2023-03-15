@@ -221,6 +221,7 @@ linkcheck_ignore = [
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
+    "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password"
 ]
 
 # retry before render a link broken (fix for "too many requests")

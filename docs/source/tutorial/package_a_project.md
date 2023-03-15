@@ -107,9 +107,9 @@ kedro package
 
 Kedro builds the package into the `dist` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
 
-The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
+The resulting `.egg` and `.whl` packages only contain the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
 
-We recommend that you document the configuration required (parameters and catalog) in the local `README.md` file for any project recipients.
+The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside your `local` directory.
 
 ### Package recipients
 
@@ -129,6 +129,8 @@ python -m kedro_tutorial
 
 ```{note}
 The recipient will need to add a `conf` subfolder. They also need to add `data` and `logs` if the pipeline loads/saves local data or uses logging.
+Alternatively, they can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
+kedro run --conf-source <path-to-compressed-config>.tar.gz
 ```
 
 Once your project is installed, to run your pipelines from any Python code, simply import it:

@@ -30,6 +30,7 @@ Therefore, we do not recommend that you rely on the notebooks for running and/or
 
 First, let's create a new virtual environment and, within it, a new Kedro project:
 
+#### Using Conda
 ```bash
 # create fresh virtual env
 # NOTE: minor Python version of the environment
@@ -43,6 +44,27 @@ pip install "kedro~=0.18.6"
 kedro new --starter=pyspark-iris
 ```
 
+#### Using virtualenv
+```bash
+# create fresh virtual env
+# NOTE: minor Python version of the environment
+# must match the version on the Databricks cluster.
+# Make sure to install python and point to
+# the install location in the PYTHON_PATH variable
+export PYTHON_PATH=/usr/local/bin/python3.9
+pip install virtualenv
+# create a new virtual environment in .venv inside the project folder
+cd iris-databricks/
+virtualenv .venv -p $PYTHON_PATH
+source .venv/bin/activate
+
+# install Kedro and create a new project
+pip install "kedro~=0.18.6"
+# name your project Iris Databricks when prompted for it
+kedro new --starter=pyspark-iris
+cd ..
+```
+
 ### 2. Install dependencies and run locally
 
 Now, as the project has been successfully created, we should move into the project root directory, install project dependencies, and then start a local test run using [Spark local execution mode](https://stackoverflow.com/a/54064507/3364156), which means that all Spark jobs will be executed in a single JVM locally, rather than in a cluster. `pyspark-iris` Kedro starter used to generate the project already has all necessary configuration for it to work, you just need to have `pyspark` Python package installed, which is done for you by `pip install -r src/requirements.txt` command below.
@@ -52,6 +74,17 @@ Now, as the project has been successfully created, we should move into the proje
 cd iris-databricks/
 # compile and install the project dependencies, this may take a few minutes
 pip install -r src/requirements.txt
+# start a local run
+kedro run
+```
+
+You can also run the following to install the project as a whole to be able to import it and test locally.
+
+```bash
+# change the directory to the project root
+cd iris-databricks/
+# install the project and all its dependecies as defined in src/setup.py
+pip install src/
 # start a local run
 kedro run
 ```
@@ -69,9 +102,8 @@ You should get a similar output:
 If you already have an active cluster with runtime version `7.1`, you can skip this step. Here is [how to find clusters in your Databricks workspace](https://docs.databricks.com/clusters/clusters-manage.html).
 
 Follow the [Databricks official guide to create a new cluster](https://docs.databricks.com/clusters/create-cluster.html). For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
-* Runtime: `7.1 (Scala 2.12, Spark 3.0.0)`
+* Runtime: `11.3 (Scala 2.12, Spark 3.3.0)`
 * Enable autoscaling: `off`
-* Terminate after 120 minutes of inactivity: `on`
 * Worker type: `m4.large`
 * Driver Type: `Same as worker`
 * Workers: `2`
@@ -83,26 +115,26 @@ As a result you should have:
 * A Kedro project, which runs with the local version of PySpark library
 * A running Databricks cluster
 
-### 4. Create GitHub personal access token
+### 4. Create repository personal access token
 
-To synchronise the project between the local development environment and Databricks, we will use a private GitHub repository, which you will create in the next step. For authentication, we will need a GitHub personal access token, so go ahead and [create this token in your GitHub developer settings](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token).
+To synchronise the project between the local development environment and Databricks, we will use a private GitHub/Azure DevOps/GitLab repository, which you will create in the next step. For authentication, we will need a GitHub/Azure DevOps/GitLab personal access token, so go ahead and create this token in your [GitHub](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token), [Azure DevOps](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows), or [GitLab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) developer settings.
 
 ```{note}
 Make sure that `repo` scopes are enabled for your token.
 ```
 
-### 5. Create a GitHub repository
+### 5. Create a (private) repository
 
-Now you should [create a new repository in GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo) using the official guide. You can keep the repository private and you don't need to commit to it just yet.
+Now you should create a new repository in [GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo), [Azure DevOps](https://learn.microsoft.com/en-us/azure/devops/repos/git/create-new-repo), [GitLab](https://docs.gitlab.com/ee/user/project/index.html#create-a-project) using the official guides. You can keep the repository private and you don't need to commit to it just yet.
 
 To connect to the newly created repository you can use one of 2 options:
 
-* **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key configured for GitHub](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys)
-* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#4-create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
+* **SSH:** If you choose to connect with SSH, you will also need to configure the SSH connection to [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), [Azure DevOps](https://learn.microsoft.com/en-us/azure/devops/repos/git/use-ssh-keys-to-authenticate), or [GitLab](https://docs.gitlab.com/ee/user/ssh.html). You might already have an [existing SSH key configured for GitHub](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys).
+* **HTTPS:** If using HTTPS, you will be asked for your username and password when you push your first commit - please use your git username and your [personal access token](#4-create-github-personal-access-token) generated in the previous step as a password.
 
-### 6. Push Kedro project to the GitHub repository
+### 6. Push Kedro project to the repository
 
-We will use a CLI to push the newly created Kedro project to GitHub. First, you need to initialise Git in your project root directory:
+We will use a CLI to push the newly created Kedro project to your newly created repository. First, you need to initialise Git in your project root directory:
 
 ```bash
 # change the directory to the project root
@@ -120,14 +152,14 @@ git add .
 git commit -m "first commit"
 ```
 
-Finally, push the commit to GitHub:
+Finally, push the commit to your repository. Follow these instructions for getting the SSH/HTTPS URLs for your repository: [GitHub](https://docs.github.com/en/get-started/getting-started-with-git/about-remote-repositories), [Azure DevOps](https://learn.microsoft.com/en-us/azure/devops/repos/git/clone), or [GitLab](https://docs.gitlab.com/ee/gitlab-basics/start-using-git.html#clone-a-repository). Fill in the `<HTTPS URL>` or `<SSH URL>` according to your method of authenticating with git:
 
 ```bash
 # configure a new remote
 # for HTTPS run:
-git remote add origin https://github.com/<username>/<repo-name>.git
+git remote add origin <HTTPS URL>
 # or for SSH run:
-git remote add origin git@github.com:<username>/<repo-name>.git
+git remote add origin <SSH URL>
 
 # verify the new remote URL
 git remote -v
@@ -138,10 +170,10 @@ git push --set-upstream origin main
 
 ### 7. Configure the Databricks cluster
 
-The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure the [personal access token you generated in Step 2](#4-create-github-personal-access-token).
+The project has now been pushed to your private repository, and in order to pull it from the Databricks, we need to configure the [personal access token you generated in Step 2](#4-create-github-personal-access-token).
 
 [Log into your Databricks workspace](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) and then:
-1. Open `Clusters` tab
+1. Open `Repos` tab
 2. Click on your cluster name
 3. Press `Edit`
 4. Go to the `Advanced Options` and then `Spark`

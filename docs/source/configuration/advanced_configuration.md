@@ -1,9 +1,9 @@
 # Advanced configuration
 ...
 
-### Configuration patterns
-
-This logic is specified by `config_patterns` in the configuration loader classes. By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
+## Configuration patterns
+The configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.
+By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
 
 ```python
 config_patterns = {
@@ -14,7 +14,7 @@ config_patterns = {
 }
 ```
 
-## Specify the configuration loader class
+## Configuration loaders
 
 By default, Kedro is set up to use the [ConfigLoader](/kedro.config.ConfigLoader) class. Kedro also provides two additional configuration loaders with more advanced functionality: the [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) and the [OmegaConfigLoader](/kedro.config.OmegaConfigLoader).
 Each of these classes are alternatives for the default `ConfigLoader` and have different features. The following sections will describe each of these classes and their specific functionality in more detail.
@@ -174,8 +174,50 @@ from kedro.config import OmegaConfigLoader  # new import
 CONFIG_LOADER_CLASS = OmegaConfigLoader
 ```
 
-#### Templating for parameters
-Templating or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation), as it's called in `OmegaConf`, for parameters works out of the box if one condition is met: the name of the file that contains the template values must follow the same config pattern specified for parameters.
+## Advanced configuration how-tos
+
+### How to change which configuration files are loaded?
+If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
+For example, if your `parameters` files are using a `params` naming convention instead of `parameters` (e.g. `params.yml`) you need to update `CONFIG_LOADER_ARGS` as follows:
+
+```python
+CONFIG_LOADER_ARGS = {
+    "config_patterns": {
+        "parameters": ["params*", "params*/**", "**/params*"],
+    }
+}
+```
+
+By changing this setting, the default behaviour for loading parameters will be replaced, while the other configuration patterns will remain in their default state.
+
+### How to make sure non default configuration files get loaded?
+You can add configuration patterns to match files other than `parameters`, `credentials`, `logging`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
+For example, if you want to load Spark configuration files you need to update `CONFIG_LOADER_ARGS` as follows:
+
+```python
+CONFIG_LOADER_ARGS = {
+    "config_patterns": {
+        "spark": ["spark*/"],
+    }
+}
+```
+
+### How to bypass the configuration loading rules?
+You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, credentials, and logging) as well as additional configuration.
+
+```python
+from kedro.config import ConfigLoader
+from kedro.framework.project import settings
+
+conf_path = str(project_path / settings.CONF_SOURCE)
+conf_loader = ConfigLoader(conf_source=conf_path)
+
+# Bypass configuration patterns by setting the key and values directly on the config loader instance.
+conf_loader["catalog"] = {"catalog_config": "something_new"}
+```
+
+### How to do templating with the `OmegaConfigLoader`?
+Templating or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation), as it's called in `OmegaConf`, for parameters works out of the box if the template values are within the parameter files or the name of the file that contains the template values follows the same config pattern specified for parameters.
 By default, the config pattern for parameters is: `["parameters*", "parameters*/**", "**/parameters*"]`.
 Suppose you have one parameters file called `parameters.yml` containing parameters with `omegaconf` placeholders like this:
 
@@ -193,7 +235,11 @@ data:
 
 Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
-#### Custom template resolvers
+```{note}
+Templating currently only works for parameter files, but not for catalog files.
+```
+
+### How to use custom resolvers in the `OmegaConfigLoader`?
 `Omegaconf` provides functionality to [register custom resolvers](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#resolvers) for templated values. You can use these custom resolves within Kedro by extending the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) class.
 The example below illustrates this:
 
@@ -245,9 +291,17 @@ model_options:
   random_state: 3
 ```
 
-#### Environment variables for credentials
-The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
-This is an example of how you can access credentials from environment variables in `credentials.yml`:
+### How to load credentials through environment variables?
+The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `OmegaConfigLoader` and the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
+To use the `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
+
+```python
+from kedro.config import OmegaConfigLoader  # new import
+
+CONFIG_LOADER_CLASS = OmegaConfigLoader
+```
+
+Now you can use the `oc.env` resolver to access credentials from environment variables in your `credentials.yml`, as demonstrated in the following example:
 
 ```yaml
 dev_s3:
@@ -258,35 +312,4 @@ dev_s3:
 
 ```{note}
 Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials.
-```
-
-## Advanced configuration how-tos
-
-### How to change what configuration files are loaded?
-
-### How to make sure non default configuration files get loaded?
-The configuration patterns can be changed by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md). You can change the default patterns as well as add additional ones, for example, for Spark configuration files.
-This example shows how to load `parameters` if your files are using a `params` naming convention instead of `parameters` and how to add patterns to load Spark configuration:
-
-```python
-CONFIG_LOADER_ARGS = {
-    "config_patterns": {
-        "spark": ["spark*/"],
-        "parameters": ["params*", "params*/**", "**/params*"],
-    }
-}
-```
-
-### How to bypass the configuration loading rules?
-You can also bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, credentials, and logging) as well as additional configuration.
-
-```python
-from kedro.config import ConfigLoader
-from kedro.framework.project import settings
-
-conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
-
-# Bypass configuration patterns by setting the key and values directly on the config loader instance.
-conf_loader["catalog"] = {"catalog_config": "something_new"}
 ```

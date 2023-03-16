@@ -179,5 +179,5 @@ The `package_name` keyword argument of KedroSession.create() currently does not 
 ```
 
 ```{note}
-The main() method currently returns an exit code, which may not be suitable for downstream processes. If you need to run your Kedro project interactively and use the results, consider using the KedroSession approach as shown above.
+The entry-point of a packaged project (the `main()` method  of `src/<project_name>/__main__.py`) currently returns an exit code, which stops downstream processes from using its output. If you need to run your Kedro project interactively and use the results, consider using the KedroSession approach as shown above.
 ```

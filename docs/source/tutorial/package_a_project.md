@@ -152,3 +152,32 @@ There are various methods to deploy packaged pipelines via Kedro plugins:
 * [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
 * [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.
 * The [Deployment guide](../deployment/deployment_guide) touches on other deployment targets such as AWS Batch and Prefect, and there is a [range of third-party plugins for deployment](extend_kedro/plugins.md#community-developed-plugins).
+
+## Running a packaged project interactively
+
+To run a Kedro project within a session, use the following code:
+
+```python
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import configure_project
+
+project_root = "<project_root>"
+configure_project(project_root)
+
+with KedroSession.create("<project_name>", project_root) as session:
+    session.run()
+```
+
+Replace <project_name> with your project's name and <project_root> with the path to your project directory.
+
+```{note}
+When running a packaged Kedro project interactively, it is important to use the configure_project() function instead of bootstrap_project(). The latter is meant only for configuring projects that haven't been packaged.
+```
+
+```{note}
+The `package_name` keyword argument of KedroSession.create() currently does not have any effect and can be confusing. This argument will be removed in Kedro version 0.19, which is a breaking change. For now, you can safely ignore this argument.
+```
+
+```{note}
+The main() method currently returns an exit code, which may not be suitable for downstream processes. If you need to run your Kedro project interactively and use the results, consider using the KedroSession approach as shown above.
+```

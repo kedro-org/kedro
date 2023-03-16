@@ -168,16 +168,16 @@ with KedroSession.create("<project_name>", project_root) as session:
     session.run()
 ```
 
-Replace <project_name> with your project's name and <project_root> with the path to your project directory.
+Replace `<project_name>` with your project's name and `<project_root>` with the path to your project directory.
 
 ```{note}
-When running a packaged Kedro project interactively, it is important to use the configure_project() function instead of bootstrap_project(). The latter is meant only for configuring projects that haven't been packaged.
+When running a packaged Kedro project interactively, it is important to use the `configure_project()` function instead of `bootstrap_project()`. The latter is meant only for configuring projects that haven't been packaged.
 ```
 
 ```{note}
-The `package_name` keyword argument of KedroSession.create() currently does not have any effect and can be confusing. This argument will be removed in Kedro version 0.19, which is a breaking change. For now, you can safely ignore this argument.
+The `package_name` keyword argument of `KedroSession.create()` currently does not have any effect and can be confusing. This argument will be removed in Kedro version 0.19, which is a breaking change. For now, you can safely ignore this argument.
 ```
 
 ```{note}
-The entry-point of a packaged project (the `main()` method  of `src/<project_name>/__main__.py`) currently returns an exit code, which stops downstream processes from using its output. If you need to run your Kedro project interactively and use the results, consider using the KedroSession approach as shown above.
+The entry-point of a packaged project (the `main()` method  of `src/<project_name>/__main__.py`) currently returns an exit code, which stops downstream processes from using its output. If you need to run your Kedro project interactively and use the results, consider using the `KedroSession` approach as shown above.
 ```

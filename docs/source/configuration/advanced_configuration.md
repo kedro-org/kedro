@@ -1,3 +1,6 @@
+# Advanced configuration
+...
+
 ### Configuration patterns
 
 This logic is specified by `config_patterns` in the configuration loader classes. By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
@@ -10,92 +13,6 @@ config_patterns = {
     "logging": ["logging*", "logging*/**", "**/logging*"],
 }
 ```
-
-The configuration patterns can be changed by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md). You can change the default patterns as well as add additional ones, for example, for Spark configuration files.
-This example shows how to load `parameters` if your files are using a `params` naming convention instead of `parameters` and how to add patterns to load Spark configuration:
-
-```python
-CONFIG_LOADER_ARGS = {
-    "config_patterns": {
-        "spark": ["spark*/"],
-        "parameters": ["params*", "params*/**", "**/params*"],
-    }
-}
-```
-
-You can also bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, credentials, and logging) as well as additional configuration.
-
-```python
-from kedro.config import ConfigLoader
-from kedro.framework.project import settings
-
-conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
-
-# Bypass configuration patterns by setting the key and values directly on the config loader instance.
-conf_loader["catalog"] = {"catalog_config": "something_new"}
-```
-
-Configuration information from files stored in `base` or `local` that match these rules is merged at runtime and returned as a config dictionary:
-
-* If any two configuration files located inside the same environment path (`conf/base/` or `conf/local/` in this example) contain the same top-level key, `load_config` will raise a `ValueError` indicating that duplicates are not allowed.
-
-* If two configuration files have duplicate top-level keys but are in different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get` will not raise any errors - however, a `DEBUG` level log message will be emitted with information on the overridden keys.
-
-When using the default `ConfigLoader` or the `TemplatedConfigLoader`, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors).
-
-### Additional configuration environments
-
-In addition to the two built-in local and base configuration environments, you can create your own. Your project loads `conf/base/` as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create, such as `conf/server/` or `conf/test/`. To use additional configuration environments, run the following command:
-
-```bash
-kedro run --env=<your-environment>
-```
-
-If no `env` option is specified, this will default to using the `local` environment to overwrite `conf/base`.
-
-If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
-
-```bash
-export KEDRO_ENV=<your-environment>
-```
-
-```{note}
-If you both specify the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
-```
-
-
-#### Using only one configuration environment
-
-If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise the configuration loader you're using to take `env="base"` in the constructor and then specify your custom config loader subclass in `src/<package_name>/settings.py` under the `CONFIG_LOADER_CLASS` key.
-Below is an example of such a custom class. If you're using the `TemplatedConfigLoader` or the `OmegaConfigLoader` you need to use either of those as the class you are subclassing.
-
-```python
-# src/<package_name>/custom_config.py
-
-from kedro.config import ConfigLoader
-from typing import Any, Dict
-
-
-class CustomConfigLoader(ConfigLoader):
-    def __init__(
-            self,
-            conf_source: str,
-            env: str = None,
-            runtime_params: Dict[str, Any] = None,
-    ):
-        super().__init__(conf_source=conf_source, env="base", runtime_params=runtime_params)
-```
-
-And then you can import your `CustomConfigLoader` from `settings.py`:
-
-```python
-# settings.py
-from package_name.custom_configloader import CustomConfigLoader
-
-CONFIG_LOADER_CLASS = CustomConfigLoader
-```
-
 
 ## Specify the configuration loader class
 
@@ -341,4 +258,35 @@ dev_s3:
 
 ```{note}
 Note that you can only use the resolver in `credentials.yml` and not in catalog or parameter files. This is because we do not encourage the usage of environment variables for anything other than credentials.
+```
+
+## Advanced configuration how-tos
+
+### How to change what configuration files are loaded?
+
+### How to make sure non default configuration files get loaded?
+The configuration patterns can be changed by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md). You can change the default patterns as well as add additional ones, for example, for Spark configuration files.
+This example shows how to load `parameters` if your files are using a `params` naming convention instead of `parameters` and how to add patterns to load Spark configuration:
+
+```python
+CONFIG_LOADER_ARGS = {
+    "config_patterns": {
+        "spark": ["spark*/"],
+        "parameters": ["params*", "params*/**", "**/params*"],
+    }
+}
+```
+
+### How to bypass the configuration loading rules?
+You can also bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, credentials, and logging) as well as additional configuration.
+
+```python
+from kedro.config import ConfigLoader
+from kedro.framework.project import settings
+
+conf_path = str(project_path / settings.CONF_SOURCE)
+conf_loader = ConfigLoader(conf_source=conf_path)
+
+# Bypass configuration patterns by setting the key and values directly on the config loader instance.
+conf_loader["catalog"] = {"catalog_config": "something_new"}
 ```

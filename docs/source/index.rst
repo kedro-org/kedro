@@ -105,6 +105,13 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Configuration
+
+   configuration/configuration_basics
+   configuration/advanced_configuration
+
+.. toctree::
+   :maxdepth: 2
    :caption: Data Catalog
 
    data/data_catalog

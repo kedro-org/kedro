@@ -1,9 +1,11 @@
 # Project settings
 
+## Application settings
+
 A Kedro project's `settings.py` file contains the application settings for the project, including registration of Hooks and library components. This page explains how settings work, and which settings are available.
 
 ```{note}
-Application settings is distinct from [run time configuration](configuration.md), which is stored in the `conf` folder and can vary by configuration environment, and [pyproject.toml](../faq/architecture_overview.md#kedro-project) , which provides project metadata and build configuration.
+Application settings is distinct from [run time configuration](configuration.md), which is stored in the `conf` folder and can vary by configuration environment, and [pyproject.toml](#settings-in-pyproject.toml) , which provides project metadata and build configuration.
 ```
 
 By default, all code in `settings.py` is commented out. When settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.
@@ -19,3 +21,21 @@ By default, all code in `settings.py` is commented out. When settings are not su
 | `CONFIG_LOADER_CLASS`       | `kedro.config.ConfigLoader`                       | Customise how project configuration is handled.                                                                    |
 | `CONFIG_LOADER_ARGS`        | `dict()`                                          | Keyword arguments for the `CONFIG_LOADER_CLASS` constructor.                                                       |
 | `DATA_CATALOG_CLASS`        | `kedro.io.DataCatalog`                            | Customise how the [Data Catalog](../data/data_catalog.md) is handled.                                              |
+
+## Settings in `pyproject.toml`
+The `pyproject.toml` file is defined in [PEP 518](https://peps.python.org/pep-0518/) as a configuration file to store build system requirements for Python projects.
+The `pyproject.toml` file in your project contains the metadata for your project and other tool specific configurations.
+Every Kedro project comes with a default pre-populated `pyproject.toml` file in your project root directory with the following keys specified under the `[tool.kedro]` section :
+```toml
+[tool.kedro]
+package_name = <package_name>
+project_name = <project_name>
+kedro_init_version = <kedro_version>
+```
+
+The `package_name` which should contain a [valid Python package name](https://peps.python.org/pep-0423/) for your project and `project_name` which should be a human-readable name for your project are mandatory keys.
+`kedro_init_version` specifies the version of Kedro the project was created with. When you upgrade to a newer Kedro version,
+this value should also be updated. <br>
+You can also use `pyproject.toml` to specify settings for functionalities such as [micro-packaging](../nodes_and_pipelines/micro_packaging.md)
+Additionally, you can also store the settings for the other tools you've used in your project, such as [`pytest` for automated testing](../development/automated_testing.md).
+You can consult the respective documentation of the tools you have used to check how you can configure the settings using the `pyproject.toml` file for your project. <br>

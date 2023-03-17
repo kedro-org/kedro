@@ -105,7 +105,7 @@ To package your project, run the following in your project root directory:
 kedro package
 ```
 
-Kedro builds the package into the `dist` folder of your project as a `.whl` file, which is a [Python packaging format for binary distribution](https://packaging.python.org/).
+Kedro builds the package into the `dist` folder of your project as a `.whl` file, which is a [Python packaging format for binary distribution](https://packaging.python.org/en/latest/overview/#python-binary-distributions).
 
 The resulting `.whl` packages only contain the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
 

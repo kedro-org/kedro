@@ -57,14 +57,14 @@ Create a new project using the spaceflights starter. From the terminal run:
 kedro new --starter=spaceflights
 ```
 
-Feel free to name your project as you like, but this guide assumes the project is named **Kedro Experiment Tracking Tutorial**.
+Feel free to name your project as you like, but this guide assumes the project is named `Spaceflights`.
 
 ### Install the dependencies for the project
 
 Once you have created the project, to run project-specific Kedro commands, you must navigate to the directory in which it has been created:
 
 ```bash
-cd kedro-experiment-tracking-tutorial
+cd spaceflights
 ```
 Install the project's dependencies:
 
@@ -76,7 +76,7 @@ pip install -r src/requirements.txt
 
 In the domain of experiment tracking, each pipeline run is considered a session. A session store records all related metadata for each pipeline run, from logged metrics to other run-related data such as timestamp, `git` username and branch. The session store is a [SQLite](https://www.sqlite.org/index.html) database that is generated during your first pipeline run after it has been set up in your project.
 
-To set up the session store, go to the `src/kedro-experiment-tracking-tutorial/settings.py` file and add the following:
+To set up the session store, go to the `src/spaceflights/settings.py` file and add the following:
 
 ```python
 from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore
@@ -114,7 +114,7 @@ companies_columns:
 
 Now that you have set up the tracking datasets to log experiment tracking data, next ensure that the data is returned from your nodes.
 
-Set up the data to be logged for the metrics dataset - under `nodes.py` of your `data_science` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_science/nodes.py`), add three different metrics to your `evaluate_model` function to log `r2_score`, `mae` and `me` and return these 3 metrics as key-value pairs.
+Set up the data to be logged for the metrics dataset - under `nodes.py` of your `data_science` pipeline (`src/spaceflights/pipelines/data_science/nodes.py`), add three different metrics to your `evaluate_model` function to log `r2_score`, `mae` and `me` and return these 3 metrics as key-value pairs.
 
 The new `evaluate_model` function should look like this:
 
@@ -141,7 +141,7 @@ def evaluate_model(
     return {"r2_score": score, "mae": mae, "max_error": me}
 ```
 
-Next, ensure that the dataset is also specified as an output of your `evaluate_model` node. In the `src/kedro-experiment-tracking-tutorial/pipelines/data_science/pipeline.py` file, specify the `output` of your `evaluate_model` to be the `metrics` dataset. Note that the output dataset must exactly match the name of the tracking dataset specified in the catalog file.
+Next, ensure that the dataset is also specified as an output of your `evaluate_model` node. In the `src/spaceflights/pipelines/data_science/pipeline.py` file, specify the `output` of your `evaluate_model` to be the `metrics` dataset. Note that the output dataset must exactly match the name of the tracking dataset specified in the catalog file.
 
 The node of the `evaluate_model` on the pipeline should look like this:
 
@@ -154,7 +154,7 @@ node(
 )
 ```
 
-Repeat the same steps to set up the `companies_column` dataset. For this dataset, log the column that contains the list of companies as outlined in the `companies.csv` file under the `data/01_raw` directory. Modify the `preprocess_companies` node under the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`) to return the data under a key-value pair, as shown below:
+Repeat the same steps to set up the `companies_column` dataset. For this dataset, log the column that contains the list of companies as outlined in the `companies.csv` file under the `data/01_raw` directory. Modify the `preprocess_companies` node under the `data_processing` pipeline (`src/spaceflights/pipelines/data_processing/nodes.py`) to return the data under a key-value pair, as shown below:
 
 ```python
 from typing import Tuple, Dict
@@ -174,7 +174,7 @@ def preprocess_companies(companies: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
     return companies, {"columns": companies.columns.tolist(), "data_type": "companies"}
 ```
 
-Again, you must ensure that the dataset is also specified as an output on the `pipeline.py` file under the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/pipeline.py`), as follows:
+Again, you must ensure that the dataset is also specified as an output on the `pipeline.py` file under the `data_processing` pipeline (`src/spaceflights/pipelines/data_processing/pipeline.py`), as follows:
 
 ```python
 node(
@@ -244,7 +244,7 @@ pip install -r src/requirements.txt
 
 ### Add a plotting node
 
-Add a new node to the `data_processing` nodes (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/nodes.py`):
+Add a new node to the `data_processing` nodes (`src/spaceflights/pipelines/data_processing/nodes.py`):
 
 ```python
 import matplotlib.pyplot as plt
@@ -263,7 +263,7 @@ def create_confusion_matrix(companies: pd.DataFrame):
     return plt
 ```
 
-And now add this node to the `data_processing` pipeline (`src/kedro-experiment-tracking-tutorial/pipelines/data_processing/pipeline.py`):
+And now add this node to the `data_processing` pipeline (`src/spaceflights/pipelines/data_processing/pipeline.py`):
 
 ```python
 from .nodes import create_confusion_matrix

@@ -3,7 +3,7 @@
 ## Summary
 
 * Kedro can be used on Windows, macOS or Linux.
-* Installation prerequisites include Python 3.7+, a virtual environment manager like `conda`, and `git`.
+* Installation prerequisites include a virtual environment manager like `conda`, Python 3.7+, and `git`.
 * You should install Kedro using `pip install kedro`.
 
 If you encounter any problems as you set up Kedro, you can ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or [search the archives for a solution](https://linen-discord.kedro.org).

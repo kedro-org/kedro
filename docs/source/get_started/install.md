@@ -12,7 +12,7 @@ If you encounter any problems as you set up Kedro, you can ask for help on Kedro
 ## Installation prerequisites
 * **Python**: Kedro supports macOS, Linux, and Windows and is built for Python 3.7+. You'll select a version of Python when you create a virtual environment for your Kedro project.
 
-* **Python virtual environment**: We suggest you create a new Python virtual environment for *each* new Kedro project you work on to isolate its dependencies from those of other projects.
+* **Virtual environment**: We suggest you create a new virtual environment for *each* new Kedro project you work on to isolate its Python dependencies from those of other projects.
 
 * **git**: You must install `git` onto your machine if you do not already have it. Type `git -v` into your terminal window to confirm it is installed. You should see the version of `git` available or an error message. You can download it from the official  [`git`](https://git-scm.com/) website.
 

@@ -22,7 +22,7 @@ If you hit an issue with the tutorial:
 * Check the [spaceflights tutorial FAQ](spaceflights_tutorial_faqs.md) to see if we have answered the question already.
 * Use [Kedro-Viz](../visualisation/kedro-viz_visualisation) to visualise your project to better understand how the datasets, nodes and pipelines fit together.
 * Use the [#questions channel](https://slack.kedro.org/) on our Slack channel to ask the community for help.
-* Search the [searchable archive of Discord discussions](https://linen-discord.kedro.org/).
+* Search the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro).
 
 ## Terminology
 

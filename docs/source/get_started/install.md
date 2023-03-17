@@ -32,7 +32,7 @@ This is our recommended approach. From your terminal:
 conda create --name kedro-environment python=3.10 -y
 ```
 
-In this example, we use Python 3.10, and create a virtual environment called `kedro-environment`. You can opt for a different version of Python if you need it for your particular project, and name it anything you choose.
+In this example, we use Python 3.10, and create a virtual environment called `kedro-environment`. You can opt for a different version of Python (any version >= 3.7 and <3.11) for your project, and name it anything you choose.
 
 The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory:
 

@@ -316,6 +316,24 @@ You should see output similar to the following:
 ```
 </details>
 
+## Visualise the project
+
+This section introduces project visualisation using Kedro-Viz, which is a separate package from the standard Kedro installation. To install it your virtual environment:
+
+```bash
+pip install kedro-viz
+```
+
+To start Kedro-Viz, enter the following in your terminal:
+
+```bash
+kedro viz
+```
+
+This command automatically opens a browser tab to serve the visualisation at `http://127.0.0.1:4141/`. Explore the visualisation at leisure, and consult the [visualisation documentation](../visualisation/kedro-viz_visualisation) for more detail.
+
+To exit, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
+
 ## Checkpoint
 
 This is an excellent place to take a breath and summarise what you have seen in the example so far.
@@ -329,5 +347,6 @@ Photo by <a href="https://unsplash.com/@maltehelmhold">Malte Helmhold</a> on <a 
 * How to add three datasets to the project and set up the Kedro Data Catalog
 * How to create a data processing pipeline with three nodes to transform and merge the input datasets and create a model input table
 * How to persist the output from a pipeline by registering those datasets to the Data Catalog
+* How to visualise the project
 
 The next step is to create the data science pipeline for spaceflight price prediction.

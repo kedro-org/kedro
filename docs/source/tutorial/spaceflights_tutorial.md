@@ -26,7 +26,7 @@ If you hit an issue with the tutorial:
 
 ## Terminology
 
-We will explain any Kedro-specific terminology we use in the tutorial as we introduce it, and you can find out more from the [glossary](../resources/glossary.md). We use additional terminology that may not be familiar to some readers, such as the concepts below.
+We explain any Kedro-specific terminology as we introduce it, and further information can be found in the [glossary](../resources/glossary.md). Some additional terminology may not be familiar to some readers, such as the concepts below.
 
 ### Project root directory
 Also known as the "root directory", this is the parent folder for the entire project. It is the top-level folder that contains all other files and directories associated with the project.

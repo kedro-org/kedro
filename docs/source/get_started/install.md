@@ -6,15 +6,15 @@
 * Installation prerequisites include a virtual environment manager like `conda`, Python 3.7+, and `git`.
 * You should install Kedro using `pip install kedro`.
 
-If you encounter any problems as you set up Kedro, you can ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or [search the archives for a solution](https://linen-discord.kedro.org).
+If you encounter any problems as you set up Kedro, ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or review the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro).
 
 
 ## Installation prerequisites
 * **Python**: Kedro supports macOS, Linux, and Windows and is built for Python 3.7+. You'll select a version of Python when you create a virtual environment for your Kedro project.
 
-* **Virtual environment**: We suggest you create a new virtual environment for *each* new Kedro project you work on to isolate its Python dependencies from those of other projects.
+* **Virtual environment**: You should create a new virtual environment for *each* new Kedro project you work on to isolate its Python dependencies from those of other projects.
 
-* **git**: You must install `git` onto your machine if you do not already have it. Type `git -v` into your terminal window to confirm it is installed. You should see the version of `git` available or an error message. You can download it from the official  [`git`](https://git-scm.com/) website.
+* **git**: You must install `git` onto your machine if you do not already have it. Type `git -v` into your terminal window to confirm it is installed; it will return the version of `git` available or an error message. [You can download `git` from the official website](https://git-scm.com/).
 
 ## Create a Python virtual environment for your Kedro project
 
@@ -26,13 +26,13 @@ We strongly recommend [installing `conda` as your virtual environment manager](h
 
 ### How to create a new virtual environment using `conda`
 
-This is our recommended approach. From your terminal:
+The recommended approach. From your terminal:
 
 ```bash
 conda create --name kedro-environment python=3.10 -y
 ```
 
-In this example, we use Python 3.10, and create a virtual environment called `kedro-environment`. You can opt for a different version of Python (any version >= 3.7 and <3.11) for your project, and name it anything you choose.
+The example below uses Python 3.10, and creates a virtual environment called `kedro-environment`. You can opt for a different version of Python (any version >= 3.7 and <3.11) for your project, and you can name it anything you choose.
 
 The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory:
 
@@ -75,7 +75,6 @@ Next, create a new virtual environment in this directory with `venv`:
 
 ```bash
 python -m venv .venv
-```
 ```
 
 Activate this virtual environment:
@@ -130,7 +129,7 @@ To install Kedro from the Python Package Index (PyPI):
 pip install kedro
 ```
 
-While we recommend you to use `pip`, it is also possible to install Kedro using `conda install -c conda-forge kedro`.
+You can also install Kedro using `conda install -c conda-forge kedro`.
 
 ## Verify your Kedro installation
 
@@ -144,7 +143,8 @@ You should see an ASCII art graphic and the Kedro version number. For example:
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive from our retired Discord server](https://linen-discord.kedro.org), or post a new query on the [Slack organisation](https://slack.kedro.org).
+If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro), or post a new query on the [Slack organisation](https://slack.kedro.org).
+
 
 ## How to upgrade Kedro
 

@@ -230,7 +230,7 @@ You should see output similar to the following:
 
 </details>
 
-As you can see, we successfully ran both the `data_processing` and `data_science` pipelines, generating a model and evaluating it.
+As you can see, the `data_processing` and `data_science` pipelines ran successfully, generated a model and evaluated it.
 
 
 ### Slice a pipeline
@@ -480,19 +480,21 @@ ds_pipeline_2 = pipeline(
 ```
 </details>
 
-We instantiate the template_pipeline twice but pass in different parameters. The `pipeline_instance` variable is the template pipeline, and `ds_pipeline_1` and `ds_pipeline_2` are the two separately parameterised instantiations.
+The code instantiates the template_pipeline twice but passes in different parameters. The `pipeline_instance` variable is the template pipeline, and `ds_pipeline_1` and `ds_pipeline_2` are the two separately parameterised instantiations.
 
-So let's go through in detail how those namespaces affect our catalog references:
+#### How do namespaces affect parameters?
 
-- All `inputs` and `outputs` within the nodes of our `ds_pipeline_1` have the `active_modelling_pipeline` prefix:
-  - `params:model_options` turns into `active_modelling_pipeline.params:model_options`
-  - `X_train` turns into `active_modelling_pipeline.X_train`
-  - `X_test` turns into `active_modelling_pipeline.X_test`, and so on
+All `inputs` and `outputs` within the nodes of the `ds_pipeline_1` have the `active_modelling_pipeline` prefix:
 
-- There are a separate set of parameters for `ds_pipeline_2` with the `candidate_modelling_pipeline` prefix:
-  - `params:model_options` turns into `candidate_modelling_pipeline.params:model_options`
-  - `X_train` turns into `candidate_modelling_pipeline.X_train`
-  - `X_test` turns into `candidate_modelling_pipeline.X_test`, and so on
+- `params:model_options` turns into `active_modelling_pipeline.params:model_options`
+- `X_train` turns into `active_modelling_pipeline.X_train`
+- `X_test` turns into `active_modelling_pipeline.X_test`, and so on
+
+There are a separate set of parameters for `ds_pipeline_2` with the `candidate_modelling_pipeline` prefix:
+
+- `params:model_options` turns into `candidate_modelling_pipeline.params:model_options`
+- `X_train` turns into `candidate_modelling_pipeline.X_train`
+- `X_test` turns into `candidate_modelling_pipeline.X_test`, and so on
 
 However, `model_input_table` does not get parameterised as it needs to be shared between instances, so is frozen outside the scope of the namespace wrappers.
 
@@ -504,9 +506,9 @@ This renders as follows using `kedro viz` (hover over the datasets to see their 
 
 There are three different Kedro runners that can run the pipeline:
 
-* `SequentialRunner` - runs your nodes sequentially; once a node has completed its task then the next one starts.
-* `ParallelRunner` - runs your nodes in parallel; independent nodes are able to run at the same time, which is more efficient when there are independent branches in your pipeline and enables you to take advantage of multiple CPU cores.
-* `ThreadRunner` - runs your nodes in parallel, similarly to `ParallelRunner`, but uses multithreading instead of multiprocessing.
+* `SequentialRunner` - runs nodes sequentially; once a node has completed its task then the next one starts.
+* `ParallelRunner` - runs nodes in parallel; independent nodes are able to run at the same time, which is more efficient when there are independent branches in your pipeline and enables you to take advantage of multiple CPU cores.
+* `ThreadRunner` - runs nodes in parallel, similarly to `ParallelRunner`, but uses multithreading instead of multiprocessing.
 
 By default, Kedro uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the terminal. If you decide to use `ParallelRunner`, `ThreadRunner` or a custom runner, you can do so through the `--runner` flag as follows:
 

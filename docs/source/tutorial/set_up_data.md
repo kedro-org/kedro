@@ -1,6 +1,6 @@
 # Set up the data
 
-In this section, we add datasets to the project's `data` folder and review how the datasets are registered in [Kedro's Data Catalog](../data/data_catalog.md), which is the registry of all data sources available for use by the project.
+This sections shows how to add datasets to the project's `data` folder. It also reviews how those datasets are registered in [Kedro's Data Catalog](../data/data_catalog.md), which is the registry of all data sources available for use by the project.
 
 ## Project datasets
 
@@ -118,7 +118,7 @@ When you have finished, close `ipython` session with `exit()`.
 
 ### Custom data
 
-[Kedro supports numerous datasets](/kedro.datasets) out of the box, but you can also add support for any proprietary data format or filesystem in your pipeline.
+[Kedro supports numerous datasets](/kedro.datasets) out of the box, but you can also add support for any proprietary data format or filesystem.
 
 You can find further information about [how to add support for custom datasets](../extend_kedro/custom_datasets.md) in specific documentation covering advanced usage.
 

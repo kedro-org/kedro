@@ -171,7 +171,6 @@ conf_loader["catalog"] = {"catalog_config": "something_new"}
 ```
 
 ### How to use Jinja2 syntax in configuration?
-
 From version 0.17.0, `TemplateConfigLoader` also supports the [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is an example of a `catalog.yml` file that uses both features:
 
 ```

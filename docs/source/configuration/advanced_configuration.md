@@ -108,52 +108,6 @@ raw_car_data:
 
 Under the hood, `TemplatedConfigLoader` uses [`JMESPath` syntax](https://github.com/jmespath/jmespath.py) to extract elements from the globals dictionary.
 
-#### Use Jinja2 syntax in configuration
-
-From version 0.17.0, `TemplateConfigLoader` also supports the [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is an example of a `catalog.yml` file that uses both features:
-
-```
-{% for speed in ['fast', 'slow'] %}
-{{ speed }}-trains:
-    type: MemoryDataSet
-
-{{ speed }}-cars:
-    type: pandas.CSVDataSet
-    filepath: s3://${bucket_name}/{{ speed }}-cars.csv
-    save_args:
-        index: true
-
-{% endfor %}
-```
-
-When parsing this configuration file, `TemplateConfigLoader` will:
-
-1. Read the `catalog.yml` and compile it using Jinja2
-2. Use a YAML parser to parse the compiled config into a Python dictionary
-3. Expand `${bucket_name}` in `filepath` using the `globals_pattern` and `globals_dict` arguments for the `TemplateConfigLoader` instance, as in the previous examples
-
-The output Python dictionary will look as follows:
-
-```python
-{
-    "fast-trains": {"type": "MemoryDataSet"},
-    "fast-cars": {
-        "type": "pandas.CSVDataSet",
-        "filepath": "s3://my_s3_bucket/fast-cars.csv",
-        "save_args": {"index": True},
-    },
-    "slow-trains": {"type": "MemoryDataSet"},
-    "slow-cars": {
-        "type": "pandas.CSVDataSet",
-        "filepath": "s3://my_s3_bucket/slow-cars.csv",
-        "save_args": {"index": True},
-    },
-}
-```
-
-```{warning}
-Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do not recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
-```
 
 ### OmegaConfigLoader
 
@@ -215,6 +169,54 @@ conf_loader = ConfigLoader(conf_source=conf_path)
 # Bypass configuration patterns by setting the key and values directly on the config loader instance.
 conf_loader["catalog"] = {"catalog_config": "something_new"}
 ```
+
+### How to use Jinja2 syntax in configuration?
+
+From version 0.17.0, `TemplateConfigLoader` also supports the [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is an example of a `catalog.yml` file that uses both features:
+
+```
+{% for speed in ['fast', 'slow'] %}
+{{ speed }}-trains:
+    type: MemoryDataSet
+
+{{ speed }}-cars:
+    type: pandas.CSVDataSet
+    filepath: s3://${bucket_name}/{{ speed }}-cars.csv
+    save_args:
+        index: true
+
+{% endfor %}
+```
+
+When parsing this configuration file, `TemplateConfigLoader` will:
+
+1. Read the `catalog.yml` and compile it using Jinja2
+2. Use a YAML parser to parse the compiled config into a Python dictionary
+3. Expand `${bucket_name}` in `filepath` using the `globals_pattern` and `globals_dict` arguments for the `TemplateConfigLoader` instance, as in the previous examples
+
+The output Python dictionary will look as follows:
+
+```python
+{
+    "fast-trains": {"type": "MemoryDataSet"},
+    "fast-cars": {
+        "type": "pandas.CSVDataSet",
+        "filepath": "s3://my_s3_bucket/fast-cars.csv",
+        "save_args": {"index": True},
+    },
+    "slow-trains": {"type": "MemoryDataSet"},
+    "slow-cars": {
+        "type": "pandas.CSVDataSet",
+        "filepath": "s3://my_s3_bucket/slow-cars.csv",
+        "save_args": {"index": True},
+    },
+}
+```
+
+```{warning}
+Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do not recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
+```
+
 
 ### How to do templating with the `OmegaConfigLoader`?
 Templating or [variable interpolation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation), as it's called in `OmegaConf`, for parameters works out of the box if the template values are within the parameter files or the name of the file that contains the template values follows the same config pattern specified for parameters.

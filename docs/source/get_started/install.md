@@ -74,8 +74,8 @@ mkdir kedro-environment && cd kedro-environment
 Next, create a new virtual environment in this directory with `venv`:
 
 ```bash
-python -m venv env/kedro-environment  # macOS / Linux
-python -m venv env\kedro-environment  # Windows
+python -m venv .venv
+```
 ```
 
 Activate this virtual environment:

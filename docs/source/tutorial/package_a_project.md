@@ -111,29 +111,22 @@ The resulting `.egg` and `.whl` packages only contain the Python source code of 
 
 The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside your `local` directory.
 
-### Package recipients
+### Run a packaged project
 
-Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed.
-
-A recipient can install the project by calling:
+To run a packaged project it must first be installed. To install the project, run the following command:
 
 ```bash
 pip install <path-to-wheel-file>
 ```
 
-An executable, `kedro-tutorial`, is placed in the `bin` subfolder of the Python install folder, so the project can be run as follows:
+Once your project is installed, it  can be run in two ways:
 
-```bash
-python -m kedro_tutorial
-```
+1. Using the project's CLI.
+2. Interactively using Python code.
 
-```{note}
-The recipient will need to add a `conf` subfolder. They also need to add `data` and `logs` if the pipeline loads/saves local data or uses logging.
-Alternatively, they can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
-kedro run --conf-source <path-to-compressed-config>.tar.gz
-```
+To run the project using its CLI, you can either use the package name (simply `<package_name>` from the command line), or the package name followed by the `run` command (`<package_name> run`). To see a full list of the options that the project's CLI supports, you can run `<package_name> -h`.
 
-Once your project is installed, to run your pipelines from any Python code, simply import it:
+To run your packaged project interactively using code, you can import from the project:
 
 ```python
 from kedro_tutorial.__main__ import main
@@ -145,6 +138,14 @@ main(
 
 This is equivalent to running `kedro run`, and you can provide all the parameters described by `kedro run --help`.
 
+Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed.
+
+```{note}
+The recipient will need to add a `conf` subfolder. They also need to add `data` and `logs` if the pipeline loads/saves local data or uses logging.
+Alternatively, they can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
+kedro run --conf-source <path-to-compressed-config>.tar.gz
+```
+
 ### Docker, Airflow and other deployment targets
 
 There are various methods to deploy packaged pipelines via Kedro plugins:
@@ -152,32 +153,3 @@ There are various methods to deploy packaged pipelines via Kedro plugins:
 * [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
 * [Kedro-Airflow](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-airflow) to convert your Kedro project into an [Airflow](https://airflow.apache.org/) project.
 * The [Deployment guide](../deployment/deployment_guide) touches on other deployment targets such as AWS Batch and Prefect, and there is a [range of third-party plugins for deployment](extend_kedro/plugins.md#community-developed-plugins).
-
-## Running a packaged project interactively
-
-To run a Kedro project within a session, use the following code:
-
-```python
-from kedro.framework.session import KedroSession
-from kedro.framework.startup import configure_project
-
-project_root = "<project_root>"
-configure_project(project_root)
-
-with KedroSession.create("<project_name>", project_root) as session:
-    session.run()
-```
-
-Replace `<project_name>` with your project's name and `<project_root>` with the path to your project directory.
-
-```{note}
-When running a packaged Kedro project interactively, it is important to use the `configure_project()` function instead of `bootstrap_project()`. The latter is meant only for configuring projects that haven't been packaged.
-```
-
-```{note}
-The `package_name` keyword argument of `KedroSession.create()` currently does not have any effect and can be confusing. This argument will be removed in Kedro version 0.19, which is a breaking change. For now, you can safely ignore this argument.
-```
-
-```{note}
-The entry-point of a packaged project (the `main()` method  of `src/<project_name>/__main__.py`) currently returns an exit code, which stops downstream processes from using its output. If you need to run your Kedro project interactively and use the results, consider using the `KedroSession` approach as shown above.
-```

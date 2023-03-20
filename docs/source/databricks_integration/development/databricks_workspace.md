@@ -1,4 +1,4 @@
-# Developing with the Databricks Workspace
+# Developing with Databricks Workspace
 
 This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws).
 

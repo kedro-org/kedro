@@ -267,3 +267,32 @@ In [2]: %run_viz
 DBFS is a distributed file system mounted into a DataBricks workspace and accessible on a DataBricks cluster. It maps cloud object storage URIs to relative paths so as to simplify the process of persisting files. With DBFS, libraries can read from or write to distributed storage as if it's a local file.
 To use datasets with DBFS, the file path passed to the dataset **must** be prefixed with `/dbfs/` and look something like, `/dbfs/example_project/data/02_intermediate/processed_data`. This applies to all datasets, including `SparkDataSet`.
 > **Note**: Most Python code, except PySpark, will try to resolve a file path in the driver node storage by default, this will result in an `DataSetError` if the code is using a file path that is actually a DBFS save location. To avoid this, always make sure to point the file path to `/dbfs` when storing or loading data on DBFS. For more rules on what is saved in DBFS versus driver node storage by default, please refer to the [Databricks documentation](https://docs.databricks.com/files/index.html#what-is-the-root-path-for-databricks).
+
+## Run a packaged Kedro project on Databricks
+
+To run a packaged Kedro project that has been installed on a Databricks cluster, use the following code:
+
+```python
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import configure_project
+
+project_root = "<project_root>"
+configure_project(project_root)
+
+with KedroSession.create("<project_name>", project_root) as session:
+    session.run()
+```
+
+Replace `<project_name>` with your project's name and `<project_root>` with the path to your project directory.
+
+```{note}
+When running a packaged Kedro project interactively, it is important to use the `configure_project()` function instead of `bootstrap_project()`. The latter is meant only for configuring projects that haven't been packaged.
+```
+
+```{note}
+The `package_name` keyword argument of `KedroSession.create()` currently does not have any effect and can be confusing. This argument will be removed in Kedro version 0.19, which is a breaking change. For now, you can safely ignore this argument.
+```
+
+```{note}
+The entry-point of a packaged project (the `main()` method  of `src/<project_name>/__main__.py`) currently returns an exit code, which stops downstream processes from using its output. If you need to run your Kedro project interactively and use the results, consider using the `KedroSession` approach as shown above.
+```

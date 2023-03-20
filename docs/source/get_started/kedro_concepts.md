@@ -101,7 +101,7 @@ By default, Kedro creates one file, `credentials.yml`, in `conf/local`.
 
 ### `data`
 
-The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders according to the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention).
+The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders according to the [commonly accepted data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71).
 
 ### `src`
 

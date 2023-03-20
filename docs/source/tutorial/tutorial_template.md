@@ -74,7 +74,7 @@ You may also want to store credentials such as usernames and passwords if they a
 
 To do this, add them to `conf/local/credentials.yml` (some examples are included in that file for illustration).
 
-### Configuration best practice to avoid leaking confidential data?
+### Configuration best practice to avoid leaking confidential data
 
 * Do not commit data to version control.
 * Do not commit notebook output cells (data can easily sneak into notebooks when you don't delete output cells).

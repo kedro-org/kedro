@@ -23,8 +23,7 @@ By default, all code in `settings.py` is commented out. When settings are not su
 | `DATA_CATALOG_CLASS`        | `kedro.io.DataCatalog`                            | Customise how the [Data Catalog](../data/data_catalog.md) is handled.                                              |
 
 ## Settings in `pyproject.toml`
-The `pyproject.toml` file is defined in [PEP 518](https://peps.python.org/pep-0518/) as a configuration file to store build system requirements for Python projects.
-The `pyproject.toml` file in your project contains the metadata for your project and other tool specific configurations.
+The `pyproject.toml` file is the standard way to store build metadata and tool settings for Python projects.
 Every Kedro project comes with a default pre-populated `pyproject.toml` file in your project root directory with the following keys specified under the `[tool.kedro]` section :
 ```toml
 [tool.kedro]

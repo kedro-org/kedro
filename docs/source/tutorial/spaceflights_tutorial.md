@@ -35,7 +35,7 @@ Also known as the "root directory", this is the parent folder for the entire pro
 These are Python packages or libraries that an individual project depends upon to complete a task. For example, the Spaceflights tutorial project depends on the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Standard development workflow
-When you build a Kedro project, you will typically follow a [standard development workflow](../faq/faq.md#what-is-the-typical-kedro-project-development-workflow):
+When you build a Kedro project, you will typically follow a standard development workflow:
 
 1. Set up the project template
 

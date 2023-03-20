@@ -1,12 +1,12 @@
 # Package an entire Kedro project
 
-This section explains how to build your project documentation, and how to bundle your entire project into a Python package.
+This section explains how to build project documentation, and how to bundle a Kedro project into a Python package.
 
 Kedro also has an advanced feature which supports packaging on a pipeline level allowing you share and reuse pipelines across projects! To read more about this please look at the [section on micro-packaging](../nodes_and_pipelines/micro_packaging.md).
 
 ## Add documentation to your project
 
-There are several documentation frameworks for Python projects. This section describes how to use [Sphinx](https://www.sphinx-doc.org) to build the documentation of your Kedro project.
+There are several documentation frameworks for Python projects. This section describes how to use [Sphinx](https://www.sphinx-doc.org).
 
 To install Sphinx, run the following:
 
@@ -52,9 +52,9 @@ After the quickstart process is complete, you can build the documentation by **n
 make html
 ```
 
-Your project documentation will be written to the `docs/build/html` directory.
+Project documentation will be written to the `docs/build/html` directory.
 
-You may want to add project-specific Markdown documentation within the `docs/source` folder of your Kedro project. To be able to build it, follow the [introduction instructions of MyST-Parser](https://myst-parser.readthedocs.io/en/stable/intro.html) and update your `docs/source/index.rst` file to add the markdown files to the table of contents.
+You may want to add project-specific Markdown documentation within the `docs/source` folder of your Kedro project. To be able to build it, follow the [introduction instructions of MyST-Parser](https://myst-parser.readthedocs.io/en/stable/intro.html) and update the `docs/source/index.rst` file to add the markdown files to the table of contents.
 
 ### Documentation from docstrings
 If you wish to add documentation built from [`docstrings`](https://datacamp.com/community/tutorials/docstrings-python) within your project, you need to make some changes to the Sphinx configuration files found in the `docs/source` directory to use [automatic documentation generation from code](https://www.sphinx-doc.org/en/master/tutorial/automatic-doc-generation.html).
@@ -66,14 +66,14 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary"]
 autosummary_generate = True
 ```
 
-Finally, to ensure that you include the autodoc modules in your build, run the following command once **from the `docs` folder**:
+Finally, to ensure that you include the autodoc modules in the build, run the following command once **from the `docs` folder**:
 
 ```bash
 sphinx-apidoc --module-first -o source ../src/<project_name>
 
 ```
 
-This will generate a `docs/src/modules.rst` file, as well as other files containing references to your docstrings. To include those in your documentation, make sure your `docs/src/index.rst` has a `modules` entry in the table of contents:
+This will generate a `docs/src/modules.rst` file, as well as other files containing references to any docstrings. To include those in your documentation, make sure `docs/src/index.rst` has a `modules` entry in the table of contents:
 
 ```text
 .. toctree::
@@ -99,21 +99,21 @@ Consult the Sphinx project documentation for [additional options to pass to `sph
 
 ## Package your project
 
-To package your project, run the following in your project root directory:
+To package a project, run the following in your project root directory:
 
 ```bash
 kedro package
 ```
 
-Kedro builds the package into the `dist` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
+Kedro builds the package into the `dist` folder of the project as a `.whl` file, which is a [Python packaging format for binary distribution](https://packaging.python.org/en/latest/overview/#python-binary-distributions).
 
-The resulting `.egg` and `.whl` packages only contain the Python source code of your Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
+The resulting `.whl` packages only contain the Python source code of the Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
 
-The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside your `local` directory.
+The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside the `local` directory.
 
 ### Package recipients
 
-Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed.
+Recipients of the `.whl` file need to have Python and `pip` on their machines, but do not need to have Kedro installed.
 
 A recipient can install the project by calling:
 
@@ -121,10 +121,10 @@ A recipient can install the project by calling:
 pip install <path-to-wheel-file>
 ```
 
-An executable, `kedro-tutorial`, is placed in the `bin` subfolder of the Python install folder, so the project can be run as follows:
+An executable, `spaceflights`, is placed in the `bin` subfolder of the Python install folder, so the project can be run as follows:
 
 ```bash
-python -m kedro_tutorial
+python -m spaceflights
 ```
 
 ```{note}
@@ -133,10 +133,10 @@ Alternatively, they can make use of the ``OmegaConfigLoader`` to run the configu
 kedro run --conf-source <path-to-compressed-config>.tar.gz
 ```
 
-Once your project is installed, to run your pipelines from any Python code, simply import it:
+Once the project is installed, to run the pipelines from any Python code, simply import it:
 
 ```python
-from kedro_tutorial.__main__ import main
+from spaceflights.__main__ import main
 
 main(
     ["--pipeline", "__default__"]

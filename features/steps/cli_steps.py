@@ -203,6 +203,18 @@ def disable_plugin_hooks(context, plugin):
         settings_file.write(to_add)
 
 
+@given("I have set the OmegaConfigLoader in settings")
+def use_omegaconfigloader(context):
+    """Set `config_loader_class` in `settings.py`."""
+    settings_path = (
+        context.root_project_dir / "src" / context.package_name / "settings.py"
+    )
+    to_add = """\nfrom kedro.config import OmegaConfigLoader
+            \nCONFIG_LOADER_CLASS = OmegaConfigLoader"""
+    with settings_path.open("a") as settings_file:
+        settings_file.write(to_add)
+
+
 @given("I have initialized a git repository")
 def init_git_repo(context):
     """Init git repo"""

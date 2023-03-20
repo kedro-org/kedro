@@ -38,7 +38,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.18.6"
+pip install "kedro~=0.18.7"
 # name your project Iris Databricks when prompted for it
 kedro new --starter=pyspark-iris
 ```
@@ -174,7 +174,7 @@ In your newly-created notebook, put each of the below code snippets into a separ
 * Install Kedro and the latest compatible version of Kedro-Datasets.
 
 ```console
-%pip install "kedro==0.18.6" "kedro-datasets[spark.SparkDataSet]~=1.0.2"
+%pip install "kedro==0.18.7" "kedro-datasets[spark.SparkDataSet]~=1.1.0"
 ```
 
 * Copy input data into DBFS

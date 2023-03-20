@@ -8,7 +8,18 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.7
+
+# Upcoming Release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.7
 
 ## Major features and improvements
 * `kedro package` now includes the project configuration in a compressed `tar.gz` file.
@@ -17,9 +28,6 @@
 ## Bug fixes and other changes
 * Added a guide and tooling for developing Kedro for Databricks.
 * Implement missing dict-like interface for `_ProjectPipeline`.
-
-
-## Breaking changes to the API
 
 # Release 0.18.6
 

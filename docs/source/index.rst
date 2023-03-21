@@ -147,6 +147,13 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Kedro in your workflow
+
+   workflow_integration/databricks.rst
+   workflow_integration/pyspark.rst
+
+.. toctree::
+   :maxdepth: 2
    :caption: Development
 
    development/set_up_vscode
@@ -167,7 +174,6 @@ Welcome to Kedro's documentation!
    deployment/prefect
    deployment/kubeflow
    deployment/aws_batch
-   deployment/databricks
    deployment/aws_sagemaker
    deployment/aws_step_functions
    deployment/airflow_astronomer
@@ -175,6 +181,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+<<<<<<< HEAD
    :caption: Databricks integration
 
    databricks_integration/visualisation
@@ -187,7 +194,13 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+<<<<<<< HEAD
    :caption: FAQs
+=======
+=======
+>>>>>>> 8d4757f6 (Revise index.rst)
+   :caption: Resources
+>>>>>>> 03ed7288 (Revise index.rst)
 
    faq/faq
    faq/architecture_overview

@@ -126,12 +126,30 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
 
     """
-    response = requests.get(url, timeout=1.0)
-    response.raise_for_status()
+    try:
+        polling.poll(
+            custom_request,
+            step=60,
+            args=(url, headers),
+            poll_forever=True
+        )
+        print("Got status as success. Proceeding......")
+        exit()
+    except KeyboardInterrupt:
+        logging.info("exiting")
+        exit()
 
     data = response.text
     assert string in data
     assert context.result.poll() is None
+
+
+def custom_request(url: str, headers: dict):
+    if requests.get(url=url, headers=headers).json().get('status') != 'success':
+        logging.info("Polling started.......")
+        logging.info("Waiting.......")
+        return False
+    return True
 
 
 @given("I have prepared a run_config file with config options")

@@ -49,12 +49,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     "sphinx.ext.doctest",
-    "sphinx.ext.todo",
-    "sphinx.ext.coverage",
-    "sphinx.ext.mathjax",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
-    "nbsphinx",
     "sphinx_copybutton",
     "sphinxcontrib.mermaid",
     "myst_parser",
@@ -304,23 +300,6 @@ texinfo_documents = [
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
-
-# -- Extension configuration -------------------------------------------------
-
-# nbsphinx_prolog = """
-# see here for prolog/epilog details:
-# https://nbsphinx.readthedocs.io/en/0.3.1/prolog-and-epilog.html
-# """
-
-nbsphinx_epilog = """
-.. note::
-
-     Found a bug, or didn't find what you were looking for? 🙏 `Please file a
-     ticket <https://github.com/kedro-org/kedro/issues/new/choose>`_
-"""
-
-# -- NBconvert kedro config -------------------------------------------------
-nbsphinx_kedro_name = "kedro"
 
 # -- Kedro specific configuration -----------------------------------------
 KEDRO_MODULES = [

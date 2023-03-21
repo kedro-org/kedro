@@ -112,8 +112,6 @@ extras_require = {
         "docutils==0.16",
         "sphinx~=3.4.3",
         "sphinx_rtd_theme==1.1.1",
-        "nbsphinx==0.8.1",
-        "nbstripout~=0.4",
         "sphinx-autodoc-typehints==1.11.1",
         "sphinx_copybutton==0.3.1",
         "ipykernel>=5.3, <7.0",

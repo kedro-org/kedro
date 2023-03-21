@@ -175,7 +175,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: PySpark integration
+   :caption: Databricks integration
 
    databricks_integration/visualisation
 

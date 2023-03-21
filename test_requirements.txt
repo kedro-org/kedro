@@ -62,3 +62,4 @@ tensorflow~=2.0
 triad>=0.6.7, <1.0
 trufflehog~=2.1
 xlsxwriter~=1.0
+polling~=0.3

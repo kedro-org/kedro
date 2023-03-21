@@ -339,6 +339,10 @@ def exec_notebook(context, command):
     context.result = ChildTerminatingPopen(
         cmd, env=context.env, cwd=str(context.root_project_dir)
     )
+    r = 0
+    while(r.status_code != 200):
+        r = requests.head("http://localhost:8888")
+        r.status_code == 200
 
 
 @when("Wait until the process is finished")

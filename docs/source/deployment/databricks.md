@@ -174,7 +174,7 @@ In your newly-created notebook, put each of the below code snippets into a separ
 * Install Kedro and the latest compatible version of Kedro-Datasets.
 
 ```console
-%pip install "kedro==0.18.7" "kedro-datasets[spark.SparkDataSet]~=1.1.0"
+%pip install "kedro==0.18.7" "kedro-datasets[spark.SparkDataSet]~=1.1"
 ```
 
 * Copy input data into DBFS

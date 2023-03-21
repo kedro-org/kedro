@@ -45,7 +45,6 @@ pyarrow>=1.0, <7.0
 pylint>=2.5.2, <3.0
 pyproj~=3.0
 pyspark>=2.2, <4.0
-	@@ -50,15 +49,15 @@ pytest-mock>=1.7.1, <2.0
 pytest-xdist[psutil]~=2.2.1
 pytest~=7.2
 redis~=4.1

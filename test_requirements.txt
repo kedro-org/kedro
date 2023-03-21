@@ -49,15 +49,15 @@ pytest-mock>=1.7.1, <2.0
 pytest-xdist[psutil]~=2.2.1
 pytest~=7.2
 redis~=4.1
+requests
 requests-mock~=1.6
-requests~=2.20
 s3fs>=0.3.0  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
 scikit-learn
 scipy
 SQLAlchemy
-tables~=3.6.0; platform_system == "Windows" and python_version<'3.9'
-tables~=3.6; platform_system != "Windows"
-tensorflow~=2.0
+tables; platform_system == "Windows" and python_version<'3.9'
+tables; platform_system != "Windows"
+tensorflow
 triad>=0.6.7, <1.0
 trufflehog~=2.1
 xlsxwriter~=1.0

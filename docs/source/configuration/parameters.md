@@ -1,9 +1,10 @@
 ## Parameters
 
-### Load parameters
+### How to load parameters
 
 Parameters project configuration can be loaded by any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
-The following examples will all make use of the default `ConfigLoader` class.
+
+The following examples all make use of the default `ConfigLoader` class.
 
 ```python
 from kedro.config import ConfigLoader
@@ -14,13 +15,13 @@ conf_loader = ConfigLoader(conf_source=conf_path, env="local")
 parameters = conf_loader["parameters"]
 ```
 
-This will load configuration files from any subdirectories in `conf` that have a filename starting with `parameters`, or are located inside a folder with name starting with `parameters`.
+This loads configuration files from any subdirectories in `conf` that have a filename starting with `parameters`, or are located inside a folder with name starting with `parameters`.
 
 ```{note}
-Since `local` is set as the environment, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
+Since `env` is set to `local`, the configuration path `conf/local` takes precedence in the example above. Any overlapping top-level keys from `conf/base` are overwritten by those from `conf/local`.
 ```
 
-Calling `conf_loader[key]` in the example above will throw a `MissingConfigException` error if no configuration files match the given key. If this is a valid workflow for your application, you can handle it as follows:
+Calling `conf_loader[key]` in the example above will throw a `MissingConfigException` error if no configuration files match the given key. But if this is a valid workflow for your application, you can handle it as follows:
 
 ```python
 from kedro.config import ConfigLoader, MissingConfigException
@@ -39,12 +40,13 @@ except MissingConfigException:
 The `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
 ```
 
-[Parameters can then be used on their own or fed in as function inputs.](#use-parameters)
+[Parameters can then be used on their own or fed in as function inputs](#use-parameters).
 
-### Specify parameters at runtime
+### How to specify parameters at runtime
 
-Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. To do so, use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes.
-Each key-value pair is split on the first colon or equals sign. Following examples are both valid commands:
+Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes.
+
+Each key-value pair is split on the first colon or equals sign. The following examples are both valid commands:
 
 ```bash
 kedro run --params=param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
@@ -52,7 +54,10 @@ kedro run --params=param_key1:value1,param_key2:2.0  # this will add {"param_key
 ```bash
 kedro run --params=param_key1=value1,param_key2=2.0
 ```
-Values provided in the CLI take precedence and overwrite parameters specified in configuration files. Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
+Values provided in the CLI take precedence and overwrite parameters specified in configuration files.
+
+* Parameter keys are _always_ treated as strings.
+* Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise, they are also treated as string.
 
 If any extra parameter key and/or value contains spaces, wrap the whole option contents in quotes:
 
@@ -69,16 +74,16 @@ kedro run --params=endpoint_url:https://endpoint.example.com
 kedro run --params=endpoint_url=https://endpoint.example.com
 ```
 
-### Use parameters
+### How to use parameters
 
-Say you have a set of parameters you're playing around with that specify modelling hyperparameters. You can declare these in one place, for instance `conf/base/parameters.yml`, so that you isolate your changes in one central location.
+Say you have a set of parameters that specify modelling hyperparameters. You can declare these in one place, for instance `conf/base/parameters.yml`, so that you isolate your changes in one central location.
 
 ```yaml
 step_size: 1
 learning_rate: 0.01
 ```
 
- You can now use the `params:` prefix to reference these parameters in the `node` definition:
+You can now use the `params:` prefix to reference these parameters in the `node` definition:
 
 ```python
 def increase_volume(volume, step):

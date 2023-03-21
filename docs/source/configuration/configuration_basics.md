@@ -1,8 +1,8 @@
 # Configuration
 
-This section contains detailed information about Kedro project configuration to store settings for your project such as [parameters](./parameters.md), [credentials](./credentials.md), the [data catalog](../data/data_catalog.md), and [logging information](../logging/logging.md).
+This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters.md), [credentials](./credentials.md), the [data catalog](../data/data_catalog.md), and [logging information](../logging/logging.md).
 
-Kedro makes use of a configuration loader to load any project configuration files, and the available configuration loader classes are: 
+Kedro makes use of a configuration loader to load any project configuration files, and the available configuration loader classes are:
 
 * [`ConfigLoader`](/kedro.config.ConfigLoader)
 * [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader)
@@ -53,12 +53,25 @@ Configuration files will be matched according to file name and type rules. Suppo
 * *Either* of the following is true:
   * filename starts with `catalog`
   * file is located in a subfolder whose name is prefixed with `catalog`
-* *And* file extension is one of the following: 
-    * `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties` for the `ConfigLoader` and `TemplatedConfigLoader` 
+* *And* file extension is one of the following:
+    * `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties` for the `ConfigLoader` and `TemplatedConfigLoader`
     * `yaml`, `yml`, or `json` for the `OmegaConfigLoader`
 
+### Configuration patterns
+Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.
 
-## How to use Kedro configuration 
+By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
+
+```python
+config_patterns = {
+    "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
+    "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
+    "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
+    "logging": ["logging*", "logging*/**", "**/logging*"],
+}
+```
+
+## How to use Kedro configuration
 
 This section contains a set of guidance for the most common configuration requirements of standard Kedro projects:
 
@@ -139,7 +152,7 @@ conf_loader = ConfigLoader(conf_source=conf_path)
 conf_catalog = conf_loader["catalog"]
 ```
 
-### How to specify additional configuration environments 
+### How to specify additional configuration environments
 In addition to the two built-in `local` and `base` configuration environments, you can create your own. Your project loads `conf/base/` as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create, such as `conf/server/` or `conf/test/`. To use additional configuration environments, run the following command:
 
 ```bash

@@ -131,7 +131,7 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         polling.poll(
             custom_request,
             step=60,
-            args=(url, headers),
+            args=(url),
             poll_forever=True
         )
         print("Got status as success. Proceeding......")

@@ -139,13 +139,15 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         logging.info("exiting")
         exit()
 
+    response = requests.get(url)
+    response.raise_for_status()
     data = response.text
     assert string in data
     assert context.result.poll() is None
 
 
 def custom_request(url: str, headers: dict):
-    if requests.get(url=url, headers=headers).json().get('status') != 'success':
+    if requests.get(url=url).json().get('status') != 'success':
         logging.info("Polling started.......")
         logging.info("Waiting.......")
         return False
@@ -357,10 +359,6 @@ def exec_notebook(context, command):
     context.result = ChildTerminatingPopen(
         cmd, env=context.env, cwd=str(context.root_project_dir)
     )
-    r = 0
-    while(r.status_code != 200):
-        r = requests.head("http://localhost:8888")
-        r.status_code == 200
 
 
 @when("Wait until the process is finished")

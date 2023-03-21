@@ -3,11 +3,11 @@ adlfs>=2021.7.1
 bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython~=1.73
-blacken-docs==1.9.2
+blacken-docs>=1.9.2
 black~=22.0
-compress-pickle[lz4]~=1.2.0
+compress-pickle[lz4]>=1.2.0
 coverage[toml]
-dask[complete]~=2021.10  # pinned by Snyk to avoid a vulnerability
+dask[complete]>=2021.10  # pinned by Snyk to avoid a vulnerability
 delta-spark~=1.2.1  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
 dill~=0.3.1
 filelock>=3.4.0, <4.0
@@ -22,16 +22,16 @@ ipython~=8.10; python_version >= '3.8'
 isort~=5.0
 Jinja2<3.1.0
 joblib>=0.14
-jupyterlab_server>=2.11.1, <2.16.0 # 2.16.0 requires importlib_metedata >= 4.8.3 which conflicts with flake8 requirement
-jupyterlab~=3.0, <3.6.0 # 3.6.0 requires jupyterlab_server~=2.19
-jupyter~=1.0
+jupyter>=1.0
+jupyterlab>=3.0 # 3.6.0 requires jupyterlab_server~=2.19
+jupyterlab_server>=2.11.1 # 2.16.0 requires importlib_metedata >= 4.8.3 which conflicts with flake8 requirement
 lxml~=4.6
 matplotlib>=3.0.3; python_version < '3.10' # 3.4.0 breaks holoviews
 matplotlib>=3.5; python_version == '3.10'
 memory_profiler>=0.50.0, <1.0
 moto==1.3.7; python_version < '3.10'
 moto==3.0.4; python_version == '3.10'
-networkx
+networkx>=2.4
 opencv-python~=4.5.5.64
 openpyxl>=3.0.3
 pandas  # 1.3 for read_xml/to_xml
@@ -54,10 +54,10 @@ requests-mock~=1.6
 s3fs>=0.3.0  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
 scikit-learn
 scipy
-SQLAlchemy
+SQLAlchemy>=1.2
 tables>3.6.1; platform_system == "Windows" and python_version<'3.9'
 tables>3.6.1; platform_system != "Windows"
 tensorflow
 triad>=0.6.7, <1.0
-trufflehog~=2.1
-xlsxwriter~=1.0
+trufflehog>=2.1
+xlsxwriter>=1.0

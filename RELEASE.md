@@ -18,6 +18,7 @@
 
 ## Bug fixes and other changes
 * Added a guide and tooling for developing Kedro for Databricks.
+* Implement missing dict-like interface for `_ProjectPipeline`.
 
 
 ## Breaking changes to the API

@@ -1,6 +1,6 @@
 # Visualise charts in Kedro-Viz
 
-This page describes how to make interactive visualisations of your Kedro projects with Kedro-Viz, which supports integration with [Plotly](https://plotly.com/python/) and [Matplotlib](https://matplotlib.org/).
+This page describes how to make interactive visualisations of a Kedro project with Kedro-Viz, which supports integration with [Plotly](https://plotly.com/python/) and [Matplotlib](https://matplotlib.org/).
 
 ## Visualisation with Plotly
 
@@ -16,7 +16,7 @@ Generate a copy of the spaceflights tutorial project with all the code in place 
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, you can enter anything, but we will assume `Kedro Tutorial` throughout.
+When prompted for a project name, you can enter anything, but we will assume `Spaceflights` throughout.
 
 When your project is ready, navigate to the root directory of the project.
 
@@ -27,7 +27,7 @@ There are two types of Plotly datasets supported by Kedro:
 * `plotly.PlotlyDataSet` which only supports [Plotly Express](https://plotly.com/python/plotly-express)
 * `plotly.JSONDataSet` which supports Plotly Express and [Plotly Graph Objects](https://plotly.com/python/graph-objects/)
 
-To use the Plotly datasets, you must update the `requirements.txt` file in the `src` folder of your Kedro project to add the following dependencies:
+To use the Plotly datasets, you must update the `requirements.txt` file in the `src` folder of the Kedro project to add the following dependencies:
 
 
 ```text
@@ -78,7 +78,7 @@ kedro pipeline create reporting
 
 ### Add the Plotly reporting nodes
 
-Add the following to `src/kedro_tutorial/pipelines/reporting/nodes.py`:
+Add the following to `src/spaceflights/pipelines/reporting/nodes.py`:
 
 ```python
 import plotly.express as px
@@ -116,7 +116,7 @@ def compare_passenger_capacity_go(preprocessed_shuttles: pd.DataFrame):
 
 ### Update the reporting pipeline code
 
-Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to replace the existing code with the following:
+Update `src/spaceflights/pipelines/reporting/pipeline.py` to replace the existing code with the following:
 
 ```python
 from kedro.pipeline import Pipeline, node, pipeline
@@ -167,7 +167,7 @@ View the larger visualisation of the chart by clicking the 'Expand Plotly Visual
 
 ## Visualisation with Matplotlib
 
-Integrating Matplotlib into Kedro-Viz allows you to output charts as part of your pipeline visualisation.
+Integrating Matplotlib into Kedro-Viz allows you to output charts as part of pipeline visualisation.
 
 ```{note}
 The MatplotlibWriter dataset converts Matplotlib objects to image files. This means that Matplotlib charts within Kedro-Viz are static and not interactive, unlike the Plotly charts seen above.
@@ -177,7 +177,7 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 
 ### Update the dependencies
 
-You must update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
+You must update the `src/requirements.txt` file in the Kedro project by adding the following dataset to enable Matplotlib for the project:
 
 ```bash
 kedro-datasets[matplotlib.MatplotlibWriter]~=1.0.2
@@ -195,7 +195,7 @@ dummy_confusion_matrix:
 ```
 
 ### Add another node
-Add the following to `src/kedro_tutorial/pipelines/reporting/nodes.py`:
+Add the following to `src/spaceflights/pipelines/reporting/nodes.py`:
 
 ```python
 import matplotlib.pyplot as plt
@@ -218,7 +218,7 @@ def create_confusion_matrix(companies: pd.DataFrame):
 
 ### Update the pipeline
 
-Update `src/kedro_tutorial/pipelines/reporting/pipeline.py` to add the following to `create_pipeline`:
+Update `src/spaceflights/pipelines/reporting/pipeline.py` to add the following to `create_pipeline`:
 
 ```python
 from .nodes import create_confusion_matrix
@@ -243,7 +243,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 Run the pipelines with `kedro run` and then visualise the result with `kedro viz`.
 
-Click to see a small preview of your Matplotlib image in the metadata panel.
+Click to see a small preview of the Matplotlib image in the metadata panel.
 
 ![](../meta/images/pipeline_visualisation_matplotlib.png)
 

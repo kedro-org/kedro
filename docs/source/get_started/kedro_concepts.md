@@ -1,6 +1,17 @@
 # Kedro concepts
 
-It is time to introduce the most basic elements of Kedro. You can find further information about these and more advanced Kedro concepts in the [Kedro glossary](../resources/glossary.md).
+This page introduces the most basic elements of Kedro. You can find further information about these and more advanced Kedro concepts in the [Kedro glossary](../resources/glossary.md).
+
+You may prefer to skip to the next section to [create a Kedro project for hands-on Kedro experience](./new_project.md).
+
+## Summary
+
+* Kedro nodes are the building blocks of pipelines. A node is a wrapper for a Python function that names the inputs and outputs of that function.
+* A pipeline organises the dependencies and execution order of a collection of nodes.
+* Kedro has a registry of all data sources the project can use called the Data Catalog. There is inbuilt support for various file types and file systems.
+* Kedro projects follow a default template that uses specific folders to store datasets, notebooks, configuration and source code.
+
+
 ## Node
 
 In Kedro, a node is a wrapper for a [pure Python function](../resources/glossary.md#node) that names the inputs and outputs of that function. Nodes are the building block of a pipeline, and the output of one node can be the input of another.
@@ -44,13 +55,13 @@ greeting_pipeline = pipeline([return_greeting_node, join_statements_node])
 
 The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `DataCatalog`, a Kedro class that can be specialised for different types of data storage.
 
-[Kedro provides numerous different built-in datasets](/kedro.datasets) for various file types and file systems, so you don’t have to write the logic for reading/writing data.
+[Kedro provides different built-in datasets](/kedro.datasets) for numerous file types and file systems, so you don’t have to write the logic for reading/writing data.
 
 ## Kedro project directory structure
 
-Kedro projects follow a default template that uses specific folders to store datasets, notebooks, configuration and source code. We advise you to retain the structure to make it easy to share your projects with other Kedro users, but you can adapt the folder structure if you need to.
+One of the main advantages of working with Kedro projects is that they follow a default template that makes collaboration straightforward. Kedro uses semantic naming to set up a default project with specific folders to store datasets, notebooks, configuration and source code. We advise you to retain the default Kedro project structure to make it easy to share your projects with other Kedro users, although you can adapt the folder structure if you need to.
 
-A standard Kedro project structure is as follows:
+The default Kedro project structure is as follows:
 
 ```
 project-dir         # Parent directory of the template
@@ -60,7 +71,7 @@ project-dir         # Parent directory of the template
 ├── docs            # Project documentation
 ├── logs            # Project output logs (not committed to version control)
 ├── notebooks       # Project-related Jupyter notebooks (can be used for experimental code before moving the code to src)
-├── pyproject.toml  # Identifies the project root and [contains configuration information](../faq/architecture_overview.md#kedro-project)
+├── pyproject.toml  # Identifies the project root and contains configuration information
 ├── README.md       # Project README
 ├── setup.cfg       # Configuration options for `pytest` when doing `kedro test` and for the `isort` utility when doing `kedro lint`
 └── src             # Project source code
@@ -90,7 +101,7 @@ By default, Kedro creates one file, `credentials.yml`, in `conf/local`.
 
 ### `data`
 
-The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders according to the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention).
+The `data` folder contains multiple subfolders to store project data. We recommend you put raw data into `raw` and move processed data to other subfolders according to the [commonly accepted data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71).
 
 ### `src`
 

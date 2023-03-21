@@ -316,7 +316,7 @@ Call the `run()` method of the `KedroSession` defined in `kedro.framework.sessio
 kedro run
 ```
 
-`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext`, you need to set `context_path` in the [`pyproject.toml` configuration file](../faq/architecture_overview.md#kedro-project).
+`KedroContext` can be extended in `run.py` (`src/<package_name>/run.py`). In order to use the extended `KedroContext`, you need to set `context_path` in the `pyproject.toml` configuration file.
 
 #### Modifying a `kedro run`
 
@@ -351,7 +351,7 @@ You can also combine these options together, so the following command runs all t
 kedro run --from-nodes=split --to-nodes=predict,report
 ```
 
-This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../kedro_project_setup/configuration.md#configure-kedro-run-arguments).
+This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../nodes_and_pipelines/run_a_pipeline.md#configure-kedro-run-arguments).
 
 A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../kedro_project_setup/configuration.md#parameters).
 
@@ -396,7 +396,7 @@ _This command will be deprecated from Kedro version 0.19.0._
 kedro build-docs
 ```
 
-The `build-docs` command builds [project documentation](../tutorial/package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
+The `build-docs` command builds [project documentation](../tutorial/package_a_project.md#add-documentation-to-a-kedro-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 #### Lint your project

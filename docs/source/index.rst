@@ -108,6 +108,8 @@ Welcome to Kedro's documentation!
    :caption: Configuration
 
    configuration/configuration_basics
+   configuration/credentials
+   configuration/parameters
    configuration/advanced_configuration
 
 .. toctree::

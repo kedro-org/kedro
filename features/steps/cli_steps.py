@@ -586,14 +586,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        util.wait_for(
-            func=_check_service_up,
-            context=context,
-            url=url,
-            string="Jupyter Notebook",
-            timeout_=15,
-            print_error=True,
-        )
+        _check_service_up(context, url, "Jupyter Notebook")
     finally:
         context.result.terminate()
 
@@ -609,14 +602,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        util.wait_for(
-            func=_check_service_up,
-            timeout_=20,
-            context=context,
-            url=url,
-            string='<a href="/lab"',
-            print_error=True,
-        )
+        _check_service_up(context, url, "Jupyter Notebook")
     finally:
         context.result.terminate()
 

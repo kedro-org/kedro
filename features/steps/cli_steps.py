@@ -147,7 +147,7 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
     assert context.result.poll() is None
 
 
-def custom_request(url: str, headers: dict):
+def custom_request(url: str):
     if requests.get(url=url).json().get('status') != 'success':
         logging.info("Polling started.......")
         logging.info("Waiting.......")

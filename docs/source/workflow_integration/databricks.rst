@@ -8,5 +8,3 @@ Databricks integration
 
    databricks_workspace.md
    visualisation.md
-
-

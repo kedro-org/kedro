@@ -55,8 +55,8 @@ s3fs>=0.3.0  # Needs to be at least 0.3.0 to make use of `cachable` attribute on
 scikit-learn
 scipy
 SQLAlchemy
-tables; platform_system == "Windows" and python_version<'3.9'
-tables; platform_system != "Windows"
+tables>3.6.1; platform_system == "Windows" and python_version<'3.9'
+tables>3.6.1; platform_system != "Windows"
 tensorflow
 triad>=0.6.7, <1.0
 trufflehog~=2.1

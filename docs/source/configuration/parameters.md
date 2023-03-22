@@ -144,4 +144,3 @@ In both cases, under the hood parameters are added to the Data Catalog through t
 ```{note}
 You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
 ```
-    

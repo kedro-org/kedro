@@ -71,7 +71,7 @@ config_patterns = {
 }
 ```
 
-If you want to change change the way configuration is loaded, you can either [customise the config patterns](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) or [bypass the configuration loading](advanced_configuration.md#how-to-bypass-the-configuration-loading-rules) as described in the advanced configuration chapter. 
+If you want to change change the way configuration is loaded, you can either [customise the config patterns](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) or [bypass the configuration loading](advanced_configuration.md#how-to-bypass-the-configuration-loading-rules) as described in the advanced configuration chapter.
 
 ## How to use Kedro configuration
 

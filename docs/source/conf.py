@@ -15,9 +15,7 @@
 import importlib
 import os
 import re
-import shutil
 import sys
-from distutils.dir_util import copy_tree
 from inspect import getmembers, isclass, isfunction
 from pathlib import Path
 from typing import List, Tuple
@@ -472,20 +470,6 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):
     remove_arrows_in_examples(lines)
 
 
-def _prepare_build_dir(app, config):
-    """Get current working directory to the state expected
-    by the ReadTheDocs builder. Shortly, it does the same as
-    ./build-docs.sh script except not running `sphinx-build` step."""
-    build_root = Path(app.srcdir)
-    build_out = Path(app.outdir)
-    copy_tree(str(here / "source"), str(build_root))
-    copy_tree(str(build_root / "api_docs"), str(build_root))
-    shutil.rmtree(str(build_root / "api_docs"))
-    shutil.rmtree(str(build_out), ignore_errors=True)
-    copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
-    shutil.rmtree(str(build_root / "css"))
-
-
 def env_override(default_appid):
     build_version = os.getenv("READTHEDOCS_VERSION")
 
@@ -512,7 +496,6 @@ def _add_jinja_filters(app):
 
 
 def setup(app):
-    app.connect("config-inited", _prepare_build_dir)
     app.connect("builder-inited", _add_jinja_filters)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.add_css_file("css/qb1-sphinx-rtd.css")
@@ -552,4 +535,4 @@ mermaid_output_format = "png"
 # https://github.com/mermaidjs/mermaid.cli#linux-sandbox-issue
 mermaid_params = ["-p", here / "puppeteer-config.json", "-s", "2"]
 # https://github.com/kedro-org/kedro/issues/2451
-mermaid_version = mermaid_init_js = None
+mermaid_version = mermaid_init_js = ""

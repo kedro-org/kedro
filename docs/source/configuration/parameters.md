@@ -1,6 +1,6 @@
-## Parameters
+# Parameters
 
-### How to load parameters
+## How to load parameters
 
 Parameters project configuration can be loaded by any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 
@@ -42,7 +42,7 @@ The `kedro.framework.context.KedroContext` class uses the approach above to load
 
 [Parameters can then be used on their own or fed in as function inputs](#use-parameters).
 
-### How to specify parameters at runtime
+## How to specify parameters at runtime
 
 Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. Use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes.
 
@@ -74,7 +74,7 @@ kedro run --params=endpoint_url:https://endpoint.example.com
 kedro run --params=endpoint_url=https://endpoint.example.com
 ```
 
-### How to use parameters
+## How to use parameters
 
 Say you have a set of parameters that specify modelling hyperparameters. You can declare these in one place, for instance `conf/base/parameters.yml`, so that you isolate your changes in one central location.
 
@@ -144,3 +144,4 @@ In both cases, under the hood parameters are added to the Data Catalog through t
 ```{note}
 You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
 ```
+    

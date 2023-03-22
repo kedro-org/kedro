@@ -1,10 +1,10 @@
-## Credentials
+# Credentials
 
 For security reasons, we strongly recommend that you *do not* commit any credentials or other secrets to version control.
 
 Kedro is set up so that, by default, if a file inside the `conf` folder (and its subfolders) contains `credentials` in its name, it will be ignored by git.
 
-### How to load credentials
+## How to load credentials
 Credentials configuration can be loaded the same way as any other project configuration using any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 
 The following examples all use the default `ConfigLoader` class.
@@ -45,6 +45,9 @@ The `kedro.framework.context.KedroContext` class uses the approach above to load
 
 Credentials configuration can then be used on its own or [fed into the `DataCatalog`](../data/data_catalog.md#feeding-in-credentials).
 
-### How to work with AWS credentials
+If you would rather store your credentials in environment variables instead of a file, you can use the `OmegaConfigLoader` [to load credentials from environment variables](advanced_configuration.md#how-to-load-credentials-through-environment-variables) as described in the advanced configuration chapter. 
+
+## How to work with AWS credentials
 
 When you work with AWS credentials on datasets, you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
+

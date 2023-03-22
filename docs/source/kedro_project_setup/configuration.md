@@ -12,6 +12,39 @@ You can also specify a source directory for the configuration files at run time 
 ```bash
 kedro run --conf-source=<path-to-new-conf-directory>
 ```
+
+If you're using the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) you can also read configuration from a compressed file in `tar.gz` or `zip` format. The two commands below are examples of how to reference a `tar.gz` or `zip` file:
+
+ ```bash
+kedro run --conf-source=<path-to-compressed-file>.tar.gz
+
+kedro run --conf-source=<path-to-compressed-file>.zip
+```
+
+To compress your configuration you can either leverage Kedro's `kedro package` command which builds the package into the `dist/` folder of your project, and creates one `.egg` file, one `.whl` file, as well as a `tar.gz` file containing the project configuration. This compressed version of the config files excludes any files inside your `local` directory.
+Alternatively you can run the command below to create a `tar.gz` file:
+
+```bash
+tar --exclude=local/*.yml -czf <my_conf_name>.tar.gz --directory=<path-to-conf-dir> <conf-dir>
+```
+
+Or the following command to create a `zip` file:
+
+```bash
+zip -x <conf-dir>/local/** -r <my_conf_name>.zip <conf-dir>
+```
+
+Note that for both the `tar.gz` and `zip` file the following structure is expected:
+
+```text
+<conf_dir>
+├── base               <-- the files inside be different, but this is an example of a standard Kedro structure.
+│   └── parameters.yml
+│   └── catalog.yml
+└── local              <-- the top level local directory is required, but no files should be inside when distributed.
+└── README.md          <-- optional but included with the default Kedro conf structure.
+```
+
 ## Local and base configuration environments
 
 Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loaded using the `ConfigLoader` class:
@@ -30,7 +63,7 @@ This recursively scans for configuration files firstly in the `conf/base/` (`bas
 * *Either* of the following is true:
   * filename starts with `catalog`
   * file is located in a sub-directory whose name is prefixed with `catalog`
-* *And* file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties`
+* *And* file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties` for the `ConfigLoader` and `TemplatedConfigLoader` or `yaml`, `yml`, or `json` for the `OmegaConfigLoader`.
 
 This logic is specified by `config_patterns` in the [ConfigLoader](/kedro.config.ConfigLoader) and [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) classes. By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
 
@@ -74,7 +107,7 @@ Configuration information from files stored in `base` or `local` that match thes
 
 * If two configuration files have duplicate top-level keys but are in different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get` will not raise any errors - however, a `DEBUG` level log message will be emitted with information on the overridden keys.
 
-Any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors).
+When using the default `ConfigLoader` or the `TemplatedConfigLoader`, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors).
 
 ## Additional configuration environments
 
@@ -86,7 +119,40 @@ kedro run --env=test
 
 If no `env` option is specified, this will default to using the `local` environment to overwrite `conf/base`.
 
-If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<package_name>/settings.py` under the `CONTEXT_CLASS` key.
+If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you must customise the configuration loader you're using to take `default_run_env="base"` in the constructor and then specify your custom config loader subclass in `src/<package_name>/settings.py` under the `CONFIG_LOADER_CLASS` key.
+Below is an example of such a custom class. If you're using the `TemplatedConfigLoader` or the `OmegaConfigLoader` you need to use either of those as the class you are subclassing.
+
+```python
+# src/<package_name>/custom_config.py
+
+from kedro.config import ConfigLoader
+from typing import Any, Dict
+
+
+class CustomConfigLoader(ConfigLoader):
+    def __init__(
+        self,
+        conf_source: str,
+        env: str = None,
+        runtime_params: Dict[str, Any] = None,
+        default_run_env: str = "base",
+    ):
+        super().__init__(
+            conf_source=conf_source,
+            env=env,
+            runtime_params=runtime_params,
+            default_run_env=default_run_env,
+        )
+```
+
+And then you can import your `CustomConfigLoader` from `settings.py`:
+
+```python
+# settings.py
+from package_name.custom_configloader import CustomConfigLoader
+
+CONFIG_LOADER_CLASS = CustomConfigLoader
+```
 
 If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
 
@@ -272,6 +338,49 @@ data:
 
 Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
+### Custom template resolvers
+`Omegaconf` provides functionality to [register custom resolvers](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#resolvers) for templated values. You can use these custom resolves within Kedro by extending the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) class.
+The example below illustrates this:
+
+```python
+from kedro.config import OmegaConfigLoader
+from omegaconf import OmegaConf
+from typing import Any, Dict
+
+
+class CustomOmegaConfigLoader(OmegaConfigLoader):
+    def __init__(
+        self,
+        conf_source: str,
+        env: str = None,
+        runtime_params: Dict[str, Any] = None,
+    ):
+        super().__init__(
+            conf_source=conf_source, env=env, runtime_params=runtime_params
+        )
+
+        # Register a customer resolver that adds up numbers.
+        self.register_custom_resolver("add", lambda *numbers: sum(numbers))
+
+    @staticmethod
+    def register_custom_resolver(name, function):
+        """
+        Helper method that checks if the resolver has already been registered and registers the
+        resolver if it's new. The check is needed, because omegaconf will throw an error
+        if a resolver with the same name is registered twice.
+        Alternatively, you can call `register_new_resolver()` with  `replace=True`.
+        """
+        if not OmegaConf.has_resolver(name):
+            OmegaConf.register_new_resolver(name, function)
+```
+
+You can then use the custom "add" resolver in your `parameters.yml` as follows:
+
+```yaml
+model_options:
+  test_size: ${add:1,2,3}
+  random_state: 3
+```
 
 ### Environment variables for credentials
 The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
@@ -292,7 +401,8 @@ Note that you can only use the resolver in `credentials.yml` and not in catalog 
 
 ### Load parameters
 
-Parameters project configuration can be loaded with the help of the `ConfigLoader` class:
+Parameters project configuration can be loaded by any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
+The following examples will all make use of the default `ConfigLoader` class.
 
 ```python
 from kedro.config import ConfigLoader
@@ -433,7 +543,8 @@ You can use `add_feed_dict()` to inject any other entries into your `DataCatalog
 
 For security reasons, we strongly recommend you to *not* commit any credentials or other secrets to the Version Control System. Hence, by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
 
-Credentials configuration can be loaded the same way as any other project configuration using the `ConfigLoader` class:
+Credentials configuration can be loaded the same way as any other project configuration using any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
+The following examples will all make use of the default `ConfigLoader` class.
 
 ```python
 from kedro.config import ConfigLoader
@@ -474,37 +585,3 @@ Credentials configuration can then be used on its own or [fed into the `DataCata
 ### AWS credentials
 
 When you work with AWS credentials on datasets, you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
-
-## Configure `kedro run` arguments
-
-An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../development/commands_reference.md#run-the-project). However, instead of specifying all the command line options in a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
-
-```console
-$ kedro run --config=config.yml
-```
-
-where `config.yml` is formatted as below (for example):
-
-```yaml
-run:
-  tags: tag1, tag2, tag3
-  pipeline: pipeline1
-  parallel: true
-  nodes_names: node1, node2
-  env: env1
-```
-
-The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes=...`, but you have to use an underscore in the configuration file:
-
-```yaml
-run:
-  from_nodes: ...
-```
-
-This is because the configuration file gets parsed by [Click](https://click.palletsprojects.com/en/8.1.x/), a Python package to handle command line interfaces. Click passes the options defined in the configuration file to a Python function. The option names need to match the argument names in that function.
-
-Variable names and arguments in Python may only contain alpha-numeric characters and underscores, so it's not possible to have a dash in the option names when using the configuration file.
-
-```{note}
-If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
-```

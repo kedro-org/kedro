@@ -6,6 +6,10 @@ This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org
 If you are using [Databricks Repos](https://docs.databricks.com/repos/index.html) to run a Kedro project then you should [disable file-based logging](../logging/logging.md#disable-file-based-logging). This prevents Kedro from attempting to write to the read-only file system.
 ```
 
+```{note}
+If you are a Kedro contributor looking for information on deploying a custom build of Kedro to Databricks, see the [development guide](../contribution/development_for_databricks.md).
+```
+
 ## Prerequisites
 
 * New or existing [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/) with administrative privileges
@@ -34,7 +38,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.18.5"
+pip install "kedro~=0.18.7"
 # name your project Iris Databricks when prompted for it
 kedro new --starter=pyspark-iris
 ```
@@ -56,22 +60,20 @@ You should get a similar output:
 ```console
 ...
 [08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
-                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 ### 3. Create a Databricks cluster
 
-If you already have an active cluster with runtime version `7.1`, you can skip this step. Here is [how to find clusters in your Databricks workspace](https://docs.databricks.com/clusters/clusters-manage.html).
+If you already have an active cluster with runtime version `7.3`, you can skip this step. Here is [how to find clusters in your Databricks workspace](https://docs.databricks.com/clusters/clusters-manage.html).
 
 Follow the [Databricks official guide to create a new cluster](https://docs.databricks.com/clusters/create-cluster.html). For the purpose of this tutorial (and to minimise costs) we recommend the following settings:
-* Runtime: `7.1 (Scala 2.12, Spark 3.0.0)`
+* Runtime: `7.3 (Scala 2.12, Spark 3.0.1)`
 * Enable autoscaling: `off`
 * Terminate after 120 minutes of inactivity: `on`
-* Worker type: `m4.large`
+* Worker type: `Standard_DS3_v2`
 * Driver Type: `Same as worker`
 * Workers: `2`
-* Advanced options -> Instances -> # Volumes: `1`
 
 While your cluster is being provisioned, you can continue to the next step.
 
@@ -94,7 +96,7 @@ Now you should [create a new repository in GitHub](https://docs.github.com/en/gi
 To connect to the newly created repository you can use one of 2 options:
 
 * **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key configured for GitHub](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys)
-* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#4-create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
+* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#4-create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api#authenticating-with-username-and-password).
 
 ### 6. Push Kedro project to the GitHub repository
 
@@ -172,7 +174,7 @@ In your newly-created notebook, put each of the below code snippets into a separ
 * Install Kedro and the latest compatible version of Kedro-Datasets.
 
 ```console
-%pip install "kedro==0.18.5" "kedro-datasets[spark.SparkDataSet]~=1.0.2"
+%pip install "kedro==0.18.7" "kedro-datasets[spark.SparkDataSet]~=1.1"
 ```
 
 * Copy input data into DBFS
@@ -209,7 +211,7 @@ from kedro.framework.startup import bootstrap_project
 
 bootstrap_project(project_root)
 
-with KedroSession.create(project_path=project_root) as session:
+with KedroSession.create(project_path=project_root, env="databricks") as session:
     session.run()
 ```
 
@@ -259,3 +261,9 @@ Kedro-Viz can then be launched in a new browser tab with the `%run_viz` line mag
 ```ipython
 In [2]: %run_viz
 ```
+
+## How to use datasets stored on Databricks DBFS
+
+DBFS is a distributed file system mounted into a DataBricks workspace and accessible on a DataBricks cluster. It maps cloud object storage URIs to relative paths so as to simplify the process of persisting files. With DBFS, libraries can read from or write to distributed storage as if it's a local file.
+To use datasets with DBFS, the file path passed to the dataset **must** be prefixed with `/dbfs/` and look something like, `/dbfs/example_project/data/02_intermediate/processed_data`. This applies to all datasets, including `SparkDataSet`.
+> **Note**: Most Python code, except PySpark, will try to resolve a file path in the driver node storage by default, this will result in an `DataSetError` if the code is using a file path that is actually a DBFS save location. To avoid this, always make sure to point the file path to `/dbfs` when storing or loading data on DBFS. For more rules on what is saved in DBFS versus driver node storage by default, please refer to the [Databricks documentation](https://docs.databricks.com/files/index.html#what-is-the-root-path-for-databricks).

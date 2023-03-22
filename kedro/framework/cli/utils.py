@@ -417,9 +417,7 @@ def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-def _reformat_load_versions(  # pylint: disable=unused-argument
-    ctx, param, value
-) -> Dict[str, str]:
+def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
     """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
@@ -469,7 +467,7 @@ def _split_params(ctx, param, value):
             )
         dot_list.append(item)
     conf = OmegaConf.from_dotlist(dot_list)
-    return conf
+    return OmegaConf.to_container(conf)
 
 
 def _split_load_versions(ctx, param, value):

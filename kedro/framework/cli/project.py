@@ -26,6 +26,7 @@ from kedro.framework.cli.utils import (
     split_node_names,
     split_string,
 )
+from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 from kedro.utils import load_obj
@@ -172,6 +173,22 @@ def package(metadata: ProjectMetadata):
             "../dist",
         ],
         cwd=str(source_path),
+    )
+
+    directory = (
+        str(Path(settings.CONF_SOURCE).parent)
+        if settings.CONF_SOURCE != "conf"
+        else metadata.project_path
+    )
+    call(
+        [
+            "tar",
+            "--exclude=local/*.yml",
+            "-czf",
+            f"dist/conf-{metadata.package_name}.tar.gz",
+            f"--directory={directory}",
+            str(Path(settings.CONF_SOURCE).stem),
+        ]
     )
 
 
@@ -403,7 +420,7 @@ def activate_nbstripout(
 )
 @click.option(
     "--conf-source",
-    type=click.Path(exists=True, file_okay=False, resolve_path=True),
+    type=click.Path(exists=True, file_okay=True, resolve_path=True),
     help=CONF_SOURCE_HELP,
 )
 @click.option(

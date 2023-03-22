@@ -387,4 +387,4 @@ Generally speaking, the [limitations on AWS Lambda](https://docs.aws.amazon.com/
 
 ## Final thought
 
-One major benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider. For example, AWS has recently announced a [Feature Store for SageMaker](https://aws.amazon.com/sagemaker/feature-store/). We could easily use it as the Features layer in [Kedro's Data Engineering convention](../faq/faq.md#what-is-data-engineering-convention).
+One major benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider, such as the use of the AWS [feature store for SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.

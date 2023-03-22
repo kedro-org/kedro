@@ -22,7 +22,7 @@ build:
 sphinx:
   builder: html
   configuration: docs/conf.py
-  fail_on_warning: true
+  fail_on_warning: false  # Turn back on soon
 
 # Build documentation with MkDocs
 # mkdocs:

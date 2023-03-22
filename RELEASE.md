@@ -18,24 +18,31 @@
 * Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
-
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 
+# Upcoming Release
 
-# Upcoming Release 0.18.7
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+
+
+# Release 0.18.7
 
 ## Major features and improvements
 * Added new Kedro CLI `kedro jupyter setup` to setup Jupyter Kernel for Kedro.
 * `kedro package` now includes the project configuration in a compressed `tar.gz` file.
 * Added functionality to the `OmegaConfigLoader` to load configuration from compressed files of `zip` or `tar` format. This feature requires `fsspec>=2023.1.0`.
-
+* Signficant improvements to on-boarding documentation that covers setup for new Kedro users. Also some major changes to the spaceflights tutorial to make it faster to work through. We think it's a better read. Tell us if it's not.
 
 ## Bug fixes and other changes
 * Added a guide and tooling for developing Kedro for Databricks.
 * Implement missing dict-like interface for `_ProjectPipeline`.
-
-## Breaking changes to the API
 
 
 # Release 0.18.6

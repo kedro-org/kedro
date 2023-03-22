@@ -6,11 +6,6 @@ This tutorial uses the [Databricks Starter](https://github.com/kedro-org/kedro-s
 
 >If you are a Kedro contributor looking for information on deploying a custom build of Kedro to Databricks, see the [development guide](../contribution/development_for_databricks.md).
 
-
-```{note}
-If you are a Kedro contributor looking for information on deploying a custom build of Kedro to Databricks, see the [development guide](../contribution/development_for_databricks.md).
-```
-
 ## Prerequisites
 
 * New or existing [AWS](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/), [Azure](https://signup.azure.com) or [GCP](https://cloud.google.com) account with administrative privileges

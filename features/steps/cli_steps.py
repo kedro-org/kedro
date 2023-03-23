@@ -345,18 +345,21 @@ def exec_notebook(context, command):
 def wait_for_notebook_to_run(context, time):
     timer = 0
     url = f"http://localhost:8888"
-    response = requests.get(url)
-    while response.status_code != 200:
-        sleep(10)
-        timer += 10
-        if timer > time:
-            print("Could not find jupyter server after 5 minutes")
-            break
-        if response.status_code == 200:
-            print("Found Jupyter server")
-            break
+    try:
         response = requests.get(url)
-    assert response.status_code == 200
+        while response.status_code != 200:
+            sleep(10)
+            timer += 10
+            if timer > time:
+                print("Could not find jupyter server after 5 minutes")
+                break
+            if response.status_code == 200:
+                print("Found Jupyter server")
+                break
+            response = requests.get(url)
+        assert response.status_code == 200
+    except ConnectionRefusedError:
+        print("Connection refused")
 
 
 @when("Wait until the process is finished")

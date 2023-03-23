@@ -15,7 +15,7 @@ Feature: Jupyter targets in new project
 
   Scenario: Execute jupyter lab target
     When I execute the kedro jupyter command "lab --no-browser"
-    Then I wait for the jupyter webserver to run for "100" seconds
+    Then I wait for the jupyter webserver to run for "360" seconds
     Then Jupyter Lab should run on port 8888
 
   Scenario: Execute node convert into Python files

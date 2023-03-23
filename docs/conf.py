@@ -572,3 +572,5 @@ myst_heading_anchors = 5
 mermaid_output_format = "png"
 # https://github.com/mermaidjs/mermaid.cli#linux-sandbox-issue
 mermaid_params = ["-p", here / "puppeteer-config.json", "-s", "2"]
+# https://github.com/kedro-org/kedro/issues/2451
+mermaid_version = mermaid_init_js = None

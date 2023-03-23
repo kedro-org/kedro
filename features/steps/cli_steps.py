@@ -4,7 +4,7 @@ import json
 import shutil
 import textwrap
 from pathlib import Path
-from time import time
+from time import time, sleep
 import polling
 
 import behave
@@ -127,32 +127,11 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
 
     """
-    try:
-        polling.poll(
-            custom_request,
-            step=60,
-            args=(url),
-            poll_forever=True
-        )
-        print("Got status as success. Proceeding......")
-        exit()
-    except KeyboardInterrupt:
-        logging.info("exiting")
-        exit()
-
     response = requests.get(url)
     response.raise_for_status()
     data = response.text
     assert string in data
     assert context.result.poll() is None
-
-
-def custom_request(url: str):
-    if requests.get(url=url).json().get('status') != 'success':
-        logging.info("Polling started.......")
-        logging.info("Waiting.......")
-        return False
-    return True
 
 
 @given("I have prepared a run_config file with config options")
@@ -360,6 +339,24 @@ def exec_notebook(context, command):
     context.result = ChildTerminatingPopen(
         cmd, env=context.env, cwd=str(context.root_project_dir)
     )
+
+
+@then('I wait for the jupyter webserver to run for "{time:d}" seconds')
+def wait_for_notebook_to_run(context, time):
+    timer = 0
+    url = f"http://localhost:8888"
+    response = requests.get(url)
+    while response.status_code != 200:
+        sleep(10)
+        timer += 10
+        if timer > time:
+            print("Could not find jupyter server after 5 minutes")
+            break
+        if response.status_code == 200:
+            print("Found Jupyter server")
+            break
+        response = requests.get(url)
+    assert response.status_code == 200
 
 
 @when("Wait until the process is finished")

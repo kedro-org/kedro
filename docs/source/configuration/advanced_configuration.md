@@ -171,7 +171,7 @@ conf_loader["catalog"] = {"catalog_config": "something_new"}
 ```
 
 ### How to use Jinja2 syntax in configuration
-From version 0.17.0, `TemplateConfigLoader` also supports the [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is an example of a `catalog.yml` file that uses both features:
+From version 0.17.0, `TemplatedConfigLoader` also supports the [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is an example of a `catalog.yml` file that uses both features:
 
 ```
 {% for speed in ['fast', 'slow'] %}
@@ -187,11 +187,11 @@ From version 0.17.0, `TemplateConfigLoader` also supports the [Jinja2](https://p
 {% endfor %}
 ```
 
-When parsing this configuration file, `TemplateConfigLoader` will:
+When parsing this configuration file, `TemplatedConfigLoader` will:
 
 1. Read the `catalog.yml` and compile it using Jinja2
 2. Use a YAML parser to parse the compiled config into a Python dictionary
-3. Expand `${bucket_name}` in `filepath` using the `globals_pattern` and `globals_dict` arguments for the `TemplateConfigLoader` instance, as in the previous examples
+3. Expand `${bucket_name}` in `filepath` using the `globals_pattern` and `globals_dict` arguments for the `TemplatedConfigLoader` instance, as in the previous examples
 
 The output Python dictionary will look as follows:
 

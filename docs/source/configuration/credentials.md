@@ -1,10 +1,12 @@
 # Credentials
 
 For security reasons, we strongly recommend that you *do not* commit any credentials or other secrets to version control.
-
 Kedro is set up so that, by default, if a file inside the `conf` folder (and its subfolders) contains `credentials` in its name, it will be ignored by git.
 
-## How to load credentials
+Credentials configuration can be used on its own directly in code or [fed into the `DataCatalog`](../data/data_catalog.md#feeding-in-credentials).
+If you would rather store your credentials in environment variables instead of a file, you can use the `OmegaConfigLoader` [to load credentials from environment variables](advanced_configuration.md#how-to-load-credentials-through-environment-variables) as described in the advanced configuration chapter.
+
+## How to load credentials in code
 Credentials configuration can be loaded the same way as any other project configuration using any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 
 The following examples all use the default `ConfigLoader` class.
@@ -14,15 +16,11 @@ from kedro.config import ConfigLoader
 from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path, env="local")
+conf_loader = ConfigLoader(conf_source=conf_path)
 credentials = conf_loader["credentials"]
 ```
 
 This loads configuration files from `conf/base` and `conf/local` whose filenames start with `credentials`, or that are located inside a folder with a name that starts with `credentials`.
-
-```{note}
-Since `env` is set to `local`, the configuration path `conf/local` takes precedence in the example above. Any overlapping top-level keys from `conf/base` will be overwritten by the those from `conf/local`.
-```
 
 Calling `conf_loader[key]` in the example above throws a `MissingConfigException` error if no configuration files match the given key. But if this is a valid workflow for your application, you can handle it as follows:
 
@@ -31,7 +29,7 @@ from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path, env="local")
+conf_loader = ConfigLoader(conf_source=conf_path)
 
 try:
     credentials = conf_loader["credentials"]
@@ -42,10 +40,6 @@ except MissingConfigException:
 ```{note}
 The `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
 ```
-
-Credentials configuration can then be used on its own or [fed into the `DataCatalog`](../data/data_catalog.md#feeding-in-credentials).
-
-If you would rather store your credentials in environment variables instead of a file, you can use the `OmegaConfigLoader` [to load credentials from environment variables](advanced_configuration.md#how-to-load-credentials-through-environment-variables) as described in the advanced configuration chapter.
 
 ## How to work with AWS credentials
 

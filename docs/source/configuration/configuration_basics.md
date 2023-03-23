@@ -139,7 +139,7 @@ Note that for both the `tar.gz` and `zip` file the following structure is expect
 └── README.md          <-- optional but included with the default Kedro conf structure.
 ```
 
-### How to directly access configuration
+### How to access configuration in code
 To directly access configuration in code, for example to debug, you can do so as follows:
 
 ```python

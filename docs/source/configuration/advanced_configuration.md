@@ -40,6 +40,22 @@ To point your `TemplatedConfigLoader` to the globals file, add it to the the `CO
 CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
 ```
 
+Now the templating can be applied to the configuration. Here is an example of a templated `conf/base/catalog.yml` file:
+
+```yaml
+raw_boat_data:
+    type: "${datasets.spark}"  # nested paths into global dict are allowed
+    filepath: "s3a://${bucket_name}/${key_prefix}/${folders.raw}/boats.csv"
+    file_format: parquet
+
+raw_car_data:
+    type: "${datasets.csv}"
+    filepath: "s3://${bucket_name}/data/${key_prefix}/${folders.raw}/${filename|cars.csv}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
+```
+
+Under the hood, `TemplatedConfigLoader` uses [`JMESPath` syntax](https://github.com/jmespath/jmespath.py) to extract elements from the globals dictionary.
+
+
 Alternatively, you can declare which values to fill in the template through a dictionary. This dictionary could look like the following:
 
 ```python
@@ -77,21 +93,6 @@ CONFIG_LOADER_ARGS = {
 ```
 
 If you specify both `globals_pattern` and `globals_dict` in `CONFIG_LOADER_ARGS`, the contents of the dictionary resulting from `globals_pattern` are merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence.
-
-Now the templating can be applied to the configuration. Here is an example of a templated `conf/base/catalog.yml` file:
-
-```yaml
-raw_boat_data:
-    type: "${datasets.spark}"  # nested paths into global dict are allowed
-    filepath: "s3a://${bucket_name}/${key_prefix}/${folders.raw}/boats.csv"
-    file_format: parquet
-
-raw_car_data:
-    type: "${datasets.csv}"
-    filepath: "s3://${bucket_name}/data/${key_prefix}/${folders.raw}/${filename|cars.csv}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
-```
-
-Under the hood, `TemplatedConfigLoader` uses [`JMESPath` syntax](https://github.com/jmespath/jmespath.py) to extract elements from the globals dictionary.
 
 
 ## OmegaConfigLoader
@@ -155,7 +156,10 @@ CONFIG_LOADER_ARGS = {
 ### How to bypass the configuration loading rules
 You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, credentials, and logging) as well as additional configuration.
 
-```python
+```{code-block} python
+:lineno-start: 10
+:emphasize-lines: 8
+
 from kedro.config import ConfigLoader
 from kedro.framework.project import settings
 

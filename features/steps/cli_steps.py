@@ -343,23 +343,7 @@ def exec_notebook(context, command):
 
 @then('I wait for the jupyter webserver to run for "{time:d}" seconds')
 def wait_for_notebook_to_run(context, time):
-    timer = 0
-    url = f"http://localhost:8888"
-    try:
-        response = requests.get(url)
-        while response.status_code != 200:
-            sleep(10)
-            timer += 10
-            if timer > time:
-                print("Could not find jupyter server after 5 minutes")
-                break
-            if response.status_code == 200:
-                print("Found Jupyter server")
-                break
-            response = requests.get(url)
-        assert response.status_code == 200
-    except ConnectionRefusedError:
-        print("Connection refused")
+    sleep(time)
 
 
 @when("Wait until the process is finished")

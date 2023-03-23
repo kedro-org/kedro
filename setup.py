@@ -109,14 +109,16 @@ extras_require = {
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
     "docs": [
+        # docutils>=0.17 changed the HTML
+        # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
         "docutils==0.16",
-        "sphinx~=3.4.3",
-        "sphinx_rtd_theme==1.1.1",
-        "sphinx-autodoc-typehints==1.11.1",
+        "sphinx~=5.3.0",
+        "sphinx_rtd_theme==1.2.0",
+        "sphinx-autodoc-typehints==1.22.0",
         "sphinx_copybutton==0.3.1",
         "ipykernel>=5.3, <7.0",
         "sphinxcontrib-mermaid~=0.7.1",
-        "myst-parser~=0.17.2",
+        "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),

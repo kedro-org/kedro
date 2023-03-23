@@ -25,17 +25,17 @@ elif [ "$action" == "docs" ]; then
   sphinx-build -c docs/ -ETa -j auto -D language=en docs/build/ docs/build/html
 fi
 
-# Clean up build artefacts
-rm -rf docs/build/html/_sources
+# # Clean up build artefacts
+# rm -rf docs/build/html/_sources
 
-# Copy built HTML to temp directory, clean up build dir and replace with built docs only
-rm -rf docs/temp
-mkdir docs/temp/
-mkdir docs/temp/html
-cp -rf docs/build/html/* docs/temp/html
+# # Copy built HTML to temp directory, clean up build dir and replace with built docs only
+# rm -rf docs/temp
+# mkdir docs/temp/
+# mkdir docs/temp/html
+# cp -rf docs/build/html/* docs/temp/html
 
-rm -rf docs/build
-mkdir docs/build
-mkdir docs/build/html
-cp -rf docs/temp/html/* docs/build/html
-rm -rf docs/temp
+# rm -rf docs/build
+# mkdir docs/build
+# mkdir docs/build/html
+# cp -rf docs/temp/html/* docs/build/html
+# rm -rf docs/temp

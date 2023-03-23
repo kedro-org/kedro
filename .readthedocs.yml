@@ -17,6 +17,11 @@ build:
     post_create_environment:
       - npm install -g @mermaid-js/mermaid-cli
       - ./docs/kedro-datasets-docs.sh
+    pre_build:
+      - pip freeze
+      - pip list
+    post_build:
+      - cat $(find . -name "kedro.pipeline.Pipeline.rst")
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

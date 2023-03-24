@@ -138,7 +138,7 @@ main(
 
 This is equivalent to running `kedro run`, and you can provide all the parameters described by `kedro run --help`.
 
-Recipients of the `.egg` and `.whl` files need to have Python and `pip` on their machines, but do not need to have Kedro installed.
+To install the package from a `.whl` file, you need to have Python and `pip` on your machine, but do not need to have Kedro installed.
 
 ```{note}
 The recipient will need to add a `conf` subfolder. They also need to add `data` and `logs` if the pipeline loads/saves local data or uses logging.

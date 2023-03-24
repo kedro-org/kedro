@@ -152,7 +152,8 @@ class DataCatalog:
             feed_dict: A feed dict with data to be added in memory.
             layers: A dictionary of data set layers. It maps a layer name
                 to a set of data set names, according to the
-                data engineering convention.
+                data engineering convention. For more details, see
+                https://docs.kedro.org/en/stable/resources/glossary.html#layers-data-engineering-convention
 
         Example:
         ::

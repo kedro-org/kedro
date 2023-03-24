@@ -286,7 +286,7 @@ with KedroSession.create("<project_name>", project_root) as session:
 Replace `<project_name>` with your project's name and `<project_root>` with the path to your project directory.
 
 ```{note}
-When running a packaged Kedro project interactively, it is important to use the `configure_project()` function instead of `bootstrap_project()`. The latter is meant only for configuring projects that haven't been packaged.
+Use `configure_project()` to  run a packaged Kedro project interactively. Do **not** use `bootstrap_project()`, which is meant only for projects that haven't been packaged.
 ```
 
 ```{note}

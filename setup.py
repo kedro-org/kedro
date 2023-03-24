@@ -114,7 +114,9 @@ extras_require = {
         "docutils==0.16",
         "sphinx~=5.3.0",
         "sphinx_rtd_theme==1.2.0",
-        "sphinx-autodoc-typehints==1.22.0",
+        # Regression on sphinx-autodoc-typehints 1.21
+        # that creates some problematic docstrings
+        "sphinx-autodoc-typehints==1.20.2",
         "sphinx_copybutton==0.3.1",
         "ipykernel>=5.3, <7.0",
         "sphinxcontrib-mermaid~=0.7.1",

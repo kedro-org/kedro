@@ -93,7 +93,7 @@ class DryRunner(AbstractRunner):
         pipeline: Pipeline,
         catalog: DataCatalog,
         hook_manager: PluginManager = None,
-        session_id: str = None
+        session_id: str = None,
     ) -> None:
         """The method implementing dry pipeline running.
         Example logs output using this implementation:

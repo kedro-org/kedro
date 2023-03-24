@@ -276,14 +276,14 @@ To run a packaged Kedro project that has been installed on a Databricks cluster,
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import configure_project
 
-project_root = "<project_root>"
-configure_project(project_root)
+package_name = "<package_name>"
+configure_project(package_name)
 
-with KedroSession.create("<package_name>", project_root) as session:
+with KedroSession.create("<package_name>", package_name) as session:
     session.run()
 ```
 
-Replace `<project_name>` with your project's name and `<project_root>` with the path to your project directory.
+Replace `<package_name>` with your package's name.
 
 Use `configure_project()` to  run a packaged Kedro project interactively. Do **not** use `bootstrap_project()`, which is meant only for projects that haven't been packaged.
 

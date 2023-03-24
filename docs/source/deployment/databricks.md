@@ -289,4 +289,6 @@ Use `configure_project()` to  run a packaged Kedro project interactively. Do **n
 
 The `package_name` keyword argument of `KedroSession.create()` currently does not have any effect and can be confusing. This argument will be removed in Kedro version 0.19, which is a breaking change. For now, you can safely ignore this argument.
 
-The entry-point of a packaged project (the `main()` method  of `src/<project_name>/__main__.py`) currently returns an exit code, which stops downstream processes from using its output. If you need to run your Kedro project interactively and use the results, consider using the `KedroSession` approach as shown above.
+```{note}
+The entry-point of a packaged project is the `main()` method  of `src/<project_name>/__main__.py`, and it returns an exit code, which stops downstream processes from using its output. If you need to run your Kedro project interactively and use the results, consider using the `KedroSession` approach as shown above.
+```

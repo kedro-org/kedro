@@ -22,7 +22,7 @@ bash docs/kedro-datasets-docs.sh
 if [ "$action" == "linkcheck" ]; then
   sphinx-build -c docs/ -ETan -j auto -D language=en -b linkcheck docs/build/ docs/build/html
 elif [ "$action" == "docs" ]; then
-  python -m sphinx.cmd.build -c docs/ -ETa -j auto -D language=en docs/build/ docs/build/html
+  sphinx-build -c docs/ -ETa -j auto -D language=en docs/build/ docs/build/html
 fi
 
 # Clean up build artefacts

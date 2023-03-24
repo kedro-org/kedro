@@ -1,4 +1,4 @@
-# Running Kedro-Viz on Databricks
+# How to run Kedro-Viz on Databricks
 
 [Kedro-Viz](../visualisation/kedro-viz_visualisation.md) is a tool that allows you to visualise your Kedro pipeline. It is a standalone web application that runs on a web browser, it can be run on a local machine or on Databricks itself.
 

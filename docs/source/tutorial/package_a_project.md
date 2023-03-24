@@ -119,10 +119,7 @@ To run a packaged project it must first be installed. To install the project, ru
 pip install <path-to-wheel-file>
 ```
 
-Once your project is installed, it  can be run in two ways:
-
-- Using the project's CLI. 
-- xInteractively using Python code.
+Once your project is installed, it  can be run either using the project's CLI or interactively using Python code.
 
 To run the project using its CLI, you can either use the package name (simply `<package_name>` from the command line), or the package name followed by the `run` command (`<package_name> run`). To see a full list of the options that the project's CLI supports, you can run `<package_name> -h`.
 

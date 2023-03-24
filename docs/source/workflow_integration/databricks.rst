@@ -7,4 +7,4 @@ Databricks integration
    :caption: Databricks
 
    databricks_workspace.md
-   visualisation.md
+   databricks_visualisation.md

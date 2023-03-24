@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set  # noqa
 
 import fsspec
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, OmegaConf
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
@@ -311,7 +311,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise ValueError(f"{dup_str}")
 
     @staticmethod
-    def _resolve_environment_variables(config: Dict[str, Any]) -> None:
+    def _resolve_environment_variables(config: DictConfig) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
         them in-place, clearing the resolver after the operation is complete if
         it was not registered beforehand.

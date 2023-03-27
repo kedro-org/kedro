@@ -147,10 +147,10 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Kedro in your workflow
+   :caption: Integrations
 
-   workflow_integration/databricks.rst
-   workflow_integration/pyspark.rst
+   integrations/databricks.rst
+   integrations/pyspark.rst
 
 .. toctree::
    :maxdepth: 2

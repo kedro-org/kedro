@@ -46,8 +46,10 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
         git_data["dirty"] = bool(git_status_res.decode().strip())
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
-        logging.getLogger(__name__).debug("Unable to git describe %s", project_path)
+    except Exception:
+        logger = logging.getLogger(__name__)
+        logger.debug("Unable to git describe %s", project_path)
+        logger.debug(traceback.format_exc())
         return {}
 
     return {"git": git_data}
@@ -157,6 +159,8 @@ class KedroSession:
             save_on_close=save_on_close,
             conf_source=conf_source,
         )
+        # we need a ConfigLoader registered in order to be able to set up logging
+        session._setup_logging()
 
         # have to explicitly type session_data otherwise mypy will complain
         # possibly related to this: https://github.com/python/mypy/issues/1430
@@ -187,8 +191,6 @@ class KedroSession:
 
         session._store.update(session_data)
 
-        # we need a ConfigLoader registered in order to be able to set up logging
-        session._setup_logging()
         return session
 
     def _get_logging_config(self) -> Dict[str, Any]:

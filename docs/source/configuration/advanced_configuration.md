@@ -6,7 +6,7 @@ Each of these classes are alternatives for the default `ConfigLoader` and have d
 
 ## TemplatedConfigLoader
 
-Kedro provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
+Kedro provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
 
 ```python
 from kedro.config import TemplatedConfigLoader  # new import
@@ -34,7 +34,7 @@ folders:
     fea: "04_feature"
 ```
 
-To point your `TemplatedConfigLoader` to the globals file, add it to the the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md):
+To point your `TemplatedConfigLoader` to the globals file, add it to the the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
 
 ```python
 CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
@@ -73,7 +73,7 @@ Alternatively, you can declare which values to fill in the template through a di
 }
 ```
 
-To point your `TemplatedConfigLoader` to the globals dictionary, add it to the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](settings.md):
+To point your `TemplatedConfigLoader` to the globals dictionary, add it to the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
 
 ```python
 CONFIG_LOADER_ARGS = {
@@ -107,7 +107,7 @@ From Kedro 0.18.5 you can use the [`OmegaConfigLoader`](/kedro.config.OmegaConfi
 
 `OmegaConfigLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
 
-To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
+To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
 
 ```python
 from kedro.config import OmegaConfigLoader  # new import
@@ -119,13 +119,13 @@ CONFIG_LOADER_CLASS = OmegaConfigLoader
 
 This section contains a set of guidance for advanced configuration requirements of standard Kedro projects:
 
-* [How to change which configuration files are loaded]()
-* [How to ensure non default configuration files get loaded]()
-* [How to bypass the configuration loading rules]()
-* [How to use Jinja2 syntax in configuration]()
-* [How to do templating with the `OmegaConfigLoader`]()
-* [How to use custom resolvers in the `OmegaConfigLoader`]()
-* [How to load credentials through environment variables]()
+* [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
+* [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
+* [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
+* [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
+* [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+* [How to use custom resolvers in the `OmegaConfigLoader`](#how-to-use-custom-resolvers-in-the-omegaconfigloader)
+* [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
 ### How to change which configuration files are loaded
 If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
@@ -294,7 +294,7 @@ model_options:
 
 ### How to load credentials through environment variables
 The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `OmegaConfigLoader` and the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
-To use the `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](settings.md):
+To use the `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
 
 ```python
 from kedro.config import OmegaConfigLoader  # new import

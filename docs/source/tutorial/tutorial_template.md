@@ -80,4 +80,4 @@ To do this, add them to `conf/local/credentials.yml` (some examples are included
 * Do not commit notebook output cells (data can easily sneak into notebooks when you don't delete output cells).
 * Do not commit credentials in `conf/`. Use only the `conf/local/` folder for sensitive information like access credentials.
 
-You can find additional information in the [advanced documentation on configuration](../kedro_project_setup/configuration.md).
+You can find additional information in the [documentation on configuration](../configuration/configuration_basics.md).

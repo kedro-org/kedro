@@ -77,16 +77,16 @@ If you want to change change the way configuration is loaded, you can either [cu
 
 This section contains a set of guidance for the most common configuration requirements of standard Kedro projects:
 
-* [How to change the setting for a configuration source folder]()
-* [How to change the configuration source folder at run time]()
-* [How to read configuration from a compressed file]()
-* [How to directly access configuration]()
-* [How to specify additional configuration environments ]()
-* [How to change the default overriding environment]()
-* [How to use only one configuration environment]()
+* [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
+* [How to change the configuration source folder at run time](#how-to-change-the-configuration-source-folder-at-runtime)
+* [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
+* [How to access configuration in code](#how-to-access-configuration-in-code)
+* [How to specify additional configuration environments ](#how-to-specify-additional-configuration-environments)
+* [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
+* [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
 
 ### How to change the setting for a configuration source folder
-To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](settings.md) as follows:
+To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md) as follows:
 
 ```python
 CONF_SOURCE = "new_conf"

@@ -342,7 +342,11 @@ def exec_notebook(context, command):
 
 @then('I wait for the jupyter webserver to run for "{time:d}" seconds')
 def wait_for_notebook_to_run(context, time):
-    sleep(time)
+    one_line_output = context.result.stdout.readline()
+    print(one_line_output)
+    while one_line_output != "sajid":
+        one_line_output = context.result.stdout.readline()
+        print(one_line_output)
 
 
 @when("Wait until the process is finished")

@@ -1,10 +1,9 @@
+# Databricks integration
 
-Databricks integration
-=============================================
+```{toctree}
+:caption: Databricks
+:maxdepth: 2
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Databricks
-
-   databricks_workspace.md
-   databricks_visualisation.md
+databricks_workspace.md
+visualisation.md
+```

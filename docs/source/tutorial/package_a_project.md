@@ -143,7 +143,8 @@ Once the packaged project is installed, you will need to add:
 * a `conf` folder
 * a `data` folder if the pipeline loads/saves local data
 * a `logs` folder if the project uses logging.
-Alternatively, they can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
+
+Alternatively, you can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
 kedro run --conf-source <path-to-compressed-config>.tar.gz
 ```
 

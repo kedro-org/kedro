@@ -52,7 +52,7 @@ pytest~=7.2
 kedro~=0.18.7
 kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.1
 kedro-telemetry~=0.2.0
-kedro-viz~=5.0 # Visualise pipelines
+kedro-viz~=6.0 # Visualise pipelines
 
 # For modelling in the data science pipeline
 scikit-learn~=1.0

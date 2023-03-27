@@ -153,7 +153,7 @@ class DataCatalog:
             layers: A dictionary of data set layers. It maps a layer name
                 to a set of data set names, according to the
                 data engineering convention. For more details, see
-                https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention
+                https://docs.kedro.org/en/stable/resources/glossary.html#layers-data-engineering-convention
 
         Example:
         ::

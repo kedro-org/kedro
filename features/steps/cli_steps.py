@@ -5,7 +5,6 @@ import shutil
 import textwrap
 from pathlib import Path
 from time import time, sleep
-import polling
 
 import behave
 import requests
@@ -588,7 +587,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     try:
         _check_service_up(context, url, "Jupyter Notebook")
     finally:
-        context.result.terminate()
+        context.result.kill()
 
 
 @then("docs should be generated")

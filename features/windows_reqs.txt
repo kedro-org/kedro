@@ -7,5 +7,3 @@ psutil==5.8.0
 requests~=2.20
 toml~=0.10.1
 PyYAML>=4.2, <7.0
-polling ~= 0.3
-

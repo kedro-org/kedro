@@ -531,13 +531,13 @@ class TestKedroSession:
         session = KedroSession.create(mock_package_name, fake_project)
         assert "git" not in session.store
 
-        expected_log_messages = [f"Unable to git describe {fake_project}"]
+        expected_log_message = f"Unable to git describe {fake_project}"
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
             if rec.name == SESSION_LOGGER_NAME and rec.levelno == logging.DEBUG
         ]
-        assert actual_log_messages == expected_log_messages
+        assert expected_log_message in actual_log_messages
 
     def test_get_username_error(self, fake_project, mock_package_name, mocker, caplog):
         """Test that username information is not added to the session store

@@ -341,11 +341,13 @@ def exec_notebook(context, command):
 
 
 @then('I wait for the jupyter webserver to run for "{time:d}" seconds')
-def wait_for_notebook_to_run(context, time):
-    one_line_output = context.result.stdout.readline()
-    while one_line_output != "JupyterLab extension loaded":
+def wait_for_notebook_to_run(context, timeout):
+    timeout_start = time.time()
+    while time.time() < timeout_start +timeout:
         one_line_output = context.result.stdout.readline()
-
+        if "Jupyter extension loaded" in one_line_output or time.time() > timeout:
+            break
+        time.sleep(1)
 
 @when("Wait until the process is finished")
 def wait(context):

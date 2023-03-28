@@ -98,9 +98,17 @@ Welcome to Kedro's documentation!
 
    kedro_project_setup/starters
    kedro_project_setup/dependencies
-   kedro_project_setup/configuration
    kedro_project_setup/session
    kedro_project_setup/settings
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Configuration
+
+   configuration/configuration_basics
+   configuration/credentials
+   configuration/parameters
+   configuration/advanced_configuration
 
 .. toctree::
    :maxdepth: 2

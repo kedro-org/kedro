@@ -28,11 +28,6 @@ with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
 with open("dependency/requirements.txt", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
 
-# get test dependencies and installs
-with open("test_requirements.txt", encoding="utf-8") as f:
-    test_requires = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
-
-
 # Get the long description from the README file
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
@@ -174,7 +169,6 @@ setup(
     python_requires=">=3.7, <3.11",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,
-    tests_require=test_requires,
     install_requires=requires,
     author="Kedro",
     entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},

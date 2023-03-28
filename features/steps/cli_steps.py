@@ -345,6 +345,7 @@ def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
     while time() < timeout_start + timeout:
         one_line_output = context.result.stdout.readline()
+        print(one_line_output)
         if "Jupyter extension loaded" in one_line_output or time() > timeout:
             break
         time.sleep(1)

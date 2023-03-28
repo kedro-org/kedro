@@ -593,7 +593,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     try:
         _check_service_up(context, url, "Jupyter Notebook")
     finally:
-        context.result.kill()
+        context.result.terminate()
 
 
 @then("docs should be generated")

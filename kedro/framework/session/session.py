@@ -159,8 +159,6 @@ class KedroSession:
             save_on_close=save_on_close,
             conf_source=conf_source,
         )
-        # we need a ConfigLoader registered in order to be able to set up logging
-        session._setup_logging()
 
         # have to explicitly type session_data otherwise mypy will complain
         # possibly related to this: https://github.com/python/mypy/issues/1430
@@ -168,7 +166,6 @@ class KedroSession:
             "package_name": session._package_name,
             "project_path": session._project_path,
             "session_id": session.session_id,
-            **_describe_git(session._project_path),
         }
 
         ctx = click.get_current_context(silent=True)
@@ -189,6 +186,11 @@ class KedroSession:
                 "Unable to get username. Full exception: %s", exc
             )
 
+        session._store.update(session_data)
+
+        # We need ConfigLoader and env to setup logging correctly
+        session._setup_logging()
+        session_data.update(**_describe_git(session._project_path))
         session._store.update(session_data)
 
         return session

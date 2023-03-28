@@ -46,8 +46,10 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
         git_data["dirty"] = bool(git_status_res.decode().strip())
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
-        logging.getLogger(__name__).debug("Unable to git describe %s", project_path)
+    except Exception:  # pylint: disable=broad-except
+        logger = logging.getLogger(__name__)
+        logger.debug("Unable to git describe %s", project_path)
+        logger.debug(traceback.format_exc())
         return {}
 
     return {"git": git_data}
@@ -164,7 +166,6 @@ class KedroSession:
             "package_name": session._package_name,
             "project_path": session._project_path,
             "session_id": session.session_id,
-            **_describe_git(session._project_path),
         }
 
         ctx = click.get_current_context(silent=True)
@@ -187,8 +188,11 @@ class KedroSession:
 
         session._store.update(session_data)
 
-        # we need a ConfigLoader registered in order to be able to set up logging
+        # We need ConfigLoader and env to setup logging correctly
         session._setup_logging()
+        session_data.update(**_describe_git(session._project_path))
+        session._store.update(session_data)
+
         return session
 
     def _get_logging_config(self) -> Dict[str, Any]:

@@ -46,7 +46,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
         git_data["dirty"] = bool(git_status_res.decode().strip())
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         logger = logging.getLogger(__name__)
         logger.debug("Unable to git describe %s", project_path)
         logger.debug(traceback.format_exc())

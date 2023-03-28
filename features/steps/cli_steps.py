@@ -343,11 +343,12 @@ def exec_notebook(context, command):
 def wait_for_notebook_to_run(context, timeout):
     timeout_start = time.time()
     while time.time() < timeout_start + timeout:
-        one_line_output = context.result.stdout.readline()
-        print(one_line_output)
-        if "Jupyter extension loaded" in one_line_output:
+        stdout = context.result.stdout.readline()
+        print(stdout)
+        stderr = context.result.stderr.readline()
+        print(stderr)
+        if "http://127.0.0.1:" in stdout or "http://127.0.0.1:" in stderr:
             break
-        time.sleep(1)
 
 
 @when("Wait until the process is finished")

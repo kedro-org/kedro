@@ -4,8 +4,7 @@ import json
 import shutil
 import textwrap
 from pathlib import Path
-from time import time, sleep
-
+import time
 import behave
 import requests
 import toml
@@ -342,11 +341,11 @@ def exec_notebook(context, command):
 
 @then('I wait for the jupyter webserver to run for "{timeout:d}" seconds')
 def wait_for_notebook_to_run(context, timeout):
-    timeout_start = time()
-    while time() < timeout_start + timeout:
+    timeout_start = time.time()
+    while time.time() < timeout_start + timeout:
         one_line_output = context.result.stdout.readline()
         print(one_line_output)
-        if "Jupyter extension loaded" in one_line_output or time() > timeout:
+        if "Jupyter extension loaded" in one_line_output:
             break
         time.sleep(1)
 

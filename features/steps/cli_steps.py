@@ -336,16 +336,16 @@ def exec_notebook(context, command):
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
     context.result = ChildTerminatingPopen(
-        cmd, env=context.env, cwd=str(context.root_project_dir)
+        cmd, env=context.env, cwd=str(context.root_project_dir), universal_newlines=True
     )
 
 
 @then('I wait for the jupyter webserver to run for "{timeout:d}" seconds')
 def wait_for_notebook_to_run(context, timeout):
-    timeout_start = time.time()
-    while time.time() < timeout_start +timeout:
+    timeout_start = time()
+    while time() < timeout_start + timeout:
         one_line_output = context.result.stdout.readline()
-        if "Jupyter extension loaded" in one_line_output or time.time() > timeout:
+        if "Jupyter extension loaded" in one_line_output or time() > timeout:
             break
         time.sleep(1)
 

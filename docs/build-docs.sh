@@ -12,7 +12,7 @@ rm -rf kedro/datasets
 bash docs/kedro-datasets-docs.sh
 
 if [ "$action" == "linkcheck" ]; then
-  sphinx-build -ETan -j auto -D language=en -b linkcheck -d docs/build/doctrees docs/source docs/build/linkcheck
+  sphinx-build -WETan -j auto -D language=en -b linkcheck -d docs/build/doctrees docs/source docs/build/linkcheck
 elif [ "$action" == "docs" ]; then
-  sphinx-build -ETa -j auto -D language=en -b html -d docs/build/doctrees docs/source docs/build/html
+  sphinx-build -WETa -j auto -D language=en -b html -d docs/build/doctrees docs/source docs/build/html
 fi

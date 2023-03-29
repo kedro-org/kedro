@@ -15,6 +15,7 @@
 
 ## Bug fixes and other changes
 * Improvements to documentation about configuration.
+* Improvements to Jupyter E2E tests.
 
 ## Breaking changes to the API
 

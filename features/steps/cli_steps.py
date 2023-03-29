@@ -347,7 +347,9 @@ def wait_for_notebook_to_run(context, timeout):
         stdout = context.result.stdout.readline()
         if "http://127.0.0.1:" in stdout:
             break
-    raise TimeoutError("Failed to run Jupyter server in time")
+    
+    if time() < timeout_start + timeout:
+        raise TimeoutError("Failed to run Jupyter server in time")
 
 
 @when("Wait until the process is finished")

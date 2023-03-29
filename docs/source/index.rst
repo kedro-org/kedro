@@ -53,33 +53,21 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Introduction
 
-   introduction/introduction
-
-.. toctree::
-   :maxdepth: 2
-   :caption: First steps
-
-   get_started/install
-   get_started/new_project
-   get_started/kedro_concepts
+   introduction/introduction_index.rst
 
 .. toctree::
    :maxdepth: 2
-   :caption: Next steps: Tutorial
 
-   tutorial/spaceflights_tutorial
-   tutorial/tutorial_template
-   tutorial/set_up_data
-   tutorial/create_a_pipeline
-   tutorial/add_another_pipeline
-   tutorial/package_a_project
-   tutorial/spaceflights_tutorial_faqs
+   get_started/get_started.rst
 
 .. toctree::
    :maxdepth: 2
-   :caption: Visualisation with Kedro-Viz
+
+   tutorial/tutorial.rst   
+
+.. toctree::
+   :maxdepth: 2
 
    visualisation/kedro-viz_visualisation
    visualisation/visualise_charts_with_plotly

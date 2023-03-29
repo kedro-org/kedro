@@ -188,7 +188,6 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-<<<<<<< HEAD
    :caption: Databricks integration
 
    databricks_integration/visualisation
@@ -201,14 +200,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-<<<<<<< HEAD
-<<<<<<< HEAD
    :caption: FAQs
-=======
-=======
->>>>>>> 8d4757f6 (Revise index.rst)
-   :caption: Resources
->>>>>>> 03ed7288 (Revise index.rst)
 
    faq/faq
    faq/architecture_overview
@@ -216,11 +208,8 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-=======
->>>>>>> main
    :caption: Resources
 
-   faq/faq
    resources/glossary
 
 

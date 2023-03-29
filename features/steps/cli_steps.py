@@ -128,6 +128,11 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
     response = requests.get(url)
     response.raise_for_status()
     data = response.text
+    print("*********")
+    print(string)
+    print("*********")
+    print(data)
+    print("*********")
     assert string in data
     assert context.result.poll() is None
 

@@ -10,7 +10,7 @@ Kedro uses configuration to make your code reproducible when it has to reference
 
 You can copy this file and reference additional locations for the same datasets. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while copying and updating a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets that you are using for prototyping your data pipeline(s).
 
-Built-in functionality for `conf/local/` to overwrite `conf/base/` is [described in the documentation about configuration](../kedro_project_setup/configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
+Built-in functionality for `conf/local/` to overwrite `conf/base/` is [described in the documentation about configuration](../configuration/configuration_basics.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
 
 The Data Catalog also works with the `credentials.yml` file in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
 
@@ -372,12 +372,12 @@ scooters:
 
 ## Adding parameters
 
-You can [configure parameters](../kedro_project_setup/configuration.md#load-parameters) for your project and [reference them](../kedro_project_setup/configuration.md#use-parameters) in your nodes. To do this, use the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry or metadata you wish on the `DataCatalog`.
+You can [configure parameters](../configuration/parameters.md) for your project and [reference them](../configuration/parameters.md#how-to-use-parameters) in your nodes. To do this, use the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry or metadata you wish on the `DataCatalog`.
 
 
 ## Feeding in credentials
 
-Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../kedro_project_setup/configuration.md#aws-credentials). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
+Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 

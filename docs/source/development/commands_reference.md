@@ -335,7 +335,7 @@ the names of relevant nodes, datasets, envs, etc. in your project.
 | `kedro run --namespace=<namespace>`                                 | Run only nodes with the specified namespace                                                                                                                                                                                                             |
 | `kedro run --config=<config_file_name>.yml`                         | Specify all command line options in a named YAML configuration file                                                                                                                                                                                     |
 | `kedro run --conf-source=<path_to_config_directory>`                | Specify a new source directory for configuration files                                                                                                                                                                                                  |
-| `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../kedro_project_setup/configuration.md#configuration-with-omegaconf). Specify a compressed config file in `zip` or `tar` format.                                                                  |
+| `kedro run --conf-source=<path_to_compressed file>`                 | Only possible when using the [``OmegaConfigLoader``](../configuration/advanced_configuration.md#omegaconfigloader). Specify a compressed config file in `zip` or `tar` format.                                                                  |
 | `kedro run --params=<param_key1>:<value1>,<param_key2>:<value2>`    | Does a parametrised kedro run with `{"param_key1": "value1", "param_key2": 2}`. These will take precedence over parameters defined in the `conf` directory. Additionally, dot (`.`) syntax can be used to address nested keys like `parent.child:value` |
 
 You can also combine these options together, so the following command runs all the nodes from `split` to `predict` and `report`:
@@ -346,7 +346,7 @@ kedro run --from-nodes=split --to-nodes=predict,report
 
 This functionality is extended to the `kedro run --config=config.yml` command, which allows you to [specify run commands in a configuration file](../nodes_and_pipelines/run_a_pipeline.md#configure-kedro-run-arguments).
 
-A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../kedro_project_setup/configuration.md#parameters).
+A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../configuration/parameters.md).
 
 ### Deploy the project
 

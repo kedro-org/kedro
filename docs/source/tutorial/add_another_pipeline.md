@@ -112,7 +112,7 @@ model_options:
 
 Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
 
-More information about [parameters is available in the configuration documentation](../kedro_project_setup/configuration.md#parameters).
+More information about [parameters is available in the configuration documentation](../configuration/parameters.md).
 
 ## Model registration
 

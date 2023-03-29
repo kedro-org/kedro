@@ -64,7 +64,7 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
 
-   tutorial/tutorial.md   
+   tutorial/tutorial.md
 
 .. toctree::
    :maxdepth: 2

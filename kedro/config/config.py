@@ -86,7 +86,7 @@ class ConfigLoader(AbstractConfigLoader):
             base_env: Name of the base environment. Defaults to `"base"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths.
-            default_run_env: Name of the base environment. Defaults to `"local"`.
+            default_run_env: Name of the default run environment. Defaults to `"local"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths. Can be overriden by supplying the `env` argument.
         """

@@ -340,13 +340,14 @@ def exec_notebook(context, command):
     )
 
 
-@then('I wait for the jupyter webserver to run for "{timeout:d}" seconds')
+@then('I wait for the jupyter webserver to run for up to "{timeout:d}" seconds')
 def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
     while time() < timeout_start + timeout:
         stdout = context.result.stdout.readline()
         if "http://127.0.0.1:" in stdout:
             break
+    raise TimeoutError("Failed to run Jupyter server in time")
 
 
 @when("Wait until the process is finished")

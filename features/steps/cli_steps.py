@@ -4,7 +4,8 @@ import json
 import shutil
 import textwrap
 from pathlib import Path
-import time
+from time import time
+
 import behave
 import requests
 import toml
@@ -125,14 +126,9 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
         string: The string to be checked.
 
     """
-    response = requests.get(url)
+    response = requests.get(url, timeout=1.0)
     response.raise_for_status()
     data = response.text
-    print("*********")
-    print(string)
-    print("*********")
-    print(data)
-    print("*********")
     assert string in data
     assert context.result.poll() is None
 
@@ -346,12 +342,10 @@ def exec_notebook(context, command):
 
 @then('I wait for the jupyter webserver to run for "{timeout:d}" seconds')
 def wait_for_notebook_to_run(context, timeout):
-    timeout_start = time.time()
-    while time.time() < timeout_start + timeout:
+    timeout_start = time()
+    while time() < timeout_start + timeout:
         stdout = context.result.stdout.readline()
-        print(stdout)
         stderr = context.result.stderr.readline()
-        print(stderr)
         if "http://127.0.0.1:" in stdout or "http://127.0.0.1:" in stderr:
             break
 
@@ -596,7 +590,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        _check_service_up(context, url, "Jupyter Notebook")
+        _check_service_up(context, url, '<a href="/lab"')
     finally:
         context.result.terminate()
 

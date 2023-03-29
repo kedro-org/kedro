@@ -345,8 +345,7 @@ def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
     while time() < timeout_start + timeout:
         stdout = context.result.stdout.readline()
-        stderr = context.result.stderr.readline()
-        if "http://127.0.0.1:" in stdout or "http://127.0.0.1:" in stderr:
+        if "http://127.0.0.1:" in stdout:
             break
 
 

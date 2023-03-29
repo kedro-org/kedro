@@ -9,7 +9,7 @@ Feature: Jupyter targets in new project
     Then I should get a message including "The kernel has been created successfully at"
 
   Scenario: Execute jupyter notebook target
-    When I execute the kedro jupyter command "notebook --no-browser --debug"
+    When I execute the kedro jupyter command "notebook --no-browser"
     Then I wait for the jupyter webserver to run for "360" seconds
     Then jupyter notebook should run on port 8888
 

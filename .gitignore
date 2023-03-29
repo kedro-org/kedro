@@ -133,6 +133,10 @@ venv.bak/
 # mkdocs documentation
 /site
 /kedro/framework/html
+
+# Sphinx documentation
+# Additional files created by sphinx.ext.autosummary
+# Some of them are actually tracked to control the output
 /docs/source/kedro.*
 
 # mypy

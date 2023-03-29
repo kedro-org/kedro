@@ -32,17 +32,37 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
+class JupyterCommandGroup(click.Group):
+    """A custom class for ordering the `kedro jupyter` command groups"""
+
+    def list_commands(self, ctx):
+        """List commands according to a custom order"""
+        return ["setup", "notebook", "lab", "convert"]
+
+
 # pylint: disable=missing-function-docstring
 @click.group(name="Kedro")
 def jupyter_cli():  # pragma: no cover
     pass
 
 
-@jupyter_cli.group()
+@jupyter_cli.group(cls=JupyterCommandGroup)
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.
     """
+
+
+@forward_command(jupyter, "setup", forward_help=True)
+@click.pass_obj  # this will pass the metadata as first argument
+def setup(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-argument
+    """Initialise the Jupyter Kernel for a kedro project."""
+    _check_module_importable("ipykernel")
+    validate_settings()
+
+    kernel_name = f"kedro_{metadata.package_name}"
+    kernel_path = _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
+    click.secho(f"\nThe kernel has been created successfully at {kernel_path}")
 
 
 @forward_command(jupyter, "notebook", forward_help=True)
@@ -96,7 +116,7 @@ def jupyter_lab(
     )
 
 
-def _create_kernel(kernel_name: str, display_name: str) -> None:
+def _create_kernel(kernel_name: str, display_name: str) -> str:
     """Creates an IPython kernel for the kedro project. If one with the same kernel_name
     exists already it will be replaced.
 
@@ -129,6 +149,9 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
     Args:
         kernel_name: Name of the kernel to create.
         display_name: Kernel name as it is displayed in the UI.
+
+    Returns:
+        String of the path of the created kernel.
 
     Raises:
         KedroCliError: When kernel cannot be setup.
@@ -164,6 +187,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
         raise KedroCliError(
             f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
         ) from exc
+    return kernel_path
 
 
 @command_with_verbosity(jupyter, "convert")

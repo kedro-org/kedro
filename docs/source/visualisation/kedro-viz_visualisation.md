@@ -14,7 +14,7 @@ Generate a copy of the spaceflights tutorial project with all the code in place 
 kedro new --starter=spaceflights
 ```
 
-When prompted for a project name, you can enter anything, but we will assume `Kedro Tutorial` throughout.
+When prompted for a project name, you can enter anything, but we will assume `Spaceflights` throughout.
 
 When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro-Viz:
 
@@ -50,9 +50,8 @@ You should see the following:
 
 If a visualisation panel opens up and a pipeline is not visible, refresh the view, and check that your tutorial project code is complete if you've not generated it from the starter template. If you still don't see the visualisation, the Kedro community can help:
 
-* use the [#questions channel](https://slack.kedro.org/) on our Slack channel (which replaces our Discord server) to ask the community for help
-* search the [searchable archive of Discord discussions](https://linen-discord.kedro.org/)
-
+* use the [#questions channel](https://slack.kedro.org/) on our Slack channel to ask the community for help
+* search the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro)
 
 ### Exit an open visualisation
 
@@ -76,7 +75,7 @@ The `autoreload` flag reflects changes to the project as they happen. For exampl
 
 By convention, a [pipeline can be defined as having different layers](../resources/glossary.md#layers-data-engineering-convention) according to how data is processed, which makes it easier to collaborate.
 
-For example, the [data engineering convention](../faq/faq.md#what-is-data-engineering-convention) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
+For example, the [data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
 You can add a `layer` attribute to the datasets in the Data Catalog, which is reflected in the Kedro-Viz visualisation.
 

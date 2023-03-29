@@ -215,13 +215,13 @@ linkcheck_ignore = [
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
-    "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
-    "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
     # "anchor not found" but it's a valid selector for code examples
     "https://docs.delta.io/latest/delta-update.html#language-python",
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
+    "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
+    "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password"
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -572,3 +572,5 @@ myst_heading_anchors = 5
 mermaid_output_format = "png"
 # https://github.com/mermaidjs/mermaid.cli#linux-sandbox-issue
 mermaid_params = ["-p", here / "puppeteer-config.json", "-s", "2"]
+# https://github.com/kedro-org/kedro/issues/2451
+mermaid_version = mermaid_init_js = None

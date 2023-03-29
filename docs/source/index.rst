@@ -59,16 +59,15 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Get started
+   :caption: First steps
 
    get_started/install
-   get_started/kedro_concepts
    get_started/new_project
-   get_started/summary
+   get_started/kedro_concepts
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorial
+   :caption: Next steps: Tutorial
 
    tutorial/spaceflights_tutorial
    tutorial/tutorial_template
@@ -99,9 +98,17 @@ Welcome to Kedro's documentation!
 
    kedro_project_setup/starters
    kedro_project_setup/dependencies
-   kedro_project_setup/configuration
    kedro_project_setup/session
    kedro_project_setup/settings
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Configuration
+
+   configuration/configuration_basics
+   configuration/credentials
+   configuration/parameters
+   configuration/advanced_configuration
 
 .. toctree::
    :maxdepth: 2
@@ -195,6 +202,7 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
 <<<<<<< HEAD
+<<<<<<< HEAD
    :caption: FAQs
 =======
 =======
@@ -208,10 +216,13 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+=======
+>>>>>>> main
    :caption: Resources
 
-   resources/logos
+   faq/faq
    resources/glossary
+
 
 .. toctree::
    :maxdepth: 2

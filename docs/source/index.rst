@@ -54,24 +54,22 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
 
-   introduction/introduction_index.rst
+   introduction/introduction_index.md
 
 .. toctree::
    :maxdepth: 2
 
-   get_started/get_started.rst
+   get_started/get_started.md
 
 .. toctree::
    :maxdepth: 2
 
-   tutorial/tutorial.rst   
+   tutorial/tutorial.md   
 
 .. toctree::
    :maxdepth: 2
 
-   visualisation/kedro-viz_visualisation
-   visualisation/visualise_charts_with_plotly
-   visualisation/experiment_tracking
+   visualisation/visualisation.md
 
 .. toctree::
    :maxdepth: 2

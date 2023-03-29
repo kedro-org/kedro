@@ -129,6 +129,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env=env,
             runtime_params=runtime_params,
         )
+        if not self.runtime_params:
+            self.runtime_params = {}
 
     def __getitem__(self, key) -> Dict[str, Any]:
         """Get configuration files by key, load and merge them, and
@@ -275,7 +277,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return {}
         if len(aggregate_config) == 1:
             return list(aggregate_config)[0]
-        return dict(OmegaConf.merge(*aggregate_config))
+        return OmegaConf.to_container(
+            OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
+        )
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

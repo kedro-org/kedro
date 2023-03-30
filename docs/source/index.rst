@@ -196,7 +196,7 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: PySpark integration
 
-   tools_integration/pyspark
+   integrations/pyspark
 
 .. toctree::
    :maxdepth: 2

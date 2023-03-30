@@ -44,9 +44,6 @@ linkcheck:
 	pip install -e ".[docs]"
 	./docs/build-docs.sh "linkcheck"
 
-devserver: build-docs
-	cd docs && npm install && npm start
-
 package: clean install
 	python setup.py sdist bdist_wheel
 

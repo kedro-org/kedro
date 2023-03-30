@@ -5,5 +5,5 @@
 :maxdepth: 2
 
 databricks_workspace.md
-visualisation.md
+databricks_visualisation.md
 ```

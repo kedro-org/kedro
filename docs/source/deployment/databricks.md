@@ -279,7 +279,7 @@ from kedro.framework.startup import configure_project
 package_name = "<package_name>"
 configure_project(package_name)
 
-with KedroSession.create("<package_name>", package_name) as session:
+with KedroSession.create(package_name) as session:
     session.run()
 ```
 

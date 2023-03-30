@@ -154,6 +154,13 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Integrations
+
+   integrations/databricks.rst
+   integrations/pyspark.rst
+
+.. toctree::
+   :maxdepth: 2
    :caption: Development
 
    development/set_up_vscode
@@ -174,11 +181,16 @@ Welcome to Kedro's documentation!
    deployment/prefect
    deployment/kubeflow
    deployment/aws_batch
-   deployment/databricks
    deployment/aws_sagemaker
    deployment/aws_step_functions
    deployment/airflow_astronomer
    deployment/dask
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Databricks integration
+
+   databricks_integration/visualisation
 
 .. toctree::
    :maxdepth: 2
@@ -188,9 +200,16 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Resources
+   :caption: FAQs
 
    faq/faq
+   faq/architecture_overview
+   faq/kedro_principles
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Resources
+
    resources/glossary
 
 

@@ -123,6 +123,8 @@ Once your project is installed, it can be run either using the project's CLI or 
 
 To run your project using its CLI, run `<project_name>`. To see a full list of the options that the project's CLI supports, you can run `<project_name> --help`.
 
+Another way of doing this is to run `python -m <package_name>`. You an also use the CLI in this way, to see a full list of options, you cna run `python -m <package_name> --help`.
+
 To run your packaged project interactively using code, you can import from the project:
 
 ```python

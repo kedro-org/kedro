@@ -190,7 +190,7 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Databricks integration
 
-   databricks_integration/visualisation
+   integrations/databricks
 
 .. toctree::
    :maxdepth: 2

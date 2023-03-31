@@ -118,6 +118,7 @@ extras_require = {
         # that creates some problematic docstrings
         "sphinx-autodoc-typehints==1.20.2",
         "sphinx_copybutton==0.3.1",
+        "sphinx-notfound-page",
         "ipykernel>=5.3, <7.0",
         "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=1.0.0",

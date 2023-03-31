@@ -31,7 +31,7 @@ We will demonstrate this using an example based on the Kedro PySpark Iris starte
 
 Initialize a Kedro project with the PySpark Iris starter. To do this, run the following command in your local environment:
 
-```{bash}
+```bash
 kedro new --starter=pyspark-iris
 ```
 
@@ -39,7 +39,7 @@ Name your new project `iris-databricks` for observability.
 
 This command will create a new Kedro project using the PySpark Iris starter template. After creating the project, initialize Git for the Kedro project by running the following commands:
 
-```{bash}
+```bash
 cd <project_root>
 git init
 ```
@@ -50,7 +50,7 @@ Create a new Git repository with your Git provider. Once the repository is set u
 
 To sync your local Git repository with the remote repository stored on your Git provider, use the following commands:
 
-```{python}
+```python
 git remote add origin <your-git-repository-url>
 git add .
 git commit -m "Initial commit"
@@ -95,7 +95,7 @@ To run the Python code from your Databricks Repo, [create a new Databricks Noteb
 
 Before you import and run your Python code, you'll need to install your project's dependencies. Your project has a `requirements.txt` file for this purpose. Install the dependencies using the %pip magic command in a new cell in your notebook:
 
-```{bash}
+```bash
 %pip install -r "/Repos/<your_username>/iris-databricks/requirements.txt"
 ```
 
@@ -107,7 +107,7 @@ In this demonstration project, you will upload the project data to DBFS as the P
 
 There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. Use the following Databricks CLI command to upload your data:
 
-```{bash}
+```bash
 databricks fs cp --recursive /data dbfs:/root/projects/iris-databricks/data
 ```
 
@@ -115,7 +115,7 @@ The --recursive flag ensures that the entire folder and its contents are uploade
 
 To ensure that your folder has been successfully uploaded to DBFS, you can list the contents of the destination folder in DBFS using the following command:
 
-```{bash}
+```bash
 databricks fs ls dbfs:/path/to/dbfs/folder
 ```
 
@@ -125,7 +125,7 @@ You should see the contents of the project's `data/` directory.
 
 To run your project in your notebook, enter the following code in a new cell:
 
-```{python}
+```python
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 project_root = "/Repos/<your_username>/iris-databricks/"
@@ -138,7 +138,7 @@ Replace `<your_username>` with your Databricks username such that `project_root`
 
 Run this newly created cell to start a run of your project on the attached cluster. You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
 
-```{bash}
+```bash
 ...
 [08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
                     INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
@@ -155,7 +155,7 @@ Now that your project has run successfully once, you can make changes to your pr
 
 To isolate your changes from the main branch of your project, you will modify your project in a new feature branch. To create a new Git branch and check it out, use the following command from your project's root directory.
 
-```{bash}
+```bash
 git branch feat/modified-classifier
 git checkout feat/modified-classifier
 ```
@@ -164,7 +164,7 @@ git checkout feat/modified-classifier
 
 Next, modify the given Python code in your local development environment to create predictions using a three-nearest neighbour classifier. A three-nearest neighbour classifier works by finding the most common class among the three closest neighbours to make a prediction. Modify the code for `make_predictions` in the file `<project_root>/src/<package_name>/node.py` to the following:
 
-```{python}
+```python
 def make_predictions(
     X_train: pd.DataFrame, X_test: pd.DataFrame, y_train: pd.DataFrame
 ) -> pd.DataFrame:
@@ -194,13 +194,13 @@ def make_predictions(
 
 The next step is to commit the modified code to your repository. Check that you have the `feat/modified-classifier` branch checked out using the following command:
 
-```{bash}
+```bash
 git branch
 ```
 
 You should see the following output:
 
-```{bash}
+```bash
 * feat/modified-classifier
   main
 ```
@@ -209,7 +209,7 @@ The `*` character next to `feat/modified-classifier` indicates that this is the 
 
 Now push your changes to your remote repository:
 
-```{bash}
+```bash
 git push origin --set-upstream feat/modified-classifier
 ```
 
@@ -223,7 +223,7 @@ Next, check the available branches. Click on the "Branches" button located in th
 
 Return to your Databricks notebook. Re-run the cells you used to run your project previously. The project will now run again, giving output similar to the following:
 
-```{bash}
+```bash
 ...
 [08/09/22 11:23:30] INFO     Model has accuracy of X.XXX on test data.                                        nodes.py:74
                     INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
@@ -252,7 +252,7 @@ To synchronize the main branch of your Databricks repository with your local mac
 1. Click the Push button located in the upper-right corner of the Databricks Repos UI. This will push the merged changes to your remote Git provider.
 2. In your local environment, run the following commands:
 
-```{bash}
+```bash
 git pull
 git checkout main
 ```

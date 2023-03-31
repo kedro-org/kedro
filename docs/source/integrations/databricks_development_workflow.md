@@ -1,20 +1,19 @@
 # Development Workflow
 
-This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos. This hybrid workflow involves developing your Kedro project using a local Integrated Development Environment (IDE) and using Databricks notebooks for testing purposes, this approach has several advantages, it allows for:
+This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos. This hybrid workflow involves developing your Kedro project using a local Integrated Development Environment (IDE) and using Databricks notebooks for testing purposes. This guide demonstrates this workflow using an example based on the Kedro PySpark Iris starter.
+This workflow has several important advantages, it allows for:
 
 - Use of powerful development features offered by an IDE that are not available on Databricks notebooks.
-- Ensuring version control for your project.
-- Enhanced multiuser development.
+- Version control of your project.
+- Multiuser development.
 
-An IDE offers various benefits for development:
+An IDE offers important benefits for development:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
-- Linters like pylint or flake8 can be integrated to catch potential issues in your code.
+- Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
 - Static type checkers like mypy can check types in your code, helping to identify potential type-related issues early in the development process.
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
-
-We will demonstrate this using an example based on the Kedro PySpark Iris starter. This workflow also enables multiuser collaboration on a Kedro project and facilitates best practices by keeping project code version controlled.
 
 ## Prerequisites
 

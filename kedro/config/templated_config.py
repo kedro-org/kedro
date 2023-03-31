@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 import jmespath
 
-from kedro.config import AbstractConfigLoader
+from kedro.config.abstract_config import AbstractConfigLoader
 from kedro.config.common import _get_config_from_patterns, _remove_duplicates
 
 IDENTIFIER_PATTERN = re.compile(

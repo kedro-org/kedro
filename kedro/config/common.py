@@ -10,7 +10,7 @@ from warnings import warn
 
 from yaml.parser import ParserError
 
-from kedro.config import BadConfigException, MissingConfigException
+from kedro.config.abstract_config import BadConfigException, MissingConfigException
 
 SUPPORTED_EXTENSIONS = [
     ".yml",

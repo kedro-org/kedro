@@ -109,17 +109,24 @@ extras_require = {
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
     "docs": [
+        # docutils>=0.17 changed the HTML
+        # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
         "docutils==0.16",
-        "sphinx~=3.4.3",
-        "sphinx_rtd_theme==1.1.1",
-        "nbsphinx==0.8.1",
-        "nbstripout~=0.4",
-        "sphinx-autodoc-typehints==1.11.1",
+        "sphinx~=5.3.0",
+        "sphinx_rtd_theme==1.2.0",
+        # Regression on sphinx-autodoc-typehints 1.21
+        # that creates some problematic docstrings
+        "sphinx-autodoc-typehints==1.20.2",
         "sphinx_copybutton==0.3.1",
         "ipykernel>=5.3, <7.0",
         "sphinxcontrib-mermaid~=0.7.1",
-        "myst-parser~=0.17.2",
+        "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
+        # https://github.com/kedro-org/kedro-plugins/issues/141
+        # https://github.com/kedro-org/kedro-plugins/issues/143
+        "kedro-datasets[api,biosequence,dask,geopandas,matplotlib,holoviews,networkx,pandas,pillow,polars,video,plotly,redis,spark,svmlight,yaml]==1.1.1",
+        "kedro-datasets[tensorflow]==1.1.1; platform_system != 'Darwin' or platform_machine != 'arm64'",
+        "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),

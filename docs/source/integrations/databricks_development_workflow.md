@@ -59,7 +59,7 @@ Name your new project `iris-databricks` for consistency with the rest of the com
 This command will create a new Kedro project using the PySpark Iris starter template. After creating the project, initialize Git for the Kedro project by running the following commands:
 
 ```bash
-cd <project_root>
+cd iris-databricks
 git init
 ```
 

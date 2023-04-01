@@ -11,7 +11,7 @@ An IDE offers important benefits for development:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
 - Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
-- Static type checkers like mypy can check types in your code, helping to identify potential type-related issues early in the development process.
+- Static type checkers like Mypy can check types in your code, helping to identify potential type-related issues early in the development process.
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
 
@@ -26,6 +26,26 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 ## Develop a project using the hybrid workflow
 
+### Create a virtual environment and install Kedro and the Databricks CLI
+
+Create a virtual environment for this tutorial using Conda:
+
+```bash
+conda create --name kedro-hybrid-workflow python=3.10
+```
+
+Once it has been created, activate it:
+
+```bash
+conda activate kedro-hybrid-workflow
+```
+
+With your Conda environment activated, install Kedro and the Databricks CLI:
+
+```bash
+pip install kedro databricks-cli
+```
+
 ### Create a new project and add it to version control
 
 Initialize a Kedro project with the PySpark Iris starter. To do this, run the following command in your local environment:
@@ -34,7 +54,7 @@ Initialize a Kedro project with the PySpark Iris starter. To do this, run the fo
 kedro new --starter=pyspark-iris
 ```
 
-Name your new project `iris-databricks` for observability.
+Name your new project `iris-databricks` for consistency with the rest of the commands in this tutorial.
 
 This command will create a new Kedro project using the PySpark Iris starter template. After creating the project, initialize Git for the Kedro project by running the following commands:
 

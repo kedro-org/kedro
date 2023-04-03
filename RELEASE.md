@@ -15,6 +15,8 @@
 
 ## Bug fixes and other changes
 * Improvements to documentation about configuration.
+* Improvements to Jupyter E2E tests.
+* Improvements to documentation on visualising Kedro projects on Databricks.
 
 ## Breaking changes to the API
 

@@ -13,7 +13,7 @@ from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
-from kedro.config import AbstractConfigLoader, MissingConfigException
+from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigException
 
 _config_logger = logging.getLogger(__name__)
 

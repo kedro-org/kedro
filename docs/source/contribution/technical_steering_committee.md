@@ -1,5 +1,7 @@
 # Join the Technical Steering Committee
 
+In the Kedro project's latest iteration it is an incubating project within [LF AI & Data](https://lfaidata.foundation/).
+
 The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers.
 
 The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We accept new members into the TSC to fuel Kedro's continued development. We list [Kedro's current and past maintainers](https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro) on GitHub.
@@ -8,6 +10,7 @@ In this section, we describe:
 
 - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
 - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
+- [Kedro maintainers](#kedro-maintainers)
 - [Application process](#application-process)
 - [Voting process](#voting-process)
 
@@ -44,6 +47,55 @@ We look for commitment markers with the following:
   for help where needed
 - Showing excitement about the future of Kedro
 - Building a collaborative relationship with the existing team
+
+## Kedro maintainers
+
+Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at QuantumBlack to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
+
+
+Currently, the core Kedro team consists of:
+
+[Ahdra Merali](https://github.com/AhdraMeraliQB),
+[Andrew Mackay](https://github.com/Mackay031),
+[Ankita Katiyar](https://github.com/ankatiyar),
+[Antony Milne](https://github.com/AntonyMilneQB),
+[Deepyaman Datta](https://github.com/deepyaman),
+[Gabriel Comym](https://github.com/comym),
+[Huong Nguyen](https://github.com/Huongg),
+[Ivan Danov](https://github.com/idanov),
+[Jannic Holzer](https://github.com/jmholzer),
+[Jo Stichbury](https://github.com/stichbury),
+[Joel Schwarzmann](https://github.com/datajoely),
+[Juan Luis Cano](https://github.com/astrojuanlu),
+[Merel Theisen](https://github.com/merelcht),
+[Nero Okwa](https://github.com/NeroOkwa),
+[Nok Lam Chan](https://github.com/noklam),
+[Rashida Kanchwala](https://github.com/rashidakanchwala),
+[Sajid Alam](https://github.com/SajidAlamQB),
+[Stephanie Kaiser](https://github.com/TBD),
+[Tynan DeBold](https://github.com/tynandebold) and
+[Yetunde Dada](https://github.com/yetudada).
+
+Former core team members with significant contributions include:
+
+[Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
+[Anton Kirilenko](https://github.com/Flid),
+[Cvetanka Nechevska](https://github.com/cvetankanechevska),
+[Dmitrii Deriabin](https://github.com/dmder),
+[Gordon Wrigley](https://github.com/tolomea),
+[Hamza Oza](https://github.com/hamzaoza),
+[Ignacio Paricio](https://github.com/ignacioparicio),
+[Jiri Klein](https://github.com/jiriklein),
+[Kiyohito Kunii](https://github.com/921kiyo),
+[Laís Carvalho](https://github.com/laisbsc),
+[Liam Brummitt](https://github.com/bru5),
+[Lim Hoang](https://github.com/limdauto),
+[Lorena Bălan](https://github.com/lorenabalan),
+[Nasef Khan](https://github.com/nakhan98),
+[Richard Westenra](https://github.com/richardwestenra),
+[Susanna Wong](https://github.com/studioswong) and
+[Zain Patel](https://github.com/mzjp2).
+
 
 ## Application process
 

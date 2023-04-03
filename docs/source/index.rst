@@ -54,142 +54,90 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
 
-   introduction/introduction_index.md
+   introduction/index.md
 
 .. toctree::
    :maxdepth: 2
 
-   get_started/get_started.md
+   get_started/index.md
 
 .. toctree::
    :maxdepth: 2
 
-   tutorial/tutorial.md
+   tutorial/index.md
 
 .. toctree::
    :maxdepth: 2
 
-   visualisation/visualisation.md
+   visualisation/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Notebooks & IPython users
 
-   notebooks_and_ipython/kedro_and_notebooks
-   notebooks_and_ipython/kedro_as_a_data_registry
+   notebooks_and_ipython/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Kedro project setup
-
-   kedro_project_setup/starters
-   kedro_project_setup/dependencies
-   kedro_project_setup/session
-   kedro_project_setup/settings
+   
+   kedro_project_setup/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Configuration
-
-   configuration/configuration_basics
-   configuration/credentials
-   configuration/parameters
-   configuration/advanced_configuration
+   
+   configuration/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Data Catalog
-
-   data/data_catalog
-   data/kedro_io
+   
+   data/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Nodes and pipelines
-
-   nodes_and_pipelines/nodes
-   nodes_and_pipelines/pipeline_introduction
-   nodes_and_pipelines/modular_pipelines
-   nodes_and_pipelines/pipeline_registry
-   nodes_and_pipelines/micro_packaging
-   nodes_and_pipelines/run_a_pipeline
-   nodes_and_pipelines/slice_a_pipeline
+   
+   nodes_and_pipelines/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Extend Kedro
-
-   extend_kedro/common_use_cases
-   extend_kedro/custom_datasets
-   extend_kedro/plugins
+   
+   extend_kedro/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Hooks
-
-   hooks/introduction
-   hooks/common_use_cases
-   hooks/examples
+   
+   hooks/index.md
 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Logging
 
-   logging/logging
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Integrations
-
-   integrations/databricks.rst
-   integrations/pyspark.rst
+   logging/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Development
-
-   development/set_up_vscode
-   development/set_up_pycharm
-   development/commands_reference
-   development/debugging
-   development/automated_testing
-   development/linting
+   
+   integrations/databricks.md
+   integrations/pyspark.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Deployment
-
-   deployment/deployment_guide
-   deployment/single_machine
-   deployment/distributed
-   deployment/argo
-   deployment/prefect
-   deployment/kubeflow
-   deployment/aws_batch
-   deployment/aws_sagemaker
-   deployment/aws_step_functions
-   deployment/airflow_astronomer
-   deployment/dask
+   
+   development/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Resources
+   
+   deployment/index.md
 
-   faq/faq
-   resources/glossary
+.. toctree::
+   :maxdepth: 2
+   
+   resources/index.md
 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contribute to Kedro
 
-   contribution/contribute_to_kedro
-   contribution/developer_contributor_guidelines
-   contribution/backwards_compatibility
-   contribution/documentation_contributor_guidelines
-   contribution/technical_steering_committee
-   contribution/development_for_databricks
+   contribution/index.md
 
 API documentation
 =================

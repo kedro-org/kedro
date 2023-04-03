@@ -1,8 +1,7 @@
 # Databricks integration
 
 ```{toctree}
-:caption: Databricks
-:maxdepth: 2
+:hidden:
 
 databricks_workspace.md
 databricks_visualisation.md

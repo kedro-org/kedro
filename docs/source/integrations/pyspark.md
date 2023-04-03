@@ -1,8 +1,7 @@
 # PySpark integration
 
 ```{toctree}
-:caption: PySpark
-:maxdepth: 2
+:hidden:
 
 pyspark_integration.md
 ```

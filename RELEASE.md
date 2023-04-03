@@ -17,6 +17,7 @@
 * Improvements to documentation about configuration.
 * Improvements to Jupyter E2E tests.
 * Improvements to documentation on visualising Kedro projects on Databricks.
+* Added CLI arguments information to session store to improve run reproducibility using `Kedro-Viz` Run Command.
 
 ## Breaking changes to the API
 

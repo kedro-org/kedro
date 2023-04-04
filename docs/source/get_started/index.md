@@ -1,7 +1,9 @@
 # First steps
 
+This section explains the first steps to set up and explore Kedro:
+
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 install
 new_project

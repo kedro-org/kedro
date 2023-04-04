@@ -52,58 +52,53 @@ Welcome to Kedro's documentation!
     :alt: OpenSSF Best Practices Badge Program
 
 .. toctree::
-   :maxdepth: 2
 
    introduction/index.md
 
 .. toctree::
-   :maxdepth: 2
 
    get_started/index.md
 
 .. toctree::
-   :maxdepth: 2
 
-   tutorial/index.md
+   tutorial/spaceflights_tutorial.md
 
 .. toctree::
-   :maxdepth: 2
 
    visualisation/index.md
 
 .. toctree::
-   :maxdepth: 2
 
    notebooks_and_ipython/index.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    kedro_project_setup/index.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    configuration/index.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    data/index.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    nodes_and_pipelines/index.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    extend_kedro/index.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    hooks/index.md
 
 
@@ -114,23 +109,23 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   
+
    integrations/databricks.md
    integrations/pyspark.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    development/index.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    deployment/index.md
 
 .. toctree::
    :maxdepth: 2
-   
+
    resources/index.md
 
 

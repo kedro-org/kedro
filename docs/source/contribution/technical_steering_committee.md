@@ -50,7 +50,7 @@ We look for commitment markers who can do the following:
 
 ## Kedro maintainers
 
-<!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT  A VOTE TO SIGN OFF ANY CHANGES -->
+<!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT A VOTE TO SIGN OFF ANY CHANGES -->
 
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at QuantumBlack to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 

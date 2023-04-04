@@ -134,7 +134,7 @@ kedro run --conf-source <path-to-compressed-config>.tar.gz
 
 Once your project is installed, it can be run either from the command line or interactively using Python code.
 
-To do a basic run of your installed project from the command line, run `python -m <package_name>`. The packaged project also exposes a CLI which you can use to modify how your project will be run. To see a list of options, use `python -m <package_name> --help` at the command line.
+To do a basic run of your installed project from the command line, run `python -m <package_name>`. The packaged project also exposes a command line interface which you can use to modify how your project will be run. To see a list of options, use `python -m <package_name> --help` at the command line.
 
 To run your packaged project interactively using code, you can import `main` from the project:
 

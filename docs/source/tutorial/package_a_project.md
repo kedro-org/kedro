@@ -136,7 +136,7 @@ Once your project is installed, it can be run either from the command line or in
 
 To do a basic run of your installed project from the command line, run `python -m <package_name>`. The packaged project also exposes a CLI which you can use to modify how your project will run. To see a list of options, use `python -m <package_name> --help` at the command line.
 
-In addition, you can also use the human-readable 'repo name' that you used to create your project to run your packaged project. This name is the same as the name of the directory that you created for your project after running `kedro new`. You can run `<repo_name>` to do a basic run of your project and `<repo_name> --help` to see CLI options.
+In addition, you can also use the human-readable 'repo name' that you used to create your project to run your packaged project. This name is the same as the name of the directory that you created for your project by running `kedro new`. You can run `<repo_name>` at the command line to do a basic run of your project and `<repo_name> --help` to see CLI options.
 
 To run your packaged project interactively using code, you can import `main` from the project:
 

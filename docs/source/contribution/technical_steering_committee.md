@@ -2,7 +2,7 @@
 
 In the Kedro project's latest iteration it is an incubating project within [LF AI & Data](https://lfaidata.foundation/).
 
-The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers. We list [Kedro's current and past maintainers](https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro) on this page.
+The term "Technical Steering Committee" (TSC) describes the group of Kedro maintainers. We list [Kedro's current and past maintainers](#kedro-maintainers) on this page.
 
 The TSC is responsible for the project's future development; you can read about our duties in our [Technical Charter](https://github.com/kedro-org/kedro/blob/main/kedro_technical_charter.pdf). We are happy to accept new members into the TSC to fuel Kedro's continued development.
 
@@ -49,6 +49,8 @@ We look for commitment markers who can do the following:
 - Build a collaborative relationship with the existing team
 
 ## Kedro maintainers
+
+<!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT  A VOTE TO SIGN OFF ANY CHANGES -->
 
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at QuantumBlack to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 

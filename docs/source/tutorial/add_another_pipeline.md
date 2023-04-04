@@ -170,7 +170,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 ## Test the pipelines
 
-When you created your project with `kedro new`, one of the files generated was `src/<project_name>/pipeline_registry.py` which constructs a `__default__` pipeline that includes every pipeline in the project.
+When you created your project with `kedro new`, one of the files generated was `src/<package_name>/pipeline_registry.py` which constructs a `__default__` pipeline that includes every pipeline in the project.
 
 This means that you do not need to manually instruct Kedro to run each pipeline, but can execute the default pipeline, which consists of the data processing and then data science pipeline in turn.
 

@@ -69,7 +69,7 @@ autosummary_generate = True
 Finally, to ensure that you include the autodoc modules in the build, run the following command once **from the `docs` folder**:
 
 ```bash
-sphinx-apidoc --module-first -o source ../src/<project_name>
+sphinx-apidoc --module-first -o source ../src/<package_name>
 
 ```
 

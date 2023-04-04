@@ -1,6 +1,5 @@
 """``kedro.io`` provides functionality to read and write to a
-number of data sets. At core of the library is ``AbstractDataSet``
-which allows implementation of various ``AbstractDataSet``s.
+number of data sets. At core of the library is the ``AbstractDataSet`` class.
 """
 
 from .cached_dataset import CachedDataSet

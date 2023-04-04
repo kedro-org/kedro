@@ -98,9 +98,17 @@ Welcome to Kedro's documentation!
 
    kedro_project_setup/starters
    kedro_project_setup/dependencies
-   kedro_project_setup/configuration
    kedro_project_setup/session
    kedro_project_setup/settings
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Configuration
+
+   configuration/configuration_basics
+   configuration/credentials
+   configuration/parameters
+   configuration/advanced_configuration
 
 .. toctree::
    :maxdepth: 2
@@ -146,6 +154,13 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Integrations
+
+   integrations/databricks.rst
+   integrations/pyspark.rst
+
+.. toctree::
+   :maxdepth: 2
    :caption: Development
 
    development/set_up_vscode
@@ -166,17 +181,10 @@ Welcome to Kedro's documentation!
    deployment/prefect
    deployment/kubeflow
    deployment/aws_batch
-   deployment/databricks
    deployment/aws_sagemaker
    deployment/aws_step_functions
    deployment/airflow_astronomer
    deployment/dask
-
-.. toctree::
-   :maxdepth: 2
-   :caption: PySpark integration
-
-   tools_integration/pyspark
 
 .. toctree::
    :maxdepth: 2

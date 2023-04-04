@@ -1,10 +1,9 @@
-import re
 from codecs import open
 from glob import glob
 from itertools import chain
 from os import path
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 name = "kedro"
 here = path.abspath(path.dirname(__file__))
@@ -15,27 +14,9 @@ SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
 
-# get package version
-with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
-    result = re.search(r'__version__ = ["\']([^"\']+)', f.read())
-
-    if not result:
-        raise ValueError("Can't find the version in kedro/__init__.py")
-
-    version = result.group(1)
-
 # get the dependencies and installs
 with open("dependency/requirements.txt", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
-
-# get test dependencies and installs
-with open("test_requirements.txt", encoding="utf-8") as f:
-    test_requires = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
-
-
-# Get the long description from the README file
-with open(path.join(here, "README.md"), encoding="utf-8") as f:
-    readme = f.read()
 
 template_files = []
 for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
@@ -109,17 +90,25 @@ extras_require = {
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
     "docs": [
+        # docutils>=0.17 changed the HTML
+        # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
         "docutils==0.16",
-        "sphinx~=3.4.3",
-        "sphinx_rtd_theme==1.1.1",
-        "nbsphinx==0.8.1",
-        "nbstripout~=0.4",
-        "sphinx-autodoc-typehints==1.11.1",
+        "sphinx~=5.3.0",
+        "sphinx_rtd_theme==1.2.0",
+        # Regression on sphinx-autodoc-typehints 1.21
+        # that creates some problematic docstrings
+        "sphinx-autodoc-typehints==1.20.2",
         "sphinx_copybutton==0.3.1",
+        "sphinx-notfound-page",
         "ipykernel>=5.3, <7.0",
         "sphinxcontrib-mermaid~=0.7.1",
-        "myst-parser~=0.17.2",
+        "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
+        # https://github.com/kedro-org/kedro-plugins/issues/141
+        # https://github.com/kedro-org/kedro-plugins/issues/143
+        "kedro-datasets[api,biosequence,dask,geopandas,matplotlib,holoviews,networkx,pandas,pillow,polars,video,plotly,redis,spark,svmlight,yaml]==1.1.1",
+        "kedro-datasets[tensorflow]==1.1.1; platform_system != 'Darwin' or platform_machine != 'arm64'",
+        "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),
@@ -156,31 +145,8 @@ extras_require = {
 extras_require["all"] = _collect_requirements(extras_require)
 
 setup(
-    name=name,
-    version=version,
-    description="Kedro helps you build production-ready data and analytics pipelines",
-    license="Apache Software License (Apache 2.0)",
-    long_description=readme,
-    long_description_content_type="text/markdown",
-    url="https://github.com/kedro-org/kedro",
-    python_requires=">=3.7, <3.11",
-    packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
-    include_package_data=True,
-    tests_require=test_requires,
-    install_requires=requires,
-    author="Kedro",
-    entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},
     package_data={
         name: ["py.typed", "test_requirements.txt"] + template_files
     },
-    zip_safe=False,
-    keywords="pipelines, machine learning, data pipelines, data science, data engineering",
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-    ],
     extras_require=extras_require,
 )

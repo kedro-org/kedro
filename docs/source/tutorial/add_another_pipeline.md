@@ -112,7 +112,7 @@ model_options:
 
 Here, the parameters `test_size` and `random_state` are used as part of the train-test split, and `features` gives the names of columns in the model input table to use as features.
 
-More information about [parameters is available in the configuration documentation](../kedro_project_setup/configuration.md#parameters).
+More information about [parameters is available in the configuration documentation](../configuration/parameters.md).
 
 ## Model registration
 
@@ -518,7 +518,7 @@ kedro run --runner=ThreadRunner
 kedro run --runner=module.path.to.my.runner
 ```
 
-`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../tools_integration/pyspark.md) and [Dask](/kedro.datasets.dask.ParquetDataSet).
+`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and [Dask](/kedro.datasets.dask.ParquetDataSet).
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
 atasets to work with different data formats (including CSV, Excel, and Parquet)

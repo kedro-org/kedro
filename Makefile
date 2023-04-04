@@ -44,11 +44,8 @@ linkcheck:
 	pip install -e ".[docs]"
 	./docs/build-docs.sh "linkcheck"
 
-devserver: build-docs
-	cd docs && npm install && npm start
-
 package: clean install
-	python setup.py sdist bdist_wheel
+	python -m pip install build && python -m build
 
 install-test-requirements:
 	pip install -r test_requirements.txt
@@ -63,7 +60,7 @@ print-python-env:
 	@./tools/print_env.sh
 
 databricks-build:
-	python setup.py bdist_wheel
+	python -m pip install build && python -m build
 	python ./tools/databricks_build.py
 
 sign-off:

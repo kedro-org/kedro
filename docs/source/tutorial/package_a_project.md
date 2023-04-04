@@ -146,7 +146,7 @@ main(
 )  # or simply main() if you don't want to provide any arguments
 ```
 
-This is equivalent to `python -m <package_name>` at the command line, and you can pass in all the arguments that correspond to options described by `python -m <package_name> --help`.
+This is equivalent to `python -m <package_name>` at the command line, and you can pass in all the arguments that correspond to the options described by `python -m <package_name> --help`.
 
 ### Docker, Airflow and other deployment targets
 

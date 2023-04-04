@@ -113,31 +113,13 @@ The project configuration is provided separately in a `tar.gz` file, also inside
 
 ### Run a packaged project
 
-To run a packaged project it must first be installed. To install the project, run the following command:
+To run a packaged project it must first be installed. To install the package from a `.whl` file, you need to have Python and `pip` on your machine, but do not need to have Kedro installed.
+
+To install the project, run the following command:
 
 ```bash
 pip install <path-to-wheel-file>
 ```
-
-Once your project is installed, it can be run either from the command line or interactively using Python code.
-
-To do a basic run of your installed project from the command line, run `python -m <package_name>`. The packaged project also exposes a CLI which you can use to modify how your project will run. To see a list of options, use `python -m <package_name> --help` at the command line.
-
-In addition, you can also use the human-readable 'repo name' that you used to create your project to run your packaged project. This name is the same as the name of the directory that you created for your project after running `kedro new`. You can run `<repo_name>` to do a basic run of your project and `<repo_name> --help` to see CLI options.
-
-To run your packaged project interactively using code, you can import from the project:
-
-```python
-from spaceflights.__main__ import main
-
-main(
-    ["--pipeline", "__default__"]
-)  # or simply main() if you don't want to provide any arguments
-```
-
-This is equivalent to running `kedro run`, and you can provide all the parameters described by `kedro run --help`.
-
-To install the package from a `.whl` file, you need to have Python and `pip` on your machine, but do not need to have Kedro installed.
 
 ```{note}
 Once the packaged project is installed, you will need to add:
@@ -149,6 +131,24 @@ Once the packaged project is installed, you will need to add:
 Alternatively, you can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
 kedro run --conf-source <path-to-compressed-config>.tar.gz
 ```
+
+Once your project is installed, it can be run either from the command line or interactively using Python code.
+
+To do a basic run of your installed project from the command line, run `python -m <package_name>`. The packaged project also exposes a CLI which you can use to modify how your project will run. To see a list of options, use `python -m <package_name> --help` at the command line.
+
+In addition, you can also use the human-readable 'repo name' that you used to create your project to run your packaged project. This name is the same as the name of the directory that you created for your project after running `kedro new`. You can run `<repo_name>` to do a basic run of your project and `<repo_name> --help` to see CLI options.
+
+To run your packaged project interactively using code, you can import `main` from the project:
+
+```python
+from spaceflights.__main__ import main
+
+main(
+    ["--pipeline", "__default__"]
+)  # or simply main() if you don't want to provide any arguments
+```
+
+This is equivalent to `kedro run` at the command line, and you can provide all the parameters described by `kedro run --help`.
 
 ### Docker, Airflow and other deployment targets
 

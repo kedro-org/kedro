@@ -113,7 +113,7 @@ The project configuration is provided separately in a `tar.gz` file, also inside
 
 ### Run a packaged project
 
-To run a packaged project it must first be installed. To install the package from a `.whl` file, you need to have Python and `pip` on your machine, but do not need to have Kedro installed.
+To run a packaged project it must first be installed. To install the package from a `.whl` file, you need to have Python and `pip` installed on your machine, but you do not need to have Kedro installed.
 
 To install the project, run the following command:
 
@@ -141,14 +141,14 @@ In addition, you can also use the human-readable 'repo name' that you used to cr
 To run your packaged project interactively using code, you can import `main` from the project:
 
 ```python
-from spaceflights.__main__ import main
+from <package_name>.__main__ import main
 
 main(
     ["--pipeline", "__default__"]
 )  # or simply main() if you don't want to provide any arguments
 ```
 
-This is equivalent to `kedro run` at the command line, and you can provide all the parameters described by `kedro run --help`.
+This is equivalent to `python -m <package_name>` at the command line, and you can pass in all the arguments that correspond to options described by `python -m <package_name> --help`.
 
 ### Docker, Airflow and other deployment targets
 

@@ -54,7 +54,7 @@ Initialize a Kedro project with the PySpark Iris starter. To do this, run the fo
 kedro new --starter=pyspark-iris
 ```
 
-Name your new project `iris-databricks` for consistency with the rest of the commands in this tutorial.
+Name your new project `iris-databricks` for consistency with the rest of this guide.
 
 This command will create a new Kedro project using the PySpark Iris starter template. After creating the project, initialize Git for the Kedro project by running the following commands:
 

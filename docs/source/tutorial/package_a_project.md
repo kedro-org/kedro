@@ -119,11 +119,11 @@ To run a packaged project it must first be installed. To install the project, ru
 pip install <path-to-wheel-file>
 ```
 
-Once your project is installed, it can be run either using the project's CLI or interactively using Python code.
+Once your project is installed, it can be run either from the command line or interactively using Python code.
 
-To run your project using its CLI, run `<project_name>`. To see a full list of the options that the project's CLI supports, you can run `<project_name> --help`.
+To do a basic run of your installed project from the command line, run `python -m <package_name>`. The project also exposes a CLI which you can use to change how your project will run. To see a list of options, use `python -m <package_name> --help` at the command line.
 
-Another way of doing this is to run `python -m <package_name>`. You an also use the CLI in this way, to see a full list of options, you cna run `python -m <package_name> --help`.
+In addition, you can also use the human-readable 'repo name' that you used to create your project to run your packaged project. This name is the same as the name of the directory that you created for your project after running `kedro new`. You can run `<repo_name>` to do a basic run of your project and `<repo_name> --help` to see CLI options.
 
 To run your packaged project interactively using code, you can import from the project:
 

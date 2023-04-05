@@ -140,24 +140,42 @@ To ensure that your folder has been successfully uploaded to DBFS, you can list 
 databricks fs ls dbfs:/path/to/dbfs/folder
 ```
 
-You should see the contents of the project's `data/` directory.
+You should see the contents of the project's `data/` directory printed to your terminal:
+
+```bash
+01_raw
+02_intermediate
+03_primary
+04_feature
+05_model_input
+06_models
+07_model_output
+08_reporting
+```
 
 #### Run your project
 
-To run your project in your notebook, enter the following code in a new cell:
+To run your project in your notebook, use the Kedro IPython extension. Start by loading the extension in a new cell:
 
-```python
-from kedro.framework.session import KedroSession
-from kedro.framework.startup import bootstrap_project
-project_root = "/Repos/<your_username>/iris-databricks/"
-bootstrap_project(project_root)
-with KedroSession.create(project_path=project_root, env="databricks") as session:
-    session.run()
+```bash
+%load_ext kedro.ipython
 ```
 
-Replace `<your_username>` with your Databricks username such that `project_root` correctly points to the project stored in Databricks Repos.
+Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. Create a new cell and run the line magic to load your Kedro project.
 
-Run this newly created cell to start a run of your project on the attached cluster. You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
+```bash
+%reload_kedro /Workspace/Repos/<your_username>/iris-databricks
+```
+
+Replace `<your_username>` with your Databricks username such that `project_root` correctly points to the project stored in Databricks Repos. Loading your Kedro project with the `%reload_kedro` line magic will initialise four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project.
+
+To run your project, create a new cell and execute the following piece of Python code in it:
+
+```bash
+session.run()
+```
+
+You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
 
 ```bash
 ...
@@ -166,7 +184,6 @@ Run this newly created cell to start a run of your project on the attached clust
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
-
 
 ### Make local changes in your local development environment
 

@@ -150,6 +150,10 @@ body.wy-body-for-nav {
     background: none !important;
 }
 
+.wy-menu-vertical li.toctree-l1>a {
+    font-size: 1.8rem;
+}
+
 .rst-content.style-external-links a.reference.external:after {
     color: inherit;
     opacity: 0.8;

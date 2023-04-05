@@ -104,18 +104,18 @@ Databricks Repos supports common Git operations that you can use to manage your 
 
 ### Run your project using Databricks notebooks
 
-Now that your project is synced with Databricks repos, you can run it on a Databricks cluster using Databricks notebooks.
+Now that your project is synced with Databricks repos, the following sections will guide you through the process to run it on a  cluster using notebooks.
 
-#### Create a new Databricks Notebook
+#### Create a new Databricks notebook
 
-To run the Python code from your Databricks Repo, [create a new Databricks Notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and attach it to your cluster.
+To run the Python code from your Databricks repo, [create a new Databricks Notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and attach it to your cluster.
 
 #### Install project dependencies from the requirements.txt file
 
 Before you import and run your Python code, you'll need to install your project's dependencies. Your project has a `requirements.txt` file for this purpose. Install the dependencies using the %pip magic command in a new cell in your notebook:
 
 ```bash
-%pip install -r "/Repos/<your_username>/iris-databricks/requirements.txt"
+%pip install -r "/Workspace/Repos/<your_username>/iris-databricks/src/requirements.txt"
 ```
 
 This command will install the dependencies listed in your requirements.txt file to the Databricks cluster attached to your notebook.

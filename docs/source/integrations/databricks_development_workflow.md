@@ -129,7 +129,7 @@ In this demonstration project, you will upload the project data to DBFS as the P
 There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. Use the following Databricks CLI command to upload your data:
 
 ```bash
-databricks fs cp --recursive /data dbfs:/root/projects/iris-databricks/data
+databricks fs cp --recursive data/ dbfs:/root/projects/iris-databricks/data
 ```
 
 The --recursive flag ensures that the entire folder and its contents are uploaded.

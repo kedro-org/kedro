@@ -65,7 +65,7 @@ git init
 
 ### Add your project to version control
 
-Create a new Git repository with your Git provider. Once the repository is set up, generate an access token, which will be used to connect your Kedro project with Databricks. Look up the documentation of your Git provider to learn how to generate an access token if you are unclear, as this is different for each provider.
+Create a new private Git repository with your Git provider. Once the repository is set up, generate an access token, which will be used to connect your Kedro project with Databricks. Look up the documentation of your Git provider to learn how to generate an access token if you are unclear, as this is different for each provider.
 
 To sync your local Git repository with the remote repository stored on your Git provider, use the following commands:
 
@@ -82,7 +82,9 @@ Replace `<your-git-repository-url>` with the URL of the Git repository you creat
 
 The next step is to sync the remote repository stored on your Git provider to Databricks Repos.
 
-To integrate Databricks Repos with your remote Git repository, you first need to obtain an access token from your Git provider. Access tokens are used for authentication and authorization. The process for obtaining a token varies depending on your Git provider. For detailed instructions on how to generate an access token for your specific Git provider, refer to the [Databricks documentation](https://docs.databricks.com/repos/get-access-tokens-from-git-provider.html).
+To integrate Databricks Repos with the private Git repository stored by your Git provider, you first need to obtain an access token from your Git provider. Access tokens are used for authenticating an application that wishes to access your private Git repository.
+
+The process for obtaining a token varies depending on your Git provider. Follow the instructions for generating an access token and adding it to Databricks specific to your Git provider in the [Databricks documentation](https://docs.databricks.com/repos/get-access-tokens-from-git-provider.html).
 
 ### Sync your Git repository with Databricks
 
@@ -92,9 +94,7 @@ After obtaining your Git access token, you need to sync your remote Git reposito
 2. Click on the 'Add Repo' button.
 3. In the 'Add Repo' dialog, select your Git provider from the list.
 4. Enter the URL of your remote Git repository containing the Kedro project.
-5. Paste the access token you generated earlier in the 'Access Token' field.
-6. Click on the 'Add Repo' button to complete the setup.
-7. Clone your Kedro project into Databricks Repos
+5. Click on the 'Add Repo' button to complete the setup.
 
 In the Repos tab, find the connected Git repository and click on it. Databricks will automatically clone the repository and display its contents. Your Kedro project is now available in Databricks Repos, and you can start working with it in the Databricks Workspace.
 
@@ -263,9 +263,9 @@ Now that you have tested your modified classifier, you can merge your changes in
 1. Check out the main branch in the Databricks Repos UI by clicking the branch dropdown and selecting the `main` branch.
 2. Click the Merge button located next to the branch dropdown. Select the feat/modified-classifier branch from the list of branches, and click Merge.
 
-#### Synchronise your changes with your remote and local repositories
+#### Sync your changes with your remote and local repositories
 
-To synchronize the main branch of your Databricks repository with your local machine and remote Git repository, follow these steps:
+To sync the main branch of your Databricks repository with your local machine and remote Git repository, follow these steps:
 
 
 1. Click the Push button located in the upper-right corner of the Databricks Repos UI. This will push the merged changes to your remote Git provider.

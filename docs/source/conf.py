@@ -52,6 +52,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinxcontrib.mermaid",
     "myst_parser",
+    "notfound.extension",
 ]
 
 # enable autosummary plugin (table of contents for modules/classes/class

@@ -43,8 +43,10 @@ conda activate kedro-hybrid-workflow
 With your Conda environment activated, install Kedro and the Databricks CLI:
 
 ```bash
-pip install kedro databricks-cli
+pip install kedro databricks-cli --upgrade
 ```
+
+After installing the Databricks CLI, you must authenticate it with your Databricks instance. Follow the instructions in the [Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication) to do this.
 
 ### Create a new project and add it to version control
 
@@ -122,7 +124,7 @@ This command will install the dependencies listed in your requirements.txt file 
 
 #### Upload project data to DBFS
 
-In this demonstration project, you will upload the project data to DBFS as the PySpark Iris starter catalog is set up for data stored in this location. In general, you can store project data in any  location accessible over the internet.
+In this demonstration project, you will upload the project data to DBFS as the PySpark Iris starter catalog is set up for data stored in this location. In general, you can store project data in any location accessible over the internet.
 
 There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. Use the following Databricks CLI command to upload your data:
 

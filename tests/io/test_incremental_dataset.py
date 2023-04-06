@@ -68,7 +68,8 @@ class TestIncrementalDataSetLocal:
         pds = IncrementalDataSet(str(local_csvs), DATASET)
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
-        for partition_id, data in loaded.items():
+        for partition_id, load_func in loaded.items():
+            data = load_func()
             assert_frame_equal(data, partitioned_data_pandas[partition_id])
 
         checkpoint_path = local_csvs / pds.DEFAULT_CHECKPOINT_FILENAME
@@ -97,7 +98,8 @@ class TestIncrementalDataSetLocal:
         pds.save({new_partition_key: df})
         assert new_partition_path.exists()
         loaded = pds.load()
-        assert_frame_equal(loaded[new_partition_key], df)
+        reloaded_data = loaded[new_partition_key]()
+        assert_frame_equal(reloaded_data, df)
 
     @pytest.mark.parametrize(
         "filename_suffix,expected_partitions",
@@ -381,7 +383,8 @@ class TestPartitionedDataSetS3:
         assert pds._checkpoint._protocol == "s3"
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
-        for partition_id, data in loaded.items():
+        for partition_id, load_func in loaded.items():
+            data = load_func()
             assert_frame_equal(data, partitioned_data_pandas[partition_id])
 
         assert not pds._checkpoint.exists()

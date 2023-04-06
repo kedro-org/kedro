@@ -276,6 +276,13 @@ class PartitionedDataSet(AbstractDataSet):
             path = path[: -len(self._filename_suffix)]
         return path
 
+    def _get_valid_loaded_partitions(
+        self, partitions: Dict[str, Callable[[], Any]]
+    ) -> Dict[str, Callable[[], Any]]:
+        if not partitions:
+            raise DataSetError(f"No partitions found in '{self._path}'")
+        return partitions
+
     def _load(self) -> Dict[str, Callable[[], Any]]:
         partitions = {}
 
@@ -287,10 +294,7 @@ class PartitionedDataSet(AbstractDataSet):
             partition_id = self._path_to_partition(partition)
             partitions[partition_id] = dataset.load
 
-        if not partitions:
-            raise DataSetError(f"No partitions found in '{self._path}'")
-
-        return partitions
+        return self._get_valid_loaded_partitions(partitions)
 
     def _save(self, data: Dict[str, Any]) -> None:
         if self._overwrite and self._filesystem.exists(self._normalized_path):
@@ -382,7 +386,6 @@ class IncrementalDataSet(PartitionedDataSet):
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ):
-
         """Creates a new instance of ``IncrementalDataSet``.
 
         Args:
@@ -521,18 +524,9 @@ class IncrementalDataSet(PartitionedDataSet):
         except DataSetError:
             return None
 
-    def _load(self) -> Dict[str, Callable[[], Any]]:
-        partitions = {}
-
-        for partition in self._list_partitions():
-            partition_id = self._path_to_partition(partition)
-            kwargs = deepcopy(self._dataset_config)
-            # join the protocol back since PySpark may rely on it
-            kwargs[self._filepath_arg] = self._join_protocol(partition)
-            partitions[partition_id] = self._dataset_type(  # type: ignore
-                **kwargs
-            ).load()
-
+    def _get_valid_loaded_partitions(
+        self, partitions: Dict[str, Callable[[], Any]]
+    ) -> Dict[str, Callable[[], Any]]:
         return partitions
 
     def confirm(self) -> None:

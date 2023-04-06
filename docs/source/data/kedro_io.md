@@ -485,7 +485,7 @@ The checkpoint file is only created _after_ [the partitioned dataset is explicit
 #### Incremental dataset load
 
 Loading `IncrementalDataSet` works similarly to [`PartitionedDataSet`](#partitioned-dataset-load) with several exceptions:
-1. `IncrementalDataSet` loads the data _eagerly_, so the values in the returned dictionary represent the actual data stored in the corresponding partition, rather than a pointer to the load function. `IncrementalDataSet` considers a partition relevant for processing if its ID satisfies the comparison function, given the checkpoint value.
+1. `IncrementalDataSet` considers a partition relevant for processing if its ID satisfies the comparison function, given the checkpoint value. A load function is returned for all relevant partitions.
 2. `IncrementalDataSet` _does not_ raise a `DataSetError` if load finds no partitions to return - an empty dictionary is returned instead. An empty list of available partitions is part of a normal workflow for `IncrementalDataSet`.
 
 #### Incremental dataset save

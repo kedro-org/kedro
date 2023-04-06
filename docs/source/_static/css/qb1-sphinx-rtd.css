@@ -263,6 +263,7 @@ body.wy-body-for-nav {
 
 .wy-body-for-nav .wy-menu-vertical li.current a:hover {
     background: none;
+    font-weight: 600;
 }
 
 .wy-menu-vertical a span.toctree-expand {

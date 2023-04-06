@@ -29,6 +29,7 @@
 * Improvements to documentation about configuration.
 * Improvements to Jupyter E2E tests.
 * Improvements to documentation on visualising Kedro projects on Databricks.
+* Fixed test dependencies for MacOS.
 
 ## Breaking changes to the API
 

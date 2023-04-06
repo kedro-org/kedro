@@ -204,35 +204,13 @@ git checkout feat/modified-classifier
 
 The PySpark Iris starter uses a one-nearest neighbour classifier to make predictions. In this section, you will modify it to create predictions using a three-nearest neighbour classifier. A three-nearest neighbour classifier works by finding the most common class among the three closest neighbours to make a prediction, while a one-nearest neighbour classifier only uses the class of the nearest neighbour.
 
-Open the file `<project_root>/src/iris_databricks/nodes.py` in your IDE. Add the following line of code underneath the last import statement, on line 12:
+Open the file `<project_root>/src/iris_databricks/nodes.py` in your IDE. Insert a new line underneath the import statements and add the following code to it:
 
 ```python
-from collections import Counter
+from scipy.stats import mode
 ```
 
-This line of code is out of order with the other imports and there is now only one line of whitespace between your import statements and the function `split_data`. If you have a linter integrated with your IDE, you may notice it warning you of this problem in style. This is a good opportunity to demonstrate the power of developing in your local environment. To fix these style issues automatically, run the following at the command line:
-
-```bash
-isort <project_root>/src/iris_databricks/nodes.py
-```
-
-Look at the code inside `nodes.py` and notice that there are now two lines of whitespace before `split_data` and all your imports are in sorted order:
-
-```python
-import logging
-from collections import Counter
-from typing import Dict, Tuple
-
-import numpy as np
-import pandas as pd
-from pyspark.sql import DataFrame
-
-
-def split_data(data: DataFrame, parameters: Dict) -> Tuple:
-    ...
-```
-
-Modify the classifier by changing the code in the function `make_predictions`:
+Now modify the classifier by changing the code in the function `make_predictions`:
 
 ```python
 def make_predictions(
@@ -246,19 +224,25 @@ def make_predictions(
     Returns:
         y_pred: Prediction of the target variable.
     """
+
     X_train_numpy = X_train.to_numpy()
     X_test_numpy = X_test.to_numpy()
+
     squared_distances = np.sum(
         (X_train_numpy[:, None, :] - X_test_numpy[None, :, :]) ** 2, axis=-1
     )
-    # Find the indices of the three smallest values along axis 0
-    nearest_neighbours = np.argpartition(squared_distances, 2, axis=0)[:3]
-    # Get the labels of the three nearest neighbors
-    labels = y_train.iloc[nearest_neighbours]
-    # Find the most common class among the three nearest neighbors
-    y_pred = labels.apply(lambda x: Counter(x).most_common(1)[0][0], axis=0)
-    # Set the index of y_pred to match the index of X_test
-    y_pred.index = X_test.index
+    three_nearest_neighbours = np.argsort(squared_distances, axis=0)[:3]
+
+    # Use list comprehension to index y_train for each test point's three nearest neighbours
+    y_nearest_neighbours = np.array(
+        [y_train.iloc[three_nearest_neighbours[:, i]] for i in range(X_test.shape[0])]
+    )
+
+    y_pred_mode, _ = mode(y_nearest_neighbours, axis=1)
+    y_pred = pd.DataFrame(
+        y_pred_mode.squeeze(), columns=y_train.columns, index=X_test.index
+    )
+
     return y_pred
 ```
 
@@ -285,9 +269,9 @@ git push origin --set-upstream feat/modified-classifier
 
 #### Pull the new branch and check it out on Databricks Repos
 
-Navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the "Git actions" button inn the upper-right corner of the repo page (it looks like a circular arrow). From the drop-down menu, click on "Pull". This will pull the latest changes from the remote repository into your Databricks Repo.
+Navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the `Pull` button in the upper-right corner of the repo page. Click it will pull the latest changes from the remote repository into your Databricks Repo.
 
-Next, check the available branches. Click on the "Branches" button located in the upper-right corner of the repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Checkout the `feat/modified-classifier` branch by clicking on it in the list. This will switch your active branch to feat/modified-classifier. Your workspace will now show the contents of the selected branch.
+Next, check the available branches. Click on the "Branches" button located in the upper-left corner of the repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Checkout the `feat/modified-classifier` branch by clicking on it in the list. This will switch your active branch to feat/modified-classifier.
 
 #### Re-run your project after your changes
 
@@ -295,13 +279,13 @@ Return to your Databricks notebook. Re-run the cells you used to run your projec
 
 ```bash
 ...
-[08/09/22 11:23:30] INFO     Model has accuracy of X.XXX on test data.                                        nodes.py:74
+[08/09/22 11:23:30] INFO     Model has accuracy of 1.000 on test data.                                        nodes.py:74
                     INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 
-As you can see, your model's accuracy has changed as you are using a different classifier to produce the result.
+You can see that your model's accuracy has changed now that you are using a different classifier to produce the result. As it seems that the accuracy of your classifier on test data has improved, you decide to merge these changes to the `main` branch of your project.
 
 ```{note}
 If your cluster terminates, you must re-run the cell containing the `%pip ...` magic to re-install your project's dependencies. If not, repeating this step is only necessary if your project's requirements change.
@@ -309,7 +293,7 @@ If your cluster terminates, you must re-run the cell containing the `%pip ...` m
 
 #### Merge the modified code with the main branch
 
-Now that you have tested your modified classifier, you can merge your changes into the main branch of your project. To merge changes from the `feat/modified-classifier branch` into the main branch of your repository in Databricks Repos follow these steps:
+To merge changes from the `feat/modified-classifier branch` into the main branch of your repository in Databricks Repos follow these steps:
 
 1. Check out the main branch in the Databricks Repos UI by clicking the branch dropdown and selecting the `main` branch.
 2. Click the Merge button located next to the branch dropdown. Select the feat/modified-classifier branch from the list of branches, and click Merge.
@@ -317,7 +301,6 @@ Now that you have tested your modified classifier, you can merge your changes in
 #### Sync your changes with your remote and local repositories
 
 To sync the main branch of your Databricks repository with your local machine and remote Git repository, follow these steps:
-
 
 1. Click the Push button located in the upper-right corner of the Databricks Repos UI. This will push the merged changes to your remote Git provider.
 2. In your local environment, run the following commands:

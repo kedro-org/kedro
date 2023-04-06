@@ -181,7 +181,7 @@ You should see logging output while the cell is running. After execution finishe
 
 ```bash
 ...
-[08/09/22 11:23:30] INFO     Model has accuracy of 0.933 on test data.                                        nodes.py:74
+[08/09/22 11:23:30] INFO     Model has accuracy of 0.960 on test data.                                        nodes.py:74
                     INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
@@ -202,7 +202,37 @@ git checkout feat/modified-classifier
 
 #### Modify the classifier
 
-Next, modify the given Python code in your local development environment to create predictions using a three-nearest neighbour classifier. A three-nearest neighbour classifier works by finding the most common class among the three closest neighbours to make a prediction. Modify the code for `make_predictions` in the file `<project_root>/src/<package_name>/node.py` to the following:
+The PySpark Iris starter uses a one-nearest neighbour classifier to make predictions. In this section, you will modify it to create predictions using a three-nearest neighbour classifier. A three-nearest neighbour classifier works by finding the most common class among the three closest neighbours to make a prediction, while a one-nearest neighbour classifier only uses the class of the nearest neighbour.
+
+Open the file `<project_root>/src/iris_databricks/nodes.py` in your IDE. Add the following line of code underneath the last import statement, on line 12:
+
+```python
+from collections import Counter
+```
+
+This line of code is out of order with the other imports and there is now only one line of whitespace between your import statements and the function `split_data`. If you have a linter integrated with your IDE, you may notice it warning you of this problem in style. This is a good opportunity to demonstrate the power of developing in your local environment. To fix these style issues automatically, run the following at the command line:
+
+```bash
+isort <project_root>/src/iris_databricks/nodes.py
+```
+
+Look at the code inside `nodes.py` and notice that there are now two lines of whitespace before `split_data` and all your imports are in sorted order:
+
+```python
+import logging
+from collections import Counter
+from typing import Dict, Tuple
+
+import numpy as np
+import pandas as pd
+from pyspark.sql import DataFrame
+
+
+def split_data(data: DataFrame, parameters: Dict) -> Tuple:
+    ...
+```
+
+Modify the classifier by changing the code in the function `make_predictions`:
 
 ```python
 def make_predictions(
@@ -245,17 +275,17 @@ You should see the following output:
   main
 ```
 
-The `*` character next to `feat/modified-classifier` indicates that this is the currently checked-out branch.]
-
-Now push your changes to your remote repository:
+The `*` character next to `feat/modified-classifier` indicates that this is the currently checked-out branch. Now commit your changes to the branch and push it to your remote repository:
 
 ```bash
+git add -u
+git commit -m "Modify 1-nearest neighbour classifier to 3-nearest-neighbour classifier"
 git push origin --set-upstream feat/modified-classifier
 ```
 
 #### Pull the new branch and check it out on Databricks Repos
 
-First, navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the "Git actions" button inn the upper-right corner of the repo page (it looks like a circular arrow). From the drop-down menu, click on "Pull". This will pull the latest changes from the remote repository into your Databricks Repo.
+Navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the "Git actions" button inn the upper-right corner of the repo page (it looks like a circular arrow). From the drop-down menu, click on "Pull". This will pull the latest changes from the remote repository into your Databricks Repo.
 
 Next, check the available branches. Click on the "Branches" button located in the upper-right corner of the repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Checkout the `feat/modified-classifier` branch by clicking on it in the list. This will switch your active branch to feat/modified-classifier. Your workspace will now show the contents of the selected branch.
 

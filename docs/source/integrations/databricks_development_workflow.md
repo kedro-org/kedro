@@ -161,10 +161,12 @@ To run your project in your notebook, use the Kedro IPython extension. Start by 
 %load_ext kedro.ipython
 ```
 
-Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. Create a new cell and run the line magic to load your Kedro project.
+Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. The next step is to load your Kedro project with the `databricks` environment. The `databricks` environment is defined in the PySpark Iris starter and directs Kedro to use the configuration in the `conf/databricks` directory. To learn more about environments in Kedro configuration, see the [documentation](../configuration/configuration_basics.md#configuration-environments).
+
+Create a new cell and run the line magic to load your Kedro project.
 
 ```bash
-%reload_kedro /Workspace/Repos/<your_username>/iris-databricks
+%reload_kedro /Workspace/Repos/<your_username>/iris-databricks --env=databricks
 ```
 
 Replace `<your_username>` with your Databricks username such that `project_root` correctly points to the project stored in Databricks Repos. Loading your Kedro project with the `%reload_kedro` line magic will initialise four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project.

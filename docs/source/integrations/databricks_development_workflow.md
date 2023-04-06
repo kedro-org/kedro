@@ -124,7 +124,7 @@ This command will install the dependencies listed in your requirements.txt file 
 
 #### Upload project data to DBFS
 
-In this demonstration project, you will upload the project data to DBFS as the PySpark Iris starter catalog is set up for data stored in this location. In general, you can store project data in any location accessible over the internet.
+In this demonstration project, you will upload the project data to DBFS as the PySpark Iris starter comes with a catalog that is set up to access data stored on DBFS.
 
 There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. Use the following Databricks CLI command to upload your data:
 
@@ -271,7 +271,7 @@ git push origin --set-upstream feat/modified-classifier
 
 Navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the `Pull` button in the upper-right corner of the Repo page. Click it will pull the latest changes from the remote repository into your Databricks Repo.
 
-Next, check the available branches. Click on the "Branches" button located in the upper-left corner of the Repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Checkout the `feat/modified-classifier` branch by clicking on it in the list. This will switch your active branch to feat/modified-classifier.
+Next, check the available branches. Click on the "Branches" button located in the upper-left corner of the Repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Check out the `feat/modified-classifier` branch by clicking on it in the drop-down list. This will switch your active branch to feat/modified-classifier.
 
 #### Re-run your project after your changes
 

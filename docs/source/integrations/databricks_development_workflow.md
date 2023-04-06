@@ -1,4 +1,4 @@
-# Development Workflow
+# Databricks development workflow
 
 This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos. This hybrid workflow involves developing your Kedro project using a local Integrated Development Environment (IDE) and using Databricks notebooks for testing purposes. This guide demonstrates this workflow using an example based on the Kedro PySpark Iris starter.
 This workflow has several important advantages, it allows for:

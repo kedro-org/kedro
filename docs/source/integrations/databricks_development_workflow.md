@@ -187,7 +187,7 @@ You should see logging output while the cell is running. After execution finishe
 
 ### Make local changes in your local development environment
 
-Now that your project has run successfully once, you can make changes to your project using the convenience and power of your local development environment. In this section, you will change your project to use a modified classifier to create predictions on the iris data. 
+Now that your project has run successfully once, you can make changes to your project using the convenience and power of your local development environment. In this section, you will change your project to use a modified classifier to create predictions on the iris data.
 
 #### Create a local feature branch
 

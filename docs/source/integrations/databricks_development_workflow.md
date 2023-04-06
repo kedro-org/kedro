@@ -269,9 +269,9 @@ git push origin --set-upstream feat/modified-classifier
 
 #### Pull the new branch and check it out on Databricks Repos
 
-Navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the `Pull` button in the upper-right corner of the repo page. Click it will pull the latest changes from the remote repository into your Databricks Repo.
+Navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the `Pull` button in the upper-right corner of the Repo page. Click it will pull the latest changes from the remote repository into your Databricks Repo.
 
-Next, check the available branches. Click on the "Branches" button located in the upper-left corner of the repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Checkout the `feat/modified-classifier` branch by clicking on it in the list. This will switch your active branch to feat/modified-classifier.
+Next, check the available branches. Click on the "Branches" button located in the upper-left corner of the Repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Checkout the `feat/modified-classifier` branch by clicking on it in the list. This will switch your active branch to feat/modified-classifier.
 
 #### Re-run your project after your changes
 
@@ -293,26 +293,25 @@ If your cluster terminates, you must re-run the cell containing the `%pip ...` m
 
 #### Merge the modified code with the main branch
 
-To merge changes from the `feat/modified-classifier branch` into the main branch of your repository in Databricks Repos follow these steps:
-
-1. Check out the main branch in the Databricks Repos UI by clicking the branch dropdown and selecting the `main` branch.
-2. Click the Merge button located next to the branch dropdown. Select the feat/modified-classifier branch from the list of branches, and click Merge.
-
-#### Sync your changes with your remote and local repositories
-
-To sync the main branch of your Databricks repository with your local machine and remote Git repository, follow these steps:
-
-1. Click the Push button located in the upper-right corner of the Databricks Repos UI. This will push the merged changes to your remote Git provider.
-2. In your local environment, run the following commands:
+To merge changes from the `feat/modified-classifier` branch into the main branch of your repository, use Git in your local environment. First, check out the main branch:
 
 ```bash
-git pull
 git checkout main
 ```
 
-Now, you should be able to see the modifications made to your classifier in your local IDE.
+Now, merge the `feat/modified-classifier` branch:
 
-This concludes the demonstration workflow. Your PySpark Iris project now has a newly developed feature, and the changes are synchronized across all three Git repositories (Databricks, remote, and local) that contain your project data.
+```bash
+git merge feat/modified-classifier
+```
+
+Now that the main branch of your local Git repository contains the changes you made, you should sync the main branch of your repository with your remote Git provider. At the command line in your local development environment:
+
+```bash
+git push origin
+```
+
+To sync the main branch of the project to your Databricks repo, navigate to your Databricks Repo in the Databricks Workspace UI and use the `Pull` button as you did previously.
 
 ```{note}
 In a real project with collaborators, the best practice for merging your work with the main branch of your project is to open a pull request (PR) using your Git provider's interface. This allows your collaborators to review your work before it is merged.
@@ -320,4 +319,6 @@ In a real project with collaborators, the best practice for merging your work wi
 
 ### Summary
 
-This simple demonstration took you through a hybrid development workflow for your Kedro project on Databricks. By using an IDE for development, Git for version control and collaboration and Databricks Repos to sync your code with Databricks, you can enhance your development experience and improve your project's velocity and quality.
+This concludes the demonstration workflow. Your PySpark Iris project now has a newly developed feature, and the changes are synchronized across all three Git repositories (Databricks, remote, and local) that contain your project data.
+
+This tutorial covered a hybrid Kedro project development workflow on Databricks, utilising your local development environment, Git for versioning, and Databricks Repos for code synchronization, improving development efficiency and quality.

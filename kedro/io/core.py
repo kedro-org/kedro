@@ -331,7 +331,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         return dataset_copy
 
 
-class AbstractDataSet(metaclass=DeprecatedClassMeta):
+class AbstractDataSet(Generic[_DI, _DO], metaclass=DeprecatedClassMeta):
     _DeprecatedClassMeta__alias = AbstractDataset
 
 

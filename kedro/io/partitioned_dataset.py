@@ -32,7 +32,7 @@ KEY_PROPAGATION_WARNING = (
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
-class PartitionedDataset(AbstractDataSet):
+class PartitionedDataset(AbstractDataset):
     # pylint: disable=too-many-instance-attributes,protected-access
     """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:

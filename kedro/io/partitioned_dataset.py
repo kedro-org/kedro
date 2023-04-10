@@ -14,7 +14,7 @@ from cachetools import Cache, cachedmethod
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
-    AbstractDataSet,
+    AbstractDataset,
     DatasetError,
     parse_dataset_definition,
 )
@@ -134,7 +134,7 @@ class PartitionedDataset(AbstractDataSet):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         path: str,
-        dataset: str | type[AbstractDataSet] | dict[str, Any],
+        dataset: str | type[AbstractDataset] | dict[str, Any],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
         credentials: dict[str, Any] = None,
@@ -157,7 +157,7 @@ class PartitionedDataset(AbstractDataSet):
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataSet``
+                a) object of a class that inherits from ``AbstractDataset``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -379,14 +379,14 @@ class IncrementalDataset(PartitionedDataset):
         >>> data_set.load()
     """
 
-    DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataSet"
+    DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataset"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         path: str,
-        dataset: str | type[AbstractDataSet] | dict[str, Any],
+        dataset: str | type[AbstractDataset] | dict[str, Any],
         checkpoint: str | dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
@@ -410,7 +410,7 @@ class IncrementalDataset(PartitionedDataset):
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataSet``
+                a) object of a class that inherits from ``AbstractDataset``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -525,7 +525,7 @@ class IncrementalDataset(PartitionedDataset):
         )
 
     @property
-    def _checkpoint(self) -> AbstractDataSet:
+    def _checkpoint(self) -> AbstractDataset:
         type_, kwargs = parse_dataset_definition(self._checkpoint_config)
         return type_(**kwargs)  # type: ignore
 

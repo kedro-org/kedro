@@ -1,4 +1,4 @@
-"""``PartitionedDataSet`` loads and saves partitioned file-like data using the
+"""``PartitionedDataset`` loads and saves partitioned file-like data using the
 underlying dataset definition. It also uses `fsspec` for filesystem level operations.
 """
 import operator
@@ -12,12 +12,12 @@ from cachetools import Cache, cachedmethod
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
-    AbstractDataSet,
-    DataSetError,
+    AbstractDataset,
+    DatasetError,
     parse_dataset_definition,
 )
 from kedro.io.data_catalog import CREDENTIALS_KEY
-from kedro.utils import load_obj
+from kedro.utils import DeprecatedClassMeta, load_obj
 
 DATASET_CREDENTIALS_KEY = "dataset_credentials"
 CHECKPOINT_CREDENTIALS_KEY = "checkpoint_credentials"
@@ -30,9 +30,9 @@ KEY_PROPAGATION_WARNING = (
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
-class PartitionedDataSet(AbstractDataSet):
+class PartitionedDataset(AbstractDataset):
     # pylint: disable=too-many-instance-attributes,protected-access
-    """``PartitionedDataSet`` loads and saves partitioned file-like data using the
+    """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
@@ -47,10 +47,10 @@ class PartitionedDataSet(AbstractDataSet):
     .. code-block:: yaml
 
         station_data:
-          type: PartitionedDataSet
+          type: PartitionedDataset
           path: data/03_primary/station_data
           dataset:
-            type: pandas.CSVDataSet
+            type: pandas.CSVDataset
             load_args:
               sep: '\\t'
             save_args:
@@ -64,7 +64,7 @@ class PartitionedDataSet(AbstractDataSet):
     ::
 
         >>> import pandas as pd
-        >>> from kedro.io import PartitionedDataSet
+        >>> from kedro.io import PartitionedDataset
         >>>
         >>> # Create a fake pandas dataframe with 10 rows of data
         >>> df = pd.DataFrame([{"DAY_OF_MONTH": str(i), "VALUE": i} for i in range(1, 11)])
@@ -76,9 +76,9 @@ class PartitionedDataSet(AbstractDataSet):
             }
         >>>
         >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
-        >>> data_set = PartitionedDataSet(
+        >>> data_set = PartitionedDataset(
                 path="df_with_partition",
-                dataset="pandas.CSVDataSet",
+                dataset="pandas.CSVDataset",
                 filename_suffix=".csv"
             )
         >>> # This will create a folder `df_with_partition` and save multiple files
@@ -101,15 +101,15 @@ class PartitionedDataSet(AbstractDataSet):
     ::
 
         >>> import pandas as pd
-        >>> from kedro.io import PartitionedDataSet
+        >>> from kedro.io import PartitionedDataset
         >>>
         >>> # these credentials will be passed to both 'fsspec.filesystem()' call
         >>> # and the dataset initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = PartitionedDataSet(
+        >>> data_set = PartitionedDataset(
                 path="s3://bucket-name/path/to/folder",
-                dataset="pandas.CSVDataSet",
+                dataset="pandas.CSVDataset",
                 credentials=credentials
             )
         >>> loaded = data_set.load()
@@ -132,7 +132,7 @@ class PartitionedDataSet(AbstractDataSet):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         path: str,
-        dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
+        dataset: Union[str, Type[AbstractDataset], Dict[str, Any]],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
@@ -140,7 +140,7 @@ class PartitionedDataSet(AbstractDataSet):
         fs_args: Dict[str, Any] = None,
         overwrite: bool = False,
     ):
-        """Creates a new instance of ``PartitionedDataSet``.
+        """Creates a new instance of ``PartitionedDataset``.
 
         Args:
             path: Path to the folder containing partitioned data.
@@ -150,11 +150,11 @@ class PartitionedDataSet(AbstractDataSet):
                 ``fsspec.implementations.local.LocalFileSystem`` will be used.
                 **Note:** Some concrete implementations are bundled with ``fsspec``,
                 while others (like ``s3`` or ``gcs``) must be installed separately
-                prior to usage of the ``PartitionedDataSet``.
+                prior to usage of the ``PartitionedDataset``.
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataSet``
+                a) object of a class that inherits from ``AbstractDataset``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -179,7 +179,7 @@ class PartitionedDataSet(AbstractDataSet):
             overwrite: If True, any existing partitions will be removed.
 
         Raises:
-            DataSetError: If versioning is enabled for the underlying dataset.
+            DatasetError: If versioning is enabled for the underlying dataset.
         """
         # pylint: disable=import-outside-toplevel
         from fsspec.utils import infer_storage_options  # for performance reasons
@@ -195,7 +195,7 @@ class PartitionedDataSet(AbstractDataSet):
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
         if VERSION_KEY in self._dataset_config:
-            raise DataSetError(
+            raise DatasetError(
                 f"'{self.__class__.__name__}' does not support versioning of the "
                 f"underlying dataset. Please remove '{VERSIONED_FLAG_KEY}' flag from "
                 f"the dataset definition."
@@ -288,7 +288,7 @@ class PartitionedDataSet(AbstractDataSet):
             partitions[partition_id] = dataset.load
 
         if not partitions:
-            raise DataSetError(f"No partitions found in '{self._path}'")
+            raise DatasetError(f"No partitions found in '{self._path}'")
 
         return partitions
 
@@ -331,11 +331,15 @@ class PartitionedDataSet(AbstractDataSet):
         self._invalidate_caches()
 
 
-class IncrementalDataSet(PartitionedDataSet):
-    """``IncrementalDataSet`` inherits from ``PartitionedDataSet``, which loads
+class PartitionedDataSet(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = PartitionedDataSet
+
+
+class IncrementalDataset(PartitionedDataset):
+    """``IncrementalDataset`` inherits from ``PartitionedDataset``, which loads
     and saves partitioned file-like data using the underlying dataset
     definition. For filesystem level operations it uses `fsspec`:
-    https://github.com/intake/filesystem_spec. ``IncrementalDataSet`` also stores
+    https://github.com/intake/filesystem_spec. ``IncrementalDataset`` also stores
     the information about the last processed partition in so-called `checkpoint`
     that is persisted to the location of the data partitions by default, so that
     subsequent pipeline run loads only new partitions past the checkpoint.
@@ -343,7 +347,7 @@ class IncrementalDataSet(PartitionedDataSet):
     Example:
     ::
 
-        >>> from kedro.io import IncrementalDataSet
+        >>> from kedro.io import IncrementalDataset
         >>>
         >>> # these credentials will be passed to:
         >>> # a) 'fsspec.filesystem()' call,
@@ -351,9 +355,9 @@ class IncrementalDataSet(PartitionedDataSet):
         >>> # c) the checkpoint initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = IncrementalDataSet(
+        >>> data_set = IncrementalDataset(
         >>>     path="s3://bucket-name/path/to/folder",
-        >>>     dataset="pandas.CSVDataSet",
+        >>>     dataset="pandas.CSVDataset",
         >>>     credentials=credentials
         >>> )
         >>> loaded = data_set.load()  # loads all available partitions
@@ -367,14 +371,14 @@ class IncrementalDataSet(PartitionedDataSet):
         >>> data_set.load()
     """
 
-    DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataSet"
+    DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataset"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         path: str,
-        dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
+        dataset: Union[str, Type[AbstractDataset], Dict[str, Any]],
         checkpoint: Union[str, Dict[str, Any]] = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
@@ -383,7 +387,7 @@ class IncrementalDataSet(PartitionedDataSet):
         fs_args: Dict[str, Any] = None,
     ):
 
-        """Creates a new instance of ``IncrementalDataSet``.
+        """Creates a new instance of ``IncrementalDataset``.
 
         Args:
             path: Path to the folder containing partitioned data.
@@ -393,11 +397,11 @@ class IncrementalDataSet(PartitionedDataSet):
                 ``fsspec.implementations.local.LocalFileSystem`` will be used.
                 **Note:** Some concrete implementations are bundled with ``fsspec``,
                 while others (like ``s3`` or ``gcs``) must be installed separately
-                prior to usage of the ``PartitionedDataSet``.
+                prior to usage of the ``PartitionedDataset``.
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataSet``
+                a) object of a class that inherits from ``AbstractDataset``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -429,7 +433,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
 
         Raises:
-            DataSetError: If versioning is enabled for the underlying dataset.
+            DatasetError: If versioning is enabled for the underlying dataset.
         """
 
         super().__init__(
@@ -459,7 +463,7 @@ class IncrementalDataSet(PartitionedDataSet):
         checkpoint_config = checkpoint_config or {}
 
         for key in {VERSION_KEY, VERSIONED_FLAG_KEY} & checkpoint_config.keys():
-            raise DataSetError(
+            raise DatasetError(
                 f"'{self.__class__.__name__}' does not support versioning of the "
                 f"checkpoint. Please remove '{key}' key from the checkpoint definition."
             )
@@ -509,7 +513,7 @@ class IncrementalDataSet(PartitionedDataSet):
         )
 
     @property
-    def _checkpoint(self) -> AbstractDataSet:
+    def _checkpoint(self) -> AbstractDataset:
         type_, kwargs = parse_dataset_definition(self._checkpoint_config)
         return type_(**kwargs)  # type: ignore
 
@@ -518,7 +522,7 @@ class IncrementalDataSet(PartitionedDataSet):
             return self._force_checkpoint
         try:
             return self._checkpoint.load()
-        except DataSetError:
+        except DatasetError:
             return None
 
     def _load(self) -> Dict[str, Callable[[], Any]]:
@@ -541,3 +545,7 @@ class IncrementalDataSet(PartitionedDataSet):
         partition_ids = [self._path_to_partition(p) for p in self._list_partitions()]
         if partition_ids:
             self._checkpoint.save(partition_ids[-1])  # checkpoint to last partition
+
+
+class IncrementalDataSet(metaclass=DeprecatedClassMeta):
+    __DeprecatedClassMeta__alias = IncrementalDataset

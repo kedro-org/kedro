@@ -19,7 +19,7 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
-from kedro.utils import load_obj
+from kedro.utils import DeprecatedClassMeta, load_obj
 
 warnings.simplefilter("default", DeprecationWarning)
 
@@ -31,35 +31,47 @@ PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
 
 
-class DataSetError(Exception):
-    """``DataSetError`` raised by ``AbstractDataSet`` implementations
+class DatasetError(Exception):
+    """``DatasetError`` raised by ``AbstractDataset`` implementations
     in case of failure of input/output methods.
 
-    ``AbstractDataSet`` implementations should provide instructive
+    ``AbstractDataset`` implementations should provide instructive
     information in case of failure.
     """
 
     pass
 
 
-class DataSetNotFoundError(DataSetError):
-    """``DataSetNotFoundError`` raised by ``DataCatalog`` class in case of
+class DataSetError(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = DatasetError
+
+
+class DatasetNotFoundError(DatasetError):
+    """``DatasetNotFoundError`` raised by ``DataCatalog`` class in case of
     trying to use a non-existing data set.
     """
 
     pass
 
 
-class DataSetAlreadyExistsError(DataSetError):
-    """``DataSetAlreadyExistsError`` raised by ``DataCatalog`` class in case
+class DataSetNotFoundError(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = DatasetNotFoundError
+
+
+class DatasetAlreadyExistsError(DatasetError):
+    """``DatasetAlreadyExistsError`` raised by ``DataCatalog`` class in case
     of trying to add a data set which already exists in the ``DataCatalog``.
     """
 
     pass
 
 
-class VersionNotFoundError(DataSetError):
-    """``VersionNotFoundError`` raised by ``AbstractVersionedDataSet`` implementations
+class DataSetAlreadyExistsError(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = DatasetAlreadyExistsError
+
+
+class VersionNotFoundError(DatasetError):
+    """``VersionNotFoundError`` raised by ``AbstractVersionedDataset`` implementations
     in case of no load versions available for the data set.
     """
 
@@ -70,8 +82,8 @@ _DI = TypeVar("_DI")
 _DO = TypeVar("_DO")
 
 
-class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
-    """``AbstractDataSet`` is the base class for all data set implementations.
+class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
+    """``AbstractDataset`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
     If a specific dataset implementation cannot be used in conjunction with
@@ -82,10 +94,10 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractDataSet
+        >>> from kedro.io import AbstractDataset
         >>>
         >>>
-        >>> class MyOwnDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
+        >>> class MyOwnDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         >>>     def __init__(self, filepath, param1, param2=True):
         >>>         self._filepath = PurePosixPath(filepath)
         >>>         self._param1 = param1
@@ -107,7 +119,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
     ::
 
         my_dataset:
-            type: <path-to-my-own-dataset>.MyOwnDataSet
+            type: <path-to-my-own-dataset>.MyOwnDataset
             filepath: data/01_raw/my_data.csv
             param1: <param1-value> # param1 is a required argument
             # param2 will be True by default
@@ -120,7 +132,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         config: Dict[str, Any],
         load_version: str = None,
         save_version: str = None,
-    ) -> "AbstractDataSet":
+    ) -> "AbstractDataset":
         """Create a data set instance using the configuration provided.
 
         Args:
@@ -134,10 +146,10 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
                 if versioning was not enabled.
 
         Returns:
-            An instance of an ``AbstractDataSet`` subclass.
+            An instance of an ``AbstractDataset`` subclass.
 
         Raises:
-            DataSetError: When the function fails to create the data set
+            DatasetError: When the function fails to create the data set
                 from its config.
 
         """
@@ -146,21 +158,21 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
                 config, load_version, save_version
             )
         except Exception as exc:
-            raise DataSetError(
+            raise DatasetError(
                 f"An exception occurred when parsing config "
-                f"for DataSet '{name}':\n{str(exc)}"
+                f"for Dataset '{name}':\n{str(exc)}"
             ) from exc
 
         try:
             data_set = class_obj(**config)  # type: ignore
         except TypeError as err:
-            raise DataSetError(
-                f"\n{err}.\nDataSet '{name}' must only contain arguments valid for the "
+            raise DatasetError(
+                f"\n{err}.\nDataset '{name}' must only contain arguments valid for the "
                 f"constructor of '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
         except Exception as err:
-            raise DataSetError(
-                f"\n{err}.\nFailed to instantiate DataSet '{name}' "
+            raise DatasetError(
+                f"\n{err}.\nFailed to instantiate Dataset '{name}' "
                 f"of type '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
         return data_set
@@ -176,7 +188,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
             Data returned by the provided load method.
 
         Raises:
-            DataSetError: When underlying load method raises error.
+            DatasetError: When underlying load method raises error.
 
         """
 
@@ -184,7 +196,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
 
         try:
             return self._load()
-        except DataSetError:
+        except DatasetError:
             raise
         except Exception as exc:
             # This exception handling is by design as the composed data sets
@@ -192,7 +204,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
             message = (
                 f"Failed while loading data from data set {str(self)}.\n{str(exc)}"
             )
-            raise DataSetError(message) from exc
+            raise DatasetError(message) from exc
 
     def save(self, data: _DI) -> None:
         """Saves data by delegation to the provided save method.
@@ -201,30 +213,30 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
             data: the value to be saved by provided save method.
 
         Raises:
-            DataSetError: when underlying save method raises error.
+            DatasetError: when underlying save method raises error.
             FileNotFoundError: when save method got file instead of dir, on Windows.
             NotADirectoryError: when save method got file instead of dir, on Unix.
         """
 
         if data is None:
-            raise DataSetError("Saving 'None' to a 'DataSet' is not allowed")
+            raise DatasetError("Saving 'None' to a 'Dataset' is not allowed")
 
         try:
             self._logger.debug("Saving %s", str(self))
             self._save(data)
-        except DataSetError:
+        except DatasetError:
             raise
         except (FileNotFoundError, NotADirectoryError):
             raise
         except Exception as exc:
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
-            raise DataSetError(message) from exc
+            raise DatasetError(message) from exc
 
     def __str__(self):
         def _to_str(obj, is_root=False):
             """Returns a string representation where
-            1. The root level (i.e. the DataSet.__init__ arguments) are
-            formatted like DataSet(key=value).
+            1. The root level (i.e. the Dataset.__init__ arguments) are
+            formatted like Dataset(key=value).
             2. Dictionaries have the keys alphabetically sorted recursively.
             3. None values are not shown.
             """
@@ -250,21 +262,21 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
     @abc.abstractmethod
     def _load(self) -> _DO:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_load' method"
         )
 
     @abc.abstractmethod
     def _save(self, data: _DI) -> None:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_save' method"
         )
 
     @abc.abstractmethod
     def _describe(self) -> Dict[str, Any]:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_describe' method"
         )
 
@@ -276,7 +288,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
             Flag indicating whether the output already exists.
 
         Raises:
-            DataSetError: when underlying exists method raises error.
+            DatasetError: when underlying exists method raises error.
 
         """
         try:
@@ -286,7 +298,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
             message = (
                 f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
             )
-            raise DataSetError(message) from exc
+            raise DatasetError(message) from exc
 
     def _exists(self) -> bool:
         self._logger.warning(
@@ -299,7 +311,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         """Release any cached data.
 
         Raises:
-            DataSetError: when underlying release method raises error.
+            DatasetError: when underlying release method raises error.
 
         """
         try:
@@ -307,16 +319,20 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
             self._release()
         except Exception as exc:
             message = f"Failed during release for data set {str(self)}.\n{str(exc)}"
-            raise DataSetError(message) from exc
+            raise DatasetError(message) from exc
 
     def _release(self) -> None:
         pass
 
-    def _copy(self, **overwrite_params) -> "AbstractDataSet":
+    def _copy(self, **overwrite_params) -> "AbstractDataset":
         dataset_copy = copy.deepcopy(self)
         for name, value in overwrite_params.items():
             setattr(dataset_copy, name, value)
         return dataset_copy
+
+
+class AbstractDataSet(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = AbstractDataset
 
 
 def generate_timestamp() -> str:
@@ -352,7 +368,7 @@ _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", "
 
 def parse_dataset_definition(
     config: Dict[str, Any], load_version: str = None, save_version: str = None
-) -> Tuple[Type[AbstractDataSet], Dict[str, Any]]:
+) -> Tuple[Type[AbstractDataset], Dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
@@ -366,7 +382,7 @@ def parse_dataset_definition(
             if versioning was not enabled.
 
     Raises:
-        DataSetError: If the function fails to parse the configuration provided.
+        DatasetError: If the function fails to parse the configuration provided.
 
     Returns:
         2-tuple: (Dataset class object, configuration dictionary)
@@ -375,12 +391,12 @@ def parse_dataset_definition(
     config = copy.deepcopy(config)
 
     if "type" not in config:
-        raise DataSetError("'type' is missing from DataSet catalog configuration")
+        raise DatasetError("'type' is missing from Dataset catalog configuration")
 
     class_obj = config.pop("type")
     if isinstance(class_obj, str):
         if len(class_obj.strip(".")) != len(class_obj):
-            raise DataSetError(
+            raise DatasetError(
                 "'type' class path does not support relative "
                 "paths or paths ending with a dot."
             )
@@ -390,15 +406,15 @@ def parse_dataset_definition(
         try:
             class_obj = next(obj for obj in trials if obj is not None)
         except StopIteration as exc:
-            raise DataSetError(
+            raise DatasetError(
                 f"Class '{class_obj}' not found or one of its dependencies "
                 f"has not been installed."
             ) from exc
 
-    if not issubclass(class_obj, AbstractDataSet):
-        raise DataSetError(
-            f"DataSet type '{class_obj.__module__}.{class_obj.__qualname__}' "
-            f"is invalid: all data set types must extend 'AbstractDataSet'."
+    if not issubclass(class_obj, AbstractDataset):
+        raise DatasetError(
+            f"Dataset type '{class_obj.__module__}.{class_obj.__qualname__}' "
+            f"is invalid: all data set types must extend 'AbstractDataset'."
         )
 
     if VERSION_KEY in config:
@@ -438,7 +454,7 @@ def _load_obj(class_path: str) -> Optional[object]:
         return None
     except AttributeError as exc:
         if available_classes and class_name in available_classes:
-            raise DataSetError(
+            raise DatasetError(
                 f"{exc} Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
                 f"https://kedro.readthedocs.io/en/stable/"
@@ -454,9 +470,9 @@ def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
-class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
+class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     """
-    ``AbstractVersionedDataSet`` is the base class for all versioned data set
+    ``AbstractVersionedDataset`` is the base class for all versioned data set
     implementations. All data sets that implement versioning should extend this
     abstract class and implement the methods marked as abstract.
 
@@ -465,10 +481,10 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractVersionedDataSet
+        >>> from kedro.io import AbstractVersionedDataset
         >>>
         >>>
-        >>> class MyOwnDataSet(AbstractVersionedDataSet):
+        >>> class MyOwnDataset(AbstractVersionedDataset):
         >>>     def __init__(self, filepath, version, param1, param2=True):
         >>>         super().__init__(PurePosixPath(filepath), version)
         >>>         self._param1 = param1
@@ -493,7 +509,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     ::
 
         my_dataset:
-            type: <path-to-my-own-dataset>.MyOwnDataSet
+            type: <path-to-my-own-dataset>.MyOwnDataset
             filepath: data/01_raw/my_data.csv
             versioned: true
             param1: <param1-value> # param1 is a required argument
@@ -507,7 +523,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         exists_function: Callable[[str], bool] = None,
         glob_function: Callable[[str], List[str]] = None,
     ):
-        """Creates a new instance of ``AbstractVersionedDataSet``.
+        """Creates a new instance of ``AbstractVersionedDataset``.
 
         Args:
             filepath: Filepath in POSIX format to a file.
@@ -590,7 +606,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         versioned_path = self._get_versioned_path(save_version)  # type: ignore
 
         if self._exists_function(str(versioned_path)):
-            raise DataSetError(
+            raise DatasetError(
                 f"Save path '{versioned_path}' for {str(self)} must not exist if "
                 f"versioning is enabled."
             )
@@ -611,7 +627,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         except (FileNotFoundError, NotADirectoryError) as err:
             # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
             _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"
-            raise DataSetError(
+            raise DatasetError(
                 f"Cannot save versioned dataset '{self._filepath.name}' to "
                 f"'{self._filepath.parent.as_posix()}' because a file with the same "
                 f"name already exists in the directory. This is likely because "
@@ -637,7 +653,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
             Flag indicating whether the output already exists.
 
         Raises:
-            DataSetError: when underlying exists method raises error.
+            DatasetError: when underlying exists method raises error.
 
         """
         self._logger.debug("Checking whether target of %s exists", str(self))
@@ -649,11 +665,15 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
             message = (
                 f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
             )
-            raise DataSetError(message) from exc
+            raise DatasetError(message) from exc
 
     def _release(self) -> None:
         super()._release()
         self._version_cache.clear()
+
+
+class AbstractVersionedDataSet(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = AbstractVersionedDataset
 
 
 def _parse_filepath(filepath: str) -> Dict[str, str]:
@@ -700,16 +720,18 @@ def _parse_filepath(filepath: str) -> Dict[str, str]:
 def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, str]:
     """Parses filepath on protocol and path.
 
+    .. warning::
+        Versioning is not supported for HTTP protocols.
+
     Args:
-        filepath: raw filepath e.g.: `gcs://bucket/test.json`.
+        filepath: raw filepath e.g.: ``gcs://bucket/test.json``.
         version: instance of ``kedro.io.core.Version`` or None.
 
     Returns:
         Protocol and path.
 
     Raises:
-        DataSetError: when protocol is http(s) and version is not None.
-        Note: HTTP(s) dataset doesn't support versioning.
+        DatasetError: when protocol is http(s) and version is not None.
     """
     options_dict = _parse_filepath(filepath)
     path = options_dict["path"]
@@ -717,9 +739,9 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, 
 
     if protocol in HTTP_PROTOCOLS:
         if version is not None:
-            raise DataSetError(
-                "HTTP(s) DataSet doesn't support versioning. "
-                "Please remove version flag from the dataset configuration."
+            raise DatasetError(
+                "Versioning is not supported for HTTP protocols. "
+                "Please remove the `versioned` flag from the dataset configuration."
             )
         path = path.split(PROTOCOL_DELIMITER, 1)[-1]
 
@@ -746,6 +768,6 @@ def validate_on_forbidden_chars(**kwargs):
     """Validate that string values do not include white-spaces or ;"""
     for key, value in kwargs.items():
         if " " in value or ";" in value:
-            raise DataSetError(
+            raise DatasetError(
                 f"Neither white-space nor semicolon are allowed in '{key}'."
             )

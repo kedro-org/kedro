@@ -114,5 +114,5 @@ class CachedDataset(AbstractDataset):
         return self.__dict__
 
 
-class CachedDataSet(meta=DeprecatedClassMeta):
+class CachedDataSet(metaclass=DeprecatedClassMeta):
     _DeprecatedClassMeta__alias = CachedDataset

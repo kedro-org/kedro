@@ -36,7 +36,7 @@ class DatasetError(Exception):
     """``DatasetError`` raised by ``AbstractDataSet`` implementations
     in case of failure of input/output methods.
 
-    ``AbstractDataSet`` implementations should provide instructive
+    ``AbstractDataset`` implementations should provide instructive
     information in case of failure.
     """
 
@@ -89,8 +89,8 @@ _DI = TypeVar("_DI")
 _DO = TypeVar("_DO")
 
 
-class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
-    """``AbstractDataSet`` is the base class for all data set implementations.
+class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
+    """``AbstractDataset`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
     If a specific dataset implementation cannot be used in conjunction with
@@ -101,7 +101,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractDataSet
+        >>> from kedro.io import AbstractDataset
         >>>
         >>>
         >>> class MyOwnDataset(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
@@ -153,7 +153,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
                 if versioning was not enabled.
 
         Returns:
-            An instance of an ``AbstractDataSet`` subclass.
+            An instance of an ``AbstractDataset`` subclass.
 
         Raises:
             DatasetError: When the function fails to create the data set
@@ -269,21 +269,21 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
     @abc.abstractmethod
     def _load(self) -> _DO:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_load' method"
         )
 
     @abc.abstractmethod
     def _save(self, data: _DI) -> None:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_save' method"
         )
 
     @abc.abstractmethod
     def _describe(self) -> dict[str, Any]:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_describe' method"
         )
 
@@ -336,6 +336,10 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         for name, value in overwrite_params.items():
             setattr(dataset_copy, name, value)
         return dataset_copy
+
+
+class AbstractDataSet(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = AbstractDataset
 
 
 def generate_timestamp() -> str:
@@ -476,9 +480,9 @@ def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
-class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
+class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     """
-    ``AbstractVersionedDataSet`` is the base class for all versioned data set
+    ``AbstractVersionedDataset`` is the base class for all versioned data set
     implementations. All data sets that implement versioning should extend this
     abstract class and implement the methods marked as abstract.
 
@@ -487,7 +491,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractVersionedDataSet
+        >>> from kedro.io import AbstractVersionedDataset
         >>>
         >>>
         >>> class MyOwnDataset(AbstractVersionedDataSet):
@@ -529,7 +533,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         exists_function: Callable[[str], bool] = None,
         glob_function: Callable[[str], list[str]] = None,
     ):
-        """Creates a new instance of ``AbstractVersionedDataSet``.
+        """Creates a new instance of ``AbstractVersionedDataset``.
 
         Args:
             filepath: Filepath in POSIX format to a file.

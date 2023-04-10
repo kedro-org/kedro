@@ -1,27 +1,28 @@
-"""``MemoryDataSet`` is a data set implementation which handles in-memory data.
+"""``MemoryDataset`` is a data set implementation which handles in-memory data.
 """
 
 import copy
 from typing import Any, Dict
 
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataset, DatasetError
+from kedro.utils import DeprecatedClassMeta
 
 _EMPTY = object()
 
 
-class MemoryDataSet(AbstractDataSet):
-    """``MemoryDataSet`` loads and saves data from/to an in-memory
+class MemoryDataset(AbstractDataset):
+    """``MemoryDataset`` loads and saves data from/to an in-memory
     Python object.
 
     Example:
     ::
 
-        >>> from kedro.io import MemoryDataSet
+        >>> from kedro.io import MemoryDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
-        >>> data_set = MemoryDataSet(data=data)
+        >>> data_set = MemoryDataset(data=data)
         >>>
         >>> loaded_data = data_set.load()
         >>> assert loaded_data.equals(data)
@@ -34,7 +35,7 @@ class MemoryDataSet(AbstractDataSet):
     """
 
     def __init__(self, data: Any = _EMPTY, copy_mode: str = None):
-        """Creates a new instance of ``MemoryDataSet`` pointing to the
+        """Creates a new instance of ``MemoryDataset`` pointing to the
         provided Python object.
 
         Args:
@@ -50,7 +51,7 @@ class MemoryDataSet(AbstractDataSet):
 
     def _load(self) -> Any:
         if self._data is _EMPTY:
-            raise DataSetError("Data for MemoryDataSet has not been saved yet.")
+            raise DatasetError("Data for MemoryDataset has not been saved yet.")
 
         copy_mode = self._copy_mode or _infer_copy_mode(self._data)
         data = _copy_with_mode(self._data, copy_mode=copy_mode)
@@ -111,7 +112,7 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
         copy_mode: The copy mode to use, one of "deepcopy", "copy" and "assign".
 
     Raises:
-        DataSetError: If copy_mode is specified, but isn't valid
+        DatasetError: If copy_mode is specified, but isn't valid
             (i.e: not one of deepcopy, copy, assign)
 
     Returns:
@@ -124,9 +125,13 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
     elif copy_mode == "assign":
         copied_data = data
     else:
-        raise DataSetError(
+        raise DatasetError(
             f"Invalid copy mode: {copy_mode}. "
             f"Possible values are: deepcopy, copy, assign."
         )
 
     return copied_data
+
+
+class MemoryDataSet(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = MemoryDataset

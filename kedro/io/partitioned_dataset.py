@@ -332,7 +332,7 @@ class PartitionedDataset(AbstractDataset):
 
 
 class PartitionedDataSet(metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = PartitionedDataSet
+    _DeprecatedClassMeta__alias = PartitionedDataset
 
 
 class IncrementalDataset(PartitionedDataset):

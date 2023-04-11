@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set  # noqa
 
 import fsspec
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, OmegaConf
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
@@ -264,6 +264,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     f"Invalid YAML or JSON file {Path(conf_path, config_filepath.name).as_posix()},"
                     f" unable to read line {line}, position {cursor}."
                 ) from exc
+                if not OmegaConf.is_dict(config):
+                    raise TypeError("Only DictConfig is supported")
 
         seen_file_to_keys = {
             file: set(config.keys()) for file, config in config_per_file.items()
@@ -273,9 +275,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         if not aggregate_config:
             return {}
-        if len(aggregate_config) == 1:
-            return list(aggregate_config)[0]
-        return dict(OmegaConf.merge(*aggregate_config))
+        # if len(aggregate_config) == 1:
+        #     return list(aggregate_config)[0]
+        return OmegaConf.to_container(
+            OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True)
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""
@@ -311,7 +314,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise ValueError(f"{dup_str}")
 
     @staticmethod
-    def _resolve_environment_variables(config: Dict[str, Any]) -> None:
+    def _resolve_environment_variables(config: DictConfig]) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
         them in-place, clearing the resolver after the operation is complete if
         it was not registered beforehand.

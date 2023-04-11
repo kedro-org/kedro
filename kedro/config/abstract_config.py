@@ -17,12 +17,12 @@ class AbstractConfigLoader(UserDict):
         conf_source: str,
         env: str = None,
         runtime_params: Dict[str, Any] = None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.conf_source = conf_source
         self.env = env
-        self.runtime_params = runtime_params
+        self.runtime_params = runtime_params or {}
 
 
 class BadConfigException(Exception):

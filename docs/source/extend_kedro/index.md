@@ -1,7 +1,7 @@
 # Extend Kedro
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 common_use_cases
 custom_datasets

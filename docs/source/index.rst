@@ -64,7 +64,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorial and basic Kedro usage   
+   :caption: Tutorial and basic Kedro usage
 
    tutorial/spaceflights_tutorial.md
 

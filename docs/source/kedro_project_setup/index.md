@@ -1,7 +1,7 @@
 # Kedro project setup
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 starters
 dependencies

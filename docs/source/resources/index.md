@@ -1,7 +1,7 @@
 # Resources
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 ../faq/faq
 glossary

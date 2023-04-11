@@ -1,7 +1,7 @@
 # Nodes and pipelines
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 nodes
 pipeline_introduction

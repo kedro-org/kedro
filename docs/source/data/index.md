@@ -1,7 +1,7 @@
 # Data Catalog
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 data_catalog
 kedro_io

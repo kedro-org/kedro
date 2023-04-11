@@ -1,7 +1,7 @@
 # Configuration
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 configuration_basics
 credentials

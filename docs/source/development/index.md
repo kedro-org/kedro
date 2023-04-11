@@ -1,7 +1,7 @@
 # Development
 
 ```{toctree}
-:hidden:
+:maxdepth: 1
 
 set_up_vscode
 set_up_pycharm

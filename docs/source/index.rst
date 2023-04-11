@@ -52,27 +52,36 @@ Welcome to Kedro's documentation!
     :alt: OpenSSF Best Practices Badge Program
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Learn about Kedro
 
    introduction/index.md
 
 .. toctree::
+   :maxdepth: 2
 
    get_started/index.md
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Tutorial and basic Kedro usage   
 
    tutorial/spaceflights_tutorial.md
 
 .. toctree::
+   :maxdepth: 2
 
    visualisation/index.md
 
 .. toctree::
+   :maxdepth: 2
 
    notebooks_and_ipython/index.md
+   resources/index.md
 
 .. toctree::
    :maxdepth: 2
+   :caption: Kedro projects
 
    kedro_project_setup/index.md
 
@@ -93,6 +102,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Advanced usage
 
    extend_kedro/index.md
 
@@ -125,12 +135,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-
-   resources/index.md
-
-
-.. toctree::
-   :maxdepth: 2
+   :caption: Contribute to Kedro
 
    contribution/index.md
 

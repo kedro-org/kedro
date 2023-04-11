@@ -46,9 +46,9 @@ kedro run --runner=ThreadRunner
 `SparkDataSet` doesn't work correctly with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataSet`, you must use `ThreadRunner`.
 ```
 
-For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../tools_integration/pyspark.md).
+For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../integrations/pyspark_integration.md).
 
-
+hook_manager: PluginManager = None,
 
 ## Custom runners
 
@@ -65,9 +65,15 @@ from kedro.runner.runner import AbstractRunner
 from pluggy import PluginManager
 
 
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.pipeline import Pipeline
+from kedro.runner.runner import AbstractRunner
+
+
 class DryRunner(AbstractRunner):
     """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
-    nodes would be run without actually executing anything.
+    nodes would be run without actually executing anything. It also checks if all the
+    neccessary data exists.
     """
 
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
@@ -100,7 +106,6 @@ class DryRunner(AbstractRunner):
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
-            hook_manager: The ``PluginManager`` to activate hooks.
             session_id: The id of the session.
 
         """
@@ -108,8 +113,18 @@ class DryRunner(AbstractRunner):
         self._logger.info(
             "Actual run would execute %d nodes:\n%s",
             len(nodes),
-            "\n".join(map(str, nodes)),
+            "\n",
+            pipeline.describe(),
         )
+        self._logger.info("Checking inputs...")
+        input_names = pipeline.inputs()
+        missing_inputs = [
+            input_name
+            for input_name in input_names
+            if not catalog._get_dataset(input_name).exists()
+        ]
+        if missing_inputs:
+            raise KeyError(f"Datasets {missing_inputs} not found.")
 ```
 </details>
 

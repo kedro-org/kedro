@@ -65,7 +65,7 @@ It's generally a good practice to create AWS resources (like S3 bucket above) fo
 
 ### Create the configuration environment
 
-Configuration in Kedro is logically separated into [configuration environments](../kedro_project_setup/configuration.md#additional-configuration-environments) which are loaded in specific order where the project is run. To separate SageMaker-specific configuration from the default one, let's create a new configuration environment. Go ahead and create a `conf/sagemaker` folder and then create the following files in it.
+Configuration in Kedro is logically separated into [configuration environments](../configuration/configuration_basics.md#how-to-specify-additional-configuration-environments) which are loaded in specific order where the project is run. To separate SageMaker-specific configuration from the default one, let's create a new configuration environment. Go ahead and create a `conf/sagemaker` folder and then create the following files in it.
 
 ```{note}
 `${key}` in the YAML snippets below is a special syntax which allows you to template the project configuration. You don't need to replace those values, just paste them as-is.

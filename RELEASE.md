@@ -9,11 +9,14 @@
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
 
-# Upcoming Release
+# Upcoming Release 0.18.8
 
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Improvements to documentation about configuration.
+* Improvements to Jupyter E2E tests.
+* Improvements to documentation on visualising Kedro projects on Databricks.
 
 ## Breaking changes to the API
 
@@ -25,12 +28,11 @@
 * Added new Kedro CLI `kedro jupyter setup` to setup Jupyter Kernel for Kedro.
 * `kedro package` now includes the project configuration in a compressed `tar.gz` file.
 * Added functionality to the `OmegaConfigLoader` to load configuration from compressed files of `zip` or `tar` format. This feature requires `fsspec>=2023.1.0`.
-* Signficant improvements to on-boarding documentation that covers setup for new Kedro users. Also some major changes to the spaceflights tutorial to make it faster to work through. We think it's a better read. Tell us if it's not.
-
+* Significant improvements to on-boarding documentation that covers setup for new Kedro users. Also some major changes to the spaceflights tutorial to make it faster to work through. We think it's a better read. Tell us if it's not.
 
 ## Bug fixes and other changes
 * Added a guide and tooling for developing Kedro for Databricks.
-* Implement missing dict-like interface for `_ProjectPipeline`.
+* Implemented missing dict-like interface for `_ProjectPipeline`.
 
 # Release 0.18.6
 

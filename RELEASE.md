@@ -12,11 +12,15 @@
 # Upcoming Release 0.18.8
 
 ## Major features and improvements
+* Added support for overiding global parameters via `kedro run --params`
+*
 
 ## Bug fixes and other changes
 * Improvements to documentation about configuration.
 * Improvements to Jupyter E2E tests.
 * Improvements to documentation on visualising Kedro projects on Databricks.
+* Push OmegaConfigLoader variable interpolation earlier in the resolving process,
+  OmegaConfigLoader["parameters"] now return a `Dict` instead of `DictConfig`.
 
 ## Breaking changes to the API
 

@@ -254,6 +254,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     # this is a workaround to read it as a binary file and decode it back to utf8.
                     tmp_fo = io.StringIO(open_config.read().decode("utf8"))
                     config = OmegaConf.load(tmp_fo)
+                    if not OmegaConf.is_dict(config):
+                        raise TypeError("Only DictConfig is supported")
                 if read_environment_variables:
                     self._resolve_environment_variables(config)
                 config_per_file[config_filepath] = config
@@ -277,6 +279,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return {}
         # if len(aggregate_config) == 1:
         #     return list(aggregate_config)[0]
+        print("DEBUG", OmegaConf.merge(*aggregate_config, self.runtime_params))
         return OmegaConf.to_container(
             OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True)
 

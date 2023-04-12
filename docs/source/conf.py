@@ -496,8 +496,14 @@ def _add_jinja_filters(app):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
+def _override_permalinks_icon(app):
+    # https://github.com/readthedocs/sphinx_rtd_theme/issues/98#issuecomment-1503211439
+    app.config.html_permalinks_icon = "¶"
+
+
 def setup(app):
     app.connect("builder-inited", _add_jinja_filters)
+    app.connect("builder-inited", _override_permalinks_icon)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.add_css_file("css/qb1-sphinx-rtd.css")
     # fix a bug with table wraps in Read the Docs Sphinx theme:

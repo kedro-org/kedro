@@ -23,7 +23,7 @@
 * [How do I access configuration in code](../configuration/configuration_basics.md#how-to-access-configuration-in-code)?
 * [How do I load credentials in code](../configuration/credentials.md#how-to-load-credentials-in-code)?
 * [How do I load parameters in code](../configuration/parameters.md#how-to-load-parameters-in-code)?
-* [How do I specify additional configuration environments ](../configuration/configuration_basics.md#how-to-specify-additional-configuration-environments)?
+* [How do I specify additional configuration environments](../configuration/configuration_basics.md#how-to-specify-additional-configuration-environments)?
 * [How do I change the default overriding configuration environment](../configuration/configuration_basics.md#how-to-change-the-default-overriding-environment)?
 * [How do I use only one configuration environment](../configuration/configuration_basics.md#how-to-use-only-one-configuration-environment)?
 

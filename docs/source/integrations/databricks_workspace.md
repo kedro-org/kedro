@@ -257,3 +257,28 @@ After this, you can reload Kedro by running the line magic command `%reload_kedr
 DBFS is a distributed file system mounted into a DataBricks workspace and accessible on a DataBricks cluster. It maps cloud object storage URIs to relative paths so as to simplify the process of persisting files. With DBFS, libraries can read from or write to distributed storage as if it's a local file.
 To use datasets with DBFS, the file path passed to the dataset **must** be prefixed with `/dbfs/` and look something like, `/dbfs/example_project/data/02_intermediate/processed_data`. This applies to all datasets, including `SparkDataSet`.
 > **Note**: Most Python code, except PySpark, will try to resolve a file path in the driver node storage by default, this will result in an `DataSetError` if the code is using a file path that is actually a DBFS save location. To avoid this, always make sure to point the file path to `/dbfs` when storing or loading data on DBFS. For more rules on what is saved in DBFS versus driver node storage by default, please refer to the [Databricks documentation](https://docs.databricks.com/files/index.html#what-is-the-root-path-for-databricks).
+
+## Run a packaged Kedro project on Databricks
+
+To run a packaged Kedro project that has been installed on a Databricks cluster, use the following code:
+
+```python
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import configure_project
+
+package_name = "<package_name>"
+configure_project(package_name)
+
+with KedroSession.create(package_name) as session:
+    session.run()
+```
+
+Replace `<package_name>` with your package's name.
+
+Use `configure_project()` to  run a packaged Kedro project interactively. Do **not** use `bootstrap_project()`, which is meant only for projects that haven't been packaged.
+
+The `package_name` keyword argument of `KedroSession.create()` currently does not have any effect and can be confusing. This argument will be removed in Kedro version 0.19, which is a breaking change. For now, you can safely ignore this argument.
+
+```{note}
+The entry-point of a packaged project is the `main()` method  of `src/<package_name>/__main__.py`, and it returns an exit code, which stops downstream processes from using its output. This known to cause problems on Databricks. Therefore, you should **always** use `session.run()` to run a packaged project on Databricks.
+```

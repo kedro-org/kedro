@@ -69,7 +69,7 @@ autosummary_generate = True
 Finally, to ensure that you include the autodoc modules in the build, run the following command once **from the `docs` folder**:
 
 ```bash
-sphinx-apidoc --module-first -o source ../src/<project_name>
+sphinx-apidoc --module-first -o source ../src/<package_name>
 
 ```
 
@@ -111,39 +111,42 @@ The resulting `.whl` packages only contain the Python source code of the Kedro p
 
 The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside the `local` directory.
 
-### Package recipients
+### Run a packaged project
 
-Recipients of the `.whl` file need to have Python and `pip` on their machines, but do not need to have Kedro installed.
+To run a packaged project it must first be installed. To install the package from a `.whl` file, you need to have Python and `pip` installed on your machine, but you do not need to have Kedro installed.
 
-A recipient can install the project by calling:
+To install the project, run the following command:
 
 ```bash
 pip install <path-to-wheel-file>
 ```
 
-An executable, `spaceflights`, is placed in the `bin` subfolder of the Python install folder, so the project can be run as follows:
-
-```bash
-python -m spaceflights
-```
-
 ```{note}
-The recipient will need to add a `conf` subfolder. They also need to add `data` and `logs` if the pipeline loads/saves local data or uses logging.
-Alternatively, they can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
+Once the packaged project is installed, you will need to add:
+
+* a `conf` folder
+* a `data` folder if the pipeline loads/saves local data
+* a `logs` folder if the project uses logging.
+
+Alternatively, you can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
 kedro run --conf-source <path-to-compressed-config>.tar.gz
 ```
 
-Once the project is installed, to run the pipelines from any Python code, simply import it:
+Once your project is installed, it can be run either from the command line or interactively using Python code.
+
+To do a basic run of your installed project from the command line, run `python -m <package_name>`. The packaged project also exposes a command line interface which you can use to modify how your project will be run. To see a list of options, use `python -m <package_name> --help` at the command line.
+
+To run your packaged project interactively using code, you can import `main` from the project:
 
 ```python
-from spaceflights.__main__ import main
+from <package_name>.__main__ import main
 
 main(
     ["--pipeline", "__default__"]
 )  # or simply main() if you don't want to provide any arguments
 ```
 
-This is equivalent to running `kedro run`, and you can provide all the parameters described by `kedro run --help`.
+This is equivalent to `python -m <package_name>` at the command line, and you can pass in all the arguments that correspond to the options described by `python -m <package_name> --help`.
 
 ### Docker, Airflow and other deployment targets
 

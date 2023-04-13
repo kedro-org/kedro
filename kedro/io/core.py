@@ -374,9 +374,6 @@ def parse_dataset_definition(
     save_version = save_version or generate_timestamp()
     config = copy.deepcopy(config)
 
-    if "type" not in config:
-        raise DataSetError("'type' is missing from DataSet catalog configuration")
-
     class_obj = config.pop("type")
     if isinstance(class_obj, str):
         if len(class_obj.strip(".")) != len(class_obj):

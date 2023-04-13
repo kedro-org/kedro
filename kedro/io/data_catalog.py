@@ -269,14 +269,15 @@ class DataCatalog:
 
         layers = defaultdict(set)  # type: Dict[str, Set[str]]
         for ds_name, ds_config in catalog.items():
-            ds_layer = ds_config.pop("layer", None)
-            if ds_layer is not None:
-                layers[ds_layer].add(ds_name)
+            if "type" in ds_config:
+                ds_layer = ds_config.pop("layer", None)
+                if ds_layer is not None:
+                    layers[ds_layer].add(ds_name)
 
-            ds_config = _resolve_credentials(ds_config, credentials)
-            data_sets[ds_name] = AbstractDataSet.from_config(
-                ds_name, ds_config, load_versions.get(ds_name), save_version
-            )
+                ds_config = _resolve_credentials(ds_config, credentials)
+                data_sets[ds_name] = AbstractDataSet.from_config(
+                    ds_name, ds_config, load_versions.get(ds_name), save_version
+                )
 
         dataset_layers = layers or None
         return cls(data_sets=data_sets, layers=dataset_layers)

@@ -76,7 +76,8 @@ class AbstractRunner(ABC):
         unsatisfied = pipeline.inputs() - set(catalog.list())
         if unsatisfied:
             raise ValueError(
-                f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
+                f"Pipeline input(s) {unsatisfied} not found in the DataCatalog. "
+                f"Make sure that any dataset entry contains the 'type' key."
             )
 
         free_outputs = pipeline.outputs() - set(catalog.list())

@@ -120,8 +120,7 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
 
-   integrations/databricks.md
-   integrations/pyspark.md
+   integrations/index.md
 
 .. toctree::
    :maxdepth: 2

@@ -17,7 +17,7 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 ## Prerequisites
 
-- Active [Databricks deployment](https://docs.databricks.com/getting-started/index.html) (Databricks Community Edition will not work as it doesn't support personal access tokens).
+- Active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
 - [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine.
 - An account on a Git provider such as [GitHub](https://github.com/). You can check which [Git providers are supported by Databricks](https://docs.databricks.com/repos/index.html#supported-git-providers).
@@ -45,7 +45,7 @@ With your Conda environment activated, install Kedro and dbx:
 pip install kedro dbx --upgrade
 ```
 
-dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use both the Databricks CLI and dbx to sync code and data with Databricks.
+dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync code your project with Databricks.
 
 After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance]([Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 
@@ -57,55 +57,23 @@ Create a Kedro project with the PySpark Iris starter. To do this, run the follow
 kedro new --starter=pyspark-iris
 ```
 
-Name your new project `iris-databricks` for consistency with the rest of this guide.
+Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the PySpark Iris starter template.
 
-This command will create a new Kedro project using the PySpark Iris starter template. Initialize Git for the Kedro project by running the following commands:
+### Create a repo on Databricks and sync your project
+
+Create a new repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
+
+In this guide, you will not sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
+
+![](../meta/images/databricks_repo_creation.png)
+
+The next step is to use dbx to sync your project to your repo. At the command line run:
 
 ```bash
-cd iris-databricks
-git init
+
 ```
 
-### Add your project to Version Control
-
-Create a new private Git repository with your Git provider. Then, generate an access token to connect your Kedro project with Databricks. Look up the documentation of your Git provider to learn how to generate an access token if you are unclear, as this is different for each provider.
-
-To sync your local Git repository with the remote repository stored on your Git provider, use the following commands:
-
-```python
-git remote add origin <your-git-repository-url>
-git add .
-git commit -m "Initial commit"
-git push -u origin main
-```
-
-Replace `<your-git-repository-url>` with the URL of the Git repository you created earlier.
-
-### Set up Databricks Repos and clone your project
-
-The next step is to sync the remote repository stored on your Git provider to Databricks Repos.
-
-To integrate Databricks Repos with the private Git repository stored by your Git provider, you first need to obtain an access token from your Git provider. Access tokens authenticate an application that wishes to access your private Git repository.
-
-The process for obtaining a token varies depending on your Git provider. Follow the instructions for generating an access token and adding it to Databricks specific to your Git provider in the [Databricks documentation](https://docs.databricks.com/repos/get-access-tokens-from-git-provider.html).
-
-### Sync your Git repository with Databricks
-
-After obtaining your Git access token, sync your remote Git repository to Databricks:
-
-1. Navigate to the Repos tab in your Databricks workspace.
-2. Click on the 'Add Repo' button.
-3. In the 'Add Repo' dialogue, select your Git provider from the list.
-4. Enter the URL of your remote Git repository containing the Kedro project.
-5. Click the 'Add Repo' button to complete the setup.
-
-Find the connected Git repository and click on it in the Repos tab. Databricks will automatically clone the repository and display its contents. Your Kedro project is now available in Databricks Repos, and you can start working with it in the Databricks Workspace.
-
-```{note}
-Databricks Repos supports some Git operations that you can use to manage your repository, see the [Databricks documentation](https://docs.databricks.com/repos/git-operations-with-repos.html) for reference.
-```
-
-### Run your project using Databricks notebooks
+### Run your project with Databricks notebooks
 
 Now that your project is synced with Databricks Repos, the following sections will guide you through running it on a cluster using notebooks.
 

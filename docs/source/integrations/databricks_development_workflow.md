@@ -1,6 +1,6 @@
 # Databricks development workflow
 
-This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos. This hybrid workflow involves developing your Kedro project using a local Integrated Development Environment (IDE) and Databricks notebooks for testing purposes. This guide demonstrates this workflow using an example based on the Kedro PySpark Iris starter.
+This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos. This hybrid workflow involves developing your Kedro project using a local Integrated Development Environment (IDE) and Databricks notebooks for testing. This guide demonstrates this workflow using an example based on the Kedro PySpark Iris starter.
 This workflow has several advantages, enabling:
 
 - Use of powerful development features offered by an IDE not available on Databricks notebooks.
@@ -17,8 +17,7 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 ## Prerequisites
 
-- New or existing [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/) with administrative privileges.
-- Active [Databricks deployment](https://docs.databricks.com/getting-started/index.html) on AWS (Databricks Community Edition won't suffice as it doesn't allow you to provision personal tokens).
+- Active [Databricks deployment](https://docs.databricks.com/getting-started/index.html) (Databricks Community Edition will not work as it doesn't support personal access tokens).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
 - [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine.
 - An account on a Git provider such as [GitHub](https://github.com/). You can check which [Git providers are supported by Databricks](https://docs.databricks.com/repos/index.html#supported-git-providers).

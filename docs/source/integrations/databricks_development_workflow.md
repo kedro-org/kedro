@@ -25,9 +25,9 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 ## Develop a project using the hybrid workflow
 
-### Create a virtual environment and install Kedro and the Databricks CLI
+### Create a virtual environment and install Kedro and dbx
 
-Create a virtual environment for this tutorial using Conda:
+In your local development environment, create a virtual environment for this tutorial using Conda:
 
 ```bash
 conda create --name kedro-hybrid-workflow python=3.10
@@ -39,13 +39,15 @@ Once it is created, activate it:
 conda activate kedro-hybrid-workflow
 ```
 
-With your Conda environment activated, install Kedro and the Databricks CLI:
+With your Conda environment activated, install Kedro and dbx:
 
 ```bash
-pip install kedro databricks-cli --upgrade
+pip install kedro dbx --upgrade
 ```
 
-After installing the Databricks CLI, you must authenticate it with your [Databricks instance]([Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
+dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use both the Databricks CLI and dbx to sync code and data with Databricks.
+
+After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance]([Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 
 ### Create a new project and add it to Version Control
 
@@ -120,37 +122,6 @@ Before you import and run your Python code, you'll need to install your project'
 ```
 
 This command will install the dependencies listed in your requirements.txt file to the Databricks cluster attached to your notebook.
-
-#### Upload project data to DBFS
-
-In this demonstration project, you will upload the project data to DBFS as the PySpark Iris starter comes with a catalog set up to access data stored on DBFS.
-
-There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. Use the following Databricks CLI command to upload your data:
-
-```bash
-databricks fs cp --recursive data/ dbfs:/root/projects/iris-databricks/data
-```
-
-The --recursive flag ensures that the entire folder and its contents are uploaded.
-
-To ensure that your folder has been uploaded to DBFS, you can list the contents of the destination folder in DBFS using the following command:
-
-```bash
-databricks fs ls dbfs:/path/to/dbfs/folder
-```
-
-You should see the contents of the project's `data/` directory printed to your terminal:
-
-```bash
-01_raw
-02_intermediate
-03_primary
-04_feature
-05_model_input
-06_models
-07_model_output
-08_reporting
-```
 
 #### Run your project
 

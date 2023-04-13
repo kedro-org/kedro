@@ -30,7 +30,7 @@ To set up these features, look for instructions specific to your IDE (for instan
 In your local development environment, create a virtual environment for this tutorial using Conda:
 
 ```bash
-conda create --name kedro-hybrid-workflow python=3.10
+conda create --name iris-databricks python=3.10
 ```
 
 Once it is created, activate it:
@@ -67,10 +67,28 @@ In this guide, you will not sync your project with a remote Git provider, so unc
 
 ![](../meta/images/databricks_repo_creation.png)
 
-The next step is to use dbx to sync your project to your repo. At the command line run:
+The next step is to use dbx to sync your project to your repo. Open a new command line, activate your conda environment, navigate to your project directory and start `dbx sync`:
 
 ```bash
+conda activate iris-databricks
+cd <project_root>
+dbx sync repo -d iris-databricks --source .
+```
 
+Successfully starting `dbx sync` will write output similar to the following:
+
+```{bash}
+...
+[dbx][2023-04-13 21:59:48.148] Putting /Repos/<databricks_username>/iris-databricks/src/tests/__init__.py
+[dbx][2023-04-13 21:59:48.168] Putting /Repos/<databricks_username>/iris-databricks/src/tests/test_pipeline.py
+[dbx][2023-04-13 21:59:48.189] Putting /Repos/<databricks_username>/iris-databricks/src/tests/test_run.py
+[dbx][2023-04-13 21:59:48.928] Done. Watching for changes...
+```
+
+`dbx sync` will automatically sync any further changes made in your local project directory with your Databricks repo while it runs.
+
+```{note}
+Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing.
 ```
 
 ### Run your project with Databricks notebooks

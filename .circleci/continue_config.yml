@@ -516,7 +516,24 @@ jobs:
 workflows:
   version: 2.1
 
-  build_code_and_docs:
+  lint_only:
+    when:
+      and:
+        - <<pipeline.parameters.docs_change>>
+        - not: <<pipeline.parameters.code_change>>
+        - not: <<pipeline.parameters.release_kedro>>
+        - not: <<pipeline.parameters.run_hourly>>
+        - not: <<pipeline.parameters.run_nightly>>
+    jobs:
+      - lint:
+          matrix:
+            parameters:
+              python_version: ["3.7", "3.8", "3.9", "3.10"]
+      - all_circleci_checks_succeeded:
+          requires:
+            - lint
+
+  build_code:
     when:
       and:
         - <<pipeline.parameters.code_change>>

@@ -516,7 +516,7 @@ jobs:
 workflows:
   version: 2.1
 
-  lint_docs_only:
+  lint_only:
     when:
       and:
         - <<pipeline.parameters.docs_change>>
@@ -533,7 +533,7 @@ workflows:
           requires:
             - lint
 
-  build_code_and_docs:
+  build_code:
     when:
       and:
         - <<pipeline.parameters.code_change>>

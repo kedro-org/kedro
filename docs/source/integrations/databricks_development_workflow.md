@@ -63,7 +63,7 @@ The next step is to use dbx to sync your project to your repo. Open a new termin
 ```bash
 conda activate iris-databricks
 cd <project_root>
-dbx sync repo -d iris-databricks --source .
+dbx sync repo -d iris-databricks -s . -fi conf/local
 ```
 
 Successfully starting `dbx sync` will write output similar to the following:
@@ -95,8 +95,10 @@ To run the Python code from your Databricks repo, [create a new Python notebook]
 Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. In your `iris-databricks` notebook on Databricks, install the dependencies by running the following %pip magic command in a new cell:
 
 ```ipython
-%pip install -r "/Workspace/Repos/<your_username>/iris-databricks/src/requirements.txt"
+%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/src/requirements.txt"
 ```
+
+Remember to replace `<databricks_username>` with your username on Databricks such that `project_root` correctly points to your project's location.
 
 This command will install the dependencies listed in your requirements.txt file to the Databricks cluster attached to your notebook. To run your project in your notebook, use the Kedro IPython extension. Start by loading the extension in a new cell:
 
@@ -107,10 +109,10 @@ This command will install the dependencies listed in your requirements.txt file 
 Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. Create a new cell and run the line magic to load your Kedro project.
 
 ```ipython
-%reload_kedro /Workspace/Repos/<your_username>/iris-databricks
+%reload_kedro /Workspace/Repos/<databricks_username>/iris-databricks
 ```
 
-Replace `<your_username>` with your Databricks username such that `project_root` correctly points to the project stored in Databricks Repos. Loading your Kedro project with the `%reload_kedro` line magic will define four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project.
+Loading your Kedro project with the `%reload_kedro` line magic will define four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project.
 
 To run your project, create a new cell and execute the following piece of Python code in it:
 
@@ -127,6 +129,10 @@ You should see logging output while the cell is running. After execution finishe
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
+
+At the end of these steps, your notebook should appear similar to the following (with cells collapsed):
+
+
 
 ## Modify and test your project
 

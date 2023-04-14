@@ -56,7 +56,7 @@ Create a new repo on Databricks by navigating to `New` tab in the Databricks wor
 
 In this guide, you will not sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
 
-![](../meta/images/databricks_repo_creation.png)
+![Create a new repo on Databricks](../meta/images/databricks_repo_creation.png)
 
 The next step is to use dbx to sync your project to your repo. Open a new terminal instance, activate your conda environment, navigate to your project directory and start `dbx sync`:
 
@@ -117,37 +117,47 @@ Now that your project is available on Databricks, you can run it on a cluster us
 
 To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 
-[](../meta/images/databricks_notebook_creation.png)
+[Create a new notebook on Databricks](../meta/images/databricks_notebook_creation.png)
 
 ### Run your project
 
-Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. In your `iris-databricks` notebook on Databricks, install the dependencies by running the following %pip magic command in a new cell:
+To run your project in your notebook, create four new cells with the following commands. Remember to replace `<databricks_username>` with your username on Databricks such that `project_root` correctly points to your project's location.
+
+1. Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. Add the following code to the first new cell to install the dependencies:
 
 ```ipython
 %pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/src/requirements.txt"
 ```
 
-Remember to replace `<databricks_username>` with your username on Databricks such that `project_root` correctly points to your project's location.
-
-This command will install the dependencies listed in your requirements.txt file to the Databricks cluster attached to your notebook. To run your project in your notebook, use the Kedro IPython extension. Start by loading the extension in a new cell:
+2. To run your project in your notebook, you must load the Kedro IPython extension. Add the following code to the second new cell to load the IPython extension:
 
 ```ipython
 %load_ext kedro.ipython
 ```
 
-Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project, with the `--env=databricks` option. The `databricks` environment is defined in the PySpark Iris starter and directs Kedro to use the configuration in the `conf/databricks` directory. To learn more about environments in Kedro configuration, see the [documentation](../configuration/configuration_basics.md#configuration-environments). Create a new cell and run the line magic to load your Kedro project:
+3. Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. The `--env=databricks` option will make Kedro use the `databricks` environment. The `databricks` environment is defined in the PySpark Iris starter and directs Kedro to use the configuration in the `conf/databricks` directory. To learn more about environments in Kedro configuration, see the [documentation](../configuration/configuration_basics.md#configuration-environments). Add the following code to the third new cell to load your Kedro project:
 
 ```ipython
 %reload_kedro /Workspace/Repos/<databricks_username>/iris-databricks --env=databricks
 ```
 
-Loading your Kedro project with the `%reload_kedro` line magic will define four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project.
-
-To run your project, create a new cell and execute the following piece of Python code in it:
+4. Loading your Kedro project with the `%reload_kedro` line magic will define four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project. Add the following code to the third new cell to run your Kedro project:
 
 ```ipython
 session.run()
 ```
+
+At the end of these steps, your notebook should match the image:
+
+![Databricks completed notebook](../meta/images/databricks_finished_notebook.png)
+
+Run the completed notebook using the `Run All` bottom in the top right of the UI:
+
+![Databricks notebook run all](../meta/images/databricks_run_all.png)
+
+On your first run, you will be prompted to consent to analytics, type `y` or `N` in the field that appears and press `Enter`:
+
+![Databricks notebook telemetry consent](../meta/images/databricks_telemetry_consent.png)
 
 You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
 
@@ -158,10 +168,6 @@ You should see logging output while the cell is running. After execution finishe
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
-
-At the end of these steps, your notebook should appear similar to the following (with cells collapsed):
-
-
 
 ## Modify and test your project
 

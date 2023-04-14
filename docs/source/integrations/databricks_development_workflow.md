@@ -23,7 +23,7 @@ To set up these features, look for instructions specific to your IDE (for instan
 - An account on a Git provider such as [GitHub](https://github.com/). You can check which [Git providers are supported by Databricks](https://docs.databricks.com/repos/index.html#supported-git-providers).
 - [Git installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your local machine.
 
-## Develop a project using the hybrid workflow
+## Set up your project
 
 ### Create a virtual environment and install Kedro and dbx
 
@@ -49,7 +49,7 @@ dbx is an extension of the Databricks CLI, a command-line program for interactin
 
 After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance]([Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 
-### Create a new project and add it to Version Control
+### Create a new Kedro project and add it to version control
 
 Create a Kedro project with the PySpark Iris starter. To do this, run the following command in your local environment:
 
@@ -58,6 +58,14 @@ kedro new --starter=pyspark-iris
 ```
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the PySpark Iris starter template.
+
+Add your project to version control using Git:
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+```
 
 ### Create a repo on Databricks and sync your project
 
@@ -91,15 +99,13 @@ Successfully starting `dbx sync` will write output similar to the following:
 Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing.
 ```
 
-### Run your project with Databricks notebooks
+### Create a new Databricks notebook
 
 Now that your project is synced with Databricks Repos, the following sections will guide you through running it on a cluster using notebooks.
 
-#### Create a new Databricks notebook
-
 To run the Python code from your Databricks repo, [create a new Databricks Notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and attach it to your cluster.
 
-#### Install project dependencies from the requirements.txt file
+### Install project dependencies from the requirements.txt file
 
 Before you import and run your Python code, you'll need to install your project's dependencies. Your project has a `requirements.txt` file for this purpose. Install the dependencies using the %pip magic command in a new cell in your notebook:
 
@@ -109,7 +115,7 @@ Before you import and run your Python code, you'll need to install your project'
 
 This command will install the dependencies listed in your requirements.txt file to the Databricks cluster attached to your notebook.
 
-#### Run your project
+### Run your project
 
 To run your project in your notebook, use the Kedro IPython extension. Start by loading the extension in a new cell:
 
@@ -117,12 +123,10 @@ To run your project in your notebook, use the Kedro IPython extension. Start by 
 %load_ext kedro.ipython
 ```
 
-Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. The next step is to load your Kedro project with the `databricks` environment. The `databricks` environment is defined in the PySpark Iris starter and directs Kedro to use the configuration in the `conf/databricks` directory. To learn more about environments in Kedro configuration, see the [documentation](../configuration/configuration_basics.md#configuration-environments).
-
-Create a new cell and run the line magic to load your Kedro project.
+Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. Create a new cell and run the line magic to load your Kedro project.
 
 ```bash
-%reload_kedro /Workspace/Repos/<your_username>/iris-databricks --env=databricks
+%reload_kedro /Workspace/Repos/<your_username>/iris-databricks
 ```
 
 Replace `<your_username>` with your Databricks username such that `project_root` correctly points to the project stored in Databricks Repos. Loading your Kedro project with the `%reload_kedro` line magic will define four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project.
@@ -143,11 +147,11 @@ You should see logging output while the cell is running. After execution finishe
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 
-### Make local changes in your local development environment
+## Modify and test your project
 
 Now that your project has run successfully once, you can make changes using the convenience and power of your local development environment. In this section, you will change your project to use a modified classifier to create predictions on the iris data.
 
-#### Create a local feature branch
+### Create a local feature branch
 
 To isolate your changes from the main branch of your project, you will modify your project in a new feature branch. To create a new Git branch and check it out, use the following command from your project's root directory.
 
@@ -156,7 +160,7 @@ git branch feat/modified-classifier
 git checkout feat/modified-classifier
 ```
 
-#### Modify the classifier
+### Modify the classifier
 
 The PySpark Iris starter uses a one-nearest neighbour classifier to make predictions. In this section, you will modify it to create predictions using a three-nearest neighbour classifier. A three-nearest neighbour classifier works by finding the most common class among the three closest neighbours to make a prediction. A one-nearest neighbour classifier only uses the class of the nearest neighbour.
 
@@ -223,13 +227,13 @@ git commit -m "Modify 1-nearest neighbour classifier to 3-nearest-neighbour clas
 git push origin --set-upstream feat/modified-classifier
 ```
 
-#### Pull the new branch and check it out on Databricks Repos
+### Pull the new branch and check it out on Databricks Repos
 
 Navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the `Pull` button in the upper-right corner of the Repo page. Click it to sync the latest changes from the remote repository into your Databricks Repo.
 
 Next, check the available branches. Click on the "Branches" button in the upper-left corner of the Repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Check out the `feat/modified-classifier` branch by clicking on it in the drop-down list. Your active branch is now feat/modified-classifier.
 
-#### Re-run your project after your changes
+### Re-run your project after your changes
 
 Return to your Databricks notebook. Re-run the cells you used to run your project previously. The project will now run again, giving output similar to the following:
 
@@ -247,7 +251,7 @@ You can see that your model's accuracy has changed now that you are using a diff
 If your cluster terminates, you must re-run the cell containing the `%pip ...` magic to re-install your project's dependencies. If not, repeating this step is only necessary if your project's requirements change.
 ```
 
-#### Merge the modified code with the main branch
+### Merge the modified code with the main branch
 
 To merge changes from the `feat/modified-classifier` branch into the main branch of your repository, use Git in your local environment. First, check out the main branch:
 
@@ -273,7 +277,7 @@ To sync the main branch to your Databricks Repo, navigate to your Databricks Rep
 In a project with collaborators, the best practice for merging your work with the main branch is to open a pull request (PR) using your Git provider's interface. PRs enable your collaborators to review your work before merging it.
 ```
 
-### Summary
+## Summary
 
 Your PySpark Iris project now has a newly developed feature, and the changes are synced across all three Git repositories (Databricks, remote, and local) that contain your project data.
 

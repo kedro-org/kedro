@@ -82,6 +82,35 @@ Successfully starting `dbx sync` will write output similar to the following:
 Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing, not in the editor that Databricks Repos provides.
 ```
 
+### Upload project data to DBFS
+
+In this demonstration project, you will upload the project data to DBFS as the PySpark Iris starter comes with a catalog set up to access data stored on DBFS.
+
+There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. Use the following Databricks CLI command to upload your data:
+
+```bash
+databricks fs cp -r data/ dbfs:/root/projects/iris-databricks/data
+```
+
+The --recursive flag ensures that the entire folder and its contents are uploaded. You can list the contents of the destination folder in DBFS using the following command:
+
+```bash
+databricks fs ls dbfs:/root/projects/iris-databricks/data
+```
+
+You should see the contents of the project's `data/` directory printed to your terminal:
+
+```bash
+01_raw
+02_intermediate
+03_primary
+04_feature
+05_model_input
+06_models
+07_model_output
+08_reporting
+```
+
 ### Create a new Databricks notebook
 
 Now that your project is available on Databricks, you can run it on a cluster using a notebook.
@@ -106,10 +135,10 @@ This command will install the dependencies listed in your requirements.txt file 
 %load_ext kedro.ipython
 ```
 
-Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. Create a new cell and run the line magic to load your Kedro project.
+Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project, with the `--env=databricks` option. The `databricks` environment is defined in the PySpark Iris starter and directs Kedro to use the configuration in the `conf/databricks` directory. To learn more about environments in Kedro configuration, see the [documentation](../configuration/configuration_basics.md#configuration-environments). Create a new cell and run the line magic to load your Kedro project:
 
 ```ipython
-%reload_kedro /Workspace/Repos/<databricks_username>/iris-databricks
+%reload_kedro /Workspace/Repos/<databricks_username>/iris-databricks --env=databricks
 ```
 
 Loading your Kedro project with the `%reload_kedro` line magic will define four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project.

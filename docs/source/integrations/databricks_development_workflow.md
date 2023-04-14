@@ -141,15 +141,6 @@ You should see logging output while the cell is running. After execution finishe
 
 Now that your project has run successfully once, you can make changes using the convenience and power of your local development environment. In this section, you will change your project to use a modified classifier to create predictions on the iris data.
 
-### Create a local feature branch
-
-To isolate your changes from the main branch of your project, you will modify your project in a new feature branch. To create a new Git branch and check it out, use the following command from your project's root directory.
-
-```bash
-git branch feat/modified-classifier
-git checkout feat/modified-classifier
-```
-
 ### Modify the training / test split ratio
 
 The PySpark Iris starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by locally editing your project, then run the modified project on Databricks to observe the difference.
@@ -158,13 +149,13 @@ Open the file `<project_root>/conf/parameters.yml` in your local environment. Ed
 
 ```bash
 ...
-[dbx][2023-04-14 18:29:39.235] Putting /Repos/jannic_holzer@mckinsey.com/iris-databricks/conf/base/parameters.yml
+[dbx][2023-04-14 18:29:39.235] Putting /Repos/<databricks_username>/iris-databricks/conf/base/parameters.yml
 [dbx][2023-04-14 18:29:40.820] Done
 ```
 
 ### Re-run your project
 
-Return to your Databricks notebook. Re-run the cells you used to run your project previously. The project will now run again, giving output similar to the following:
+Return to your Databricks notebook. Re-run the cell containing the code `session.run()`. The project will now run again, giving output similar to the following:
 
 ```bash
 ...

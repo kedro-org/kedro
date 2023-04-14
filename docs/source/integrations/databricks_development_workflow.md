@@ -92,7 +92,7 @@ To run the Python code from your Databricks repo, [create a new Python notebook]
 
 ### Run your project
 
-Before you import and run your Python code, you'll need to install your project's dependencies. Your project has a `requirements.txt` file for this purpose. Install the dependencies using the %pip magic command in a new cell in your notebook:
+Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. In your `iris-databricks` notebook on Databricks, install the dependencies by running the following %pip magic command in a new cell:
 
 ```ipython
 %pip install -r "/Workspace/Repos/<your_username>/iris-databricks/src/requirements.txt"

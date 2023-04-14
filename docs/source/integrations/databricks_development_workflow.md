@@ -20,8 +20,6 @@ To set up these features, look for instructions specific to your IDE (for instan
 - Active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
 - [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine.
-- An account on a Git provider such as [GitHub](https://github.com/). You can check which [Git providers are supported by Databricks](https://docs.databricks.com/repos/index.html#supported-git-providers).
-- [Git installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your local machine.
 
 ## Set up your project
 
@@ -49,7 +47,7 @@ dbx is an extension of the Databricks CLI, a command-line program for interactin
 
 After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance]([Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 
-### Create a new Kedro project and add it to version control
+### Create a new Kedro project
 
 Create a Kedro project with the PySpark Iris starter. To do this, run the following command in your local environment:
 
@@ -59,14 +57,6 @@ kedro new --starter=pyspark-iris
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the PySpark Iris starter template.
 
-Add your project to version control using Git:
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-```
-
 ### Create a repo on Databricks and sync your project
 
 Create a new repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
@@ -75,7 +65,7 @@ In this guide, you will not sync your project with a remote Git provider, so unc
 
 ![](../meta/images/databricks_repo_creation.png)
 
-The next step is to use dbx to sync your project to your repo. Open a new command line, activate your conda environment, navigate to your project directory and start `dbx sync`:
+The next step is to use dbx to sync your project to your repo. Open a new terminal instance, activate your conda environment, navigate to your project directory and start `dbx sync`:
 
 ```bash
 conda activate iris-databricks
@@ -160,80 +150,19 @@ git branch feat/modified-classifier
 git checkout feat/modified-classifier
 ```
 
-### Modify the classifier
+### Modify the training / test split ratio
 
-The PySpark Iris starter uses a one-nearest neighbour classifier to make predictions. In this section, you will modify it to create predictions using a three-nearest neighbour classifier. A three-nearest neighbour classifier works by finding the most common class among the three closest neighbours to make a prediction. A one-nearest neighbour classifier only uses the class of the nearest neighbour.
+The PySpark Iris starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by locally editing your project, then run the modified project on Databricks to observe the difference.
 
-Open the file `<project_root>/src/iris_databricks/nodes.py` in your IDE. Insert a new line underneath the import statements and add the following code to it:
-
-```python
-from scipy.stats import mode
-```
-
-Now modify the classifier by changing the code in the function `make_predictions`:
-
-```python
-def make_predictions(
-    X_train: pd.DataFrame, X_test: pd.DataFrame, y_train: pd.DataFrame
-) -> pd.DataFrame:
-    """Uses 3-nearest neighbour classifier to create predictions.
-    Args:
-        X_train: Training data of features.
-        y_train: Training data for target.
-        X_test: Test data for features.
-    Returns:
-        y_pred: Prediction of the target variable.
-    """
-
-    X_train_numpy = X_train.to_numpy()
-    X_test_numpy = X_test.to_numpy()
-
-    squared_distances = np.sum(
-        (X_train_numpy[:, None, :] - X_test_numpy[None, :, :]) ** 2, axis=-1
-    )
-    three_nearest_neighbours = np.argsort(squared_distances, axis=0)[:3]
-
-    # Use list comprehension to index y_train for each test point's three nearest neighbours
-    y_nearest_neighbours = np.array(
-        [y_train.iloc[three_nearest_neighbours[:, i]] for i in range(X_test.shape[0])]
-    )
-
-    y_pred_mode, _ = mode(y_nearest_neighbours, axis=1)
-    y_pred = pd.DataFrame(
-        y_pred_mode.squeeze(), columns=y_train.columns, index=X_test.index
-    )
-
-    return y_pred
-```
-
-The next step is to commit the modified code to your repository. Check that you have the `feat/modified-classifier` branch checked out using the following command:
+Open the file `<project_root>/conf/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction 0.7`. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks repo:
 
 ```bash
-git branch
+...
+[dbx][2023-04-14 18:29:39.235] Putting /Repos/jannic_holzer@mckinsey.com/iris-databricks/conf/base/parameters.yml
+[dbx][2023-04-14 18:29:40.820] Done
 ```
 
-You should see the following output:
-
-```bash
-* feat/modified-classifier
-  main
-```
-
-The `*` character next to `feat/modified-classifier` indicates that this is the currently checked-out branch. Now commit your changes to the branch and push it to your remote repository:
-
-```bash
-git add -u
-git commit -m "Modify 1-nearest neighbour classifier to 3-nearest-neighbour classifier"
-git push origin --set-upstream feat/modified-classifier
-```
-
-### Pull the new branch and check it out on Databricks Repos
-
-Navigate to your Databricks Repo in the Databricks Workspace UI. To pull the changes from your remote repository, look for the `Pull` button in the upper-right corner of the Repo page. Click it to sync the latest changes from the remote repository into your Databricks Repo.
-
-Next, check the available branches. Click on the "Branches" button in the upper-left corner of the Repo page. You should see the newly pulled branch `feat/modified-classifier` in the list. Check out the `feat/modified-classifier` branch by clicking on it in the drop-down list. Your active branch is now feat/modified-classifier.
-
-### Re-run your project after your changes
+### Re-run your project
 
 Return to your Databricks notebook. Re-run the cells you used to run your project previously. The project will now run again, giving output similar to the following:
 
@@ -251,34 +180,6 @@ You can see that your model's accuracy has changed now that you are using a diff
 If your cluster terminates, you must re-run the cell containing the `%pip ...` magic to re-install your project's dependencies. If not, repeating this step is only necessary if your project's requirements change.
 ```
 
-### Merge the modified code with the main branch
-
-To merge changes from the `feat/modified-classifier` branch into the main branch of your repository, use Git in your local environment. First, check out the main branch:
-
-```bash
-git checkout main
-```
-
-Now, merge the `feat/modified-classifier` branch:
-
-```bash
-git merge feat/modified-classifier
-```
-
-Now that the main branch of your local Git repository contains the changes you made, you should sync the main branch of your repository with your remote Git provider. At the command line in your local development environment:
-
-```bash
-git push origin
-```
-
-To sync the main branch to your Databricks Repo, navigate to your Databricks Repo in the Databricks Workspace UI and use the `Pull` button as you did previously.
-
-```{note}
-In a project with collaborators, the best practice for merging your work with the main branch is to open a pull request (PR) using your Git provider's interface. PRs enable your collaborators to review your work before merging it.
-```
-
 ## Summary
 
-Your PySpark Iris project now has a newly developed feature, and the changes are synced across all three Git repositories (Databricks, remote, and local) that contain your project data.
-
-This tutorial covered a hybrid Kedro project development workflow on Databricks, using your local development environment, Git for versioning, and Databricks Repos to sync code, improving development efficiency and quality.
+This tutorial covered a hybrid Kedro project development workflow on Databricks, using your local development environment, dbx and Databricks repos to sync code, improving development efficiency.

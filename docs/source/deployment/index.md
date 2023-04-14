@@ -1,4 +1,4 @@
-# Deployment guide
+# Deployment
 
 ## Deployment choices
 
@@ -32,4 +32,21 @@ flowchart TD
     style G text-align:left
     H["Does (part of) your pipeline integrate with Amazon SageMaker?<br/><br/>Read the SageMaker integration guide"];
     style H text-align:left
+```
+
+## Deployment guides
+
+```{toctree}
+:maxdepth: 1
+
+single_machine
+distributed
+argo
+prefect
+kubeflow
+aws_batch
+aws_sagemaker
+aws_step_functions
+airflow_astronomer
+dask
 ```

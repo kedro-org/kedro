@@ -150,6 +150,10 @@ body.wy-body-for-nav {
     background: none !important;
 }
 
+.wy-menu-vertical li.toctree-l1>a {
+    font-size: 1.8rem;
+}
+
 .rst-content.style-external-links a.reference.external:after {
     color: inherit;
     opacity: 0.8;
@@ -259,6 +263,7 @@ body.wy-body-for-nav {
 
 .wy-body-for-nav .wy-menu-vertical li.current a:hover {
     background: none;
+    font-weight: 600;
 }
 
 .wy-menu-vertical a span.toctree-expand {

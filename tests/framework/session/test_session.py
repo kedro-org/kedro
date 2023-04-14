@@ -244,6 +244,7 @@ class TestKedroSession:
         fake_username,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
+        mocker.patch("sys.argv", ["kedro", "run", "--params=x"])
         mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         session = KedroSession.create(
             mock_package_name, fake_project, env=env, extra_params=extra_params
@@ -253,7 +254,7 @@ class TestKedroSession:
             "args": mock_click_ctx.args,
             "params": mock_click_ctx.params,
             "command_name": mock_click_ctx.command.name,
-            "command_path": mock_click_ctx.command_path,
+            "command_path": "kedro run --params=x",
         }
         expected_store = {
             "project_path": fake_project,
@@ -289,13 +290,14 @@ class TestKedroSession:
         fake_username,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
+        mocker.patch("sys.argv", ["kedro", "run", "--params=x"])
         session = KedroSession.create(mock_package_name, fake_project)
 
         expected_cli_data = {
             "args": mock_click_ctx.args,
             "params": mock_click_ctx.params,
             "command_name": mock_click_ctx.command.name,
-            "command_path": mock_click_ctx.command_path,
+            "command_path": "kedro run --params=x",
         }
         expected_store = {
             "project_path": fake_project,

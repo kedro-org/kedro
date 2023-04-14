@@ -4,6 +4,7 @@ import logging
 import logging.config
 import os
 import subprocess
+import sys
 import traceback
 from copy import deepcopy
 from pathlib import Path
@@ -60,7 +61,7 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
         "args": ctx.args,
         "params": ctx.params,
         "command_name": ctx.command.name,
-        "command_path": ctx.command_path,
+        "command_path": " ".join(["kedro"] + sys.argv[1:]),
     }
 
 

@@ -1,7 +1,6 @@
 # Databricks development workflow
 
-This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos. This hybrid workflow involves developing your Kedro project using a local Integrated Development Environment (IDE) and Databricks notebooks for testing. This guide demonstrates this workflow using an example based on the Kedro PySpark Iris starter.
-This workflow has several advantages, enabling:
+This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos, using the PySpark Iris starter. This workflow enables you to use your local environment for development and Databricks notebooks for testing. It has several advantages for development relative to using only Databricks notebooks, it enables:
 
 - Use of powerful development features offered by an IDE not available on Databricks notebooks.
 - Version control of your project.
@@ -145,7 +144,7 @@ Now that your project has run successfully once, you can make changes using the 
 
 The PySpark Iris starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by locally editing your project, then run the modified project on Databricks to observe the difference.
 
-Open the file `<project_root>/conf/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction 0.7`. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks repo:
+Open the file `<project_root>/conf/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks repo:
 
 ```bash
 ...

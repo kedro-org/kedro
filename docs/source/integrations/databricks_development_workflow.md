@@ -27,7 +27,7 @@ conda create --name iris-databricks python=3.10
 Once it is created, activate it:
 
 ```bash
-conda activate kedro-hybrid-workflow
+conda activate iris-databricks
 ```
 
 With your Conda environment activated, install Kedro and dbx:
@@ -38,7 +38,7 @@ pip install kedro dbx --upgrade
 
 dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync code your project with Databricks.
 
-After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance]([Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
+After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 
 ### Create a new Kedro project
 

@@ -79,36 +79,34 @@ Successfully starting `dbx sync` will write output similar to the following:
 `dbx sync` will automatically sync any further changes made in your local project directory with your Databricks repo while it runs.
 
 ```{note}
-Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing.
+Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing, not in the editor that Databricks Repos provides.
 ```
 
 ### Create a new Databricks notebook
 
-Now that your project is synced with Databricks Repos, the following sections will guide you through running it on a cluster using notebooks.
+Now that your project is available on Databricks, you can run it on a cluster using a notebook.
 
-To run the Python code from your Databricks repo, [create a new Databricks Notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) and attach it to your cluster.
+To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 
-### Install project dependencies from the requirements.txt file
-
-Before you import and run your Python code, you'll need to install your project's dependencies. Your project has a `requirements.txt` file for this purpose. Install the dependencies using the %pip magic command in a new cell in your notebook:
-
-```bash
-%pip install -r "/Workspace/Repos/<your_username>/iris-databricks/src/requirements.txt"
-```
-
-This command will install the dependencies listed in your requirements.txt file to the Databricks cluster attached to your notebook.
+[](../meta/images/databricks_notebook_creation.png)
 
 ### Run your project
 
-To run your project in your notebook, use the Kedro IPython extension. Start by loading the extension in a new cell:
+Before you import and run your Python code, you'll need to install your project's dependencies. Your project has a `requirements.txt` file for this purpose. Install the dependencies using the %pip magic command in a new cell in your notebook:
 
-```bash
+```ipython
+%pip install -r "/Workspace/Repos/<your_username>/iris-databricks/src/requirements.txt"
+```
+
+This command will install the dependencies listed in your requirements.txt file to the Databricks cluster attached to your notebook. To run your project in your notebook, use the Kedro IPython extension. Start by loading the extension in a new cell:
+
+```ipython
 %load_ext kedro.ipython
 ```
 
 Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. Create a new cell and run the line magic to load your Kedro project.
 
-```bash
+```ipython
 %reload_kedro /Workspace/Repos/<your_username>/iris-databricks
 ```
 
@@ -116,7 +114,7 @@ Replace `<your_username>` with your Databricks username such that `project_root`
 
 To run your project, create a new cell and execute the following piece of Python code in it:
 
-```bash
+```ipython
 session.run()
 ```
 

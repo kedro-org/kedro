@@ -17,7 +17,7 @@ check for styling inconsistencies and reformat your files in place.
 [You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
 - **`flake8`** is a wrapper around [`pep8`](https://pypi.org/project/pep8/),
 [`pyflakes`](https://pypi.org/project/pyflakes/), and [`mccabe`](https://pypi.org/project/mccabe/) which can lint code and format it with respect to [PEP 8](https://peps.python.org/pep-0008/),
-and check the cyclomatic complexity of your code base.
+and check the [cyclomatic complexity](https://www.ibm.com/docs/en/raa/6.1?topic=metrics-cyclomatic-complexity) of your code base.
 [You can read more in the `flake8` documentation](https://flake8.pycqa.org/en/latest/).
 - **`isort`** is a Python library used to reformat code by sorting imports alphabetically and automatically separating them into sections by
 type. [You can read more in the `isort` documentation](https://pycqa.github.io/isort/).

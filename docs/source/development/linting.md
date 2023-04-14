@@ -60,6 +60,11 @@ isort --profile black --check <project_root>
 You can also have `black` and `isort` automatically format your code by omitting the `--check` flag. Since `isort` and
 `black` both format your imports, adding `--profile black` to the `isort` run helps avoid potential conflicts.
 
+Use the following to invoke `flake8`:
+```bash
+flake8 <project_root>
+```
+
 ## Automated formatting and linting with `pre-commit` hooks
 
 You can automate the process of formatting and linting with [`pre-commit`](https://github.com/pre-commit/pre-commit) hooks.

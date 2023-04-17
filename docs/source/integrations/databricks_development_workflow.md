@@ -63,10 +63,10 @@ The next step is to use dbx to sync your project to your repo. Open a new termin
 ```bash
 conda activate iris-databricks
 cd <project_root>
-dbx sync repo -d iris-databricks -s . -fi conf/local
+dbx sync repo --dest-repo iris-databricks --source . --force-include conf/local
 ```
 
-Successfully starting `dbx sync` will write output similar to the following:
+This command will sync your local directory (`--source .`) with your repo (`--dest-repo iris-databricks`) on Databricks, forcing it to include the project's `conf/local` directory (`--force-include conf/local`). When started for the first time in your project directory, `dbx sync` will write output similar to the following to your terminal:
 
 ```bash
 ...

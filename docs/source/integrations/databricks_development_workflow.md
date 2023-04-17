@@ -117,7 +117,7 @@ Now that your project is available on Databricks, you can run it on a cluster us
 
 To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 
-[Create a new notebook on Databricks](../meta/images/databricks_notebook_creation.png)
+![Create a new notebook on Databricks](../meta/images/databricks_notebook_creation.png)
 
 ### Run your project
 

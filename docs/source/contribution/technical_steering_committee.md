@@ -68,6 +68,7 @@ Currently, the core Kedro team consists of:
 [Jo Stichbury](https://github.com/stichbury),
 [Joel Schwarzmann](https://github.com/datajoely),
 [Juan Luis Cano](https://github.com/astrojuanlu),
+[Marcin Zabłocki](https://github.com/marrrcin),
 [Merel Theisen](https://github.com/merelcht),
 [Nero Okwa](https://github.com/NeroOkwa),
 [Nok Lam Chan](https://github.com/noklam),

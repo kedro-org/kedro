@@ -177,7 +177,7 @@ Now that your project has run successfully once, you can make changes using the 
 
 The PySpark Iris starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by editing your project in your local environment, then run the modified project on Databricks to observe the different result.
 
-Open the file `<project_root>/conf/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks repo:
+Open the file `<project_root>/conf/base/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks repo:
 
 ```bash
 ...
@@ -187,22 +187,22 @@ Open the file `<project_root>/conf/parameters.yml` in your local environment. Ed
 
 ### Re-run your project
 
-Return to your Databricks notebook. Re-run the cell containing the code `session.run()`. The project will now run again, giving output similar to the following:
+Return to your Databricks notebook. Re-run the third and fourth cells in your notebook (containing the code `%reload_kedro ...` and `session.run()`). The project will now run again, giving output similar to the following:
 
 ```bash
 ...
-[08/09/22 11:23:30] INFO     Model has accuracy of 1.000 on test data.                                        nodes.py:74
+[08/09/22 11:23:30] INFO     Model has accuracy of 0.953 on test data.                                        nodes.py:74
                     INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
                     INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 
-You can see that your model's accuracy has changed now that you are using a different classifier to produce the result. As it seems that the accuracy of your classifier on test data has improved, you decide to merge these changes to the `main` branch of your project.
+You can see that your model's accuracy has changed now that you are using a different classifier to produce the result.
 
 ```{note}
-If your cluster terminates, you must re-run the cell containing the `%pip ...` magic to re-install your project's dependencies. If not, repeating this step is only necessary if your project's requirements change.
+If your cluster terminates, you must re-run your entire notebook, as libraries installed using `%pip install ...` are ephemeral. If not, repeating this step is only necessary if your project's requirements change.
 ```
 
 ## Summary
 
-This tutorial covered a hybrid Kedro project development workflow on Databricks, using your local development environment, dbx and Databricks repos to sync code, improving development efficiency.
+This tutorial covered a hybrid Kedro project development workflow on Databricks, using your local development environment, dbx and Databricks repos to sync code, improving development efficiency versus only using Databricks notebooks.

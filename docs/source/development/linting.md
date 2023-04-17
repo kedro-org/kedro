@@ -1,33 +1,34 @@
-# Linting
+# Code formatting and linting
 
 ## Introduction
-Linting tools are used to improve the quality of your code by checking for errors and making sure it meets a stylistic
-standard before it is run. As a project grows and goes through various stages of development, it becomes important to
-maintain the code quality. Linting makes your code more readable, easy to debug and maintain, and stylistically
-consistent.
 
-## Set up linting tools
-There are a variety of linting tools available to use with your Kedro projects. This guide shows you how to use
+Code formatting guidelines set a standard for the layout of your code, for stylistic elements such as use of line breaks and whitespace. Format doesn't have any impact on how the code works, but using a consistent style makes your code more readable, and makes it more likely to be reused.
+
+Linting tools check your code for errors such as a missing bracket or line indent. This can save time and frustration because you can catch errors in advance of running the code.
+
+As a project grows and goes through various stages of development it becomes important to maintain code quality. Using a consistent format and linting your code ensures that it is consistent, readable, and easy to debug and maintain.
+
+## Set up Python tools
+There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use
 [`black`](https://github.com/psf/black), [`flake8`](https://github.com/PyCQA/flake8), and
-[`isort`](https://github.com/PyCQA/isort) to lint your Kedro projects.
+[`isort`](https://github.com/PyCQA/isort) to format and lint your Kedro projects.
 - **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
 check for styling inconsistencies and reformat your files in place.
 [You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
 - **`flake8`** is a wrapper around [`pep8`](https://pypi.org/project/pep8/),
-[`pyflakes`](https://pypi.org/project/pyflakes/), and [`mccabe`](https://pypi.org/project/mccabe/) which can flag
-programming errors and coding style inconsistencies with respect to [PEP 8](https://peps.python.org/pep-0008/),
-and check the cyclomatic complexity of your code base.
+[`pyflakes`](https://pypi.org/project/pyflakes/), and [`mccabe`](https://pypi.org/project/mccabe/) which can lint code and format it with respect to [PEP 8](https://peps.python.org/pep-0008/),
+and check the [cyclomatic complexity](https://www.ibm.com/docs/en/raa/6.1?topic=metrics-cyclomatic-complexity) of your code base.
 [You can read more in the `flake8` documentation](https://flake8.pycqa.org/en/latest/).
-- **`isort`** is a Python library used to sort imports alphabetically and automatically separate them into sections by
+- **`isort`** is a Python library used to reformat code by sorting imports alphabetically and automatically separating them into sections by
 type. [You can read more in the `isort` documentation](https://pycqa.github.io/isort/).
 
-### Install linting tools
-You can install `black`, `flake8`, and `isort` by adding the following lines to your project's `src/requirements.txt`
+### Install the tools
+Install `black`, `flake8`, and `isort` by adding the following lines to your project's `src/requirements.txt`
 file:
 ```text
 black # Used for formatting code
-flake8 # Used for linting code
-isort # Used for linting code
+flake8 # Used for linting and formatting
+isort # Used for formatting code (sorting module imports)
 ```
 To install all the project-specific dependencies, including the linting tools, navigate to the root directory of the
 project and run:
@@ -40,20 +41,33 @@ pip install black
 pip install flake8
 pip install isort
 ```
+#### Configure `flake8`
 
-### Run linting tools
+Store your `flake8` configuration in a file named `setup.cfg` within your project root. The Kedro starters use the [following configuration](https://github.com/kedro-org/kedro-starters/blob/main/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/setup.cfg):
+
+```text
+[flake8]
+max-line-length=88
+extend-ignore=E203
+```
+
+### Run the tools
 Use the following commands to run lint checks:
 ```bash
 black --check <project_root>
-flake8 <project_root>
 isort --profile black --check <project_root>
 ```
 You can also have `black` and `isort` automatically format your code by omitting the `--check` flag. Since `isort` and
 `black` both format your imports, adding `--profile black` to the `isort` run helps avoid potential conflicts.
 
-## Automating linting with `pre-commit` hooks
+Use the following to invoke `flake8`:
+```bash
+flake8 <project_root>
+```
 
-You can automate linting by using [`pre-commit`](https://github.com/pre-commit/pre-commit) hooks.
+## Automated formatting and linting with `pre-commit` hooks
+
+You can automate the process of formatting and linting with [`pre-commit`](https://github.com/pre-commit/pre-commit) hooks.
 These hooks are run before committing your code to your repositories to automatically point out formatting issues,
 making code reviews easier and less time-consuming.
 

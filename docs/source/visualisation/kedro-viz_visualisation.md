@@ -1,6 +1,5 @@
-# Get started with Kedro-Viz
+# Visualise the spaceflights project
 
-[Kedro-Viz](https://github.com/kedro-org/kedro-viz) is a key part of Kedro. It visualises the pipelines in a Kedro project by showing data, nodes, and the connections between them.
 
 This section assumes you are familiar with the basic Kedro concepts described in the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md). If you have not yet worked through the tutorial, you can still follow this example.
 
@@ -28,14 +27,6 @@ The next step is optional, but useful to check that all is working. Run the full
 kedro run
 ```
 
-## Visualise the spaceflights project
-
-The Kedro-Viz package needs to be installed separately as it is not part of the standard Kedro installation:
-
-```bash
-pip install kedro-viz
-```
-
 To start Kedro-Viz, type the following into your terminal from the project directory:
 
 ```bash
@@ -52,8 +43,6 @@ If a visualisation panel opens up and a pipeline is not visible, refresh the vie
 
 * use the [#questions channel](https://slack.kedro.org/) on our Slack channel to ask the community for help
 * search the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro)
-
-### Exit an open visualisation
 
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 

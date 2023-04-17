@@ -40,6 +40,10 @@ dbx is an extension of the Databricks CLI, a command-line program for interactin
 
 After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 
+```{note}
+To install and use `dbx` you must use Python >= 3.8.
+```
+
 ### Create a new Kedro project
 
 Create a Kedro project with the PySpark Iris starter using the following command in your local environment:

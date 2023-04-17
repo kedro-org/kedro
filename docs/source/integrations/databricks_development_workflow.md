@@ -169,13 +169,13 @@ You should see logging output while the cell is running. After execution finishe
                     INFO     Pipeline execution completed successfully.                                      runner.py:89
 ```
 
-## Modify and test your project
+## Modify your project and test the changes
 
 Now that your project has run successfully once, you can make changes using the convenience and power of your local development environment. In this section, you will change your project to use a modified classifier to create predictions on the iris data.
 
 ### Modify the training / test split ratio
 
-The PySpark Iris starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by locally editing your project, then run the modified project on Databricks to observe the difference.
+The PySpark Iris starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by editing your project in your local environment, then run the modified project on Databricks to observe the different result.
 
 Open the file `<project_root>/conf/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks repo:
 

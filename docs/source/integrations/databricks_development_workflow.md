@@ -68,7 +68,7 @@ dbx sync repo -d iris-databricks -s . -fi conf/local
 
 Successfully starting `dbx sync` will write output similar to the following:
 
-```{bash}
+```bash
 ...
 [dbx][2023-04-13 21:59:48.148] Putting /Repos/<databricks_username>/iris-databricks/src/tests/__init__.py
 [dbx][2023-04-13 21:59:48.168] Putting /Repos/<databricks_username>/iris-databricks/src/tests/test_pipeline.py

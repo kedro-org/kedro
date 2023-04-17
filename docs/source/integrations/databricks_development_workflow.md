@@ -1,6 +1,6 @@
 # Databricks development workflow
 
-This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos, using the PySpark Iris starter. This workflow enables you to use your local environment for development and Databricks notebooks for testing. It has several advantages for development relative to using only Databricks notebooks as it enables the use of powerful development features offered by an IDE that are not available on Databricks notebooks:
+This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos and the PySpark Iris starter. This workflow enables you to use your local environment for development and Databricks notebooks for testing. It has several advantages for development relative to using only Databricks notebooks as it enables the use of powerful development features offered by an IDE that are not available on Databricks notebooks:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
 - Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
@@ -10,7 +10,7 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 ## Prerequisites
 
-- Active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
+- An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
 - [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine.
 
@@ -36,13 +36,13 @@ With your Conda environment activated, install Kedro and dbx:
 pip install kedro dbx --upgrade
 ```
 
-dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync code your project with Databricks.
+dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks.
 
 After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 
 ### Create a new Kedro project
 
-Create a Kedro project with the PySpark Iris starter. To do this, run the following command in your local environment:
+Create a Kedro project with the PySpark Iris starter using the following command in your local environment:
 
 ```bash
 kedro new --starter=pyspark-iris
@@ -89,10 +89,10 @@ When run on Databricks, Kedro cannot access data stored in your project's direct
 There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. Use the following Databricks CLI command to upload your data:
 
 ```bash
-databricks fs cp -r data/ dbfs:/root/projects/iris-databricks/data
+databricks fs cp --recursive data/ dbfs:/root/projects/iris-databricks/data
 ```
 
-The --recursive flag ensures that the entire folder and its contents are uploaded. You can list the contents of the destination folder in DBFS using the following command:
+The `--recursive` flag ensures that the entire folder and its contents are uploaded. You can list the contents of the destination folder in DBFS using the following command:
 
 ```bash
 databricks fs ls dbfs:/root/projects/iris-databricks/data
@@ -147,7 +147,7 @@ To run your project in your notebook, open it from the Databricks workspace UI a
 session.run()
 ```
 
-At the end of these steps, your notebook should match the image:
+After completing these steps, your notebook should match the following image:
 
 ![Databricks completed notebook](../meta/images/databricks_finished_notebook.png)
 
@@ -187,7 +187,7 @@ Open the file `<project_root>/conf/base/parameters.yml` in your local environmen
 
 ### Re-run your project
 
-Return to your Databricks notebook. Re-run the third and fourth cells in your notebook (containing the code `%reload_kedro ...` and `session.run()`). The project will now run again, giving output similar to the following:
+Return to your Databricks notebook. Re-run the third and fourth cells in your notebook (containing the code `%reload_kedro ...` and `session.run()`). The project will now run again, producing output similar to the following:
 
 ```bash
 ...
@@ -205,4 +205,12 @@ If your cluster terminates, you must re-run your entire notebook, as libraries i
 
 ## Summary
 
-This tutorial covered a hybrid Kedro project development workflow on Databricks, using your local development environment, dbx and Databricks repos to sync code, improving development efficiency versus only using Databricks notebooks.
+This tutorial introduced a hybrid Kedro project development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. The main steps in this workflow are:
+
+1. Creating a virtual environment and installing and configuring dbx.
+2. Creating a repo on Databricks and syncing your project using dbx.
+3. Uploading project data to a location accessible by Kedro when run on Databricks (such as DBFS).
+4. Creating a Databricks notebook to run your project.
+5. Modifying your project in your local environment and testing the changes on Databricks in an iterative loop.
+
+This approach improves development efficiency and provides access to powerful development features, such as auto-completion, linting, and static type checking, that are not available when working exclusively with Databricks notebooks.

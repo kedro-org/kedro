@@ -430,6 +430,13 @@ def activate_nbstripout(
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
+@click.option(
+    "--meta-params",
+    type=click.UNPROCESSED,
+    default="",
+    help=PARAMS_ARG_HELP,
+    callback=_split_params,
+)
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals
 def run(
     tag,
@@ -450,6 +457,7 @@ def run(
     conf_source,
     params,
     namespace,
+    meta_params,
 ):
     """Run the pipeline."""
 
@@ -467,7 +475,10 @@ def run(
     load_version = {**load_version, **load_versions}
 
     with KedroSession.create(
-        env=env, conf_source=conf_source, extra_params=params
+        env=env,
+        conf_source=conf_source,
+        extra_params=params,
+        meta_params=meta_params,
     ) as session:
         session.run(
             tags=tag,

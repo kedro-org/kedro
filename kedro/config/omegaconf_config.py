@@ -76,6 +76,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         conf_source: str,
         env: str = None,
         runtime_params: Dict[str, Any] = None,
+        meta_params: Dict[str, Any] = None,
         *,
         config_patterns: Dict[str, List[str]] = None,
         base_env: str = "base",
@@ -124,6 +125,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             self._protocol = "file"
         self._fs = fsspec.filesystem(protocol=self._protocol, fo=conf_source)
 
+        self.meta_params = meta_params
         super().__init__(
             conf_source=conf_source,
             env=env,
@@ -166,7 +168,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
         base_config = self.load_and_merge_dir_config(
-            base_path, patterns, read_environment_variables
+            base_path, patterns, read_environment_variables, key
         )
         config = base_config
 
@@ -177,7 +179,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
         env_config = self.load_and_merge_dir_config(
-            env_path, patterns, read_environment_variables
+            env_path, patterns, read_environment_variables, key
         )
 
         # Destructively merge the two env dirs. The chosen env will override base.
@@ -210,6 +212,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         conf_path: str,
         patterns: Iterable[str],
         read_environment_variables: Optional[bool] = False,
+        key=None,
     ) -> Dict[str, Any]:
         """Recursively load and merge all configuration files in a directory using OmegaConf,
         which satisfy a given list of glob patterns from a specific path.
@@ -277,11 +280,17 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         if not aggregate_config:
             return {}
-        # if len(aggregate_config) == 1:
-        #     return list(aggregate_config)[0]
-        print("DEBUG", OmegaConf.merge(*aggregate_config, self.runtime_params))
-        return OmegaConf.to_container(
-            OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True)
+
+        if key == "parameters":
+            if self.meta_params:
+                return OmegaConf.to_container(
+                    OmegaConf.merge(*aggregate_config, self.meta_params), resolve=True
+                )
+            else:
+                return OmegaConf.to_container(
+                    OmegaConf.merge(*aggregate_config, self.runtime_params),
+                    resolve=True,
+                )
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

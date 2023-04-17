@@ -130,6 +130,7 @@ class KedroSession:
         save_on_close: bool = True,
         env: str = None,
         extra_params: Dict[str, Any] = None,
+        meta_params: Dict[str, Any] = None,
         conf_source: Optional[str] = None,
     ) -> "KedroSession":
         """Create a new instance of ``KedroSession`` with the session data.
@@ -178,7 +179,8 @@ class KedroSession:
 
         if extra_params:
             session_data["extra_params"] = extra_params
-
+        if meta_params:
+            session_data["meta_params"] = meta_params
         try:
             session_data["username"] = getpass.getuser()
         except Exception as exc:  # pylint: disable=broad-except
@@ -282,12 +284,22 @@ class KedroSession:
         """An instance of the config loader."""
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
+        meta_params = self.store.get("meta_params")
 
         config_loader_class = settings.CONFIG_LOADER_CLASS
+        if not meta_params:
+            return config_loader_class(
+                conf_source=self._conf_source,
+                env=env,
+                runtime_params=extra_params,
+                **settings.CONFIG_LOADER_ARGS,
+            )
+
         return config_loader_class(
             conf_source=self._conf_source,
             env=env,
             runtime_params=extra_params,
+            meta_params=meta_params,
             **settings.CONFIG_LOADER_ARGS,
         )
 

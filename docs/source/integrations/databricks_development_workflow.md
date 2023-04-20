@@ -50,7 +50,14 @@ pip install kedro dbx --upgrade
 
 ### Authenticate the Databricks CLI
 
-**Now, you must authenticate the Databricks CLI with your Databricks instance.** [Use the Databricks documentation to do this](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
+**Now, you must authenticate the Databricks CLI with your Databricks instance.**
+
+[Refer to the Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication) for a complete guide on how to authenticate your CLI. The key steps are:
+
+1. Create a personal access token for your user on your Databricks instance.
+2. Run `databricks configure --token`.
+3. Enter your token and Databricks host when prompted.
+4. Run `databricks fs ls dbfs:/` at the command line to verify your authentication.
 
 ```{note}
 dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.

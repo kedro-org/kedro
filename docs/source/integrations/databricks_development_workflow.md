@@ -16,6 +16,18 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 ## Set up your project
 
+### Note your Databricks username and host
+
+Note your Databricks username and host as you will need it for the remainder of this guide.
+
+Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
+
+![Find Databricks host and username](../meta/images/find_databricks_host_and_username.png)
+
+```{note}
+Your databricks host must include the protocol (`https://`).
+```
+
 ### Create a virtual environment and install Kedro and dbx
 
 In your local development environment, create a virtual environment for this tutorial using Conda:

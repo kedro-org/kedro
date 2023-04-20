@@ -28,7 +28,7 @@ Find your Databricks username in the top right of the workspace UI and the host 
 Your databricks host must include the protocol (`https://`).
 ```
 
-### Create a virtual environment and install Kedro and dbx
+### Install Kedro and dbx in a new virtual environment
 
 In your local development environment, create a virtual environment for this tutorial using Conda:
 
@@ -47,6 +47,8 @@ With your Conda environment activated, install Kedro and dbx:
 ```bash
 pip install kedro dbx --upgrade
 ```
+
+### Authenticate the Databricks CLI
 
 **Now, you must authenticate the Databricks CLI with your Databricks instance.** [Use the Databricks documentation to do this](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 

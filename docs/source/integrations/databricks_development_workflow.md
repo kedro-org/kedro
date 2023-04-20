@@ -104,7 +104,7 @@ Syncing with dbx is one-way only, meaning changes you make using the Databricks 
 
 ### Create a `conf/local` directory in your Databricks repo
 
-Kedro requires your projec to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks repo, so you must create it manually.
+Kedro requires your project to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks repo, so you must create it manually.
 
 Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> Folder` as in the image below:
 
@@ -121,13 +121,13 @@ When run on Databricks, Kedro cannot access data stored in your project's direct
 There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI command to upload your locally stored data to DBFS:
 
 ```bash
-databricks fs cp --recursive <project_root>/data/ dbfs:/root/projects/iris-databricks/data
+databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris-databricks/data
 ```
 
 The `--recursive` flag ensures that the entire folder and its contents are uploaded. You can list the contents of the destination folder in DBFS using the following command:
 
 ```bash
-databricks fs ls dbfs:/root/projects/iris-databricks/data
+databricks fs ls dbfs:/FileStore/iris-databricks
 ```
 
 You should see the contents of the project's `data/` directory printed to your terminal:

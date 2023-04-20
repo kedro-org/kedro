@@ -106,13 +106,13 @@ Syncing with dbx is one-way only, meaning changes you make using the Databricks 
 
 Kedro requires your projec to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks repo, so you must create it manually.
 
-Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> folder` as in the image below:
+Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> Folder` as in the image below:
 
 ![Create a conf folder in Databricks repo](../meta/images/databricks_conf_folder_creation.png)
 
 Name the new folder `local`:
 
-![Name new conf folder in Databricks repo](../meta/images/databricks_conf_folder_creation_name.png)
+![Final conf folder](../meta/images/final_conf_folder.png)
 
 In this guide, we will leave the newly created folder empty.
 

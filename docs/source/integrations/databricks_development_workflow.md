@@ -60,7 +60,9 @@ In this guide, you will not sync your project with a remote Git provider, so unc
 
 ![Create a new repo on Databricks](../meta/images/databricks_repo_creation.png)
 
-The next step is to use dbx to sync your project to your repo. Open a new terminal instance, activate your conda environment, navigate to your project directory and start `dbx sync`:
+The next step is to use dbx to sync your project to your repo.
+
+**Open a new terminal instance**, activate your conda environment, and navigate to your project directory and start `dbx sync`:
 
 ```bash
 conda activate iris-databricks
@@ -77,6 +79,8 @@ This command will sync your local directory (`--source .`) with your repo (`--de
 [dbx][2023-04-13 21:59:48.189] Putting /Repos/<databricks_username>/iris-databricks/src/tests/test_run.py
 [dbx][2023-04-13 21:59:48.928] Done. Watching for changes...
 ```
+
+**Keep the second terminal (running dbx sync) open during development; closing it stops syncing new changes.**
 
 `dbx sync` will automatically sync any further changes made in your local project directory with your Databricks repo while it runs.
 

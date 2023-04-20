@@ -12,6 +12,7 @@
 # Upcoming Release 0.18.8
 
 ## Major features and improvements
+* Added `KEDRO_LOGGING_CONFIG` for configuring logging.
 
 ## Bug fixes and other changes
 * Improvements to documentation about configuration.

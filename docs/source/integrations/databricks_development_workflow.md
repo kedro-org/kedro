@@ -110,11 +110,9 @@ Open the Databricks workspace UI and using the panel on the left, navigate to `R
 
 ![Create a conf folder in Databricks repo](../meta/images/databricks_conf_folder_creation.png)
 
-Name the new folder `local`:
+Name the new folder `local`. In this guide, we have no local credentials to store and so we will leave the newly created folder empty. Your `conf/local` and `local` directories should now look like the following:
 
 ![Final conf folder](../meta/images/final_conf_folder.png)
-
-In this guide, we will leave the newly created folder empty.
 
 ### Upload project data to DBFS
 

@@ -175,7 +175,7 @@ You should see logging output while the cell is running. After execution finishe
 
 ## Modify your project and test the changes
 
-Now that your project has run successfully once, you can make changes using the convenience and power of your local development environment. In this section, you will change your project to use a modified classifier to create predictions on the iris data.
+Now that your project has run successfully once, you can make changes using the convenience and power of your local development environment. In this section, you will modify the project to use a different ratio of training data to test data and check the effect of this change on Databricks.
 
 ### Modify the training / test split ratio
 

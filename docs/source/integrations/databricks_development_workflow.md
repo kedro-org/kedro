@@ -12,7 +12,7 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
-- [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine.
+- [Conda installed](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) on your local machine in order to create a virtual environment with a specific version of Python (>= 3.8 is required). If you have Python >= 3.8 installed, you can use other software to create a virtual environment.
 
 ## Set up your project
 
@@ -36,12 +36,10 @@ With your Conda environment activated, install Kedro and dbx:
 pip install kedro dbx --upgrade
 ```
 
-dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks.
-
-After installing dbx, you must authenticate the Databricks CLI with your [Databricks instance](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
+**Now, you must authenticate the Databricks CLI with your Databricks instance.** [Use the Databricks documentation to do this](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication).
 
 ```{note}
-To install and use `dbx` you must use Python >= 3.8.
+dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
 ```
 
 ### Create a new Kedro project

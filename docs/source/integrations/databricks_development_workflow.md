@@ -67,10 +67,10 @@ The next step is to use dbx to sync your project to your repo.
 ```bash
 conda activate iris-databricks
 cd <project_root>
-dbx sync repo --dest-repo iris-databricks --source . --force-include conf/local
+dbx sync repo --dest-repo iris-databricks --source .
 ```
 
-This command will sync your local directory (`--source .`) with your repo (`--dest-repo iris-databricks`) on Databricks, forcing it to include the project's `conf/local` directory (`--force-include conf/local`). When started for the first time in your project directory, `dbx sync` will write output similar to the following to your terminal:
+This command will sync your local directory (`--source .`) with your repo (`--dest-repo iris-databricks`) on Databricks. When started for the first time, `dbx sync` will write output similar to the following to your terminal:
 
 ```bash
 ...
@@ -80,13 +80,27 @@ This command will sync your local directory (`--source .`) with your repo (`--de
 [dbx][2023-04-13 21:59:48.928] Done. Watching for changes...
 ```
 
-**Keep the second terminal (running dbx sync) open during development; closing it stops syncing new changes.**
+**Keep the second terminal (running dbx sync) alive during development; closing it stops syncing new changes.**
 
 `dbx sync` will automatically sync any further changes made in your local project directory with your Databricks repo while it runs.
 
 ```{note}
 Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing, not in the editor that Databricks Repos provides.
 ```
+
+### Create a `conf/local` directory in your Databricks repo
+
+Kedro requires your projec to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks repo, so you must create it manually.
+
+Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> folder` as in the image below:
+
+![Create a conf folder in Databricks repo](../meta/images/databricks_conf_folder_creation.png)
+
+Name the new folder `local`:
+
+![Name new conf folder in Databricks repo](../meta/images/databricks_conf_folder_creation_name.png)
+
+In this guide, we will leave the newly created folder empty.
 
 ### Upload project data to DBFS
 

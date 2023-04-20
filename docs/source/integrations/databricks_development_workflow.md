@@ -212,9 +212,10 @@ If your cluster terminates, you must re-run your entire notebook, as libraries i
 This tutorial introduced a hybrid Kedro project development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. The main steps in this workflow are:
 
 1. Creating a virtual environment and installing and configuring dbx.
-2. Creating a repo on Databricks and syncing your project using dbx.
-3. Uploading project data to a location accessible by Kedro when run on Databricks (such as DBFS).
-4. Creating a Databricks notebook to run your project.
-5. Modifying your project in your local environment and testing the changes on Databricks in an iterative loop.
+2. Creating a new Kedro project using the PySpark Iris starter.
+3. Creating a repo on Databricks and syncing your project using dbx.
+4. Uploading project data to a location accessible by Kedro when run on Databricks (such as DBFS).
+5. Creating a Databricks notebook to run your project.
+6. Modifying your project in your local environment and testing the changes on Databricks in an iterative loop.
 
 This approach improves development efficiency and provides access to powerful development features, such as auto-completion, linting, and static type checking, that are not available when working exclusively with Databricks notebooks.

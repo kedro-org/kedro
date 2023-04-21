@@ -51,7 +51,6 @@ To follow this tutorial, ensure you have the following:
     ├── data
     ├── docs
     ├── include
-    ├── logs
     ├── notebooks
     ├── packages.txt
     ├── plugins

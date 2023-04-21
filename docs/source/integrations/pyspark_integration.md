@@ -40,7 +40,7 @@ class SparkHooks:
 
         # Initialise the spark session
         spark_session_conf = (
-            SparkSession.builder.appName(context._package_name)
+            SparkSession.builder.appName(context._project_path.name)
             .enableHiveSupport()
             .config(conf=spark_conf)
         )

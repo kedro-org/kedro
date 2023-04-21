@@ -60,7 +60,7 @@ Currently, the core Kedro team consists of:
 [Ahdra Merali](https://github.com/AhdraMeraliQB),
 [Andrew Mackay](https://github.com/Mackay031),
 [Ankita Katiyar](https://github.com/ankatiyar),
-[Antony Milne](https://github.com/AntonyMilne),
+[Antony Milne](https://github.com/antonymilne),
 [Deepyaman Datta](https://github.com/deepyaman),
 [Huong Nguyen](https://github.com/Huongg),
 [Ivan Danov](https://github.com/idanov),

@@ -69,7 +69,6 @@ project-dir         # Parent directory of the template
 ├── conf            # Project configuration files
 ├── data            # Local project data (not committed to version control)
 ├── docs            # Project documentation
-├── logs            # Project output logs (not committed to version control)
 ├── notebooks       # Project-related Jupyter notebooks (can be used for experimental code before moving the code to src)
 ├── pyproject.toml  # Identifies the project root and contains configuration information
 ├── README.md       # Project README

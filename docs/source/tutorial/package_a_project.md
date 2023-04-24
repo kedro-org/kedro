@@ -107,7 +107,7 @@ kedro package
 
 Kedro builds the package into the `dist` folder of the project as a `.whl` file, which is a [Python packaging format for binary distribution](https://packaging.python.org/en/latest/overview/#python-binary-distributions).
 
-The resulting `.whl` packages only contain the Python source code of the Kedro pipeline, not any of the `conf`, `data` and `logs` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
+The resulting `.whl` packages only contain the Python source code of the Kedro pipeline, not any of the `conf` and `data` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration information, dataset and logging locations.
 
 The project configuration is provided separately in a `tar.gz` file, also inside the `dist` folder. This compressed version of the config files excludes any files inside the `local` directory.
 
@@ -126,7 +126,6 @@ Once the packaged project is installed, you will need to add:
 
 * a `conf` folder
 * a `data` folder if the pipeline loads/saves local data
-* a `logs` folder if the project uses logging.
 
 Alternatively, you can make use of the ``OmegaConfigLoader`` to run the configuration directly from the compressed .tar.gz configuration file by running
 kedro run --conf-source <path-to-compressed-config>.tar.gz

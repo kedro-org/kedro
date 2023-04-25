@@ -80,6 +80,7 @@ class LambdaDataSet(AbstractDataSet):
         save: Optional[Callable[[Any], None]],
         exists: Callable[[], bool] = None,
         release: Callable[[], None] = None,
+        metadata: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``LambdaDataSet`` with references to the
         required input/output data set methods.
@@ -89,6 +90,7 @@ class LambdaDataSet(AbstractDataSet):
             save: Method to save data to a data set.
             exists: Method to check whether output data already exists.
             release: Method to release any cached information.
+            metadata: Any arbitrary user metadata.
 
         Raises:
             DataSetError: If a method is specified, but is not a Callable.
@@ -111,3 +113,4 @@ class LambdaDataSet(AbstractDataSet):
         self.__save = save
         self.__exists = exists
         self.__release = release
+        self.metadata = metadata

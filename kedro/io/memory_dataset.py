@@ -33,7 +33,9 @@ class MemoryDataSet(AbstractDataSet):
 
     """
 
-    def __init__(self, data: Any = _EMPTY, copy_mode: str = None):
+    def __init__(
+        self, data: Any = _EMPTY, copy_mode: str = None, metadata: Dict[str, Any] = None
+    ):
         """Creates a new instance of ``MemoryDataSet`` pointing to the
         provided Python object.
 
@@ -42,9 +44,11 @@ class MemoryDataSet(AbstractDataSet):
             copy_mode: The copy mode used to copy the data. Possible
                 values are: "deepcopy", "copy" and "assign". If not
                 provided, it is inferred based on the data type.
+            metadata: Any arbitrary user metadata.
         """
         self._data = _EMPTY
         self._copy_mode = copy_mode
+        self.metadata = metadata
         if data is not _EMPTY:
             self._save(data)
 

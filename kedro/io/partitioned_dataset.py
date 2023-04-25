@@ -139,6 +139,7 @@ class PartitionedDataSet(AbstractDataSet):
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
         overwrite: bool = False,
+        metadata: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``PartitionedDataSet``.
 
@@ -177,6 +178,7 @@ class PartitionedDataSet(AbstractDataSet):
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
             overwrite: If True, any existing partitions will be removed.
+            metadata: Any arbitrary user metadata.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
@@ -191,6 +193,7 @@ class PartitionedDataSet(AbstractDataSet):
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._partition_cache = Cache(maxsize=1)  # type: Cache
+        self.metadata = metadata
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
@@ -381,6 +384,7 @@ class IncrementalDataSet(PartitionedDataSet):
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ):
 
         """Creates a new instance of ``IncrementalDataSet``.
@@ -427,6 +431,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+            metadata: Any arbitrary user metadata.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
@@ -444,6 +449,7 @@ class IncrementalDataSet(PartitionedDataSet):
 
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)
         self._force_checkpoint = self._checkpoint_config.pop("force_checkpoint", None)
+        self.metadata = metadata
 
         comparison_func = self._checkpoint_config.pop("comparison_func", operator.gt)
         if isinstance(comparison_func, str):

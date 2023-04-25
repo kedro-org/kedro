@@ -8,6 +8,17 @@ This guide demonstrates a development workflow for Kedro projects on Databricks 
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
 
+## What this page covers
+
+This tutorial introduces a project development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. The main steps in this workflow are:
+
+- [Create a virtual environment and install and configure dbx.](#install-kedro-and-dbx-in-a-new-virtual-environment)
+- [Create a new Kedro project using the PySpark Iris starter.](#create-a-new-kedro-project)
+- [Create a repo on Databricks and sync your project using dbx.](#create-a-repo-on-databricks)
+- [Upload project data to a location accessible by Kedro when run on Databricks (such as DBFS).](#upload-project-data-to-dbfs)
+- [Create a Databricks notebook to run your project.](#create-a-new-databricks-notebook)
+- [Modify your project in your local environment and test the changes on Databricks in an iterative loop.](#modify-your-project-and-test-the-changes)
+
 ## Prerequisites
 
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
@@ -246,13 +257,4 @@ If your cluster terminates, you must re-run your entire notebook, as libraries i
 
 ## Summary
 
-This tutorial introduced a hybrid Kedro project development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. The main steps in this workflow are:
-
-1. Creating a virtual environment and installing and configuring dbx.
-2. Creating a new Kedro project using the PySpark Iris starter.
-3. Creating a repo on Databricks and syncing your project using dbx.
-4. Uploading project data to a location accessible by Kedro when run on Databricks (such as DBFS).
-5. Creating a Databricks notebook to run your project.
-6. Modifying your project in your local environment and testing the changes on Databricks in an iterative loop.
-
-This approach improves development efficiency and provides access to powerful development features, such as auto-completion, linting, and static type checking, that are not available when working exclusively with Databricks notebooks.
+This guide demonstrated a development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. This approach improves development efficiency and provides access to powerful development features, such as auto-completion, linting, and static type checking, that are not available when working exclusively with Databricks notebooks.

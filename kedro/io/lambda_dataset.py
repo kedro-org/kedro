@@ -74,6 +74,7 @@ class LambdaDataSet(AbstractDataSet):
         else:
             self.__release()
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         load: Optional[Callable[[], Any]],

@@ -143,7 +143,10 @@ class ThreadRunner(AbstractRunner):
                     # have finished with.
                     for data_set in node.inputs:
                         load_counts[data_set] -= 1
-                        if load_counts[data_set] < 1:
+                        if (
+                            load_counts[data_set] < 1
+                            and data_set not in pipeline.inputs()
+                        ):
                             catalog.release(data_set)
                     for data_set in node.outputs:
                         if (

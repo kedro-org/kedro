@@ -18,7 +18,7 @@ To set up these features, look for instructions specific to your IDE (for instan
 
 ### Note your Databricks username and host
 
-Note your Databricks username and host as you will need it for the remainder of this guide.
+Note your Databricks **username** and **host** as you will need it for the remainder of this guide.
 
 Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
 
@@ -73,13 +73,15 @@ kedro new --starter=pyspark-iris
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the PySpark Iris starter template.
 
-### Create a repo on Databricks and sync your project
+### Create a repo on Databricks
 
 Create a new repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
 
 In this guide, you will not sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
 
 ![Create a new repo on Databricks](../meta/images/databricks_repo_creation.png)
+
+### Sync code with your Databricks repo using dbx
 
 The next step is to use dbx to sync your project to your repo.
 
@@ -134,7 +136,7 @@ databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris-databrick
 The `--recursive` flag ensures that the entire folder and its contents are uploaded. You can list the contents of the destination folder in DBFS using the following command:
 
 ```bash
-databricks fs ls dbfs:/FileStore/iris-databricks
+databricks fs ls dbfs:/FileStore/iris-databricks/data
 ```
 
 You should see the contents of the project's `data/` directory printed to your terminal:
@@ -160,7 +162,7 @@ To run the Python code from your Databricks repo, [create a new Python notebook]
 
 ### Run your project
 
-To run your project in your notebook, open it from the Databricks workspace UI and create four new cells with the following commands. Remember to replace `<databricks_username>` with your username on Databricks such that `project_root` correctly points to your project's location.
+Open your newly-created notebook and create **four new cells** inside it. You will fill these cells with code that runs your project. When copying the following code snippets, remember to replace `<databricks_username>` with your username on Databricks such that `project_root` correctly points to your project's location.
 
 1. Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. Add the following code to the first new cell to install the dependencies:
 

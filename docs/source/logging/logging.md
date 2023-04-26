@@ -7,12 +7,11 @@ By default, Python only shows logging messages at level `WARNING` and above. Ked
 
 ## Project-side logging configuration
 
-In addition to the `rich` handler defined in Kedro's framework, the [project-side `conf/base/logging.yml`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/conf/base/logging.yml) defines three further logging handlers:
+In addition to the `rich` handler defined in Kedro's framework, the [project-side `conf/base/logging.yml`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/conf/base/logging.yml) defines two further logging handlers:
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting
-* `info_file_handler`: write logs of level `INFO` and above to `logs/info.log`
-* `error_file_handler`: write logs of level `ERROR` and above to `logs/error.log`
+* `info_file_handler`: write logs of level `INFO` and above to `info.log`
 
-The logging handlers that are actually used by default are `rich`, `info_file_handler` and `error_file_handler`.
+The logging handlers that are actually used by default are `rich` and `info_file_handler`.
 
 The project-side logging configuration also ensures that [logs emitted from your project's logger](#perform-logging-in-your-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
 
@@ -20,12 +19,12 @@ We now give some common examples of how you might like to change your project's 
 
 ### Disable file-based logging
 
-You might sometimes need to disable file-based logging, e.g. if you are running Kedro on a read-only file system such as [Databricks Repos](https://docs.databricks.com/repos/index.html). The simplest way to do this is to delete your `conf/base/logging.yml` file. The `logs` directory can then also be safely removed. With no project-side logging configuration specified, Kedro uses the default framework-side logging configuration, which does not include any file-based handlers.
+You might sometimes need to disable file-based logging, e.g. if you are running Kedro on a read-only file system such as [Databricks Repos](https://docs.databricks.com/repos/index.html). The simplest way to do this is to delete your `conf/base/logging.yml` file. With no project-side logging configuration specified, Kedro uses the default framework-side logging configuration, which does not include any file-based handlers.
 
 Alternatively, if you would like to keep other configuration in `conf/base/logging.yml` and just disable file-based logging, then you can remove the file-based handlers from the `root` logger as follows:
 ```diff
  root:
--  handlers: [console, info_file_handler, error_file_handler]
+-  handlers: [console, info_file_handler]
 +  handlers: [console]
 ```
 
@@ -35,8 +34,8 @@ To use plain rather than rich logging, swap the `rich` handler for the `console`
 
 ```diff
  root:
--  handlers: [rich, info_file_handler, error_file_handler]
-+  handlers: [console, info_file_handler, error_file_handler]
+-  handlers: [rich, info_file_handler]
++  handlers: [console, info_file_handler]
 ```
 
 ### Rich logging in a dumb terminal

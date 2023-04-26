@@ -6,11 +6,11 @@ import shutil
 import tempfile
 import venv
 from pathlib import Path
-from typing import Set  # noqa
+from typing import Set
 
 from features.steps.sh_run import run
 
-_PATHS_TO_REMOVE = set()  # type: Set[Path]
+_PATHS_TO_REMOVE: Set[Path] = set()
 
 FRESH_VENV_TAG = "fresh_venv"
 

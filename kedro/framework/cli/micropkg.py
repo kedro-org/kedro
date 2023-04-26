@@ -480,7 +480,7 @@ def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
 def _find_config_files(
     source_config_dir: Path, glob_patterns: List[str]
 ) -> List[Tuple[Path, str]]:
-    config_files = []  # type: List[Tuple[Path, str]]
+    config_files: List[Tuple[Path, str]] = []
 
     if source_config_dir.is_dir():
         config_files = [

@@ -38,7 +38,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
             cwd=project_path,
             stderr=subprocess.STDOUT,
         )
-        git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
+        git_data: Dict[str, Any] = {"commit_sha": res.decode().strip()}
         git_status_res = subprocess.check_output(
             ["git", "status", "--short"],
             cwd=project_path,

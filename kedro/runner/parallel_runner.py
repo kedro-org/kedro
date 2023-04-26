@@ -11,7 +11,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Dict, Iterable, Set  # noqa
+from typing import Any, Dict, Iterable, Set
 
 from pluggy import PluginManager
 
@@ -290,7 +290,7 @@ class ParallelRunner(AbstractRunner):
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())
-        done_nodes = set()  # type: Set[Node]
+        done_nodes: Set[Node] = set()
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)

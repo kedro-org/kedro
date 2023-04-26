@@ -7,7 +7,7 @@ import io
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Any, Iterable, Optional  # noqa
+from typing import Any, Iterable
 
 import fsspec
 from omegaconf import OmegaConf
@@ -211,7 +211,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self,
         conf_path: str,
         patterns: Iterable[str],
-        read_environment_variables: Optional[bool] = False,
+        read_environment_variables: bool | None = False,
     ) -> dict[str, Any]:
         """Recursively load and merge all configuration files in a directory using OmegaConf,
         which satisfy a given list of glob patterns from a specific path.

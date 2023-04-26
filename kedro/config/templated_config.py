@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 import jmespath
 
@@ -98,8 +98,8 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         *,
         base_env: str = "base",
         default_run_env: str = "local",
-        globals_pattern: Optional[str] = None,
-        globals_dict: Optional[dict[str, Any]] = None,
+        globals_pattern: str | None = None,
+        globals_dict: dict[str, Any] | None = None,
     ):
         """Instantiates a ``TemplatedConfigLoader``.
 

@@ -2,6 +2,8 @@
 or more configuration files from specified paths, and format template strings
 with the values from the passed dictionary.
 """
+from __future__ import annotations
+
 import re
 from copy import deepcopy
 from pathlib import Path

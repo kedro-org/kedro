@@ -1,6 +1,8 @@
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files of yaml or json type from specified paths through OmegaConf.
 """
+from __future__ import annotations
+
 import io
 import logging
 import mimetypes

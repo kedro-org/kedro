@@ -267,7 +267,7 @@ class DataCatalog:
                 f"are not found in the catalog."
             )
 
-        layers = defaultdict(set)  # type: Dict[str, Set[str]]
+        layers: Dict[str, Set[str]] = defaultdict(set)
         for ds_name, ds_config in catalog.items():
             ds_layer = ds_config.pop("layer", None)
             if ds_layer is not None:

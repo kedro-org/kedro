@@ -98,6 +98,8 @@ def test_find_pipelines_skips_modules_with_unexpected_return_value_type(
     (pipeline_dir / "__init__.py").write_text(
         textwrap.dedent(
             """
+            from __future__ import annotations
+
             from kedro.pipeline import Pipeline, node, pipeline
 
 

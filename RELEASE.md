@@ -12,7 +12,7 @@
 # Upcoming Release 0.18.8
 
 ## Major features and improvements
-* Added `KEDRO_LOGGING_CONFIG` for configuring logging.
+* Added `KEDRO_LOGGING_CONFIG` environment variable, which can be used to configure logging from the beginning of the `kedro` process.
 
 ## Bug fixes and other changes
 * Improvements to documentation about configuration.

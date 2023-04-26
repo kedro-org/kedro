@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import Any
 
 import click
 
 
 def _recurse_cli(
-    cli_element: Union[click.Command, click.Group, click.CommandCollection],
+    cli_element: click.Command | click.Group | click.CommandCollection,
     ctx: click.Context,
     io_dict: dict[str, Any],
     get_help: bool = False,
@@ -52,7 +52,7 @@ def _recurse_cli(
 
 
 def get_cli_structure(
-    cli_obj: Union[click.Command, click.Group, click.CommandCollection],
+    cli_obj: click.Command | click.Group | click.CommandCollection,
     get_help: bool = False,
 ) -> dict[str, Any]:
     """Convenience wrapper function for `_recurse_cli` to work within

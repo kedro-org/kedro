@@ -17,7 +17,7 @@ The project-side logging configuration also ensures that [logs emitted from your
 
 We now give some common examples of how you might like to change your project's logging configuration.
 
-## Using `KEDRO_LOGGING_CONFIG` environment variable
+### Using `KEDRO_LOGGING_CONFIG` environment variable
 
 `KEDRO_LOGGING_CONFIG` is an optional environment variable that you can use to specify the path of your logging configuration file, overriding the default path of `conf/base/logging.yml`.
 

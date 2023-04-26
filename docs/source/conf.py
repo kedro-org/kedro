@@ -11,6 +11,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+from __future__ import annotations
 
 import importlib
 import os
@@ -18,7 +19,6 @@ import re
 import sys
 from inspect import getmembers, isclass, isfunction
 from pathlib import Path
-from typing import List, Tuple
 
 from click import secho, style
 
@@ -330,7 +330,7 @@ def remove_arrows_in_examples(lines):
         lines[i] = line.replace(">>>", "")
 
 
-def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
+def autolink_replacements(what: str) -> list[tuple[str, str, str]]:
     """
     Create a list containing replacement tuples of the form:
     (``regex``, ``replacement``, ``obj``) for all classes and methods which are
@@ -402,7 +402,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
     return replacements, suggestions
 
 
-def log_suggestions(lines: List[str], name: str):
+def log_suggestions(lines: list[str], name: str):
     """Use the ``suggestions`` list to log in the terminal places where the
     developer has forgotten to surround with double back-ticks class
     name/function name references.

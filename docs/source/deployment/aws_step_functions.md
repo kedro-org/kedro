@@ -173,7 +173,7 @@ ARG FUNCTION_DIR
 ARG RUNTIME_VERSION
 # Create the function directory
 RUN mkdir -p ${FUNCTION_DIR}
-RUN mkdir -p ${FUNCTION_DIR}/{conf,logs}
+RUN mkdir -p ${FUNCTION_DIR}/{conf}
 # Add handler function
 COPY lambda_handler.py ${FUNCTION_DIR}
 # Add conf/ directory

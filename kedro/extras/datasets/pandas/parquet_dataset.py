@@ -57,7 +57,6 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
             index: name
           save_args:
             compression: GZIP
-            partition_on: [name]
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\

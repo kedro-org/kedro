@@ -1,4 +1,4 @@
-"""``APIDataSet`` loads the data from HTTP(S) APIs.
+"""``APIDataset`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 from typing import Any, Dict, Iterable, List, NoReturn, Union
@@ -13,8 +13,8 @@ from kedro.io.core import AbstractDataSet, DatasetError
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class APIDataSet(AbstractDataSet[None, requests.Response]):
-    """``APIDataSet`` loads the data from HTTP(S) APIs.
+class APIDataset(AbstractDataSet[None, requests.Response]):
+    """``APIDataset`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
     Example usage for the
@@ -24,7 +24,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     .. code-block:: yaml
 
         usda:
-          type: api.APIDataSet
+          type: api.APIDataset
           url: https://quickstats.nass.usda.gov
           params:
             key: SOME_TOKEN,
@@ -39,10 +39,10 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
-        >>> from kedro.extras.datasets.api import APIDataSet
+        >>> from kedro.extras.datasets.api import APIDataset
         >>>
         >>>
-        >>> data_set = APIDataSet(
+        >>> data_set = APIDataset(
         >>>     url="https://quickstats.nass.usda.gov",
         >>>     params={
         >>>         "key": "SOME_TOKEN",
@@ -69,7 +69,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         timeout: int = 60,
         credentials: Union[Iterable[str], AuthBase] = None,
     ) -> None:
-        """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
+        """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.
 
         Args:
             url: The API URL endpoint.
@@ -139,3 +139,7 @@ class APIDataSet(AbstractDataSet[None, requests.Response]):
         response = self._execute_request()
 
         return response.ok
+
+
+class APIDataSet(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = APIDataset

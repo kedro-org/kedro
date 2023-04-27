@@ -4,6 +4,7 @@ import logging
 import logging.config
 import os
 import subprocess
+import sys
 import traceback
 from copy import deepcopy
 from pathlib import Path
@@ -37,7 +38,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
             cwd=project_path,
             stderr=subprocess.STDOUT,
         )
-        git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
+        git_data: Dict[str, Any] = {"commit_sha": res.decode().strip()}
         git_status_res = subprocess.check_output(
             ["git", "status", "--short"],
             cwd=project_path,
@@ -60,7 +61,7 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
         "args": ctx.args,
         "params": ctx.params,
         "command_name": ctx.command.name,
-        "command_path": ctx.command_path,
+        "command_path": " ".join(["kedro"] + sys.argv[1:]),
     }
 
 

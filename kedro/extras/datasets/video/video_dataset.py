@@ -15,6 +15,7 @@ import numpy as np
 import PIL.Image
 
 from kedro.io.core import AbstractDataset, get_protocol_and_path
+from kedro.utils import DeprecatedClassMeta
 
 
 class SlicedVideo:

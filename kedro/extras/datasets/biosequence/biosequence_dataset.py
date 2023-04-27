@@ -9,6 +9,7 @@ import fsspec
 from Bio import SeqIO
 
 from kedro.io.core import AbstractDataset, get_filepath_str, get_protocol_and_path
+from kedro.utils import DeprecatedClassMeta
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -138,5 +139,5 @@ class BioSequenceDataset(AbstractDataset[List, List]):
 
 
 
-class BiosequenceDataSet(metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = BiosequenceDataset
+class BioSequenceDataSet(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = BioSequenceDataset

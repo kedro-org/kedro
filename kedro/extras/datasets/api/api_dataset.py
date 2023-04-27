@@ -14,7 +14,7 @@ from kedro.utils import DeprecatedClassMeta
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class APIDataset(AbstractDataSet[None, requests.Response]):
+class APIDataset(AbstractDataset[None, requests.Response]):
     """``APIDataset`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 

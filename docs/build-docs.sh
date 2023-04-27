@@ -7,10 +7,6 @@ set -o nounset
 
 action=$1
 
-# Reinstall kedro-datasets locally
-rm -rf kedro/datasets
-bash docs/kedro-datasets-docs.sh
-
 if [ "$action" == "linkcheck" ]; then
   sphinx-build -WETan -j auto -D language=en -b linkcheck -d docs/build/doctrees docs/source docs/build/linkcheck
 elif [ "$action" == "docs" ]; then

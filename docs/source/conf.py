@@ -55,7 +55,7 @@ extensions = [
     "notfound.extension",
 ]
 
-# enable autosummary plugin (table of contents for modules/classes/class
+# enable autosummary plugin  (table of contents for modules/classes/class
 # methods)
 autosummary_generate = True
 autosummary_generate_overwrite = False
@@ -102,6 +102,9 @@ type_targets = {
         "tuple",
         "Any",
         "Dict",
+        "dict",
+        "list",
+        "set",
         "typing.Dict",
         "typing.Iterable",
         "typing.List",
@@ -122,7 +125,9 @@ type_targets = {
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",
+        "Path",
         "pathlib.Path",
+        "PurePosixPath",
         "pathlib.PurePosixPath",
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
@@ -133,6 +138,7 @@ type_targets = {
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
         "kedro.datasets.pandas.json_dataset.JSONDataSet",
         "pluggy._manager.PluginManager",
+        "PluginManager",
         "_DI",
         "_DO",
         # The statements below were added after subclassing UserDict in AbstractConfigLoader.

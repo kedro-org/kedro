@@ -7,6 +7,7 @@ import requests
 from requests.auth import AuthBase
 
 from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.utils import DeprecatedClassMeta
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets

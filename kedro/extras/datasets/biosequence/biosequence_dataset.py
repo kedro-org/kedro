@@ -1,4 +1,4 @@
-"""BioSequenceDataset loads and saves data to/from bio-sequence objects to
+"""BioSequenceDataSet loads and saves data to/from bio-sequence objects to
 file.
 """
 from copy import deepcopy
@@ -9,20 +9,19 @@ import fsspec
 from Bio import SeqIO
 
 from kedro.io.core import AbstractDataset, get_filepath_str, get_protocol_and_path
-from kedro.utils import DeprecatedClassMeta
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class BioSequenceDataset(AbstractDataset[List, List]):
-    r"""``BioSequenceDataset`` loads and saves data to a sequence file.
+class BioSequenceDataSet(AbstractDataset[List, List]):
+    r"""``BioSequenceDataSet`` loads and saves data to a sequence file.
 
     Example:
     ::
 
-        >>> from kedro.extras.datasets.biosequence import BioSequenceDataset
+        >>> from kedro.extras.datasets.biosequence import BioSequenceDataSet
         >>> from io import StringIO
         >>> from Bio import SeqIO
         >>>
@@ -31,7 +30,7 @@ class BioSequenceDataset(AbstractDataset[List, List]):
         >>> for record in SeqIO.parse(StringIO(data), "fasta"):
         >>>     raw_data.append(record)
         >>>
-        >>> data_set = BioSequenceDataset(filepath="ls_orchid.fasta",
+        >>> data_set = BioSequenceDataSet(filepath="ls_orchid.fasta",
         >>>                               load_args={"format": "fasta"},
         >>>                               save_args={"format": "fasta"})
         >>> data_set.save(raw_data)
@@ -55,7 +54,7 @@ class BioSequenceDataset(AbstractDataset[List, List]):
         fs_args: Dict[str, Any] = None,
     ) -> None:
         """
-        Creates a new instance of ``BioSequenceDataset`` pointing
+        Creates a new instance of ``BioSequenceDataSet`` pointing
         to a concrete filepath.
 
         Args:
@@ -136,8 +135,3 @@ class BioSequenceDataset(AbstractDataset[List, List]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-# pylint: disable=missing-class-docstring,too-few-public-methods
-class BioSequenceDataSet(metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = BioSequenceDataset

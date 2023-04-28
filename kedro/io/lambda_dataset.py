@@ -1,6 +1,6 @@
 """``LambdaDataset`` is an implementation of ``AbstractDataSet`` which allows for
 providing custom load, save, and exists methods without extending
-``AbstractDataset``.
+``AbstractDataSet``.
 """
 from __future__ import annotations
 

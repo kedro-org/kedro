@@ -5,9 +5,7 @@ number of data sets. At the core of the library is the ``AbstractDataSet`` class
 from .cached_dataset import CachedDataSet, CachedDataset
 from .core import (
     AbstractDataSet,
-    AbstractDataset,
     AbstractVersionedDataSet,
-    AbstractVersionedDataset,
     DataSetAlreadyExistsError,
     DatasetAlreadyExistsError,
     DataSetError,
@@ -28,9 +26,7 @@ from .partitioned_dataset import (
 
 __all__ = [
     "AbstractDataSet",
-    "AbstractDataset",
     "AbstractVersionedDataSet",
-    "AbstractVersionedDataset",
     "CachedDataSet",
     "CachedDataset",
     "DataCatalog",

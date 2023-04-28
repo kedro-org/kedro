@@ -12,8 +12,8 @@ import pandas as pd
 
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
-    AbstractVersionedDataset,
-    DatasetError,
+    AbstractVersionedDataSet,
+    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class CSVDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
+class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 
@@ -179,7 +179,7 @@ class CSVDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DatasetError:
+        except DataSetError:
             return False
 
         return self._fs.exists(load_path)

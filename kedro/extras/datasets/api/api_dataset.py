@@ -6,14 +6,14 @@ from typing import Any, Dict, Iterable, List, NoReturn, Union
 import requests
 from requests.auth import AuthBase
 
-from kedro.io.core import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataSet, DataSetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class APIDataSet(AbstractDataset[None, requests.Response]):
+class APIDataSet(AbstractDataSet[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
@@ -123,9 +123,9 @@ class APIDataSet(AbstractDataset[None, requests.Response]):
             response = requests.request(**self._request_args)
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
-            raise DatasetError("Failed to fetch data", exc) from exc
+            raise DataSetError("Failed to fetch data", exc) from exc
         except OSError as exc:
-            raise DatasetError("Failed to connect to the remote server") from exc
+            raise DataSetError("Failed to connect to the remote server") from exc
 
         return response
 
@@ -133,7 +133,7 @@ class APIDataSet(AbstractDataset[None, requests.Response]):
         return self._execute_request()
 
     def _save(self, data: None) -> NoReturn:
-        raise DatasetError(f"{self.__class__.__name__} is a read only data set type")
+        raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
 
     def _exists(self) -> bool:
         response = self._execute_request()

@@ -1,4 +1,4 @@
-"""``AbstractDataset`` implementation to read/write from/to a sequence file."""
+"""``AbstractDataSet`` implementation to read/write from/to a sequence file."""
 
 __all__ = ["BioSequenceDataSet"]
 

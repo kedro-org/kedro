@@ -1,4 +1,4 @@
-"""``ParquetDataset`` is a data set used to load and save data to parquet files using Dask
+"""``ParquetDataSet`` is a data set used to load and save data to parquet files using Dask
 dataframe"""
 
 from copy import deepcopy
@@ -9,15 +9,14 @@ import fsspec
 import triad
 
 from kedro.io.core import AbstractDataset, get_protocol_and_path
-from kedro.utils import DeprecatedClassMeta
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
-    """``ParquetDataset`` loads and saves data to parquet file(s). It uses Dask
+class ParquetDataSet(AbstractDataset[dd.DataFrame, dd.DataFrame]):
+    """``ParquetDataSet`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
@@ -28,7 +27,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     .. code-block:: yaml
 
         cars:
-          type: dask.ParquetDataset
+          type: dask.ParquetDataSet
           filepath: s3://bucket_name/path/to/folder
           save_args:
             compression: GZIP
@@ -42,7 +41,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
-        >>> from kedro.extras.datasets.dask import ParquetDataset
+        >>> from kedro.extras.datasets.dask import ParquetDataSet
         >>> import pandas as pd
         >>> import dask.dataframe as dd
         >>>
@@ -50,7 +49,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>>                      'col3': [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
-        >>> data_set = ParquetDataset(
+        >>> data_set = ParquetDataSet(
         >>>     filepath="s3://bucket_name/path/to/folder",
         >>>     credentials={
         >>>         'client_kwargs':{
@@ -75,7 +74,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     .. code-block:: yaml
 
         parquet_dataset:
-          type: dask.ParquetDataset
+          type: dask.ParquetDataSet
           filepath: "s3://bucket_name/path/to/folder"
           credentials:
             client_kwargs:
@@ -101,7 +100,7 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ParquetDataset`` pointing to concrete
+        """Creates a new instance of ``ParquetDataSet`` pointing to concrete
         parquet files.
 
         Args:
@@ -209,8 +208,3 @@ class ParquetDataset(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         return file_system.exists(self._filepath)
-
-
-# pylint: disable=missing-class-docstring,too-few-public-methods
-class ParquetDataSet(metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = ParquetDataset

@@ -138,6 +138,5 @@ class BioSequenceDataset(AbstractDataset[List, List]):
         self._fs.invalidate_cache(filepath)
 
 
-
 class BioSequenceDataSet(metaclass=DeprecatedClassMeta):
     _DeprecatedClassMeta__alias = BioSequenceDataset

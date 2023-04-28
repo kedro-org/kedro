@@ -338,10 +338,6 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         return dataset_copy
 
 
-class AbstractDataSet(Generic[_DI, _DO], metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = AbstractDataSet
-
-
 def generate_timestamp() -> str:
     """Generate the timestamp to be used by versioning.
 

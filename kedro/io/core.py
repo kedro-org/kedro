@@ -347,6 +347,9 @@ _CONSISTENCY_WARNING = (
     "intermediate data sets where possible to avoid this warning."
 )
 
+# `kedro_datasets` is probed before `kedro.extras.datasets`,
+# hence the DeprecationWarning will not be shown
+# if the dataset is available in the former
 _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", ""]
 
 

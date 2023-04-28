@@ -1,4 +1,4 @@
-"""``VideoDataset`` loads/saves video data from an underlying
+"""``VideoDataSet`` loads/saves video data from an underlying
 filesystem (e.g.: local, S3, GCS). It uses OpenCV VideoCapture to read
 and decode videos and OpenCV VideoWriter to encode and write video.
 """
@@ -193,8 +193,8 @@ class GeneratorVideo(AbstractVideo):
         return self
 
 
-class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
-    """``VideoDataset`` loads / save video data from a given filepath as sequence
+class VideoDataSet(AbstractDataset[AbstractVideo, AbstractVideo]):
+    """``VideoDataSet`` loads / save video data from a given filepath as sequence
     of PIL.Image.Image using OpenCV.
 
     Example usage for the
@@ -204,11 +204,11 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     .. code-block:: yaml
 
         cars:
-          type: video.VideoDataset
+          type: video.VideoDataSet
           filepath: data/01_raw/cars.mp4
 
         motorbikes:
-          type: video.VideoDataset
+          type: video.VideoDataSet
           filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.mp4
           credentials: dev_s3
 
@@ -217,10 +217,10 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
-        >>> from kedro.extras.datasets.video import VideoDataset
+        >>> from kedro.extras.datasets.video import VideoDataSet
         >>> import numpy as np
         >>>
-        >>> video = VideoDataset(filepath='/video/file/path.mp4').load()
+        >>> video = VideoDataSet(filepath='/video/file/path.mp4').load()
         >>> frame = video[0]
         >>> np.sum(np.asarray(frame))
 
@@ -228,7 +228,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
     Example creating a video from numpy frames using Python API:
     ::
 
-        >>> from kedro.extras.datasets.video.video_dataset import VideoDataset, SequenceVideo
+        >>> from kedro.extras.datasets.video.video_dataset import VideoDataSet, SequenceVideo
         >>> import numpy as np
         >>> from PIL import Image
         >>>
@@ -238,14 +238,14 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         >>>   imgs.append(Image.fromarray(frame))
         >>>   frame -= 1
         >>>
-        >>> video = VideoDataset("my_video.mp4")
+        >>> video = VideoDataSet("my_video.mp4")
         >>> video.save(SequenceVideo(imgs, fps=25))
 
 
     Example creating a video from numpy frames using a generator and the Python API:
     ::
 
-        >>> from kedro.extras.datasets.video.video_dataset import VideoDataset, GeneratorVideo
+        >>> from kedro.extras.datasets.video.video_dataset import VideoDataSet, GeneratorVideo
         >>> import numpy as np
         >>> from PIL import Image
         >>>
@@ -255,7 +255,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         >>>     yield Image.fromarray(frame)
         >>>     frame -= 1
         >>>
-        >>> video = VideoDataset("my_video.mp4")
+        >>> video = VideoDataSet("my_video.mp4")
         >>> video.save(GeneratorVideo(gen(), fps=25, length=None))
 
     """
@@ -267,7 +267,7 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of VideoDataset to load / save video data for given filepath.
+        """Creates a new instance of VideoDataSet to load / save video data for given filepath.
 
         Args:
             filepath: The location of the video file to load / save data.
@@ -324,12 +324,12 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
                         f_target.write(f_tmp.read())
 
     def _write_to_filepath(self, video: AbstractVideo, filepath: str) -> None:
-        # TODO: This uses the codec specified in the VideoDataset if it is not None, this is due
+        # TODO: This uses the codec specified in the VideoDataSet if it is not None, this is due
         # to compatibility issues since e.g. h264 coded is licensed and is thus not included in
         # opencv if installed from a binary distribution. Since a h264 video can be read, but not
         # written, it would be error prone to use the videos fourcc code. Further, an issue is
         # that the video object does not know what container format will be used since that is
-        # selected by the suffix in the file name of the VideoDataset. Some combinations of codec
+        # selected by the suffix in the file name of the VideoDataSet. Some combinations of codec
         # and container format might not work or will have bad support.
         fourcc = self._fourcc or video.fourcc
 
@@ -355,7 +355,3 @@ class VideoDataset(AbstractDataset[AbstractVideo, AbstractVideo]):
 
     def _exists(self) -> bool:
         return self._fs.exists(self._filepath)
-
-
-class VideoDataSet(metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = VideoDataset

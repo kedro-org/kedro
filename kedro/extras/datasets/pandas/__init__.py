@@ -2,7 +2,6 @@
 
 __all__ = [
     "CSVDataSet",
-    "CSVDataset",
     "ExcelDataSet",
     "FeatherDataSet",
     "GBQTableDataSet",
@@ -19,7 +18,7 @@ __all__ = [
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .csv_dataset import CSVDataSet, CSVDataset
+    from .csv_dataset import CSVDataSet
 with suppress(ImportError):
     from .excel_dataset import ExcelDataSet
 with suppress(ImportError):

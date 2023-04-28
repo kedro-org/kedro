@@ -178,7 +178,8 @@ class PartitionedDataSet(AbstractDataSet):
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
             overwrite: If True, any existing partitions will be removed.
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
@@ -431,7 +432,8 @@ class IncrementalDataSet(PartitionedDataSet):
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.

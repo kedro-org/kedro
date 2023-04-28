@@ -51,7 +51,8 @@ class CachedDataSet(AbstractDataSet):
             copy_mode: The copy mode used to copy the data. Possible
                 values are: "deepcopy", "copy" and "assign". If not
                 provided, it is inferred based on the data type.
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             ValueError: If the provided dataset is not a valid dict/YAML

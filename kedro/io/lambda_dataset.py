@@ -91,7 +91,8 @@ class LambdaDataSet(AbstractDataSet):
             save: Method to save data to a data set.
             exists: Method to check whether output data already exists.
             release: Method to release any cached information.
-            metadata: Any arbitrary user metadata.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: If a method is specified, but is not a Callable.

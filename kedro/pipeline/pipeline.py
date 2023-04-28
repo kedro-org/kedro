@@ -150,13 +150,13 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         _validate_unique_confirms(nodes)
 
         # input -> nodes with input
-        self._nodes_by_input = defaultdict(set)  # type: Dict[str, Set[Node]]
+        self._nodes_by_input: Dict[str, Set[Node]] = defaultdict(set)
         for node in nodes:
             for input_ in node.inputs:
                 self._nodes_by_input[_strip_transcoding(input_)].add(node)
 
         # output -> node with output
-        self._nodes_by_output = {}  # type: Dict[str, Node]
+        self._nodes_by_output: Dict[str, Node] = {}
         for node in nodes:
             for output in node.outputs:
                 self._nodes_by_output[_strip_transcoding(output)] = node
@@ -329,9 +329,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             Dictionary where keys are nodes and values are sets made up of
             their parent nodes. Independent nodes have this as empty sets.
         """
-        dependencies = {
-            node: set() for node in self._nodes
-        }  # type: Dict[Node, Set[Node]]
+        dependencies: Dict[Node, Set[Node]] = {node: set() for node in self._nodes}
         for parent in self._nodes:
             for output in parent.outputs:
                 for child in self._nodes_by_input[_strip_transcoding(output)]:
@@ -539,7 +537,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         """
         starting = set(inputs)
-        result = set()  # type: Set[Node]
+        result: Set[Node] = set()
         next_nodes = self._get_nodes_with_inputs_transcode_compatible(starting)
 
         while next_nodes:
@@ -604,7 +602,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         """
         starting = set(outputs)
-        result = set()  # type: Set[Node]
+        result: Set[Node] = set()
         next_nodes = self._get_nodes_with_outputs_transcode_compatible(starting)
 
         while next_nodes:
@@ -803,8 +801,8 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
 
 def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Union[Node, Pipeline]]):
-    seen_nodes = set()  # type: Set[str]
-    duplicates = defaultdict(set)  # type: Dict[Union[Pipeline, None], Set[str]]
+    seen_nodes: Set[str] = set()
+    duplicates: Dict[Union[Pipeline, None], Set[str]] = defaultdict(set)
 
     def _check_node(node_: Node, pipeline_: Pipeline = None):
         name = node_.name

@@ -6,13 +6,13 @@ import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
-from typing import Set  # noqa
+from typing import Set
 
 from pluggy import PluginManager
 
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
-from kedro.pipeline.node import Node  # noqa
+from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
 
 
@@ -103,7 +103,7 @@ class ThreadRunner(AbstractRunner):
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())
-        done_nodes = set()  # type: Set[Node]
+        done_nodes: Set[Node] = set()
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)

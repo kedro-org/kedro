@@ -33,7 +33,7 @@ def test_environment_variable_logging_config(monkeypatch, tmp_path):
     config_path = Path(tmp_path) / "logging.yml"
     monkeypatch.setenv("KEDRO_LOGGING_CONFIG", config_path.absolute())
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "WARNING"}}}
-    with config_path.open("w", encoding='utf-8') as f:
+    with config_path.open("w", encoding="utf-8") as f:
         yaml.dump(logging_config, f)
     del sys.modules["kedro.framework.project"]
     from kedro.framework.project import LOGGING  # noqa

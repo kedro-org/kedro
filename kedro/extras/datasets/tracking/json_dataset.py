@@ -5,7 +5,7 @@ The ``JSONDataSet`` is part of Kedro Experiment Tracking. The dataset is version
 from typing import NoReturn
 
 from kedro.extras.datasets.json import JSONDataSet as JDS
-from kedro.io.core import DataSetError
+from kedro.io.core import DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -45,4 +45,4 @@ class JSONDataSet(JDS):
     versioned = True
 
     def _load(self) -> NoReturn:
-        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
+        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")

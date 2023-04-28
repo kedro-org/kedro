@@ -19,7 +19,12 @@ from .core import (
 from .data_catalog import DataCatalog
 from .lambda_dataset import LambdaDataSet, LambdaDataset
 from .memory_dataset import MemoryDataSet, MemoryDataset
-from .partitioned_dataset import IncrementalDataSet, IncrementalDataset, PartitionedDataSet, PartitionedDataset
+from .partitioned_dataset import (
+    IncrementalDataSet,
+    IncrementalDataset,
+    PartitionedDataSet,
+    PartitionedDataset,
+)
 
 __all__ = [
     "AbstractDataSet",

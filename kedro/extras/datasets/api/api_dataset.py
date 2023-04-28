@@ -142,5 +142,6 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         return response.ok
 
 
+# pylint: disable=missing-class-docstring,too-few-public-methods
 class APIDataSet(metaclass=DeprecatedClassMeta):
     _DeprecatedClassMeta__alias = APIDataset

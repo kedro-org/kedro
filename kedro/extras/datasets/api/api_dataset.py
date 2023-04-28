@@ -1,4 +1,4 @@
-"""``APIDataset`` loads the data from HTTP(S) APIs.
+"""``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/latest/
 """
 from typing import Any, Dict, Iterable, List, NoReturn, Union
@@ -7,15 +7,14 @@ import requests
 from requests.auth import AuthBase
 
 from kedro.io.core import AbstractDataset, DatasetError
-from kedro.utils import DeprecatedClassMeta
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class APIDataset(AbstractDataset[None, requests.Response]):
-    """``APIDataset`` loads the data from HTTP(S) APIs.
+class APIDataSet(AbstractDataset[None, requests.Response]):
+    """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
     Example usage for the
@@ -25,7 +24,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     .. code-block:: yaml
 
         usda:
-          type: api.APIDataset
+          type: api.APIDataSet
           url: https://quickstats.nass.usda.gov
           params:
             key: SOME_TOKEN,
@@ -40,10 +39,10 @@ class APIDataset(AbstractDataset[None, requests.Response]):
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
-        >>> from kedro.extras.datasets.api import APIDataset
+        >>> from kedro.extras.datasets.api import APIDataSet
         >>>
         >>>
-        >>> data_set = APIDataset(
+        >>> data_set = APIDataSet(
         >>>     url="https://quickstats.nass.usda.gov",
         >>>     params={
         >>>         "key": "SOME_TOKEN",
@@ -70,7 +69,7 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         timeout: int = 60,
         credentials: Union[Iterable[str], AuthBase] = None,
     ) -> None:
-        """Creates a new instance of ``APIDataset`` to fetch data from an API endpoint.
+        """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
         Args:
             url: The API URL endpoint.
@@ -140,8 +139,3 @@ class APIDataset(AbstractDataset[None, requests.Response]):
         response = self._execute_request()
 
         return response.ok
-
-
-# pylint: disable=missing-class-docstring,too-few-public-methods
-class APIDataSet(metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = APIDataset

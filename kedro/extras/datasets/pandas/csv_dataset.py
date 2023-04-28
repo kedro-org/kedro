@@ -1,4 +1,4 @@
-"""``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
+"""``CSVDataset`` loads/saves data from/to a CSV file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 """
 import logging
@@ -12,12 +12,13 @@ import pandas as pd
 
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
-    AbstractVersionedDataSet,
-    DataSetError,
+    AbstractVersionedDataset,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
+from kedro.utils import DeprectatedClassMeta
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +27,8 @@ logger = logging.getLogger(__name__)
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
-    """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
+class CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
+    """``CSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 
     Example usage for the
@@ -37,7 +38,7 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     .. code-block:: yaml
 
         cars:
-          type: pandas.CSVDataSet
+          type: pandas.CSVDataset
           filepath: data/01_raw/company/cars.csv
           load_args:
             sep: ","
@@ -48,7 +49,7 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
             decimal: .
 
         motorbikes:
-          type: pandas.CSVDataSet
+          type: pandas.CSVDataset
           filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
           credentials: dev_s3
 
@@ -57,13 +58,13 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
-        >>> from kedro.extras.datasets.pandas import CSVDataSet
+        >>> from kedro.extras.datasets.pandas import CSVDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = CSVDataSet(filepath="test.csv")
+        >>> data_set = CSVDataset(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
@@ -83,7 +84,7 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``CSVDataSet`` pointing to a concrete CSV file
+        """Creates a new instance of ``CSVDataset`` pointing to a concrete CSV file
         on a specific filesystem.
 
         Args:
@@ -179,7 +180,7 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
@@ -192,3 +193,7 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+class CSVDataSet(metaclass=DeprecatedClassMeta):
+    _DeprecatedClassMeta__alias = CSVDataset

@@ -12,7 +12,7 @@ from cachetools import Cache, cachedmethod
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
-    AbstractDataset,
+    AbstractDataSet,
     DatasetError,
     parse_dataset_definition,
 )
@@ -30,7 +30,7 @@ KEY_PROPAGATION_WARNING = (
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
-class PartitionedDataset(AbstractDataset):
+class PartitionedDataset(AbstractDataSet):
     # pylint: disable=too-many-instance-attributes,protected-access
     """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
@@ -132,7 +132,7 @@ class PartitionedDataset(AbstractDataset):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         path: str,
-        dataset: Union[str, Type[AbstractDataset], Dict[str, Any]],
+        dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
@@ -154,7 +154,7 @@ class PartitionedDataset(AbstractDataset):
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataset``
+                a) object of a class that inherits from ``AbstractDataSet``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -378,7 +378,7 @@ class IncrementalDataset(PartitionedDataset):
     def __init__(
         self,
         path: str,
-        dataset: Union[str, Type[AbstractDataset], Dict[str, Any]],
+        dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
         checkpoint: Union[str, Dict[str, Any]] = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
@@ -401,7 +401,7 @@ class IncrementalDataset(PartitionedDataset):
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataset``
+                a) object of a class that inherits from ``AbstractDataSet``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -513,7 +513,7 @@ class IncrementalDataset(PartitionedDataset):
         )
 
     @property
-    def _checkpoint(self) -> AbstractDataset:
+    def _checkpoint(self) -> AbstractDataSet:
         type_, kwargs = parse_dataset_definition(self._checkpoint_config)
         return type_(**kwargs)  # type: ignore
 

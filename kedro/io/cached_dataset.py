@@ -5,12 +5,12 @@ so that the user avoids io operations with slow storage media
 import logging
 from typing import Any, Dict, Union
 
-from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, Version
+from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataSet, Version
 from kedro.io.memory_dataset import MemoryDataset
 from kedro.utils import DeprecatedClassMeta
 
 
-class CachedDataset(AbstractDataset):
+class CachedDataset(AbstractDataSet):
     """``CachedDataset`` is a dataset wrapper which caches in memory the data saved,
     so that the user avoids io operations with slow storage media.
 
@@ -35,7 +35,7 @@ class CachedDataset(AbstractDataset):
 
     def __init__(
         self,
-        dataset: Union[AbstractDataset, Dict],
+        dataset: Union[AbstractDataSet, Dict],
         version: Version = None,
         copy_mode: str = None,
     ):
@@ -58,7 +58,7 @@ class CachedDataset(AbstractDataset):
         """
         if isinstance(dataset, dict):
             self._dataset = self._from_config(dataset, version)
-        elif isinstance(dataset, AbstractDataset):
+        elif isinstance(dataset, AbstractDataSet):
             self._dataset = dataset
         else:
             raise ValueError(
@@ -80,10 +80,10 @@ class CachedDataset(AbstractDataset):
             )
         if version:
             config[VERSIONED_FLAG_KEY] = True
-            return AbstractDataset.from_config(
+            return AbstractDataSet.from_config(
                 "_cached", config, version.load, version.save
             )
-        return AbstractDataset.from_config("_cached", config)
+        return AbstractDataSet.from_config("_cached", config)
 
     def _describe(self) -> Dict[str, Any]:
         return {

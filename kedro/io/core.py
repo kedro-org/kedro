@@ -32,10 +32,10 @@ CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdr
 
 
 class DatasetError(Exception):
-    """``DatasetError`` raised by ``AbstractDataset`` implementations
+    """``DatasetError`` raised by ``AbstractDataSet`` implementations
     in case of failure of input/output methods.
 
-    ``AbstractDataset`` implementations should provide instructive
+    ``AbstractDataSet`` implementations should provide instructive
     information in case of failure.
     """
 
@@ -71,7 +71,7 @@ class DataSetAlreadyExistsError(metaclass=DeprecatedClassMeta):
 
 
 class VersionNotFoundError(DatasetError):
-    """``VersionNotFoundError`` raised by ``AbstractVersionedDataset`` implementations
+    """``VersionNotFoundError`` raised by ``AbstractVersionedDataSet`` implementations
     in case of no load versions available for the data set.
     """
 
@@ -82,8 +82,8 @@ _DI = TypeVar("_DI")
 _DO = TypeVar("_DO")
 
 
-class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
-    """``AbstractDataset`` is the base class for all data set implementations.
+class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
+    """``AbstractDataSet`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
     If a specific dataset implementation cannot be used in conjunction with
@@ -94,10 +94,10 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractDataset
+        >>> from kedro.io import AbstractDataSet
         >>>
         >>>
-        >>> class MyOwnDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
+        >>> class MyOwnDataset(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         >>>     def __init__(self, filepath, param1, param2=True):
         >>>         self._filepath = PurePosixPath(filepath)
         >>>         self._param1 = param1
@@ -132,7 +132,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         config: Dict[str, Any],
         load_version: str = None,
         save_version: str = None,
-    ) -> "AbstractDataset":
+    ) -> "AbstractDataSet":
         """Create a data set instance using the configuration provided.
 
         Args:
@@ -146,7 +146,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 if versioning was not enabled.
 
         Returns:
-            An instance of an ``AbstractDataset`` subclass.
+            An instance of an ``AbstractDataSet`` subclass.
 
         Raises:
             DatasetError: When the function fails to create the data set
@@ -262,21 +262,21 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     @abc.abstractmethod
     def _load(self) -> _DO:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
             f"it must implement the '_load' method"
         )
 
     @abc.abstractmethod
     def _save(self, data: _DI) -> None:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
             f"it must implement the '_save' method"
         )
 
     @abc.abstractmethod
     def _describe(self) -> Dict[str, Any]:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
             f"it must implement the '_describe' method"
         )
 
@@ -324,7 +324,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
     def _release(self) -> None:
         pass
 
-    def _copy(self, **overwrite_params) -> "AbstractDataset":
+    def _copy(self, **overwrite_params) -> "AbstractDataSet":
         dataset_copy = copy.deepcopy(self)
         for name, value in overwrite_params.items():
             setattr(dataset_copy, name, value)
@@ -332,7 +332,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
 
 
 class AbstractDataSet(Generic[_DI, _DO], metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = AbstractDataset
+    _DeprecatedClassMeta__alias = AbstractDataSet
 
 
 def generate_timestamp() -> str:
@@ -368,7 +368,7 @@ _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", "
 
 def parse_dataset_definition(
     config: Dict[str, Any], load_version: str = None, save_version: str = None
-) -> Tuple[Type[AbstractDataset], Dict[str, Any]]:
+) -> Tuple[Type[AbstractDataSet], Dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
@@ -411,10 +411,10 @@ def parse_dataset_definition(
                 f"has not been installed."
             ) from exc
 
-    if not issubclass(class_obj, AbstractDataset):
+    if not issubclass(class_obj, AbstractDataSet):
         raise DatasetError(
             f"Dataset type '{class_obj.__module__}.{class_obj.__qualname__}' "
-            f"is invalid: all data set types must extend 'AbstractDataset'."
+            f"is invalid: all data set types must extend 'AbstractDataSet'."
         )
 
     if VERSION_KEY in config:
@@ -470,9 +470,9 @@ def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
-class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
+class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     """
-    ``AbstractVersionedDataset`` is the base class for all versioned data set
+    ``AbstractVersionedDataSet`` is the base class for all versioned data set
     implementations. All data sets that implement versioning should extend this
     abstract class and implement the methods marked as abstract.
 
@@ -481,10 +481,10 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractVersionedDataset
+        >>> from kedro.io import AbstractVersionedDataSet
         >>>
         >>>
-        >>> class MyOwnDataset(AbstractVersionedDataset):
+        >>> class MyOwnDataset(AbstractVersionedDataSet):
         >>>     def __init__(self, filepath, version, param1, param2=True):
         >>>         super().__init__(PurePosixPath(filepath), version)
         >>>         self._param1 = param1
@@ -523,7 +523,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         exists_function: Callable[[str], bool] = None,
         glob_function: Callable[[str], List[str]] = None,
     ):
-        """Creates a new instance of ``AbstractVersionedDataset``.
+        """Creates a new instance of ``AbstractVersionedDataSet``.
 
         Args:
             filepath: Filepath in POSIX format to a file.
@@ -673,7 +673,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
 
 
 class AbstractVersionedDataSet(metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = AbstractVersionedDataset
+    _DeprecatedClassMeta__alias = AbstractVersionedDataSet
 
 
 def _parse_filepath(filepath: str) -> Dict[str, str]:

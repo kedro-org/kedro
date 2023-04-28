@@ -1,14 +1,14 @@
-"""``LambdaDataset`` is an implementation of ``AbstractDataset`` which allows for
+"""``LambdaDataset`` is an implementation of ``AbstractDataSet`` which allows for
 providing custom load, save, and exists methods without extending
-``AbstractDataset``.
+``AbstractDataSet``.
 """
 from typing import Any, Callable, Dict, Optional
 
-from kedro.io.core import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataSet, DatasetError
 from kedro.utils import DeprecatedClassMeta
 
 
-class LambdaDataset(AbstractDataset):
+class LambdaDataset(AbstractDataSet):
     """``LambdaDataset`` loads and saves data to a data set.
     It relies on delegating to specific implementation such as csv, sql, etc.
 

@@ -4,13 +4,13 @@
 import copy
 from typing import Any, Dict
 
-from kedro.io.core import AbstractDataset, DatasetError
+from kedro.io.core import AbstractDataSet, DatasetError
 from kedro.utils import DeprecatedClassMeta
 
 _EMPTY = object()
 
 
-class MemoryDataset(AbstractDataset):
+class MemoryDataset(AbstractDataSet):
     """``MemoryDataset`` loads and saves data from/to an in-memory
     Python object.
 

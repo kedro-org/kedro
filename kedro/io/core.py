@@ -331,10 +331,6 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         return dataset_copy
 
 
-class AbstractDataSet(Generic[_DI, _DO], metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = AbstractDataSet
-
-
 def generate_timestamp() -> str:
     """Generate the timestamp to be used by versioning.
 
@@ -673,10 +669,6 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def _release(self) -> None:
         super()._release()
         self._version_cache.clear()
-
-
-class AbstractVersionedDataSet(metaclass=DeprecatedClassMeta):
-    _DeprecatedClassMeta__alias = AbstractVersionedDataSet
 
 
 def _parse_filepath(filepath: str) -> Dict[str, str]:

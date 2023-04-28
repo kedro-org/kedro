@@ -138,5 +138,6 @@ class BioSequenceDataset(AbstractDataset[List, List]):
         self._fs.invalidate_cache(filepath)
 
 
+# pylint: disable=missing-class-docstring,too-few-public-methods
 class BioSequenceDataSet(metaclass=DeprecatedClassMeta):
     _DeprecatedClassMeta__alias = BioSequenceDataset

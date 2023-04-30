@@ -7,7 +7,7 @@ from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.tracking import MetricsDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -69,7 +69,7 @@ class TestMetricsDataSet:
     def test_load_fail(self, metrics_dataset, dummy_data):
         metrics_dataset.save(dummy_data)
         pattern = r"Loading not supported for 'MetricsDataSet'"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             metrics_dataset.load()
 
     def test_exists(self, metrics_dataset, dummy_data):
@@ -125,7 +125,7 @@ class TestMetricsDataSet:
         data = {"col1": 1, "col2": 2, "col3": "hello"}
 
         pattern = "The MetricsDataSet expects only numeric values."
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             metrics_dataset.save(data)
 
     def test_not_version_str_repr(self):
@@ -163,7 +163,7 @@ class TestMetricsDataSet:
             r"Save path \'.+\' for MetricsDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             explicit_versioned_metrics_dataset.save(dummy_data)
 
     @pytest.mark.parametrize(
@@ -188,7 +188,7 @@ class TestMetricsDataSet:
     def test_http_filesystem_no_versioning(self):
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             MetricsDataSet(
                 filepath="https://example.com/file.json", version=Version(None, None)
             )

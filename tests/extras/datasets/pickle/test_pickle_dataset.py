@@ -10,7 +10,7 @@ from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pickle import PickleDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -99,7 +99,7 @@ class TestPickleDataSet:
     def test_load_missing_file(self, pickle_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set PickleDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pickle_data_set.load()
 
     @pytest.mark.parametrize(
@@ -132,7 +132,7 @@ class TestPickleDataSet:
         mocker.patch("pickle.dump", side_effect=pickle.PickleError)
         pattern = r".+ was not serialised due to:.*"
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pickle_data_set.save(dummy_dataframe)
 
     def test_invalid_backend(self, mocker):
@@ -197,7 +197,7 @@ class TestPickleDataSetVersioned:
     def test_no_versions(self, versioned_pickle_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for PickleDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_pickle_data_set.load()
 
     def test_exists(self, versioned_pickle_data_set, dummy_dataframe):
@@ -214,7 +214,7 @@ class TestPickleDataSetVersioned:
             r"Save path \'.+\' for PickleDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_pickle_data_set.save(dummy_dataframe)
 
     @pytest.mark.parametrize(
@@ -238,7 +238,7 @@ class TestPickleDataSetVersioned:
     def test_http_filesystem_no_versioning(self):
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             PickleDataSet(
                 filepath="https://example.com/file.pkl", version=Version(None, None)
             )
@@ -255,7 +255,7 @@ class TestPickleDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_pickle_data_set._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_pickle_data_set.save(dummy_dataframe)
 
         # Remove non-versioned dataset and try again

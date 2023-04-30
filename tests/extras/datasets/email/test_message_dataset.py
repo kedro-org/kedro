@@ -9,7 +9,7 @@ from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.email import EmailMessageDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -93,7 +93,7 @@ class TestEmailMessageDataSet:
     def test_load_missing_file(self, message_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set EmailMessageDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             message_data_set.load()
 
     @pytest.mark.parametrize(
@@ -158,7 +158,7 @@ class TestEmailMessageDataSetVersioned:
     def test_no_versions(self, versioned_message_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for EmailMessageDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_message_data_set.load()
 
     def test_exists(self, versioned_message_data_set, dummy_msg):
@@ -175,7 +175,7 @@ class TestEmailMessageDataSetVersioned:
             r"Save path \'.+\' for EmailMessageDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_message_data_set.save(dummy_msg)
 
     @pytest.mark.parametrize(
@@ -200,7 +200,7 @@ class TestEmailMessageDataSetVersioned:
     def test_http_filesystem_no_versioning(self):
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             EmailMessageDataSet(
                 filepath="https://example.com/file", version=Version(None, None)
             )
@@ -217,7 +217,7 @@ class TestEmailMessageDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_message_data_set._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_message_data_set.save(dummy_msg)
 
         # Remove non-versioned dataset and try again

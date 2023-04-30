@@ -10,7 +10,7 @@ from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.holoviews import HoloviewsWriter
-from kedro.io import DataSetError, Version
+from kedro.io import DatasetError, Version
 from kedro.io.core import PROTOCOL_DELIMITER
 
 
@@ -69,7 +69,7 @@ class TestHoloviewsWriter:
 
     def test_load_fail(self, hv_writer):
         pattern = r"Loading not supported for 'HoloviewsWriter'"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             hv_writer.load()
 
     def test_exists(self, dummy_hv_object, hv_writer):
@@ -145,7 +145,7 @@ class TestHoloviewsWriterVersioned:
             r"Save path \'.+\' for HoloviewsWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)
 
     @pytest.mark.parametrize(
@@ -169,7 +169,7 @@ class TestHoloviewsWriterVersioned:
     def test_http_filesystem_no_versioning(self):
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             HoloviewsWriter(
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
@@ -179,7 +179,7 @@ class TestHoloviewsWriterVersioned:
         pattern = (
             rf"Loading not supported for '{versioned_hv_writer.__class__.__name__}'"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.load()
 
     def test_exists(self, versioned_hv_writer, dummy_hv_object):
@@ -211,7 +211,7 @@ class TestHoloviewsWriterVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_hv_writer._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)
 
         # Remove non-versioned dataset and try again

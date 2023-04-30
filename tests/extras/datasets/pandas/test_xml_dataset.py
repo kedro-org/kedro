@@ -10,7 +10,7 @@ from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pandas import XMLDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -96,7 +96,7 @@ class TestXMLDataSet:
     def test_load_missing_file(self, xml_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set XMLDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             xml_data_set.load()
 
     @pytest.mark.parametrize(
@@ -174,7 +174,7 @@ class TestXMLDataSetVersioned:
     def test_no_versions(self, versioned_xml_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for XMLDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_xml_data_set.load()
 
     def test_exists(self, versioned_xml_data_set, dummy_dataframe):
@@ -191,7 +191,7 @@ class TestXMLDataSetVersioned:
             r"Save path \'.+\' for XMLDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_xml_data_set.save(dummy_dataframe)
 
     @pytest.mark.parametrize(
@@ -215,7 +215,7 @@ class TestXMLDataSetVersioned:
     def test_http_filesystem_no_versioning(self):
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             XMLDataSet(
                 filepath="https://example.com/file.xml", version=Version(None, None)
             )
@@ -232,7 +232,7 @@ class TestXMLDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_xml_data_set._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_xml_data_set.save(dummy_dataframe)
 
         # Remove non-versioned dataset and try again

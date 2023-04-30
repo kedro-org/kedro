@@ -11,7 +11,7 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.text import TextDataSet
-from kedro.io import AbstractDataSet, DataSetError, IncrementalDataSet
+from kedro.io import AbstractDataSet, DatasetError, IncrementalDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
 
 DATASET = "kedro.extras.datasets.pandas.CSVDataSet"
@@ -255,7 +255,7 @@ class TestIncrementalDataSetLocal:
     )
     def test_version_not_allowed(self, tmp_path, checkpoint_config, error_pattern):
         """Test that invalid checkpoint configurations raise expected errors"""
-        with pytest.raises(DataSetError, match=re.escape(error_pattern)):
+        with pytest.raises(DatasetError, match=re.escape(error_pattern)):
             IncrementalDataSet(str(tmp_path), DATASET, checkpoint=checkpoint_config)
 
     @pytest.mark.parametrize(

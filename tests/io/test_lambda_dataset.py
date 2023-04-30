@@ -1,6 +1,6 @@
 import pytest
 
-from kedro.io import DataSetError, LambdaDataSet
+from kedro.io import DatasetError, LambdaDataSet
 
 
 @pytest.fixture
@@ -70,12 +70,12 @@ class TestLambdaDataSetLoad:
             raise FileNotFoundError(error_message)
 
         data_set = LambdaDataSet(internal_load, None)
-        with pytest.raises(DataSetError, match=error_message):
+        with pytest.raises(DatasetError, match=error_message):
             data_set.load()
 
     def test_load_undefined(self):
         """Check the error if `LambdaDataSet.__load` is None"""
-        with pytest.raises(DataSetError, match="Cannot load data set"):
+        with pytest.raises(DatasetError, match="Cannot load data set"):
             LambdaDataSet(None, None).load()
 
     def test_load_not_callable(self):
@@ -83,7 +83,7 @@ class TestLambdaDataSetLoad:
             r"'load' function for LambdaDataSet must be a Callable\. "
             r"Object of type 'str' provided instead\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             LambdaDataSet("load", None)
 
 
@@ -102,19 +102,19 @@ class TestLambdaDataSetSave:
             r"Failed while saving data to data set LambdaDataSet\(.+\)\.\n"
             + error_message
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             mocked_data_set.save("data")
         mocked_save.assert_called_once_with("data")
 
     def test_save_undefined(self):
         """Check the error if `LambdaDataSet.__save` is None"""
-        with pytest.raises(DataSetError, match="Cannot save to data set"):
+        with pytest.raises(DatasetError, match="Cannot save to data set"):
             LambdaDataSet(None, None).save(42)
 
     def test_save_none(self, mocked_save, mocked_data_set):
         """Check the error when passing None to `save` call"""
         pattern = "Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             mocked_data_set.save(None)
         assert mocked_save.called == 0
 
@@ -123,7 +123,7 @@ class TestLambdaDataSetSave:
             r"'save' function for LambdaDataSet must be a Callable\. "
             r"Object of type 'str' provided instead\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             LambdaDataSet(None, "save")
 
 
@@ -148,7 +148,7 @@ class TestLambdaDataSetExists:
         mocked_exists.side_effect = FileNotFoundError(error_message)
         data_set = LambdaDataSet(None, None, mocked_exists)
 
-        with pytest.raises(DataSetError, match=error_message):
+        with pytest.raises(DatasetError, match=error_message):
             data_set.exists()
         mocked_exists.assert_called_once_with()
 
@@ -157,7 +157,7 @@ class TestLambdaDataSetExists:
             r"'exists' function for LambdaDataSet must be a Callable\. "
             r"Object of type 'str' provided instead\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             LambdaDataSet(None, None, "exists")
 
 
@@ -181,7 +181,7 @@ class TestLambdaDataSetRelease:
         mocked_release.side_effect = FileNotFoundError(error_message)
         data_set = LambdaDataSet(None, None, None, mocked_release)
 
-        with pytest.raises(DataSetError, match=error_message):
+        with pytest.raises(DatasetError, match=error_message):
             data_set.release()
         mocked_release.assert_called_once_with()
 
@@ -190,5 +190,5 @@ class TestLambdaDataSetRelease:
             r"'release' function for LambdaDataSet must be a Callable\. "
             r"Object of type 'str' provided instead\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             LambdaDataSet(None, None, None, "release")

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from kedro.io import DataSetError, MemoryDataSet
+from kedro.io import DatasetError, MemoryDataSet
 from kedro.io.memory_dataset import _copy_with_mode, _infer_copy_mode
 
 
@@ -143,14 +143,14 @@ class TestMemoryDataSet:
         """Check the error when attempting to load the data set that doesn't
         contain any data"""
         pattern = r"Data for MemoryDataSet has not been saved yet\."
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             MemoryDataSet().load()
 
     def test_saving_none(self):
         """Check the error when attempting to save the data set without
         providing the data"""
         pattern = r"Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             MemoryDataSet().save(None)
 
     @pytest.mark.parametrize(
@@ -202,7 +202,7 @@ def test_copy_mode_deepcopy(data):
 def test_copy_mode_invalid_string():
     """Test _copy_with_mode with invalid string"""
     pattern = "Invalid copy mode: alice. Possible values are: deepcopy, copy, assign."
-    with pytest.raises(DataSetError, match=re.escape(pattern)):
+    with pytest.raises(DatasetError, match=re.escape(pattern)):
         _copy_with_mode(None, copy_mode="alice")
 
 

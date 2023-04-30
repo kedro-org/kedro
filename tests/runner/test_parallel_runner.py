@@ -8,7 +8,7 @@ from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
-    DataSetError,
+    DatasetError,
     LambdaDataSet,
     MemoryDataSet,
 )
@@ -160,7 +160,7 @@ class TestInvalidParallelRunner:
         )
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         pattern = "Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_data_set_not_serialisable(self, is_async, fan_out_fan_in):
@@ -191,7 +191,7 @@ class TestInvalidParallelRunner:
             rf"memory datasets can only be used with serialisable data"
         )
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_unable_to_schedule_all_nodes(

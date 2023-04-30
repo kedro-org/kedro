@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DataSetError, LambdaDataSet
+from kedro.io import AbstractDataSet, DataCatalog, DatasetError, LambdaDataSet
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
@@ -52,7 +52,7 @@ class TestSeqentialRunnerBranchlessPipeline:
 
     def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
         pattern = "Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
     def test_result_saved_not_returned(self, is_async, saving_result_pipeline):

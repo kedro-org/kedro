@@ -5,7 +5,7 @@ import pytest
 import yaml
 
 from kedro.extras.datasets.pandas import CSVDataSet
-from kedro.io import CachedDataSet, DataCatalog, DataSetError, MemoryDataSet
+from kedro.io import CachedDataSet, DataCatalog, DatasetError, MemoryDataSet
 
 YML_CONFIG = """
 test_ds:
@@ -42,7 +42,7 @@ def cached_ds():
 
 class TestCachedDataset:
     def test_load_empty(self, cached_ds):
-        with pytest.raises(DataSetError, match=r"has not been saved yet"):
+        with pytest.raises(DatasetError, match=r"has not been saved yet"):
             _ = cached_ds.load()
 
     def test_save_load(self, cached_ds):
@@ -106,7 +106,7 @@ class TestCachedDataset:
     def test_config_bad_version(self):
         config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED_BAD))
         with pytest.raises(
-            DataSetError,
+            DatasetError,
             match=r"Cached datasets should specify that they are "
             r"versioned in the 'CachedDataSet', not in the "
             r"wrapped dataset",
@@ -132,7 +132,7 @@ class TestCachedDataset:
         cached_ds.save(5)
         cached_ds.release()
         with pytest.raises(
-            DataSetError, match=r"Data for MemoryDataSet has not been saved yet"
+            DatasetError, match=r"Data for MemoryDataSet has not been saved yet"
         ):
             _ = cached_ds.load()
 

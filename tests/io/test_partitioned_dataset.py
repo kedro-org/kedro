@@ -11,7 +11,7 @@ from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
-from kedro.io import DataSetError, PartitionedDataSet
+from kedro.io import DatasetError, PartitionedDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.io.partitioned_dataset import KEY_PROPAGATION_WARNING
 
@@ -246,7 +246,7 @@ class TestPartitionedDataSetLocal:
 
         for partition, df_loader in loaded_partitions.items():
             pattern = r"Failed while loading data from data set ParquetDataSet(.*)"
-            with pytest.raises(DataSetError, match=pattern) as exc_info:
+            with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
             assert (
@@ -272,7 +272,7 @@ class TestPartitionedDataSetLocal:
         ],
     )
     def test_invalid_dataset_config(self, dataset_config, error_pattern):
-        with pytest.raises(DataSetError, match=error_pattern):
+        with pytest.raises(DatasetError, match=error_pattern):
             PartitionedDataSet(str(Path.cwd()), dataset_config)
 
     @pytest.mark.parametrize(
@@ -287,14 +287,14 @@ class TestPartitionedDataSetLocal:
             "'PartitionedDataSet' does not support versioning of the underlying "
             "dataset. Please remove 'versioned' flag from the dataset definition."
         )
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             PartitionedDataSet(str(Path.cwd()), dataset_config)
 
     def test_no_partitions(self, tmpdir):
         pds = PartitionedDataSet(str(tmpdir), "pandas.CSVDataSet")
 
         pattern = re.escape(f"No partitions found in '{tmpdir}'")
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pds.load()
 
     @pytest.mark.parametrize(

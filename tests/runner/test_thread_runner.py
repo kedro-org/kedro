@@ -4,7 +4,7 @@ from typing import Any, Dict
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
+from kedro.io import AbstractDataSet, DataCatalog, DatasetError, MemoryDataSet
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ThreadRunner
@@ -105,7 +105,7 @@ class TestInvalidThreadRunner:
         )
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         pattern = "Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             ThreadRunner().run(pipeline, catalog)
 
 

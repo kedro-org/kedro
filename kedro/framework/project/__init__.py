@@ -114,7 +114,6 @@ class _ProjectSettings(LazySettings):
     )
 
     def __init__(self, *args, **kwargs):
-
         kwargs.update(
             validators=[
                 self._CONF_SOURCE,
@@ -135,6 +134,7 @@ def _load_data_wrapper(func):
     """Wrap a method in _ProjectPipelines so that data is loaded on first access.
     Taking inspiration from dynaconf.utils.functional.new_method_proxy
     """
+
     # pylint: disable=protected-access
     def inner(self, *args, **kwargs):
         self._load_data()
@@ -214,12 +214,13 @@ class _ProjectPipelines(MutableMapping):
 class _ProjectLogging(UserDict):
     # pylint: disable=super-init-not-called
     def __init__(self):
-        """Initialise project logging with default configuration. Also enable
-        rich tracebacks."""
-        default_logging = (Path(__file__).parent / "default_logging.yml").read_text(
-            encoding="utf-8"
+        """Initialise project logging. The path to logging configuration is given in
+        environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
+        path = os.environ.get(
+            "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml"
         )
-        self.configure(yaml.safe_load(default_logging))
+        logging_config = Path(path).read_text(encoding="utf-8")
+        self.configure(yaml.safe_load(logging_config))
         logging.captureWarnings(True)
 
         # We suppress click here to hide tracebacks related to it conversely,

@@ -24,11 +24,11 @@
 
 
 ## Bug fixes and other changes
-* Improvements to documentation about configuration.
 * Improvements to Jupyter E2E tests.
 * Added full `kedro run` CLI command to session store to improve run reproducibility using `Kedro-Viz` experiment tracking.
 
 ### Documentation changes
+* Improvements to documentation about configuration.
 * Improvements to Sphinx toolchain including incrementing to use a newer version.
 * Improvements to documentation on visualising Kedro projects on Databricks, and additional documentation about the development workflow for Kedro projects on Databricks.
 * Updated Technical Steering Committee membership documentation.

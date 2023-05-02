@@ -168,7 +168,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
         base_config = self.load_and_merge_dir_config(
-            base_path, patterns, read_environment_variables
+            base_path, patterns, key, read_environment_variables
         )
         config = base_config
 
@@ -179,7 +179,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
         env_config = self.load_and_merge_dir_config(
-            env_path, patterns, read_environment_variables
+            env_path, patterns, key, read_environment_variables
         )
 
         # Destructively merge the two env dirs. The chosen env will override base.
@@ -211,6 +211,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self,
         conf_path: str,
         patterns: Iterable[str],
+        key: str,
         read_environment_variables: Optional[bool] = False,
     ) -> Dict[str, Any]:
         """Recursively load and merge all configuration files in a directory using OmegaConf,
@@ -277,9 +278,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return {}
         if len(aggregate_config) == 1:
             return list(aggregate_config)[0]
-        return OmegaConf.to_container(
-            OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
-        )
+
+        if key == "parameters":
+            # Merge with runtime parameters only for "parameters"
+            return OmegaConf.to_container(
+                            OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
+                        )
+        else:
+            return OmegaConf.to_container(
+                            OmegaConf.merge(*aggregate_config), resolve=True
+                        )
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

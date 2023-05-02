@@ -218,6 +218,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         Args:
             conf_path: Path to configuration directory.
             patterns: List of glob patterns to match the filenames against.
+            key: Str of the dictionary keys to access.
             read_environment_variables: Whether to resolve environment variables.
 
         Raises:
@@ -282,10 +283,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
-        else:
-            return OmegaConf.to_container(
-                OmegaConf.merge(*aggregate_config), resolve=True
-            )
+        return OmegaConf.to_container(OmegaConf.merge(*aggregate_config), resolve=True)
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

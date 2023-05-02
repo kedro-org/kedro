@@ -129,8 +129,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env=env,
             runtime_params=runtime_params,
         )
-        if not self.runtime_params:
-            self.runtime_params = {}
 
     def __getitem__(self, key) -> Dict[str, Any]:
         """Get configuration files by key, load and merge them, and

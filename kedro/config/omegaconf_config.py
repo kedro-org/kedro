@@ -280,12 +280,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if key == "parameters":
             # Merge with runtime parameters only for "parameters"
             return OmegaConf.to_container(
-                            OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
-                        )
+                OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
+            )
         else:
             return OmegaConf.to_container(
-                            OmegaConf.merge(*aggregate_config), resolve=True
-                        )
+                OmegaConf.merge(*aggregate_config), resolve=True
+            )
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

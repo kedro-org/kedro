@@ -547,7 +547,19 @@ class TestOmegaConfigLoader:
 
     @use_config_dir
     def test_runtime_params_override_interpolated_value(self, tmp_path):
-        """Make sure the parameters is interpolated with the correct environment"""
+        """Make sure interpolated value is updated correctly with runtime_params"""
         conf = OmegaConfigLoader(str(tmp_path), runtime_params={"global": "global"})
         params = conf["parameters"]
         assert params["templated_param"] == "global"
+
+    @use_config_dir
+    def test_runtime_params_not_propogate_non_parameters_config(self, tmp_path):
+        """Make sure `catalog`, `credetials` won't get updated by runtime_params"""
+        # https://github.com/kedro-org/kedro/pull/2467
+        conf = OmegaConfigLoader(str(tmp_path), runtime_params={"global": "global"})
+        cred = conf["credentials"]
+        catalog = conf["catalog"]
+        logging = conf["logging"]
+        assert "global" not in cred
+        assert "global" not in catalog
+        assert "global" not in logging

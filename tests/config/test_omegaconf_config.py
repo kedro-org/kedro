@@ -69,14 +69,20 @@ def local_config(tmp_path):
 
 @pytest.fixture
 def create_config_dir(tmp_path, base_config, local_config):
-    proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+    base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
     local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
     parameters = tmp_path / _BASE_ENV / "parameters.json"
-    project_parameters = {"param1": 1, "param2": 2}
+    base_parameters = {"param1": 1, "param2": 2, "templated_param": "${global}"}
+    base_global_parameters = {"global": "base"}
+    local_global_parameters = {"global": "local"}
 
-    _write_yaml(proj_catalog, base_config)
+    _write_yaml(base_catalog, base_config)
     _write_yaml(local_catalog, local_config)
-    _write_json(parameters, project_parameters)
+    _write_json(parameters, base_parameters)
+    _write_json(tmp_path / _BASE_ENV / "parameters_global.json", base_global_parameters)
+    _write_json(
+        tmp_path / _DEFAULT_RUN_ENV / "parameters_global.json", local_global_parameters
+    )
 
 
 @pytest.fixture
@@ -530,3 +536,18 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(conf_source=f"{tmp_path}/Python.zip")
         catalog = conf["catalog"]
         assert catalog["trains"]["type"] == "MemoryDataSet"
+
+    @use_config_dir
+    def test_variable_interpolation_with_correct_env(self, tmp_path):
+        """Make sure the parameters is interpolated with the correct environment"""
+        conf = OmegaConfigLoader(str(tmp_path))
+        params = conf["parameters"]
+        # Making sure it is not override by local/parameters_global.yml
+        assert params["templated_param"] == "base"
+
+    @use_config_dir
+    def test_runtime_params_override_interpolated_value(self, tmp_path):
+        """Make sure the parameters is interpolated with the correct environment"""
+        conf = OmegaConfigLoader(str(tmp_path), runtime_params={"global": "global"})
+        params = conf["parameters"]
+        assert params["templated_param"] == "global"

@@ -237,10 +237,8 @@ class _ProjectLogging(UserDict):
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
         """
-        print("DEBUG", logging_config)
         logging.config.dictConfig(logging_config)
         self.data = logging_config
-
 
 
 PACKAGE_NAME = None

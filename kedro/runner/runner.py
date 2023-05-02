@@ -72,6 +72,13 @@ class AbstractRunner(ABC):
 
         hook_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
+        # Resolve dataset factories
+        # For all pipeline datasets, try match them against the catalog patterns
+        for dataset in pipeline.data_sets():
+            matched_dataset = catalog.match_name_against_dataset_factories(dataset)
+            # and add the dataset if it's a match.
+            if matched_dataset:
+                catalog.add(dataset, matched_dataset)
 
         unsatisfied = pipeline.inputs() - set(catalog.list())
         if unsatisfied:

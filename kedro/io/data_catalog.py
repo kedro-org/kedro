@@ -11,6 +11,10 @@ import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Set, Type, Union
 
+from kedro_datasets.pandas import CSVDataSet
+from parse import parse
+
+from kedro.framework.project import settings
 from kedro.io.core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
@@ -519,6 +523,49 @@ class DataCatalog:
                 data_set = MemoryDataSet(data=feed_dict[data_set_name])
 
             self.add(data_set_name, data_set, replace)
+
+    def match_name_against_dataset_factories(self, dataset_input_name: str):
+        """
+         def create_spark_dataset(dataset_name: str, *chunks):
+          # e.g. here chunks=["root_namespace", "something-instead-the-*", "spark"]
+             return  SparkDataSet(filepath=f"data/{chunks[0]}/{chunks[1]}.parquet", file_format="parquet")
+
+        "{root_namespace}.{dataset_name}@spark":
+             type: spark.SparkDataSet
+             filepath: data/{root_namespace}/{dataset_name}.parquet
+             file_format: parquet
+        """
+
+        def create_pandas_csvdataset(chunks: dict):
+            root_namespace = chunks.get("root_namespace")
+            dataset_name_chunk = chunks.get("dataset_name")
+            return CSVDataSet(
+                filepath=f"data/{root_namespace}/{dataset_name_chunk}.csv",
+                load_args={"sep": ","},
+                version=Version(None, generate_timestamp()),
+            )
+
+        catalog_args = settings.DATA_CATALOG_ARGS
+        print(f"Catalog ARGS: {catalog_args}")
+        dataset = None
+        datasets_in_catalog = self._data_sets
+        for dataset_name, dataset_config in datasets_in_catalog.items():
+            # Let's assume that any name with {} in it is a pattern to be matched.
+            if "{" and "}" in dataset_name:
+                # Match the pattern name against the input name
+                result = parse(dataset_name, dataset_input_name)
+                if result:
+                    # Call dataset factory function to create dataset.
+                    # ❓ How????
+                    dataset_factories = catalog_args.get("datasets_factories")
+                    print(f"Dataset factories = {dataset_factories}")
+                    matching_factory = dataset_factories.get(dataset_name, None)
+                    print(f"Matching factory = {matching_factory}")
+                    if matching_factory:
+                        dataset = matching_factory(result.named)
+                    else:
+                        dataset = create_pandas_csvdataset(result.named)
+        return dataset
 
     def list(self, regex_search: Optional[str] = None) -> List[str]:
         """

@@ -11,7 +11,7 @@ YML_CONFIG = """
 test_ds:
   type: CachedDataset
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataset
+    type: kedro.extras.datasets.pandas.CSVDataSet
     filepath: example.csv
 """
 
@@ -20,7 +20,7 @@ test_ds:
   type: CachedDataset
   versioned: true
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataset
+    type: kedro.extras.datasets.pandas.CSVDataSet
     filepath: example.csv
 """
 
@@ -28,7 +28,7 @@ YML_CONFIG_VERSIONED_BAD = """
 test_ds:
   type: CachedDataset
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataset
+    type: kedro.extras.datasets.pandas.CSVDataSet
     filepath: example.csv
     versioned: true
 """
@@ -81,7 +81,7 @@ class TestCachedDataset:
         catalog = DataCatalog.from_config(config)
         assert catalog.list() == ["test_ds"]
         mock = mocker.Mock()
-        assert isinstance(catalog._data_sets["test_ds"]._dataset, CSVDataset)
+        assert isinstance(catalog._data_sets["test_ds"]._dataset, CSVDataSet)
         catalog._data_sets["test_ds"]._dataset = mock
         catalog.save("test_ds", 20)
 

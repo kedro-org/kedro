@@ -1,4 +1,4 @@
-# Deployment guide
+# Deployment
 
 ## Deployment choices
 
@@ -15,7 +15,6 @@ We also provide information to help you deploy to the following:
 * to [Prefect](prefect.md)
 * to [Kubeflow Workflows](kubeflow.md)
 * to [AWS Batch](aws_batch.md)
-* to [Databricks](databricks.md)
 * to [Dask](dask.md)
 
 <!--- There has to be some non-link text in the bullets above, if it's just links, there's a Sphinx bug that fails the build process-->
@@ -33,4 +32,21 @@ flowchart TD
     style G text-align:left
     H["Does (part of) your pipeline integrate with Amazon SageMaker?<br/><br/>Read the SageMaker integration guide"];
     style H text-align:left
+```
+
+## Deployment guides
+
+```{toctree}
+:maxdepth: 1
+
+single_machine
+distributed
+argo
+prefect
+kubeflow
+aws_batch
+aws_sagemaker
+aws_step_functions
+airflow_astronomer
+dask
 ```

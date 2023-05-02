@@ -10,7 +10,7 @@ from warnings import warn
 
 from yaml.parser import ParserError
 
-from kedro.config import BadConfigException, MissingConfigException
+from kedro.config.abstract_config import BadConfigException, MissingConfigException
 
 SUPPORTED_EXTENSIONS = [
     ".yml",
@@ -64,8 +64,8 @@ def _get_config_from_patterns(
             "pattern to match config filenames against."
         )
 
-    config = {}  # type: Dict[str, Any]
-    processed_files = set()  # type: Set[Path]
+    config: Dict[str, Any] = {}
+    processed_files: Set[Path] = set()
 
     for conf_path in conf_paths:
         if not Path(conf_path).is_dir():
@@ -173,7 +173,7 @@ def _load_configs(
     """
 
     aggregate_config = {}
-    seen_file_to_keys = {}  # type: Dict[Path, AbstractSet[str]]
+    seen_file_to_keys: Dict[Path, AbstractSet[str]] = {}
 
     for config_filepath in config_filepaths:
         single_config = _load_config_file(
@@ -207,7 +207,7 @@ def _lookup_config_filepaths(
 
 def _remove_duplicates(items: Iterable[str]):
     """Remove duplicates while preserving the order."""
-    unique_items = []  # type: List[str]
+    unique_items: List[str] = []
     for item in items:
         if item not in unique_items:
             unique_items.append(item)

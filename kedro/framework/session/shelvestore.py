@@ -22,7 +22,7 @@ class ShelveStore(BaseSessionStore):
 
     def read(self) -> Dict[str, Any]:
         """Read the data from disk using `shelve` package."""
-        data = {}  # type: Dict[str, Any]
+        data: Dict[str, Any] = {}
         try:
             with shelve.open(str(self._location), flag="r") as _sh:  # nosec
                 data = dict(_sh)

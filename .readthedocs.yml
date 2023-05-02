@@ -5,24 +5,24 @@
 # Required
 version: 2
 
-# .readthedocs.yml hook to copy kedro-datasets to kedro.datasets before building the docs
 build:
   os: ubuntu-22.04
   tools:
-    python: "3.7"
+    python: "3.8"
     nodejs: "19"
   apt_packages:
     - libasound2
   jobs:
     post_create_environment:
       - npm install -g @mermaid-js/mermaid-cli
-      - ./docs/kedro-datasets-docs.sh
+    pre_build:
+      - python -m sphinx -WETan -j auto -D language=en -b linkcheck -d _build/doctrees docs/source _build/linkcheck
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: html
-  configuration: docs/conf.py
-  fail_on_warning: false  # Turn back on soon
+  configuration: docs/source/conf.py
+  fail_on_warning: true
 
 # Build documentation with MkDocs
 # mkdocs:

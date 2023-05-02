@@ -1,7 +1,51 @@
 # PEP-518 https://peps.python.org/pep-0518/
 [build-system]
 # Minimum requirements for the build system to execute.
-requires = ["setuptools>=65.5.1", "wheel"]  # PEP 518 specifications.
+requires = ["setuptools>=65.5.1"]  # PEP 518 specifications
+
+[project]
+name = "kedro"
+authors = [
+    {name = "Kedro"}
+]
+description = "Kedro helps you build production-ready data and analytics pipelines"
+requires-python = ">=3.7, <3.11"
+keywords = [
+    "pipelines",
+    "machine learning",
+    "data pipelines",
+    "data science",
+    "data engineering",
+]
+license = {text = "Apache Software License (Apache 2.0)"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dynamic = ["readme", "version", "dependencies", "optional-dependencies"]
+
+[project.urls]
+Homepage = "https://kedro.org"
+Source = "https://github.com/kedro-org/kedro"
+Documentation = "https://docs.kedro.org"
+Tracker = "https://github.com/kedro-org/kedro/issues"
+
+[project.scripts]
+kedro = "kedro.framework.cli:main"
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.packages.find]
+include = ["kedro*"]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+version = {attr = "kedro.__version__"}
+dependencies = {file = "dependency/requirements.txt"}
 
 [tool.black]
 exclude = "/templates/|^features/steps/test_starter"

@@ -22,12 +22,12 @@ def _is_relative_path(path_string: str) -> bool:
     Example:
     ::
         >>> _is_relative_path("data/01_raw") == True
-        >>> _is_relative_path("logs/info.log") == True
+        >>> _is_relative_path("info.log") == True
         >>> _is_relative_path("/tmp/data/01_raw") == False
-        >>> _is_relative_path(r"C:\\logs\\info.log") == False
-        >>> _is_relative_path(r"\\logs\\'info.log") == False
-        >>> _is_relative_path("c:/logs/info.log") == False
-        >>> _is_relative_path("s3://logs/info.log") == False
+        >>> _is_relative_path(r"C:\\info.log") == False
+        >>> _is_relative_path(r"\\'info.log") == False
+        >>> _is_relative_path("c:/info.log") == False
+        >>> _is_relative_path("s3://info.log") == False
 
     Args:
         path_string: The path string to check.
@@ -67,13 +67,13 @@ def _convert_paths_to_absolute_posix(
         >>>     conf_dictionary={
         >>>         "handlers": {
         >>>             "info_file_handler": {
-        >>>                 "filename": "logs/info.log"
+        >>>                 "filename": "info.log"
         >>>             }
         >>>         }
         >>>     }
         >>> )
         >>> print(conf['handlers']['info_file_handler']['filename'])
-        "/path/to/my/project/logs/info.log"
+        "/path/to/my/project/info.log"
 
     Args:
         project_path: The root directory to prepend to relative path to make absolute path.

@@ -128,7 +128,6 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
     """
     response = requests.get(url, timeout=1.0)
     response.raise_for_status()
-
     data = response.text
     assert string in data
     assert context.result.poll() is None
@@ -337,8 +336,20 @@ def exec_notebook(context, command):
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
     context.result = ChildTerminatingPopen(
-        cmd, env=context.env, cwd=str(context.root_project_dir)
+        cmd, env=context.env, cwd=str(context.root_project_dir), universal_newlines=True
     )
+
+
+@then('I wait for the jupyter webserver to run for up to "{timeout:d}" seconds')
+def wait_for_notebook_to_run(context, timeout):
+    timeout_start = time()
+    while time() < timeout_start + timeout:
+        stdout = context.result.stdout.readline()
+        if "http://127.0.0.1:" in stdout:
+            break
+
+    if time() >= timeout_start + timeout:
+        raise TimeoutError("Failed to run Jupyter server in time")
 
 
 @when("Wait until the process is finished")
@@ -565,14 +576,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        util.wait_for(
-            func=_check_service_up,
-            context=context,
-            url=url,
-            string="Jupyter Notebook",
-            timeout_=15,
-            print_error=True,
-        )
+        _check_service_up(context, url, "Jupyter Notebook")
     finally:
         context.result.terminate()
 
@@ -588,14 +592,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     """
     url = f"http://localhost:{port}"
     try:
-        util.wait_for(
-            func=_check_service_up,
-            timeout_=20,
-            context=context,
-            url=url,
-            string='<a href="/lab"',
-            print_error=True,
-        )
+        _check_service_up(context, url, '<a href="/lab"')
     finally:
         context.result.terminate()
 

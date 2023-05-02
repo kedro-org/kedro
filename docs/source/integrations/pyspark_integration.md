@@ -40,7 +40,7 @@ class SparkHooks:
 
         # Initialise the spark session
         spark_session_conf = (
-            SparkSession.builder.appName(context._package_name)
+            SparkSession.builder.appName(context.project_path.name)
             .enableHiveSupport()
             .config(conf=spark_conf)
         )
@@ -66,10 +66,10 @@ HOOKS = (SparkHooks(),)
 
 We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
-* [spark.DeltaTableDataSet](/kedro.datasets.spark.DeltaTableDataSet)
-* [spark.SparkDataSet](/kedro.datasets.spark.SparkDataSet)
-* [spark.SparkJDBCDataSet](/kedro.datasets.spark.SparkJDBCDataSet)
-* [spark.SparkHiveDataSet](/kedro.datasets.spark.SparkHiveDataSet)
+* [spark.DeltaTableDataSet](/kedro_datasets.spark.DeltaTableDataSet)
+* [spark.SparkDataSet](/kedro_datasets.spark.SparkDataSet)
+* [spark.SparkJDBCDataSet](/kedro_datasets.spark.SparkJDBCDataSet)
+* [spark.SparkHiveDataSet](/kedro_datasets.spark.SparkHiveDataSet)
 
 The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
 

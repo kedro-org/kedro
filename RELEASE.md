@@ -8,8 +8,15 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+# Upcoming Release 0.18.9
 
-# Upcoming Release 0.18.8
+## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 0.19.0
+
+
+# Release 0.18.8
 
 ## Major features and improvements
 * Added `KEDRO_LOGGING_CONFIG` environment variable, which can be used to configure logging from the beginning of the `kedro` process.
@@ -31,9 +38,6 @@
 * Added a 404 page to documentation.
 * Added deprecation warnings about the removal of `kedro.extras.datasets`.
 
-## Breaking changes to the API
-
-## Upcoming deprecations for Kedro 0.19.0
 
 # Release 0.18.7
 

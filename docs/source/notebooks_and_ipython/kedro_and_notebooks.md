@@ -1,7 +1,5 @@
 # Kedro and Jupyter Notebooks
 
-You can take advantage of a Jupyter Notebook's liberal development environment for exploratory data analysis and experimentation from within a Kedro project. Later, when you need to follow software best practices as the project complexity increases, or as you scale into production, you can transfer code from the Notebook into Kedro to benefit from its opinionated project framework.
-
 This page explains how best to combine Kedro and Jupyter Notebook development and illustrates with an example Notebook that has access to the `catalog`, `context`, `pipelines` and `session` variables for a Kedro project.
 
 ## A custom Kedro kernel
@@ -32,16 +30,16 @@ Navigate to the project directory and issue the following command in the termina
 kedro jupyter notebook
 ```
 
-Your browser window will open, and you can then create a new Notebook using the dropdown and selecting the `Kedro (<project_name>)` kernel.
+Your browser window will open, and you can then create a new Jupyter Notebook using the dropdown and selecting the `Kedro (<project_name>)` kernel.
 
-![Create a new Notebook with Kedro (iris) kernel](../meta/images/jupyter_new_notebook.png)
+![Create a new Jupyter Notebook with Kedro (iris) kernel](../meta/images/jupyter_new_notebook.png)
 
 We recommend that you store your Notebooks in the `notebooks` folder of your Kedro project.
 
 We will now give some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, you might like to consult the relevant [API documentation](/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir) (e.g. `dir(catalog)`).
 
 ``` {note}
-If the Kedro variables are not available within your Notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook`.
+If the Kedro variables are not available within your Jupyter Notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook`.
 ```
 
 ### `catalog`
@@ -178,7 +176,7 @@ You can also specify the following optional arguments for `session.run`:
 
 ## `%reload_kedro` line magic
 
-You can use `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) within your Notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+You can use `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) within your Jupyter Notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
 You don't need to restart the kernel to reload the Kedro IPython extension and refresh the `catalog`, `context`, `pipelines` and `session` variables.
 

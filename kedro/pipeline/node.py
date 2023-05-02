@@ -503,8 +503,8 @@ class Node:
     def _process_inputs_for_bind(inputs: Union[None, str, List[str], Dict[str, str]]):
         # Safeguard that we do not mutate list inputs
         inputs = copy.copy(inputs)
-        args = []  # type: List[str]
-        kwargs = {}  # type: Dict[str, str]
+        args: List[str] = []
+        kwargs: Dict[str, str] = {}
         if isinstance(inputs, str):
             args = [inputs]
         elif isinstance(inputs, list):

@@ -72,22 +72,15 @@ class AbstractRunner(ABC):
 
         hook_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
-        # Resolve dataset factories
-        # For all pipeline datasets, try match them against the catalog patterns
-        for dataset in pipeline.data_sets():
-            matched_dataset = catalog.match_name_against_dataset_factories(dataset)
-            # and add the dataset if it's a match.
-            if matched_dataset:
-                catalog.add(dataset, matched_dataset)
-
-        unsatisfied = pipeline.inputs() - set(catalog.list())
+        
+        unsatisfied = catalog.remove_pattern_matches(pipeline.inputs() - set(catalog.list()))
         if unsatisfied:
             raise ValueError(
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
 
-        free_outputs = pipeline.outputs() - set(catalog.list())
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())
+        free_outputs = catalog.remove_pattern_matches(pipeline.outputs() - set(catalog.list()))
+        unregistered_ds = catalog.remove_pattern_matches(pipeline.data_sets() - set(catalog.list()))
         for ds_name in unregistered_ds:
             catalog.add(ds_name, self.create_default_data_set(ds_name))
 

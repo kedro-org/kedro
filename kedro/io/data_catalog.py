@@ -143,6 +143,7 @@ class DataCatalog:
         data_sets: Dict[str, AbstractDataSet] = None,
         feed_dict: Dict[str, Any] = None,
         layers: Dict[str, Set[str]] = None,
+        dataset_patterns: Dict[str, Any] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -172,6 +173,7 @@ class DataCatalog:
         self._data_sets = dict(data_sets or {})
         self.datasets = _FrozenDatasets(self._data_sets)
         self.layers = layers
+        self.dataset_patterns = dict(dataset_patterns or {})
 
         # import the feed dict
         if feed_dict:
@@ -259,6 +261,7 @@ class DataCatalog:
             >>> catalog.save("boats", df)
         """
         data_sets = {}
+        dataset_patterns = {}
         catalog = copy.deepcopy(catalog) or {}
         credentials = copy.deepcopy(credentials) or {}
         save_version = save_version or generate_timestamp()
@@ -273,35 +276,43 @@ class DataCatalog:
 
         layers: Dict[str, Set[str]] = defaultdict(set)
         for ds_name, ds_config in catalog.items():
-            ds_layer = ds_config.pop("layer", None)
-            if ds_layer is not None:
-                layers[ds_layer].add(ds_name)
+            # Let's assume that any name with {} in it is a dataset pattern to be matched.
+            if "{" and "}" in ds_name:
+                dataset_patterns[ds_name] = ds_config
+            else:
+                ds_layer = ds_config.pop("layer", None)
+                if ds_layer is not None:
+                    layers[ds_layer].add(ds_name)
 
-            ds_config = _resolve_credentials(ds_config, credentials)
-            data_sets[ds_name] = AbstractDataSet.from_config(
-                ds_name, ds_config, load_versions.get(ds_name), save_version
-            )
-
+                ds_config = _resolve_credentials(ds_config, credentials)
+                data_sets[ds_name] = AbstractDataSet.from_config(
+                    ds_name, ds_config, load_versions.get(ds_name), save_version
+                )
         dataset_layers = layers or None
-        return cls(data_sets=data_sets, layers=dataset_layers)
+        return cls(data_sets=data_sets, layers=dataset_layers, dataset_patterns=dataset_patterns)
 
     def _get_dataset(
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
         if data_set_name not in self._data_sets:
-            error_msg = f"DataSet '{data_set_name}' not found in the catalog"
+            # Try to match against pattern
+            matched_dataset = self.match_name_against_dataset_factories(data_set_name)
+            if matched_dataset:
+                self.add(data_set_name, matched_dataset)
+            else:
+                error_msg = f"DataSet '{data_set_name}' not found in the catalog"
 
-            # Flag to turn on/off fuzzy-matching which can be time consuming and
-            # slow down plugins like `kedro-viz`
-            if suggest:
-                matches = difflib.get_close_matches(
-                    data_set_name, self._data_sets.keys()
-                )
-                if matches:
-                    suggestions = ", ".join(matches)
-                    error_msg += f" - did you mean one of these instead: {suggestions}"
+                # Flag to turn on/off fuzzy-matching which can be time consuming and
+                # slow down plugins like `kedro-viz`
+                if suggest:
+                    matches = difflib.get_close_matches(
+                        data_set_name, self._data_sets.keys()
+                    )
+                    if matches:
+                        suggestions = ", ".join(matches)
+                        error_msg += f" - did you mean one of these instead: {suggestions}"
 
-            raise DataSetNotFoundError(error_msg)
+                raise DataSetNotFoundError(error_msg)
 
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):
@@ -525,46 +536,18 @@ class DataCatalog:
             self.add(data_set_name, data_set, replace)
 
     def match_name_against_dataset_factories(self, dataset_input_name: str):
-        """
-         def create_spark_dataset(dataset_name: str, *chunks):
-          # e.g. here chunks=["root_namespace", "something-instead-the-*", "spark"]
-             return  SparkDataSet(filepath=f"data/{chunks[0]}/{chunks[1]}.parquet", file_format="parquet")
-
-        "{root_namespace}.{dataset_name}@spark":
-             type: spark.SparkDataSet
-             filepath: data/{root_namespace}/{dataset_name}.parquet
-             file_format: parquet
-        """
-
-        def create_pandas_csvdataset(chunks: dict):
-            root_namespace = chunks.get("root_namespace")
-            dataset_name_chunk = chunks.get("dataset_name")
-            return CSVDataSet(
-                filepath=f"data/{root_namespace}/{dataset_name_chunk}.csv",
-                load_args={"sep": ","},
-                version=Version(None, generate_timestamp()),
-            )
-
-        catalog_args = settings.DATA_CATALOG_ARGS
-        print(f"Catalog ARGS: {catalog_args}")
         dataset = None
-        datasets_in_catalog = self._data_sets
-        for dataset_name, dataset_config in datasets_in_catalog.items():
-            # Let's assume that any name with {} in it is a pattern to be matched.
-            if "{" and "}" in dataset_name:
-                # Match the pattern name against the input name
-                result = parse(dataset_name, dataset_input_name)
-                if result:
-                    # Call dataset factory function to create dataset.
-                    # ❓ How????
-                    dataset_factories = catalog_args.get("datasets_factories")
-                    print(f"Dataset factories = {dataset_factories}")
-                    matching_factory = dataset_factories.get(dataset_name, None)
-                    print(f"Matching factory = {matching_factory}")
-                    if matching_factory:
-                        dataset = matching_factory(result.named)
-                    else:
-                        dataset = create_pandas_csvdataset(result.named)
+        for dataset_name, dataset_config in self.dataset_patterns.items():
+            result = parse(dataset_name, dataset_input_name)
+            if result:
+                config_copy = copy.deepcopy(dataset_config)
+                # Match results to patterns in catalog entry
+                for key, value in config_copy.items():
+                    if '}' in value:
+                        string_value = str(value)
+                        config_copy[key] = string_value.format_map(result.named)
+                # Create dataset from catalog config.
+                dataset = AbstractDataSet.from_config(dataset_name, config_copy)
         return dataset
 
     def list(self, regex_search: Optional[str] = None) -> List[str]:
@@ -612,13 +595,23 @@ class DataCatalog:
             ) from exc
         return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 
+    def remove_pattern_matches(self, dataset_list: Set[str]):
+        dataset_list_minus_matched = []
+        for dataset in dataset_list:
+            # If dataset matches a pattern, remove it from the list.
+            for dataset_name, dataset_config in self.dataset_patterns.items():
+                result = parse(dataset_name, dataset)
+                if not result:
+                    dataset_list_minus_matched.append(dataset)
+        return set(dataset_list_minus_matched)
+
     def shallow_copy(self) -> "DataCatalog":
         """Returns a shallow copy of the current object.
 
         Returns:
             Copy of the current object.
         """
-        return DataCatalog(data_sets=self._data_sets, layers=self.layers)
+        return DataCatalog(data_sets=self._data_sets, layers=self.layers, dataset_patterns=self.dataset_patterns)
 
     def __eq__(self, other):
         return (self._data_sets, self.layers) == (other._data_sets, other.layers)

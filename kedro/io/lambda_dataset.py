@@ -115,4 +115,4 @@ class LambdaDataSet(AbstractDataSet):
         self.__save = save
         self.__exists = exists
         self.__release = release
-        self.metadata = metadata
+        self._metadata = metadata

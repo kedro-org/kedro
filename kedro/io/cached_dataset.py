@@ -68,7 +68,7 @@ class CachedDataSet(AbstractDataSet):
                 "representation of the dataset, or the actual dataset object."
             )
         self._cache = MemoryDataSet(copy_mode=copy_mode)
-        self.metadata = metadata
+        self._metadata = metadata
 
     def _release(self) -> None:
         self._cache.release()

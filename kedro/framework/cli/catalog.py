@@ -1,4 +1,5 @@
 """A collection of CLI commands for working with Kedro catalog."""
+import copy
 from collections import defaultdict
 
 import click
@@ -9,7 +10,7 @@ from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
-
+from parse import parse
 
 def _create_session(package_name: str, **kwargs):
     kwargs.setdefault("save_on_close", False)
@@ -174,3 +175,62 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
     catalog_path.parent.mkdir(exist_ok=True)
     with catalog_path.open(mode="w") as catalog_file:
         yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)
+
+
+@catalog.command("show")
+@env_option
+@click.pass_obj
+def list_datasets(metadata: ProjectMetadata, env):
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+    catalog = context.config_loader["catalog"]
+    secho(yaml.dump(catalog))
+
+@catalog.command("resolve")
+@env_option
+@click.option(
+    "--pipeline",
+    "-p",
+    type=str,
+    default="",
+    help="Name of the modular pipeline to run. If not set, "
+    "the project pipeline is run by default.",
+    callback=split_string,
+)
+@click.pass_obj
+def list_datasets(metadata: ProjectMetadata, pipeline, env):
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+    catalog = context.config_loader["catalog"]
+
+    target_pipelines = pipeline or pipelines.keys()
+
+    pipeline_datasets = []
+    for pipe in target_pipelines:
+        pl_obj = pipelines.get(pipe)
+        if pl_obj:
+            pipeline_ds = pl_obj.data_sets()
+            for ds in pipeline_ds:
+                pipeline_datasets.append(ds)
+        else:
+            existing_pls = ", ".join(sorted(pipelines.keys()))
+            raise KedroCliError(
+                f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
+            )
+
+
+    catalog_copy = copy.deepcopy(catalog)
+    for ds_name, ds_config in catalog.items():
+        if "{" and "}" in ds_name:
+            for pipeline_dataset in set(pipeline_datasets):
+                result = parse(ds_name, pipeline_dataset)
+                if result:
+                    config_copy = copy.deepcopy(ds_config)
+                    # Match results to patterns in catalog entry
+                    for key, value in config_copy.items():
+                        if '}' in value:
+                            string_value = str(value)
+                            config_copy[key] = string_value.format_map(result.named)
+                    catalog_copy[pipeline_dataset] = config_copy
+
+    secho(yaml.dump(catalog_copy))

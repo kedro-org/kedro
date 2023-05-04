@@ -184,31 +184,21 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
 def show_catalog_datasets(metadata: ProjectMetadata, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    catalog = context.config_loader["catalog"]
-    secho(yaml.dump(catalog))
+    catalog_conf = context.config_loader["catalog"]
+    secho(yaml.dump(catalog_conf))
 
 
 @catalog.command("resolve")
 @env_option
-@click.option(
-    "--pipeline",
-    "-p",
-    type=str,
-    default="",
-    help="Name of the modular pipeline to run. If not set, "
-    "the project pipeline is run by default.",
-    callback=split_string,
-)
 @click.pass_obj
-def resolve_catalog_datasets(metadata: ProjectMetadata, pipeline, env):
+def resolve_catalog_datasets(metadata: ProjectMetadata, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    catalog = context.config_loader["catalog"]
+    catalog_conf = context.config_loader["catalog"]
 
-    target_pipelines = pipeline or pipelines.keys()
-
+    # Create a list of all datasets used in the project pipelines.
     pipeline_datasets = []
-    for pipe in target_pipelines:
+    for pipe in pipelines.keys():
         pl_obj = pipelines.get(pipe)
         if pl_obj:
             pipeline_ds = pl_obj.data_sets()
@@ -220,7 +210,11 @@ def resolve_catalog_datasets(metadata: ProjectMetadata, pipeline, env):
                 f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
             )
 
-    catalog_copy = copy.deepcopy(catalog)
+    # Create a copy of the catalog config to not modify the original.
+    catalog_copy = copy.deepcopy(catalog_conf)
+    # Loop over all entries in the catalog, find the ones that contain a pattern to be matched,
+    # loop over al datasets in the pipeline and match these against the patterns.
+    # Then expand the matches and add them to the catalog copy to display on the CLI.
     for ds_name, ds_config in catalog.items():
         if "}" in ds_name:
             for pipeline_dataset in set(pipeline_datasets):

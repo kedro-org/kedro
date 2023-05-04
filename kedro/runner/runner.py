@@ -73,6 +73,8 @@ class AbstractRunner(ABC):
         hook_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
 
+        # Check if there are any input datasets that aren't in the catalog and
+        # don't match a pattern in the catalog.
         unsatisfied = catalog.remove_pattern_matches(
             pipeline.inputs() - set(catalog.list())
         )
@@ -80,10 +82,13 @@ class AbstractRunner(ABC):
             raise ValueError(
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
-
+        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
+        # in the catalog.
         free_outputs = catalog.remove_pattern_matches(
             pipeline.outputs() - set(catalog.list())
         )
+        # Check which datasets used in the pipeline aren't in the catalog and don't match
+        # a pattern in the catalog and create a default dataset for those datasets.
         unregistered_ds = catalog.remove_pattern_matches(
             pipeline.data_sets() - set(catalog.list())
         )

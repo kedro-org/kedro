@@ -5,12 +5,13 @@ from collections import defaultdict
 import click
 import yaml
 from click import secho
+from parse import parse
 
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.project import pipelines, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
-from parse import parse
+
 
 def _create_session(package_name: str, **kwargs):
     kwargs.setdefault("save_on_close", False)
@@ -180,11 +181,12 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
 @catalog.command("show")
 @env_option
 @click.pass_obj
-def list_datasets(metadata: ProjectMetadata, env):
+def show_catalog_datasets(metadata: ProjectMetadata, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
     catalog = context.config_loader["catalog"]
     secho(yaml.dump(catalog))
+
 
 @catalog.command("resolve")
 @env_option
@@ -198,7 +200,7 @@ def list_datasets(metadata: ProjectMetadata, env):
     callback=split_string,
 )
 @click.pass_obj
-def list_datasets(metadata: ProjectMetadata, pipeline, env):
+def resolve_catalog_datasets(metadata: ProjectMetadata, pipeline, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
     catalog = context.config_loader["catalog"]
@@ -218,17 +220,16 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
                 f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
             )
 
-
     catalog_copy = copy.deepcopy(catalog)
     for ds_name, ds_config in catalog.items():
-        if "{" and "}" in ds_name:
+        if "}" in ds_name:
             for pipeline_dataset in set(pipeline_datasets):
                 result = parse(ds_name, pipeline_dataset)
                 if result:
                     config_copy = copy.deepcopy(ds_config)
                     # Match results to patterns in catalog entry
                     for key, value in config_copy.items():
-                        if '}' in value:
+                        if "}" in value:
                             string_value = str(value)
                             config_copy[key] = string_value.format_map(result.named)
                     catalog_copy[pipeline_dataset] = config_copy

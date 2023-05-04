@@ -110,10 +110,8 @@ class _ProjectSettings(LazySettings):
     _DATA_CATALOG_CLASS = _IsSubclassValidator(
         "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
     )
-    _DATA_CATALOG_ARGS = Validator("DATA_CATALOG_ARGS", default={})
 
     def __init__(self, *args, **kwargs):
-
         kwargs.update(
             validators=[
                 self._CONF_SOURCE,
@@ -125,7 +123,6 @@ class _ProjectSettings(LazySettings):
                 self._CONFIG_LOADER_CLASS,
                 self._CONFIG_LOADER_ARGS,
                 self._DATA_CATALOG_CLASS,
-                self._DATA_CATALOG_ARGS,
             ]
         )
         super().__init__(*args, **kwargs)
@@ -135,6 +132,7 @@ def _load_data_wrapper(func):
     """Wrap a method in _ProjectPipelines so that data is loaded on first access.
     Taking inspiration from dynaconf.utils.functional.new_method_proxy
     """
+
     # pylint: disable=protected-access
     def inner(self, *args, **kwargs):
         self._load_data()

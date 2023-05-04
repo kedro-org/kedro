@@ -11,10 +11,8 @@ import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Set, Type, Union
 
-from kedro_datasets.pandas import CSVDataSet
 from parse import parse
 
-from kedro.framework.project import settings
 from kedro.io.core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
@@ -276,8 +274,8 @@ class DataCatalog:
 
         layers: Dict[str, Set[str]] = defaultdict(set)
         for ds_name, ds_config in catalog.items():
-            # Let's assume that any name with {} in it is a dataset pattern to be matched.
-            if "{" and "}" in ds_name:
+            # Let's assume that any name with } in it is a dataset pattern to be matched.
+            if "}" in ds_name:
                 dataset_patterns[ds_name] = ds_config
             else:
                 ds_layer = ds_config.pop("layer", None)
@@ -289,7 +287,11 @@ class DataCatalog:
                     ds_name, ds_config, load_versions.get(ds_name), save_version
                 )
         dataset_layers = layers or None
-        return cls(data_sets=data_sets, layers=dataset_layers, dataset_patterns=dataset_patterns)
+        return cls(
+            data_sets=data_sets,
+            layers=dataset_layers,
+            dataset_patterns=dataset_patterns,
+        )
 
     def _get_dataset(
         self, data_set_name: str, version: Version = None, suggest: bool = True
@@ -310,7 +312,9 @@ class DataCatalog:
                     )
                     if matches:
                         suggestions = ", ".join(matches)
-                        error_msg += f" - did you mean one of these instead: {suggestions}"
+                        error_msg += (
+                            f" - did you mean one of these instead: {suggestions}"
+                        )
 
                 raise DataSetNotFoundError(error_msg)
 
@@ -543,7 +547,7 @@ class DataCatalog:
                 config_copy = copy.deepcopy(dataset_config)
                 # Match results to patterns in catalog entry
                 for key, value in config_copy.items():
-                    if '}' in value:
+                    if "}" in value:
                         string_value = str(value)
                         config_copy[key] = string_value.format_map(result.named)
                 # Create dataset from catalog config.
@@ -599,7 +603,7 @@ class DataCatalog:
         dataset_list_minus_matched = []
         for dataset in dataset_list:
             # If dataset matches a pattern, remove it from the list.
-            for dataset_name, dataset_config in self.dataset_patterns.items():
+            for dataset_name in self.dataset_patterns.keys():
                 result = parse(dataset_name, dataset)
                 if not result:
                     dataset_list_minus_matched.append(dataset)
@@ -611,7 +615,11 @@ class DataCatalog:
         Returns:
             Copy of the current object.
         """
-        return DataCatalog(data_sets=self._data_sets, layers=self.layers, dataset_patterns=self.dataset_patterns)
+        return DataCatalog(
+            data_sets=self._data_sets,
+            layers=self.layers,
+            dataset_patterns=self.dataset_patterns,
+        )
 
     def __eq__(self, other):
         return (self._data_sets, self.layers) == (other._data_sets, other.layers)

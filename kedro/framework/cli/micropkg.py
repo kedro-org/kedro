@@ -8,7 +8,7 @@ import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from typing import Iterable, List, Tuple, Union
+from typing import Iterable
 
 import click
 import pkg_resources

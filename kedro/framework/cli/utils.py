@@ -159,8 +159,8 @@ class CommandCollection(click.CommandCollection):
 
     @staticmethod
     def _merge_same_name_collections(groups: Sequence[click.MultiCommand]):
-        named_groups: Mapping[str, list[click.MultiCommand]] = defaultdict(list)
-        helps: Mapping[str, list] = defaultdict(list)
+        named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
+        helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
             named_groups[group.name].append(group)
             if group.help:

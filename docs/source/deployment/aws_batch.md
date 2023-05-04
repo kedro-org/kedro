@@ -1,4 +1,8 @@
-# Deployment with AWS Batch
+# Deployment with AWS Batch (deprecated)
+
+``` {important}
+This page contains legacy documentation that has not been tested against recent Kedro releases.
+```
 
 ## Why would you use AWS Batch?
 [AWS Batch](https://aws.amazon.com/batch/) is optimised for batch computing and applications that scale with the number of jobs running in parallel. It manages job execution and compute resources, and dynamically provisions the optimal quantity and type. AWS Batch can assist with planning, scheduling, and executing your batch computing workloads, using [Amazon EC2](https://aws.amazon.com/ec2/) On-Demand and [Spot Instances](https://aws.amazon.com/ec2/spot/), and it has native integration with [CloudWatch](https://aws.amazon.com/cloudwatch/) for log collection.

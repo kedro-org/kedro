@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Mapping, Sequence
+from typing import Iterable, Sequence
 
 import click
 import importlib_metadata

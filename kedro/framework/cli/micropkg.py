@@ -8,7 +8,7 @@ import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Union
 
 import click
 import pkg_resources
@@ -708,7 +708,7 @@ def _refactor_code_for_package(
         _move_package_with_conflicting_name(tests_target, "tests")
 
 
-_SourcePathType = Union[Path, List[Tuple[Path, str]]]
+_SourcePathType = Union[Path, list[tuple[Path, str]]]
 
 
 # pylint: disable=too-many-arguments,too-many-locals

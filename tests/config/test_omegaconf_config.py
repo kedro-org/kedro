@@ -70,14 +70,24 @@ def local_config(tmp_path):
 @pytest.fixture
 def create_config_dir(tmp_path, base_config, local_config):
     base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+    base_logging = tmp_path / _BASE_ENV / "logging.yml"
+    base_spark = tmp_path / _BASE_ENV / "spark.yml"
+    base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+
     local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
+
     parameters = tmp_path / _BASE_ENV / "parameters.json"
-    base_parameters = {"param1": 1, "param2": 2, "templated_param": "${global}"}
-    base_global_parameters = {"global": "base"}
-    local_global_parameters = {"global": "local"}
+    base_parameters = {"param1": 1, "param2": 2, "interpolated_param": "${test_env}"}
+    base_global_parameters = {"test_env": "base"}
+    local_global_parameters = {"test_env": "local"}
 
     _write_yaml(base_catalog, base_config)
     _write_yaml(local_catalog, local_config)
+
+    # Empty Config
+    _write_yaml(base_logging, {"version": 1})
+    _write_yaml(base_spark, {"dummy": 1})
+
     _write_json(parameters, base_parameters)
     _write_json(tmp_path / _BASE_ENV / "parameters_global.json", base_global_parameters)
     _write_json(
@@ -543,23 +553,36 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(str(tmp_path))
         params = conf["parameters"]
         # Making sure it is not override by local/parameters_global.yml
-        assert params["templated_param"] == "base"
+        assert params["interpolated_param"] == "base"
 
     @use_config_dir
     def test_runtime_params_override_interpolated_value(self, tmp_path):
         """Make sure interpolated value is updated correctly with runtime_params"""
-        conf = OmegaConfigLoader(str(tmp_path), runtime_params={"global": "global"})
+        conf = OmegaConfigLoader(str(tmp_path), runtime_params={"test_env": "dummy"})
         params = conf["parameters"]
-        assert params["templated_param"] == "global"
+        assert params["interpolated_param"] == "dummy"
 
     @use_config_dir
+    @use_credentials_env_variable_yml
     def test_runtime_params_not_propogate_non_parameters_config(self, tmp_path):
-        """Make sure `catalog`, `credetials` won't get updated by runtime_params"""
+        """Make sure `catalog`, `credentials`, `logging` or any config other than
+        `parameters` are not updated by `runtime_params`."""
         # https://github.com/kedro-org/kedro/pull/2467
-        conf = OmegaConfigLoader(str(tmp_path), runtime_params={"global": "global"})
-        cred = conf["credentials"]
+        key = "test_env"
+        runtime_params = {key: "dummy"}
+        conf = OmegaConfigLoader(
+            str(tmp_path),
+            config_patterns={"spark": ["spark*", "spark*/**", "**/spark*"]},
+            runtime_params=runtime_params,
+        )
+        parameters = conf["parameters"]
         catalog = conf["catalog"]
+        credentials = conf["credentials"]
         logging = conf["logging"]
-        assert "global" not in cred
-        assert "global" not in catalog
-        assert "global" not in logging
+        spark = conf["spark"]
+
+        assert key in parameters
+        assert key not in catalog
+        assert key not in credentials
+        assert key not in logging
+        assert key not in spark

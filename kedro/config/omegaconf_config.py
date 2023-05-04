@@ -218,7 +218,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         Args:
             conf_path: Path to configuration directory.
             patterns: List of glob patterns to match the filenames against.
-            key: Str of the dictionary keys to access.
+            key: Key of the configuration type to fetch.
             read_environment_variables: Whether to resolve environment variables.
 
         Raises:

@@ -318,9 +318,7 @@ class DataCatalog:
                     )
                     if matches:
                         suggestions = ", ".join(matches)
-                        error_msg += (
-                            f" - did you mean one of these instead: {suggestions}"
-                        )
+                        error_msg += f" - did you mean one of these instead: {suggestions}"
 
                 raise DataSetNotFoundError(error_msg)
 
@@ -621,14 +619,16 @@ class DataCatalog:
     def remove_pattern_matches(self, dataset_list: Set[str]):
         """Helper method that checks which dataset names match a pattern in the catalog.
         It returns a copy of the original list minus all those matched dataset names."""
-        dataset_list_minus_matched = []
-        for dataset in dataset_list:
-            # If dataset matches a pattern, remove it from the list.
-            for dataset_name in self.dataset_patterns.keys():
-                result = parse(dataset_name, dataset)
-                if not result:
-                    dataset_list_minus_matched.append(dataset)
-        return set(dataset_list_minus_matched)
+        if self.dataset_patterns:
+            dataset_list_minus_matched = []
+            for dataset in dataset_list:
+                # If dataset matches a pattern, remove it from the list.
+                for dataset_name in self.dataset_patterns.keys():
+                    result = parse(dataset_name, dataset)
+                    if not result:
+                        dataset_list_minus_matched.append(dataset)
+            return set(dataset_list_minus_matched)
+        return dataset_list
 
     def shallow_copy(self) -> "DataCatalog":
         """Returns a shallow copy of the current object.

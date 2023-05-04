@@ -195,7 +195,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if not config:
             raise MissingConfigException(
                 f"No files of YAML or JSON format found in {base_path} or {env_path} matching"
-                f" the glob pattern(s): {[*self.config_patterns[key]]}"
+                f" the glob pattern(s): {[*self.config_patterns[key]]}, or the files are empty."
             )
         return config
 

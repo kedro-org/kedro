@@ -1,4 +1,4 @@
-# Deployment with AWS Batch (deprecated)
+# AWS Batch (deprecated)
 
 ``` {important}
 This page contains legacy documentation that has not been tested against recent Kedro releases.

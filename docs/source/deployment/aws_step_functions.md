@@ -1,4 +1,4 @@
-# How to deploy your Kedro pipeline with AWS Step Functions
+# AWS Step Functions
 
 This tutorial explains how to deploy a Kedro project with [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) in order to run a Kedro pipeline in production on AWS [Serverless Computing](https://aws.amazon.com/serverless/) platform.
 

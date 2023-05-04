@@ -1,4 +1,4 @@
-# Deployment with Argo Workflows (deprecated)
+# Argo Workflows (deprecated)
 
 ``` {important}
 This page contains legacy documentation that has not been tested against recent Kedro releases.

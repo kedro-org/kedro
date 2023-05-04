@@ -1,14 +1,30 @@
-# How to deploy your Kedro pipeline on Apache Airflow with Astronomer
+# Apache Airflow
 
-This tutorial explains how to deploy a Kedro project on [Apache Airflow](https://airflow.apache.org/) with [Astronomer](https://www.astronomer.io/). Apache Airflow is an extremely popular open-source workflow management platform. Workflows in Airflow are modelled and organised as [DAGs](https://en.wikipedia.org/wiki/Directed_acyclic_graph), making it a suitable engine to orchestrate and execute a pipeline authored with Kedro. [Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster easily in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
+Apache Airflow is a popular open-source workflow management platform. Workflows in Airflow are modelled and organised as [DAGs](https://en.wikipedia.org/wiki/Directed_acyclic_graph), making it a suitable engine to orchestrate and execute a pipeline authored with Kedro.
 
-The following discusses how to run the [example Iris classification pipeline](../get_started/new_project.md#create-a-new-project-containing-example-code) on a local Airflow cluster with Astronomer.
+## How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
 
-## Strategy
+The `kedro-airflow-k8s` plugin enables you to run a Kedro pipeline on Airflow with a Kubernetes cluster. The plugin can be used together with `kedro-docker` to prepare a docker image for pipeline execution.
+
+Consult the [GitHub repository for `kedro-airflow-k8s`](https://github.com/getindata/kedro-airflow-k8s) for further details, or take a look at the [documentation](https://kedro-airflow-k8s.readthedocs.io/).
+
+
+## How to run a Kedro pipeline on Apache Airflow with Astronomer
+
+The following tutorial explains how to deploy a Kedro project on [Apache Airflow](https://airflow.apache.org/) with [Astronomer](https://www.astronomer.io/). [Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster easily in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
+
+The tutorial discusses how to run the [example Iris classification pipeline](../get_started/new_project.md#create-a-new-project-containing-example-code) on a local Airflow cluster with Astronomer. You may also consider using our [`astro-airflow-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris) which provides a template containing the boilerplate code that the tutorial describes:
+
+```shell
+kedro new --starter=astro-airflow-iris
+```
+
+
+### Strategy
 
 The general strategy to deploy a Kedro pipeline on Apache Airflow is to run every Kedro node as an [Airflow task](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) while the whole pipeline is converted into a [DAG](https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html) for orchestration purpose. This approach mirrors the principles of [running Kedro in a distributed environment](distributed.md).
 
-## Prerequisites
+### Prerequisites
 
 To follow this tutorial, ensure you have the following:
 
@@ -16,7 +32,7 @@ To follow this tutorial, ensure you have the following:
 * The [Astro CLI installed](https://docs.astronomer.io/astro/install-cli)
 * `kedro>=0.17` installed
 
-## Project Setup
+## Tutorial project setup
 
 1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/create-project). Let's call it `kedro-airflow-iris`
 
@@ -142,11 +158,3 @@ If you visit the Airflow UI, you should now see the Kedro pipeline as an Airflow
 ![](../meta/images/kedro_airflow_dag.png)
 
 ![](../meta/images/kedro_airflow_dag_run.png)
-
-## Final thought
-
-This tutorial walks you through the manual process of deploying an existing Kedro project on Apache Airflow with Astronomer. However, if you are starting out, consider using our `astro-airflow-iris` starter which provides all the aforementioned boilerplate out of the box:
-
-```shell
-kedro new --starter=astro-airflow-iris
-```

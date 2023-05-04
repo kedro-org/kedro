@@ -1,4 +1,4 @@
-# Deployment with Prefect
+# Prefect
 
 This page explains how to run your Kedro pipeline using [Prefect Core](https://www.prefect.io/products/core/), an open-source workflow management system.
 

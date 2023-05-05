@@ -11,11 +11,13 @@
 # Upcoming Release 0.18.9
 
 ## Major features and improvements
-* `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
+
 * `kedro run --params` now update interpolated parameters correctly when using
 `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
+* `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
+
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 0.19.0
 

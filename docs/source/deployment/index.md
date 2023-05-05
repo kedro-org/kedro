@@ -2,17 +2,30 @@
 
 ## Deployment choices
 
-Your choice of deployment method will depend on various factors. In this section we provide guides for different approaches.
+In this section we provide guides for different deployment methods; your choice  will depend on a range of factors.
 
-If you decide to deploy your Kedro project on a single machine, you should consult our [guide to single-machine deployment](single_machine.md), and decide whether to:
+If you decide to deploy your Kedro project onto a single machine, you should consult our [guide to single-machine deployment](single_machine.md), and decide whether to:
 
 * [use Docker for container-based deployment](./single_machine.md#container-based)
 * [use package-based deployment](./single_machine.md#package-based)
 * [use the CLI to clone and deploy your codebase to a server](./single_machine.md#cli-based)
 
-If your pipeline is sizeable, you will want to run parts of it on separate machines, so will need to consult our [guide to distributed deployment](distributed.md).
+If your pipeline is sizeable, you may want to run it across separate machines, so will need to consult our [guide to distributed deployment](distributed.md).
 
-This section provides information for deployment to, or integration with, the following:
+```{mermaid}
+%%{init: { "flowchart": { "width":600 } } }%%
+
+flowchart TD
+    A{Can your Kedro pipeline run on a single machine?} -- YES --> B[Consult the single-machine deployment guide];
+    B --> C{Do you have Docker on your machine?};
+    C -- YES --> D[Use a container-based approach];
+    C -- NO --> E[Use the CLI or package mode];
+    A -- NO --> F[Consult the distributed deployment guide];
+    F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Amazon SageMaker</li><li>AWS Step functions</li><li>Azure</li><li>Dask</li><li>Databricks</li><li>Kubeflow Workflows</li><li>Prefect</li><li>Vertex AI</li>"];
+    style G text-align:left
+```
+
+This following pages provide information for deployment to, or integration with, the following:
 
 * [Airflow](airflow_astronomer.md)
 * [Amazon SageMaker](amazon_sagemaker.md)
@@ -31,23 +44,11 @@ We also have legacy documentation pages for the following deployment targets, bu
 * for [AWS Batch](aws_batch.md)
 ```
 
-```{mermaid}
-flowchart TD
-    A{Can your Kedro pipeline run on a single machine?} -- YES --> B[Consult the single-machine deployment guide];
-    B --> C{Do you have Docker on your machine?};
-    C -- YES --> D[Use a container-based approach];
-    C -- NO --> E[Use the CLI or package mode];
-    A -- NO --> F[Consult the distributed deployment guide];
-    F --> G["What distributed platform are you using?<br/><br/>Check out the guides for:<br/><br/><li>Airflow</li><li>Amazon SageMaker</li><li>AWS Step functions</li><li>Azure</li><li>Dask</li><li>Databricks</li><li>Kubeflow Workflows</li><li>Prefect</li><li>Vertex AI</li>"];
-    style G text-align:left
-    H["Does (part of) your pipeline integrate with Amazon SageMaker?<br/><br/>Read the SageMaker integration guide"];
-    style H text-align:left
-```
 
-## Deployment guides
 
 ```{toctree}
 :maxdepth: 1
+:hidden:
 
 single_machine
 distributed

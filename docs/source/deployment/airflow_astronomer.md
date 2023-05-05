@@ -1,17 +1,19 @@
 # Apache Airflow
 
-Apache Airflow is a popular open-source workflow management platform. Workflows in Airflow are modelled and organised as [DAGs](https://en.wikipedia.org/wiki/Directed_acyclic_graph), making it a suitable engine to orchestrate and execute a pipeline authored with Kedro.
+Apache Airflow is a popular open-source workflow management platform. It is a suitable engine to orchestrate and execute a pipeline authored with Kedro because workflows in Airflow are modelled and organised as [DAGs](https://en.wikipedia.org/wiki/Directed_acyclic_graph).
 
 ## How to run a Kedro pipeline on Apache Airflow using a Kubernetes cluster
 
-The `kedro-airflow-k8s` plugin enables you to run a Kedro pipeline on Airflow with a Kubernetes cluster. The plugin can be used together with `kedro-docker` to prepare a docker image for pipeline execution.
+The `kedro-airflow-k8s` plugin from Get In Data | Part of Xebia enables you to run a Kedro pipeline on Airflow with a Kubernetes cluster. The plugin can be used together with `kedro-docker` to prepare a docker image for pipeline execution.
 
 Consult the [GitHub repository for `kedro-airflow-k8s`](https://github.com/getindata/kedro-airflow-k8s) for further details, or take a look at the [documentation](https://kedro-airflow-k8s.readthedocs.io/).
 
 
 ## How to run a Kedro pipeline on Apache Airflow with Astronomer
 
-The following tutorial explains how to deploy a Kedro project on [Apache Airflow](https://airflow.apache.org/) with [Astronomer](https://www.astronomer.io/). [Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster easily in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
+The following tutorial uses a different approach and shows how to deploy a Kedro project on [Apache Airflow](https://airflow.apache.org/) with [Astronomer](https://www.astronomer.io/).
+
+[Astronomer](https://docs.astronomer.io/astro/install-cli) is a managed Airflow platform which allows users to spin up and run an Airflow cluster easily in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
 
 The tutorial discusses how to run the [example Iris classification pipeline](../get_started/new_project.md#create-a-new-project-containing-example-code) on a local Airflow cluster with Astronomer. You may also consider using our [`astro-airflow-iris` starter](https://github.com/kedro-org/kedro-starters/tree/main/astro-airflow-iris) which provides a template containing the boilerplate code that the tutorial describes:
 

@@ -179,9 +179,22 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
 
 
 def pick_best_match(matches):
-    # according to number of { then alphabetical
-    matches = sorted(matches, key=lambda x: (x[0].count("}"), x[0]))
+    matches = sorted(matches, key=lambda x: (specificity(x[0]), x[0]))
     return matches[0]
+
+
+def specificity(pattern):
+    """This function will check length of exactly matched characters not inside brackets
+    Example -
+    specificity("{namespace}.companies") = 10
+    specificity("{namespace}.{dataset}") = 1
+    specificity("france.companies") = 16
+    """
+    pattern_variables = parse(pattern, pattern).named
+    for k in pattern_variables:
+        pattern_variables[k] = ""
+    specific_characters = pattern.format(**pattern_variables)
+    return -len(specific_characters)
 
 
 @catalog.command("resolve")

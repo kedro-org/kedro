@@ -179,7 +179,7 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
 
 
 def pick_best_match(matches):
-    matches = sorted(matches, key=lambda x: (specificity(x[0]), x[0]))
+    matches = sorted(matches, key=lambda x: (specificity(x[0]), -x[0].count("{"), x[0]))
     return matches[0]
 
 

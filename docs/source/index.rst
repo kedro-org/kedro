@@ -148,7 +148,6 @@ API documentation
    :recursive:
 
    kedro
-   kedro_datasets
 
 Indices and tables
 ==================

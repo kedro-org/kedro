@@ -41,6 +41,10 @@
 * Added a 404 page to documentation.
 * Added deprecation warnings about the removal of `kedro.extras.datasets`.
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [MaximeSteinmetz](https://github.com/MaximeSteinmetz)
 
 # Release 0.18.7
 

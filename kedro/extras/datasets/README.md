@@ -1,9 +1,5 @@
 # Datasets
 
-> **Warning**
-> `kedro.extras.datasets` is deprecated and will be removed in Kedro 0.19,
-> install `kedro-datasets` instead by running `pip install kedro-datasets`.
-
 Welcome to `kedro.extras.datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataSet` implementations created by QuantumBlack and external contributors.
 
 ## What `AbstractDataSet` implementations are supported?

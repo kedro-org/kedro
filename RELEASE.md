@@ -34,12 +34,11 @@
 ### Documentation changes
 * Improvements to Sphinx toolchain including incrementing to use a newer version.
 * Improvements to documentation on visualising Kedro projects on Databricks, and additional documentation about the development workflow for Kedro projects on Databricks.
-* Updated Technical Steering Committee membership documentation.
+* Updated Technnical Steering Committee membership documentation.
 * Revised documentation section about linting and formatting and extended to give details of `flake8` configuration.
 * Updated table of contents for documentation to reduce scrolling.
 * Expanded FAQ documentation.
 * Added a 404 page to documentation.
-* Added deprecation warnings about the removal of `kedro.extras.datasets`.
 
 ## Breaking changes to the API
 

@@ -8,7 +8,7 @@ import copy
 import difflib
 import logging
 import re
-from collections import defaultdict
+from collections import defaultdict, Iterable
 from typing import Any, Dict, List, Optional, Set, Type, Union
 
 from parse import parse
@@ -561,7 +561,7 @@ class DataCatalog:
                 for key, value in config_copy.items():
                     # Find all dataset fields that need to be resolved with
                     # the values that were matched.
-                    if "}" in value:
+                    if isinstance(value, Iterable) and "}" in value:
                         string_value = str(value)
                         # result.named: {'root_namespace': 'germany', 'dataset_name': 'companies'}
                         # format_map fills in dict values into a string with {...} placeholders

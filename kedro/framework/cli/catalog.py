@@ -1,6 +1,6 @@
 """A collection of CLI commands for working with Kedro catalog."""
 import copy
-from collections import defaultdict
+from collections import defaultdict, Iterable
 
 import click
 import yaml
@@ -215,7 +215,7 @@ def resolve_catalog_datasets(metadata: ProjectMetadata, env):
     # Loop over all entries in the catalog, find the ones that contain a pattern to be matched,
     # loop over al datasets in the pipeline and match these against the patterns.
     # Then expand the matches and add them to the catalog copy to display on the CLI.
-    for ds_name, ds_config in catalog.items():
+    for ds_name, ds_config in catalog_conf.items():
         if "}" in ds_name:
             for pipeline_dataset in set(pipeline_datasets):
                 result = parse(ds_name, pipeline_dataset)
@@ -223,7 +223,7 @@ def resolve_catalog_datasets(metadata: ProjectMetadata, env):
                     config_copy = copy.deepcopy(ds_config)
                     # Match results to patterns in catalog entry
                     for key, value in config_copy.items():
-                        if "}" in value:
+                        if isinstance(value, Iterable) and "}" in value:
                             string_value = str(value)
                             config_copy[key] = string_value.format_map(result.named)
                     catalog_copy[pipeline_dataset] = config_copy

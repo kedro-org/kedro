@@ -1,7 +1,5 @@
 # Deployment
 
-## Deployment choices
-
 In this section we provide guides for different deployment methods; your choice  will depend on a range of factors.
 
 If you decide to deploy your Kedro project onto a single machine, you should consult our [guide to single-machine deployment](single_machine.md), and decide whether to:

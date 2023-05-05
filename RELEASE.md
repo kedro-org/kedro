@@ -21,28 +21,40 @@
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 
-# Upcoming Release 0.18.8
+# Upcoming Release 0.18.9
 
 ## Major features and improvements
+## Bug fixes and other changes
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 0.19.0
+
+
+# Release 0.18.8
+
+## Major features and improvements
+* Added `KEDRO_LOGGING_CONFIG` environment variable, which can be used to configure logging from the beginning of the `kedro` process.
 * Removed logs folder from the kedro new project template. File-based logging will remain but just be level INFO and above and go to project root instead.
 
+
 ## Bug fixes and other changes
-* Improvements to documentation about configuration.
 * Improvements to Jupyter E2E tests.
 * Added full `kedro run` CLI command to session store to improve run reproducibility using `Kedro-Viz` experiment tracking.
 
 ### Documentation changes
+* Improvements to documentation about configuration.
 * Improvements to Sphinx toolchain including incrementing to use a newer version.
 * Improvements to documentation on visualising Kedro projects on Databricks, and additional documentation about the development workflow for Kedro projects on Databricks.
-* Updated Technnical Steering Committee membership documentation.
+* Updated Technical Steering Committee membership documentation.
 * Revised documentation section about linting and formatting and extended to give details of `flake8` configuration.
 * Updated table of contents for documentation to reduce scrolling.
 * Expanded FAQ documentation.
 * Added a 404 page to documentation.
+* Added deprecation warnings about the removal of `kedro.extras.datasets`.
 
-## Breaking changes to the API
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
 
-## Upcoming deprecations for Kedro 0.19.0
+* [MaximeSteinmetz](https://github.com/MaximeSteinmetz)
 
 
 # Release 0.18.7

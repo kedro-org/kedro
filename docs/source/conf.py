@@ -131,7 +131,7 @@ type_targets = {
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
-        "kedro.datasets.pandas.json_dataset.JSONDataSet",
+        "kedro_datasets.pandas.json_dataset.JSONDataSet",
         "pluggy._manager.PluginManager",
         "_DI",
         "_DO",
@@ -308,7 +308,7 @@ KEDRO_MODULES = [
     "kedro.runner",
     "kedro.config",
     "kedro.extras.datasets",
-    "kedro.datasets",
+    "kedro_datasets",
 ]
 
 

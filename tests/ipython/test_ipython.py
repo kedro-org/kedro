@@ -202,7 +202,6 @@ class TestLoadIPythonExtension:
         assert expected_message in log_messages
 
     def test_load_extension_register_line_magic(self, mocker, ipython):
-
         mocker.patch("kedro.ipython._find_kedro_project")
         mock_reload_kedro = mocker.patch("kedro.ipython.reload_kedro")
         load_ipython_extension(ipython)

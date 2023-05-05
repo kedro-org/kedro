@@ -275,8 +275,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         if not aggregate_config:
             return {}
-        if len(aggregate_config) == 1:
-            return list(aggregate_config)[0]
 
         if key == "parameters":
             # Merge with runtime parameters only for "parameters"

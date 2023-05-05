@@ -57,6 +57,7 @@ amazon_sagemaker
 aws_step_functions
 azure
 dask
+databricks
 kubeflow
 prefect
 vertexai

@@ -749,9 +749,7 @@ def _generate_sdist_file(
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
         _generate_manifest_file(temp_dir_path)
-        setup_file = _generate_setup_file(
-            package_name, version, install_requires, temp_dir_path
-        )
+        _generate_setup_file(package_name, version, install_requires, temp_dir_path)
 
         package_file = destination / _get_sdist_name(name=package_name, version=version)
 
@@ -760,14 +758,14 @@ def _generate_sdist_file(
                 f"Package file {package_file} will be overwritten!", fg="yellow"
             )
 
-        # python setup.py sdist --formats=gztar --dist-dir <destination>
+        # python -m build --sdist --outdir <destination>
         call(
             [
                 sys.executable,
-                str(setup_file.resolve()),
-                "sdist",
-                "--formats=gztar",
-                "--dist-dir",
+                "-m",
+                "build",
+                "--sdist",
+                "--outdir",
                 str(destination),
             ],
             cwd=temp_dir,

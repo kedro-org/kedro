@@ -240,7 +240,7 @@ def _pull_package(
         package_reqs = _get_all_library_reqs(library_meta)
 
         if package_reqs:
-            requirements_txt = metadata.source_dir / "requirements.txt"
+            requirements_txt = metadata.project_path / "requirements.txt"
             _append_package_reqs(requirements_txt, package_reqs, package_name)
 
         _clean_pycache(temp_dir_path)
@@ -841,7 +841,7 @@ def _generate_sdist_file(
         # Build a pyproject.toml on the fly
         try:
             install_requires = _make_install_requires(
-                package_source / "requirements.txt"  # type: ignore
+                metadata.project_path / "requirements.txt"  # type: ignore
             )
         except Exception as exc:
             click.secho("FAILED", fg="red")

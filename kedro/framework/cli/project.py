@@ -88,9 +88,9 @@ def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-a
     try:
         _check_module_importable("pytest")
     except KedroCliError as exc:
-        source_path = metadata.source_dir
+        project_path = metadata.project_path
         raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(source_path))
+            NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(project_path))
         ) from exc
     python_call("pytest", args)
 
@@ -110,12 +110,14 @@ def lint(
     click.secho(deprecation_message, fg="red")
 
     source_path = metadata.source_dir
+    project_path = metadata.project_path
     package_name = metadata.package_name
-    files = files or (str(source_path / "tests"), str(source_path / package_name))
+    files = files or (str(project_path / "tests"), str(source_path / package_name))
 
     if "PYTHONPATH" not in os.environ:
         # isort needs the source path to be in the 'PYTHONPATH' environment
         # variable to treat it as a first-party import location
+        # NOTE: Actually, `pip install [-e] .` achieves the same
         os.environ["PYTHONPATH"] = str(source_path)  # pragma: no cover
 
     for module_name in ("flake8", "isort", "black"):
@@ -123,7 +125,7 @@ def lint(
             _check_module_importable(module_name)
         except KedroCliError as exc:
             raise KedroCliError(
-                NO_DEPENDENCY_MESSAGE.format(module=module_name, src=str(source_path))
+                NO_DEPENDENCY_MESSAGE.format(module=module_name, src=str(project_path))
             ) from exc
 
     python_call("black", ("--check",) + files if check_only else files)
@@ -149,7 +151,7 @@ def ipython(
 @click.pass_obj  # this will pass the metadata as first argument
 def package(metadata: ProjectMetadata):
     """Package the project as a Python wheel."""
-    source_path = metadata.source_dir
+    project_path = metadata.project_path
     call(
         [
             sys.executable,
@@ -159,7 +161,7 @@ def package(metadata: ProjectMetadata):
             "--outdir",
             "../dist",
         ],
-        cwd=str(source_path),
+        cwd=str(project_path),
     )
 
     directory = (
@@ -199,10 +201,11 @@ def build_docs(metadata: ProjectMetadata, open_docs):
     click.secho(deprecation_message, fg="red")
 
     source_path = metadata.source_dir
+    project_path = metadata.project_path
     package_name = metadata.package_name
 
-    python_call("pip", ["install", str(source_path / "[docs]")])
-    python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])
+    python_call("pip", ["install", str(project_path / "[docs]")])
+    python_call("pip", ["install", "-r", str(project_path / "requirements.txt")])
     python_call("ipykernel", ["install", "--user", f"--name={package_name}"])
     shutil.rmtree("docs/build", ignore_errors=True)
     call(
@@ -249,9 +252,9 @@ def build_reqs(
     )
     click.secho(deprecation_message, fg="red")
 
-    source_path = metadata.source_dir
-    input_file = Path(input_file or source_path / "requirements.txt")
-    output_file = Path(output_file or source_path / "requirements.lock")
+    project_path = metadata.project_path
+    input_file = Path(input_file or project_path / "requirements.txt")
+    output_file = Path(output_file or project_path / "requirements.lock")
 
     if input_file.is_file():
         python_call(
@@ -291,7 +294,7 @@ def activate_nbstripout(
     )
     click.secho(deprecation_message, fg="red")
 
-    source_path = metadata.source_dir
+    project_path = metadata.source_dir
     click.secho(
         (
             "Notebook output cells will be automatically cleared before committing"
@@ -304,7 +307,7 @@ def activate_nbstripout(
         _check_module_importable("nbstripout")
     except KedroCliError as exc:
         raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module="nbstripout", src=str(source_path))
+            NO_DEPENDENCY_MESSAGE.format(module="nbstripout", src=str(project_path))
         ) from exc
 
     try:

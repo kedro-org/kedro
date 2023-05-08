@@ -121,7 +121,7 @@ class TestTestCommand:
             fake_project_cli, ["test", "--random-arg", "value"], obj=fake_metadata
         )
         expected_message = NO_DEPENDENCY_MESSAGE.format(
-            module="pytest", src=str(fake_repo_path / "src")
+            module="pytest", src=str(fake_repo_path)
         )
 
         assert result.exit_code
@@ -148,7 +148,7 @@ class TestLintCommand:
         assert not result.exit_code, result.stdout
 
         expected_files = files or (
-            str(fake_repo_path / "src/tests"),
+            str(fake_repo_path / "tests"),
             str(fake_repo_path / "src/dummy_package"),
         )
         expected_calls = [
@@ -185,7 +185,7 @@ class TestLintCommand:
         assert not result.exit_code, result.stdout
 
         expected_files = files or (
-            str(fake_repo_path / "src/tests"),
+            str(fake_repo_path / "tests"),
             str(fake_repo_path / "src/dummy_package"),
         )
         expected_calls = [
@@ -217,7 +217,7 @@ class TestLintCommand:
 
         result = CliRunner().invoke(fake_project_cli, ["lint"], obj=fake_metadata)
         expected_message = NO_DEPENDENCY_MESSAGE.format(
-            module=module_name, src=str(fake_repo_path / "src")
+            module=module_name, src=str(fake_repo_path)
         )
 
         assert result.exit_code, result.stdout
@@ -302,7 +302,7 @@ class TestPackageCommand:
                         "--outdir",
                         "../dist",
                     ],
-                    cwd=str(fake_repo_path / "src"),
+                    cwd=str(fake_repo_path),
                 ),
                 mocker.call(
                     [
@@ -351,10 +351,10 @@ class TestBuildDocsCommand:
         )
         python_call_mock.assert_has_calls(
             [
-                mocker.call("pip", ["install", str(fake_repo_path / "src/[docs]")]),
+                mocker.call("pip", ["install", str(fake_repo_path / "[docs]")]),
                 mocker.call(
                     "pip",
-                    ["install", "-r", str(fake_repo_path / "src/requirements.txt")],
+                    ["install", "-r", str(fake_repo_path / "requirements.txt")],
                 ),
                 mocker.call("ipykernel", ["install", "--user", "--name=dummy_package"]),
             ]
@@ -395,9 +395,9 @@ class TestBuildReqsCommand:
             "piptools",
             [
                 "compile",
-                str(fake_repo_path / "src" / "requirements.txt"),
+                str(fake_repo_path / "requirements.txt"),
                 "--output-file",
-                str(fake_repo_path / "src" / "requirements.lock"),
+                str(fake_repo_path / "requirements.lock"),
             ],
         )
 
@@ -410,10 +410,10 @@ class TestBuildReqsCommand:
         fake_metadata,
     ):
         # File exists:
-        input_file = fake_repo_path / "src" / "dev-requirements.txt"
+        input_file = fake_repo_path / "dev-requirements.txt"
         with open(input_file, "a", encoding="utf-8") as file:
             file.write("")
-        output_file = fake_repo_path / "src" / "dev-requirements.lock"
+        output_file = fake_repo_path / "dev-requirements.lock"
 
         result = CliRunner().invoke(
             fake_project_cli,
@@ -444,7 +444,7 @@ class TestBuildReqsCommand:
         extra_args,
         fake_metadata,
     ):
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        requirements_txt = fake_repo_path / "requirements.txt"
 
         result = CliRunner().invoke(
             fake_project_cli, ["build-reqs"] + extra_args, obj=fake_metadata
@@ -457,7 +457,7 @@ class TestBuildReqsCommand:
             ["compile"]
             + extra_args
             + [str(requirements_txt)]
-            + ["--output-file", str(fake_repo_path / "src" / "requirements.lock")]
+            + ["--output-file", str(fake_repo_path / "requirements.lock")]
         )
         python_call_mock.assert_called_once_with("piptools", call_args)
 
@@ -466,7 +466,7 @@ class TestBuildReqsCommand:
         self, fake_project_cli, mocker, fake_metadata, os_name, fake_repo_path
     ):
         """Test error when input file requirements.txt doesn't exists."""
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        requirements_txt = fake_repo_path / "requirements.txt"
 
         mocker.patch("kedro.framework.cli.project.os").name = os_name
         mocker.patch.object(Path, "is_file", return_value=False)

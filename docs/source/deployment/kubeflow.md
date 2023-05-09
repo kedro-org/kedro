@@ -12,4 +12,4 @@ Here are the main reasons to use Kubeflow Pipelines:
 
 
 ## The `kedro-kubeflow` plugin
-The `kedro-kubeflow` plugin from Get In Data | Part of Xebia enables you to run a Kedro pipeline on Kubeflow Pipelines. Consult the [GitHub repository for `kedro-kubeflow`](https://github.com/getindata/kedro-kubeflow) for further details, or take a look at the [documentation](https://kedro-kubeflow.readthedocs.io/).
+The `kedro-kubeflow` plugin from GetInData | Part of Xebia enables you to run a Kedro pipeline on Kubeflow Pipelines. Consult the [GitHub repository for `kedro-kubeflow`](https://github.com/getindata/kedro-kubeflow) for further details, or take a look at the [documentation](https://kedro-kubeflow.readthedocs.io/).

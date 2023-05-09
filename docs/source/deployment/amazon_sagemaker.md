@@ -6,4 +6,4 @@ Amazon SageMaker is a fully-managed service and its features are covered by the 
 
 ## The `kedro-sagemaker` plugin
 
-The `kedro-sagemaker` plugin from Get In Data | Part of Xebia enables you to run a Kedro pipeline on Amazon Sagemaker. Consult the [GitHub repository for `kedro-sagemaker`](https://github.com/getindata/kedro-sagemaker) for further details, or take a look at the [documentation](https://kedro-sagemaker.readthedocs.io/).
+The `kedro-sagemaker` plugin from GetInData | Part of Xebia enables you to run a Kedro pipeline on Amazon Sagemaker. Consult the [GitHub repository for `kedro-sagemaker`](https://github.com/getindata/kedro-sagemaker) for further details, or take a look at the [documentation](https://kedro-sagemaker.readthedocs.io/).

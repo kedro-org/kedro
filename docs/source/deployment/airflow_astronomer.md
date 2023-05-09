@@ -34,7 +34,7 @@ To follow this tutorial, ensure you have the following:
 * The [Astro CLI installed](https://docs.astronomer.io/astro/install-cli)
 * `kedro>=0.17` installed
 
-## Tutorial project setup
+### Tutorial project setup
 
 1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/create-project). Let's call it `kedro-airflow-iris`
 
@@ -86,9 +86,9 @@ To follow this tutorial, ensure you have the following:
 
 5. Run `pip install -r src/requirements.txt` to install all dependencies.
 
-## Deployment process
+### Deployment process
 
-### Step 1. Create new configuration environment to prepare a compatible `DataCatalog`
+#### Step 1. Create new configuration environment to prepare a compatible `DataCatalog`
 
 * Create a `conf/airflow` directory in your Kedro project
 * Create a `catalog.yml` file in this directory with the following content
@@ -119,7 +119,7 @@ example_predictions:
 
 This ensures that all datasets are persisted so all Airflow tasks can read them without the need to share memory. In the example here we assume that all Airflow tasks share one disk, but for distributed environment you would need to use non-local filepaths.
 
-### Step 2. Package the Kedro pipeline as an Astronomer-compliant Docker image
+#### Step 2. Package the Kedro pipeline as an Astronomer-compliant Docker image
 
 * **Step 2.1**: Package the Kedro pipeline as a Python package so you can install it into the container later on:
 
@@ -143,13 +143,13 @@ FROM quay.io/astronomer/ap-airflow:2.0.0-buster-onbuild
 RUN pip install --user dist/new_kedro_project-0.1-py3-none-any.whl
 ```
 
-### Step 3. Convert the Kedro pipeline into an Airflow DAG with `kedro airflow`
+#### Step 3. Convert the Kedro pipeline into an Airflow DAG with `kedro airflow`
 
 ```shell
 kedro airflow create --target-dir=dags/ --env=airflow
 ```
 
-### Step 4. Launch the local Airflow cluster with Astronomer
+#### Step 4. Launch the local Airflow cluster with Astronomer
 
 ```shell
 astro dev start

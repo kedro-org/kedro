@@ -625,7 +625,9 @@ class DataCatalog:
                 # If dataset matches a pattern, remove it from the list.
                 for dataset_name in self.dataset_patterns.keys():
                     result = parse(dataset_name, dataset)
-                    if not result:
+                    if result:
+                        break
+                    else:
                         dataset_list_minus_matched.append(dataset)
             return set(dataset_list_minus_matched)
         return dataset_list

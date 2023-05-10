@@ -11,9 +11,7 @@
 # Upcoming Release 0.18.9
 
 ## Major features and improvements
-
-* `kedro run --params` now update interpolated parameters correctly when using
-`OmegaConfigLoader`.
+* `kedro run --params` now updates interpolated parameters correctly when using `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
@@ -44,6 +42,10 @@
 * Added a 404 page to documentation.
 * Added deprecation warnings about the removal of `kedro.extras.datasets`.
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [MaximeSteinmetz](https://github.com/MaximeSteinmetz)
 
 # Release 0.18.7
 

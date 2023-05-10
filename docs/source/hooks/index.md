@@ -1,8 +1,5 @@
 # Hooks
 
-
-## Introduction
-
 Hooks are a mechanism to add extra behaviour to Kedro's main execution in an easy and consistent manner. Some examples might include:
 
 * Adding a log statement after the data catalog is loaded.

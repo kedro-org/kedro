@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Dict
 
 import pytest
 import yaml
@@ -11,7 +12,7 @@ _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
@@ -440,7 +441,7 @@ class TestFormatObject:
             (["${a}", "X${a}"], {"a": "A"}, ["A", "XA"]),
             (["${b|D}"], {"a": "A"}, ["D"]),
             (["${b|abcDEF_.<>/@$%^&!}"], {"a": "A"}, ["abcDEF_.<>/@$%^&!"]),
-            # Dicts
+            # dicts
             ({"key": "${a}"}, {"a": "A"}, {"key": "A"}),
             ({"${a}": "value"}, {"a": "A"}, {"A": "value"}),
             ({"${a|D}": "value"}, {}, {"D": "value"}),

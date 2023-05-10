@@ -11,7 +11,7 @@ If you decide to deploy your Kedro project onto a single machine, you should con
 If your pipeline is sizeable, you may want to run it across separate machines, so will need to consult our [guide to distributed deployment](distributed.md).
 
 ```{mermaid}
-%%{init: { "flowchart": { "width":600 } } }%%
+:alt: mermaid-Decision making diagram for deploying Kedro projects
 
 flowchart TD
     A{Can your Kedro pipeline run on a single machine?} -- YES --> B[Consult the single-machine deployment guide];

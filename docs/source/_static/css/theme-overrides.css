@@ -15,3 +15,7 @@ html.writer-html5 .rst-content .wy-table-responsive table.docutils td > p {
   font-size: 1em;
   line-height: 1em;
 }
+
+img[alt^="mermaid-"] {
+  max-width: 600px;
+}

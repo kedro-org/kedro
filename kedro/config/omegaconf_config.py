@@ -1,11 +1,13 @@
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files of yaml or json type from specified paths through OmegaConf.
 """
+from __future__ import annotations
+
 import io
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set  # noqa
+from typing import Any, Iterable
 
 import fsspec
 from omegaconf import DictConfig, OmegaConf
@@ -75,9 +77,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self,
         conf_source: str,
         env: str = None,
-        runtime_params: Dict[str, Any] = None,
+        runtime_params: dict[str, Any] = None,
         *,
-        config_patterns: Dict[str, List[str]] = None,
+        config_patterns: dict[str, list[str]] = None,
         base_env: str = "base",
         default_run_env: str = "local",
     ):
@@ -130,7 +132,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             runtime_params=runtime_params,
         )
 
-    def __getitem__(self, key) -> Dict[str, Any]:
+    def __getitem__(self, key) -> dict[str, Any]:
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -210,8 +212,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         conf_path: str,
         patterns: Iterable[str],
         key: str,
-        read_environment_variables: Optional[bool] = False,
-    ) -> Dict[str, Any]:
+        read_environment_variables: bool | None = False,
+    ) -> dict[str, Any]:
         """Recursively load and merge all configuration files in a directory using OmegaConf,
         which satisfy a given list of glob patterns from a specific path.
 
@@ -295,7 +297,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         ]
 
     @staticmethod
-    def _check_duplicates(seen_files_to_keys: Dict[Path, Set[Any]]):
+    def _check_duplicates(seen_files_to_keys: dict[Path, set[Any]]):
         duplicates = []
 
         filepaths = list(seen_files_to_keys.keys())
@@ -319,7 +321,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise ValueError(f"{dup_str}")
 
     @staticmethod
-    def _resolve_environment_variables(config: DictConfig) -> None:
+    def _resolve_environment_variables(config: dict[str, Any]) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
         them in-place, clearing the resolver after the operation is complete if
         it was not registered beforehand.

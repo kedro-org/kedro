@@ -1,4 +1,6 @@
 # pylint: disable=expression-not-assigned, pointless-statement
+from __future__ import annotations
+
 import configparser
 import json
 import os
@@ -6,7 +8,6 @@ import re
 import subprocess
 import zipfile
 from pathlib import Path
-from typing import Dict
 
 import pytest
 import yaml
@@ -20,13 +21,13 @@ _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
 
 
-def _write_json(filepath: Path, config: Dict):
+def _write_json(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     json_str = json.dumps(config)
     filepath.write_text(json_str)

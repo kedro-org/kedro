@@ -1,8 +1,10 @@
 """This module provides ``kedro.abstract_config`` with the baseline
 class model for a `ConfigLoader` implementation.
 """
+from __future__ import annotations
+
 from collections import UserDict
-from typing import Any, Dict
+from typing import Any
 
 
 class AbstractConfigLoader(UserDict):
@@ -16,7 +18,7 @@ class AbstractConfigLoader(UserDict):
         self,
         conf_source: str,
         env: str = None,
-        runtime_params: Dict[str, Any] = None,
+        runtime_params: dict[str, Any] = None,
         **kwargs,
     ):
         super().__init__()

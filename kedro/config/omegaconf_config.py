@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import fsspec
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError

@@ -1,8 +1,9 @@
 """``MemoryDataSet`` is a data set implementation which handles in-memory data.
 """
+from __future__ import annotations
 
 import copy
-from typing import Any, Dict
+from typing import Any
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
@@ -71,7 +72,7 @@ class MemoryDataSet(AbstractDataSet):
     def _release(self) -> None:
         self._data = _EMPTY
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         if self._data is not _EMPTY:
             return {"data": f"<{type(self._data).__name__}>"}
         # the string representation of datasets leaves out __init__

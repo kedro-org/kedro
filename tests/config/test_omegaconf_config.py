@@ -1,4 +1,6 @@
 # pylint: disable=expression-not-assigned, pointless-statement
+from __future__ import annotations
+
 import configparser
 import json
 import os
@@ -6,7 +8,6 @@ import re
 import subprocess
 import zipfile
 from pathlib import Path
-from typing import Dict
 
 import pytest
 import yaml
@@ -20,13 +21,13 @@ _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
 
 
-def _write_json(filepath: Path, config: Dict):
+def _write_json(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     json_str = json.dumps(config)
     filepath.write_text(json_str)
@@ -69,14 +70,30 @@ def local_config(tmp_path):
 
 @pytest.fixture
 def create_config_dir(tmp_path, base_config, local_config):
-    proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
-    local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
-    parameters = tmp_path / _BASE_ENV / "parameters.json"
-    project_parameters = {"param1": 1, "param2": 2}
+    base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+    base_logging = tmp_path / _BASE_ENV / "logging.yml"
+    base_spark = tmp_path / _BASE_ENV / "spark.yml"
+    base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
 
-    _write_yaml(proj_catalog, base_config)
+    local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
+
+    parameters = tmp_path / _BASE_ENV / "parameters.json"
+    base_parameters = {"param1": 1, "param2": 2, "interpolated_param": "${test_env}"}
+    base_global_parameters = {"test_env": "base"}
+    local_global_parameters = {"test_env": "local"}
+
+    _write_yaml(base_catalog, base_config)
     _write_yaml(local_catalog, local_config)
-    _write_json(parameters, project_parameters)
+
+    # Empty Config
+    _write_yaml(base_logging, {"version": 1})
+    _write_yaml(base_spark, {"dummy": 1})
+
+    _write_json(parameters, base_parameters)
+    _write_json(tmp_path / _BASE_ENV / "parameters_global.json", base_global_parameters)
+    _write_json(
+        tmp_path / _DEFAULT_RUN_ENV / "parameters_global.json", local_global_parameters
+    )
 
 
 @pytest.fixture
@@ -530,3 +547,43 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(conf_source=f"{tmp_path}/Python.zip")
         catalog = conf["catalog"]
         assert catalog["trains"]["type"] == "MemoryDataSet"
+
+    @use_config_dir
+    def test_variable_interpolation_with_correct_env(self, tmp_path):
+        """Make sure the parameters is interpolated with the correct environment"""
+        conf = OmegaConfigLoader(str(tmp_path))
+        params = conf["parameters"]
+        # Making sure it is not override by local/parameters_global.yml
+        assert params["interpolated_param"] == "base"
+
+    @use_config_dir
+    def test_runtime_params_override_interpolated_value(self, tmp_path):
+        """Make sure interpolated value is updated correctly with runtime_params"""
+        conf = OmegaConfigLoader(str(tmp_path), runtime_params={"test_env": "dummy"})
+        params = conf["parameters"]
+        assert params["interpolated_param"] == "dummy"
+
+    @use_config_dir
+    @use_credentials_env_variable_yml
+    def test_runtime_params_not_propogate_non_parameters_config(self, tmp_path):
+        """Make sure `catalog`, `credentials`, `logging` or any config other than
+        `parameters` are not updated by `runtime_params`."""
+        # https://github.com/kedro-org/kedro/pull/2467
+        key = "test_env"
+        runtime_params = {key: "dummy"}
+        conf = OmegaConfigLoader(
+            str(tmp_path),
+            config_patterns={"spark": ["spark*", "spark*/**", "**/spark*"]},
+            runtime_params=runtime_params,
+        )
+        parameters = conf["parameters"]
+        catalog = conf["catalog"]
+        credentials = conf["credentials"]
+        logging = conf["logging"]
+        spark = conf["spark"]
+
+        assert key in parameters
+        assert key not in catalog
+        assert key not in credentials
+        assert key not in logging
+        assert key not in spark

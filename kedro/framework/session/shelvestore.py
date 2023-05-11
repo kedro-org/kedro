@@ -1,11 +1,13 @@
 """This module implements a dict-like store object used to persist Kedro sessions.
 This module is separated from store.py to ensure it's only imported when exported explicitly.
 """
+from __future__ import annotations
+
 import dbm
 import shelve
 from multiprocessing import Lock
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from .store import BaseSessionStore
 
@@ -20,9 +22,9 @@ class ShelveStore(BaseSessionStore):
     def _location(self) -> Path:
         return Path(self._path).expanduser().resolve() / self._session_id / "store"
 
-    def read(self) -> Dict[str, Any]:
+    def read(self) -> dict[str, Any]:
         """Read the data from disk using `shelve` package."""
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         try:
             with shelve.open(str(self._location), flag="r") as _sh:  # nosec
                 data = dict(_sh)

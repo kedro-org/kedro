@@ -1,9 +1,11 @@
 """``PartitionedDataSet`` loads and saves partitioned file-like data using the
 underlying dataset definition. It also uses `fsspec` for filesystem level operations.
 """
+from __future__ import annotations
+
 import operator
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Type, Union
+from typing import Any, Callable
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -132,12 +134,12 @@ class PartitionedDataSet(AbstractDataSet):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         path: str,
-        dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
+        dataset: str | type[AbstractDataSet] | dict[str, Any],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
         overwrite: bool = False,
         metadata: Dict[str, Any] = None,
     ):
@@ -253,7 +255,7 @@ class PartitionedDataSet(AbstractDataSet):
         return self._path
 
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
-    def _list_partitions(self) -> List[str]:
+    def _list_partitions(self) -> list[str]:
         return [
             path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
@@ -280,7 +282,7 @@ class PartitionedDataSet(AbstractDataSet):
             path = path[: -len(self._filename_suffix)]
         return path
 
-    def _load(self) -> Dict[str, Callable[[], Any]]:
+    def _load(self) -> dict[str, Callable[[], Any]]:
         partitions = {}
 
         for partition in self._list_partitions():
@@ -296,7 +298,7 @@ class PartitionedDataSet(AbstractDataSet):
 
         return partitions
 
-    def _save(self, data: Dict[str, Any]) -> None:
+    def _save(self, data: dict[str, Any]) -> None:
         if self._overwrite and self._filesystem.exists(self._normalized_path):
             self._filesystem.rm(self._normalized_path, recursive=True)
 
@@ -311,7 +313,7 @@ class PartitionedDataSet(AbstractDataSet):
             dataset.save(partition_data)
         self._invalidate_caches()
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         clean_dataset_config = (
             {k: v for k, v in self._dataset_config.items() if k != CREDENTIALS_KEY}
             if isinstance(self._dataset_config, dict)
@@ -378,14 +380,14 @@ class IncrementalDataSet(PartitionedDataSet):
     def __init__(
         self,
         path: str,
-        dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
-        checkpoint: Union[str, Dict[str, Any]] = None,
+        dataset: str | type[AbstractDataSet] | dict[str, Any],
+        checkpoint: str | dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        credentials: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
-        metadata: Dict[str, Any] = None,
+        credentials: dict[str, Any] = None,
+        load_args: dict[str, Any] = None,
+        fs_args: dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ):
 
         """Creates a new instance of ``IncrementalDataSet``.
@@ -459,8 +461,8 @@ class IncrementalDataSet(PartitionedDataSet):
         self._comparison_func = comparison_func
 
     def _parse_checkpoint_config(
-        self, checkpoint_config: Union[str, Dict[str, Any], None]
-    ) -> Dict[str, Any]:
+        self, checkpoint_config: str | dict[str, Any] | None
+    ) -> dict[str, Any]:
         checkpoint_config = deepcopy(checkpoint_config)
         if isinstance(checkpoint_config, str):
             checkpoint_config = {"force_checkpoint": checkpoint_config}
@@ -491,7 +493,7 @@ class IncrementalDataSet(PartitionedDataSet):
         return {**default_config, **checkpoint_config}
 
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
-    def _list_partitions(self) -> List[str]:
+    def _list_partitions(self) -> list[str]:
         checkpoint = self._read_checkpoint()
         checkpoint_path = (
             self._filesystem._strip_protocol(  # pylint: disable=protected-access
@@ -521,7 +523,7 @@ class IncrementalDataSet(PartitionedDataSet):
         type_, kwargs = parse_dataset_definition(self._checkpoint_config)
         return type_(**kwargs)  # type: ignore
 
-    def _read_checkpoint(self) -> Union[str, None]:
+    def _read_checkpoint(self) -> str | None:
         if self._force_checkpoint is not None:
             return self._force_checkpoint
         try:
@@ -529,7 +531,7 @@ class IncrementalDataSet(PartitionedDataSet):
         except DataSetError:
             return None
 
-    def _load(self) -> Dict[str, Callable[[], Any]]:
+    def _load(self) -> dict[str, Callable[[], Any]]:
         partitions = {}
 
         for partition in self._list_partitions():

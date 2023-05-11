@@ -4,12 +4,14 @@ use a ``DataCatalog``, you need to instantiate it with a dictionary of data
 sets. Then it will act as a single point of reference for your calls,
 relaying load and save functions to the underlying data sets.
 """
+from __future__ import annotations
+
 import copy
 import difflib
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from typing import Any
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -28,8 +30,8 @@ WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
 def _get_credentials(
-    credentials_name: str, credentials: Dict[str, Any]
-) -> Dict[str, Any]:
+    credentials_name: str, credentials: dict[str, Any]
+) -> dict[str, Any]:
     """Return a set of credentials from the provided credentials dict.
 
     Args:
@@ -56,8 +58,8 @@ def _get_credentials(
 
 
 def _resolve_credentials(
-    config: Dict[str, Any], credentials: Dict[str, Any]
-) -> Dict[str, Any]:
+    config: dict[str, Any], credentials: dict[str, Any]
+) -> dict[str, Any]:
     """Return the dataset configuration where credentials are resolved using
     credentials dictionary provided.
 
@@ -97,7 +99,7 @@ class _FrozenDatasets:
 
     def __init__(
         self,
-        *datasets_collections: Union["_FrozenDatasets", Dict[str, AbstractDataSet]],
+        *datasets_collections: _FrozenDatasets | dict[str, AbstractDataSet],
     ):
         """Return a _FrozenDatasets instance from some datasets collections.
         Each collection could either be another _FrozenDatasets or a dictionary.
@@ -136,9 +138,9 @@ class DataCatalog:
 
     def __init__(
         self,
-        data_sets: Dict[str, AbstractDataSet] = None,
-        feed_dict: Dict[str, Any] = None,
-        layers: Dict[str, Set[str]] = None,
+        data_sets: dict[str, AbstractDataSet] = None,
+        feed_dict: dict[str, Any] = None,
+        layers: dict[str, set[str]] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -179,12 +181,12 @@ class DataCatalog:
 
     @classmethod
     def from_config(
-        cls: Type,
-        catalog: Optional[Dict[str, Dict[str, Any]]],
-        credentials: Dict[str, Dict[str, Any]] = None,
-        load_versions: Dict[str, str] = None,
+        cls: type,
+        catalog: dict[str, dict[str, Any]] | None,
+        credentials: dict[str, dict[str, Any]] = None,
+        load_versions: dict[str, str] = None,
         save_version: str = None,
-    ) -> "DataCatalog":
+    ) -> DataCatalog:
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
         ``DataCatalog`` with configuration parsed from configuration files.
@@ -267,7 +269,7 @@ class DataCatalog:
                 f"are not found in the catalog."
             )
 
-        layers: Dict[str, Set[str]] = defaultdict(set)
+        layers: dict[str, set[str]] = defaultdict(set)
         for ds_name, ds_config in catalog.items():
             ds_layer = ds_config.pop("layer", None)
             if ds_layer is not None:
@@ -453,7 +455,7 @@ class DataCatalog:
         self.datasets = _FrozenDatasets(self.datasets, {data_set_name: data_set})
 
     def add_all(
-        self, data_sets: Dict[str, AbstractDataSet], replace: bool = False
+        self, data_sets: dict[str, AbstractDataSet], replace: bool = False
     ) -> None:
         """Adds a group of new data sets to the ``DataCatalog``.
 
@@ -487,7 +489,7 @@ class DataCatalog:
         for name, data_set in data_sets.items():
             self.add(name, data_set, replace)
 
-    def add_feed_dict(self, feed_dict: Dict[str, Any], replace: bool = False) -> None:
+    def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
         """Adds instances of ``MemoryDataSet``, containing the data provided
         through feed_dict.
 
@@ -520,7 +522,7 @@ class DataCatalog:
 
             self.add(data_set_name, data_set, replace)
 
-    def list(self, regex_search: Optional[str] = None) -> List[str]:
+    def list(self, regex_search: str | None = None) -> list[str]:
         """
         List of all ``DataSet`` names registered in the catalog.
         This can be filtered by providing an optional regular expression
@@ -565,7 +567,7 @@ class DataCatalog:
             ) from exc
         return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 
-    def shallow_copy(self) -> "DataCatalog":
+    def shallow_copy(self) -> DataCatalog:
         """Returns a shallow copy of the current object.
 
         Returns:

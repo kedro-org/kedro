@@ -1,6 +1,8 @@
 """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
+from __future__ import annotations
+
 import multiprocessing
 import os
 import pickle
@@ -11,7 +13,7 @@ from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Dict, Iterable, Set
+from typing import Any, Iterable
 
 from pluggy import PluginManager
 
@@ -78,7 +80,7 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
-def _bootstrap_subprocess(package_name: str, logging_config: Dict[str, Any]):
+def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
     # pylint: disable=import-outside-toplevel,cyclic-import
     from kedro.framework.project import configure_logging, configure_project
 
@@ -92,7 +94,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
     is_async: bool = False,
     session_id: str = None,
     package_name: str = None,
-    logging_config: Dict[str, Any] = None,
+    logging_config: dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -290,7 +292,7 @@ class ParallelRunner(AbstractRunner):
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())
-        done_nodes: Set[Node] = set()
+        done_nodes: set[Node] = set()
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)

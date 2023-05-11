@@ -2,7 +2,9 @@
 providing custom load, save, and exists methods without extending
 ``AbstractDataSet``.
 """
-from typing import Any, Callable, Dict, Optional
+from __future__ import annotations
+
+from typing import Any, Callable
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
@@ -29,7 +31,7 @@ class LambdaDataSet(AbstractDataSet):
         >>> data_set = LambdaDataSet(load, None)
     """
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         def _to_str(func):
             if not func:
                 return None
@@ -77,8 +79,8 @@ class LambdaDataSet(AbstractDataSet):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        load: Optional[Callable[[], Any]],
-        save: Optional[Callable[[Any], None]],
+        load: Callable[[], Any] | None,
+        save: Callable[[Any], None] | None,
         exists: Callable[[], bool] = None,
         release: Callable[[], None] = None,
         metadata: Dict[str, Any] = None,

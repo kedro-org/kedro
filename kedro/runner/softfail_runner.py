@@ -129,7 +129,7 @@ class SoftFailRunner(SequentialRunner):
             len(skip_nodes),
         )
         if skip_nodes:
-            self._suggest_resume_scenario(pipeline, done_nodes)
+            self._suggest_resume_scenario(pipeline, done_nodes, catalog)
 
     def run(
         self,

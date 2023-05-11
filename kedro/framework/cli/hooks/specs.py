@@ -2,7 +2,7 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
-from typing import List
+from __future__ import annotations
 
 from kedro.framework.startup import ProjectMetadata
 
@@ -16,7 +16,7 @@ class CLICommandSpecs:
     def before_command_run(
         self,
         project_metadata: ProjectMetadata,
-        command_args: List[str],
+        command_args: list[str],
     ):
         """Hooks to be invoked before a CLI command runs.
         It receives the ``project_metadata`` as well as
@@ -31,7 +31,7 @@ class CLICommandSpecs:
 
     @cli_hook_spec
     def after_command_run(
-        self, project_metadata: ProjectMetadata, command_args: List[str], exit_code: int
+        self, project_metadata: ProjectMetadata, command_args: list[str], exit_code: int
     ):
         """Hooks to be invoked after a CLI command runs.
         It receives the ``project_metadata`` as well as

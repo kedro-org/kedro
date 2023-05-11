@@ -24,7 +24,7 @@ class AbstractConfigLoader(UserDict):
         super().__init__()
         self.conf_source = conf_source
         self.env = env
-        self.runtime_params = runtime_params
+        self.runtime_params = runtime_params or {}
 
 
 class BadConfigException(Exception):

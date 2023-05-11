@@ -17,6 +17,7 @@
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
 
 ## Breaking changes to the API
+* `kedro package` does not produce `.egg` files anymore, and now relies exclusively on `.whl` files.
 ## Upcoming deprecations for Kedro 0.19.0
 
 

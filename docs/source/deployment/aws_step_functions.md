@@ -1,14 +1,17 @@
-# How to deploy your Kedro pipeline with AWS Step Functions
+# AWS Step Functions
 
 This tutorial explains how to deploy a Kedro project with [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) in order to run a Kedro pipeline in production on AWS [Serverless Computing](https://aws.amazon.com/serverless/) platform.
 
-## Why would you run a Kedro pipeline with AWS Step Functions
+## Why would you run a Kedro pipeline with AWS Step Functions?
 
-A major problem when data pipelines move to production is to build and maintain the underlying compute infrastructure, or [servers](https://en.wikipedia.org/wiki/Server_(computing)). However, [serverless computing](https://en.wikipedia.org/wiki/Serverless_computing) can address some aspects of this problem, whereby cloud providers allocate machine resources on demand, allowing data engineers and data scientists to focus on their business problems. [Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) and [AWS Lambda](https://aws.amazon.com/lambda/) are good examples of this solution, but others are available.
+A major problem when data pipelines move to production is to build and maintain the underlying compute infrastructure, or [servers](https://en.wikipedia.org/wiki/Server_(computing)). [Serverless computing](https://en.wikipedia.org/wiki/Serverless_computing) hands the provisioning and management of distributed computing resources to cloud providers, enabling data engineers and data scientists to focus on their business problems.
 
-In addition to on-demand compute, services like [AWS Step Functions](https://aws.amazon.com/step-functions/) offer a managed orchestration capability that makes it easy to sequence serverless functions and multiple cloud-native services into business-critical applications. From a Kedro perspective, this means the ability to run each node and retain the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure.
+[Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) and [AWS Lambda](https://aws.amazon.com/lambda/) are good examples of this solution, but others are available. Services like [AWS Step Functions](https://aws.amazon.com/step-functions/) offer a managed orchestration capability that makes it easy to sequence serverless functions and multiple cloud-native services into business-critical applications.
+
+From a Kedro perspective, this means the ability to run each node and retain the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure. Another benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider, such as the use of the [feature store for Amazon SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.
 
 The following discusses how to run the Kedro pipeline from the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) on [AWS Step Functions](https://aws.amazon.com/step-functions/).
+
 
 ## Strategy
 
@@ -384,7 +387,3 @@ If you go into the state machine and click on `Start Execution`, you will be abl
 ## Limitations
 
 Generally speaking, the [limitations on AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) have improved dramatically in recent years. However, it's still worth noting that each Lambda function has a 15-minute timeout, 10GB maximum memory limit and 10GB container image code package size limit. This means, for example, if you have a node that takes longer than 15 minutes to run, you should switch to some other AWS services, such as [AWS Batch](aws_batch) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.
-
-## Final thought
-
-One major benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider, such as the use of the AWS [feature store for SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.

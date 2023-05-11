@@ -296,23 +296,10 @@ class TestPackageCommand:
                 mocker.call(
                     [
                         sys.executable,
-                        "setup.py",
-                        "clean",
-                        "--all",
-                        "bdist_egg",
-                        "--dist-dir",
-                        "../dist",
-                    ],
-                    cwd=str(fake_repo_path / "src"),
-                ),
-                mocker.call(
-                    [
-                        sys.executable,
-                        "setup.py",
-                        "clean",
-                        "--all",
-                        "bdist_wheel",
-                        "--dist-dir",
+                        "-m",
+                        "build",
+                        "--wheel",
+                        "--outdir",
                         "../dist",
                     ],
                     cwd=str(fake_repo_path / "src"),

@@ -148,28 +148,15 @@ def ipython(
 @project_group.command()
 @click.pass_obj  # this will pass the metadata as first argument
 def package(metadata: ProjectMetadata):
-    """Package the project as a Python egg and wheel."""
+    """Package the project as a Python wheel."""
     source_path = metadata.source_dir
     call(
         [
             sys.executable,
-            "setup.py",
-            "clean",
-            "--all",
-            "bdist_egg",
-            "--dist-dir",
-            "../dist",
-        ],
-        cwd=str(source_path),
-    )
-    call(
-        [
-            sys.executable,
-            "setup.py",
-            "clean",
-            "--all",
-            "bdist_wheel",
-            "--dist-dir",
+            "-m",
+            "build",
+            "--wheel",
+            "--outdir",
             "../dist",
         ],
         cwd=str(source_path),

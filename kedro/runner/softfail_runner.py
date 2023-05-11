@@ -5,36 +5,14 @@ of provided nodes.
 
 from collections import Counter
 from itertools import chain
-
-from pluggy import PluginManager
+from typing import Any, Dict, Set
 
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
-from kedro.pipeline.pipeline import _strip_transcoding
-from kedro.runner.runner import run_node
 from kedro.runner import SequentialRunner
-from typing import Dict, Set, Any
-
-
-def child_dependencies(self) -> Dict[Node, Set[Node]]:
-    """All dependencies of nodes where the first Node has a direct dependency on
-    the second Node.
-
-    Returns:
-        Dictionary where keys are nodes and values are sets made up of
-        their parent nodes. Independent nodes have this as empty sets.
-    """
-    dependencies = {node: set() for node in self._nodes}
-    for parent in self._nodes:
-        for output in parent.outputs:
-            for child in self._nodes_by_input[_strip_transcoding(output)]:
-                dependencies[parent].add(child)
-
-    return dependencies
-
-
-Pipeline.child_dependencies = property(child_dependencies)
+from kedro.runner.runner import run_node
+from pluggy import PluginManager
 
 
 class SoftFailRunner(SequentialRunner):
@@ -44,34 +22,6 @@ class SoftFailRunner(SequentialRunner):
     immediately upon encountering node failure. Instead, it will continue to run on
     remaining nodes as long as their dependencies are fulfilled.
     """
-
-    def _update_skip_nodes(self, node, node_dependencies, skip_nodes=None) -> Set[Node]:
-        """Traverse the DAG with Breath-First-Search (BFS) to find all descendent nodes.
-        `skip_nodes` is used to eliminate unnecessary search path, the `skip_nodes` will be
-        updated during the search.
-
-        Args:
-        node: A ``Node`` that need to be skipped due to exception.
-        node_dependencies: Node dependencies Dict[Node, Set[Node]], the key is the Node
-        and the value is the child of the node.
-        skip_nodes: A set of Node to be skipped.
-
-        Returns:
-            The set of nodes that need to be skipped.
-        """
-
-        queue = [node]
-        node_set = set()
-        while queue:
-            parent_node = queue.pop()
-            if parent_node in skip_nodes:
-                continue
-            for child in node_dependencies[parent_node]:
-                node_set.add(child)
-                if child not in skip_nodes:
-                    skip_nodes.add(child)
-                queue.append(child)
-        return node_set
 
     def _run(
         self,
@@ -94,7 +44,7 @@ class SoftFailRunner(SequentialRunner):
         nodes = pipeline.nodes
         done_nodes = set()
         skip_nodes = set()
-        child_dependencies = pipeline.child_dependencies
+        fail_nodes = set()
 
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         for exec_index, node in enumerate(nodes):
@@ -105,9 +55,8 @@ class SoftFailRunner(SequentialRunner):
                 run_node(node, catalog, hook_manager, self._is_async, session_id)
                 done_nodes.add(node)
             except Exception as e:
-                new_nodes = self._update_skip_nodes(
-                    node, child_dependencies, skip_nodes
-                )
+                new_nodes = self._update_skip_nodes(node, pipeline, skip_nodes)
+                fail_nodes.add(node)
                 self._logger.warning(f"Skipped node: {str(new_nodes)}")
                 self._logger.warning(e)
             # decrement load counts and release any data sets we've finished with
@@ -121,15 +70,42 @@ class SoftFailRunner(SequentialRunner):
 
             self._logger.info(
                 "Completed %d out of %d tasks",
-                exec_index + 1 - len(skip_nodes),
+                len(done_nodes),
                 len(nodes),
             )
-        self._logger.warn(
-            "%d node(s) failed during the execution",
-            len(skip_nodes),
-        )
+        self._summary(pipeline, skip_nodes, fail_nodes)
+
         if skip_nodes:
             self._suggest_resume_scenario(pipeline, done_nodes, catalog)
+
+    def _update_skip_nodes(self, node, pipeline, skip_nodes=None) -> Set[Node]:
+        """Traverse the DAG with Breath-First-Search (BFS) to find all descendent nodes.
+        `skip_nodes` is used to eliminate unnecessary search path, the `skip_nodes` will be
+        updated during the search.
+
+        Args:
+        node: A ``Node`` that need to be skipped due to exception.
+        node_dependencies: Node dependencies Dict[Node, Set[Node]], the key is the Node
+        and the value is the child of the node.
+        skip_nodes: A set of Node to be skipped.
+
+        Returns:
+            The set of nodes that need to be skipped.
+        """
+        node_set = pipeline.from_nodes(node.name).nodes
+        skip_nodes |= set(pipeline.from_nodes(node.name).nodes)
+        return node_set
+
+    def _summary(self, pipeline, skip_nodes, fail_nodes):
+        if fail_nodes:
+            fail_nodes_names = [node.name for node in fail_nodes]
+            self._logger.warning("These are the nodes with error %s", fail_nodes_names)
+        if skip_nodes:
+            skip_nodes_names = [node.name for node in skip_nodes]
+            skipped_output = pipeline.only_nodes(*skip_nodes_names).outputs()
+            self._logger.warning(
+                "These are the datasets that haven't been generated %s", skipped_output
+            )
 
     def run(
         self,
@@ -172,12 +148,12 @@ class SoftFailRunner(SequentialRunner):
             catalog.add(ds_name, self.create_default_data_set(ds_name))
 
         if self._is_async:
-            self._logger.info(
+            self._self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
         self._run(pipeline, catalog, hook_manager, session_id)
 
-        # self._logger.warn("Pipeline execution completed successfully.")
+        # self._self._logger.warn("Pipeline execution completed successfully.")
 
         # Override runner temporarily - need to handle the GC properly, not important for now
         # run_result = {}

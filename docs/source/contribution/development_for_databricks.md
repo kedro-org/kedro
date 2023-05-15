@@ -2,7 +2,7 @@
 
 Many Kedro users deploy their projects to [Databricks](https://www.databricks.com/), a cloud-based platform for data engineering and data science. We encourage contributions to extend and improve the experience for Kedro users on Databricks; this guide explains how to efficiently test your locally modified version of Kedro on Databricks as part of a build-and-test development cycle.
 
-## How to deploy a development version of Kedro to Databricks
+## Deploy a development version of Kedro to Databricks
 
 ```{note}
 This page is for **contributors** developing changes to Kedro that need to test them on Databricks. If you are a Kedro user working on an individual or team project and need more information about workflows, consult the [documentation for developing a Kedro project on Databricks](../integrations/databricks_workspace.md).

@@ -2,10 +2,12 @@
 or more configuration files from specified paths, and format template strings
 with the values from the passed dictionary.
 """
+from __future__ import annotations
+
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Iterable
 
 import jmespath
 
@@ -91,13 +93,13 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         self,
         conf_source: str,
         env: str = None,
-        runtime_params: Dict[str, Any] = None,
-        config_patterns: Dict[str, List[str]] = None,
+        runtime_params: dict[str, Any] = None,
+        config_patterns: dict[str, list[str]] = None,
         *,
         base_env: str = "base",
         default_run_env: str = "local",
-        globals_pattern: Optional[str] = None,
-        globals_dict: Optional[Dict[str, Any]] = None,
+        globals_pattern: str | None = None,
+        globals_dict: dict[str, Any] | None = None,
     ):
         """Instantiates a ``TemplatedConfigLoader``.
 
@@ -162,7 +164,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         """Property method to return deduplicated configuration paths."""
         return _remove_duplicates(self._build_conf_paths())
 
-    def get(self, *patterns: str) -> Dict[str, Any]:  # type: ignore
+    def get(self, *patterns: str) -> dict[str, Any]:  # type: ignore
         """Tries to resolve the template variables in the config dictionary
         provided by the ``ConfigLoader`` (super class) ``get`` method using the
         dictionary of replacement values obtained in the ``__init__`` method.
@@ -194,7 +196,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         ]
 
 
-def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
+def _format_object(val: Any, format_dict: dict[str, Any]) -> Any:
     """Recursive function that loops through the values of a map. In case another
     map or a list is encountered, it calls itself. When a string is encountered,
     it will use the `format_dict` to replace strings that look like `${expr}`,

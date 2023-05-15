@@ -1,13 +1,16 @@
 """This module implements Kedro session responsible for project lifecycle."""
+from __future__ import annotations
+
 import getpass
 import logging
 import logging.config
 import os
 import subprocess
+import sys
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Iterable
 
 import click
 from omegaconf import OmegaConf, omegaconf
@@ -29,7 +32,7 @@ from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 
 
-def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
+def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
     project_path = str(project_path)
     try:
         res = subprocess.check_output(
@@ -37,7 +40,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
             cwd=project_path,
             stderr=subprocess.STDOUT,
         )
-        git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
+        git_data: dict[str, Any] = {"commit_sha": res.decode().strip()}
         git_status_res = subprocess.check_output(
             ["git", "status", "--short"],
             cwd=project_path,
@@ -55,12 +58,12 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
     return {"git": git_data}
 
 
-def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
+def _jsonify_cli_context(ctx: click.core.Context) -> dict[str, Any]:
     return {
         "args": ctx.args,
         "params": ctx.params,
         "command_name": ctx.command.name,
-        "command_path": ctx.command_path,
+        "command_path": " ".join(["kedro"] + sys.argv[1:]),
     }
 
 
@@ -102,9 +105,9 @@ class KedroSession:
         self,
         session_id: str,
         package_name: str = None,
-        project_path: Union[Path, str] = None,
+        project_path: Path | str | None = None,
         save_on_close: bool = False,
-        conf_source: Optional[str] = None,
+        conf_source: str | None = None,
     ):
         self._project_path = Path(project_path or Path.cwd()).resolve()
         self.session_id = session_id
@@ -126,12 +129,12 @@ class KedroSession:
     def create(  # pylint: disable=too-many-arguments
         cls,
         package_name: str = None,
-        project_path: Union[Path, str] = None,
+        project_path: Path | str | None = None,
         save_on_close: bool = True,
         env: str = None,
-        extra_params: Dict[str, Any] = None,
-        conf_source: Optional[str] = None,
-    ) -> "KedroSession":
+        extra_params: dict[str, Any] = None,
+        conf_source: str | None = None,
+    ) -> KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
 
         Args:
@@ -162,7 +165,7 @@ class KedroSession:
 
         # have to explicitly type session_data otherwise mypy will complain
         # possibly related to this: https://github.com/python/mypy/issues/1430
-        session_data: Dict[str, Any] = {
+        session_data: dict[str, Any] = {
             "package_name": session._package_name,
             "project_path": session._project_path,
             "session_id": session.session_id,
@@ -195,10 +198,10 @@ class KedroSession:
 
         return session
 
-    def _get_logging_config(self) -> Dict[str, Any]:
+    def _get_logging_config(self) -> dict[str, Any]:
         logging_config = self._get_config_loader()["logging"]
         if isinstance(logging_config, omegaconf.DictConfig):
-            logging_config = OmegaConf.to_container(logging_config)
+            logging_config = OmegaConf.to_container(logging_config)  # pragma: no cover
         # turn relative paths in logging config into absolute path
         # before initialising loggers
         logging_config = _convert_paths_to_absolute_posix(
@@ -253,7 +256,7 @@ class KedroSession:
         return logging.getLogger(__name__)
 
     @property
-    def store(self) -> Dict[str, Any]:
+    def store(self) -> dict[str, Any]:
         """Return a copy of internal store."""
         return dict(self._store)
 
@@ -316,9 +319,9 @@ class KedroSession:
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
         to_outputs: Iterable[str] = None,
-        load_versions: Dict[str, str] = None,
+        load_versions: dict[str, str] = None,
         namespace: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
         Args:

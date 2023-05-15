@@ -170,7 +170,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
 ## Test the pipelines
 
-When you created your project with `kedro new`, one of the files generated was `src/<project_name>/pipeline_registry.py` which constructs a `__default__` pipeline that includes every pipeline in the project.
+When you created your project with `kedro new`, one of the files generated was `src/<package_name>/pipeline_registry.py` which constructs a `__default__` pipeline that includes every pipeline in the project.
 
 This means that you do not need to manually instruct Kedro to run each pipeline, but can execute the default pipeline, which consists of the data processing and then data science pipeline in turn.
 
@@ -518,7 +518,7 @@ kedro run --runner=ThreadRunner
 kedro run --runner=module.path.to.my.runner
 ```
 
-`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and [Dask](/kedro.datasets.dask.ParquetDataSet).
+`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and [Dask](/kedro_datasets.dask.ParquetDataSet).
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).
 atasets to work with different data formats (including CSV, Excel, and Parquet)

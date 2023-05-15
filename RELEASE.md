@@ -8,19 +8,45 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-
-# Upcoming Release 0.18.8
+# Upcoming Release 0.18.9
 
 ## Major features and improvements
+* `kedro run --params` now updates interpolated parameters correctly when using `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
-* Improvements to documentation about configuration.
-* Improvements to Jupyter E2E tests.
-* Improvements to documentation on visualising Kedro projects on Databricks.
+* `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
 
 ## Breaking changes to the API
-
+* `kedro package` does not produce `.egg` files anymore, and now relies exclusively on `.whl` files.
 ## Upcoming deprecations for Kedro 0.19.0
+
+
+# Release 0.18.8
+
+## Major features and improvements
+* Added `KEDRO_LOGGING_CONFIG` environment variable, which can be used to configure logging from the beginning of the `kedro` process.
+* Removed logs folder from the kedro new project template. File-based logging will remain but just be level INFO and above and go to project root instead.
+
+
+## Bug fixes and other changes
+* Improvements to Jupyter E2E tests.
+* Added full `kedro run` CLI command to session store to improve run reproducibility using `Kedro-Viz` experiment tracking.
+
+### Documentation changes
+* Improvements to documentation about configuration.
+* Improvements to Sphinx toolchain including incrementing to use a newer version.
+* Improvements to documentation on visualising Kedro projects on Databricks, and additional documentation about the development workflow for Kedro projects on Databricks.
+* Updated Technical Steering Committee membership documentation.
+* Revised documentation section about linting and formatting and extended to give details of `flake8` configuration.
+* Updated table of contents for documentation to reduce scrolling.
+* Expanded FAQ documentation.
+* Added a 404 page to documentation.
+* Added deprecation warnings about the removal of `kedro.extras.datasets`.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [MaximeSteinmetz](https://github.com/MaximeSteinmetz)
 
 # Release 0.18.7
 

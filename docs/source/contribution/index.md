@@ -1,4 +1,4 @@
-# Introduction
+# Contribute to Kedro
 
 We welcome any and all contributions to Kedro, at whatever level you can manage. For example, you could:
 
@@ -10,3 +10,14 @@ We welcome any and all contributions to Kedro, at whatever level you can manage.
 - [Review other contributors' PRs](https://github.com/kedro-org/kedro/pulls)
 - [Contribute code](./developer_contributor_guidelines.md), for example to fix a bug or add a feature
 - [Contribute to the documentation](documentation_contributor_guidelines.md)
+
+
+```{toctree}
+:hidden:
+
+developer_contributor_guidelines
+backwards_compatibility
+documentation_contributor_guidelines
+technical_steering_committee
+development_for_databricks
+```

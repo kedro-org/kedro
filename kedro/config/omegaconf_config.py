@@ -1,11 +1,13 @@
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files of yaml or json type from specified paths through OmegaConf.
 """
+from __future__ import annotations
+
 import io
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set  # noqa
+from typing import Any, Iterable
 
 import fsspec
 from omegaconf import OmegaConf
@@ -75,9 +77,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self,
         conf_source: str,
         env: str = None,
-        runtime_params: Dict[str, Any] = None,
+        runtime_params: dict[str, Any] = None,
         *,
-        config_patterns: Dict[str, List[str]] = None,
+        config_patterns: dict[str, list[str]] = None,
         base_env: str = "base",
         default_run_env: str = "local",
     ):
@@ -130,7 +132,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             runtime_params=runtime_params,
         )
 
-    def __getitem__(self, key) -> Dict[str, Any]:
+    def __getitem__(self, key) -> dict[str, Any]:
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
 
@@ -166,7 +168,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
         base_config = self.load_and_merge_dir_config(
-            base_path, patterns, read_environment_variables
+            base_path, patterns, key, read_environment_variables
         )
         config = base_config
 
@@ -177,7 +179,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
         env_config = self.load_and_merge_dir_config(
-            env_path, patterns, read_environment_variables
+            env_path, patterns, key, read_environment_variables
         )
 
         # Destructively merge the two env dirs. The chosen env will override base.
@@ -209,14 +211,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self,
         conf_path: str,
         patterns: Iterable[str],
-        read_environment_variables: Optional[bool] = False,
-    ) -> Dict[str, Any]:
+        key: str,
+        read_environment_variables: bool | None = False,
+    ) -> dict[str, Any]:
         """Recursively load and merge all configuration files in a directory using OmegaConf,
         which satisfy a given list of glob patterns from a specific path.
 
         Args:
             conf_path: Path to configuration directory.
             patterns: List of glob patterns to match the filenames against.
+            key: Key of the configuration type to fetch.
             read_environment_variables: Whether to resolve environment variables.
 
         Raises:
@@ -273,9 +277,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         if not aggregate_config:
             return {}
-        if len(aggregate_config) == 1:
-            return list(aggregate_config)[0]
-        return dict(OmegaConf.merge(*aggregate_config))
+
+        if key == "parameters":
+            # Merge with runtime parameters only for "parameters"
+            return OmegaConf.to_container(
+                OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
+            )
+        return OmegaConf.to_container(OmegaConf.merge(*aggregate_config), resolve=True)
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""
@@ -287,7 +295,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         ]
 
     @staticmethod
-    def _check_duplicates(seen_files_to_keys: Dict[Path, Set[Any]]):
+    def _check_duplicates(seen_files_to_keys: dict[Path, set[Any]]):
         duplicates = []
 
         filepaths = list(seen_files_to_keys.keys())
@@ -311,7 +319,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise ValueError(f"{dup_str}")
 
     @staticmethod
-    def _resolve_environment_variables(config: Dict[str, Any]) -> None:
+    def _resolve_environment_variables(config: dict[str, Any]) -> None:
         """Use the ``oc.env`` resolver to read environment variables and replace
         them in-place, clearing the resolver after the operation is complete if
         it was not registered beforehand.

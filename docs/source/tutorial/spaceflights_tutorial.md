@@ -1,15 +1,24 @@
-# Introducing spaceflights
+# Next steps: Tutorial
 
 In this tutorial, we construct nodes and pipelines for a price-prediction model to illustrate the steps of a typical Kedro workflow.
 
 The tutorial takes approximately **30 minutes** to complete. You will work in the terminal and by inspecting project files in an IDE or text editor. There is no Jupyter notebook for the project.
 
-
-## Scenario
-
 *It is 2160, and the space tourism industry is booming. Globally, thousands of space shuttle companies take tourists to the Moon and back. You have been able to source data that lists the amenities offered in each space shuttle, customer reviews, and company information.*
 
 ***Project***: *You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight.*
+
+```{toctree}
+:maxdepth: 1
+
+tutorial_template
+set_up_data
+create_a_pipeline
+add_another_pipeline
+package_a_project
+spaceflights_tutorial_faqs
+```
+
 
 ![](../meta/images/moon-rocket.png)
 

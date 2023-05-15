@@ -55,7 +55,7 @@ greeting_pipeline = pipeline([return_greeting_node, join_statements_node])
 
 The Kedro Data Catalog is the registry of all data sources that the project can use to manage loading and saving data. It maps the names of node inputs and outputs as keys in a `DataCatalog`, a Kedro class that can be specialised for different types of data storage.
 
-[Kedro provides different built-in datasets](/kedro.datasets) for numerous file types and file systems, so you don’t have to write the logic for reading/writing data.
+[Kedro provides different built-in datasets](/kedro_datasets) for numerous file types and file systems, so you don’t have to write the logic for reading/writing data.
 
 ## Kedro project directory structure
 
@@ -69,7 +69,6 @@ project-dir         # Parent directory of the template
 ├── conf            # Project configuration files
 ├── data            # Local project data (not committed to version control)
 ├── docs            # Project documentation
-├── logs            # Project output logs (not committed to version control)
 ├── notebooks       # Project-related Jupyter notebooks (can be used for experimental code before moving the code to src)
 ├── pyproject.toml  # Identifies the project root and contains configuration information
 ├── README.md       # Project README

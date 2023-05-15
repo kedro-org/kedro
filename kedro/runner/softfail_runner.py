@@ -76,7 +76,7 @@ class SoftFailRunner(SequentialRunner):
         self._summary(pipeline, skip_nodes, fail_nodes)
 
         if skip_nodes:
-            self._suggest_resume_scenario(pipeline, done_nodes, catalog)
+            self._suggest_resume_scenario(pipeline, done_nodes)
 
     def _update_skip_nodes(self, node, pipeline, skip_nodes=None) -> Set[Node]:
         """Traverse the DAG with Breath-First-Search (BFS) to find all descendent nodes.

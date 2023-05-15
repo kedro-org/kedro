@@ -2,7 +2,7 @@
 
 Many Kedro users deploy their projects to [Databricks](https://www.databricks.com/), a cloud-based platform for data engineering and data science. We encourage contributions to extend and improve the experience for Kedro users on Databricks; this guide explains how to efficiently test your locally modified version of Kedro on Databricks as part of a build-and-test development cycle.
 
-## Deploy a development version of Kedro to Databricks
+## How to deploy a development version of Kedro to Databricks
 
 ```{note}
 This page is for **contributors** developing changes to Kedro that need to test them on Databricks. If you are a Kedro user working on an individual or team project and need more information about workflows, consult the [documentation for developing a Kedro project on Databricks](../integrations/databricks_workspace.md).
@@ -25,7 +25,7 @@ The development workflow for Kedro on Databricks is similar to the one for Kedro
 
 To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` target named `databricks-build` that automates the process of building a wheel file and installing this on your Databricks cluster to save development time.
 
-### Setup the Databricks CLI to test a Kedro build
+### How to set up the Databricks CLI to test a Kedro build
 
 Before you use `make databricks-build`, you must [set up the Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).
 

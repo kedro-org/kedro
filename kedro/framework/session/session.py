@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import click
-from omegaconf import OmegaConf, omegaconf
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException

@@ -162,13 +162,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         read_environment_variables = key == "credentials"
 
+        processed_files: set[Path] = set()
         # Load base env config
         if self._protocol == "file":
             base_path = str(Path(self.conf_source) / self.base_env)
         else:
             base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
         base_config = self.load_and_merge_dir_config(
-            base_path, patterns, key, read_environment_variables
+            base_path, patterns, key, processed_files, read_environment_variables
         )
         config = base_config
 
@@ -179,9 +180,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
         env_config = self.load_and_merge_dir_config(
-            env_path, patterns, key, read_environment_variables
+            env_path, patterns, key, processed_files, read_environment_variables
         )
-
         # Destructively merge the two env dirs. The chosen env will override base.
         common_keys = config.keys() & env_config.keys()
         if common_keys:
@@ -194,7 +194,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         config.update(env_config)
 
-        if not config:
+        if not processed_files:
             raise MissingConfigException(
                 f"No files of YAML or JSON format found in {base_path} or {env_path} matching"
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
@@ -207,11 +207,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
-    def load_and_merge_dir_config(
+    def load_and_merge_dir_config(  # pylint: disable=too-many-arguments
         self,
         conf_path: str,
         patterns: Iterable[str],
         key: str,
+        processed_files: set,
         read_environment_variables: bool | None = False,
     ) -> dict[str, Any]:
         """Recursively load and merge all configuration files in a directory using OmegaConf,
@@ -221,6 +222,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             conf_path: Path to configuration directory.
             patterns: List of glob patterns to match the filenames against.
             key: Key of the configuration type to fetch.
+            processed_files: Set of files read for a given configuration type.
             read_environment_variables: Whether to resolve environment variables.
 
         Raises:
@@ -258,6 +260,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     # this is a workaround to read it as a binary file and decode it back to utf8.
                     tmp_fo = io.StringIO(open_config.read().decode("utf8"))
                     config = OmegaConf.load(tmp_fo)
+                    processed_files.add(config_filepath)
                 if read_environment_variables:
                     self._resolve_environment_variables(config)
                 config_per_file[config_filepath] = config

@@ -35,7 +35,7 @@ class MemoryDataSet(AbstractDataSet):
     """
 
     def __init__(
-        self, data: Any = _EMPTY, copy_mode: str = None, metadata: Dict[str, Any] = None
+        self, data: Any = _EMPTY, copy_mode: str = None, metadata: dict[str, Any] = None
     ):
         """Creates a new instance of ``MemoryDataSet`` pointing to the
         provided Python object.

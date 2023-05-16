@@ -39,7 +39,7 @@ class CachedDataSet(AbstractDataSet):
         dataset: AbstractDataSet | dict,
         version: Version = None,
         copy_mode: str = None,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ):
         """Creates a new instance of ``CachedDataSet`` pointing to the
         provided Python object.

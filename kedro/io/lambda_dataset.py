@@ -83,7 +83,7 @@ class LambdaDataSet(AbstractDataSet):
         save: Callable[[Any], None] | None,
         exists: Callable[[], bool] = None,
         release: Callable[[], None] = None,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ):
         """Creates a new instance of ``LambdaDataSet`` with references to the
         required input/output data set methods.

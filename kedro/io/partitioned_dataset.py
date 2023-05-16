@@ -141,7 +141,7 @@ class PartitionedDataSet(AbstractDataSet):
         load_args: dict[str, Any] = None,
         fs_args: dict[str, Any] = None,
         overwrite: bool = False,
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] = None,
     ):
         """Creates a new instance of ``PartitionedDataSet``.
 

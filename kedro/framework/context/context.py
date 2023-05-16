@@ -8,7 +8,6 @@ from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
 
-from omegaconf import DictConfig
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -93,7 +92,6 @@ def _convert_paths_to_absolute_posix(
     conf_keys_with_filepath = ("filename", "filepath", "path")
 
     for conf_key, conf_value in conf_dictionary.items():
-
         # if the conf_value is another dictionary, absolutify its paths first.
         if isinstance(conf_value, dict):
             conf_dictionary[conf_key] = _convert_paths_to_absolute_posix(
@@ -156,9 +154,7 @@ def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> N
         if key not in old_dict:
             old_dict[key] = value
         else:
-            if isinstance(old_dict[key], (dict, DictConfig)) and isinstance(
-                value, (dict, DictConfig)
-            ):
+            if isinstance(old_dict[key], dict) and isinstance(value, dict):
                 _update_nested_dict(old_dict[key], value)
             else:
                 old_dict[key] = value
@@ -326,7 +322,7 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             feed_dict[key] = param_value
-            if isinstance(param_value, (dict, DictConfig)):
+            if isinstance(param_value, dict):
                 for key, val in param_value.items():
                     _add_param_to_feed_dict(f"{param_name}.{key}", val)
 

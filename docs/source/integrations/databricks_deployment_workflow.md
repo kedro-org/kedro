@@ -4,14 +4,17 @@ In this guide, you will explore the process of packaging a Kedro project and run
 
 By packaging your Kedro project and running it on Databricks, you can execute your pipeline without the need for a notebook. This approach is particularly well-suited for production, as it provides a structured and reproducible way to run your code. However, it is not ideal for development, where rapid iteration is necessary. For guidance on developing a Kedro project for Databricks, see the [development workflow guide](./databricks_development_workflow.md).
 
-This guide will cover two methods for running your packaged Kedro project as a job on Databricks:
+By the end of this guide, you'll have a clear understanding of the steps involved in packaging your Kedro project and running it as a job on Databricks.
 
-- [Manually starting a job run via the Databricks workspace UI.](#run-your-packaged-project-via-the-databricks-workspace-ui)
-- [Using dbx in your local environment to initiate the job run.](#deploying-a-kedro-project-as-a-databricks-job-using-dbx)
+## What this page covers
+
+This page covers how to set up your project for deployment to Databricks and two methods for running your packaged Kedro project as a job:
+
+- [Set up your project for deployment on Databricks.](#set-up-your-project)
+- [Run your project as a job using the Databricks workspace UI.](#deploy-and-run-your-kedro-project-using-the-workspace-ui)
+- [Run your project as a job using dbx.](#deploy-and-run-your-kedro-project-using-dbx)
 
 Manually starting your job using the Databricks workspace UI has a shallower learning curve and is more intuitive. Using dbx to run your project saves time and allows you to store information about your job declaratively in your project, but is less intuitive and requires more time to set up.
-
-By the end of this guide, you'll have a clear understanding of the steps involved in packaging your Kedro project and running it as a job on Databricks using either of these methods.
 
 ## Prerequisites
 
@@ -65,7 +68,7 @@ pip install kedro dbx --upgrade
 4. Run `databricks fs ls dbfs:/` at the command line to verify your authentication.
 
 ```{note}
-dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
+dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to automatically package your project, upload it to Databricks and run it as a job.
 ```
 
 ### Create a new Kedro project
@@ -80,9 +83,9 @@ Name your new project `iris-databricks` for consistency with the rest of this gu
 
 ### Create an entry point for Databricks
 
-The default entry point of a Kedro project exposes a Click command line interface (CLI) and cannot be used as the entry point to your package on Databricks. To run your project as a Databricks job, you must define a new entry point for use on Databricks.
+The default entry point of a Kedro project uses a Click command line interface (CLI), which is not compatible with Databricks. To run your project as a Databricks job, you must define a new entry point speficially for use on Databricks.
 
-This entry point is already created for you in the PySpark Iris starter and therefore there is no extra work to do as part of this guide, though generally **you must create it manually for your own projects using the following steps**:
+The PySpark Iris starter has this entry point pre-built, so there is no extra work to do in this guide. **Generally you must create it manually for your own projects using the following steps**:
 
 1. **Create an entry point script**: Create a new file in `<project_root>/src` named `databricks_run.py`. Copy the contents of the `<project_root>/src/databricks_run.py` file defined in the [PySpark Iris starter]() to this new file.
 
@@ -100,14 +103,18 @@ Remember to replace <package_name> with the correct package name for your projec
 This process adds an entry point to your project which can be used to run it on Databricks.
 
 ```{note}
-Using the default entry point of a Kedro project on Databricks will cause the job run to fail.
+Because you are no longer using the default entry-point for Kedro, you will not be able to run your project with the options it allows. Instead, the `databricks_run` entry point in PySpark-Iris contains a simple implementation of the following options:
+- `--package`: 
+- `--pipeline`: specifies a pipeline for your run.
+- `--tags`:
+- `--env`: specifies a configuration environment to load for your run.
+- `--conf-source`: specifies the location of the `conf/` directory to use with your Kedro project.
+- `--params`: 
 ```
-
-## Package and run your project via the Databricks Workspace UI
 
 ### Package your project
 
-To package your Kedro project for deployment on Databricks, you must create a Wheel file, which is a binary distribution of your project. In the root directory of your Kedro project, run the following command:
+To package your Kedro project for deployment on Databricks, you must create a Wheel (`.whl`) file, which is a binary distribution of your project. In the root directory of your Kedro project, run the following command:
 
 ```bash
 kedro package
@@ -115,7 +122,41 @@ kedro package
 
 This command generates a `.whl` file in the `dist` directory within your project's root directory.
 
-### Run your packaged project on Databricks
+### Upload project data and configuration to DBFS
+
+Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data and configuration to an accessible location. In this guide, we will store the data on the Databricks File System (DBFS).
+
+There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI commands to upload your project's locally stored data and configuration to DBFS:
+
+```bash
+databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris-databricks/data
+databricks fs cp --recursive <project_root>/conf/ dbfs:/FileStore/iris-databricks/conf
+```
+
+The `--recursive` flag ensures that the entire folder and its contents are uploaded. You can list the contents of the destination folder in DBFS using the following command:
+
+```bash
+databricks fs ls dbfs:/FileStore/iris-databricks/data
+```
+
+You should see the contents of the project's `data/` directory printed to your terminal:
+
+```bash
+01_raw
+02_intermediate
+03_primary
+04_feature
+05_model_input
+06_models
+07_model_output
+08_reporting
+```
+
+```{note}
+A Kedro project's configuration and data do not get included when it is packaged. They must be stored somewhere accessible to allow your packaged project to run.
+```
+
+## Deploy and run your Kedro project using the workspace UI
 
 To run your packaged project on Databricks using the workspace UI, perform the following steps:
 
@@ -129,77 +170,35 @@ To run your packaged project on Databricks using the workspace UI, perform the f
 
 3. **Specify options**:
 
-3. **Run the job**: Click "Run Now" to start the job. The job's status will be displayed in the "Runs" tab. You can view the logs and results by clicking on the job run in the list.
+4. **Run the job**: Click "Run Now" to start the job. The job's status will be displayed in the "Runs" tab. You can view the logs and results by clicking on the job run in the list.
 
 ![Databricks run job](../meta/images/databricks_run_job.png)
 
-If you now 
-
 By following these steps, you packaged your Kedro project and manually ran it as a job on Databricks using the workspace UI.
 
+## Deploy and run your Kedro project using dbx
 
+dbx allows you to define a Databricks workflow in a [deployment file](https://dbx.readthedocs.io/en/latest/reference/deployment/). This file stores information about how your project should be run on Databricks and can be either YAML or JSON format. This file can be stored inside your project, where it can be added to version control.
 
+In this section, you will use `dbx deploy` to create a Databricks workflow of your packaged Kedro project using a deployment file in YAML format, then you will run your packaged Kedro project using `dbx launch`.
 
+1. **Create a `dbx` deployment file**: In your Kedro project's `conf` directory, create a `dbx` deployment file named `deployment.yml`. Add the following declarative information on how to deploy and run your Kedro project on Databricks:
 
-
-
-## Deploying a Kedro Project as a Databricks Job Using dbx
-
-To deploy your Kedro project as a Databricks job using dbx, follow these steps:
-
-### Install and configure dbx
-
-1. **Install `dbx`**: If you haven't already, install the dbx CLI tool in your local environment by running:
-
-```bash
-pip install dbx
+```yaml
+environments:
+  default:
+    workflows:
+      - name: "iris-databricks"
+        tasks:
+          - task_key: "main"
+            <<: *basic-static-cluster
+            python_wheel_task:
+              package_name: "iris_databricks"
+              entry_point: "databricks_run"
+              parameters: ["--env", "databricks"]
 ```
 
-2. **Configure Databricks CLI**: Ensure that you have the Databricks CLI installed and configured with the appropriate authentication settings. For more information, refer to the [Databricks CLI documentation](https://docs.databricks.com/dev-tools/cli/index.html).
-
-### Package Kedro Project
-
-3. **Create a Wheel file**: Package your Kedro project into a Wheel file by running the following command in the project's root directory:
-
-```bash
-python setup.py bdist_wheel
-```
-
-This command generates a `.whl` file in the `dist` directory within your project's root directory.
-
-### Deploy and Run the Kedro Project on Databricks
-
-4. **Create a `dbx` deployment configuration**: In your Kedro project's root directory, create a `dbx` deployment configuration file named `dbx_deploy.json`. This file should contain the necessary information to deploy and run your Kedro project on Databricks. Here's an example configuration:
-
-```json
-{
-    "jobs": {
-        "my_kedro_job": {
-            "type": "python",
-            "python_file": "my_kedro_project/run.py",
-            "libraries": [
-                {"whl": "dist/my_kedro_project-0.1.0-py3-none-any.whl"}
-            ],
-            "job_parameters": {
-                "params": "{\"param1\": \"value1\", \"param2\": \"value2\"}"
-            },
-            "cluster": {
-                "cluster_name": "my_kedro_cluster",
-                "spark_version": "8.4.x-scala2.12",
-                "node_type_id": "Standard_DS3_v2",
-                "autoscale": {
-                    "min_workers": 1,
-                    "max_workers": 4
-                }
-            }
-        }
-    }
-}
-```
-
-   Replace the placeholders with the appropriate values for your Kedro project, library, and cluster configuration.
-
-5. **Deploy the job**: In your Kedro project's root directory, run the following command to deploy the job using the `dbx` CLI:
+2. **Deploy the job**: In your Kedro project's root directory, run the following command to deploy the job using the `dbx` CLI:
 
 ```bash
 dbx deploy --config-file dbx_deploy.json
@@ -207,7 +206,7 @@ dbx deploy --config-file dbx_deploy.json
 
 This command uploads the Wheel file to the Databricks workspace, creates or updates the job, and configures the job with the specified cluster settings and job parameters.
 
-6. **Run the job**: To start the job, run the following command:
+3. **Run the job**: To start the job, run the following command:
 
 ```bash
 dbx run --job my_kedro_job

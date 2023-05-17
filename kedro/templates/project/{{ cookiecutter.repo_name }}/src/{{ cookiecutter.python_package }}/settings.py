@@ -3,20 +3,20 @@ from the Kedro defaults. For further information, including these default values
 https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 
 # Instantiated project hooks.
-# HOOKS = (,)
+# For example, after creating a hooks.py and defining a ProjectHooks class there, do
+# from {{cookiecutter.python_package}}.hooks import ProjectHooks
+# HOOKS = (ProjectHooks(),)
 
 # Installed plugins for which to disable hook auto-registration.
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
 
 # Class that manages storing KedroSession data.
-# from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore
-# from pathlib import Path
-# SESSION_STORE_CLASS = SQLiteStore
+# from kedro.framework.session.store import BaseSessionStore
+# SESSION_STORE_CLASS = BaseSessionStore
 # Keyword arguments to pass to the `SESSION_STORE_CLASS` constructor.
 # SESSION_STORE_ARGS = {
 #     "path": "./sessions"
 # }
-
 
 # Directory that holds configuration.
 # CONF_SOURCE = "conf"

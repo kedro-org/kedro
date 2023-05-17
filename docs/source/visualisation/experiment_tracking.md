@@ -11,6 +11,8 @@ The metadata you store may include:
 * Model weights
 * Plots and other visualisations
 
+Kedro-Viz provides a reliable and convenient way to store and access experiment data. With collaborative experiment tracking in Kedro-Viz, you can easily share your experiments with team members. This is made possible through local and remote storage solutions. Whether you choose to store your experiments locally or leverage cloud storage options like AWS S3, Kedro-Viz ensures that all team members can access and analyze their own experiments as well as those conducted by others.
+
 ## Experiment tracking demonstration using Kedro-Viz
 
 We have made an [experiment tracking demo](https://demo.kedro.org/experiment-tracking) to enable you to explore the capabilities of Kedro-Viz further.
@@ -23,6 +25,8 @@ Kedro has always supported parameter versioning (as part of your codebase with a
 Kedro-Viz version 4.1.1 introduced metadata capture, visualisation, discovery and comparison, enabling you to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 
 Kedro-Viz version 5.0 also supports the [display and comparison of plots, such as Plotly and Matplotlib](../visualisation/visualise_charts_with_plotly.md). Support for metric plots (timeseries and parellel coords) was added to Kedro-Viz version 5.2.1.
+
+Kedro-Viz version 6.2 includes support for collaborative experiment tracking using a cloud storage solution. This means that multiple users can store their experiment data in a centralized remote storage, such as AWS S3, and access it through Kedro-Viz.  
 
 ## When should I use experiment tracking in Kedro?
 
@@ -48,7 +52,7 @@ There are three steps to enable experiment tracking features with Kedro-Viz. We 
 To use this tutorial code, you must already have [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). You can confirm the versions you have installed by running `kedro info`
 
 ```{note}
-The example code uses a version of Kedro-Viz `>=5.2.1`.
+The example code uses a version of Kedro-Viz `>6.2.0`.
 ```
 
 Create a new project using the spaceflights starter. From the terminal run:
@@ -86,12 +90,41 @@ SESSION_STORE_CLASS = SQLiteStore
 SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data")}
 ```
 
-This specifies the creation of the `SQLiteStore` under the `data/` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin.
+This specifies the creation of the `SQLiteStore` under the `data/` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin
 
 This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-experiment-tracking-datasets) or [set up your nodes and pipelines to log metrics](#modify-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable, but both should be completed to get a working experiment tracking setup.
 
+To enable collaborative experiment tracking in Kedro-Viz, you can specify a remote path in the SESSION_STORE_ARGS variable, which links to your cloud storage. In Kedro-Viz version 6.2, the only way to set up credentials for accessing your cloud storage is through environment variables. 
+
+```python
+from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore
+from pathlib import Path
+
+SESSION_STORE_CLASS = SQLiteStore
+SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data"), 
+                    "remote_path": "s3://my-bucket-name/path/to/experiments"}
+```
+
+Please ensure you have the necessary credentials set up as shown below:
+
+```bash
+export AWS_ACCESS_KEY_ID="your_access_key_id"
+export AWS_SECRET_ACCESS_KEY="your_secret_access_key"
+export AWS_REGION="your_aws_region"
+
+```
+
+Kedro-viz saves your experiments as SQLite database files on a central cloud storage. To ensure that all users have a unique filename you can set up your `KEDRO_SQLITE_STORE_USERNAME` in the environment variables. By default, Kedro-viz will take your computer user name if this is not specified.
+
+```bash
+export KEDRO_SQLITE_STORE_USERNAME ="your_unique__username"
+
+```
+By following the above steps and providing the necessary credentials and a unique username, you can enable collaborative experiment tracking in Kedro-Viz. 
+
+
 ```{note}
-Please ensure that your installed version of Kedro-Viz is `>=5.2.1`.
+Please ensure that your installed version of Kedro-Viz is `>=6.2.0`.
 ```
 
 ## Set up experiment tracking datasets

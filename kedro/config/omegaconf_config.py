@@ -248,12 +248,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
         self._check_duplicates(seen_file_to_keys)
 
         aggregate_config = config_per_file.values()
+        return self._merge_and_resolve_config(key, aggregate_config)
+
+    def _merge_and_resolve_config(self, key, aggregate_config):
         if not aggregate_config:
             return {}
 
         if key == "parameters":
             # Merge with runtime parameters only for "parameters"
-            return OmegaConf.to_container(
+            return  OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
         return OmegaConf.to_container(OmegaConf.merge(*aggregate_config), resolve=True)

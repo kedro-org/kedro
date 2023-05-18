@@ -240,12 +240,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         config_per_file = {}
         for config_filepath in config_files_filtered:
-            self._load_omega_config(
-                conf_path,
-                processed_files,
-                read_environment_variables,
-                config_per_file,
-                config_filepath,
+            config_per_file[config_filepath] = self._load_omega_config(
+                conf_path, processed_files, read_environment_variables, config_filepath
             )
 
         seen_file_to_keys = {
@@ -272,7 +268,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         conf_path,
         processed_files,
         read_environment_variables,
-        config_per_file,
         config_filepath,
     ):
         try:
@@ -284,7 +279,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 processed_files.add(config_filepath)
             if read_environment_variables:
                 self._resolve_environment_variables(config)
-            config_per_file[config_filepath] = config
         except (ParserError, ScannerError) as exc:
             line = exc.problem_mark.line  # type: ignore
             cursor = exc.problem_mark.column  # type: ignore
@@ -292,6 +286,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 f"Invalid YAML or JSON file {Path(conf_path, config_filepath.name).as_posix()},"
                 f" unable to read line {line}, position {cursor}."
             ) from exc
+        return config
 
     def _build_conf_paths(self, conf_path, patterns):
         if not self._fs.isdir(Path(conf_path).as_posix()):

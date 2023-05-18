@@ -196,7 +196,7 @@ class PartitionedDataSet(AbstractDataSet):
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._partition_cache: Cache = Cache(maxsize=1)
-        self._metadata = metadata
+        self.metadata = metadata
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
@@ -453,7 +453,7 @@ class IncrementalDataSet(PartitionedDataSet):
 
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)
         self._force_checkpoint = self._checkpoint_config.pop("force_checkpoint", None)
-        self._metadata = metadata
+        self.metadata = metadata
 
         comparison_func = self._checkpoint_config.pop("comparison_func", operator.gt)
         if isinstance(comparison_func, str):

@@ -240,7 +240,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         config_per_file = {}
         for config_filepath in config_files_filtered:
-            self._load_omega_config(conf_path, processed_files, read_environment_variables, config_per_file, config_filepath)
+            self._load_omega_config(
+                conf_path,
+                processed_files,
+                read_environment_variables,
+                config_per_file,
+                config_filepath,
+            )
 
         seen_file_to_keys = {
             file: set(config.keys()) for file, config in config_per_file.items()
@@ -256,16 +262,23 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         if key == "parameters":
             # Merge with runtime parameters only for "parameters"
-            return  OmegaConf.to_container(
+            return OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
         return OmegaConf.to_container(OmegaConf.merge(*aggregate_config), resolve=True)
 
-    def _load_omega_config(self, conf_path, processed_files, read_environment_variables, config_per_file, config_filepath):
+    def _load_omega_config(
+        self,
+        conf_path,
+        processed_files,
+        read_environment_variables,
+        config_per_file,
+        config_filepath,
+    ):
         try:
             with self._fs.open(str(config_filepath.as_posix())) as open_config:
-                    # As fsspec doesn't allow the file to be read as StringIO,
-                    # this is a workaround to read it as a binary file and decode it back to utf8.
+                # As fsspec doesn't allow the file to be read as StringIO,
+                # this is a workaround to read it as a binary file and decode it back to utf8.
                 tmp_fo = io.StringIO(open_config.read().decode("utf8"))
                 config = OmegaConf.load(tmp_fo)
                 processed_files.add(config_filepath)
@@ -276,9 +289,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
             line = exc.problem_mark.line  # type: ignore
             cursor = exc.problem_mark.column  # type: ignore
             raise ParserError(
-                    f"Invalid YAML or JSON file {Path(conf_path, config_filepath.name).as_posix()},"
-                    f" unable to read line {line}, position {cursor}."
-                ) from exc
+                f"Invalid YAML or JSON file {Path(conf_path, config_filepath.name).as_posix()},"
+                f" unable to read line {line}, position {cursor}."
+            ) from exc
 
     def _build_conf_paths(self, conf_path, patterns):
         if not self._fs.isdir(Path(conf_path).as_posix()):

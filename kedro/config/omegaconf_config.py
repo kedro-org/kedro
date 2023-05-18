@@ -236,21 +236,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         # pylint: disable=too-many-locals
 
-        if not self._fs.isdir(Path(conf_path).as_posix()):
-            raise MissingConfigException(
-                f"Given configuration path either does not exist "
-                f"or is not a valid directory: {conf_path}"
-            )
-
-        paths = [
-            Path(each)
-            for pattern in patterns
-            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix())
-        ]
-        deduplicated_paths = set(paths)
-        config_files_filtered = [
-            path for path in deduplicated_paths if self._is_valid_config_path(path)
-        ]
+        config_files_filtered = self._build_conf_paths(conf_path, patterns)
 
         config_per_file = {}
         for config_filepath in config_files_filtered:
@@ -275,9 +261,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         seen_file_to_keys = {
             file: set(config.keys()) for file, config in config_per_file.items()
         }
-        aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
 
+        aggregate_config = config_per_file.values()
         if not aggregate_config:
             return {}
 
@@ -287,6 +273,25 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
         return OmegaConf.to_container(OmegaConf.merge(*aggregate_config), resolve=True)
+
+    def _build_conf_paths(self, conf_path, patterns):
+        if not self._fs.isdir(Path(conf_path).as_posix()):
+            raise MissingConfigException(
+                f"Given configuration path either does not exist "
+                f"or is not a valid directory: {conf_path}"
+            )
+
+        paths = [
+            Path(each)
+            for pattern in patterns
+            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix())
+        ]
+        deduplicated_paths = set(paths)
+        config_files_filtered = [
+            path for path in deduplicated_paths if self._is_valid_config_path(path)
+        ]
+
+        return config_files_filtered
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

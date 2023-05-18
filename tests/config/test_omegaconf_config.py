@@ -335,6 +335,15 @@ class TestOmegaConfigLoader:
         with pytest.raises(MissingConfigException, match=pattern):
             OmegaConfigLoader(str(tmp_path))["credentials"]
 
+    def test_empty_catalog_file(self, tmp_path):
+        """Check that empty catalog file is read and returns an empty dict"""
+        _write_yaml(tmp_path / _BASE_ENV / "catalog_empty.yml", {})
+        catalog_patterns = {"catalog": ["catalog*", "catalog*/**", "**/catalog*"]}
+        catalog = OmegaConfigLoader(
+            conf_source=tmp_path, env="base", config_patterns=catalog_patterns
+        )["catalog"]
+        assert catalog == {}
+
     def test_overlapping_patterns(self, tmp_path, mocker):
         """Check that same configuration file is not loaded more than once."""
         _write_yaml(

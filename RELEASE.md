@@ -15,6 +15,7 @@
 
 ## Bug fixes and other changes
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
+* `OmegaConfigLoader` does not show a `MissingConfigError` when the config files exist but are empty.
 
 ## Breaking changes to the API
 * `kedro package` does not produce `.egg` files anymore, and now relies exclusively on `.whl` files.

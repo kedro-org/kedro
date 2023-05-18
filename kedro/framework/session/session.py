@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import click
-from omegaconf import OmegaConf, omegaconf
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException
@@ -200,8 +199,6 @@ class KedroSession:
 
     def _get_logging_config(self) -> dict[str, Any]:
         logging_config = self._get_config_loader()["logging"]
-        if isinstance(logging_config, omegaconf.DictConfig):
-            logging_config = OmegaConf.to_container(logging_config)  # pragma: no cover
         # turn relative paths in logging config into absolute path
         # before initialising loggers
         logging_config = _convert_paths_to_absolute_posix(

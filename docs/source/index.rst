@@ -73,6 +73,11 @@ Welcome to Kedro's documentation!
 
    visualisation/index.md
 
+   .. toctree::
+   :maxdepth: 2
+
+   experiment_tracking/index.md
+
 .. toctree::
    :maxdepth: 2
 

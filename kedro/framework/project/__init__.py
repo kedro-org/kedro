@@ -112,7 +112,6 @@ class _ProjectSettings(LazySettings):
     )
 
     def __init__(self, *args, **kwargs):
-
         kwargs.update(
             validators=[
                 self._CONF_SOURCE,
@@ -133,6 +132,7 @@ def _load_data_wrapper(func):
     """Wrap a method in _ProjectPipelines so that data is loaded on first access.
     Taking inspiration from dynaconf.utils.functional.new_method_proxy
     """
+
     # pylint: disable=protected-access
     def inner(self, *args, **kwargs):
         self._load_data()
@@ -219,16 +219,6 @@ class _ProjectLogging(UserDict):
         )
         self.configure(yaml.safe_load(default_logging))
         logging.captureWarnings(True)
-
-        # We suppress click here to hide tracebacks related to it conversely,
-        # kedro is not suppressed to show its tracebacks for easier debugging.
-        # sys.executable is used to get the kedro executable path to hide the
-        # top level traceback.
-        # Rich traceback handling does not work on databricks. Hopefully this will be
-        # fixed on their side at some point, but until then we disable it.
-        # See https://github.com/Textualize/rich/issues/2455
-        if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
-            rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
         rich.pretty.install()
 
     def configure(self, logging_config: Dict[str, Any]) -> None:

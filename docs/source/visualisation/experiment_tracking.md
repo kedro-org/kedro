@@ -94,7 +94,7 @@ This specifies the creation of the `SQLiteStore` under the `data` subfolder, usi
 
 This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-experiment-tracking-datasets) or [set up your nodes and pipelines to log metrics](#modify-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable, but both should be completed to get a working experiment tracking setup.
 
-To enable collaborative experiment tracking in Kedro-Viz, you can specify a remote path in the SESSION_STORE_ARGS variable, which links to your cloud storage. In Kedro-Viz version 6.2, the only way to set up credentials for accessing your cloud storage is through environment variables. 
+To enable collaborative experiment tracking in Kedro-Viz, specify a remote path in the `SESSION_STORE_ARGS` variable, which links to your cloud storage. In Kedro-Viz version 6.2, the only way to set up credentials for accessing your cloud storage is through environment variables. 
 
 ```python
 from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore

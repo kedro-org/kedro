@@ -114,7 +114,7 @@ export AWS_REGION="your_aws_region"
 
 ```
 
-Kedro-viz saves your experiments as SQLite database files on a central cloud storage. To ensure that all users have a unique filename you can set up your `KEDRO_SQLITE_STORE_USERNAME` in the environment variables. By default, Kedro-viz will take your computer user name if this is not specified.
+Kedro-Viz saves your experiments as SQLite database files on a central cloud storage. To ensure that all users have a unique filename set up your `KEDRO_SQLITE_STORE_USERNAME` in the environment variables. By default, Kedro-Viz will take your computer user name if this is not specified.
 
 ```bash
 export KEDRO_SQLITE_STORE_USERNAME ="your_unique__username"

@@ -90,7 +90,7 @@ SESSION_STORE_CLASS = SQLiteStore
 SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data")}
 ```
 
-This specifies the creation of the `SQLiteStore` under the `data/` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin
+This specifies the creation of the `SQLiteStore` under the `data` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin
 
 This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-experiment-tracking-datasets) or [set up your nodes and pipelines to log metrics](#modify-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable, but both should be completed to get a working experiment tracking setup.
 

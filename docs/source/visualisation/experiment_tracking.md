@@ -120,7 +120,6 @@ Kedro-Viz saves your experiments as SQLite database files on a central cloud sto
 export KEDRO_SQLITE_STORE_USERNAME ="your_unique__username"
 
 ```
-By following the above steps and providing the necessary credentials and a unique username, you can enable collaborative experiment tracking in Kedro-Viz. 
 
 
 ```{note}

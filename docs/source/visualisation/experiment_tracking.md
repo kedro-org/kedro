@@ -105,7 +105,7 @@ SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data"),
                     "remote_path": "s3://my-bucket-name/path/to/experiments"}
 ```
 
-Please ensure you have the necessary credentials set up as shown below:
+Ensure you have the necessary credentials set up as shown below:
 
 ```bash
 export AWS_ACCESS_KEY_ID="your_access_key_id"

@@ -11,7 +11,7 @@ The metadata you store may include:
 * Model weights
 * Plots and other visualisations
 
-Kedro-Viz provides a reliable and convenient way to store and access experiment data. With collaborative experiment tracking in Kedro-Viz, you can easily share your experiments with team members. This is made possible through local and remote storage solutions. Whether you choose to store your experiments locally or leverage cloud storage options like AWS S3, Kedro-Viz ensures that all team members can access and analyze their own experiments as well as those conducted by others.
+You can use Kedro-Viz experiment tracking to store and access results, and to share them with others for comparison. Storage can be local or remote, such as cloud storage on AWS S3.
 
 ## Experiment tracking demonstration using Kedro-Viz
 

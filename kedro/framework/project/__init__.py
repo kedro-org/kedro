@@ -1,6 +1,8 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
+from __future__ import annotations
+
 import importlib
 import logging.config
 import operator
@@ -12,7 +14,7 @@ import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import click
 import importlib_resources
@@ -112,7 +114,6 @@ class _ProjectSettings(LazySettings):
     )
 
     def __init__(self, *args, **kwargs):
-
         kwargs.update(
             validators=[
                 self._CONF_SOURCE,
@@ -133,6 +134,7 @@ def _load_data_wrapper(func):
     """Wrap a method in _ProjectPipelines so that data is loaded on first access.
     Taking inspiration from dynaconf.utils.functional.new_method_proxy
     """
+
     # pylint: disable=protected-access
     def inner(self, *args, **kwargs):
         self._load_data()
@@ -159,9 +161,9 @@ class _ProjectPipelines(MutableMapping):
     """
 
     def __init__(self) -> None:
-        self._pipelines_module: Optional[str] = None
+        self._pipelines_module: str | None = None
         self._is_data_loaded = False
-        self._content: Dict[str, Pipeline] = {}
+        self._content: dict[str, Pipeline] = {}
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str):
@@ -185,7 +187,7 @@ class _ProjectPipelines(MutableMapping):
         self._content = project_pipelines
         self._is_data_loaded = True
 
-    def configure(self, pipelines_module: Optional[str] = None) -> None:
+    def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every ``configure`` call,
         data are reloaded.
@@ -212,12 +214,13 @@ class _ProjectPipelines(MutableMapping):
 class _ProjectLogging(UserDict):
     # pylint: disable=super-init-not-called
     def __init__(self):
-        """Initialise project logging with default configuration. Also enable
-        rich tracebacks."""
-        default_logging = (Path(__file__).parent / "default_logging.yml").read_text(
-            encoding="utf-8"
+        """Initialise project logging. The path to logging configuration is given in
+        environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
+        path = os.environ.get(
+            "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml"
         )
-        self.configure(yaml.safe_load(default_logging))
+        logging_config = Path(path).read_text(encoding="utf-8")
+        self.configure(yaml.safe_load(logging_config))
         logging.captureWarnings(True)
 
         # We suppress click here to hide tracebacks related to it conversely,
@@ -231,7 +234,7 @@ class _ProjectLogging(UserDict):
             rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
         rich.pretty.install()
 
-    def configure(self, logging_config: Dict[str, Any]) -> None:
+    def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
@@ -266,7 +269,7 @@ def configure_project(package_name: str):
     PACKAGE_NAME = package_name
 
 
-def configure_logging(logging_config: Dict[str, Any]) -> None:
+def configure_logging(logging_config: dict[str, Any]) -> None:
     """Configure logging according to ``logging_config`` dictionary."""
     LOGGING.configure(logging_config)
 
@@ -289,7 +292,7 @@ def validate_settings():
     importlib.import_module(f"{PACKAGE_NAME}.settings")
 
 
-def _create_pipeline(pipeline_module: types.ModuleType) -> Optional[Pipeline]:
+def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     if not hasattr(pipeline_module, "create_pipeline"):
         warnings.warn(
             f"The '{pipeline_module.__name__}' module does not "
@@ -312,7 +315,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Optional[Pipeline]:
     return obj
 
 
-def find_pipelines() -> Dict[str, Pipeline]:
+def find_pipelines() -> dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.

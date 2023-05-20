@@ -17,6 +17,21 @@ The project-side logging configuration also ensures that [logs emitted from your
 
 We now give some common examples of how you might like to change your project's logging configuration.
 
+### Using `KEDRO_LOGGING_CONFIG` environment variable
+
+`KEDRO_LOGGING_CONFIG` is an optional environment variable that you can use to specify the path of your logging configuration file, overriding the default path of `conf/base/logging.yml`.
+
+To use this environment variable, set it to the path of your desired logging configuration file before running any Kedro commands. For example, if you have a logging configuration file located at `/path/to/logging.yml`, you can set `KEDRO_LOGGING_CONFIG` as follows:
+
+```bash
+export KEDRO_LOGGING_CONFIG=/path/to/logging.yml
+```
+
+After setting the environment variable, any subsequent Kedro commands will use the logging configuration file at the specified path.
+
+```{note}
+If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will default to using the logging configuration file at the project's default location of `conf/base/logging.yml`.
+```
 ### Disable file-based logging
 
 You might sometimes need to disable file-based logging, e.g. if you are running Kedro on a read-only file system such as [Databricks Repos](https://docs.databricks.com/repos/index.html). The simplest way to do this is to delete your `conf/base/logging.yml` file. With no project-side logging configuration specified, Kedro uses the default framework-side logging configuration, which does not include any file-based handlers.

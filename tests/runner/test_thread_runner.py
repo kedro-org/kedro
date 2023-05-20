@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -126,7 +128,7 @@ class LoggingDataSet(AbstractDataSet):
         self.log.append(("release", self.name))
         self.value = None
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {}
 
 

@@ -1,6 +1,7 @@
 """This module provides a set of classes which underpin the data loading and
 saving functionality provided by ``kedro.io``.
 """
+from __future__ import annotations
 
 import abc
 import copy
@@ -13,7 +14,7 @@ from functools import partial
 from glob import iglob
 from operator import attrgetter
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, Type, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 from urllib.parse import urlsplit
 
 from cachetools import Cache, cachedmethod
@@ -127,12 +128,12 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
 
     @classmethod
     def from_config(
-        cls: Type,
+        cls: type,
         name: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         load_version: str = None,
         save_version: str = None,
-    ) -> "AbstractDataSet":
+    ) -> AbstractDataSet:
         """Create a data set instance using the configuration provided.
 
         Args:
@@ -274,7 +275,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         )
 
     @abc.abstractmethod
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         raise NotImplementedError(
             f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
             f"it must implement the '_describe' method"
@@ -324,7 +325,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
     def _release(self) -> None:
         pass
 
-    def _copy(self, **overwrite_params) -> "AbstractDataSet":
+    def _copy(self, **overwrite_params) -> AbstractDataSet:
         dataset_copy = copy.deepcopy(self)
         for name, value in overwrite_params.items():
             setattr(dataset_copy, name, value)
@@ -366,8 +367,8 @@ _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", "
 
 
 def parse_dataset_definition(
-    config: Dict[str, Any], load_version: str = None, save_version: str = None
-) -> Tuple[Type[AbstractDataSet], Dict[str, Any]]:
+    config: dict[str, Any], load_version: str = None, save_version: str = None
+) -> tuple[type[AbstractDataSet], dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
@@ -436,7 +437,7 @@ def parse_dataset_definition(
     return class_obj, config
 
 
-def _load_obj(class_path: str) -> Optional[object]:
+def _load_obj(class_path: str) -> object | None:
     mod_path, _, class_name = class_path.rpartition(".")
     try:
         available_classes = load_obj(f"{mod_path}.__all__")
@@ -518,9 +519,9 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def __init__(
         self,
         filepath: PurePosixPath,
-        version: Optional[Version],
+        version: Version | None,
         exists_function: Callable[[str], bool] = None,
-        glob_function: Callable[[str], List[str]] = None,
+        glob_function: Callable[[str], list[str]] = None,
     ):
         """Creates a new instance of ``AbstractVersionedDataSet``.
 
@@ -572,7 +573,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         """Generate and cache the current save version"""
         return generate_timestamp()
 
-    def resolve_load_version(self) -> Optional[str]:
+    def resolve_load_version(self) -> str | None:
         """Compute the version the dataset should be loaded with."""
         if not self._version:
             return None
@@ -588,7 +589,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         load_version = self.resolve_load_version()
         return self._get_versioned_path(load_version)  # type: ignore
 
-    def resolve_save_version(self) -> Optional[str]:
+    def resolve_save_version(self) -> str | None:
         """Compute the version the dataset should be saved with."""
         if not self._version:
             return None
@@ -671,7 +672,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         self._version_cache.clear()
 
 
-def _parse_filepath(filepath: str) -> Dict[str, str]:
+def _parse_filepath(filepath: str) -> dict[str, str]:
     """Split filepath on protocol and path. Based on `fsspec.utils.infer_storage_options`.
 
     Args:
@@ -712,7 +713,7 @@ def _parse_filepath(filepath: str) -> Dict[str, str]:
     return options
 
 
-def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, str]:
+def get_protocol_and_path(filepath: str, version: Version = None) -> tuple[str, str]:
     """Parses filepath on protocol and path.
 
     .. warning::

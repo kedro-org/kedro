@@ -3,9 +3,9 @@ This topic explains how to deploy Kedro in a distributed system.
 
 Distributed applications refer to software that runs on multiple computers within a network at the same time and can be stored on servers or with cloud computing. Unlike traditional applications that run on a single machine, distributed applications run on multiple systems simultaneously for a single task or job.
 
-You may select to use a distributed system if your Kedro pipelines are very compute-intensive because you can benefit from the cloud's elasticity and scalability to manage compute resources.
+You may select to use a distributed system if your Kedro pipelines are very compute-intensive to benefit from the cloud's elasticity and scalability to manage compute resources.
 
- As a distributed deployment strategy, we recommend the following series of steps:
+As a distributed deployment strategy, we recommend the following series of steps:
 
 ## 1. Containerise the pipeline
 
@@ -22,7 +22,7 @@ We then recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugin
 
 After you’ve built the Docker image for your project locally, you would typically have to transfer the image to a container registry, such as DockerHub or AWS Elastic Container Registry, to be able to pull it on your remote servers. You can find instructions on how to do so [in our guide for single-machine deployment](./single_machine.md#how-to-use-container-registry).
 
-## 2. Convert your Kedro pipeline into targeted platform's primitives
+## 2. Convert your Kedro pipeline into targeted platform primitives
 
 A Kedro pipeline benefits from a structure that's normally easy to translate (at least semantically) into the language that different platforms would understand. A DAG of `nodes` can be converted into a series of tasks where each node maps to an individual task, whether it being a Kubeflow operator, an AWS Batch job, etc, and the dependencies are the same as those mapped in `Pipeline.node_dependencies`.
 

@@ -155,8 +155,10 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
+                     "pipeline_name": str,
+                     "namespace": Optional[str],
+                     "runner": str,
                    }
 
             pipeline: The ``Pipeline`` that will be run.
@@ -190,8 +192,10 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
+                     "pipeline_name": str,
+                     "namespace": Optional[str],
+                     "runner": str,
                    }
 
             run_result: The output of ``Pipeline`` run.
@@ -229,9 +233,12 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
+                     "pipeline_name": str,
+                     "namespace": Optional[str],
+                     "runner": str,
                    }
+
             pipeline: The ``Pipeline`` that will was run.
             catalog: The ``DataCatalog`` used during the run.
         """

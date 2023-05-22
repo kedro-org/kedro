@@ -4,11 +4,11 @@ In this guide, you will explore the process of packaging a Kedro project and run
 
 By packaging your Kedro project and running it on Databricks, you can execute your pipeline without the need for a notebook. This approach is particularly well-suited for production, as it provides a structured and reproducible way to run your code. However, it is not ideal for development, where rapid iteration is necessary. For guidance on developing a Kedro project for Databricks in a rapid build-test loop, see the [development workflow guide](./databricks_development_workflow.md).
 
-Running your packaged project as a Databricks job is very different to running it from a notebook. In particular, it does not **not** allow you to see the log output of your project as you may be used to seeing it when running Kedro from a command line. Here are some example use cases for running your packaged Kedro project as a Databricks job:
+Running your packaged project as a Databricks job is very different to running it from a notebook. In particular, it does not **not** allow you to see the log output of your project as you may be used to seeing it when running Kedro from a command line or notebook. Here are some example use cases for running a packaged Kedro project as a Databricks job:
 
-- **Machine learning pipeline with MLflow**: your Kedro project runs an ML model and metrics about your experiments are tracked in MLflow.
 - **Data engineering pipeline**: the output of your Kedro project is a file or set of files containing cleaned and processed data.
-- **Automated, scheduled runs**: your Kedro project should be run on Databricks on an [automated schedule](https://docs.databricks.com/workflows/jobs/schedule-jobs.html#add-a-job-schedule).
+- **Machine learning with MLflow**: your Kedro project runs an ML model and metrics about your experiments are automatically tracked in MLflow via custom integrations.
+- **Automated and scheduled runs**: your Kedro project should be run on Databricks on an [automated schedule](https://docs.databricks.com/workflows/jobs/schedule-jobs.html#add-a-job-schedule).
 - **CI/CD integration**: you have a CI/CD pipeline set up that produces a packaged Kedro project.
 
 By the end of this guide, you'll have a clear understanding of the steps involved in packaging your Kedro project and running it as a job on Databricks.
@@ -40,6 +40,8 @@ Your databricks host must include the protocol (`https://`).
 
 ### Install Kedro and the databricks CLI in a new virtual environment
 
+The following commands will create a new Conda environment, activate it, and then install Kedro and the Databricks CLI.
+
 In your local development environment, create a virtual environment for this tutorial using Conda:
 
 ```bash
@@ -52,7 +54,7 @@ Once it is created, activate it:
 conda activate iris-databricks
 ```
 
-With your Conda environment activated, install Kedro and the Databricks CLIs:
+With your Conda environment activated, install Kedro and the Databricks CLI:
 
 ```bash
 pip install kedro databricks-cli --upgrade
@@ -85,7 +87,36 @@ The default entry point of a Kedro project uses a Click command line interface (
 
 The PySpark Iris starter has this entry point pre-built, so there is no extra work to do in this guide. **Generally you must create it manually for your own projects using the following steps**:
 
-1. **Create an entry point script**: Create a new file in `<project_root>/src` named `databricks_run.py`. Copy the contents of the `<project_root>/src/databricks_run.py` file defined in the PySpark Iris starter to this new file.
+1. **Create an entry point script**: Create a new file in `<project_root>/src/iris_databricks` named `databricks_run.py`. Copy the following code to this file:
+
+```python
+import argparse
+import logging
+from kedro.framework.project import configure_project
+from kedro.framework.session import KedroSession
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--env", dest="env", type=str)
+    parser.add_argument("--conf-source", dest="conf_source", type=str)
+
+    args = parser.parse_args()
+    env = args.env
+    conf_source = args.conf_source
+
+    # https://kb.databricks.com/notebooks/cmd-c-on-object-id-p0.html
+    logging.getLogger("py4j.java_gateway").setLevel(logging.ERROR)
+    logging.getLogger("py4j.py4j.clientserver").setLevel(logging.ERROR)
+
+    configure_project(package_name)
+    with KedroSession.create(env=env, conf_source=conf_source) as session:
+        session.run()
+
+
+if __name__ == "__main__":
+    main()
+```
 
 2. **Define a new entry point**: Open `<project_root>/src/setup.py` in a text editor or IDE and add a new line in the definition of the `entry_point` tuple, so that it becomes:
 
@@ -101,7 +132,7 @@ Remember to replace <package_name> with the correct package name for your projec
 This process adds an entry point to your project which can be used to run it on Databricks.
 
 ```{note}
-Because you are no longer using the default entry-point for Kedro, you will not be able to run your project with the options it usually provides. Instead, the `databricks_run` entry point in PySpark-Iris contains a simple implementation of the following options:
+Because you are no longer using the default entry-point for Kedro, you will not be able to run your project with the options it usually provides. Instead, the `databricks_run` entry point in the PySpark Iris starter contains a simple implementation of the following options:
 - `--package`: the name
 - `--env`: specifies a configuration environment to load for your run.
 - `--conf-source`: specifies the location of the `conf/` directory to use with your Kedro project.

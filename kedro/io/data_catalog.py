@@ -11,7 +11,9 @@ import difflib
 import logging
 import re
 from collections import defaultdict
-from typing import Any
+from typing import Any, Iterable
+
+from parse import parse
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -141,6 +143,7 @@ class DataCatalog:
         data_sets: dict[str, AbstractDataSet] = None,
         feed_dict: dict[str, Any] = None,
         layers: dict[str, set[str]] = None,
+        dataset_patterns: dict[str, Any] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -170,6 +173,9 @@ class DataCatalog:
         self._data_sets = dict(data_sets or {})
         self.datasets = _FrozenDatasets(self._data_sets)
         self.layers = layers
+        # Keep a record of all patterns in the catalog.
+        # {dataset pattern name : dataset pattern body}
+        self.dataset_patterns = dict(dataset_patterns or {})
 
         # import the feed dict
         if feed_dict:
@@ -257,6 +263,7 @@ class DataCatalog:
             >>> catalog.save("boats", df)
         """
         data_sets = {}
+        dataset_patterns = {}
         catalog = copy.deepcopy(catalog) or {}
         credentials = copy.deepcopy(credentials) or {}
         save_version = save_version or generate_timestamp()
@@ -271,35 +278,53 @@ class DataCatalog:
 
         layers: dict[str, set[str]] = defaultdict(set)
         for ds_name, ds_config in catalog.items():
-            ds_layer = ds_config.pop("layer", None)
-            if ds_layer is not None:
-                layers[ds_layer].add(ds_name)
+            # Let's assume that any name with } in it is a dataset pattern to be matched.
+            if "}" in ds_name:
+                # Add each pattern to the dataset_patterns dict.
+                dataset_patterns[ds_name] = ds_config
+            else:
+                ds_layer = ds_config.pop("layer", None)
+                if ds_layer is not None:
+                    layers[ds_layer].add(ds_name)
 
-            ds_config = _resolve_credentials(ds_config, credentials)
-            data_sets[ds_name] = AbstractDataSet.from_config(
-                ds_name, ds_config, load_versions.get(ds_name), save_version
-            )
-
+                ds_config = _resolve_credentials(ds_config, credentials)
+                data_sets[ds_name] = AbstractDataSet.from_config(
+                    ds_name, ds_config, load_versions.get(ds_name), save_version
+                )
         dataset_layers = layers or None
-        return cls(data_sets=data_sets, layers=dataset_layers)
+        return cls(
+            data_sets=data_sets,
+            layers=dataset_layers,
+            dataset_patterns=dataset_patterns,
+        )
 
     def _get_dataset(
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
         if data_set_name not in self._data_sets:
-            error_msg = f"DataSet '{data_set_name}' not found in the catalog"
+            # When a dataset is "used" in the pipeline that's not in the recorded catalog datasets,
+            # try to match it against the patterns in the catalog. If it's a match, resolve it to
+            # a dataset instance and add it to the catalog, so it only needs to be matched once
+            # and not everytime the dataset is used in the pipeline.
+            matched_dataset = self.match_name_against_dataset_factories(data_set_name)
+            if matched_dataset:
+                self.add(data_set_name, matched_dataset)
+            else:
+                error_msg = f"DataSet '{data_set_name}' not found in the catalog"
 
-            # Flag to turn on/off fuzzy-matching which can be time consuming and
-            # slow down plugins like `kedro-viz`
-            if suggest:
-                matches = difflib.get_close_matches(
-                    data_set_name, self._data_sets.keys()
-                )
-                if matches:
-                    suggestions = ", ".join(matches)
-                    error_msg += f" - did you mean one of these instead: {suggestions}"
+                # Flag to turn on/off fuzzy-matching which can be time consuming and
+                # slow down plugins like `kedro-viz`
+                if suggest:
+                    matches = difflib.get_close_matches(
+                        data_set_name, self._data_sets.keys()
+                    )
+                    if matches:
+                        suggestions = ", ".join(matches)
+                        error_msg += (
+                            f" - did you mean one of these instead: {suggestions}"
+                        )
 
-            raise DataSetNotFoundError(error_msg)
+                raise DataSetNotFoundError(error_msg)
 
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):
@@ -522,6 +547,36 @@ class DataCatalog:
 
             self.add(data_set_name, data_set, replace)
 
+    def match_name_against_dataset_factories(
+        self, dataset_input_name: str
+    ) -> AbstractDataSet | None:
+        """
+        For a given dataset name, try to match it against the dataset patterns in the catalog.
+        If it's a match, return the dataset instance.
+        """
+        dataset = None
+        # Loop through all dataset patterns and check if the given dataset name has a match.
+        for dataset_pattern, dataset_template in self.dataset_patterns.items():
+            result = parse(dataset_pattern, dataset_input_name)
+            # If there's a match resolve the rest of the pattern to create a dataset instance.
+            # A result can be None or something like:
+            # <Result () {'root_namespace': 'germany', 'dataset_name': 'companies'}>
+            if result:
+                config_copy = copy.deepcopy(dataset_template)
+                # Match results to patterns in catalog entry
+                for key, value in config_copy.items():
+                    # Find all dataset fields that need to be resolved with
+                    # the values that were matched.
+                    if isinstance(value, Iterable) and "}" in value:
+                        string_value = str(value)
+                        # result.named: {'root_namespace': 'germany', 'dataset_name': 'companies'}
+                        # format_map fills in dict values into a string with {...} placeholders
+                        # of the same key name.
+                        config_copy[key] = string_value.format_map(result.named)
+                # Create dataset from catalog config.
+                dataset = AbstractDataSet.from_config(dataset_pattern, config_copy)
+        return dataset
+
     def list(self, regex_search: str | None = None) -> list[str]:
         """
         List of all ``DataSet`` names registered in the catalog.
@@ -567,13 +622,29 @@ class DataCatalog:
             ) from exc
         return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 
+    def exists_in_catalog(self, dataset_name: str) -> bool:
+        """Check if a dataset exists in the catalog as an exact match or if it matches a pattern."""
+        if dataset_name in self._data_sets:
+            return True
+
+        if self.dataset_patterns and any(
+            parse(pattern, dataset_name) for pattern in self.dataset_patterns
+        ):
+            return True
+
+        return False
+
     def shallow_copy(self) -> DataCatalog:
         """Returns a shallow copy of the current object.
 
         Returns:
             Copy of the current object.
         """
-        return DataCatalog(data_sets=self._data_sets, layers=self.layers)
+        return DataCatalog(
+            data_sets=self._data_sets,
+            layers=self.layers,
+            dataset_patterns=self.dataset_patterns,
+        )
 
     def __eq__(self, other):
         return (self._data_sets, self.layers) == (other._data_sets, other.layers)

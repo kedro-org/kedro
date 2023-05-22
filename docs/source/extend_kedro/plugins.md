@@ -4,7 +4,7 @@ Kedro plugins allow you to create new features for Kedro and inject additional c
 
 ## Overview
 
-Kedro extension mechanism is built on [pluggy](https://pluggy.readthedocs.io/), a solid plugin management library that was created for the [pytest](https://docs.pytest.org/) ecosystem. pluggy relies on [entry points](https://packaging.python.org/en/latest/specifications/entry-points/), a Python mechanism for packages to provide components that can be discovered by other packages using [`importlib.metadata`](https://docs.python.org/3/library/importlib.metadata.html#entry-points).
+Kedro's extension mechanism is built on [`pluggy`](https://pluggy.readthedocs.io/), a solid plugin management library that was created for the [pytest](https://docs.pytest.org/) ecosystem. `pluggy` relies on [entry points](https://packaging.python.org/en/latest/specifications/entry-points/), a Python mechanism for packages to provide components that can be discovered by other packages using [`importlib.metadata`](https://docs.python.org/3/library/importlib.metadata.html#entry-points).
 
 ## Example of a simple plugin
 

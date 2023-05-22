@@ -20,6 +20,12 @@
 
 ## Breaking changes to the API
 * `kedro package` does not produce `.egg` files anymore, and now relies exclusively on `.whl` files.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [tomasvanpottelbergh](https://github.com/tomasvanpottelbergh)
+
 ## Upcoming deprecations for Kedro 0.19.0
 
 

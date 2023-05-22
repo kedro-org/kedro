@@ -1,13 +1,11 @@
-# How to deploy a development version of Kedro to Databricks
+# Contribute changes to Kedro that are tested on Databricks
 
-[Databricks](https://www.databricks.com/) is a cloud-based platform for data engineering and data science that many Kedro users deploy their Kedro projects to. Extending and improving the Kedro experience on Databricks is important to a large part of Kedro's user base.
+Many Kedro users deploy their projects to [Databricks](https://www.databricks.com/), a cloud-based platform for data engineering and data science. We encourage contributions to extend and improve the experience for Kedro users on Databricks; this guide explains how to efficiently test your locally modified version of Kedro on Databricks as part of a build-and-test development cycle.
 
-## Introduction
-
-This guide describes how to efficiently develop features and fixes for Kedro on Databricks. Using this guide, you will be able to quickly test your locally modified version of Kedro on Databricks as part of a build-and-test development cycle.
+## How to deploy a development version of Kedro to Databricks
 
 ```{note}
-This page is for people developing changes to Kedro that need to test them on Databricks. If you are working on a Kedro project and need more information about workflows, consult the [documentation for developing a Kedro project on Databricks](../integrations/databricks_workspace.md).
+This page is for **contributors** developing changes to Kedro that need to test them on Databricks. If you are a Kedro user working on an individual or team project and need more information about workflows, consult the [documentation for developing a Kedro project on Databricks](../integrations/databricks_workspace.md).
 ```
 
 ## Prerequisites
@@ -27,7 +25,7 @@ The development workflow for Kedro on Databricks is similar to the one for Kedro
 
 To make developing Kedro for Databricks easier, Kedro comes with a `Makefile` target named `databricks-build` that automates the process of building a wheel file and installing this on your Databricks cluster to save development time.
 
-### Setup the Databricks CLI to test a Kedro build
+### How to set up the Databricks CLI to test a Kedro build
 
 Before you use `make databricks-build`, you must [set up the Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html#set-up-the-cli).
 

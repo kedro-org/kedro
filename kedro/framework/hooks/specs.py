@@ -2,7 +2,9 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
-from typing import Any, Dict, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from kedro.framework.context import KedroContext
 from kedro.io import DataCatalog
@@ -19,11 +21,11 @@ class DataCatalogSpecs:
     def after_catalog_created(  # pylint: disable=too-many-arguments
         self,
         catalog: DataCatalog,
-        conf_catalog: Dict[str, Any],
-        conf_creds: Dict[str, Any],
-        feed_dict: Dict[str, Any],
+        conf_catalog: dict[str, Any],
+        conf_creds: dict[str, Any],
+        feed_dict: dict[str, Any],
         save_version: str,
-        load_versions: Dict[str, str],
+        load_versions: dict[str, str],
     ) -> None:
         """Hooks to be invoked after a data catalog is created.
         It receives the ``catalog`` as well as
@@ -50,10 +52,10 @@ class NodeSpecs:
         self,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
+        inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Hook to be invoked before a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
 
@@ -78,8 +80,8 @@ class NodeSpecs:
         self,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
-        outputs: Dict[str, Any],
+        inputs: dict[str, Any],
+        outputs: dict[str, Any],
         is_async: bool,
         session_id: str,
     ) -> None:
@@ -107,7 +109,7 @@ class NodeSpecs:
         error: Exception,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
+        inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
     ):
@@ -133,7 +135,7 @@ class PipelineSpecs:
 
     @hook_spec
     def before_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self, run_params: dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         """Hook to be invoked before a pipeline runs.
 
@@ -165,8 +167,8 @@ class PipelineSpecs:
     @hook_spec
     def after_pipeline_run(
         self,
-        run_params: Dict[str, Any],
-        run_result: Dict[str, Any],
+        run_params: dict[str, Any],
+        run_result: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
     ) -> None:
@@ -202,7 +204,7 @@ class PipelineSpecs:
     def on_pipeline_error(
         self,
         error: Exception,
-        run_params: Dict[str, Any],
+        run_params: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
     ):

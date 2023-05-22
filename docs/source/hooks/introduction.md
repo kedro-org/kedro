@@ -82,7 +82,7 @@ class DataCatalogHooks:
         return logging.getLogger(self.__class__.__name__)
 
     @hook_impl
-    def after_catalog_created(self, catalog: DataCatalog) -> None:
+    def after_catalog_created(self, catalog: DataCatalog, **kwargs) -> None:
         self._logger.info(catalog.list())
 ```
 

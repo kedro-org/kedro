@@ -1,4 +1,4 @@
-# same versions as `test_requirements`
+# same versions as [test] optional requirements
 # e2e tests on Windows are slow but we don't need to install
 # everything, so just this subset will be enough for CI
 behave==1.2.6

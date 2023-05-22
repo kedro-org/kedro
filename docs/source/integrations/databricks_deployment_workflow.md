@@ -8,7 +8,7 @@ Running your packaged project as a Databricks job is very different to running i
 
 - **Machine learning pipeline with MLflow**: your Kedro project runs an ML model and metrics about your experiments are tracked in MLflow.
 - **Data engineering pipeline**: the output of your Kedro project is a file or set of files containing cleaned and processed data.
-- **Automated, scheduled runs**: your Kedro project should be run on Databricks on an automated schedule.
+- **Automated, scheduled runs**: your Kedro project should be run on Databricks on an [automated schedule](https://docs.databricks.com/workflows/jobs/schedule-jobs.html#add-a-job-schedule).
 - **CI/CD integration**: you have a CI/CD pipeline set up that produces a packaged Kedro project.
 
 By the end of this guide, you'll have a clear understanding of the steps involved in packaging your Kedro project and running it as a job on Databricks.
@@ -101,7 +101,7 @@ Remember to replace <package_name> with the correct package name for your projec
 This process adds an entry point to your project which can be used to run it on Databricks.
 
 ```{note}
-Because you are no longer using the default entry-point for Kedro, you will not be able to run your project with the options it allows. Instead, the `databricks_run` entry point in PySpark-Iris contains a simple implementation of the following options:
+Because you are no longer using the default entry-point for Kedro, you will not be able to run your project with the options it usually provides. Instead, the `databricks_run` entry point in PySpark-Iris contains a simple implementation of the following options:
 - `--package`: the name 
 - `--env`: specifies a configuration environment to load for your run.
 - `--conf-source`: specifies the location of the `conf/` directory to use with your Kedro project.
@@ -245,7 +245,7 @@ This page describes a manual workflow for deploying and running project on Datab
 - [Use the Databricks API.](#databricks-api)
 - [Use the Databricks CLI.](#databricks-cli)
 
-Both of these methods allows you to store information about your job declaratively in the same version control system as the rest of your project. For each method, the information stored declaratively is the same as what is entered manually in the [above section on creating and running a job in Databricks](#deploy-and-run-your-kedro-project-using-the-workspace-ui).
+Both of these methods enable you to store information about your job declaratively in the same version control system as the rest of your project. For each method, the information stored declaratively is the same as what is entered manually in the [above section on creating and running a job in Databricks](#deploy-and-run-your-kedro-project-using-the-workspace-ui).
 
 These methods can be integrated into a CI/CD pipeline to automatically deploy a packaged Kedro project to Databricks as a job.
 
@@ -267,3 +267,7 @@ The Databricks Command Line Interface (CLI) is another way to automate deploymen
 3. Create a JSON file containing your job's configuration.
 4. Use the [`jobs create` command](https://docs.databricks.com/dev-tools/cli/jobs-cli.html#create-a-job) to create a new job.
 5. Use the [`jobs run-now` command](https://docs.databricks.com/dev-tools/cli/jobs-cli.html#run-a-job) to run your newly created job.
+
+## Summary
+
+This guide demonstrated how to deploy a packaged Kedro project on Databricks. This is a structured and reproducible way to run your Kedro projects on Databricks that can be automated and integrated into CI/CD pipelines.

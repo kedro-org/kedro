@@ -8,6 +8,7 @@
 
 databricks_workspace.md
 databricks_development_workflow.md
+databricks_deployment_workflow.md
 databricks_visualisation.md
 ```
 

@@ -85,7 +85,7 @@ The default entry point of a Kedro project uses a Click command line interface (
 
 The PySpark Iris starter has this entry point pre-built, so there is no extra work to do in this guide. **Generally you must create it manually for your own projects using the following steps**:
 
-1. **Create an entry point script**: Create a new file in `<project_root>/src` named `databricks_run.py`. Copy the contents of the `<project_root>/src/databricks_run.py` file defined in the [PySpark Iris starter]() to this new file.
+1. **Create an entry point script**: Create a new file in `<project_root>/src` named `databricks_run.py`. Copy the contents of the `<project_root>/src/databricks_run.py` file defined in the PySpark Iris starter to this new file.
 
 2. **Define a new entry point**: Open `<project_root>/src/setup.py` in a text editor or IDE and add a new line in the definition of the `entry_point` tuple, so that it becomes:
 
@@ -102,7 +102,7 @@ This process adds an entry point to your project which can be used to run it on 
 
 ```{note}
 Because you are no longer using the default entry-point for Kedro, you will not be able to run your project with the options it usually provides. Instead, the `databricks_run` entry point in PySpark-Iris contains a simple implementation of the following options:
-- `--package`: the name 
+- `--package`: the name
 - `--env`: specifies a configuration environment to load for your run.
 - `--conf-source`: specifies the location of the `conf/` directory to use with your Kedro project.
 ```

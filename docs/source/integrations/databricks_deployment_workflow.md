@@ -204,19 +204,17 @@ The final configuration for your job should look the same as the following:
 
 ![Configure Databricks job](../meta/images/databricks_configure_new_job.png)
 
-4. **Run the job**: Click "Run Now" to start a run of the job. The job's status will be displayed in the `Runs` tab. Navigate to the `Runs` tab and view the logs and results by clicking on the job run in the list:
+Click `Save task` to save the configuration.
 
-![Databricks run job](../meta/images/databricks_run_job.png)
+4. **Run the job**: Click `Run now` to start a run of the job. The job's status will be displayed in the `Runs` tab. Navigate to the `Runs` tab of the `Workflow` panel and view the logs and results by clicking on the job run in the list:
+
+![Databricks job status](../meta/images/databricks_job_status.png)
 
 After you run the job:
 
 - The job cluster will start.
 - The packaged Kedro project and all its dependencies will be installed.
 - The packaged Kedro project will be run from the specified `databricks_run` entry point.
-
-You can view the status of the job run by clicking on the `Runs` tab of the `Workflow` panel:
-
-![Databricks job status](../meta/images/databricks_job_status.png)
 
 A run will take roughly six to seven minutes.
 

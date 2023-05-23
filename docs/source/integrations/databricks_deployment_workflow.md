@@ -123,10 +123,7 @@ if __name__ == "__main__":
 2. **Define a new entry point**: Open `<project_root>/src/setup.py` in a text editor or IDE and add a new line in the definition of the `entry_point` tuple, so that it becomes:
 
 ```python
-entry_point = (
-    ...,
-    "databricks_run = <package_name>.databricks_run:main"
-)
+entry_point = (..., "databricks_run = <package_name>.databricks_run:main")
 ```
 
 Remember to replace <package_name> with the correct package name for your project.

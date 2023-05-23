@@ -75,23 +75,29 @@ class AbstractRunner(ABC):
 
         # Check if there are any input datasets that aren't in the catalog and
         # don't match a pattern in the catalog.
-        unsatisfied = catalog.remove_pattern_matches(
-            pipeline.inputs() - set(catalog.list())
-        )
+        unsatisfied = [
+            input_name
+            for input_name in pipeline.inputs()
+            if not catalog.exists_in_catalog(input_name)
+        ]
         if unsatisfied:
             raise ValueError(
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
         # Check if there's any output datasets that aren't in the catalog and don't match a pattern
         # in the catalog.
-        free_outputs = catalog.remove_pattern_matches(
-            pipeline.outputs() - set(catalog.list())
-        )
+        free_outputs = [
+            output_name
+            for output_name in pipeline.outputs()
+            if not catalog.exists_in_catalog(output_name)
+        ]
+
         # Check which datasets used in the pipeline aren't in the catalog and don't match
         # a pattern in the catalog and create a default dataset for those datasets.
-        unregistered_ds = catalog.remove_pattern_matches(
-            pipeline.data_sets() - set(catalog.list())
-        )
+        unregistered_ds = [
+            ds for ds in pipeline.data_sets() if not catalog.exists_in_catalog(ds)
+        ]
+        logging.warning(f"UNREGISTERED DS: {unregistered_ds}")
         for ds_name in unregistered_ds:
             catalog.add(ds_name, self.create_default_data_set(ds_name))
 

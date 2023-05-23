@@ -299,6 +299,7 @@ class DataCatalog:
     def _get_dataset(
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
+        logging.warning(f"Getting data for {data_set_name}")
         if data_set_name not in self._data_sets:
             # When a dataset is "used" in the pipeline that's not in the recorded catalog datasets,
             # try to match it against the patterns in the catalog. If it's a match, resolve it to
@@ -548,6 +549,7 @@ class DataCatalog:
         For a given dataset name, try to match it against the dataset patterns in the catalog.
         If it's a match, return the dataset instance.
         """
+        logging.warning(f"Matching dataset {dataset_input_name}")
         dataset = None
         # Loop through all dataset patterns and check if the given dataset name has a match.
         for dataset_name, dataset_config in self.dataset_patterns.items():
@@ -615,6 +617,17 @@ class DataCatalog:
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
         return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
+
+    def exists_in_catalog(self, dataset_name: str) -> bool:
+        """Check if a dataset exists in the catalog as an exact match or if it matches a pattern."""
+        if dataset_name in self._data_sets:
+            return True
+
+        if self.dataset_patterns and any(
+                parse(pattern, dataset_name) for pattern in self.dataset_patterns
+        ):
+            return True
+        return False
 
     def remove_pattern_matches(self, dataset_list: Set[str]):
         """Helper method that checks which dataset names match a pattern in the catalog.

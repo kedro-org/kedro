@@ -45,7 +45,7 @@ kedro_datasets
    kedro_datasets.spark.SparkHiveDataSet
    kedro_datasets.spark.SparkJDBCDataSet
    kedro_datasets.svmlight.SVMLightDataSet
-   kedro_datasets.tensorflow.TensorFlowModelDataset
+   kedro_datasets.tensorflow.TensorFlowModelDataSet
    kedro_datasets.text.TextDataSet
    kedro_datasets.tracking.JSONDataSet
    kedro_datasets.tracking.MetricsDataSet

@@ -43,6 +43,22 @@ Alternatively, if you would like to keep other configuration in `conf/base/loggi
 +  handlers: [console]
 ```
 
+### Customise `rich` handler
+The `kedro.extras.logging.RichHandler` is subclass from [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler) and support the same set of arguments. By default we enable `rich_tracebacks: True` to use `rich` to render execeptions. You can turn it off with `rich_tracebacks: False`.
+
+When `rich_tracebacks` is set as `True`, the configuration will be propagate into
+[`rich.pretty.install`](https://rich.readthedocs.io/en/stable/reference/pretty.html?highlight=rich.pretty.install#rich.pretty.install)
+If the argument is supported in `rich.pretty.install`, it will also be propogated to the traceback's settings.
+
+For example, you can enable display of locals inside `logging.yml` to help debugging.
+```
+  rich:
+    class: kedro.extras.logging.RichHandler
+    rich_tracebacks: True
+    tracebacks_show_locals: True
+```
+
+The list of available options can be found in [Rich's documentation](https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler)
 ### Use plain console logging
 
 To use plain rather than rich logging, swap the `rich` handler for the `console` one as follows:

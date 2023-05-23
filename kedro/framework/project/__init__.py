@@ -16,10 +16,7 @@ from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any
 
-import click
 import importlib_resources
-import rich.pretty
-import rich.traceback
 import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -221,8 +218,7 @@ class _ProjectLogging(UserDict):
         )
         logging_config = Path(path).read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
-        logging.captureWarnings(True)
-        rich.pretty.install()
+
 
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project

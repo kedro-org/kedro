@@ -39,6 +39,7 @@ class CachedDataSet(AbstractDataSet):
         dataset: AbstractDataSet | dict,
         version: Version = None,
         copy_mode: str = None,
+        metadata: dict[str, Any] = None,
     ):
         """Creates a new instance of ``CachedDataSet`` pointing to the
         provided Python object.
@@ -52,6 +53,8 @@ class CachedDataSet(AbstractDataSet):
             copy_mode: The copy mode used to copy the data. Possible
                 values are: "deepcopy", "copy" and "assign". If not
                 provided, it is inferred based on the data type.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             ValueError: If the provided dataset is not a valid dict/YAML
@@ -67,6 +70,7 @@ class CachedDataSet(AbstractDataSet):
                 "representation of the dataset, or the actual dataset object."
             )
         self._cache = MemoryDataSet(copy_mode=copy_mode)
+        self.metadata = metadata
 
     def _release(self) -> None:
         self._cache.release()

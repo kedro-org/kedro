@@ -1,6 +1,7 @@
 """A collection of CLI commands for working with Kedro catalog."""
 import copy
-from collections import defaultdict, Iterable
+from collections import defaultdict
+from typing import Iterable
 
 import click
 import yaml

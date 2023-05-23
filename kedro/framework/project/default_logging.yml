@@ -4,7 +4,9 @@ disable_existing_loggers: False
 
 handlers:
   rich:
-    class: rich.logging.RichHandler
+    class: kedro.extras.logging.RichHandler
+    rich_tracebacks: True
+    # tracebacks_show_locals: False
 
 loggers:
   kedro:

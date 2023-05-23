@@ -230,7 +230,7 @@ def resolve_catalog_datasets(metadata: ProjectMetadata, env):
                     catalog_copy[pipeline_dataset] = config_copy
 
     # Remove all patterns from the resolved catalog
-    for ds_name, ds_config in catalog_copy.items():
+    for ds_name, ds_config in catalog_conf.items():
         if "}" in ds_name:
             del catalog_copy[ds_name]
 

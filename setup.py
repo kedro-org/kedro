@@ -104,14 +104,8 @@ extras_require = {
         "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
-        # https://github.com/kedro-org/kedro-plugins/issues/141
         # https://github.com/kedro-org/kedro-plugins/issues/143
-        "kedro-datasets[api,biosequence,dask,geopandas,matplotlib,holoviews,networkx,pandas,pillow,polars,video,plotly,redis,spark,svmlight,yaml]==1.1.1",
-        "kedro-datasets[tensorflow]==1.1.1; platform_system != 'Darwin' or platform_machine != 'arm64'",
-        "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
-        # https://github.com/kedro-org/kedro-plugins/pull/148
-        "snowflake-snowpark-python~=1.0.0",
-        "pyarrow~=8.0",
+        "kedro-datasets[api,biosequence,dask,geopandas,matplotlib,holoviews,networkx,pandas,pillow,polars,video,plotly,redis,snowflake,spark,svmlight,tensorflow,yaml]==1.3.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),

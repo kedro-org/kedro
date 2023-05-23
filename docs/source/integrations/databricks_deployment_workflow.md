@@ -147,7 +147,17 @@ You will not be able to directly see your project's log output when it is run as
 - Upload metrics from a machine learning model to MLflow.
 - Save a dataset as a CSV file in DBFS.
 
-In this guide, your project will save its logs to a location in DBFS. **The `databricks` environment of the PySpark Iris starter is already configured to do this.** The configuration used to achieve this can be found in the `conf/databricks/logging.yml` file.
+In this guide, your project will save its logs to a location in DBFS.
+
+- **Create a directory to save your logs into on DBFS**: at the command line in your local environment, run the following Databricks CLI command:
+
+```bash
+databricks fs mkdirs dbfs:/FileStore/iris-databricks/logs
+```
+
+This command creates a directory on DBFS (`/dbfs/FileStore/iris-databricks/logs`) where your project can save its logs.
+
+**The `databricks` environment of the PySpark Iris starter is already configured to save logs in this location.** The configuration used to achieve this is part of the [`databricks` environment](../configuration/configuration_basics.md#configuration-environments) defined for PySpark-Iris and can be found in the `conf/databricks/logging.yml` file.
 
 ### Package your project
 
@@ -165,7 +175,9 @@ Your packaged Kedro project needs access to data and configuration in order to r
 
 The PySpark Iris starter contains an environment that is set up to access data stored in DBFS (`conf/databricks`). To learn more about environments in Kedro configuration, see the [configuration documentation](../configuration/configuration_basics.md#configuration-environments). When you run your project on Databricks, you will pass the name of this environment as an option, as well as the path to the `conf/` directory on DBFS.
 
-There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI commands to upload your project's locally stored data and configuration to DBFS:
+There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers.
+
+- **Upload your project's data and config**: at the command line in your local environment, use the following Databricks CLI commands to upload your project's locally stored data and configuration to DBFS:
 
 ```bash
 databricks fs cp --recursive <project_root>/data/ dbfs:/FileStore/iris-databricks/data

@@ -8,8 +8,8 @@ import copy
 import difflib
 import logging
 import re
-from collections import defaultdict, Iterable
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Set, Type, Union, Iterable
 
 from parse import parse
 

@@ -229,4 +229,9 @@ def resolve_catalog_datasets(metadata: ProjectMetadata, env):
                             config_copy[key] = string_value.format_map(result.named)
                     catalog_copy[pipeline_dataset] = config_copy
 
+    # Remove all patterns from the resolved catalog
+    for ds_name, ds_config in catalog_copy.items():
+        if "}" in ds_name:
+            del catalog_copy[ds_name]
+
     secho(yaml.dump(catalog_copy))

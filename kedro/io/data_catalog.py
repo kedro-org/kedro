@@ -278,9 +278,9 @@ class DataCatalog:
 
         layers: dict[str, set[str]] = defaultdict(set)
         for ds_name, ds_config in catalog.items():
-            # Let's assume that any name with } in it is a dataset pattern to be matched.
+            # Assume that any name with } in it is a dataset factory to be matched.
             if "}" in ds_name:
-                # Add each pattern to the dataset_patterns dict.
+                # Add each factory to the dataset_patterns dict.
                 dataset_patterns[ds_name] = ds_config
             else:
                 ds_layer = ds_config.pop("layer", None)
@@ -303,9 +303,9 @@ class DataCatalog:
     ) -> AbstractDataSet:
         if data_set_name not in self._data_sets:
             # When a dataset is "used" in the pipeline that's not in the recorded catalog datasets,
-            # try to match it against the patterns in the catalog. If it's a match, resolve it to
-            # a dataset instance and add it to the catalog, so it only needs to be matched once
-            # and not everytime the dataset is used in the pipeline.
+            # try to match it against the data factories in the catalog. If it's a match,
+            # resolve it to a dataset instance and add it to the catalog, so it only needs
+            # to be matched once and not everytime the dataset is used in the pipeline.
             matched_dataset = self.match_name_against_dataset_factories(data_set_name)
             if matched_dataset:
                 self.add(data_set_name, matched_dataset)
@@ -558,23 +558,22 @@ class DataCatalog:
         # Loop through all dataset patterns and check if the given dataset name has a match.
         for dataset_pattern, dataset_template in self.dataset_patterns.items():
             result = parse(dataset_pattern, dataset_input_name)
-            # If there's a match resolve the rest of the pattern to create a dataset instance.
-            # A result can be None or something like:
-            # <Result () {'root_namespace': 'germany', 'dataset_name': 'companies'}>
+            # If there's a match resolve the rest of the pattern template to create
+            # a dataset instance. A result can be None or contain a dictionary of matched items:
             if result:
-                config_copy = copy.deepcopy(dataset_template)
+                template_copy = copy.deepcopy(dataset_template)
                 # Match results to patterns in catalog entry
-                for key, value in config_copy.items():
+                for key, value in template_copy.items():
                     # Find all dataset fields that need to be resolved with
                     # the values that were matched.
                     if isinstance(value, Iterable) and "}" in value:
                         string_value = str(value)
-                        # result.named: {'root_namespace': 'germany', 'dataset_name': 'companies'}
+                        # result.named: gives access to all dict items in the match result.
                         # format_map fills in dict values into a string with {...} placeholders
                         # of the same key name.
-                        config_copy[key] = string_value.format_map(result.named)
-                # Create dataset from catalog config.
-                dataset = AbstractDataSet.from_config(dataset_pattern, config_copy)
+                        template_copy[key] = string_value.format_map(result.named)
+                # Create dataset from catalog template.
+                dataset = AbstractDataSet.from_config(dataset_pattern, template_copy)
         return dataset
 
     def list(self, regex_search: str | None = None) -> list[str]:
@@ -631,7 +630,6 @@ class DataCatalog:
             parse(pattern, dataset_name) for pattern in self.dataset_patterns
         ):
             return True
-
         return False
 
     def shallow_copy(self) -> DataCatalog:

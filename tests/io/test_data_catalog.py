@@ -88,6 +88,23 @@ def sane_config_with_tracking_ds(tmp_path):
 
 
 @pytest.fixture
+def config_with_dataset_factories(filepath):
+    return {
+        "catalog": {
+            "{boats}@csv": {
+                "type": "pandas.CSVDataSet",
+                "filepath": filepath
+            },
+            "cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "s3://test_bucket/test_file.csv",
+                "layer": "raw",
+            },
+        },
+    }
+
+
+@pytest.fixture
 def data_set(filepath):
     return CSVDataSet(filepath=filepath, save_args={"index": False})
 
@@ -683,3 +700,28 @@ class TestDataCatalogVersioned:
         )
         with pytest.raises(DataSetError, match=pattern):
             versioned_dataset.load()
+
+
+class TestDataCatalogDatasetFactories:
+    def test_patterns_and_datasets_on_catalog(self, config_with_dataset_factories):
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        assert "cars" in catalog._data_sets
+        assert "{boats}@csv" not in catalog._data_sets
+        assert "cars" not in catalog.dataset_patterns
+        assert "{boats}@csv" in catalog.dataset_patterns
+
+    def test_match_added_to_datasets_on_get(self, config_with_dataset_factories):
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        assert "{boats}@csv" not in catalog._data_sets
+        assert "rowboat@csv" not in catalog._data_sets
+        assert "{boats}@csv" in catalog.dataset_patterns
+
+        rowboat = catalog._get_dataset("rowboat@csv")
+        assert isinstance(rowboat, CSVDataSet)
+        assert "rowboat@csv" in catalog._data_sets
+
+    def test_exists_in_catalog(self, config_with_dataset_factories):
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        assert catalog.exists_in_catalog("cars")
+        assert not catalog.exists_in_catalog("boats")
+        assert catalog.exists_in_catalog("boats@csv")

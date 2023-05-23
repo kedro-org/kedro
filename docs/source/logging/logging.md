@@ -45,9 +45,9 @@ Alternatively, if you would like to keep other configuration in `conf/base/loggi
 
 ### Customize the `rich` Handler
 
-Kedro's `kedro.extras.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
+Kedro's `kedro.extras.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
 
-When `rich_tracebacks` is set to `True`, the configuration is propagated to [`rich.pretty.install`](https://rich.readthedocs.io/en/stable/reference/pretty.html?highlight=rich.pretty.install#rich.pretty.install). If an argument is compatible with `rich.pretty.install`, it will be passed to the traceback's settings.
+When `rich_tracebacks` is set to `True`, the configuration is propagated to [`rich.traceback.install`](https://rich.readthedocs.io/en/stable/reference/traceback.html#rich.traceback.install). If an argument is compatible with `rich.pretty.install`, it will be passed to the traceback's settings.
 
 For instance, you can enable the display of local variables inside `logging.yml` to aid with debugging.
 
@@ -58,7 +58,7 @@ rich:
   tracebacks_show_locals: True
 ```
 
-A comprehensive list of available options can be found in the [Rich's documentation](https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler).
+A comprehensive list of available options can be found in the [RichHandler documentation](https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler).
 
 ### Use plain console logging
 

@@ -21,6 +21,17 @@ class RichHandler(rich.logging.RichHandler):
         super().__init__(*args, **kwargs)
         logging.captureWarnings(True)
         rich.pretty.install()
+        # Map arguments from RichHandler's constructor to rich.traceback.install
+        # signatures
+
+        mapped_kwargs = {}
+        for key, value in kwargs.items():
+            prefix = "tracebacks_"
+            if key.startswith(prefix):
+                mapped_kwargs[key[len(prefix):]] = value
+            elif key in ("locals_max_length", "locals_max_string"):
+                mapped_kwargs[key] = value
+
         if self.rich_tracebacks:
             # We suppress click here to hide tracebacks related to it conversely,
             # kedro is not suppressed to show its tracebacks for easier debugging.
@@ -31,9 +42,12 @@ class RichHandler(rich.logging.RichHandler):
             # See https://github.com/Textualize/rich/issues/2455
 
             if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
-                rich.traceback.install(
-                    suppress=[click, str(Path(sys.executable).parent)]
-                )
+                # rich.traceback.install(
+                #     suppress=[click, str(Path(sys.executable).parent)]
+                # )
+                # https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler
+                # Support overlapping argument between RichHandler and rich.traceback.install
+                rich.traceback.install(**mapped_kwargs)
 
 
 if __name__ == "__main__":

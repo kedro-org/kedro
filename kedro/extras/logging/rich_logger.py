@@ -1,18 +1,22 @@
 import logging
-from multiprocessing.sharedctypes import Value
 import os
+import sys
+from multiprocessing.sharedctypes import Value
 from pathlib import Path
 
 import click
-import rich
-import sys
+import rich.logging
+import rich.pretty
+import rich.traceback
+
 
 class RichHandler(rich.logging.RichHandler):
     """Identical to rich's logging handler but with a few extra behaviours:
-        * warnings issued by the `warnings` module are redirected to logging
-        * pretty printing is enabled on the Python REPL (including IPython and Jupyter)
-        * all tracebacks are handled by rich when rich_tracebacks=True
+    * warnings issued by the `warnings` module are redirected to logging
+    * pretty printing is enabled on the Python REPL (including IPython and Jupyter)
+    * all tracebacks are handled by rich when rich_tracebacks=True
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         logging.captureWarnings(True)
@@ -28,21 +32,10 @@ class RichHandler(rich.logging.RichHandler):
 
             if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
                 rich.traceback.install(
-                    suppress=[
-                    click,
-                               str(Path(sys.executable).parent)
-                              ]
-                    )
-            ###                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-            ### NOTE YOU MAY WELL NEED TO CHANGE THIS PATH DEPENDING ON WHERE
-            ### THIS FILE ENDS UP SO THAT IT POINTS TO THE RIGHT PLACE
+                    suppress=[click, str(Path(sys.executable).parent)]
+                )
 
 
-# class _ProjectLogging(Use Dict):
-#     # pylint: disable=super-init-not-called
-#     def __init__(self):
-#         """Initialise project logging. The path to logging configuration is given in
-#         environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
-#         path = os.environ.get("KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml")
-#         logging_config = Path(path).read_text(encoding="utf-8")
-#         self.configure(yaml.safe_load(logging_config))
+if __name__ == "__main__":
+    RichHandler()
+    print(1)

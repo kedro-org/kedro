@@ -58,7 +58,7 @@ rich:
   tracebacks_show_locals: True
 ```
 
-A comprehensive list of available options can be found in the [RichHandler documentation](https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler).
+A comprehensive list of available options can be found in the [RichHandler documentation](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler).
 
 ### Use plain console logging
 

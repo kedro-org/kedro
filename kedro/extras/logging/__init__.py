@@ -6,7 +6,7 @@ import warnings
 from .color_logger import ColorHandler
 from .rich_logger import RichHandler
 
-__all__ = ["ColorHandler", "Richhandler"]
+__all__ = ["ColorHandler", "RichHandler"]
 
 warnings.simplefilter("default", DeprecationWarning)
 

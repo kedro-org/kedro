@@ -10,6 +10,8 @@ import rich.pretty
 import rich.traceback
 
 logger = logging.getLogger(__file__)
+
+
 class RichHandler(rich.logging.RichHandler):
     """Identical to rich's logging handler but with a few extra behaviours:
     * warnings issued by the `warnings` module are redirected to logging
@@ -31,11 +33,11 @@ class RichHandler(rich.logging.RichHandler):
         # Rich traceback handling does not work on databricks. Hopefully this will be
         # fixed on their side at some point, but until then we disable it.
         # See https://github.com/Textualize/rich/issues/2455
-        mapped_kwargs = {"suppress" : [click, str(Path(sys.executable).parent)]}
+        mapped_kwargs = {"suppress": [click, str(Path(sys.executable).parent)]}
         for key, value in kwargs.items():
             prefix = "tracebacks_"
             if key.startswith(prefix):
-                key_prefix_removed = key[len(prefix):]
+                key_prefix_removed = key[len(prefix) :]
                 if key_prefix_removed == "suppress":
                     mapped_kwargs[key_prefix_removed] += value
                 else:
@@ -44,7 +46,6 @@ class RichHandler(rich.logging.RichHandler):
                 mapped_kwargs[key] = value
 
         if self.rich_tracebacks:
-
             if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
                 # https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler
                 # Support overlapping argument between RichHandler and rich.traceback.install

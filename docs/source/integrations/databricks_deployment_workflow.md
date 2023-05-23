@@ -155,7 +155,7 @@ databricks fs mkdirs dbfs:/FileStore/iris-databricks/logs
 
 This command creates a directory on DBFS (`/dbfs/FileStore/iris-databricks/logs`) where your project can save its logs.
 
-**The `databricks` environment of the PySpark Iris starter is already configured to save logs in this location.** The configuration used to achieve this is part of the [`databricks` environment](../configuration/configuration_basics.md#configuration-environments) defined for PySpark-Iris and can be found in the `conf/databricks/logging.yml` file.
+**The `databricks` environment of the PySpark Iris starter is already configured to save logs in this location.** The configuration used to achieve this is part of the [`databricks` environment](../configuration/configuration_basics.md#configuration-environments) defined for PySpark Iris and can be found in the `conf/databricks/logging.yml` file.
 
 ### Package your project
 

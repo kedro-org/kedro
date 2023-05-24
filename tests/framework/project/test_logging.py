@@ -82,24 +82,27 @@ def test_rich_traceback_not_installed(mocker):
 def test_rich_traceback_configuration(mocker):
     rich_traceback_install = mocker.patch("rich.traceback.install")
     rich_pretty_install = mocker.patch("rich.pretty.install")
+
     import click
 
     sys_executable_path = str(Path(sys.executable).parent)
     traceback_install_defaults = {"suppress": [click, sys_executable_path]}
-
+    fake_path = "dummy"
     rich_handler = {
         "class": "kedro.logging.RichHandler",
         "rich_tracebacks": True,
         "tracebacks_show_locals": True,
+        "tracebacks_suppress": [fake_path],
     }
 
     test_logging_config = default_logging_config.copy()
     test_logging_config["handlers"]["rich"] = rich_handler
     LOGGING.configure(test_logging_config)
 
-    rich_traceback_install.assert_called_with(
-        **{"show_locals": True, **traceback_install_defaults}
-    )
+    expected_install_defaults = traceback_install_defaults.copy()
+    expected_install_defaults["suppress"].extend([fake_path])
+    expected_install_defaults["show_locals"] = True
+    rich_traceback_install.assert_called_with(**expected_install_defaults)
     rich_pretty_install.assert_called_once()
 
 

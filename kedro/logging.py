@@ -52,9 +52,6 @@ class RichHandler(rich.logging.RichHandler):
                     traceback_install_kwargs[key_prefix_removed].extend(value)
                 else:
                     traceback_install_kwargs[key_prefix_removed] = value
-            # These two arguments are also compatible with RichHandler
-            elif key in ("locals_max_length", "locals_max_string"):
-                traceback_install_kwargs[key] = value
 
         if self.rich_tracebacks and "DATABRICKS_RUNTIME_VERSION" not in os.environ:
             # Rich traceback handling does not work on databricks. Hopefully this will be

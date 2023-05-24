@@ -19,7 +19,7 @@ We now give some common examples of how you might like to change your project's 
 
 ### Using `KEDRO_LOGGING_CONFIG` environment variable
 
-`KEDRO_LOGGING_CONFIG` is an optional environment variable that you can use to specify the path of your logging configuration file, overriding the default Kedro's framework `default_logging.yml`.
+`KEDRO_LOGGING_CONFIG` is an optional environment variable that you can use to specify the path of your logging configuration file, overriding the default Kedro's `default_logging.yml`.
 
 To use this environment variable, set it to the path of your desired logging configuration file before running any Kedro commands. For example, if you have a logging configuration file located at `/path/to/logging.yml`, you can set `KEDRO_LOGGING_CONFIG` as follows:
 
@@ -45,7 +45,7 @@ Alternatively, if you would like to keep other configuration in `conf/base/loggi
 
 ### Customize the `rich` Handler
 
-Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHand[label](vscode-file://vscode-a section of the class.
+Kedro's `kedro.extras.logging.RichHandler` is a subclass of [`rich.logging.RichHand[label](vscode-file://vscode-a section of the class.
 
 pp/Applications/Visual%20Studio%20Code.app/Contents/Resources/app/out/vs/code/electron-sandbox/workbench/workbench.html)ler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
 

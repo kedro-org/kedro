@@ -7,6 +7,8 @@ from pluggy import PluginManager
 from .markers import CLI_HOOK_NAMESPACE
 from .specs import CLICommandSpecs
 
+logger = logging.getLogger(__name__)
+
 _cli_hook_manager = None
 
 _CLI_PLUGIN_HOOKS = "kedro.cli_hooks"
@@ -17,6 +19,8 @@ def get_cli_hook_manager():
     global _cli_hook_manager
     if _cli_hook_manager is None:
         _cli_hook_manager = CLIHooksManager()
+    _cli_hook_manager.trace.root.setwriter(logger.debug)
+    _cli_hook_manager.enable_tracing()
     return _cli_hook_manager
 
 
@@ -42,7 +46,7 @@ class CLIHooksManager(PluginManager):
         }
 
         if plugin_names:
-            logging.getLogger(__name__).debug(
+            logger.debug(
                 "Registered CLI hooks from %d installed plugin(s): %s",
                 len(plugin_names),
                 ", ".join(sorted(plugin_names)),

@@ -12,6 +12,7 @@
 
 ## Major features and improvements
 * `kedro run --params` now updates interpolated parameters correctly when using `OmegaConfigLoader`.
+* Added `metadata` attribute to `kedro.io` datasets. This is ignored by Kedro, but may be consumed by users or external plugins.
 
 ## Bug fixes and other changes
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
@@ -19,6 +20,12 @@
 
 ## Breaking changes to the API
 * `kedro package` does not produce `.egg` files anymore, and now relies exclusively on `.whl` files.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [tomasvanpottelbergh](https://github.com/tomasvanpottelbergh)
+
 ## Upcoming deprecations for Kedro 0.19.0
 
 

@@ -38,9 +38,6 @@ class RichHandler(rich.logging.RichHandler):
         # kedro is not suppressed to show its tracebacks for easier debugging.
         # sys.executable is used to get the kedro executable path to hide the
         # top level traceback.
-        # Rich traceback handling does not work on databricks. Hopefully this will be
-        # fixed on their side at some point, but until then we disable it.
-        # See https://github.com/Textualize/rich/issues/2455
 
         traceback_install_kwargs = {
             "suppress": [click, str(Path(sys.executable).parent)]
@@ -60,6 +57,7 @@ class RichHandler(rich.logging.RichHandler):
                 traceback_install_kwargs[key] = value
 
         if self.rich_tracebacks and "DATABRICKS_RUNTIME_VERSION" not in os.environ:
-            # https://rich.readthedocs.io/en/stable/reference/logging.html?highlight=rich%20handler#rich.logging.RichHandler
-            # Support compatible arguments between RichHandler and rich.traceback.install
+            # Rich traceback handling does not work on databricks. Hopefully this will be
+            # fixed on their side at some point, but until then we disable it.
+            # See https://github.com/Textualize/rich/issues/2455
             rich.traceback.install(**traceback_install_kwargs)

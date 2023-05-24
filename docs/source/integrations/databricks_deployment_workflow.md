@@ -84,7 +84,7 @@ This command creates a new Kedro project using the PySpark Iris starter template
 
 ### Create an entry point for Databricks
 
-The default entry point of a Kedro project uses a Click command line interface (CLI), which is not compatible with Databricks. To run your project as a Databricks job, you must define a new entry point speficially for use on Databricks.
+The default entry point of a Kedro project uses a Click command line interface (CLI), which is not compatible with Databricks. To run your project as a Databricks job, you must define a new entry point specifically for use on Databricks.
 
 The PySpark Iris starter has this entry point pre-built, so there is no extra work to do in this guide. **Generally you must create it manually for your own projects using the following steps**:
 

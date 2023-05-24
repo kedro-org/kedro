@@ -1,4 +1,4 @@
-# AWS Batch (deprecated)
+# AWS Batch (legacy documentation)
 
 ``` {important}
 This page contains legacy documentation that has not been tested against recent Kedro releases.

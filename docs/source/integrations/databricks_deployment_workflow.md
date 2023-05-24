@@ -302,7 +302,7 @@ The Databricks API enables you to programmatically interact with Databricks serv
 3. Use the Jobs API's [`/create` endpoint](https://docs.databricks.com/workflows/jobs/jobs-api-updates.html#create) to create a new job.
 4. Use the Jobs API's [`/runs/submit` endpoint](https://docs.databricks.com/workflows/jobs/jobs-api-updates.html#runs-submit) to run your newly created job.
 
-### Databricks CLI
+### How to use the Databricks CLI to automate deployment of a Kedro project
 
 The Databricks Command Line Interface (CLI) is another way to automate deployment of your Kedro project. The following steps outline how to use the Databricks CLI to automate the deployment of a Kedro project:
 

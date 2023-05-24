@@ -1,4 +1,4 @@
-# pylint: disable=import-outside-toplevel,unused-import,reimported
+# pylint: disable=import-outside-toplevel
 import logging
 import sys
 from pathlib import Path
@@ -38,6 +38,7 @@ def test_environment_variable_logging_config(monkeypatch, tmp_path):
     with config_path.open("w", encoding="utf-8") as f:
         yaml.dump(logging_config, f)
     from kedro.framework.project import _ProjectLogging
+
     LOGGING = _ProjectLogging()
 
     assert LOGGING.data == logging_config
@@ -59,6 +60,47 @@ def test_rich_traceback_enabled(mocker):
 
     rich_traceback_install.assert_called()
     rich_pretty_install.assert_called()
+
+
+def test_rich_traceback_not_installed(mocker):
+    rich_traceback_install = mocker.patch("rich.traceback.install")
+    rich_pretty_install = mocker.patch("rich.pretty.install")
+    rich_handler = {
+        "class": "kedro.logging.RichHandler",
+        "rich_tracebacks": False,
+        "tracebacks_show_locals": True,
+    }
+    test_logging_config = default_logging_config.copy()
+    test_logging_config["handlers"]["rich"] = rich_handler
+
+    LOGGING.configure(test_logging_config)
+
+    rich_pretty_install.assert_called_once()
+    rich_traceback_install.assert_not_called()
+
+
+def test_rich_traceback_configuration(mocker):
+    rich_traceback_install = mocker.patch("rich.traceback.install")
+    rich_pretty_install = mocker.patch("rich.pretty.install")
+    import click
+
+    sys_executable_path = str(Path(sys.executable).parent)
+    traceback_install_defaults = {"suppress": [click, sys_executable_path]}
+
+    rich_handler = {
+        "class": "kedro.logging.RichHandler",
+        "rich_tracebacks": True,
+        "tracebacks_show_locals": True,
+    }
+
+    test_logging_config = default_logging_config.copy()
+    test_logging_config["handlers"]["rich"] = rich_handler
+    LOGGING.configure(test_logging_config)
+
+    rich_traceback_install.assert_called_with(
+        **{"show_locals": True, **traceback_install_defaults}
+    )
+    rich_pretty_install.assert_called_once()
 
 
 def test_rich_traceback_disabled_on_databricks(mocker, monkeypatch):

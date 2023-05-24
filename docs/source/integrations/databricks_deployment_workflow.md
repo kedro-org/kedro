@@ -287,8 +287,8 @@ By following these steps, you packaged your Kedro project and manually ran it as
 
 Up to this point, this page has described a manual workflow for deploying and running a project on Databricks. The process can be automated in two ways:
 
-- [Use the Databricks API.](#databricks-api)
-- [Use the Databricks CLI.](#databricks-cli)
+- [Use the Databricks API.](#how-to-use-the-databricks-api-to-automate-deployment-of-a-kedro-project)
+- [Use the Databricks CLI.](#how-to-use-the-databricks-cli-to-automate-deployment-of-a-kedro-project)
 
 Both of these methods enable you to store information about your job declaratively in the same version control system as the rest of your project. For each method, the information stored declaratively is the same as what is entered manually in the [above section on creating and running a job in Databricks](#deploy-and-run-your-kedro-project-using-the-workspace-ui).
 

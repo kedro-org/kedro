@@ -11,7 +11,9 @@ from kedro.framework.project import LOGGING, configure_logging
 default_logging_config = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"rich": {"class": "rich.logging.RichHandler"}},
+    "handlers": {
+        "rich": {"class": "kedro.extras.logging.RichHandler", "rich_tracebacks": True}
+    },
     "loggers": {"kedro": {"level": "INFO"}},
     "root": {"handlers": ["rich"]},
 }

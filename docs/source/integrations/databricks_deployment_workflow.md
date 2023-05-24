@@ -74,7 +74,7 @@ pip install kedro databricks-cli --upgrade
 
 ### Create a new Kedro project
 
-Create a Kedro project with the PySpark Iris starter using the following command in your local environment:
+Create a Kedro project by using the following command in your local environment:
 
 ```bash
 kedro new --starter=pyspark-iris

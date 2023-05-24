@@ -257,7 +257,7 @@ This page also shows an overview of all past runs of your job. As you only just 
 
 The following things happen when you run your job:
 
-- The job cluster will be provisioned and started (job status: `Pending`).
+- The job cluster is provisioned and started (job status: `Pending`).
 - The packaged Kedro project and all its dependencies will be installed (job status: `Pending`)
 - The packaged Kedro project is run from the specified `databricks_run` entry point (job status: `In Progress`).
 - The packaged code finishes executing and the job cluster is stopped (job status: `Succeeded`).

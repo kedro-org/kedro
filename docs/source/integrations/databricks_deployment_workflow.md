@@ -208,7 +208,7 @@ A Kedro project's configuration and data do not get included when it is packaged
 
 ## Deploy and run your Kedro project using the workspace UI
 
-To run your packaged project on Databricks, login to your Databricks account and, perform the following steps in the workspace:
+To run your packaged project on Databricks, login to your Databricks account and perform the following steps in the workspace:
 
 1. **Create a new job**: In the Databricks workspace, navigate to the `Worfklows` tab and click `Create Job`:
 

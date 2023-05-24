@@ -81,7 +81,7 @@ Create a Kedro project with the PySpark Iris starter using the following command
 kedro new --starter=pyspark-iris
 ```
 
-Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the PySpark Iris starter template.
+This command creates a new Kedro project using the PySpark Iris starter template. Name your new project `iris-databricks` for consistency with the rest of this guide.
 
 ### Create an entry point for Databricks
 

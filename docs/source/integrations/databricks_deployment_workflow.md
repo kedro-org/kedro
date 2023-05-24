@@ -160,7 +160,7 @@ This command creates a directory on DBFS (`/dbfs/FileStore/iris-databricks/logs`
 
 ### Package your project
 
-To package your Kedro project for deployment on Databricks, you must create a Wheel (`.whl`) file, which is a binary distribution of your project. In the root directory of your Kedro projec   t, run the following command:
+To package your Kedro project for deployment on Databricks, you must create a Wheel (`.whl`) file, which is a binary distribution of your project. In the root directory of your Kedro project, run the following command:
 
 ```bash
 kedro package

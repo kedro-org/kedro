@@ -284,7 +284,7 @@ By following these steps, you packaged your Kedro project and manually ran it as
 
 ## Resources for automating deployment to Databricks
 
-This page describes a manual workflow for deploying and running project on Databricks. This process can be automated in two ways:
+Up to this point, this page has described a manual workflow for deploying and running a project on Databricks. The process can be automated in two ways:
 
 - [Use the Databricks API.](#databricks-api)
 - [Use the Databricks CLI.](#databricks-cli)

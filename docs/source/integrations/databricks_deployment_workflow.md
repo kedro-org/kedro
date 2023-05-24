@@ -175,7 +175,7 @@ Your packaged Kedro project needs access to data and configuration in order to r
 
 The PySpark Iris starter contains an environment that is set up to access data stored in DBFS (`conf/databricks`). To learn more about environments in Kedro configuration, see the [configuration documentation](../configuration/configuration_basics.md#configuration-environments). When you run your project on Databricks, you will pass the name of this environment as an option, as well as the path to the `conf/` directory on DBFS.
 
-There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers.
+There are several ways to upload data to DBFS: you can use the [DBFS API](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/dbfs), the [`dbutils` module](https://docs.databricks.com/dev-tools/databricks-utils.html) in a Databricks notebook or the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html). In this guide, it is recommended to use the Databricks CLI because of the convenience it offers.
 
 - **Upload your project's data and config**: at the command line in your local environment, use the following Databricks CLI commands to upload your project's locally stored data and configuration to DBFS:
 

@@ -12,7 +12,7 @@ default_logging_config = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {
-        "rich": {"class": "kedro.extras.logging.RichHandler", "rich_tracebacks": True}
+        "rich": {"class": "kedro.logging.RichHandler", "rich_tracebacks": True}
     },
     "loggers": {"kedro": {"level": "INFO"}},
     "root": {"handlers": ["rich"]},
@@ -37,8 +37,8 @@ def test_environment_variable_logging_config(monkeypatch, tmp_path):
     logging_config = {"version": 1, "loggers": {"kedro": {"level": "WARNING"}}}
     with config_path.open("w", encoding="utf-8") as f:
         yaml.dump(logging_config, f)
-    del sys.modules["kedro.framework.project"]
-    from kedro.framework.project import LOGGING  # noqa
+    from kedro.framework.project import _ProjectLogging
+    LOGGING = _ProjectLogging()
 
     assert LOGGING.data == logging_config
     assert logging.getLogger("kedro").level == logging.WARNING

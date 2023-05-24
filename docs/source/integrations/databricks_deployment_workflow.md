@@ -170,7 +170,7 @@ This command generates a `.whl` file in the `dist` directory within your project
 
 ### Upload project data and configuration to DBFS
 
-Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data and configuration to an accessible location. In this guide, we will store the data on the Databricks File System (DBFS).
+Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data and configuration to a location accessible to Databricks. In this guide, we will store the data on the Databricks File System (DBFS).
 
 The PySpark Iris starter contains an environment that is set up to access data stored in DBFS (`conf/databricks`). To learn more about environments in Kedro configuration, see the [configuration documentation](../configuration/configuration_basics.md#configuration-environments). When you run your project on Databricks, you will pass the name of this environment as an option, as well as the path to the `conf/` directory on DBFS.
 

@@ -84,9 +84,9 @@ This command creates a new Kedro project using the PySpark Iris starter template
 
 ### Create an entry point for Databricks
 
-The default entry point of a Kedro project uses a Click command line interface (CLI), which is not compatible with Databricks. To run your project as a Databricks job, you must define a new entry point speficially for use on Databricks.
+The default entry point of a Kedro project uses a Click command line interface (CLI), which is not compatible with Databricks. To run your project as a Databricks job, you must define a new entry point specifically for use on Databricks.
 
-The PySpark Iris starter has this entry point pre-built, so there is no extra work to do in this guide. **Generally you must create it manually for your own projects using the following steps**:
+The PySpark Iris starter has this entry point pre-built, so there is no extra work to do here, but generally you must **create an entry point manually for your own projects using the following steps**:
 
 1. **Create an entry point script**: Create a new file in `<project_root>/src/iris_databricks` named `databricks_run.py`. Copy the following code to this file:
 
@@ -160,7 +160,7 @@ This command creates a directory on DBFS (`/dbfs/FileStore/iris-databricks/logs`
 
 ### Package your project
 
-To package your Kedro project for deployment on Databricks, you must create a Wheel (`.whl`) file, which is a binary distribution of your project. In the root directory of your Kedro projec   t, run the following command:
+To package your Kedro project for deployment on Databricks, you must create a Wheel (`.whl`) file, which is a binary distribution of your project. In the root directory of your Kedro project, run the following command:
 
 ```bash
 kedro package
@@ -208,7 +208,7 @@ A Kedro project's configuration and data do not get included when it is packaged
 
 ## Deploy and run your Kedro project using the workspace UI
 
-To run your packaged project on Databricks, login to your Databricks account and, perform the following steps in the workspace:
+To run your packaged project on Databricks, login to your Databricks account and perform the following steps in the workspace:
 
 1. **Create a new job**: In the Databricks workspace, navigate to the `Worfklows` tab and click `Create Job`:
 
@@ -257,20 +257,20 @@ This page also shows an overview of all past runs of your job. As you only just 
 
 The following things happen when you run your job:
 
-- The job cluster will be provisioned and started (job status: `Pending`).
-- The packaged Kedro project and all its dependencies will be installed (job status: `Pending`)
-- The packaged Kedro project will be run from the specified `databricks_run` entry point (job status: `In Progress`).
-- The packaged code will finish executing and the job cluster will be stopped (job status: `Succeeded`).
+- The job cluster is provisioned and started (job status: `Pending`).
+- The packaged Kedro project and all its dependencies are installed (job status: `Pending`)
+- The packaged Kedro project is run from the specified `databricks_run` entry point (job status: `In Progress`).
+- The packaged code finishes executing and the job cluster is stopped (job status: `Succeeded`).
 
 A run will take roughly six to seven minutes.
 
-When the status of your run is `Succeeded`, your job has successfully finished executing. You can now proceed to view the logs that your project produced while it was running. To retrieve the logs file from the [location in DBFS where it was saved](#plan-your-projects-output), use the following `databricks CLI` command at your local command line with the `iris-databrick` conda environment activated:
+When the status of your run is `Succeeded`, your job has successfully finished executing. You can now view the logs that your project produced while it was running. To retrieve the log file from the [location in DBFS where it was saved](#plan-your-projects-output), use the following `databricks CLI` command at your local command line with the `iris-databrick` conda environment activated:
 
 ```bash
 databricks fs cp dbfs:/FileStore/iris-databricks/logs/info.log .
 ```
 
-This will download the logs file from DBFS to your local environment. You can view the contents of the `info.log` file in any text editor, they will look similar to the following:
+This will download the log file from DBFS to your local environment. You can view the contents of the `info.log` file in any text editor, they will look similar to the following:
 
 ```bash
 ...
@@ -284,7 +284,7 @@ By following these steps, you packaged your Kedro project and manually ran it as
 
 ## Resources for automating deployment to Databricks
 
-This page describes a manual workflow for deploying and running project on Databricks. This process can be automated in two ways:
+Up to this point, this page has described a manual workflow for deploying and running a project on Databricks. The process can be automated in two ways:
 
 - [Use the Databricks API.](#databricks-api)
 - [Use the Databricks CLI.](#databricks-cli)
@@ -293,7 +293,7 @@ Both of these methods enable you to store information about your job declarative
 
 These methods can be integrated into a CI/CD pipeline to automatically deploy a packaged Kedro project to Databricks as a job.
 
-### Databricks API
+### How to use the Databricks API to automate deployment of a Kedro project
 
 The Databricks API enables you to programmatically interact with Databricks services, including job creation and execution. You can use the Jobs API to automate the deployment of your Kedro project to Databricks. The following steps outline how to use the Databricks API to do this:
 
@@ -302,7 +302,7 @@ The Databricks API enables you to programmatically interact with Databricks serv
 3. Use the Jobs API's [`/create` endpoint](https://docs.databricks.com/workflows/jobs/jobs-api-updates.html#create) to create a new job.
 4. Use the Jobs API's [`/runs/submit` endpoint](https://docs.databricks.com/workflows/jobs/jobs-api-updates.html#runs-submit) to run your newly created job.
 
-### Databricks CLI
+### How to use the Databricks CLI to automate deployment of a Kedro project
 
 The Databricks Command Line Interface (CLI) is another way to automate deployment of your Kedro project. The following steps outline how to use the Databricks CLI to automate the deployment of a Kedro project:
 

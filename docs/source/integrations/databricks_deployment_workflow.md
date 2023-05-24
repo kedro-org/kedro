@@ -293,7 +293,7 @@ Both of these methods enable you to store information about your job declarative
 
 These methods can be integrated into a CI/CD pipeline to automatically deploy a packaged Kedro project to Databricks as a job.
 
-### Databricks API
+### How to use the Databricks API to automate deployment of a Kedro project
 
 The Databricks API enables you to programmatically interact with Databricks services, including job creation and execution. You can use the Jobs API to automate the deployment of your Kedro project to Databricks. The following steps outline how to use the Databricks API to do this:
 

@@ -2,9 +2,11 @@
 
 Databricks jobs are a way to execute code on Databricks clusters, allowing you to run data processing tasks, ETL jobs, or machine learning workflows. In this guide we explore the process of packaging a Kedro project and running it as a job on Databricks.
 
+## What are the advantages of packaging a Kedro project to run on Databricks?
+
 By packaging your Kedro project and running it on Databricks, you can execute your pipeline without the need for a notebook. This approach is particularly well-suited for production, as it provides a structured and reproducible way to run your code. However, it is not ideal for development, where rapid iteration is necessary. For guidance on developing a Kedro project for Databricks in a rapid build-test loop, see the [development workflow guide](./databricks_development_workflow.md).
 
-Running your packaged project as a Databricks job is very different to running it from a notebook. In particular, it does **not** allow you to see the log output of your project as you may be used to seeing it when running Kedro from a command line or notebook. 
+Running your packaged project as a Databricks job is very different to running it from a notebook. In particular, it does **not** allow you to see the log output of your project as you may be used to seeing it when running Kedro from a command line or notebook.
 
 Here are some typical use cases for running a packaged Kedro project as a Databricks job:
 
@@ -12,7 +14,6 @@ Here are some typical use cases for running a packaged Kedro project as a Databr
 - **Machine learning with MLflow**: your Kedro project runs an ML model and metrics about your experiments are tracked in MLflow.
 - **Automated and scheduled runs**: your Kedro project should be run on Databricks on an [automated schedule](https://docs.databricks.com/workflows/jobs/schedule-jobs.html#add-a-job-schedule).
 - **CI/CD integration**: you have a CI/CD pipeline set up that produces a packaged Kedro project.
-
 
 ## What this page covers
 

@@ -24,7 +24,9 @@ handlers:
     delay: True
 
   rich:
-    class: rich.logging.RichHandler
+    class: kedro.extras.logging.RichHandler
+    rich_tracebacks: True
+    # tracebacks_show_locals: True
 
 loggers:
   kedro:

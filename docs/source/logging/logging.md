@@ -19,7 +19,7 @@ We now give some common examples of how you might like to change your project's 
 
 ### Using `KEDRO_LOGGING_CONFIG` environment variable
 
-`KEDRO_LOGGING_CONFIG` is an optional environment variable that you can use to specify the path of your logging configuration file, overriding the default path of `conf/base/logging.yml`.
+`KEDRO_LOGGING_CONFIG` is an optional environment variable that you can use to specify the path of your logging configuration file, overriding the default Kedro's framework `default_logging.yml`.
 
 To use this environment variable, set it to the path of your desired logging configuration file before running any Kedro commands. For example, if you have a logging configuration file located at `/path/to/logging.yml`, you can set `KEDRO_LOGGING_CONFIG` as follows:
 

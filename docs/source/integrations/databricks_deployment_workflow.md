@@ -270,7 +270,7 @@ When the status of your run is `Succeeded`, your job has successfully finished e
 databricks fs cp dbfs:/FileStore/iris-databricks/logs/info.log .
 ```
 
-This will download the logs file from DBFS to your local environment. You can view the contents of the `info.log` file in any text editor, they will look similar to the following:
+This will download the log file from DBFS to your local environment. You can view the contents of the `info.log` file in any text editor, they will look similar to the following:
 
 ```bash
 ...

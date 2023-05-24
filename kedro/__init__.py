@@ -5,7 +5,4 @@ configuration and pipeline assembly.
 
 __version__ = "0.18.8"
 
-
-import logging
-
-logging.getLogger(__name__).addHandler(logging.NullHandler())
+import kedro.logging

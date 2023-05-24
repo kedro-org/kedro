@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-from multiprocessing.sharedctypes import Value
 from pathlib import Path
 
 import click

@@ -13,7 +13,6 @@ Here are some typical use cases for running a packaged Kedro project as a Databr
 - **Automated and scheduled runs**: your Kedro project should be run on Databricks on an [automated schedule](https://docs.databricks.com/workflows/jobs/schedule-jobs.html#add-a-job-schedule).
 - **CI/CD integration**: you have a CI/CD pipeline set up that produces a packaged Kedro project.
 
-By the end of this guide, you'll have a clear understanding of the steps involved in packaging your Kedro project and running it as a job on Databricks.
 
 ## What this page covers
 

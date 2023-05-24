@@ -7,7 +7,6 @@ import importlib
 import logging.config
 import operator
 import os
-import sys
 import traceback
 import types
 import warnings

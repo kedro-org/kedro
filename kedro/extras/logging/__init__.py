@@ -4,7 +4,6 @@ This module contains a logging handler class which produces coloured logs.
 import warnings
 
 from .color_logger import ColorHandler
-from logging import RichHandler
 
 __all__ = ["ColorHandler"]
 

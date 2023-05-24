@@ -1,3 +1,7 @@
+"""
+This module contains a logging handler class which produces coloured logs and tracebacks.
+"""
+
 import logging
 import os
 import sys

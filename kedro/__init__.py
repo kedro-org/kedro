@@ -4,5 +4,3 @@ configuration and pipeline assembly.
 """
 
 __version__ = "0.18.8"
-
-import kedro.logging

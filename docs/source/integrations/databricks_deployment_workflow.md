@@ -260,7 +260,7 @@ The following things happen when you run your job:
 - The job cluster will be provisioned and started (job status: `Pending`).
 - The packaged Kedro project and all its dependencies will be installed (job status: `Pending`)
 - The packaged Kedro project is run from the specified `databricks_run` entry point (job status: `In Progress`).
-- The packaged code will finish executing and the job cluster will be stopped (job status: `Succeeded`).
+- The packaged code finishes executing and the job cluster is stopped (job status: `Succeeded`).
 
 A run will take roughly six to seven minutes.
 

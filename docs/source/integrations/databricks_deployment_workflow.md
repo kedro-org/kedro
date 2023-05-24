@@ -264,7 +264,7 @@ The following things happen when you run your job:
 
 A run will take roughly six to seven minutes.
 
-When the status of your run is `Succeeded`, your job has successfully finished executing. You can now proceed to view the logs that your project produced while it was running. To retrieve the logs file from the [location in DBFS where it was saved](#plan-your-projects-output), use the following `databricks CLI` command at your local command line with the `iris-databrick` conda environment activated:
+When the status of your run is `Succeeded`, your job has successfully finished executing. You can now view the logs that your project produced while it was running. To retrieve the log file from the [location in DBFS where it was saved](#plan-your-projects-output), use the following `databricks CLI` command at your local command line with the `iris-databrick` conda environment activated:
 
 ```bash
 databricks fs cp dbfs:/FileStore/iris-databricks/logs/info.log .

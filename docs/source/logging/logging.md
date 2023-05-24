@@ -45,7 +45,7 @@ Alternatively, if you would like to keep other configuration in `conf/base/loggi
 
 ### Customize the `rich` Handler
 
-Kedro's `kedro.extras.logging.RichHandler` is a subclass of [`rich.logging.RichHand[label](vscode-file://vscode-a section of the class.
+Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHand[label](vscode-file://vscode-a section of the class.
 
 pp/Applications/Visual%20Studio%20Code.app/Contents/Resources/app/out/vs/code/electron-sandbox/workbench/workbench.html)ler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
 

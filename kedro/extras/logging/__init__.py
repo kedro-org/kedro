@@ -4,9 +4,9 @@ This module contains a logging handler class which produces coloured logs.
 import warnings
 
 from .color_logger import ColorHandler
-from .rich_logger import RichHandler
+from logging import RichHandler
 
-__all__ = ["ColorHandler", "RichHandler"]
+__all__ = ["ColorHandler"]
 
 warnings.simplefilter("default", DeprecationWarning)
 

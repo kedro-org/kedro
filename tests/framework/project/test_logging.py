@@ -8,24 +8,28 @@ import yaml
 
 from kedro.framework.project import LOGGING, configure_logging
 
-default_logging_config = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "rich": {"class": "kedro.logging.RichHandler", "rich_tracebacks": True}
-    },
-    "loggers": {"kedro": {"level": "INFO"}},
-    "root": {"handlers": ["rich"]},
-}
+
+@pytest.fixture
+def default_logging_config():
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "rich": {"class": "kedro.logging.RichHandler", "rich_tracebacks": True}
+        },
+        "loggers": {"kedro": {"level": "INFO"}},
+        "root": {"handlers": ["rich"]},
+    }
+    return logging_config
 
 
 @pytest.fixture(autouse=True)
-def reset_logging():
+def reset_logging(default_logging_config):
     yield
     configure_logging(default_logging_config)
 
 
-def test_default_logging_config():
+def test_default_logging_config(default_logging_config):
     assert LOGGING.data == default_logging_config
     assert "rich" in {handler.name for handler in logging.getLogger().handlers}
     assert logging.getLogger("kedro").level == logging.INFO
@@ -52,7 +56,7 @@ def test_configure_logging():
     assert logging.getLogger("kedro").level == logging.WARNING
 
 
-def test_rich_traceback_enabled(mocker):
+def test_rich_traceback_enabled(mocker, default_logging_config):
     rich_traceback_install = mocker.patch("rich.traceback.install")
     rich_pretty_install = mocker.patch("rich.pretty.install")
 
@@ -62,7 +66,7 @@ def test_rich_traceback_enabled(mocker):
     rich_pretty_install.assert_called()
 
 
-def test_rich_traceback_not_installed(mocker):
+def test_rich_traceback_not_installed(mocker, default_logging_config):
     rich_traceback_install = mocker.patch("rich.traceback.install")
     rich_pretty_install = mocker.patch("rich.pretty.install")
     rich_handler = {
@@ -79,7 +83,7 @@ def test_rich_traceback_not_installed(mocker):
     rich_traceback_install.assert_not_called()
 
 
-def test_rich_traceback_configuration(mocker):
+def test_rich_traceback_configuration(mocker, default_logging_config):
     rich_traceback_install = mocker.patch("rich.traceback.install")
     rich_pretty_install = mocker.patch("rich.pretty.install")
 
@@ -106,7 +110,9 @@ def test_rich_traceback_configuration(mocker):
     rich_pretty_install.assert_called_once()
 
 
-def test_rich_traceback_disabled_on_databricks(mocker, monkeypatch):
+def test_rich_traceback_disabled_on_databricks(
+    mocker, monkeypatch, default_logging_config
+):
     monkeypatch.setenv("DATABRICKS_RUNTIME_VERSION", "1")
     rich_traceback_install = mocker.patch("rich.traceback.install")
     rich_pretty_install = mocker.patch("rich.pretty.install")

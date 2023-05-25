@@ -74,7 +74,7 @@ def test_rich_traceback_not_installed(mocker, default_logging_config):
         "rich_tracebacks": False,
         "tracebacks_show_locals": True,
     }
-    test_logging_config = default_logging_config.copy()
+    test_logging_config = default_logging_config
     test_logging_config["handlers"]["rich"] = rich_handler
 
     LOGGING.configure(test_logging_config)
@@ -99,11 +99,11 @@ def test_rich_traceback_configuration(mocker, default_logging_config):
         "tracebacks_suppress": [fake_path],
     }
 
-    test_logging_config = default_logging_config.copy()
+    test_logging_config = default_logging_config
     test_logging_config["handlers"]["rich"] = rich_handler
     LOGGING.configure(test_logging_config)
 
-    expected_install_defaults = traceback_install_defaults.copy()
+    expected_install_defaults = traceback_install_defaults
     expected_install_defaults["suppress"].extend([fake_path])
     expected_install_defaults["show_locals"] = True
     rich_traceback_install.assert_called_with(**expected_install_defaults)

@@ -1,4 +1,4 @@
-# Argo Workflows (neglected documentation that needs an update)
+# Argo Workflows (outdated documentation that needs review)
 
 ``` {important}
 This page contains outdated documentation that has not been tested against recent Kedro releases. If you successfully use this content with a recent version of Kedro, consider telling us the steps you took on [Slack](kedro-org.slack.com) or [GitHub](https://github.com/kedro-org/kedro/issues).

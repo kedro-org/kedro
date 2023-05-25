@@ -40,7 +40,7 @@ class RichHandler(rich.logging.RichHandler):
             "suppress": [click, str(Path(sys.executable).parent)]
         }
 
-        # Mapping Arguments from RichHandler's Constructor to rich.traceback.install
+        # Mapping arguments from RichHandler's Constructor to rich.traceback.install
         prefix = "tracebacks_"
         for key, value in kwargs.items():
             if key.startswith(prefix):

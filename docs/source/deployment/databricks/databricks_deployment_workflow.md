@@ -136,7 +136,7 @@ This process adds an entry point to your project which can be used to run it on 
 ```{note}
 Because you are no longer using the default entry-point for Kedro, you will not be able to run your project with the options it usually provides. Instead, the `databricks_run` entry point in the above code and in the Databricks Iris starter contains a simple implementation of two options:
 - `--package_name` (required): the package name (defined in `setup.py`) of your packaged project.
-- `--env`: specifies a [Kedro configuration environment](../configuration/configuration_basics.md#configuration-environments) to load for your run.
+- `--env`: specifies a [Kedro configuration environment](../../configuration/configuration_basics.md#configuration-environments) to load for your run.
 - `--conf-source`: specifies the location of the `conf/` directory to use with your Kedro project.
 ```
 
@@ -178,7 +178,7 @@ A Kedro project's configuration and data do not get included when it is packaged
 
 Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data and configuration to a location accessible to Databricks. In this guide, we will store the data on the Databricks File System (DBFS).
 
-The Databricks Iris starter contains a [catalog](../data/data_catalog.md#the-data-catalog) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
+The Databricks Iris starter contains a [catalog](../../data/data_catalog.md#the-data-catalog) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
 There are several ways to upload data to DBFS: you can use the [DBFS API](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/dbfs), the [`dbutils` module](https://docs.databricks.com/dev-tools/databricks-utils.html) in a Databricks notebook or the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html). In this guide, it is recommended to use the Databricks CLI because of the convenience it offers.
 

@@ -1,4 +1,4 @@
-# Develop a project with Databricks Workspace and Notebooks
+# Databricks notebooks workflow
 
 This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws).
 
@@ -144,11 +144,11 @@ The project has now been pushed to your private GitHub repository, and in order 
 3. Press `Edit`
 4. Go to the `Advanced Options` and then `Spark`
 
-![](../meta/images/databricks_cluster_edit.png)
+![](../../meta/images/databricks_cluster_edit.png)
 
 Then in the `Environment Variables` section add your `GITHUB_USER` and `GITHUB_TOKEN` as shown on the picture:
 
-![](../meta/images/databricks_cluster_env_vars.png)
+![](../../meta/images/databricks_cluster_env_vars.png)
 
 
 ```{note}
@@ -227,7 +227,7 @@ You should get a similar output:
 
 Your complete notebook should look similar to this (the results are hidden):
 
-![](../meta/images/databricks_notebook_example.png)
+![](../../meta/images/databricks_notebook_example.png)
 
 
 ### 9. Using the Kedro IPython Extension

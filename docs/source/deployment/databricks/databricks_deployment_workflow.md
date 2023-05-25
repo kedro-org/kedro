@@ -34,7 +34,7 @@ Note your Databricks **username** and **host** as you will need it for the remai
 
 Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
 
-![Find Databricks host and username](../meta/images/find_databricks_host_and_username.png)
+![Find Databricks host and username](../../meta/images/find_databricks_host_and_username.png)
 
 ```{note}
 Your databricks host must include the protocol (`https://`).
@@ -213,11 +213,11 @@ To run your packaged project on Databricks, login to your Databricks account and
 
 1. **Create a new job**: In the Databricks workspace, navigate to the `Worfklows` tab and click `Create Job`:
 
-![Create Databricks job](../meta/images/databricks_create_new_job.png)
+![Create Databricks job](../../meta/images/databricks_create_new_job.png)
 
 2. **Create a new job cluster**: Create a dedicated [job cluster](https://docs.databricks.com/clusters/index.html) to run your job by clicking on the drop-down menu in the `Cluster` field:
 
-![Create Databricks job cluster](../meta/images/databricks_create_job_cluster.png)
+![Create Databricks job cluster](../../meta/images/databricks_create_job_cluster.png)
 
 Configure the job cluster with the following settings:
 
@@ -228,7 +228,7 @@ Configure the job cluster with the following settings:
 
 The final configuration for the job cluster should look the same as the following:
 
-![Configure Databricks job cluster](../meta/images/databricks_configure_job_cluster.png)
+![Configure Databricks job cluster](../../meta/images/databricks_configure_job_cluster.png)
 
 3. **Configure the job**: Configure the job with the following settings:
 
@@ -246,13 +246,13 @@ The final configuration for the job cluster should look the same as the followin
 
 The final configuration for your job should look the same as the following:
 
-![Configure Databricks job](../meta/images/databricks_configure_new_job.png)
+![Configure Databricks job](../../meta/images/databricks_configure_new_job.png)
 
 Click `Create` and then `Confirm and create` in the following pop-up asking you to name the job.
 
 4. **Run the job**: Click `Run now` in the top-right corner of your new job's page to start a run of the job. The status of your run can be viewed in the `Runs` tab of your job's page. Navigate to the `Runs` tab and track the progress of your run:
 
-![Databricks job status](../meta/images/databricks_job_status.png)
+![Databricks job status](../../meta/images/databricks_job_status.png)
 
 This page also shows an overview of all past runs of your job. As you only just started your job run, it's status will be `Pending`. A status of `Pending` indicates that the cluster is being started and your code is waiting to run.
 

@@ -12,15 +12,12 @@ import rich.logging
 import rich.pretty
 import rich.traceback
 
-logger = logging.getLogger(__file__)
-
-
 class RichHandler(rich.logging.RichHandler):
     """Identical to rich's logging handler but with a few extra behaviours:
     * warnings issued by the `warnings` module are redirected to logging
     * pretty printing is enabled on the Python REPL (including IPython and Jupyter)
     * all tracebacks are handled by rich when rich_tracebacks=True
-    * constructor's arguments are mapped and pass to `rich.traceback.install`
+    * constructor's arguments are mapped and passed to `rich.traceback.install`
 
     The list of available options of ``RichHandler`` can be found here:
     https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler

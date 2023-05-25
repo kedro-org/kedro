@@ -72,7 +72,6 @@ def test_rich_traceback_not_installed(mocker, default_logging_config):
     rich_handler = {
         "class": "kedro.logging.RichHandler",
         "rich_tracebacks": False,
-        "tracebacks_show_locals": True,
     }
     test_logging_config = default_logging_config
     test_logging_config["handlers"]["rich"] = rich_handler
@@ -84,10 +83,36 @@ def test_rich_traceback_not_installed(mocker, default_logging_config):
 
 
 def test_rich_traceback_configuration(mocker, default_logging_config):
+    import click
+
     rich_traceback_install = mocker.patch("rich.traceback.install")
     rich_pretty_install = mocker.patch("rich.pretty.install")
 
+    sys_executable_path = str(Path(sys.executable).parent)
+    traceback_install_defaults = {"suppress": [click, sys_executable_path]}
+
+    rich_handler = {
+        "class": "kedro.logging.RichHandler",
+        "rich_tracebacks": True,
+        "tracebacks_show_locals": True,
+    }
+
+    test_logging_config = default_logging_config
+    test_logging_config["handlers"]["rich"] = rich_handler
+    LOGGING.configure(test_logging_config)
+
+    expected_install_defaults = traceback_install_defaults
+    expected_install_defaults["show_locals"] = True
+    rich_traceback_install.assert_called_with(**expected_install_defaults)
+    rich_pretty_install.assert_called_once()
+
+
+def test_rich_traceback_configuration_extend_suppress(mocker, default_logging_config):
+    """Test the configuration is not overrided but extend for `suppress`"""
     import click
+
+    rich_traceback_install = mocker.patch("rich.traceback.install")
+    rich_pretty_install = mocker.patch("rich.pretty.install")
 
     sys_executable_path = str(Path(sys.executable).parent)
     traceback_install_defaults = {"suppress": [click, sys_executable_path]}
@@ -95,7 +120,6 @@ def test_rich_traceback_configuration(mocker, default_logging_config):
     rich_handler = {
         "class": "kedro.logging.RichHandler",
         "rich_tracebacks": True,
-        "tracebacks_show_locals": True,
         "tracebacks_suppress": [fake_path],
     }
 
@@ -105,7 +129,6 @@ def test_rich_traceback_configuration(mocker, default_logging_config):
 
     expected_install_defaults = traceback_install_defaults
     expected_install_defaults["suppress"].extend([fake_path])
-    expected_install_defaults["show_locals"] = True
     rich_traceback_install.assert_called_with(**expected_install_defaults)
     rich_pretty_install.assert_called_once()
 

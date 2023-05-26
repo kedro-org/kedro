@@ -128,6 +128,6 @@ def _install_project_requirements(context):
         and (not req.startswith("-e"))
         and (not req.startswith("#"))
     ]
-    install_reqs.append(".[pandas.CSVDataSet]")
+    install_reqs.append("kedro-datasets[pandas.CSVDataSet]")
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

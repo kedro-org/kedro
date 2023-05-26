@@ -148,17 +148,9 @@ You will not be able to directly see your project's log output when it is run as
 - Upload metrics from a machine learning model to MLflow.
 - Save a dataset as a CSV file in DBFS.
 
-In this guide, your project will save its logs to a location in DBFS.
+In this guide, your project will save its logs to a location in DBFS (`/dbfs/FileStore/iris-databricks/info.log`).
 
-- **Create a directory to save your logs into on DBFS**: at the command line in your local environment, run the following Databricks CLI command:
-
-```bash
-databricks fs mkdirs dbfs:/FileStore/iris-databricks/logs
-```
-
-This command creates a directory on DBFS (`/dbfs/FileStore/iris-databricks/logs`) where your project can save its logs.
-
-**The Databricks Iris starter is already configured to save logs in this location.** The configuration used to achieve this can be found in the `conf/base/logging.yml` file.
+**The `databricks-iris` starter is already configured to save logs in this location.** The configuration used to achieve this can be found in the `conf/base/logging.yml` file.
 
 ### Package your project
 
@@ -269,7 +261,7 @@ A run will take roughly six to seven minutes.
 When the status of your run is `Succeeded`, your job has successfully finished executing. You can now view the logs that your project produced while it was running. To retrieve the log file from the [location in DBFS where it was saved](#plan-your-projects-output), use the following `databricks CLI` command at your local command line with the `iris-databrick` conda environment activated:
 
 ```bash
-databricks fs cp dbfs:/FileStore/iris-databricks/logs/info.log .
+databricks fs cp dbfs:/FileStore/iris-databricks/info.log .
 ```
 
 This will download the log file from DBFS to your local environment. You can view the contents of the `info.log` file in any text editor, they will look similar to the following:

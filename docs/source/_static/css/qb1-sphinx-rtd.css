@@ -116,7 +116,7 @@ body.wy-body-for-nav {
 .wy-body-for-nav .wy-menu-vertical p.caption {
     margin: 1.5em 0 0.2em;
     padding: 0;
-    font-size: 2rem;
+    font-size: 1.4289rem;
     color: #161616;
     font-weight: normal;
     text-transform: none;
@@ -151,7 +151,7 @@ body.wy-body-for-nav {
 }
 
 .wy-menu-vertical li.toctree-l1>a {
-    font-size: 1.8rem;
+    font-size: 1.4289rem;
 }
 
 .rst-content.style-external-links a.reference.external:after {

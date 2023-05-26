@@ -227,7 +227,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
     click.secho("Micro-packages packaged!", fg="green")
 
 
-@micropkg.command("package")
+@command_with_verbosity(micropkg, "package")
 @env_option(
     help="Environment where the micro-package configuration lives. Defaults to `base`."
 )
@@ -254,8 +254,14 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 @click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_micropkg(
-    metadata: ProjectMetadata, module_path, env, alias, destination, all_flag
-):
+    metadata: ProjectMetadata,
+    module_path,
+    env,
+    alias,
+    destination,
+    all_flag,
+    **kwargs,
+):  # pylint: disable=unused-argument
     """Package up a modular pipeline or micro-package as a Python source distribution."""
     if not module_path and not all_flag:
         click.secho(

@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 
-.. image:: https://raw.githubusercontent.com/kedro-org/kedro/develop/static/img/kedro_banner.png
+.. image:: https://raw.githubusercontent.com/kedro-org/kedro/update-docs-font-family/static/img/kedro_banner.png
     :alt: Kedro logo
     :class: kedro-logo
 

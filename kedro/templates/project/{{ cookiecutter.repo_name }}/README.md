@@ -17,12 +17,18 @@ In order to get the best out of the template:
 
 ## How to install dependencies
 
-Declare any dependencies in `requirements.txt` for `pip` installation and `environment.yml` for `conda` installation.
+Declare any library dependencies in `pyproject.toml`, and any development dependencies in `requirements.txt`.
 
-To install them, run:
+To install all of them, run:
 
 ```
 pip install -r requirements.txt
+```
+
+To install only the library dependencies, run:
+
+```
+pip install --editable .
 ```
 
 ## How to run your Kedro pipeline
@@ -53,7 +59,7 @@ kedro build-reqs
 
 This will `pip-compile` the contents of `requirements.txt` into a new file `requirements.lock`. You can see the output of the resolution by opening `requirements.lock`.
 
-After this, if you'd like to update your project requirements, please update `requirements.txt` and re-run `kedro build-reqs`.
+After this, if you'd like to update your project requirements, please update `pyproject.toml` or `requirements.txt` and re-run `kedro build-reqs`.
 
 [Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
 
@@ -61,7 +67,7 @@ After this, if you'd like to update your project requirements, please update `re
 
 > Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `context`, `catalog`, and `startup_error`.
 >
-> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r requirements.txt` you will not need to take any extra steps before you use them.
+> Jupyter, JupyterLab, and IPython are already included as development dependencies of the project by default, so once you have run `pip install -r requirements.txt` you will not need to take any extra steps before you use them.
 
 ### Jupyter
 After installing Jupyter, you can start a local notebook server:

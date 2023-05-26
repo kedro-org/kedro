@@ -12,6 +12,7 @@ import rich.logging
 import rich.pretty
 import rich.traceback
 
+
 class RichHandler(rich.logging.RichHandler):
     """Identical to rich's logging handler but with a few extra behaviours:
     * warnings issued by the `warnings` module are redirected to logging

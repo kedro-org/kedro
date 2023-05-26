@@ -19,7 +19,7 @@ html {
 }
 
 body.wy-body-for-nav {
-    font-size: 1.6rem;
+    font-size: 1.4289rem;
     background: rgb(250, 250, 250) !important;
     color: #1e1e21;
     position: relative;
@@ -37,7 +37,7 @@ body.wy-body-for-nav {
     color: #666;
     background-color: #fff;
     font-family: inherit;
-    font-size: 1.6rem;
+    font-size: 1.4289rem;
     border: 1px #ccc solid;
     border-radius: 2px;
     transition: all ease 0.15s;
@@ -143,8 +143,8 @@ body.wy-body-for-nav {
 .wy-body-for-nav .wy-menu-vertical li a {
     display: block;
     margin: 0;
-    padding: 1.1rem 0 !important;
-    font-size: 1.6rem;
+    padding: 0.9rem 0 !important;
+    font-size: 1.4289rem;
     line-height: 1.2;
     color: #222;
     background: none !important;
@@ -422,6 +422,16 @@ footer span.commit .rst-content tt,
 .wy-body-for-nav .wy-nav-top a {
     font-size: 2.8rem;
     color: black !important;
+}
+
+.wy-side-scroll p.caption[role="heading"] span.caption-text {
+    font-weight: 700;
+}
+
+.wy-nav-content h1,
+.wy-nav-content p.caption[role="heading"] .caption-text {
+    font-size: 1.7857rem;
+    font-weight: 700;
 }
 
 

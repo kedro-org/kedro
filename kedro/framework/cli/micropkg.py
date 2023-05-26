@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Iterable, List, Tuple, Union
 
 import click
-import pkg_resources
+from packaging.requirements import InvalidRequirement, Requirement
 from rope.base.project import Project
 from rope.contrib import generate
 from rope.refactor.move import MoveModule
@@ -584,13 +584,23 @@ def _sync_path_list(source: list[tuple[Path, str]], target: Path) -> None:
         _sync_dirs(source_path, target_with_suffix)
 
 
+def _drop_comment(line):
+    # https://github.com/pypa/setuptools/blob/b545fc7/\
+    # pkg_resources/_vendor/jaraco/text/__init__.py#L554-L566
+    return line.partition(" #")[0]
+
+
 def _make_install_requires(requirements_txt: Path) -> list[str]:
     """Parses each line of requirements.txt into a version specifier valid to put in
-    install_requires."""
+    install_requires.
+    Matches pkg_resources.parse_requirements"""
     if not requirements_txt.exists():
         return []
-    requirements = pkg_resources.parse_requirements(requirements_txt.read_text())
-    return [str(requirement) for requirement in requirements]
+    return [
+        str(Requirement(_drop_comment(requirement_line)))
+        for requirement_line in requirements_txt.read_text().splitlines()
+        if requirement_line and not requirement_line.startswith("#")
+    ]
 
 
 def _create_nested_package(project: Project, package_path: Path) -> Path:
@@ -872,17 +882,25 @@ def _append_package_reqs(
 
 def _safe_parse_requirements(
     requirements: str | Iterable[str],
-) -> set[pkg_resources.Requirement]:
-    """Safely parse a requirement or set of requirements. This effectively replaces
-    pkg_resources.parse_requirements, which blows up with a ValueError as soon as it
+) -> set[Requirement]:
+    """Safely parse a requirement or set of requirements. This avoids blowing up when it
     encounters a requirement it cannot parse (e.g. `-r requirements.txt`). This way
     we can still extract all the parseable requirements out of a set containing some
     unparseable requirements.
     """
     parseable_requirements = set()
-    for requirement in pkg_resources.yield_lines(requirements):
-        try:
-            parseable_requirements.add(pkg_resources.Requirement.parse(requirement))
-        except ValueError:
-            continue
+    if isinstance(requirements, str):
+        requirements = requirements.splitlines()
+    # TODO: Properly handle continuation lines,
+    # see https://github.com/pypa/setuptools/blob/v67.8.0/setuptools/_reqs.py
+    for requirement_line in requirements:
+        if (
+            requirement_line
+            and not requirement_line.startswith("#")
+            and not requirement_line.startswith("-e")
+        ):
+            try:
+                parseable_requirements.add(Requirement(_drop_comment(requirement_line)))
+            except InvalidRequirement:
+                continue
     return parseable_requirements

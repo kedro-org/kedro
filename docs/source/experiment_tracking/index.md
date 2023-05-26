@@ -72,7 +72,7 @@ cd spaceflights
 Install the project's dependencies:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Set up the session store
@@ -268,17 +268,20 @@ In this section, we illustrate how to compare Matplotlib plots across experiment
 
 ### Update the dependencies
 
-Update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
+Update the `pyproject.toml` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```text
-kedro-datasets[matplotlib.MatplotlibWriter]~=1.1
-seaborn~=0.12.1
+dependencies = [
+    # ...
+    "kedro-datasets[matplotlib.MatplotlibWriter]~=1.1",
+    "seaborn~=0.12.1",
+]
 ```
 
 And install the requirements with:
 
 ```bash
-pip install -r src/requirements.txt
+pip install --editable .
 ```
 
 ### Add a plotting node

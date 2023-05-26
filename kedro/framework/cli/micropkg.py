@@ -947,7 +947,7 @@ def _append_package_reqs(
             file.write(sep.join(sorted_reqs))
 
     click.secho(
-        "Use 'kedro build-reqs' to compile and 'pip install -r src/requirements.lock' to install "
+        "Use 'kedro build-reqs' to compile and 'pip install -r requirements.lock' to install "
         "the updated list of requirements."
     )
 

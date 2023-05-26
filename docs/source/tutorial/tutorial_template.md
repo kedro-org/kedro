@@ -1,6 +1,6 @@
 # Set up the spaceflights project
 
-This section shows how to create a new project (with `kedro new` using the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights)) and install project dependencies (with `pip install -r src/requirements.txt`).
+This section shows how to create a new project (with `kedro new` using the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights)) and install project dependencies (with `pip install -r requirements.txt`).
 
 ## Create a new project
 
@@ -28,7 +28,7 @@ cd spaceflights
 
 Kedro projects have a `requirements.txt` file to specify their dependencies and enable sharable projects by ensuring consistency across Python packages and versions.
 
-The spaceflights project dependencies are stored in `src/requirements.txt`(you may find that the versions differ slightly depending on the version of Kedro):
+The spaceflights project dependencies are stored in `requirements.txt`(you may find that the versions differ slightly depending on the version of Kedro):
 
 ```text
 # code quality packages
@@ -63,7 +63,7 @@ scikit-learn~=1.0
 To install all the project-specific dependencies, run the following from the project root directory:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Optional: logging and configuration

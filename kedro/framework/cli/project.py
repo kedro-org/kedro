@@ -32,7 +32,7 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.utils import load_obj
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
-{src}/requirements.txt and run 'pip install -r src/requirements.txt'."""
+{src}/requirements.txt and run 'pip install -r requirements.txt'."""
 LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
 unformatted imports, and unblackened Python code without modifying the files."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
@@ -242,8 +242,8 @@ def build_docs(metadata: ProjectMetadata, open_docs):
 def build_reqs(
     metadata: ProjectMetadata, input_file, output_file, args, **kwargs
 ):  # pylint: disable=unused-argument
-    """Run `pip-compile` on src/requirements.txt or the user defined input file and save
-    the compiled requirements to src/requirements.lock or the user defined output file.
+    """Run `pip-compile` on requirements.txt or the user defined input file and save
+    the compiled requirements to requirements.lock or the user defined output file.
     (DEPRECATED)
     """
     deprecation_message = (

@@ -17,12 +17,12 @@ In order to get the best out of the template:
 
 ## How to install dependencies
 
-Declare any dependencies in `src/requirements.txt` for `pip` installation and `src/environment.yml` for `conda` installation.
+Declare any dependencies in `requirements.txt` for `pip` installation.
 
 To install them, run:
 
 ```
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## How to run Kedro
@@ -52,9 +52,9 @@ To generate or update the dependency requirements for your project:
 kedro build-reqs
 ```
 
-This will `pip-compile` the contents of `src/requirements.txt` into a new file `src/requirements.lock`. You can see the output of the resolution by opening `src/requirements.lock`.
+This will `pip-compile` the contents of `requirements.txt` into a new file `requirements.lock`. You can see the output of the resolution by opening `requirements.lock`.
 
-After this, if you'd like to update your project requirements, please update `src/requirements.txt` and re-run `kedro build-reqs`.
+After this, if you'd like to update your project requirements, please update `requirements.txt` and re-run `kedro build-reqs`.
 
 [Further information about project dependencies](https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
 

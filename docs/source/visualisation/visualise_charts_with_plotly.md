@@ -27,7 +27,7 @@ There are two types of Plotly datasets supported by Kedro:
 * `plotly.PlotlyDataSet` which only supports [Plotly Express](https://plotly.com/python/plotly-express)
 * `plotly.JSONDataSet` which supports Plotly Express and [Plotly Graph Objects](https://plotly.com/python/graph-objects/)
 
-To use the Plotly datasets, you must update the `requirements.txt` file in the `src` folder of the Kedro project to add the following dependencies:
+To use the Plotly datasets, you must update the `requirements.txt` file in the root folder of the Kedro project to add the following dependencies:
 
 
 ```text
@@ -38,7 +38,7 @@ kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]~=1.1
 Navigate to the root directory of the project in your terminal and install the dependencies for the tutorial project:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Configure the Data Catalog
@@ -177,11 +177,13 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 
 ### Update the dependencies
 
-You must update the `src/requirements.txt` file in the Kedro project by adding the following dataset to enable Matplotlib for the project:
+You must update the `pyproject.toml` file in the Kedro project by adding the following dataset to enable Matplotlib for the project:
 
 ```bash
-kedro-datasets[matplotlib.MatplotlibWriter]~=1.1
-seaborn~=0.12.1
+dependencies = [
+    "kedro-datasets[matplotlib.MatplotlibWriter]~=1.1",
+    "seaborn~=0.12.1",
+]
 ```
 
 ### Configure the Data Catalog

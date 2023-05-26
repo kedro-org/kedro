@@ -18,7 +18,7 @@ When prompted for a project name, you can enter anything, but we will assume `Sp
 When your project is ready, navigate to the root directory of the project and install the dependencies for the project, which include Kedro-Viz:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 The next step is optional, but useful to check that all is working. Run the full set of pipelines for the tutorial project:

@@ -26,6 +26,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [tomasvanpottelbergh](https://github.com/tomasvanpottelbergh)
+* [https://github.com/debugger24](https://github.com/debugger24)
 
 ## Upcoming deprecations for Kedro 0.19.0
 

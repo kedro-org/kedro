@@ -11,11 +11,13 @@ from pathlib import Path
 from typing import Iterable, List, Tuple, Union
 
 import click
+from build.util import project_wheel_metadata
 from packaging.requirements import InvalidRequirement, Requirement
 from rope.base.project import Project
 from rope.contrib import generate
 from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
+from setuptools.discovery import FlatLayoutPackageFinder
 
 from kedro.framework.cli.pipeline import (
     _assert_pkg_name_ok,
@@ -131,7 +133,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-# pylint: disable=too-many-arguments, too-many-locals
+# pylint: disable=too-many-arguments
 def _pull_package(
     package_path: str,
     metadata: ProjectMetadata,
@@ -144,25 +146,54 @@ def _pull_package(
         temp_dir_path = Path(temp_dir).resolve()
         _unpack_sdist(package_path, temp_dir_path, fs_args)
 
-        egg_info_files = list((temp_dir_path).rglob("*.egg-info"))
-        if len(egg_info_files) != 1:
-            raise KedroCliError(
-                f"More than 1 or no egg-info files found from {package_path}. "
-                f"There has to be exactly one egg-info directory."
+        # temp_dir_path is the parent directory of the project root dir
+        contents = [member for member in temp_dir_path.iterdir() if member.is_dir()]
+        if len(contents) != 1:
+            raise RuntimeError(
+                "Invalid sdist was extracted: exactly one directory was expected, "
+                f"got {contents}"
             )
-        egg_info_file = egg_info_files[0]
-        package_name = egg_info_file.stem
-        package_requirements = egg_info_file.parent / "setup.py"
+        project_root_dir = contents[0]
 
-        # Finds a string representation of 'install_requires' list from setup.py
-        reqs_list_pattern = r"install_requires\=(.*?)\,\n"
-        list_reqs = re.findall(
-            reqs_list_pattern, package_requirements.read_text(encoding="utf-8")
-        )
+        # This is much slower than parsing the requirements
+        # directly from the metadata files
+        # because it installs the package in an isolated environment,
+        # but it's the only reliable way of doing it
+        # without making assumptions on the project metadata.
+        library_meta = project_wheel_metadata(project_root_dir)
 
-        # Finds all elements from the above string representation of a list
-        reqs_element_pattern = r"\'(.*?)\'"
-        package_reqs = re.findall(reqs_element_pattern, list_reqs[0])
+        # Project name will be `my-pipeline` even if `setup.py` says `my_pipeline`
+        # because standards mandate normalization of names for comparison,
+        # see https://packaging.python.org/en/latest/specifications/core-metadata/#name
+        # The proper way to get it would be
+        # project_name = library_meta.get("Name")
+        # However, the rest of the code somehow mixes package name with project name
+        # and expects the non-normalized version, so we have to find it.
+        # In a pre-pyproject.toml world we could just parse setup.py,
+        # but now things are more complicated.
+        # kedro stores the package name in pyproject.toml,
+        # but micropackages are not kedro projects.
+        # Since micropackaging has a runtime dependency on setuptools already,
+        # we will assume flat (non-src) layout,
+        # which is what `kedro micropkg package` produces,
+        # and use setuptools utilities to save some complexity.
+        packages = [
+            package
+            for package in FlatLayoutPackageFinder().find(project_root_dir)
+            if "." not in package
+        ]
+        if len(packages) != 1:
+            # Should not happen if user is calling `micropkg pull`
+            # with the result of a `micropkg package`,
+            # and in general if the distribution only contains one package (most likely),
+            # but helps give a sensible error message otherwise
+            raise RuntimeError(
+                "Invalid package contents: exactly one package was expected, "
+                f"got {packages}"
+            )
+        package_name = packages[0]
+
+        package_reqs = _get_all_library_reqs(library_meta)
 
         if package_reqs:
             requirements_txt = metadata.source_dir / "requirements.txt"
@@ -172,7 +203,7 @@ def _pull_package(
         _install_files(
             metadata,
             package_name,
-            egg_info_file.parent,
+            project_root_dir,
             env,
             alias,
             destination,
@@ -876,6 +907,15 @@ def _append_package_reqs(
         "Use 'kedro build-reqs' to compile and 'pip install -r src/requirements.lock' to install "
         "the updated list of requirements."
     )
+
+
+def _get_all_library_reqs(metadata):
+    # Inspired by https://discuss.python.org/t/\
+    # programmatically-getting-non-optional-requirements-of-current-directory/26963/2
+    # but leaving markers intact
+    return [
+        str(Requirement(dep_str)) for dep_str in metadata.get_all("Requires-Dist", [])
+    ]
 
 
 def _safe_parse_requirements(

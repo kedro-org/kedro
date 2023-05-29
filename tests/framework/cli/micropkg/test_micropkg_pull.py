@@ -424,33 +424,6 @@ class TestMicropkgPullCommand:
             "file", fs_arg_1=1, fs_arg_2={"fs_arg_2_nested_1": 2}
         )
 
-    def test_pull_two_egg_info(
-        self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
-    ):
-        """Test for pulling an sdist file with more than one
-        dist-info directory.
-        """
-        call_pipeline_create(fake_project_cli, fake_metadata)
-        call_micropkg_package(fake_project_cli, fake_metadata)
-        sdist_file = (
-            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
-        )
-        assert sdist_file.is_file()
-
-        (tmp_path / f"{PIPELINE_NAME}-0.1" / "dummy.egg-info").mkdir(parents=True)
-
-        mocker.patch(
-            "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
-            return_value=tmp_path,
-        )
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["micropkg", "pull", str(sdist_file)],
-            obj=fake_metadata,
-        )
-        assert result.exit_code
-        assert "Error: More than 1 or no egg-info files found" in result.output
-
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize("alias", [None, "alias_path"])
     def test_pull_tests_missing(

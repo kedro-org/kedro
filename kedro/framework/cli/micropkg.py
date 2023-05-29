@@ -330,15 +330,25 @@ def _unpack_sdist(location: str, destination: Path, fs_args: str | None) -> None
                 safe_extract(tar_file, destination)
     else:
         python_call(
-            "pip", ["download", "--no-deps", "--dest", str(destination), location]
+            "pip",
+            [
+                "download",
+                "--no-deps",
+                "--no-binary",  # the micropackaging expects an sdist,
+                ":all:",  # wheels are not supported
+                "--dest",
+                str(destination),
+                location,
+            ],
         )
         sdist_file = list(destination.glob("*.tar.gz"))
-        # `--no-deps` should fetch only one source distribution file, and CLI should fail if that's
-        # not the case.
-        if len(sdist_file) != 1:
+        # `--no-deps --no-binary :all:` should fetch only one source distribution file,
+        # and CLI should fail if that's not the case.
+        # No need to check for zero sdists, in that case the previous command would fail.
+        if len(sdist_file) > 1:
             file_names = [sf.name for sf in sdist_file]
             raise KedroCliError(
-                f"More than 1 or no sdist files found: {file_names}. "
+                f"More than 1 sdist files found: {file_names}. "
                 f"There has to be exactly one source distribution file."
             )
         with tarfile.open(sdist_file[0], "r:gz") as fs_file:

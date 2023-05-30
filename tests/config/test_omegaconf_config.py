@@ -609,6 +609,10 @@ class TestOmegaConfigLoader:
         assert catalog.keys() == {"k1", "k3"}
 
         _write_yaml(tmp_path / _BASE_ENV / "catalog3.yml", {"k1": "dup", "_k2": "v5"})
-        pattern = r"Duplicate keys found in .*catalog1\.yml and .*catalog3\.yml\: k1"
+        pattern = (
+            r"Duplicate keys found in "
+            r"(.*catalog1\.yml and .*catalog3\.yml|.*catalog3\.yml and .*catalog1\.yml)"
+            r"\: k1"
+        )
         with pytest.raises(ValueError, match=pattern):
             conf["catalog"]

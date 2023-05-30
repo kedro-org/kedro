@@ -210,7 +210,11 @@ To run your packaged project on Databricks, login to your Databricks account and
 
 2. **Create a new job cluster**: Create a dedicated [job cluster](https://docs.databricks.com/clusters/index.html) to run your job by clicking on the drop-down menu in the `Cluster` field:
 
+**Do not use the default `Job_cluster`, it has not been configured to run this job.**
+
 ![Create Databricks job cluster](../../meta/images/databricks_create_job_cluster.png)
+
+Once you click `Add new job cluster`, the configuration page for this cluster appears.
 
 Configure the job cluster with the following settings:
 

@@ -9,18 +9,3 @@ kedro.logging.RichHandler
    :inherited-members:
 
 
-
-   .. rubric:: Attributes
-
-   .. autosummary::
-
-
-
-
-
-
-   .. rubric:: Methods
-
-   .. autosummary::
-
-

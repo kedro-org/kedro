@@ -208,7 +208,7 @@ To run your packaged project on Databricks, login to your Databricks account and
 
 ![Create Databricks job](../../meta/images/databricks_create_new_job.png)
 
-2. **Create a new job cluster**: Create a dedicated [job cluster](https://docs.databricks.com/clusters/index.html) to run your job by clicking on the drop-down menu in the `Cluster` field:
+2. **Create a new job cluster specific to your job**: Create a dedicated [job cluster](https://docs.databricks.com/clusters/index.html) to run your job by clicking on the drop-down menu in the `Cluster` field and then clicking `Add new job cluster`:
 
 **Do not use the default `Job_cluster`, it has not been configured to run this job.**
 

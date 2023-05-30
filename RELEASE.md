@@ -8,7 +8,7 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.9
+# Release 0.18.9
 
 ## Major features and improvements
 * `kedro run --params` now updates interpolated parameters correctly when using `OmegaConfigLoader`.
@@ -18,6 +18,7 @@
 ## Bug fixes and other changes
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
 * `OmegaConfigLoader` does not show a `MissingConfigError` when the config files exist but are empty.
+* Added `metadata` attributes to `kedro.io` datasets.
 
 ## Breaking changes to the API
 * `kedro package` does not produce `.egg` files anymore, and now relies exclusively on `.whl` files.

@@ -59,7 +59,7 @@ conda activate iris-databricks
 With your Conda environment activated, install Kedro and the Databricks CLI:
 
 ```bash
-pip install kedro databricks-cli --upgrade
+pip install kedro databricks-cli
 ```
 
 ### Authenticate the Databricks CLI

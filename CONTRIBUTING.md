@@ -17,7 +17,7 @@ The Kedro team pledges to foster and maintain a friendly community. We enforce a
 
 You can find the Kedro community on our [Slack organisation](https://slack.kedro.org/), which is where we share news and announcements, and general chat. You're also welcome to post links here to any articles or videos about Kedro that you create, or find, such as how-tos, showcases, demos, blog posts or tutorials.
 
-We also curate a [Github repo that lists content created by the Kedro community](https://github.com/kedro-org/kedro-community).
+We also curate a [Github repo that lists content created by the Kedro community](https://github.com/kedro-org/awesome-kedro).
 
 ## Contribute to the project
 

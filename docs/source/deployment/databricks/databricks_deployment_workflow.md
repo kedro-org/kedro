@@ -204,7 +204,7 @@ You should see the contents of the project's `data/` directory printed to your t
 
 To run your packaged project on Databricks, login to your Databricks account and perform the following steps in the workspace:
 
-1. **Create a new job**: In the Databricks workspace, navigate to the `Worfklows` tab and click `Create Job`:
+1. **Create a new job**: In the Databricks workspace, navigate to the `Worfklows` tab and click `Create Job` **or** click the `New` button, then `Job`:
 
 ![Create Databricks job](../../meta/images/databricks_create_new_job.png)
 

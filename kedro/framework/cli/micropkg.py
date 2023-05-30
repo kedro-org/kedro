@@ -876,6 +876,9 @@ def _append_package_reqs(
     requirements_txt: Path, package_reqs: list[str], package_name: str
 ) -> None:
     """Appends micro-package requirements to project level requirements.txt"""
+    # NOTE: packaging.requirements.Requirement equality check
+    # does not normalize names, and as such is not equivalent to pkg_resources.Requirement,
+    # see https://github.com/pypa/packaging/issues/644#issuecomment-1567982812
     incoming_reqs = _safe_parse_requirements(package_reqs)
     if requirements_txt.is_file():
         existing_reqs = _safe_parse_requirements(requirements_txt.read_text())

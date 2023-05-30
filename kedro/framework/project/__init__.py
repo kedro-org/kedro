@@ -7,7 +7,6 @@ import importlib
 import logging.config
 import operator
 import os
-import sys
 import traceback
 import types
 import warnings
@@ -16,10 +15,7 @@ from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any
 
-import click
 import importlib_resources
-import rich.pretty
-import rich.traceback
 import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -221,18 +217,6 @@ class _ProjectLogging(UserDict):
         )
         logging_config = Path(path).read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
-        logging.captureWarnings(True)
-
-        # We suppress click here to hide tracebacks related to it conversely,
-        # kedro is not suppressed to show its tracebacks for easier debugging.
-        # sys.executable is used to get the kedro executable path to hide the
-        # top level traceback.
-        # Rich traceback handling does not work on databricks. Hopefully this will be
-        # fixed on their side at some point, but until then we disable it.
-        # See https://github.com/Textualize/rich/issues/2455
-        if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
-            rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
-        rich.pretty.install()
 
     def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project

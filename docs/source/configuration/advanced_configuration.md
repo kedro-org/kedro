@@ -236,9 +236,26 @@ data:
 
 Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
-```{note}
-Templating currently only works for parameter files, but not for catalog files.
+From Kedro `0.18.10` templating also works for catalog files. To enable templating in the catalog you need to ensure that the template values are within the catalog files or the name of the file that contains the template values follows the same config pattern specified for catalogs.
+By default, the config pattern for catalogs is: `["catalog*", "catalog*/**", "**/catalog*"]`.
+
+Additionally, any template values in the catalog need to start with an underscore `_`. This is because of how catalog entries are validated.
+
+Suppose you have one catalog file called `catalog.yml` containing entries with `omegaconf` placeholders like this:
+
+```yaml
+companies:
+  type: ${_pandas.type}
+  filepath: data/01_raw/companies.csv
 ```
+
+and a file containing the template values called `catalog_globals.yml`:
+```yaml
+_pandas:
+  type: pandas.CSVDataSet
+```
+
+Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the config pattern for catalogs, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
 ### How to use custom resolvers in the `OmegaConfigLoader`
 `Omegaconf` provides functionality to [register custom resolvers](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#resolvers) for templated values. You can use these custom resolves within Kedro by extending the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) class.

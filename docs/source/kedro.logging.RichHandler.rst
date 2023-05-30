@@ -7,5 +7,3 @@ kedro.logging.RichHandler
    :members:
    :undoc-members:
    :inherited-members:
-
-

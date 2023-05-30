@@ -286,7 +286,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
-        return OmegaConf.to_container(OmegaConf.merge(*aggregate_config), resolve=True)
+        # return OmegaConf.to_container(OmegaConf.merge(*aggregate_config), resolve=True)
+
+        return {
+            k: v
+            for k, v in OmegaConf.to_container(
+                OmegaConf.merge(*aggregate_config), resolve=True
+            ).items()
+            if not k.startswith("_")
+        }
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""
@@ -307,7 +315,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
             for filepath2 in filepaths[i:]:
                 config2 = seen_files_to_keys[filepath2]
 
-                overlapping_keys = config1 & config2
+                combined_keys = config1 & config2
+                overlapping_keys = set()
+                for key in combined_keys:
+                    if not key.startswith("_"):
+                        overlapping_keys.add(key)
 
                 if overlapping_keys:
                     sorted_keys = ", ".join(sorted(overlapping_keys))

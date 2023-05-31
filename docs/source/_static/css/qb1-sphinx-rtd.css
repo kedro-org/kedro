@@ -5,7 +5,7 @@ html, body.wy-body-for-nav {
     padding: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: 'Titillium Web', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
     line-height: 2rem;
 }
@@ -309,7 +309,7 @@ article ul li {
 }
 
 h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
-    font-family: 'Titillium Web', sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 1.2em 0 1em 0;
     line-height: 1.2em;
     color: #272c2e;

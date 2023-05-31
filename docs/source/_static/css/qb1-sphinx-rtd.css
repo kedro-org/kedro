@@ -5,7 +5,7 @@ html, body.wy-body-for-nav {
     padding: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif !important;
     font-weight: 400;
     line-height: 2rem;
 }
@@ -36,7 +36,7 @@ body.wy-body-for-nav {
     padding: 6px 12px;
     color: #666;
     background-color: #fff;
-    font-family: inherit;
+    font-family: 'Inter', sans-serif !important;
     font-size: 1.4289rem;
     border: 1px #ccc solid;
     border-radius: 2px;
@@ -309,7 +309,7 @@ article ul li {
 }
 
 h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif !important;
     margin: 1.2em 0 1em 0;
     line-height: 1.2em;
     color: #272c2e;
@@ -373,7 +373,7 @@ footer span.commit .rst-content tt,
 }
 
 .wy-body-for-nav .rst-content a, .wy-body-for-nav footer a {
-    font-family: inherit;
+    font-family: 'Inter', sans-serif !important;
     font-size: inherit;
     color: #006ea7;
     text-decoration: none;

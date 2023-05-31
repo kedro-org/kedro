@@ -20,6 +20,11 @@
 * `OmegaConfigLoader` does not show a `MissingConfigError` when the config files exist but are empty.
 * Added `metadata` attributes to `kedro.io` datasets.
 
+## Documentation changes
+* Added documentation for collaborative experiment tracking within Kedro-Viz.
+* Revised section on deployment to better organise content and reflect how recently docs have been updated.
+* Minor improvements to fix typos and revise docs to align with engineering changes.
+
 ## Breaking changes to the API
 * `kedro package` does not produce `.egg` files anymore, and now relies exclusively on `.whl` files.
 

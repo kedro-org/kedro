@@ -18,7 +18,6 @@
 ## Bug fixes and other changes
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
 * `OmegaConfigLoader` does not show a `MissingConfigError` when the config files exist but are empty.
-* Added `metadata` attributes to `kedro.io` datasets.
 
 ## Documentation changes
 * Added documentation for collaborative experiment tracking within Kedro-Viz.

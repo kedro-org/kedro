@@ -13,6 +13,7 @@
 ## Major features and improvements
 * `kedro run --params` now updates interpolated parameters correctly when using `OmegaConfigLoader`.
 * Added `metadata` attribute to `kedro.io` datasets. This is ignored by Kedro, but may be consumed by users or external plugins.
+* Added `kedro.logging.RichHandler`. This replaces the default `rich.logging.RichHandler` and is more flexible, user can turn off the `rich` traceback if needed.
 
 ## Bug fixes and other changes
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
@@ -141,12 +142,12 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * You can configure config file patterns through `settings.py` without creating a custom config loader.
 * Added the following new datasets:
 
-| Type                                 | Description                                                                | Location                      |
-| ------------------------------------ | -------------------------------------------------------------------------- | ----------------------------- |
-| `svmlight.SVMLightDataSet` | Work with svmlight/libsvm files using scikit-learn library | `kedro.extras.datasets.svmlight` |
-| `video.VideoDataSet`                 | Read and write video files from a filesystem                               | `kedro.extras.datasets.video` |
-| `video.video_dataset.SequenceVideo`  | Create a video object from an iterable sequence to use with `VideoDataSet` | `kedro.extras.datasets.video` |
-| `video.video_dataset.GeneratorVideo` | Create a video object from a generator to use with `VideoDataSet`          | `kedro.extras.datasets.video` |
+| Type                                 | Description                                                                | Location                         |
+| ------------------------------------ | -------------------------------------------------------------------------- | -------------------------------- |
+| `svmlight.SVMLightDataSet`           | Work with svmlight/libsvm files using scikit-learn library                 | `kedro.extras.datasets.svmlight` |
+| `video.VideoDataSet`                 | Read and write video files from a filesystem                               | `kedro.extras.datasets.video`    |
+| `video.video_dataset.SequenceVideo`  | Create a video object from an iterable sequence to use with `VideoDataSet` | `kedro.extras.datasets.video`    |
+| `video.video_dataset.GeneratorVideo` | Create a video object from a generator to use with `VideoDataSet`          | `kedro.extras.datasets.video`    |
 * Implemented support for a functional definition of schema in `dask.ParquetDataSet` to work with the `dask.to_parquet` API.
 
 ## Bug fixes and other changes

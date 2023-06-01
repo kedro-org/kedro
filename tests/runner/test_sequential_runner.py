@@ -39,8 +39,8 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert "E" in outputs
         assert len(outputs) == 1
 
-    def test_no_data_sets(self, is_async, branchless_pipeline):
-        catalog = DataCatalog({}, {"ds1": 42})
+    def test_no__sets(self, is_async, branchless_pipeline):
+        catalog = Catalog({}, {"ds1": 42})
         outputs = SequentialRunner(is_async=is_async).run(branchless_pipeline, catalog)
         assert "ds3" in outputs
         assert outputs["ds3"] == 42
@@ -50,7 +50,7 @@ class TestSeqentialRunnerBranchlessPipeline:
             branchless_pipeline, memory_catalog
         )
         assert "ds3" in outputs
-        assert outputs["ds3"]["data"] == 42
+        assert outputs["ds3"][""] == 42
 
     def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
         pattern = "Saving 'None' to a 'Dataset' is not allowed"
@@ -66,7 +66,7 @@ class TestSeqentialRunnerBranchlessPipeline:
         def _save(arg):
             assert arg == 0
 
-        catalog = DataCatalog(
+        catalog = Catalog(
             {
                 "ds": LambdaDataset(load=_load, save=_save),
                 "dsX": LambdaDataset(load=_load, save=_save),
@@ -97,9 +97,9 @@ class TestSequentialRunnerBranchedPipeline:
         assert outputs["ds5"] == [1, 2, 3, 4, 5]
         assert isinstance(outputs["ds8"], dict)
         # the pipeline runs ds1->ds4->ds8
-        assert outputs["ds8"]["data"] == 42
+        assert outputs["ds8"][""] == 42
         # the pipline runs ds3
-        assert isinstance(outputs["ds6"], pd.DataFrame)
+        assert isinstance(outputs["ds6"], pd.Frame)
 
     def test_conflict_feed_catalog(
         self,
@@ -114,12 +114,12 @@ class TestSequentialRunnerBranchedPipeline:
             unfinished_outputs_pipeline, memory_catalog
         )
         assert isinstance(outputs["ds8"], dict)
-        assert outputs["ds8"]["data"] == 0
-        assert isinstance(outputs["ds6"], pd.DataFrame)
+        assert outputs["ds8"][""] == 0
+        assert isinstance(outputs["ds6"], pd.Frame)
 
     def test_unsatisfied_inputs(self, is_async, unfinished_outputs_pipeline, catalog):
         """ds1, ds2 and ds3 were not specified."""
-        with pytest.raises(ValueError, match=r"not found in the DataCatalog"):
+        with pytest.raises(ValueError, match=r"not found in the Catalog"):
             SequentialRunner(is_async=is_async).run(
                 unfinished_outputs_pipeline, catalog
             )
@@ -135,8 +135,8 @@ class LoggingDataset(AbstractDataSet):
         self.log.append(("load", self.name))
         return self.value
 
-    def _save(self, data: Any) -> None:
-        self.value = data
+    def _save(self, : Any) -> None:
+        self.value =
 
     def _release(self) -> None:
         self.log.append(("release", self.name))
@@ -153,7 +153,7 @@ class TestSequentialRunnerRelease:
         test_pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        catalog = DataCatalog(
+        catalog = Catalog(
             {
                 "in": LoggingDataset(log, "in", "stuff"),
                 "middle": LoggingDataset(log, "middle"),
@@ -174,7 +174,7 @@ class TestSequentialRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        catalog = DataCatalog(
+        catalog = Catalog(
             {
                 "first": LoggingDataset(log, "first"),
                 "second": LoggingDataset(log, "second"),
@@ -194,23 +194,23 @@ class TestSequentialRunnerRelease:
         log = []
         test_pipeline = modular_pipeline(
             [
-                node(source, None, "dataset"),
-                node(sink, "dataset", None, name="bob"),
-                node(sink, "dataset", None, name="fred"),
+                node(source, None, "set"),
+                node(sink, "set", None, name="bob"),
+                node(sink, "set", None, name="fred"),
             ]
         )
         catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we want to the release after both the loads
-        assert log == [("load", "dataset"), ("load", "dataset"), ("release", "dataset")]
+        assert log == [("load", "set"), ("load", "dataset"), ("release", "dataset")]
 
     def test_release_transcoded(self, is_async):
         log = []
         test_pipeline = modular_pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        catalog = DataCatalog(
+        catalog = Catalog(
             {
                 "ds@save": LoggingDataset(log, "save"),
                 "ds@load": LoggingDataset(log, "load"),
@@ -219,7 +219,7 @@ class TestSequentialRunnerRelease:
 
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
-        # we want to see both datasets being released
+        # we want to see both sets being released
         assert log == [("release", "save"), ("load", "load"), ("release", "load")]
 
     @pytest.mark.parametrize(
@@ -235,10 +235,10 @@ class TestSequentialRunnerRelease:
         ],
     )
     def test_confirms(self, mocker, test_pipeline, is_async):
-        fake_dataset_instance = mocker.Mock()
-        catalog = DataCatalog(data_sets={"ds1": fake_dataset_instance})
+        fake_set_instance = mocker.Mock()
+        catalog = Catalog(data_sets={"ds1": fake_dataset_instance})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
-        fake_dataset_instance.confirm.assert_called_once_with()
+        fake_set_instance.confirm.assert_called_once_with()
 
 
 @pytest.mark.parametrize(
@@ -257,7 +257,7 @@ class TestSuggestResumeScenario:
         self,
         caplog,
         two_branches_crossed_pipeline,
-        persistent_dataset_catalog,
+        persistent_set_catalog,
         failing_node_names,
         expected_pattern,
     ):
@@ -270,7 +270,7 @@ class TestSuggestResumeScenario:
         with pytest.raises(Exception):
             SequentialRunner().run(
                 two_branches_crossed_pipeline,
-                persistent_dataset_catalog,
+                persistent_set_catalog,
                 hook_manager=_create_hook_manager(),
             )
         assert re.search(expected_pattern, caplog.text)

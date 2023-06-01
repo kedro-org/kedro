@@ -1,13 +1,13 @@
-# Develop a project with Databricks Workspace and Notebooks
+# Databricks notebooks workflow
 
 This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/kedro-org/kedro-starters/tree/main/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws).
 
 ```{note}
-If you are using [Databricks Repos](https://docs.databricks.com/repos/index.html) to run a Kedro project then you should [disable file-based logging](../logging/logging.md#disable-file-based-logging). This prevents Kedro from attempting to write to the read-only file system.
+If you are using [Databricks Repos](https://docs.databricks.com/repos/index.html) to run a Kedro project then you should [disable file-based logging](../../logging/logging.md#disable-file-based-logging). This prevents Kedro from attempting to write to the read-only file system.
 ```
 
 ```{note}
-If you are a Kedro contributor looking for information on deploying a custom build of Kedro to Databricks, see the [development guide](../contribution/development_for_databricks.md).
+If you are a Kedro contributor looking for information on deploying a custom build of Kedro to Databricks, see the [development guide](../../contribution/development_for_databricks.md).
 ```
 
 ## Prerequisites
@@ -144,11 +144,11 @@ The project has now been pushed to your private GitHub repository, and in order 
 3. Press `Edit`
 4. Go to the `Advanced Options` and then `Spark`
 
-![](../meta/images/databricks_cluster_edit.png)
+![](../../meta/images/databricks_cluster_edit.png)
 
 Then in the `Environment Variables` section add your `GITHUB_USER` and `GITHUB_TOKEN` as shown on the picture:
 
-![](../meta/images/databricks_cluster_env_vars.png)
+![](../../meta/images/databricks_cluster_env_vars.png)
 
 
 ```{note}
@@ -227,16 +227,16 @@ You should get a similar output:
 
 Your complete notebook should look similar to this (the results are hidden):
 
-![](../meta/images/databricks_notebook_example.png)
+![](../../meta/images/databricks_notebook_example.png)
 
 
 ### 9. Using the Kedro IPython Extension
 
 You can interact with Kedro in Databricks through the Kedro [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/index.html), `kedro.ipython`.
 
-The Kedro IPython extension launches a [Kedro session](../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+The Kedro IPython extension launches a [Kedro session](../../kedro_project_setup/session.md) and makes available the useful Kedro variables `catalog`, `context`, `pipelines` and `session`. It also provides the `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) that reloads these variables (for example, if you need to update `catalog` following changes to your Data Catalog).
 
-The IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](../notebooks_and_ipython/kedro_and_notebooks.md).
+The IPython extension can be used in a Databricks notebook in a similar way to how it is used in [Jupyter notebooks](../../notebooks_and_ipython/kedro_and_notebooks.md).
 
 If you encounter a `ContextualVersionConflictError`, it is likely caused by Databricks using an old version of `pip`. Hence there's one additional step you need to do in the Databricks notebook to make use of the IPython extension. After you load the IPython extension using the below command:
 

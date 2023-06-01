@@ -47,7 +47,7 @@ def catalog():
 @click.pass_obj
 def list_datasets(metadata: ProjectMetadata, pipeline, env):
     """Show datasets per type."""
-    title = "DataSets in '{}' pipeline"
+    title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
     mentioned = "Datasets mentioned in pipeline"
 

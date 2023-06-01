@@ -113,7 +113,7 @@ class TestLambdaDatasetSave:
 
     def test_save_none(self, mocked_save, mocked_data_set):
         """Check the error when passing None to `save` call"""
-        pattern = "Saving 'None' to a 'DataSet' is not allowed"
+        pattern = "Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
             mocked_data_set.save(None)
         assert mocked_save.called == 0

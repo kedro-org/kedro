@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from kedro.io import DatasetError, MemoryDataSet
+from kedro.io import DatasetError, MemoryDataset
 from kedro.io.memory_dataset import _copy_with_mode, _infer_copy_mode
 
 
@@ -49,7 +49,7 @@ def new_data():
 
 @pytest.fixture
 def memory_dataset(input_data):
-    return MemoryDataSet(data=input_data)
+    return MemoryDataset(data=input_data)
 
 
 @pytest.fixture
@@ -62,14 +62,14 @@ def mocked_copy_with_mode(mocker):
     return mocker.patch("kedro.io.memory_dataset._copy_with_mode")
 
 
-class TestMemoryDataSet:
+class TestMemoryDataset:
     def test_load(self, memory_dataset, input_data):
         """Test basic load"""
         loaded_data = memory_dataset.load()
         assert _check_equals(loaded_data, input_data)
 
     def test_load_none(self):
-        loaded_data = MemoryDataSet(None).load()
+        loaded_data = MemoryDataset(None).load()
         assert loaded_data is None
 
     def test_load_infer_mode(
@@ -137,27 +137,27 @@ class TestMemoryDataSet:
 
     def test_create_without_data(self):
         """Test instantiation without data"""
-        assert MemoryDataSet() is not None
+        assert MemoryDataset() is not None
 
     def test_loading_none(self):
         """Check the error when attempting to load the data set that doesn't
         contain any data"""
-        pattern = r"Data for MemoryDataSet has not been saved yet\."
+        pattern = r"Data for MemoryDataset has not been saved yet\."
         with pytest.raises(DatasetError, match=pattern):
-            MemoryDataSet().load()
+            MemoryDataset().load()
 
     def test_saving_none(self):
         """Check the error when attempting to save the data set without
         providing the data"""
         pattern = r"Saving 'None' to a 'DataSet' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
-            MemoryDataSet().save(None)
+            MemoryDataset().save(None)
 
     @pytest.mark.parametrize(
         "input_data,expected",
         [
-            ("dummy_dataframe", "MemoryDataSet(data=<DataFrame>)"),
-            ("dummy_numpy_array", "MemoryDataSet(data=<ndarray>)"),
+            ("dummy_dataframe", "MemoryDataset(data=<DataFrame>)"),
+            ("dummy_numpy_array", "MemoryDataset(data=<ndarray>)"),
         ],
         indirect=["input_data"],
     )
@@ -167,7 +167,7 @@ class TestMemoryDataSet:
 
     def test_exists(self, new_data):
         """Test `exists` method invocation"""
-        data_set = MemoryDataSet()
+        data_set = MemoryDataset()
         assert not data_set.exists()
 
         data_set.save(new_data)

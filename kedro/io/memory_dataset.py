@@ -35,7 +35,9 @@ class MemoryDataset(AbstractDataSet):
 
     """
 
-    def __init__(self, data: Any = _EMPTY, copy_mode: str = None):
+    def __init__(
+        self, data: Any = _EMPTY, copy_mode: str = None, metadata: dict[str, Any] = None
+    ):
         """Creates a new instance of ``MemoryDataset`` pointing to the
         provided Python object.
 
@@ -44,9 +46,12 @@ class MemoryDataset(AbstractDataSet):
             copy_mode: The copy mode used to copy the data. Possible
                 values are: "deepcopy", "copy" and "assign". If not
                 provided, it is inferred based on the data type.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._data = _EMPTY
         self._copy_mode = copy_mode
+        self.metadata = metadata
         if data is not _EMPTY:
             self._save(data)
 

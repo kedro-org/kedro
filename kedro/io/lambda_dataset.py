@@ -77,12 +77,14 @@ class LambdaDataset(AbstractDataSet):
         else:
             self.__release()
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,
         exists: Callable[[], bool] = None,
         release: Callable[[], None] = None,
+        metadata: dict[str, Any] = None,
     ):
         """Creates a new instance of ``LambdaDataset`` with references to the
         required input/output data set methods.
@@ -92,6 +94,8 @@ class LambdaDataset(AbstractDataSet):
             save: Method to save data to a data set.
             exists: Method to check whether output data already exists.
             release: Method to release any cached information.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DatasetError: If a method is specified, but is not a Callable.
@@ -114,6 +118,7 @@ class LambdaDataset(AbstractDataSet):
         self.__save = save
         self.__exists = exists
         self.__release = release
+        self.metadata = metadata
 
 
 class LambdaDataSet(metaclass=DeprecatedClassMeta):

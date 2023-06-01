@@ -8,17 +8,31 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.9
+# Release 0.18.9
 
 ## Major features and improvements
 * `kedro run --params` now updates interpolated parameters correctly when using `OmegaConfigLoader`.
+* Added `metadata` attribute to `kedro.io` datasets. This is ignored by Kedro, but may be consumed by users or external plugins.
+* Added `kedro.logging.RichHandler`. This replaces the default `rich.logging.RichHandler` and is more flexible, user can turn off the `rich` traceback if needed.
 
 ## Bug fixes and other changes
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.
 * `OmegaConfigLoader` does not show a `MissingConfigError` when the config files exist but are empty.
 
+## Documentation changes
+* Added documentation for collaborative experiment tracking within Kedro-Viz.
+* Revised section on deployment to better organise content and reflect how recently docs have been updated.
+* Minor improvements to fix typos and revise docs to align with engineering changes.
+
 ## Breaking changes to the API
 * `kedro package` does not produce `.egg` files anymore, and now relies exclusively on `.whl` files.
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [tomasvanpottelbergh](https://github.com/tomasvanpottelbergh)
+* [https://github.com/debugger24](https://github.com/debugger24)
+
 ## Upcoming deprecations for Kedro 0.19.0
 
 
@@ -133,12 +147,12 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * You can configure config file patterns through `settings.py` without creating a custom config loader.
 * Added the following new datasets:
 
-| Type                                 | Description                                                                | Location                      |
-| ------------------------------------ | -------------------------------------------------------------------------- | ----------------------------- |
-| `svmlight.SVMLightDataSet` | Work with svmlight/libsvm files using scikit-learn library | `kedro.extras.datasets.svmlight` |
-| `video.VideoDataSet`                 | Read and write video files from a filesystem                               | `kedro.extras.datasets.video` |
-| `video.video_dataset.SequenceVideo`  | Create a video object from an iterable sequence to use with `VideoDataSet` | `kedro.extras.datasets.video` |
-| `video.video_dataset.GeneratorVideo` | Create a video object from a generator to use with `VideoDataSet`          | `kedro.extras.datasets.video` |
+| Type                                 | Description                                                                | Location                         |
+| ------------------------------------ | -------------------------------------------------------------------------- | -------------------------------- |
+| `svmlight.SVMLightDataSet`           | Work with svmlight/libsvm files using scikit-learn library                 | `kedro.extras.datasets.svmlight` |
+| `video.VideoDataSet`                 | Read and write video files from a filesystem                               | `kedro.extras.datasets.video`    |
+| `video.video_dataset.SequenceVideo`  | Create a video object from an iterable sequence to use with `VideoDataSet` | `kedro.extras.datasets.video`    |
+| `video.video_dataset.GeneratorVideo` | Create a video object from a generator to use with `VideoDataSet`          | `kedro.extras.datasets.video`    |
 * Implemented support for a functional definition of schema in `dask.ParquetDataSet` to work with the `dask.to_parquet` API.
 
 ## Bug fixes and other changes

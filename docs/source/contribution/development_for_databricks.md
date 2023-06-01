@@ -5,7 +5,7 @@ Many Kedro users deploy their projects to [Databricks](https://www.databricks.co
 ## How to deploy a development version of Kedro to Databricks
 
 ```{note}
-This page is for **contributors** developing changes to Kedro that need to test them on Databricks. If you are a Kedro user working on an individual or team project and need more information about workflows, consult the [documentation for developing a Kedro project on Databricks](../integrations/databricks_workspace.md).
+This page is for **contributors** developing changes to Kedro that need to test them on Databricks. If you are a Kedro user working on an individual or team project and need more information about workflows, consult the [documentation pages for developing a Kedro project on Databricks](../deployment/databricks/index.md).
 ```
 
 ## Prerequisites

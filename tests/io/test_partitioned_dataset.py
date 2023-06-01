@@ -46,7 +46,7 @@ LOCAL_DATASET_DEFINITION = [
 ]
 
 
-class FakeDataSet:  # pylint: disable=too-few-public-methods
+class FakeDataset:  # pylint: disable=too-few-public-methods
     pass
 
 
@@ -264,11 +264,11 @@ class TestPartitionedDatasetLocal:
                 r"Class 'missing\.module\.UndefinedDatasetType' not found",
             ),
             (
-                FakeDataSet,
-                r"DataSet type 'tests\.io\.test_partitioned_dataset\.FakeDataSet' "
+                FakeDataset,
+                r"DataSet type 'tests\.io\.test_partitioned_dataset\.FakeDataset' "
                 r"is invalid\: all data set types must extend 'AbstractDataSet'",
             ),
-            ({}, "'type' is missing from DataSet catalog configuration"),
+            ({}, "'type' is missing from Dataset catalog configuration"),
         ],
     )
     def test_invalid_dataset_config(self, dataset_config, error_pattern):

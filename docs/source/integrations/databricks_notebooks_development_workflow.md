@@ -200,4 +200,4 @@ If your cluster terminates, you must re-run your entire notebook, as libraries i
 
 ## Summary
 
-This guide demonstrated a development workflow on Databricks using only the Databricks workspace. This approach is ideal for users who prefer to develop using notebooks 
+This guide demonstrated a development workflow on Databricks using only the Databricks workspace. This approach is ideal for users who prefer to develop using notebooks and avoids having to set up and sync a local environment with Databricks.

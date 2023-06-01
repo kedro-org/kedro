@@ -505,10 +505,10 @@ class TestDataCatalogFromConfig:
 
     def test_confirm(self, tmp_path, caplog, mocker):
         """Confirm the dataset"""
-        mock_confirm = mocker.patch("kedro.io.IncrementalDataSet.confirm")
+        mock_confirm = mocker.patch("kedro.io.IncrementalDataset.confirm")
         catalog = {
             "ds_to_confirm": {
-                "type": "IncrementalDataSet",
+                "type": "IncrementalDataset",
                 "dataset": "pandas.CSVDataSet",
                 "path": str(tmp_path),
             }

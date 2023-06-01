@@ -97,7 +97,7 @@ To move your locally stored data to DBFS, open your `iris-databricks` notebook a
 dbutils.fs.cp(
     "/Workspace/Repos/<databricks_username>/iris-databricks/data/",
     "dbfs:/FileStore/iris-databricks/data",
-    recurse=True
+    recurse=True,
 )
 ```
 

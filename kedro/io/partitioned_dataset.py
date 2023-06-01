@@ -377,7 +377,7 @@ class IncrementalDataset(PartitionedDataset):
         >>> data_set.load()
     """
 
-    DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataset"
+    DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataSet"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
     # pylint: disable=too-many-arguments

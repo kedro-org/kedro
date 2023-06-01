@@ -182,7 +182,7 @@ class TestYAMLDataSetVersioned:
             versioned_yaml_data_set.save(dummy_data)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DatasetError, match=pattern):
             YAMLDataSet(

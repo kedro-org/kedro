@@ -192,7 +192,7 @@ class TestFeatherDataSetVersioned:
             versioned_feather_data_set.save(dummy_dataframe)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DatasetError, match=pattern):
             FeatherDataSet(

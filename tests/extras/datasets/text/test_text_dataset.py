@@ -157,7 +157,7 @@ class TestTextDataSetVersioned:
             versioned_txt_data_set.save(STRING)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DatasetError, match=pattern):
             TextDataSet(

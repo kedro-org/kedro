@@ -167,7 +167,7 @@ class TestHoloviewsWriterVersioned:
             versioned_hv_writer.save(dummy_hv_object)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
         with pytest.raises(DatasetError, match=pattern):
             HoloviewsWriter(

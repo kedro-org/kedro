@@ -94,7 +94,11 @@ A number of methods exist for moving data to DBFS. However, in this guide, you w
 To move your locally stored data to DBFS, open your `iris-databricks` notebook and in the first cell enter the following python code:
 
 ```python
-dbutils.fs.cp("/Workspace/Repos/<databricks_username>/iris-databricks/data/", "dbfs:/FileStore/iris-databricks/data", recurse=True)
+dbutils.fs.cp(
+    "/Workspace/Repos/<databricks_username>/iris-databricks/data/",
+    "dbfs:/FileStore/iris-databricks/data",
+    recurse=True
+)
 ```
 
 Run this cell to copy the complete directory and its contents from your Repo to DBFS.
@@ -107,7 +111,7 @@ display(dbutils.fs.ls("dbfs:/FileStore/iris-databricks/data"))
 
 Run this command to displays the contents of your project's `data/` directory. You can expect to see the following structure:
 
-```python
+```bash
 [FileInfo(path='dbfs:/FileStore/iris-databricks/data/01_raw', name='01_raw', size=...),
  FileInfo(path='dbfs:/FileStore/iris-databricks/data/02_intermediate', name='02_intermediate', size=...),
  FileInfo(path='dbfs:/FileStore/iris-databricks/data/03_primary', name='03_primary', size=...),

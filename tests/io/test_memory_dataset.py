@@ -88,7 +88,7 @@ class TestMemoryDataset:
         assert _check_equals(mocked_copy_with_mode.call_args[0][0], input_data)
 
     def test_save(self, memory_dataset, input_data, new_data):
-        """Test overriding the data set"""
+        """Test overriding the dataset"""
         memory_dataset.save(data=new_data)
         reloaded = memory_dataset.load()
         assert not _check_equals(reloaded, input_data)
@@ -110,13 +110,13 @@ class TestMemoryDataset:
         assert _check_equals(mocked_copy_with_mode.call_args[0][0], new_data)
 
     def test_load_modify_original_data(self, memory_dataset, input_data):
-        """Check that the data set object is not updated when the original
+        """Check that the dataset object is not updated when the original
         object is changed."""
         input_data = _update_data(input_data, 1, 1, -5)
         assert not _check_equals(memory_dataset.load(), input_data)
 
     def test_save_modify_original_data(self, memory_dataset, new_data):
-        """Check that the data set object is not updated when the original
+        """Check that the dataset object is not updated when the original
         object is changed."""
         memory_dataset.save(new_data)
         new_data = _update_data(new_data, 1, 1, "new value")
@@ -140,16 +140,16 @@ class TestMemoryDataset:
         assert MemoryDataset() is not None
 
     def test_loading_none(self):
-        """Check the error when attempting to load the data set that doesn't
+        """Check the error when attempting to load the dataset that doesn't
         contain any data"""
         pattern = r"Data for MemoryDataset has not been saved yet\."
         with pytest.raises(DatasetError, match=pattern):
             MemoryDataset().load()
 
     def test_saving_none(self):
-        """Check the error when attempting to save the data set without
+        """Check the error when attempting to save the dataset without
         providing the data"""
-        pattern = r"Saving 'None' to a 'DataSet' is not allowed"
+        pattern = r"Saving 'None' to a 'Dataset' is not allowed"
         with pytest.raises(DatasetError, match=pattern):
             MemoryDataset().save(None)
 
@@ -162,7 +162,7 @@ class TestMemoryDataset:
         indirect=["input_data"],
     )
     def test_str_representation(self, memory_dataset, input_data, expected):
-        """Test string representation of the data set"""
+        """Test string representation of the dataset"""
         assert expected in str(memory_dataset)
 
     def test_exists(self, new_data):

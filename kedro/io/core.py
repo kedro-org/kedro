@@ -173,7 +173,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
             ) from err
         except Exception as err:
             raise DatasetError(
-                f"\n{err}.\nFailed to instantiate Dataset '{name}' "
+                f"\n{err}.\nFailed to instantiate dataset '{name}' "
                 f"of type '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
         return data_set

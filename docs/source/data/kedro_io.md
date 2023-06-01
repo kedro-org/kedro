@@ -230,7 +230,7 @@ Currently, the following datasets support versioning:
 - `kedro_datasets.spark.SparkDataSet`
 - `kedro_datasets.yaml.YAMLDataSet`
 - `kedro_datasets.api.APIDataSet`
-- `kedro_datasets.tensorflow.TensorFlowModelDataset`
+- `kedro_datasets.tensorflow.TensorFlowModelDataSet`
 - `kedro_datasets.json.JSONDataSet`
 
 ```{note}

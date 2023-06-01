@@ -113,9 +113,9 @@ def _map_type_to_datasets(datasets, datasets_meta):
 def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     """Create Data Catalog YAML configuration with missing datasets.
 
-    Add `MemoryDataSet` datasets to Data Catalog YAML configuration file
-    for each dataset in a registered pipeline if it is missing from
-    the `DataCatalog`.
+    Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
+    file for each dataset in a registered pipeline if it is missing from
+    the ``DataCatalog``.
 
     The catalog configuration will be saved to
     `<conf_source>/<env>/catalog/<pipeline_name>.yml` file.
@@ -167,7 +167,7 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
         catalog_config = {}
 
     for ds_name in missing_ds:
-        catalog_config[ds_name] = {"type": "MemoryDataSet"}
+        catalog_config[ds_name] = {"type": "MemoryDataset"}
 
     # Create only `catalog` folder under existing environment
     # (all parent folders must exist).

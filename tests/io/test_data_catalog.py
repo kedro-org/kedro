@@ -91,10 +91,7 @@ def sane_config_with_tracking_ds(tmp_path):
 def config_with_dataset_factories(filepath):
     return {
         "catalog": {
-            "{boats}@csv": {
-                "type": "pandas.CSVDataSet",
-                "filepath": filepath
-            },
+            "{boats}@csv": {"type": "pandas.CSVDataSet", "filepath": filepath},
             "cars": {
                 "type": "pandas.CSVDataSet",
                 "filepath": "s3://test_bucket/test_file.csv",

@@ -96,6 +96,23 @@ def _sub_nonword_chars(data_set_name: str) -> str:
     return re.sub(WORDS_REGEX_PATTERN, "__", data_set_name)
 
 
+def _specificity(pattern: str) -> int:
+    """Helper function to check length of exactly matched characters not inside brackets
+    Example -
+    specificity("{namespace}.companies") = 10
+    specificity("{namespace}.{dataset}") = 1
+    specificity("france.companies") = 16
+    Args:
+        pattern:
+    Returns:
+    """
+    pattern_variables = parse(pattern, pattern).named
+    for k in pattern_variables:
+        pattern_variables[k] = ""
+    specific_characters = pattern.format(**pattern_variables)
+    return -len(specific_characters)
+
+
 class _FrozenDatasets:
     """Helper class to access underlying loaded datasets"""
 
@@ -176,6 +193,10 @@ class DataCatalog:
         # Keep a record of all patterns in the catalog.
         # {dataset pattern name : dataset pattern body}
         self.dataset_patterns = dict(dataset_patterns or {})
+        self.sorted_dataset_patterns = sorted(
+            self.dataset_patterns.keys(),
+            key=lambda x: (_specificity(x), -x.count("{"), x),
+        )
 
         # import the feed dict
         if feed_dict:
@@ -556,12 +577,12 @@ class DataCatalog:
         """
         dataset = None
         # Loop through all dataset patterns and check if the given dataset name has a match.
-        for dataset_pattern, dataset_template in self.dataset_patterns.items():
-            result = parse(dataset_pattern, dataset_input_name)
+        for pattern in self.sorted_dataset_patterns:
+            result = parse(pattern, dataset_input_name)
             # If there's a match resolve the rest of the pattern template to create
             # a dataset instance. A result can be None or contain a dictionary of matched items:
             if result:
-                template_copy = copy.deepcopy(dataset_template)
+                template_copy = copy.deepcopy(self.dataset_patterns[pattern])
                 # Match results to patterns in catalog entry
                 for key, value in template_copy.items():
                     # Find all dataset fields that need to be resolved with
@@ -571,9 +592,15 @@ class DataCatalog:
                         # result.named: gives access to all dict items in the match result.
                         # format_map fills in dict values into a string with {...} placeholders
                         # of the same key name.
-                        template_copy[key] = string_value.format_map(result.named)
+                        try:
+                            template_copy[key] = string_value.format_map(result.named)
+                        except KeyError as exc:
+                            raise DataSetError(
+                                f"Unable to resolve '{key}' for the pattern '{pattern}'"
+                            ) from exc
                 # Create dataset from catalog template.
-                dataset = AbstractDataSet.from_config(dataset_pattern, template_copy)
+                dataset = AbstractDataSet.from_config(dataset_input_name, template_copy)
+                break
         return dataset
 
     def list(self, regex_search: str | None = None) -> list[str]:

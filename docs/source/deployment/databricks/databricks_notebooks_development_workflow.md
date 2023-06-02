@@ -27,7 +27,7 @@ Note your Databricks **username** and **host** as you will need it for the remai
 
 Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
 
-![Find Databricks host and username](../meta/images/find_databricks_host_and_username.png)
+![Find Databricks host and username](../../meta/images/find_databricks_host_and_username.png)
 
 ```{note}
 Your databricks host must include the protocol (`https://`).
@@ -63,7 +63,7 @@ Create a new repo on Databricks by navigating to `New` tab in the Databricks wor
 
 In this guide, you will not sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
 
-![Create a new repo on Databricks](../meta/images/databricks_repo_creation.png)
+![Create a new repo on Databricks](../../meta/images/databricks_repo_creation.png)
 
 ### Create a `conf/local` directory in your Databricks repo
 
@@ -71,11 +71,11 @@ Kedro requires your project to have a `conf/local` directory to exist to success
 
 Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> Folder` as in the image below:
 
-![Create a conf folder in Databricks repo](../meta/images/databricks_conf_folder_creation.png)
+![Create a conf folder in Databricks repo](../../meta/images/databricks_conf_folder_creation.png)
 
 Name the new folder `local`. In this guide, we have no local credentials to store and so we will leave the newly created folder empty. Your `conf/local` and `local` directories should now look like the following:
 
-![Final conf folder](../meta/images/final_conf_folder.png)
+![Final conf folder](../../meta/images/final_conf_folder.png)
 
 ### Create a new Databricks notebook
 
@@ -83,7 +83,7 @@ Now that your project is available on Databricks, you can run it on a cluster us
 
 To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 
-![Create a new notebook on Databricks](../meta/images/databricks_notebook_creation.png)
+![Create a new notebook on Databricks](../../meta/images/databricks_notebook_creation.png)
 
 ### Copy project data to DBFS using dbutils
 
@@ -152,15 +152,15 @@ session.run()
 
 After completing these steps, your notebook should match the following image:
 
-![Databricks completed notebook](../meta/images/databricks_finished_notebook.png)
+![Databricks completed notebook](../../meta/images/databricks_finished_notebook.png)
 
 Run the completed notebook using the `Run All` bottom in the top right of the UI:
 
-![Databricks notebook run all](../meta/images/databricks_run_all.png)
+![Databricks notebook run all](../../meta/images/databricks_run_all.png)
 
 On the first run of your Kedro project, you will be prompted to consent to analytics, type `y` or `N` in the field that appears and press `Enter`:
 
-![Databricks notebook telemetry consent](../meta/images/databricks_telemetry_consent.png)
+![Databricks notebook telemetry consent](../../meta/images/databricks_telemetry_consent.png)
 
 You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
 
@@ -182,7 +182,7 @@ The `databricks-iris` starter uses a default 80-20 ratio of training data to tes
 
 In the Databricks workspace, click on the `Repos` tab in the side bar and navigate to `<databricks_username>/iris-databricks/conf/base/`. Open the the file `<project_root>/conf/base/parameters.yml` by double-clicking it. This will take you to a built-in file editor. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7`, your changes will automatically be saved.
 
-![Databricks edit file](../meta/images/databricks_edit_file.png)
+![Databricks edit file](../../meta/images/databricks_edit_file.png)
 
 ### Re-run your project
 

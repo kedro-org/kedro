@@ -414,6 +414,10 @@ class KedroSession:
             load_versions=load_versions,
         )
 
+        named_datasets = filtered_pipeline.data_sets()
+
+        catalog.resolve(named_datasets)
+
         # Run the runner
         hook_manager = self._hook_manager
         runner = runner or SequentialRunner()

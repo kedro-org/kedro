@@ -641,10 +641,10 @@ class TestOmegaConfigLoader:
                 "filepath": "data/01_raw/companies.csv",
             }
         }
-        tmp_catalog= tmp_path / _BASE_ENV / "catalog_temp.yml"
+        tmp_catalog = tmp_path / _BASE_ENV / "catalog_temp.yml"
         template = {"_pandas": {"type": "pandas.CSVDataSet"}}
         _write_yaml(base_catalog, catalog_config)
-        _write_yaml(temp_catalog, template)
+        _write_yaml(tmp_catalog, template)
 
         conf = OmegaConfigLoader(str(tmp_path))
         conf.default_run_env = ""

@@ -268,7 +268,7 @@ class TestPartitionedDatasetLocal:
                 r"Dataset type 'tests\.io\.test_partitioned_dataset\.FakeDataset' "
                 r"is invalid\: all data set types must extend 'AbstractDataSet'",
             ),
-            ({}, "'type' is missing from Dataset catalog configuration"),
+            ({}, "'type' is missing from dataset catalog configuration"),
         ],
     )
     def test_invalid_dataset_config(self, dataset_config, error_pattern):

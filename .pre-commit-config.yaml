@@ -75,30 +75,30 @@ repos:
             types: [file, python]
             exclude: ^kedro/templates/|^features/steps/test_starter
             entry: ruff
-          # - id: black
-          #   name: "Black"
-          #   language: system
-          #   files: ^kedro/|^features/|^tests/
-          #   types: [file, python]
-          #   exclude: ^features/steps/test_starter|^kedro/templates/
-          #   entry: black
-          # - id: imports
-          #   name: "Import Linter"
-          #   language: system
-          #   pass_filenames: false
-          #   entry: lint-imports
-          # - id: secret_scan
-          #   name: "Secret scan"
-          #   language: system
-          #   exclude: ^features/steps/test_starter
-          #   pass_filenames: false
-          #   entry: make secret-scan
-          # - id: bandit
-          #   name: "Bandit security check"
-          #   language: system
-          #   types: [file, python]
-          #   exclude: ^kedro/templates/|^tests/|^features/steps/test_starter
-          #   entry: bandit -ll
+          - id: black
+            name: "Black"
+            language: system
+            files: ^kedro/|^features/|^tests/
+            types: [file, python]
+            exclude: ^features/steps/test_starter|^kedro/templates/
+            entry: black
+          - id: imports
+            name: "Import Linter"
+            language: system
+            pass_filenames: false
+            entry: lint-imports
+          - id: secret_scan
+            name: "Secret scan"
+            language: system
+            exclude: ^features/steps/test_starter
+            pass_filenames: false
+            entry: make secret-scan
+          - id: bandit
+            name: "Bandit security check"
+            language: system
+            types: [file, python]
+            exclude: ^kedro/templates/|^tests/|^features/steps/test_starter
+            entry: bandit -ll
 
           # # It's impossible to specify per-directory configuration, so we just run it many times.
           # # https://github.com/PyCQA/pylint/issues/618

@@ -52,6 +52,8 @@ exclude = "/templates/|^features/steps/test_starter"
 
 [tool.isort]
 profile = "black"
+force_sort_within_sections = true  # Don't group `from` imports separately
+order_by_type = true  # Order by CONSTANT, CamelCase, snake_case
 
 [tool.pylint]
 [tool.pylint.master]
@@ -174,3 +176,22 @@ ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
     "kedro.framework.session.session -> kedro.config"
 ]
+
+[tool.ruff]
+line-length = 88
+fix = false
+show-fixes = true
+# select = ["A", "B", "C", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+select = [
+    # Pyflakes
+    "F",
+    # Pycodestyle
+    "E",
+    "W",
+    # isort
+    "I"
+]
+ignore = ["E501"]
+unfixable = []
+
+[tool.ruff.flake8-builtins]

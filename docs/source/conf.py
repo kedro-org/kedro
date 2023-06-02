@@ -26,8 +26,8 @@ from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
-project = "Kedro"
-author = "Kedro"
+project = "kedro"
+author = "kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)

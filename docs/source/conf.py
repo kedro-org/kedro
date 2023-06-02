@@ -64,7 +64,6 @@ napoleon_include_init_with_doc = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 html_static_path = ["_static"]
-html_extra_path = ["googlebce3ad2fda582ae8.html"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -201,6 +200,9 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # html_extra_path used to define a path to robots.txt which is used by webcrawlers
 # to ignore or allow certain links.
 html_extra_path = [str(here / "robots.txt")]
+
+# Likewise for search console verification
+html_extra_path = [str(here / "googlebce3ad2fda582ae8.html")]
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False

@@ -196,6 +196,11 @@ class DataCatalog:
         # Keep a record of all patterns in the catalog.
         # {dataset pattern name : dataset pattern body}
         self.dataset_patterns = dict(dataset_patterns or {})
+        # Sort all patterns according to parsing rules
+        self.sorted_patterns = sorted(
+            self.dataset_patterns.keys(),
+            key=lambda x: (_specificity(x), -x.count("{"), x),
+        )
 
         # import the feed dict
         if feed_dict:
@@ -637,41 +642,37 @@ class DataCatalog:
         Args:
             named_datasets: A set of datasets used by the pipeline being run
         """
-        sorted_patterns = sorted(
-            self.dataset_patterns.keys(),
-            key=lambda x: (_specificity(x), -x.count("{"), x),
-        )
+
         existing_datasets = self.list()
         for dataset in named_datasets:
             if dataset in existing_datasets:
                 continue
-            for pattern in sorted_patterns:
-                matched_dataset = self._match_pattern(pattern, dataset)
-                if matched_dataset:
-                    self.add(dataset, matched_dataset)
-                    break
+            matched_dataset = self._match_against_patterns(dataset)
+            if matched_dataset:
+                self.add(dataset, matched_dataset)
 
-    def _match_pattern(self, pattern: str, dataset_name: str) -> AbstractDataSet | None:
+    def _match_against_patterns(self, dataset_name: str) -> AbstractDataSet | None:
         """Match a dataset name against the patterns in the catalog
         Args:
-            pattern: A factory pattern defined in the catalog
             dataset_name: Name of the dataset to be matched against a specific pattern
 
         Returns:
             The dataset instance if the pattern is a match, None otherwise
 
         """
-        result = parse(pattern, dataset_name)
-        if result:
-            template_copy = copy.deepcopy(self.dataset_patterns[pattern])
-            for key, value in template_copy.items():
-                string_value = str(value)
-                try:
-                    formatted_string = string_value.format_map(result.named)
-                except KeyError as exc:
-                    raise DataSetError(
-                        f"Unable to resolve '{key}' for the pattern '{pattern}'"
-                    ) from exc
-                template_copy[key] = formatted_string
-            return AbstractDataSet.from_config(dataset_name, template_copy)
+        for pattern in self.sorted_patterns:
+            result = parse(pattern, dataset_name)
+            if result:
+                # Since the patterns are sorted, the first match is the best match
+                template_copy = copy.deepcopy(self.dataset_patterns[pattern])
+                for key, value in template_copy.items():
+                    string_value = str(value)
+                    try:
+                        formatted_string = string_value.format_map(result.named)
+                    except KeyError as exc:
+                        raise DataSetError(
+                            f"Unable to resolve '{key}' for the pattern '{pattern}'"
+                        ) from exc
+                    template_copy[key] = formatted_string
+                return AbstractDataSet.from_config(dataset_name, template_copy)
         return None

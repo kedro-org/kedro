@@ -51,7 +51,14 @@ Name your new project `iris-databricks` for consistency with the rest of this gu
 
 ### Create a GitHub personal access token
 
-To synchronise your project between your local development environment and Databricks, you will use a private GitHub repository, which you will create in the next step. For authentication, you will need to create a GitHub personal access token. [Create this token in your GitHub developer settings](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token).
+To synchronise your project between your local development environment and Databricks, you will use a private GitHub repository, which you will create in the next step. For authentication, you will need to create a GitHub personal access token. [Create this token in your GitHub developer settings](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token).
+
+The main steps are:
+
+- Verify your email and navigate to "Settings" under your profile photo.
+- Select "Developer settings" then "Fine-grained tokens" and click on "Generate new token".
+- Input a name for your token, choose an expiration time, select repository access, and define the token permissions.
+- Finish by clicking "Generate token".
 
 ```{note}
 Make sure that `repo` scopes are enabled for your token.

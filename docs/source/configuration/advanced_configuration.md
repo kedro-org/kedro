@@ -119,13 +119,18 @@ CONFIG_LOADER_CLASS = OmegaConfigLoader
 
 This section contains a set of guidance for advanced configuration requirements of standard Kedro projects:
 
-* [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
-* [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
-* [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
-* [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
-* [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
-* [How to use custom resolvers in the `OmegaConfigLoader`](#how-to-use-custom-resolvers-in-the-omegaconfigloader)
-* [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
+- [Advanced configuration](#advanced-configuration)
+  - [TemplatedConfigLoader](#templatedconfigloader)
+    - [Provide template values through globals](#provide-template-values-through-globals)
+  - [OmegaConfigLoader](#omegaconfigloader)
+  - [Advanced Kedro configuration](#advanced-kedro-configuration)
+    - [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
+    - [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
+    - [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
+    - [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
+    - [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+    - [How to use custom resolvers in the `OmegaConfigLoader`](#how-to-use-custom-resolvers-in-the-omegaconfigloader)
+    - [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
 ### How to change which configuration files are loaded
 If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
@@ -142,7 +147,7 @@ CONFIG_LOADER_ARGS = {
 By changing this setting, the default behaviour for loading parameters will be replaced, while the other configuration patterns will remain in their default state.
 
 ### How to ensure non default configuration files get loaded
-You can add configuration patterns to match files other than `parameters`, `credentials`, `logging`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
+You can add configuration patterns to match files other than `parameters`, `credentials`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
 For example, if you want to load Spark configuration files you need to update `CONFIG_LOADER_ARGS` as follows:
 
 ```python
@@ -154,7 +159,7 @@ CONFIG_LOADER_ARGS = {
 ```
 
 ### How to bypass the configuration loading rules
-You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, credentials, and logging) as well as additional configuration.
+You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters and credentials) as well as additional configuration.
 
 ```{code-block} python
 :lineno-start: 10

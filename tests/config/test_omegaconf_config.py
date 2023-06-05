@@ -73,7 +73,6 @@ def create_config_dir(tmp_path, base_config, local_config):
     base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
     base_logging = tmp_path / _BASE_ENV / "logging.yml"
     base_spark = tmp_path / _BASE_ENV / "spark.yml"
-    base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
 
     local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
 
@@ -596,3 +595,57 @@ class TestOmegaConfigLoader:
         assert key not in credentials
         assert key not in logging
         assert key not in spark
+
+    def test_ignore_hidden_keys(self, tmp_path):
+        """Check that the config key starting with `_` are ignored and also
+        don't cause a config merge error"""
+        _write_yaml(tmp_path / _BASE_ENV / "catalog1.yml", {"k1": "v1", "_k2": "v2"})
+        _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", {"k3": "v3", "_k2": "v4"})
+
+        conf = OmegaConfigLoader(str(tmp_path))
+        conf.default_run_env = ""
+        catalog = conf["catalog"]
+        assert catalog.keys() == {"k1", "k3"}
+
+        _write_yaml(tmp_path / _BASE_ENV / "catalog3.yml", {"k1": "dup", "_k2": "v5"})
+        pattern = (
+            r"Duplicate keys found in "
+            r"(.*catalog1\.yml and .*catalog3\.yml|.*catalog3\.yml and .*catalog1\.yml)"
+            r"\: k1"
+        )
+        with pytest.raises(ValueError, match=pattern):
+            conf["catalog"]
+
+    def test_variable_interpolation_in_catalog_with_templates(self, tmp_path):
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${_pandas.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+            "_pandas": {"type": "pandas.CSVDataSet"},
+        }
+        _write_yaml(base_catalog, catalog_config)
+
+        conf = OmegaConfigLoader(str(tmp_path))
+        conf.default_run_env = ""
+        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataSet"
+
+    def test_variable_interpolation_in_catalog_with_separate_templates_file(
+        self, tmp_path
+    ):
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        catalog_config = {
+            "companies": {
+                "type": "${_pandas.type}",
+                "filepath": "data/01_raw/companies.csv",
+            }
+        }
+        tmp_catalog = tmp_path / _BASE_ENV / "catalog_temp.yml"
+        template = {"_pandas": {"type": "pandas.CSVDataSet"}}
+        _write_yaml(base_catalog, catalog_config)
+        _write_yaml(tmp_catalog, template)
+
+        conf = OmegaConfigLoader(str(tmp_path))
+        conf.default_run_env = ""
+        assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataSet"

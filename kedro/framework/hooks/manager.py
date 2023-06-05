@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
 def _create_hook_manager() -> PluginManager:
     """Create a new PluginManager instance and register Kedro's hook specs."""
     manager = PluginManager(HOOK_NAMESPACE)
+    manager.trace.root.setwriter(logger.debug)
+    manager.enable_tracing()
     manager.add_hookspecs(NodeSpecs)
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)
@@ -60,10 +62,13 @@ def _register_hooks_setuptools(
 
     """
     already_registered = hook_manager.get_plugins()
+    # Method name is misleading:
+    # entry points are standard and don't require setuptools,
+    # see https://packaging.python.org/en/latest/specifications/entry-points/
     hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
     disabled_plugins = set(disabled_plugins)
 
-    # Get list of plugin/distinfo tuples for all setuptools registered plugins.
+    # Get list of plugin/distinfo tuples for all registered plugins.
     plugininfo = hook_manager.list_plugin_distinfo()
     plugin_names = set()
     disabled_plugin_names = set()

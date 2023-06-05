@@ -33,7 +33,7 @@ Note your Databricks **username** and **host** as you will need it for the remai
 
 Find your Databricks username in the top right of the workspace UI and the host in the browser's URL bar, up to the first slash (e.g., `https://adb-123456789123456.1.azuredatabricks.net/`):
 
-![Find Databricks host and username](../meta/images/find_databricks_host_and_username.png)
+![Find Databricks host and username](../../meta/images/find_databricks_host_and_username.png)
 
 ```{note}
 Your databricks host must include the protocol (`https://`).
@@ -90,7 +90,7 @@ Create a new repo on Databricks by navigating to `New` tab in the Databricks wor
 
 In this guide, you will not sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
 
-![Create a new repo on Databricks](../meta/images/databricks_repo_creation.png)
+![Create a new repo on Databricks](../../meta/images/databricks_repo_creation.png)
 
 ### Sync code with your Databricks repo using dbx
 
@@ -128,15 +128,15 @@ Kedro requires your project to have a `conf/local` directory to exist to success
 
 Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> Folder` as in the image below:
 
-![Create a conf folder in Databricks repo](../meta/images/databricks_conf_folder_creation.png)
+![Create a conf folder in Databricks repo](../../meta/images/databricks_conf_folder_creation.png)
 
 Name the new folder `local`. In this guide, we have no local credentials to store and so we will leave the newly created folder empty. Your `conf/local` and `local` directories should now look like the following:
 
-![Final conf folder](../meta/images/final_conf_folder.png)
+![Final conf folder](../../meta/images/final_conf_folder.png)
 
 ### Upload project data to DBFS
 
-When run on Databricks, Kedro cannot access data stored in your project's directory. Therefore, you will need to upload your project's data to an accessible location. In this guide, we will store the data on the Databricks File System (DBFS). The PySpark Iris starter contains an environment that is set up to access data stored in DBFS (`conf/databricks`). To learn more about environments in Kedro configuration, see the [configuration documentation](../configuration/configuration_basics.md#configuration-environments).
+When run on Databricks, Kedro cannot access data stored in your project's directory. Therefore, you will need to upload your project's data to an accessible location. In this guide, we will store the data on the Databricks File System (DBFS). The PySpark Iris starter contains an environment that is set up to access data stored in DBFS (`conf/databricks`). To learn more about environments in Kedro configuration, see the [configuration documentation](../../configuration/configuration_basics.md#configuration-environments).
 
 There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI command to upload your locally stored data to DBFS:
 
@@ -169,7 +169,7 @@ Now that your project is available on Databricks, you can run it on a cluster us
 
 To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 
-![Create a new notebook on Databricks](../meta/images/databricks_notebook_creation.png)
+![Create a new notebook on Databricks](../../meta/images/databricks_notebook_creation.png)
 
 ### Run your project
 
@@ -201,15 +201,15 @@ session.run()
 
 After completing these steps, your notebook should match the following image:
 
-![Databricks completed notebook](../meta/images/databricks_finished_notebook.png)
+![Databricks completed notebook](../../meta/images/databricks_finished_notebook.png)
 
 Run the completed notebook using the `Run All` bottom in the top right of the UI:
 
-![Databricks notebook run all](../meta/images/databricks_run_all.png)
+![Databricks notebook run all](../../meta/images/databricks_run_all.png)
 
 On your first run, you will be prompted to consent to analytics, type `y` or `N` in the field that appears and press `Enter`:
 
-![Databricks notebook telemetry consent](../meta/images/databricks_telemetry_consent.png)
+![Databricks notebook telemetry consent](../../meta/images/databricks_telemetry_consent.png)
 
 You should see logging output while the cell is running. After execution finishes, you should see output similar to the following:
 

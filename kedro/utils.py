@@ -80,6 +80,7 @@ class DeprecatedClassMeta(type):
 
     def __instancecheck__(cls, instance):
         return any(
+            # pylint: disable=no-value-for-parameter
             cls.__subclasscheck__(c) for c in [type(instance), instance.__class__]
         )
 

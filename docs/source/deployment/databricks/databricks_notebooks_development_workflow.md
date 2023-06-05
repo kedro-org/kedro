@@ -158,7 +158,7 @@ To move your locally stored data to DBFS, open your `iris-databricks` notebook a
 
 ```python
 dbutils.fs.cp(
-    "/Workspace/Repos/<databricks_username>/iris-databricks/data/",
+    "file:///Workspace/Repos/<databricks_username>/iris-databricks/data/",
     "dbfs:/FileStore/iris-databricks/data",
     recurse=True,
 )
@@ -169,7 +169,7 @@ Run this cell to copy the complete directory and its contents from your Repo to 
 To ensure that your data was copied correctly, you can list the contents of the destination directory in DBFS. Create a new cell underneath the first cell and enter the following code:
 
 ```python
-display(dbutils.fs.ls("dbfs:/FileStore/iris-databricks/data"))
+dbutils.fs.ls("dbfs:/FileStore/iris-databricks/data")
 ```
 
 Run this command to displays the contents of your project's `data/` directory. You can expect to see the following structure:
@@ -183,6 +183,24 @@ Run this command to displays the contents of your project's `data/` directory. Y
  FileInfo(path='dbfs:/FileStore/iris-databricks/data/06_models', name='06_models', size=...),
  FileInfo(path='dbfs:/FileStore/iris-databricks/data/07_model_output', name='07_model_output', size=...),
  FileInfo(path='dbfs:/FileStore/iris-databricks/data/08_reporting', name='08_reporting', size=...)]
+```
+
+After these cells have successfully run, you should comment the code inside them so their operations are not unnecessarily performed during notebook runs. The cells should appear as below:
+
+**Cell 1:**
+
+```ipython
+#dbutils.fs.cp(
+#    "file:///Workspace/Repos/jannic_holzer@mckinsey.com/iris-databricks/data",
+#    "dbfs:/FileStore/iris-databricks/data",
+#    recurse=True,
+#)
+```
+
+**Cell 2:**
+
+```ipython
+#dbutils.fs.ls("dbfs:/FileStore/iris-databricks/data")
 ```
 
 ### Run your project
@@ -215,7 +233,7 @@ session.run()
 
 After completing these steps, your notebook should match the following image:
 
-![Databricks completed notebook](../../meta/images/databricks_finished_notebook.png)
+![Databricks completed notebook](../../meta/images/databricks_notebooks_workflow_finished_notebook.png)
 
 Run the completed notebook using the `Run All` bottom in the top right of the UI:
 
@@ -243,7 +261,7 @@ Now that your project has run successfully once, you can make changes using the 
 
 The `databricks-iris` starter uses a default 80-20 ratio of training data to test data when training the classifier. You will edit this ratio to 70-30 and re-run your project to view the different result.
 
-In the Databricks workspace, click on the `Repos` tab in the side bar and navigate to `<databricks_username>/iris-databricks/conf/base/`. Open the the file `<project_root>/conf/base/parameters.yml` by double-clicking it. This will take you to a built-in file editor. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7`, your changes will automatically be saved.
+In the Databricks workspace, click on the `Repos` tab in the side bar and navigate to `<databricks_username>/iris-databricks/conf/base/`. Open the the file `parameters.yml` by double-clicking it. This will take you to a built-in file editor. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7`, your changes will automatically be saved.
 
 ![Databricks edit file](../../meta/images/databricks_edit_file.png)
 

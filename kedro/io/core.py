@@ -46,10 +46,7 @@ class DatasetError(Exception):
     pass
 
 
-class DataSetError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = DatasetError
+DataSetError = DatasetError
 
 
 class DatasetNotFoundError(DatasetError):
@@ -60,10 +57,7 @@ class DatasetNotFoundError(DatasetError):
     pass
 
 
-class DataSetNotFoundError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = DatasetNotFoundError
+DataSetNotFoundError = DatasetNotFoundError
 
 
 class DatasetAlreadyExistsError(DatasetError):
@@ -74,10 +68,7 @@ class DatasetAlreadyExistsError(DatasetError):
     pass
 
 
-class DataSetAlreadyExistsError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = DatasetAlreadyExistsError
+DataSetAlreadyExistsError = DatasetAlreadyExistsError
 
 
 class Wrapper(object):

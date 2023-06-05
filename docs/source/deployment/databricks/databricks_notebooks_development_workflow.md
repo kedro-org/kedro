@@ -1,8 +1,10 @@
 # Developing Kedro projects on Databricks using notebooks
 
-This guide demonstrates a workflow for developing Kedro projects on Databricks using only a Databricks Repo and notebooks. The approach explained on this page enables you to develop and test your Kedro projects entirely within the Databricks workspace.
+This guide demonstrates a workflow for developing Kedro projects on Databricks using only a Databricks Repo and a Databricks notebook. The approach explained on this page enables you to develop and test your Kedro projects entirely within the Databricks workspace.
 
 This method of developing a Kedro project for use on Databricks is ideal for developers who prefer developing their projects in notebooks rather than an in an IDE. It also avoids the overhead of setting up and syncing a local environment with Databricks. If you want to take advantage of the powerful features of an IDE to develop your project, consider following the [guide for developing a Kedro project for Databricks using your local environment](./databricks_ide_development_workflow.md).
+
+In this guide, you will store your project's code in a repository on [GitHub](https://github.com/). Databricks integrates with many [Git providers](https://docs.databricks.com/repos/index.html#supported-git-providers), including GitLab and Azure Devops. The steps in this guide to create and sync a Git repository with Databricks also apply to these Git providers, though the exact details may vary.
 
 ## What this page covers
 
@@ -116,7 +118,7 @@ git push --set-upstream origin main
 
 Create a new repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
 
-In this guide, you sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
+In this guide, you sync your project with a remote Git provider. Enter `iris-databricks` as the name of your new repository:
 
 ![Create a new repo on Databricks](../../meta/images/databricks_repo_creation.png)
 

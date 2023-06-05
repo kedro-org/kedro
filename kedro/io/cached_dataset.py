@@ -121,4 +121,6 @@ class CachedDataset(AbstractDataSet):
 
 
 class CachedDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
     _DeprecatedClassMeta__alias = CachedDataset

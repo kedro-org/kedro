@@ -71,6 +71,8 @@ class _SharedMemoryDataset:
 
 
 class _SharedMemoryDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=too-few-public-methods
+
     _DeprecatedClassMeta__alias = _SharedMemoryDataset
 
 

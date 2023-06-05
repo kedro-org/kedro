@@ -44,6 +44,8 @@ class DatasetError(Exception):
 
 
 class DataSetError(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
     _DeprecatedClassMeta__alias = DatasetError
 
 
@@ -56,6 +58,8 @@ class DatasetNotFoundError(DatasetError):
 
 
 class DataSetNotFoundError(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
     _DeprecatedClassMeta__alias = DatasetNotFoundError
 
 
@@ -68,6 +72,8 @@ class DatasetAlreadyExistsError(DatasetError):
 
 
 class DataSetAlreadyExistsError(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
     _DeprecatedClassMeta__alias = DatasetAlreadyExistsError
 
 

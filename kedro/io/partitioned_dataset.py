@@ -338,6 +338,8 @@ class PartitionedDataset(AbstractDataSet):
 
 
 class PartitionedDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
     _DeprecatedClassMeta__alias = PartitionedDataset
 
 
@@ -558,4 +560,7 @@ class IncrementalDataset(PartitionedDataset):
 
 
 class IncrementalDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
+    # pylint: disable=unused-private-member
     __DeprecatedClassMeta__alias = IncrementalDataset

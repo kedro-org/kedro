@@ -122,4 +122,6 @@ class LambdaDataset(AbstractDataSet):
 
 
 class LambdaDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
     _DeprecatedClassMeta__alias = LambdaDataset

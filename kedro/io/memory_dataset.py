@@ -140,4 +140,6 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
 
 
 class MemoryDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
     _DeprecatedClassMeta__alias = MemoryDataset

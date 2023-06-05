@@ -31,7 +31,7 @@ class TestExtractObject:
 
 
 class NewClass:
-    foo = 1
+    value = 1
 
 
 class NewClassSubclass(NewClass):
@@ -43,11 +43,11 @@ class DeprecatedClass(metaclass=DeprecatedClassMeta):
 
 
 class DeprecatedClassSubclass(DeprecatedClass):
-    foo = 2
+    value = 2
 
 
 class DeprecatedClassSubSubclass(DeprecatedClassSubclass):
-    foo = 3
+    value = 3
 
 
 class TestDeprecatedClassMeta:
@@ -74,7 +74,7 @@ class TestDeprecatedClassMeta:
         assert isinstance(DeprecatedClassSubSubclass(), NewClass)
 
     def test_inheritance(self):
-        assert NewClass().foo == 1
-        assert DeprecatedClass().foo == 1
-        assert DeprecatedClassSubclass().foo == 2
-        assert DeprecatedClassSubSubclass().foo == 3
+        assert NewClass().value == 1
+        assert DeprecatedClass().value == 1  # pylint: disable=no-member
+        assert DeprecatedClassSubclass().value == 2
+        assert DeprecatedClassSubSubclass().value == 3

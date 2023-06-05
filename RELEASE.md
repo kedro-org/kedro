@@ -24,6 +24,8 @@
 ## Migration guide from Kedro 0.18.* to 0.19.*
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
+### Logging
+`logging.yml` is now independent of Kedro's environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
 # Upcoming Release 0.18.9
 

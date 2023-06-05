@@ -1,12 +1,12 @@
 # Developing Kedro projects on Databricks using notebooks
 
-This guide demonstrates a workflow for developing Kedro projects on Databricks using only Databricks notebooks and Repos. The approach explained on this page enables you to develop and test your Kedro projects entirely within the Databricks workspace.
+This guide demonstrates a workflow for developing Kedro projects on Databricks using only a Databricks Repo and notebooks. The approach explained on this page enables you to develop and test your Kedro projects entirely within the Databricks workspace.
 
-This method of developing a Kedro project for use on Databricks is ideal for developers who prefer developing their projects in notebooks and do not use an IDE and avoids the overhead of setting up and syncing a local environment with Databricks. If you normally develop your projects in an IDE, consider following the [guide for developing a Kedro project for Databricks using your local environment](./databricks_ide_development_workflow.md).
+This method of developing a Kedro project for use on Databricks is ideal for developers who prefer developing their projects in notebooks rather than an in an IDE. It also avoids the overhead of setting up and syncing a local environment with Databricks. If you want to take advantage of the powerful features of an IDE to develop your project, consider following the [guide for developing a Kedro project for Databricks using your local environment](./databricks_ide_development_workflow.md).
 
 ## What this page covers
 
-This tutorial introduces a project development workflow on Databricks using only the Databricks workspace. The main steps in this workflow are:
+This tutorial introduces a project development workflow for Kedro projects using only the Databricks workspace. The main steps in this workflow are:
 
 - [Create a new Kedro project using the `databricks-iris` starter.](#create-a-new-kedro-project)
 - [Create a Databricks notebook to run your project.](#create-a-new-databricks-notebook)
@@ -18,6 +18,8 @@ This tutorial introduces a project development workflow on Databricks using only
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
 - Python >= 3.7 installed.
+- Git installed.
+- A [GitHub](https://github.com/) account.
 
 ## Set up your project
 
@@ -35,7 +37,7 @@ Your databricks host must include the protocol (`https://`).
 
 ### Install Kedro in a new virtual environment
 
-In your local development environment, create a virtual environment for this tutorial using Conda:
+In your local development environment, create a virtual environment for this tutorial. Any environment management system can be used, though the following commands use [Conda](https://docs.conda.io/en/latest/):
 
 ```bash
 conda create --name iris-databricks python=3.10
@@ -57,11 +59,64 @@ kedro new --starter=databricks-iris
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
 
+### Create a GitHub personal access token
+
+To synchronise your project between your local development environment and Databricks, you will use a private GitHub repository, which you will create in the next step. For authentication, you will need to create a GitHub personal access token. [Create this token in your GitHub developer settings](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token).
+
+```{note}
+Make sure that `repo` scopes are enabled for your token.
+```
+
+### Create a GitHub repository
+
+Now you should [create a new repository in GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo) using the official guide. You can keep the repository private and you don't need to commit to it just yet.
+
+To connect to the newly created repository, use one of two options:
+
+- **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key configured for GitHub](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys)
+- **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit. Use your GitHub username and your [personal access token](#create-a-github-personal-access-token) generated in the previous step as the password, [do _not_ use your original GitHub password](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api#authenticating-with-username-and-password).
+
+### Push your Kedro project to the GitHub repository
+
+At the command line, initialise Git in your project root directory:
+
+```bash
+# change the directory to the project root
+cd iris-databricks/
+# initialise git
+git init
+```
+
+Then, create the first commit:
+
+```bash
+# add all files to git staging area
+git add .
+# create the first commit
+git commit -m "first commit"
+```
+
+Finally, push the commit to GitHub:
+
+```bash
+# configure a new remote
+# for HTTPS run:
+git remote add origin https://github.com/<username>/<repo-name>.git
+# or for SSH run:
+git remote add origin git@github.com:<username>/<repo-name>.git
+
+# verify the new remote URL
+git remote -v
+
+# push the first commit
+git push --set-upstream origin main
+```
+
 ### Create a repo on Databricks
 
 Create a new repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
 
-In this guide, you will not sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
+In this guide, you sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
 
 ![Create a new repo on Databricks](../../meta/images/databricks_repo_creation.png)
 

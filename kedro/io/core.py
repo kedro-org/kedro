@@ -7,6 +7,7 @@ import abc
 import copy
 import logging
 import re
+import sys
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -30,6 +31,8 @@ VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
+
+_DEPRECATED_ERROR_CLASSES = ["DataSetError", "DataSetNotFoundError", "DataSetAlreadyExistsError"]
 
 
 class DatasetError(Exception):
@@ -75,6 +78,32 @@ class DataSetAlreadyExistsError(metaclass=DeprecatedClassMeta):
     # pylint: disable=missing-class-docstring, too-few-public-methods
 
     _DeprecatedClassMeta__alias = DatasetAlreadyExistsError
+
+
+class Wrapper(object):
+    """Convert module to class to intercept ``__getattr__()`` operation.
+
+    Code implementation copied from https://stackoverflow.com/a/40546615
+    """
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+
+    def __getattr__(self, name):
+        value = getattr(self.wrapped, name)
+
+        if name in _DEPRECATED_ERROR_CLASSES:
+            alias = value._DeprecatedClassMeta__alias
+            warnings.warn(
+                f"{name} has been renamed to {alias.__name__}, and the "
+                f"alias will be removed Kedro 0.19.0",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
+        return value
+
+
+sys.modules[__name__] = Wrapper(sys.modules[__name__])
 
 
 class VersionNotFoundError(DatasetError):

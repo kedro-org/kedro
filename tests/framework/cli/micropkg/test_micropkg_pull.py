@@ -708,14 +708,14 @@ class TestMicropkgPullCommand:
         )
 
         assert result.exit_code
-        assert "Error: More than 1 sdist files found:" in result.output
+        assert "Error: More than 1 or no sdist files found:" in result.output
 
     def test_pull_unsupported_protocol_by_fsspec(
         self, fake_project_cli, fake_metadata, tmp_path, mocker
     ):
         protocol = "unsupported"
         exception_message = f"Protocol not known: {protocol}"
-        error_message = "Error: More than 1 sdist files found:"
+        error_message = "Error: More than 1 or no sdist files found:"
         package_path = f"{protocol}://{PIPELINE_NAME}"
 
         python_call_mock = mocker.patch("kedro.framework.cli.micropkg.python_call")

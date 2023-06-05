@@ -245,7 +245,6 @@ class TestKedroSession:
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
         mocker.patch("sys.argv", ["kedro", "run", "--params=x"])
-        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         session = KedroSession.create(
             mock_package_name, fake_project, env=env, extra_params=extra_params
         )
@@ -317,7 +316,7 @@ class TestKedroSession:
         self, fake_project, monkeypatch, mock_package_name, mocker
     ):
         mocker.patch("kedro.config.config.ConfigLoader.get")
-        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
+
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 
         session = KedroSession.create(mock_package_name, fake_project)
@@ -332,7 +331,6 @@ class TestKedroSession:
         self, fake_project, monkeypatch, mock_package_name, mocker
     ):
         mocker.patch("kedro.config.config.ConfigLoader.get")
-        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 
         session = KedroSession.create(mock_package_name, fake_project)
@@ -390,23 +388,17 @@ class TestKedroSession:
         with pytest.raises(ValidationError, match=re.escape(pattern)):
             assert mock_settings.CONFIG_LOADER_CLASS
 
-    def test_no_logging_config(self, fake_project, caplog, mock_package_name, mocker):
+    def test_logging_is_not_reconfigure(
+        self, fake_project, caplog, mock_package_name, mocker
+    ):
         caplog.set_level(logging.DEBUG, logger="kedro")
+        from kedro.framework.project import LOGGING
 
-        mocker.patch("subprocess.check_output")
+        mock_logging = mocker.patch.object(LOGGING, "configure")
         session = KedroSession.create(mock_package_name, fake_project)
         session.close()
 
-        expected_log_messages = [
-            "No project logging configuration loaded; "
-            "Kedro's default logging configuration will be used."
-        ]
-        actual_log_messages = [
-            rec.getMessage()
-            for rec in caplog.records
-            if rec.name == SESSION_LOGGER_NAME and rec.levelno == logging.DEBUG
-        ]
-        assert actual_log_messages == expected_log_messages
+        mock_logging.assert_not_called()
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_default_store(
@@ -528,7 +520,6 @@ class TestKedroSession:
         """
         caplog.set_level(logging.DEBUG, logger="kedro")
 
-        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         mocker.patch("subprocess.check_output", side_effect=exception)
         session = KedroSession.create(mock_package_name, fake_project)
         assert "git" not in session.store
@@ -548,7 +539,6 @@ class TestKedroSession:
         caplog.set_level(logging.DEBUG, logger="kedro")
 
         mocker.patch("subprocess.check_output")
-        mocker.patch("kedro.framework.session.KedroSession._setup_logging")
         mocker.patch("getpass.getuser", side_effect=FakeException("getuser error"))
         session = KedroSession.create(mock_package_name, fake_project)
         assert "username" not in session.store

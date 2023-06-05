@@ -123,13 +123,13 @@ You will now create a repo on Databricks using the following steps:
 - Navigate to the `Repos` tab in the Databricks workspace UI and click `Add Repo`.
 - Keep the repo creation popup window open for the following steps.
 
-![Create a new Databricks repo](#../../meta/images/databricks_new_repo_popup.png)
+![Create a new Databricks repo](../../meta/images/databricks_new_repo_popup.png)
 
 2. **Specify your GitHub repo:**
 
 - In the `Git repository URL` field, enter your GitHub repository's URL. This will automatically populate the `Git provider` and `Repository name` fields also.
 
-![Specify GitHub repo details](#../../meta/images/databricks_specify_github_repo.png)
+![Specify GitHub repo details](../../meta/images/databricks_specify_github_repo.png)
 
 3. **Authenticate Databricks with GitHub:**
 
@@ -139,7 +139,7 @@ You will now create a repo on Databricks using the following steps:
 - In the `Token` field, enter your [GitHub personal access token](#create-a-github-personal-access-token).
 - Click the `Save` button to save your new Git credential.
 
-![Authenticate Databricks with GitHub](#../../meta/images/databricks_authenticate_repo.png)
+![Authenticate Databricks with GitHub](../../meta/images/databricks_authenticate_repo.png)
 
 4. **Finish the Repo creation process:**
 

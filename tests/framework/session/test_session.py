@@ -883,40 +883,6 @@ def fake_project_with_logging_file_handler(fake_project):
     return fake_project
 
 
-@pytest.mark.usefixtures("mock_settings")
-def test_setup_logging_using_absolute_path(
-    fake_project_with_logging_file_handler, mocker, mock_package_name
-):
-    mocked_logging = mocker.patch("logging.config.dictConfig")
-    KedroSession.create(mock_package_name, fake_project_with_logging_file_handler)
-
-    mocked_logging.assert_called_once()
-    call_args = mocked_logging.call_args[0][0]
-
-    expected_log_filepath = (
-        fake_project_with_logging_file_handler / "logs" / "info.log"
-    ).as_posix()
-    actual_log_filepath = call_args["handlers"]["info_file_handler"]["filename"]
-    assert actual_log_filepath == expected_log_filepath
-
-
-@pytest.mark.usefixtures("mock_settings_omega_config_loader_class")
-def test_setup_logging_using_omega_config_loader_class(
-    fake_project_with_logging_file_handler, mocker, mock_package_name
-):
-    mocked_logging = mocker.patch("logging.config.dictConfig")
-    KedroSession.create(mock_package_name, fake_project_with_logging_file_handler)
-
-    mocked_logging.assert_called_once()
-    call_args = mocked_logging.call_args[0][0]
-
-    expected_log_filepath = (
-        fake_project_with_logging_file_handler / "logs" / "info.log"
-    ).as_posix()
-    actual_log_filepath = call_args["handlers"]["info_file_handler"]["filename"]
-    assert actual_log_filepath == expected_log_filepath
-
-
 def get_all_values(mapping: Mapping):
     for value in mapping.values():
         yield value

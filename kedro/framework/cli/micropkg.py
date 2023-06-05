@@ -8,11 +8,12 @@ import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from typing import Iterable, List, Tuple, Union
+from typing import Any, Iterable, List, Tuple, Union
 
 import click
 from build.util import project_wheel_metadata
 from packaging.requirements import InvalidRequirement, Requirement
+from packaging.utils import canonicalize_name
 from rope.base.project import Project
 from rope.contrib import generate
 from rope.refactor.move import MoveModule
@@ -47,6 +48,53 @@ setup(
     install_requires={install_requires},
 )
 """
+
+
+class _EquivalentRequirement(Requirement):
+    # See https://github.com/pypa/packaging/issues/644#issuecomment-1567982812
+
+    @property
+    def canonical_name(self) -> str:
+        """Canonicalized name according to the rules of PEP 503."""
+        return canonicalize_name(self.name)
+
+    def _to_str(self, name: str) -> str:
+        parts: list[str] = [name]
+
+        if self.extras:
+            formatted_extras = ",".join(sorted(self.extras))
+            parts.append(f"[{formatted_extras}]")
+
+        if self.specifier:
+            parts.append(str(self.specifier))
+
+        if self.url:
+            parts.append(f"@ {self.url}")
+            if self.marker:
+                parts.append(" ")
+
+        if self.marker:
+            parts.append(f"; {self.marker}")
+
+        return "".join(parts)
+
+    def __str__(self) -> str:
+        return self._to_str(self.name)
+
+    def __hash__(self) -> int:
+        return hash((self.__class__.__name__, self._to_str(self.canonical_name)))
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, (Requirement, _EquivalentRequirement)):
+            return NotImplemented
+
+        return (
+            self.canonical_name == other.canonical_name
+            and self.extras == other.extras
+            and self.specifier == other.specifier
+            and self.url == other.url
+            and self.marker == other.marker
+        )
 
 
 def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
@@ -620,7 +668,7 @@ def _make_install_requires(requirements_txt: Path) -> list[str]:
     if not requirements_txt.exists():
         return []
     return [
-        str(Requirement(_drop_comment(requirement_line)))
+        str(_EquivalentRequirement(_drop_comment(requirement_line)))
         for requirement_line in requirements_txt.read_text().splitlines()
         if requirement_line and not requirement_line.startswith("#")
     ]
@@ -868,9 +916,6 @@ def _append_package_reqs(
     requirements_txt: Path, package_reqs: list[str], package_name: str
 ) -> None:
     """Appends micro-package requirements to project level requirements.txt"""
-    # NOTE: packaging.requirements.Requirement equality check
-    # does not normalize names, and as such is not equivalent to pkg_resources.Requirement,
-    # see https://github.com/pypa/packaging/issues/644#issuecomment-1567982812
     incoming_reqs = _safe_parse_requirements(package_reqs)
     if requirements_txt.is_file():
         existing_reqs = _safe_parse_requirements(requirements_txt.read_text())
@@ -909,13 +954,14 @@ def _get_all_library_reqs(metadata):
     # See https://discuss.python.org/t/\
     # programmatically-getting-non-optional-requirements-of-current-directory/26963/2
     return [
-        str(Requirement(dep_str)) for dep_str in metadata.get_all("Requires-Dist", [])
+        str(_EquivalentRequirement(dep_str))
+        for dep_str in metadata.get_all("Requires-Dist", [])
     ]
 
 
 def _safe_parse_requirements(
     requirements: str | Iterable[str],
-) -> set[Requirement]:
+) -> set[_EquivalentRequirement]:
     """Safely parse a requirement or set of requirements. This avoids blowing up when it
     encounters a requirement it cannot parse (e.g. `-r requirements.txt`). This way
     we can still extract all the parseable requirements out of a set containing some
@@ -933,7 +979,9 @@ def _safe_parse_requirements(
             and not requirement_line.startswith("-e")
         ):
             try:
-                parseable_requirements.add(Requirement(_drop_comment(requirement_line)))
+                parseable_requirements.add(
+                    _EquivalentRequirement(_drop_comment(requirement_line))
+                )
             except InvalidRequirement:
                 continue
     return parseable_requirements

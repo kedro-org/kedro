@@ -6,8 +6,11 @@ from .cached_dataset import CachedDataSet, CachedDataset
 from .core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
+    DataSetAlreadyExistsError,
     DatasetAlreadyExistsError,
+    DataSetError,
     DatasetError,
+    DataSetNotFoundError,
     DatasetNotFoundError,
     Version,
 )

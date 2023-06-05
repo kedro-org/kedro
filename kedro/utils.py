@@ -84,4 +84,6 @@ class DeprecatedClassMeta(type):
         )
 
     def __subclasscheck__(cls, subclass):
-        return subclass is cls or issubclass(subclass, getattr(cls, "_DeprecatedClassMeta__alias"))
+        return subclass is cls or issubclass(
+            subclass, getattr(cls, "_DeprecatedClassMeta__alias")
+        )

@@ -71,7 +71,7 @@ Make sure that `repo` scopes are enabled for your token.
 
 ### Create a GitHub repository
 
-Now you should [create a new repository in GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo) using the official guide. You can keep the repository private and you don't need to commit to it just yet.
+Now you should [create a new repository in GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo) using the official guide. Keep the repository private and don't commit to it yet. For consistency with the rest of this guide, name your GitHub repository `iris-databricks`.
 
 To connect to the newly created repository, use one of two options:
 
@@ -103,9 +103,9 @@ Finally, push the commit to GitHub:
 ```bash
 # configure a new remote
 # for HTTPS run:
-git remote add origin https://github.com/<username>/<repo-name>.git
+git remote add origin https://github.com/<username>/iris-databricks.git
 # or for SSH run:
-git remote add origin git@github.com:<username>/<repo-name>.git
+git remote add origin git@github.com:<username>/iris-databricks.git
 
 # verify the new remote URL
 git remote -v
@@ -116,27 +116,38 @@ git push --set-upstream origin main
 
 ### Create a repo on Databricks
 
-Create a new repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
+You will now create a repo on Databricks using the following steps:
 
-In this guide, you sync your project with a remote Git provider. Enter `iris-databricks` as the name of your new repository:
+1. **Create a new repo:**
 
-![Create a new repo on Databricks](../../meta/images/databricks_repo_creation.png)
+- Navigate to the `Repos` tab in the Databricks workspace UI and click `Add Repo`.
+- Keep the repo creation popup window open for the following steps.
 
-### Create a `conf/local` directory in your Databricks repo
+![Create a new Databricks repo](#../../meta/images/databricks_new_repo_popup.png)
 
-Kedro requires your project to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks repo, so you must create it manually.
+2. **Specify your GitHub repo:**
 
-Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> Folder` as in the image below:
+- In the `Git repository URL` field, enter your GitHub repository's URL. This will automatically populate the `Git provider` and `Repository name` fields also.
 
-![Create a conf folder in Databricks repo](../../meta/images/databricks_conf_folder_creation.png)
+![Specify GitHub repo details](#../../meta/images/databricks_specify_github_repo.png)
 
-Name the new folder `local`. In this guide, we have no local credentials to store and so we will leave the newly created folder empty. Your `conf/local` and `local` directories should now look like the following:
+3. **Authenticate Databricks with GitHub:**
 
-![Final conf folder](../../meta/images/final_conf_folder.png)
+- Click on the `Git credential` field.
+- In the `Git provider` field, select `GitHub` in the dropdown menu.
+- In the `Git provider username or email` field, enter the username or email address of your GitHub account.
+- In the `Token` field, enter your [GitHub personal access token](#create-a-github-personal-access-token).
+- Click the `Save` button to save your new Git credential.
+
+![Authenticate Databricks with GitHub](#../../meta/images/databricks_authenticate_repo.png)
+
+4. **Finish the Repo creation process:**
+
+- Click `Create Repo`. Your GitHub repository is cloned to Databricks and the popup window closes.
 
 ### Create a new Databricks notebook
 
-Now that your project is available on Databricks, you can run it on a cluster using a notebook.
+Now that your project is available in a Databricks Repo, you can run it on a cluster using a notebook.
 
 To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 

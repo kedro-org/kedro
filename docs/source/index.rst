@@ -43,6 +43,10 @@ Welcome to Kedro's documentation!
     :target: https://slack.kedro.org
     :alt: Kedro's Slack organisation
 
+.. image:: https://img.shields.io/badge/slack-archive-blue.svg?label=Kedro%20Slack%20
+    :target: https://www.linen.dev/s/kedro
+    :alt: Kedro's Slack archive
+
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black
     :alt: Code style is Black
@@ -125,7 +129,7 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
 
-   integrations/index.md
+   integrations/pyspark_integration.md
 
 .. toctree::
    :maxdepth: 2

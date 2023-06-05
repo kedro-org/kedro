@@ -167,16 +167,8 @@ def _pull_package(
         # see https://packaging.python.org/en/latest/specifications/core-metadata/#name
         # The proper way to get it would be
         # project_name = library_meta.get("Name")
-        # However, the rest of the code somehow mixes package name with project name
-        # and expects the non-normalized version, so we have to find it.
-        # In a pre-pyproject.toml world we could just parse setup.py,
-        # but now things are more complicated.
-        # kedro stores the package name in pyproject.toml,
-        # but micropackages are not kedro projects.
-        # Since micropackaging has a runtime dependency on setuptools already,
-        # we will assume flat (non-src) layout,
-        # which is what `kedro micropkg package` produces,
-        # and use setuptools utilities to save some complexity.
+        # However, the rest of the code expects the non-normalized package name,
+        # so we have to find it.
         packages = [
             package
             for package in FlatLayoutPackageFinder().find(project_root_dir)
@@ -913,9 +905,9 @@ def _append_package_reqs(
 
 
 def _get_all_library_reqs(metadata):
-    # Inspired by https://discuss.python.org/t/\
+    """Get all library requirements from metadata, leaving markers intact."""
+    # See https://discuss.python.org/t/\
     # programmatically-getting-non-optional-requirements-of-current-directory/26963/2
-    # but leaving markers intact
     return [
         str(Requirement(dep_str)) for dep_str in metadata.get_all("Requires-Dist", [])
     ]

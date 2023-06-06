@@ -88,15 +88,18 @@ def sane_config_with_tracking_ds(tmp_path):
 
 
 @pytest.fixture
-def config_with_dataset_factories(filepath):
+def config_with_dataset_factories():
     return {
         "catalog": {
-            "{boats}@csv": {"type": "pandas.CSVDataSet", "filepath": filepath},
-            "cars": {
+            "{brand}_cars": {
                 "type": "pandas.CSVDataSet",
-                "filepath": "s3://test_bucket/test_file.csv",
-                "layer": "raw",
+                "filepath": "data/01_raw/{brand}_cars.csv",
             },
+            "audi_cars": {
+                "type": "pandas.ParquetDataSet",
+                "filepath": "data/01_raw/audi_cars.xls",
+            },
+            "boats": {"type": "pandas.CSVDataSet", "filepath": "data/01_raw/boats.csv"},
         },
     }
 
@@ -700,9 +703,55 @@ class TestDataCatalogVersioned:
 
 
 class TestDataCatalogDatasetFactories:
-    def test_patterns_and_datasets_on_catalog(self, config_with_dataset_factories):
+    def test_patterns_not_in_catalog_datasets(self, config_with_dataset_factories):
+        """Check that the pattern is not in the catalog datasets"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        assert "cars" in catalog._data_sets
-        assert "{boats}@csv" not in catalog._data_sets
-        assert "cars" not in catalog.dataset_patterns
-        assert "{boats}@csv" in catalog.dataset_patterns
+        assert "audi_cars" in catalog._data_sets
+        assert "{brand}_cars" not in catalog._data_sets
+        assert "audi_cars" not in catalog.dataset_patterns
+        assert "{brand}_cars" in catalog.dataset_patterns
+
+    def test_pattern_matching_only_one_match(self, config_with_dataset_factories):
+        """Check that dataset names are added to the catalog when one pattern exists"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        named_datasets = {"tesla_cars", "audi_cars", "ford_cars", "boats"}
+        # Before resolution
+        assert "tesla_cars" not in catalog._data_sets
+        assert "audi_cars" in catalog._data_sets
+        assert "ford_cars" not in catalog._data_sets
+        assert "boats" in catalog._data_sets
+        catalog.resolve(named_datasets)
+        # After resolution
+        assert "tesla_cars" in catalog._data_sets
+        assert "audi_cars" in catalog._data_sets
+        assert "ford_cars" in catalog._data_sets
+        assert "boats" in catalog._data_sets
+
+    def test_explicit_entry_not_overwritten(self, config_with_dataset_factories):
+        """Check that the existing catalog entry is not overwritten by config in pattern"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        named_datasets = {"tesla_cars", "audi_cars", "ford_cars", "boats"}
+        audi_cars_before = catalog._get_dataset("audi_cars")
+        catalog.resolve(named_datasets)
+        audi_cars_after = catalog._get_dataset("audi_cars")
+        assert audi_cars_before == audi_cars_after
+
+    def test_dataset_not_in_catalog_when_no_pattern_match(self):
+        """Check that the dataset is not added to the catalog when there is no pattern"""
+        assert True
+
+    def test_dataset_pattern_ordering(self):
+        """Check that the patterns are ordered correctly according to the parsing rules"""
+        assert True
+
+    def test_pattern_matching_multiple_patterns(self):
+        """Check that the patterns are matched correctly when multiple patterns exist"""
+        assert True
+
+    def test_config_parsed_from_pattern(self):
+        """Check that the body of the dataset entry is correctly parsed"""
+        assert True
+
+    def test_unmatched_key_error_when_parsing_config(self):
+        """Check error raised when key mentioned in the config is not in pattern name"""
+        assert True

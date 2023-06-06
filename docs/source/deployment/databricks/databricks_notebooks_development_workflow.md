@@ -39,6 +39,13 @@ Once it is created, activate it:
 conda activate iris-databricks
 ```
 
+With your Conda environment activated, install Kedro:
+
+```bash
+pip install kedro
+```
+
+
 ### Create a new Kedro project
 
 Create a Kedro project with the `databricks-iris` starter using the following command in your local environment:
@@ -57,8 +64,8 @@ The main steps are:
 
 - Verify your email and navigate to "Settings" under your profile photo.
 - Select "Developer settings" then "Fine-grained tokens" and click on "Generate new token".
-- Input a name for your token, choose an expiration time, select repository access, and define the token permissions.
-- Finish by clicking "Generate token".
+- Select a name and expiration time for your token, choose an expiration time.
+- Select which repositories your token will allow access to and define the token permissions.
 
 ```{note}
 Make sure that `repo` scopes are enabled for your token.
@@ -191,7 +198,7 @@ After these cells have successfully run, you should comment the code inside them
 
 ```ipython
 #dbutils.fs.cp(
-#    "file:///Workspace/Repos/jannic_holzer@mckinsey.com/iris-databricks/data",
+#    "file:///Workspace/Repos/<databricks_username>/iris-databricks/data",
 #    "dbfs:/FileStore/iris-databricks/data",
 #    recurse=True,
 #)
@@ -254,7 +261,7 @@ You should see logging output while the cell is running. After execution finishe
 
 ## Modify your project and test the changes
 
-Now that your project has run successfully once, you can make changes using the Databricks UI. In this section, you will modify the project to use a different ratio of training data to test data and check the effect of this change on Databricks.
+Now that your project has run successfully once, you can make changes using the Databricks UI. In this section, you will modify the project to use a different ratio of training data to test data and check the effect of this change.
 
 ### Modify the training / test split ratio
 

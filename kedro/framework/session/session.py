@@ -414,8 +414,9 @@ class KedroSession:
             load_versions=load_versions,
         )
 
+        # Get a set of all datasets used by the pipeline
         named_datasets = filtered_pipeline.data_sets()
-
+        # Resolve the datasets against patterns in the catalog
         catalog.resolve(named_datasets)
 
         # Run the runner

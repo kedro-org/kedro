@@ -52,10 +52,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     mentioned = "Datasets mentioned in pipeline"
 
     session = _create_session(metadata.package_name, env=env)
-    context = session.load_context()
-    datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
-    catalog_ds = set(context.catalog.list())
-
+    loaded_catalog = session.load_context().catalog
     target_pipelines = pipeline or pipelines.keys()
 
     result = {}
@@ -63,12 +60,14 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         pl_obj = pipelines.get(pipe)
         if pl_obj:
             pipeline_ds = pl_obj.data_sets()
+            loaded_catalog.resolve(pipeline_ds)
         else:
             existing_pls = ", ".join(sorted(pipelines.keys()))
             raise KedroCliError(
                 f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
             )
-
+        catalog_ds = set(loaded_catalog.list())
+        datasets_meta = loaded_catalog._data_sets  # pylint: disable=protected-access
         unused_ds = catalog_ds - pipeline_ds
         default_ds = pipeline_ds - catalog_ds
         used_ds = catalog_ds - unused_ds

@@ -77,11 +77,6 @@ Make sure that `repo` scopes are enabled for your token.
 
 ### Push your Kedro project to the GitHub repository
 
-To connect to the newly created repository from your local environment, use one of two options:
-
-- **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key configured for GitHub](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys)
-- **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit. Use your GitHub username and your [personal access token](#create-a-github-personal-access-token) generated in the previous step as the password, [do _not_ use your original GitHub password](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api#authenticating-with-username-and-password).
-
 At the command line, initialise Git in your project root directory:
 
 ```bash
@@ -100,7 +95,12 @@ git add .
 git commit -m "first commit"
 ```
 
-Finally, push the commit to GitHub:
+To connect to your GitHub repository from your local environment, use one of two options:
+
+- **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key configured for GitHub](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys)
+- **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit. Use your GitHub username and your [personal access token](#create-a-github-personal-access-token) generated in the previous step as the password, [do _not_ use your original GitHub password](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api#authenticating-with-username-and-password).
+
+With one of these two options chosen, run the following commands:
 
 ```bash
 # configure a new remote

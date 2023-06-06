@@ -22,12 +22,13 @@ This tutorial introduces a project development workflow for Kedro projects using
 - Python >= 3.7 installed.
 - Git installed.
 - A [GitHub](https://github.com/) account.
+- A Python environment management system installed, [venv](https://docs.python.org/3/library/venv.html), [virtualenv](https://virtualenv.pypa.io/en/latest/) or [Conda](https://docs.conda.io/en/latest/) are popular choices.
 
 ## Set up your project
 
 ### Install Kedro in a new virtual environment
 
-In your local development environment, create a virtual environment for this tutorial. Any environment management system can be used, though the following commands use [Conda](https://docs.conda.io/en/latest/):
+In your local development environment, create a virtual environment for this tutorial. Any environment management system can be used, though the following commands use Conda:
 
 ```bash
 conda create --name iris-databricks python=3.10
@@ -45,7 +46,6 @@ With your Conda environment activated, install Kedro:
 pip install kedro
 ```
 
-
 ### Create a new Kedro project
 
 Create a Kedro project with the `databricks-iris` starter using the following command in your local environment:
@@ -55,6 +55,10 @@ kedro new --starter=databricks-iris
 ```
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
+
+### Create a GitHub repository
+
+Now you should [create a new repository in GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo) using the official guide. Keep the repository private and don't commit to it yet. For consistency with the rest of this guide, name your GitHub repository `iris-databricks`.
 
 ### Create a GitHub personal access token
 
@@ -71,16 +75,12 @@ The main steps are:
 Make sure that `repo` scopes are enabled for your token.
 ```
 
-### Create a GitHub repository
+### Push your Kedro project to the GitHub repository
 
-Now you should [create a new repository in GitHub](https://docs.github.com/en/github/getting-started-with-github/create-a-repo) using the official guide. Keep the repository private and don't commit to it yet. For consistency with the rest of this guide, name your GitHub repository `iris-databricks`.
-
-To connect to the newly created repository, use one of two options:
+To connect to the newly created repository from your local environment, use one of two options:
 
 - **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key configured for GitHub](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys)
 - **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit. Use your GitHub username and your [personal access token](#create-a-github-personal-access-token) generated in the previous step as the password, [do _not_ use your original GitHub password](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api#authenticating-with-username-and-password).
-
-### Push your Kedro project to the GitHub repository
 
 At the command line, initialise Git in your project root directory:
 

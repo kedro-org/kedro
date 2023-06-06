@@ -6,7 +6,7 @@ Databricks jobs are a way to execute code on Databricks clusters, allowing you t
 
 By packaging your Kedro project and running it on Databricks, you can execute your pipeline without the need for a notebook. This approach is particularly well-suited for production, as it provides a structured and reproducible way to run your code. However, it is not ideal for development, where rapid iteration is necessary. For guidance on developing a Kedro project for Databricks in a rapid build-test loop, see the [development workflow guide](./databricks_development_workflow.md).
 
-Running your packaged project as a Databricks job is very different to running it from a notebook. In particular, it does **not** allow you to see the log output of your project as you may be used to seeing it when running Kedro from a command line or notebook.
+Running your packaged project as a Databricks job is very different to running it from a notebook. Running a Kedro project on a job cluster is significantly slower than running it as a notebook on a cluster that has already been started, as the job cluster has to be provisioned and started for each run. In addition, there is no way to change your project's code once it has been packaged. Instead, you must create a new package after making any changes.
 
 Here are some typical use cases for running a packaged Kedro project as a Databricks job:
 
@@ -140,18 +140,6 @@ Because you are no longer using the default entry-point for Kedro, you will not 
 - `--conf-source`: specifies the location of the `conf/` directory to use with your Kedro project.
 ```
 
-### Plan your project's output
-
-You will not be able to directly see your project's log output when it is run as a Databricks job. You will need to decide on and implement a strategy for storing your project's results. Some examples are:
-
-- Write the result of a data engineering pipeline to a managed delta table.
-- Upload metrics from a machine learning model to MLflow.
-- Save a dataset as a CSV file in DBFS.
-
-In this guide, your project will save its logs to a location in DBFS (`/dbfs/FileStore/iris-databricks/info.log`).
-
-**The `databricks-iris` starter is already configured to save logs in this location.** The configuration used to achieve this can be found in the `conf/base/logging.yml` file.
-
 ### Package your project
 
 To package your Kedro project for deployment on Databricks, you must create a Wheel (`.whl`) file, which is a binary distribution of your project. In the root directory of your Kedro project, run the following command:
@@ -204,7 +192,7 @@ You should see the contents of the project's `data/` directory printed to your t
 
 To run your packaged project on Databricks, login to your Databricks account and perform the following steps in the workspace:
 
-1. **Create a new job**: In the Databricks workspace, navigate to the `Worfklows` tab and click `Create Job` **or** click the `New` button, then `Job`:
+1. **Create a new job**: In the Databricks workspace, navigate to the `Workflows` tab and click `Create Job` **or** click the `New` button, then `Job`:
 
 ![Create Databricks job](../../meta/images/databricks_create_new_job.png)
 
@@ -262,20 +250,13 @@ The following things happen when you run your job:
 
 A run will take roughly six to seven minutes.
 
-When the status of your run is `Succeeded`, your job has successfully finished executing. You can now view the logs that your project produced while it was running. To retrieve the log file from the [location in DBFS where it was saved](#plan-your-projects-output), use the following `databricks CLI` command at your local command line with the `iris-databricks` conda environment activated:
-
-```bash
-databricks fs cp dbfs:/FileStore/iris-databricks/info.log .
-```
-
-This will download the log file from DBFS to your local environment. You can view the contents of the `info.log` file in any text editor, they will look similar to the following:
+When the status of your run is `Succeeded`, your job has successfully finished executing. You can view the logging output created by the run by clicking on the link with the text `Go to the latest successful run` to take you to the `main run` view. You should see logs similar to the following:
 
 ```bash
 ...
-2023-05-19 14:38:06,333 - kedro.io.data_catalog - INFO - Loading data from 'example_iris_data' (SparkDataSet)...
-2023-05-19 14:38:12,077 - kedro.io.data_catalog - INFO - Loading data from 'parameters' (MemoryDataSet)...
-2023-05-19 14:38:12,079 - kedro.pipeline.node - INFO - Running node: split: split_data([example_iris_data,parameters]) -> [X_train@pyspark,X_test@pyspark,y_train@pyspark,y_test@pyspark]
-...
+2023-06-06 12:56:14,399 - iris_databricks.nodes - INFO - Model has an accuracy of 0.972 on test data.
+2023-06-06 12:56:14,403 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
+2023-06-06 12:56:14,404 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
 By following these steps, you packaged your Kedro project and manually ran it as a job on Databricks using the workspace UI.

@@ -1,20 +1,20 @@
 """Behave step definitions for the cli_scenarios feature."""
 
 import json
+from pathlib import Path
 import shutil
 import textwrap
-from pathlib import Path
 from time import time
 
 import behave
+from behave import given, then, when
 import requests
 import toml
 import yaml
-from behave import given, then, when
 
-import kedro
 from features.steps import util
 from features.steps.sh_run import ChildTerminatingPopen, check_run, run
+import kedro
 
 OK_EXIT_CODE = 0
 
@@ -455,14 +455,12 @@ def check_created_project_structure(context):
 @then("the logs should show that {number} nodes were run")
 def check_one_node_run(context, number):
     expected_log_line = f"Completed {number} out of {number} tasks"
-    info_log = context.root_project_dir / "logs" / "info.log"
     assert expected_log_line in context.result.stdout
 
 
 @then('the logs should show that "{node}" was run')
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
-    info_log = context.root_project_dir / "logs" / "info.log"
     stdout = context.result.stdout
     assert expected_log_line in stdout, (
         "Expected the following message segment to be printed on stdout: "

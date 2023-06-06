@@ -254,7 +254,7 @@ You should see logging output while the cell is running. After execution finishe
 
 ```bash
 ...
-2023-06-06 12:55:22,705 - iris_databricks.nodes - INFO - Model has an accuracy of 0.972 on test data.
+2023-06-06 12:55:22,705 - iris_databricks.nodes - INFO - Model has an accuracy of 0.953 on test data.
 2023-06-06 12:55:22,709 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
 2023-06-06 12:55:22,709 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```

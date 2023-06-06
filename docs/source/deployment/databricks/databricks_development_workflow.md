@@ -14,7 +14,7 @@ This tutorial introduces a project development workflow on Databricks, using you
 
 - [Create a virtual environment and install and configure dbx.](#install-kedro-and-dbx-in-a-new-virtual-environment)
 - [Create a new Kedro project using the `databricks-iris` starter.](#create-a-new-kedro-project)
-- [Create a repo on Databricks and sync your project using dbx.](#create-a-repo-on-databricks)
+- [Create a Repo on Databricks and sync your project using dbx.](#create-a-repo-on-databricks)
 - [Upload project data to a location accessible by Kedro when run on Databricks (such as DBFS).](#upload-project-data-to-dbfs)
 - [Create a Databricks notebook to run your project.](#create-a-new-databricks-notebook)
 - [Modify your project in your local environment and test the changes on Databricks in an iterative loop.](#modify-your-project-and-test-the-changes)
@@ -71,7 +71,7 @@ pip install kedro dbx --upgrade
 4. Run `databricks fs ls dbfs:/` at the command line to verify your authentication.
 
 ```{note}
-dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
+dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks Repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
 ```
 
 ### Create a new Kedro project
@@ -84,17 +84,17 @@ kedro new --starter=databricks-iris
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
 
-### Create a repo on Databricks
+### Create a Repo on Databricks
 
-Create a new repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
+Create a new Repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
 
 In this guide, you will not sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
 
-![Create a new repo on Databricks](../../meta/images/databricks_repo_creation.png)
+![Create a new Repo on Databricks](../../meta/images/databricks_repo_creation.png)
 
-### Sync code with your Databricks repo using dbx
+### Sync code with your Databricks Repo using dbx
 
-The next step is to use dbx to sync your project to your repo.
+The next step is to use dbx to sync your project to your Repo.
 
 **Open a new terminal instance**, activate your conda environment, and navigate to your project directory and start `dbx sync`:
 
@@ -104,7 +104,7 @@ cd <project_root>
 dbx sync repo --dest-repo iris-databricks --source .
 ```
 
-This command will sync your local directory (`--source .`) with your repo (`--dest-repo iris-databricks`) on Databricks. When started for the first time, `dbx sync` will write output similar to the following to your terminal:
+This command will sync your local directory (`--source .`) with your Repo (`--dest-repo iris-databricks`) on Databricks. When started for the first time, `dbx sync` will write output similar to the following to your terminal:
 
 ```bash
 ...
@@ -116,19 +116,19 @@ This command will sync your local directory (`--source .`) with your repo (`--de
 
 **Keep the second terminal (running dbx sync) alive during development; closing it stops syncing new changes.**
 
-`dbx sync` will automatically sync any further changes made in your local project directory with your Databricks repo while it runs.
+`dbx sync` will automatically sync any further changes made in your local project directory with your Databricks Repo while it runs.
 
 ```{note}
 Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing, not in the editor that Databricks Repos provides.
 ```
 
-### Create a `conf/local` directory in your Databricks repo
+### Create a `conf/local` directory in your Databricks Repo
 
-Kedro requires your project to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks repo, so you must create it manually.
+Kedro requires your project to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks Repo, so you must create it manually.
 
 Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> Folder` as in the image below:
 
-![Create a conf folder in Databricks repo](../../meta/images/databricks_conf_folder_creation.png)
+![Create a conf folder in Databricks Repo](../../meta/images/databricks_conf_folder_creation.png)
 
 Name the new folder `local`. In this guide, we have no local credentials to store and so we will leave the newly created folder empty. Your `conf/local` and `local` directories should now look like the following:
 
@@ -169,7 +169,7 @@ You should see the contents of the project's `data/` directory printed to your t
 
 Now that your project is available on Databricks, you can run it on a cluster using a notebook.
 
-To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
+To run the Python code from your Databricks Repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 
 ![Create a new notebook on Databricks](../../meta/images/databricks_notebook_creation.png)
 
@@ -228,9 +228,9 @@ Now that your project has run successfully once, you can make changes using the 
 
 ### Modify the training / test split ratio
 
-The `databricks-iris` starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by editing your project in your local environment, then sync it with the Databricks repo using `dbx`, and then run the modified project on Databricks to observe the different result.
+The `databricks-iris` starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by editing your project in your local environment, then sync it with the Databricks Repo using `dbx`, and then run the modified project on Databricks to observe the different result.
 
-Open the file `<project_root>/conf/base/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks repo:
+Open the file `<project_root>/conf/base/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks Repo:
 
 ```bash
 ...

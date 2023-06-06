@@ -235,7 +235,7 @@ After completing these steps, your notebook should match the following image:
 
 ![Databricks completed notebook](../../meta/images/databricks_notebooks_workflow_finished_notebook.png)
 
-Run the completed notebook using the `Run All` bottom in the top right of the UI:
+Run the completed notebook using the `Run All` button in the top right of the UI:
 
 ![Databricks notebook run all](../../meta/images/databricks_run_all.png)
 
@@ -247,10 +247,9 @@ You should see logging output while the cell is running. After execution finishe
 
 ```bash
 ...
-[08/09/22 11:23:30] INFO     Model has accuracy of 0.960 on test data.                                        nodes.py:74
-                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
-                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
-                    INFO     Pipeline execution completed successfully.                                      runner.py:89
+2023-06-06 12:55:22,705 - iris_databricks.nodes - INFO - Model has an accuracy of 0.972 on test data.
+2023-06-06 12:55:22,709 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
+2023-06-06 12:55:22,709 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
 ## Modify your project and test the changes
@@ -271,10 +270,9 @@ Return to your Databricks notebook. Re-run the third and fourth cells in your no
 
 ```bash
 ...
-[08/09/22 11:23:30] INFO     Model has accuracy of 0.953 on test data.                                        nodes.py:74
-                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
-                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
-                    INFO     Pipeline execution completed successfully.                                      runner.py:89
+2023-06-06 12:56:14,399 - iris_databricks.nodes - INFO - Model has an accuracy of 0.972 on test data.
+2023-06-06 12:56:14,403 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
+2023-06-06 12:56:14,404 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
 You can see that your model's accuracy has changed now that you are using a different classifier to produce the result.

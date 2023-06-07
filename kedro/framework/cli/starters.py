@@ -3,6 +3,8 @@
 This module implements commands available from the kedro CLI for creating
 projects.
 """
+from __future__ import annotations
+
 import os
 import re
 import shutil
@@ -11,7 +13,7 @@ import tempfile
 from collections import OrderedDict
 from itertools import groupby
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable
 
 import click
 import yaml
@@ -49,8 +51,8 @@ class KedroStarterSpec:  # pylint: disable=too-few-public-methods
 
     alias: str
     template_path: str
-    directory: Optional[str] = None
-    origin: Optional[str] = field(init=False)
+    directory: str | None = None
+    origin: str | None = field(init=False)
 
 
 _OFFICIAL_STARTER_SPECS = [
@@ -90,7 +92,7 @@ DIRECTORY_ARG_HELP = (
 
 
 # pylint: disable=unused-argument
-def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no cover
+def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
     """Remove readonly files on Windows
     See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
     """
@@ -98,7 +100,7 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     func(path)
 
 
-def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
+def _get_starters_dict() -> dict[str, KedroStarterSpec]:
     """This function lists all the starter aliases declared in
     the core repo and in plugins entry points.
 
@@ -145,10 +147,10 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
 
 
 def _starter_spec_to_dict(
-    starter_specs: Dict[str, KedroStarterSpec]
-) -> Dict[str, Dict[str, str]]:
+    starter_specs: dict[str, KedroStarterSpec]
+) -> dict[str, dict[str, str]]:
     """Convert a dictionary of starters spec to a nicely formatted dictionary"""
-    format_dict: Dict[str, Dict[str, str]] = {}
+    format_dict: dict[str, dict[str, str]] = {}
     for alias, spec in starter_specs.items():
         format_dict[alias] = {}  # Each dictionary represent 1 starter
         format_dict[alias]["template_path"] = spec.template_path
@@ -244,7 +246,7 @@ def list_starters():
     starters_dict = _get_starters_dict()
 
     # Group all specs by origin as nested dict and sort it.
-    sorted_starters_dict: Dict[str, Dict[str, KedroStarterSpec]] = {
+    sorted_starters_dict: dict[str, dict[str, KedroStarterSpec]] = {
         origin: dict(sorted(starters_dict_by_origin))
         for origin, starters_dict_by_origin in groupby(
             starters_dict.items(), lambda item: item[1].origin
@@ -263,7 +265,7 @@ def list_starters():
         )
 
 
-def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
+def _fetch_config_from_file(config_path: str) -> dict[str, str]:
     """Obtains configuration for a new kedro project non-interactively from a file.
 
     Args:
@@ -294,10 +296,10 @@ def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
 
 
 def _make_cookiecutter_args(
-    config: Dict[str, str],
+    config: dict[str, str],
     checkout: str,
     directory: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Creates a dictionary of arguments to pass to cookiecutter.
 
     Args:
@@ -330,7 +332,7 @@ def _make_cookiecutter_args(
     return cookiecutter_args
 
 
-def _create_project(template_path: str, cookiecutter_args: Dict[str, Any]):
+def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
     Args:
@@ -416,7 +418,7 @@ def _get_cookiecutter_dir(
     return Path(cookiecutter_dir)
 
 
-def _get_prompts_required(cookiecutter_dir: Path) -> Optional[Dict[str, Any]]:
+def _get_prompts_required(cookiecutter_dir: Path) -> dict[str, Any] | None:
     """Finds the information a user must supply according to prompts.yml."""
     prompts_yml = cookiecutter_dir / "prompts.yml"
     if not prompts_yml.is_file():
@@ -432,8 +434,8 @@ def _get_prompts_required(cookiecutter_dir: Path) -> Optional[Dict[str, Any]]:
 
 
 def _fetch_config_from_user_prompts(
-    prompts: Dict[str, Any], cookiecutter_context: OrderedDict
-) -> Dict[str, str]:
+    prompts: dict[str, Any], cookiecutter_context: OrderedDict
+) -> dict[str, str]:
     """Interactively obtains information from user prompts.
 
     Args:
@@ -448,7 +450,7 @@ def _fetch_config_from_user_prompts(
     from cookiecutter.environment import StrictEnvironment
     from cookiecutter.prompt import read_user_variable, render_variable
 
-    config: Dict[str, str] = {}
+    config: dict[str, str] = {}
 
     for variable_name, prompt_dict in prompts.items():
         prompt = _Prompt(**prompt_dict)
@@ -507,7 +509,7 @@ class _Prompt:
             raise ValueError(message, self.error_message)
 
 
-def _get_available_tags(template_path: str) -> List:
+def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
     # pylint: disable=import-outside-toplevel
     import git
@@ -527,7 +529,7 @@ def _get_available_tags(template_path: str) -> List:
     return sorted(unique_tags)
 
 
-def _validate_config_file(config: Dict[str, str], prompts: Dict[str, Any]):
+def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
     """Checks that the configuration file contains all needed variables.
 
     Args:

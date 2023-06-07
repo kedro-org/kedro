@@ -113,7 +113,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.18.8
+v0.18.9
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -350,7 +350,7 @@ A parameterised run is best used for dynamic parameters, i.e. running the same p
 
 ### Deploy the project
 
-The following packages your application as one `.egg` file  and one `.whl` file within the `dist/` folder of your project. It packages the project configuration separately in a `tar.gz` file:
+The following packages your application as one `.whl` file within the `dist/` folder of your project. It packages the project configuration separately in a `tar.gz` file:
 
 ```bash
 kedro package

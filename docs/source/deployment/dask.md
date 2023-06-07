@@ -1,4 +1,4 @@
-# Deployment to a Dask cluster
+# Dask
 
 This page explains how to distribute execution of the nodes composing your Kedro pipeline using [Dask](https://docs.dask.org/en/stable/), a flexible, open-source library for parallel computing in Python.
 

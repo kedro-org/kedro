@@ -161,7 +161,7 @@ def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> N
                 old_dict[key] = value
 
 
-def _expand_full_path(project_path: Union[str, Path]) -> Path:
+def _expand_full_path(project_path: str | Path) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
@@ -175,7 +175,7 @@ class KedroContext:
     project_path: Path = field(converter=_expand_full_path)
     config_loader: ConfigLoader
     _hook_manager: PluginManager
-    env: str = None
+    env: str | None = None
     _extra_params: dict[str, Any] = field(default=None, converter=deepcopy)
 
     """Create a context object by providing the root of a Kedro project and

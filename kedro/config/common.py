@@ -1,12 +1,11 @@
 """This module contains methods and facade interfaces for various ConfigLoader
 implementations.
 """
-from __future__ import annotations
 
 import logging
 from glob import iglob
 from pathlib import Path
-from typing import AbstractSet, Any, Iterable
+from typing import AbstractSet, Any, Dict, Iterable, List, Set
 from warnings import warn
 
 from yaml.parser import ParserError
@@ -29,8 +28,8 @@ def _get_config_from_patterns(
     conf_paths: Iterable[str],
     patterns: Iterable[str] = None,
     ac_template: bool = False,
-    ac_context: dict[str, Any] = None,
-) -> dict[str, Any]:
+    ac_context: Dict[str, Any] = None,
+) -> Dict[str, Any]:
     """Recursively scan for configuration files, load and merge them, and
     return them in the form of a config dictionary.
 
@@ -65,8 +64,8 @@ def _get_config_from_patterns(
             "pattern to match config filenames against."
         )
 
-    config: dict[str, Any] = {}
-    processed_files: set[Path] = set()
+    config: Dict[str, Any] = {}
+    processed_files: Set[Path] = set()
 
     for conf_path in conf_paths:
         if not Path(conf_path).is_dir():
@@ -105,8 +104,8 @@ def _get_config_from_patterns(
 
 
 def _load_config_file(
-    config_file: Path, ac_template: bool = False, ac_context: dict[str, Any] = None
-) -> dict[str, Any]:
+    config_file: Path, ac_template: bool = False, ac_context: Dict[str, Any] = None
+) -> Dict[str, Any]:
     """Load an individual config file using `anyconfig` as a backend.
 
     Args:
@@ -154,8 +153,8 @@ def _load_config_file(
 
 
 def _load_configs(
-    config_filepaths: list[Path], ac_template: bool, ac_context: dict[str, Any] = None
-) -> dict[str, Any]:
+    config_filepaths: List[Path], ac_template: bool, ac_context: Dict[str, Any] = None
+) -> Dict[str, Any]:
     """Recursively load all configuration files, which satisfy
     a given list of glob patterns from a specific path.
 
@@ -178,7 +177,7 @@ def _load_configs(
     """
 
     aggregate_config = {}
-    seen_file_to_keys: dict[Path, AbstractSet[str]] = {}
+    seen_file_to_keys: Dict[Path, AbstractSet[str]] = {}
 
     for config_filepath in config_filepaths:
         single_config = _load_config_file(
@@ -194,9 +193,9 @@ def _load_configs(
 def _lookup_config_filepaths(
     conf_path: Path,
     patterns: Iterable[str],
-    processed_files: set[Path],
+    processed_files: Set[Path],
     logger: Any,
-) -> list[Path]:
+) -> List[Path]:
     config_files = _path_lookup(conf_path, patterns)
 
     seen_files = config_files & processed_files
@@ -212,7 +211,7 @@ def _lookup_config_filepaths(
 
 def _remove_duplicates(items: Iterable[str]):
     """Remove duplicates while preserving the order."""
-    unique_items: list[str] = []
+    unique_items: List[str] = []
     for item in items:
         if item not in unique_items:
             unique_items.append(item)
@@ -225,7 +224,7 @@ def _remove_duplicates(items: Iterable[str]):
 
 
 def _check_duplicate_keys(
-    processed_files: dict[Path, AbstractSet[str]], filepath: Path, conf: dict[str, Any]
+    processed_files: Dict[Path, AbstractSet[str]], filepath: Path, conf: Dict[str, Any]
 ) -> None:
     duplicates = []
 
@@ -243,7 +242,7 @@ def _check_duplicate_keys(
         raise ValueError(f"Duplicate keys found in {filepath} and:\n- {dup_str}")
 
 
-def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> set[Path]:
+def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> Set[Path]:
     """Return a set of all configuration files from ``conf_path`` or
     its subdirectories, which satisfy a given list of glob patterns.
 

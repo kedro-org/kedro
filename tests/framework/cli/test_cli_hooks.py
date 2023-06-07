@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 import logging
 from collections import namedtuple
+from typing import List
 
 import pytest
 from click.testing import CliRunner
@@ -44,7 +43,7 @@ class FakeEntryPoint:
             def before_command_run(
                 self,
                 project_metadata: ProjectMetadata,
-                command_args: list[str],
+                command_args: List[str],
             ):
                 print(
                     f"Before command `{' '.join(command_args)}` run for project {project_metadata}"
@@ -54,7 +53,7 @@ class FakeEntryPoint:
             def after_command_run(
                 self,
                 project_metadata: ProjectMetadata,
-                command_args: list[str],
+                command_args: List[str],
                 exit_code: int,
             ):
                 print(

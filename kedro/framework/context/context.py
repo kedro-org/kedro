@@ -1,14 +1,14 @@
 """This module provides context for Kedro project."""
-from __future__ import annotations
 
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any
+from typing import Any, Dict, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
 from attrs import field, frozen
+from omegaconf import DictConfig
 from pluggy import PluginManager
 
 from kedro.config import ConfigLoader, MissingConfigException
@@ -53,8 +53,8 @@ def _is_relative_path(path_string: str) -> bool:
 
 
 def _convert_paths_to_absolute_posix(
-    project_path: Path, conf_dictionary: dict[str, Any]
-) -> dict[str, Any]:
+    project_path: Path, conf_dictionary: Dict[str, Any]
+) -> Dict[str, Any]:
     """Turn all relative paths inside ``conf_dictionary`` into absolute paths by appending them
     to ``project_path`` and convert absolute Windows paths to POSIX format. This is a hack to
     make sure that we don't have to change user's working directory for logging and datasets to
@@ -93,6 +93,7 @@ def _convert_paths_to_absolute_posix(
     conf_keys_with_filepath = ("filename", "filepath", "path")
 
     for conf_key, conf_value in conf_dictionary.items():
+
         # if the conf_value is another dictionary, absolutify its paths first.
         if isinstance(conf_value, dict):
             conf_dictionary[conf_key] = _convert_paths_to_absolute_posix(
@@ -143,7 +144,7 @@ def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
         )
 
 
-def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
+def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> None:
     """Update a nested dict with values of new_dict.
 
     Args:
@@ -155,13 +156,15 @@ def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> N
         if key not in old_dict:
             old_dict[key] = value
         else:
-            if isinstance(old_dict[key], dict) and isinstance(value, dict):
+            if isinstance(old_dict[key], (dict, DictConfig)) and isinstance(
+                value, (dict, DictConfig)
+            ):
                 _update_nested_dict(old_dict[key], value)
             else:
                 old_dict[key] = value
 
 
-def _expand_full_path(project_path: str | Path) -> Path:
+def _expand_full_path(project_path: Union[str, Path]) -> Path:
     return Path(project_path).expanduser().resolve()
 
 
@@ -175,8 +178,8 @@ class KedroContext:
     project_path: Path = field(converter=_expand_full_path)
     config_loader: ConfigLoader
     _hook_manager: PluginManager
-    env: str | None = None
-    _extra_params: dict[str, Any] = field(default=None, converter=deepcopy)
+    env: Optional[str] = None
+    _extra_params: Optional[Dict[str, Any]] = field(default=None, converter=deepcopy)
 
     """Create a context object by providing the root of a Kedro project and
     the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
@@ -211,7 +214,7 @@ class KedroContext:
         return self._get_catalog()
 
     @property
-    def params(self) -> dict[str, Any]:
+    def params(self) -> Dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
 
         Returns:
@@ -229,7 +232,7 @@ class KedroContext:
     def _get_catalog(
         self,
         save_version: str = None,
-        load_versions: dict[str, str] = None,
+        load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 
@@ -269,7 +272,7 @@ class KedroContext:
         )
         return catalog
 
-    def _get_feed_dict(self) -> dict[str, Any]:
+    def _get_feed_dict(self) -> Dict[str, Any]:
         """Get parameters and return the feed dictionary."""
         params = self.params
         feed_dict = {"parameters": params}
@@ -289,7 +292,7 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             feed_dict[key] = param_value
-            if isinstance(param_value, dict):
+            if isinstance(param_value, (dict, DictConfig)):
                 for key, val in param_value.items():
                     _add_param_to_feed_dict(f"{param_name}.{key}", val)
 
@@ -298,7 +301,7 @@ class KedroContext:
 
         return feed_dict
 
-    def _get_config_credentials(self) -> dict[str, Any]:
+    def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
             conf_creds = self.config_loader["credentials"]

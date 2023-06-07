@@ -1,6 +1,5 @@
 # Experiment tracking in Kedro-Viz
 
-
 Experiment tracking is the process of saving all the metadata related to an experiment each time you run it. It enables you to compare different runs of a machine-learning model as part of the experimentation process.
 
 The metadata you store may include:
@@ -12,9 +11,9 @@ The metadata you store may include:
 * Model weights
 * Plots and other visualisations
 
-You can use Kedro-Viz experiment tracking to store and access results, and to share them with others for comparison. Storage can be local or remote, such as cloud storage on AWS S3.
+## Experiment tracking demonstration using Kedro-Viz
 
-Kedro's [experiment tracking demo](https://demo.kedro.org/experiment-tracking) enables you to explore the experiment tracking capabilities of Kedro-Viz.
+We have made an [experiment tracking demo](https://demo.kedro.org/experiment-tracking) to enable you to explore the capabilities of Kedro-Viz further.
 
 ![](../meta/images/experiment-tracking_demo.gif)
 
@@ -24,8 +23,6 @@ Kedro has always supported parameter versioning (as part of your codebase with a
 Kedro-Viz version 4.1.1 introduced metadata capture, visualisation, discovery and comparison, enabling you to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 
 Kedro-Viz version 5.0 also supports the [display and comparison of plots, such as Plotly and Matplotlib](../visualisation/visualise_charts_with_plotly.md). Support for metric plots (timeseries and parellel coords) was added to Kedro-Viz version 5.2.1.
-
-Kedro-Viz version 6.2 includes support for collaborative experiment tracking using a cloud storage solution. This means that multiple users can store their experiment data in a centralized remote storage, such as AWS S3, and access it through Kedro-Viz.
 
 ## When should I use experiment tracking in Kedro?
 
@@ -51,7 +48,7 @@ There are three steps to enable experiment tracking features with Kedro-Viz. We 
 To use this tutorial code, you must already have [installed Kedro](../get_started/install.md) and [Kedro-Viz](../visualisation/kedro-viz_visualisation.md). You can confirm the versions you have installed by running `kedro info`
 
 ```{note}
-The example code uses a version of Kedro-Viz `>6.2.0`.
+The example code uses a version of Kedro-Viz `>=5.2.1`.
 ```
 
 Create a new project using the spaceflights starter. From the terminal run:
@@ -79,8 +76,7 @@ pip install -r src/requirements.txt
 
 In the domain of experiment tracking, each pipeline run is considered a session. A session store records all related metadata for each pipeline run, from logged metrics to other run-related data such as timestamp, `git` username and branch. The session store is a [SQLite](https://www.sqlite.org/index.html) database that is generated during your first pipeline run after it has been set up in your project.
 
-### Local storage
-To set up the session store locally, go to the `src/spaceflights/settings.py` file and add the following:
+To set up the session store, go to the `src/spaceflights/settings.py` file and add the following:
 
 ```python
 from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore
@@ -90,47 +86,12 @@ SESSION_STORE_CLASS = SQLiteStore
 SESSION_STORE_ARGS = {"path": str(Path(__file__).parents[2] / "data")}
 ```
 
-This specifies the creation of the `SQLiteStore` under the `data` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin
+This specifies the creation of the `SQLiteStore` under the `data/` subfolder, using the `SQLiteStore` setup from your installed Kedro-Viz plugin.
 
 This step is crucial to enable experiment tracking features on Kedro-Viz, as it is the database used to serve all run data to the Kedro-Viz front-end. Once this step is complete, you can either proceed to [set up the tracking datasets](#set-up-experiment-tracking-datasets) or [set up your nodes and pipelines to log metrics](#modify-your-nodes-and-pipelines-to-log-metrics); these two activities are interchangeable, but both should be completed to get a working experiment tracking setup.
 
-
-## Collaborative experiment tracking
-
 ```{note}
-To use collaborative experiment tracking, ensure that your installed version of Kedro-Viz is `>=6.2.0`.
-```
-
-For collaborative experiment tracking, Kedro-Viz saves your experiments as SQLite database files on a central cloud storage. To ensure that all users have a unique filename, set up your `KEDRO_SQLITE_STORE_USERNAME` in the environment variables. By default, Kedro-Viz will take your computer user name if this is not specified.
-
-> Note: In Kedro-Viz version 6.2, the only way to set up credentials for accessing your cloud storage is through environment variables.
-
-```bash
-export KEDRO_SQLITE_STORE_USERNAME ="your_unique__username"
-
-```
-
-Now specify a remote path in the `SESSION_STORE_ARGS` variable, which links to your cloud storage.
-
-
-```python
-from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore
-from pathlib import Path
-
-SESSION_STORE_CLASS = SQLiteStore
-SESSION_STORE_ARGS = {
-    "path": str(Path(__file__).parents[2] / "data"),
-    "remote_path": "s3://my-bucket-name/path/to/experiments",
-}
-```
-
-Finally, ensure you have the necessary credentials set up as shown below:
-
-```bash
-export AWS_ACCESS_KEY_ID="your_access_key_id"
-export AWS_SECRET_ACCESS_KEY="your_secret_access_key"
-export AWS_REGION="your_aws_region"
-
+Please ensure that your installed version of Kedro-Viz is `>=5.2.1`.
 ```
 
 ## Set up experiment tracking datasets

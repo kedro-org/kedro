@@ -1,5 +1,4 @@
 """A collection of CLI commands for working with Kedro micro-packages."""
-from __future__ import annotations
 
 import re
 import shutil
@@ -8,7 +7,7 @@ import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from typing import Iterable, List, Tuple, Union
+from typing import Iterable, List, Optional, Set, Tuple, Union
 
 import click
 import pkg_resources
@@ -280,7 +279,7 @@ def package_micropkg(
     click.secho(message, fg="green")
 
 
-def _get_fsspec_filesystem(location: str, fs_args: str | None):
+def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
     # pylint: disable=import-outside-toplevel
     import anyconfig
     import fsspec
@@ -315,7 +314,7 @@ def safe_extract(tar, path):
     tar.extractall(path)  # nosec B202
 
 
-def _unpack_sdist(location: str, destination: Path, fs_args: str | None) -> None:
+def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> None:
     filesystem = _get_fsspec_filesystem(location, fs_args)
 
     if location.endswith(".tar.gz") and filesystem and filesystem.exists(location):
@@ -354,10 +353,10 @@ def _refactor_code_for_unpacking(
     project: Project,
     package_path: Path,
     tests_path: Path,
-    alias: str | None,
-    destination: str | None,
+    alias: Optional[str],
+    destination: Optional[str],
     project_metadata: ProjectMetadata,
-) -> tuple[Path, Path]:
+) -> Tuple[Path, Path]:
     """This is the reverse operation of `_refactor_code_for_package`, i.e
     we go from:
     <temp_dir>  # also the root of the Rope project
@@ -479,9 +478,9 @@ def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
 
 
 def _find_config_files(
-    source_config_dir: Path, glob_patterns: list[str]
-) -> list[tuple[Path, str]]:
-    config_files: list[tuple[Path, str]] = []
+    source_config_dir: Path, glob_patterns: List[str]
+) -> List[Tuple[Path, str]]:
+    config_files: List[Tuple[Path, str]] = []
 
     if source_config_dir.is_dir():
         config_files = [
@@ -562,13 +561,13 @@ def _get_sdist_name(name, version):
     return f"{name}-{version}.tar.gz"
 
 
-def _sync_path_list(source: list[tuple[Path, str]], target: Path) -> None:
+def _sync_path_list(source: List[Tuple[Path, str]], target: Path) -> None:
     for source_path, suffix in source:
         target_with_suffix = (target / suffix).resolve()
         _sync_dirs(source_path, target_with_suffix)
 
 
-def _make_install_requires(requirements_txt: Path) -> list[str]:
+def _make_install_requires(requirements_txt: Path) -> List[str]:
     """Parses each line of requirements.txt into a version specifier valid to put in
     install_requires."""
     if not requirements_txt.exists():
@@ -629,7 +628,7 @@ def _refactor_code_for_package(
     project: Project,
     package_path: Path,
     tests_path: Path,
-    alias: str | None,
+    alias: Optional[str],
     project_metadata: ProjectMetadata,
 ) -> None:
     """In order to refactor the imports properly, we need to recreate
@@ -715,7 +714,7 @@ _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 def _generate_sdist_file(
     micropkg_name: str,
     destination: Path,
-    source_paths: tuple[_SourcePathType, ...],
+    source_paths: Tuple[_SourcePathType, ...],
     version: str,
     metadata: ProjectMetadata,
     alias: str = None,
@@ -788,7 +787,7 @@ def _generate_manifest_file(output_dir: Path):
 
 
 def _generate_setup_file(
-    package_name: str, version: str, install_requires: list[str], output_dir: Path
+    package_name: str, version: str, install_requires: List[str], output_dir: Path
 ) -> Path:
     setup_file = output_dir / "setup.py"
 
@@ -804,7 +803,7 @@ def _generate_setup_file(
 
 def _get_package_artifacts(
     source_path: Path, package_name: str
-) -> tuple[Path, Path, Path]:
+) -> Tuple[Path, Path, Path]:
     """From existing package, returns in order:
     source_path, tests_path, config_path
     """
@@ -818,7 +817,7 @@ def _get_package_artifacts(
 
 
 def _append_package_reqs(
-    requirements_txt: Path, package_reqs: list[str], package_name: str
+    requirements_txt: Path, package_reqs: List[str], package_name: str
 ) -> None:
     """Appends micro-package requirements to project level requirements.txt"""
     incoming_reqs = _safe_parse_requirements(package_reqs)
@@ -855,8 +854,8 @@ def _append_package_reqs(
 
 
 def _safe_parse_requirements(
-    requirements: str | Iterable[str],
-) -> set[pkg_resources.Requirement]:
+    requirements: Union[str, Iterable[str]]
+) -> Set[pkg_resources.Requirement]:
     """Safely parse a requirement or set of requirements. This effectively replaces
     pkg_resources.parse_requirements, which blows up with a ValueError as soon as it
     encounters a requirement it cannot parse (e.g. `-r requirements.txt`). This way

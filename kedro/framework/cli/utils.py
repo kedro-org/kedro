@@ -1,6 +1,4 @@
 """Utilities for use with click."""
-from __future__ import annotations
-
 import difflib
 import logging
 import re
@@ -16,7 +14,7 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
 import importlib_metadata
@@ -41,7 +39,7 @@ ENTRY_POINT_GROUPS = {
 logger = logging.getLogger(__name__)
 
 
-def call(cmd: list[str], **kwargs):  # pragma: no cover
+def call(cmd: List[str], **kwargs):  # pragma: no cover
     """Run a subprocess command and raise if it fails.
 
     Args:
@@ -112,7 +110,7 @@ def _suggest_cli_command(
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: tuple[str, Sequence[click.MultiCommand]]):
+    def __init__(self, *groups: Tuple[str, Sequence[click.MultiCommand]]):
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
             for title, cli_list in groups
@@ -139,7 +137,7 @@ class CommandCollection(click.CommandCollection):
         """Deduplicate commands by keeping the ones from the last source
         in the list.
         """
-        seen_names: set[str] = set()
+        seen_names: Set[str] = set()
         for cli_collection in reversed(cli_collections):
             for cmd_group in reversed(cli_collection.sources):
                 cmd_group.commands = {  # type: ignore
@@ -159,8 +157,8 @@ class CommandCollection(click.CommandCollection):
 
     @staticmethod
     def _merge_same_name_collections(groups: Sequence[click.MultiCommand]):
-        named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
-        helps: defaultdict[str, list] = defaultdict(list)
+        named_groups: Mapping[str, List[click.MultiCommand]] = defaultdict(list)
+        helps: Mapping[str, list] = defaultdict(list)
         for group in groups:
             named_groups[group.name].append(group)
             if group.help:
@@ -178,7 +176,7 @@ class CommandCollection(click.CommandCollection):
             if cli_list
         ]
 
-    def resolve_command(self, ctx: click.core.Context, args: list):
+    def resolve_command(self, ctx: click.core.Context, args: List):
         try:
             return super().resolve_command(ctx, args)
         except click.exceptions.UsageError as exc:
@@ -201,7 +199,7 @@ class CommandCollection(click.CommandCollection):
                     group.format_commands(ctx, formatter)
 
 
-def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
+def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     """Get package version from requirements.txt.
 
     Args:
@@ -297,7 +295,7 @@ def split_string(ctx, param, value):  # pylint: disable=unused-argument
 
 
 # pylint: disable=unused-argument,missing-param-doc,missing-type-doc
-def split_node_names(ctx, param, to_split: str) -> list[str]:
+def split_node_names(ctx, param, to_split: str) -> List[str]:
     """Split string by comma, ignoring commas enclosed by square parentheses.
     This avoids splitting the string of nodes names on commas included in
     default node names, which have the pattern
@@ -419,7 +417,7 @@ def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
+def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
     """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
@@ -477,7 +475,7 @@ def _split_load_versions(ctx, param, value):
     return _reformat_load_versions(ctx, param, lv_tuple) if value else {}
 
 
-def _get_values_as_tuple(values: Iterable[str]) -> tuple[str, ...]:
+def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
 
 

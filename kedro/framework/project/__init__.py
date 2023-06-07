@@ -1,21 +1,23 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument,global-statement
-from __future__ import annotations
-
 import importlib
 import logging.config
 import operator
 import os
+import sys
 import traceback
 import types
 import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
+import click
 import importlib_resources
+import rich.pretty
+import rich.traceback
 import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -157,9 +159,9 @@ class _ProjectPipelines(MutableMapping):
     """
 
     def __init__(self) -> None:
-        self._pipelines_module: str | None = None
+        self._pipelines_module: Optional[str] = None
         self._is_data_loaded = False
-        self._content: dict[str, Pipeline] = {}
+        self._content: Dict[str, Pipeline] = {}
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str):
@@ -183,7 +185,7 @@ class _ProjectPipelines(MutableMapping):
         self._content = project_pipelines
         self._is_data_loaded = True
 
-    def configure(self, pipelines_module: str | None = None) -> None:
+    def configure(self, pipelines_module: Optional[str] = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every ``configure`` call,
         data are reloaded.
@@ -217,8 +219,20 @@ class _ProjectLogging(UserDict):
         )
         logging_config = Path(path).read_text(encoding="utf-8")
         self.configure(yaml.safe_load(logging_config))
+        logging.captureWarnings(True)
 
-    def configure(self, logging_config: dict[str, Any]) -> None:
+        # We suppress click here to hide tracebacks related to it conversely,
+        # kedro is not suppressed to show its tracebacks for easier debugging.
+        # sys.executable is used to get the kedro executable path to hide the
+        # top level traceback.
+        # Rich traceback handling does not work on databricks. Hopefully this will be
+        # fixed on their side at some point, but until then we disable it.
+        # See https://github.com/Textualize/rich/issues/2455
+        if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
+            rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
+        rich.pretty.install()
+
+    def configure(self, logging_config: Dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
@@ -253,7 +267,7 @@ def configure_project(package_name: str):
     PACKAGE_NAME = package_name
 
 
-def configure_logging(logging_config: dict[str, Any]) -> None:
+def configure_logging(logging_config: Dict[str, Any]) -> None:
     """Configure logging according to ``logging_config`` dictionary."""
     LOGGING.configure(logging_config)
 
@@ -276,7 +290,7 @@ def validate_settings():
     importlib.import_module(f"{PACKAGE_NAME}.settings")
 
 
-def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
+def _create_pipeline(pipeline_module: types.ModuleType) -> Optional[Pipeline]:
     if not hasattr(pipeline_module, "create_pipeline"):
         warnings.warn(
             f"The '{pipeline_module.__name__}' module does not "
@@ -299,7 +313,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines() -> dict[str, Pipeline]:
+def find_pipelines() -> Dict[str, Pipeline]:
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.

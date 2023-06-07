@@ -183,7 +183,7 @@ You don't need to restart the kernel to reload the Kedro IPython extension and r
 `%reload_kedro` accepts optional keyword arguments `env` and `params`. For example, to use configuration environment `prod`:
 
 ```ipython
-%reload_kedro --env=prod
+%reload_kedro --env=prod`
 ```
 
 For more details, run `%reload_kedro?`.

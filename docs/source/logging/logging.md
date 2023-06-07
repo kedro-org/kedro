@@ -19,7 +19,7 @@ We now give some common examples of how you might like to change your project's 
 
 ### Using `KEDRO_LOGGING_CONFIG` environment variable
 
-`KEDRO_LOGGING_CONFIG` is an optional environment variable that you can use to specify the path of your logging configuration file, overriding the default Kedro's `default_logging.yml`.
+`KEDRO_LOGGING_CONFIG` is an optional environment variable that you can use to specify the path of your logging configuration file, overriding the default path of `conf/base/logging.yml`.
 
 To use this environment variable, set it to the path of your desired logging configuration file before running any Kedro commands. For example, if you have a logging configuration file located at `/path/to/logging.yml`, you can set `KEDRO_LOGGING_CONFIG` as follows:
 
@@ -30,7 +30,7 @@ export KEDRO_LOGGING_CONFIG=/path/to/logging.yml
 After setting the environment variable, any subsequent Kedro commands will use the logging configuration file at the specified path.
 
 ```{note}
-If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will default to using the logging configuration file at the project's default location of  Kedro's `default_logging.yml`.
+If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will default to using the logging configuration file at the project's default location of `conf/base/logging.yml`.
 ```
 ### Disable file-based logging
 
@@ -42,28 +42,6 @@ Alternatively, if you would like to keep other configuration in `conf/base/loggi
 -  handlers: [console, info_file_handler]
 +  handlers: [console]
 ```
-
-### Customise the `rich` Handler
-
-Kedro's `kedro.extras.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
-
-```{note}
-If you want to disable `rich`'s tracebacks, you must set `KEDRO_LOGGING_CONFIG` to point to your local config i.e. `conf/base/logging.yml`.
-```
-
-When `rich_tracebacks` is set to `True`, the configuration is propagated to [`rich.traceback.install`](https://rich.readthedocs.io/en/stable/reference/traceback.html#rich.traceback.install). If an argument is compatible with `rich.traceback.install`, it will be passed to the traceback's settings.
-
-For instance, you can enable the display of local variables inside `logging.yml` to aid with debugging.
-
-```yaml
-rich:
-  class: kedro.extras.logging.RichHandler
-  rich_tracebacks: True
-  tracebacks_show_locals: True
-```
-
-A comprehensive list of available options can be found in the [RichHandler documentation](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler).
-
 
 ### Use plain console logging
 

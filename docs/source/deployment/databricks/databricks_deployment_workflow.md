@@ -1,4 +1,4 @@
-# Databricks deployment workflow
+# Developing Kedro projects for Databricks using an IDE
 
 Databricks jobs are a way to execute code on Databricks clusters, allowing you to run data processing tasks, ETL jobs, or machine learning workflows. In this guide we explore the process of packaging a Kedro project and running it as a job on Databricks.
 

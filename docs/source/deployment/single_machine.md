@@ -1,9 +1,9 @@
 # Single-machine deployment
 This topic explains how to deploy Kedro on a production server. You can use three alternative methods to deploy your Kedro pipelines:
 
-- [Container-based deployment](#container-based)
-- [Package-based deployment](#package-based)
-- [CLI-based deployment](#cli-based)
+- Container-based using [Kedro-Docker](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker)
+- Package-based using [`kedro package`](../development/commands_reference.md#deploy-the-project)
+- CLI-based using the [Kedro CLI](../development/commands_reference.md)
 
 
 ## Container-based
@@ -39,24 +39,28 @@ Repositories on Docker Hub are set to public visibility by default. You can chan
 The procedure for using other container registries, like AWS ECR or GitLab Container Registry, will be almost identical to the steps described above. However, authentication will be different for each solution.
 
 ## Package-based
-If you prefer not to use containerisation, you can instead package your Kedro project using [`kedro package`](../development/commands_reference.md#deploy-the-project).
-
-Run the following in your project’s root directory:
+If you prefer not to use containerisation, you can instead package your Kedro project by running the following in your project’s root directory:
 
 ```console
 kedro package
 ```
 
-Kedro builds the package into the `dist/` folder of your project, and creates a `.whl` file, which is [a Python packaging format for binary distribution](https://packaging.python.org/overview/).
+Kedro builds the package into the `dist/` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/overview/).
 
-The resulting `.whl` package only contains the Python source code of your Kedro pipeline, not any of the `conf/` and `data/` subfolders nor the `pyproject.toml` file.
+The resulting `.egg` and `.whl` packages only contain the Python source code of your Kedro pipeline, not any of the `conf/` and `data/` subfolders nor the `pyproject.toml` file.
 The project configuration is packaged separately in a `tar.gz` file. This compressed version of the config files excludes any files inside your `local` directory.
 This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration, data and logging. When distributed, the packaged project must be run from within a directory that contains the `pyproject.toml` file and `conf/` subfolder (and `data/` if your pipeline loads/saves local data). This means that you will have to create these directories on the remote servers manually.
 
-Recipients of the `.whl` file need to have Python and `pip` set up on their machines, but do not need to have Kedro installed. The project is installed to the root of a folder with the relevant `conf/` and `data/` subfolders, by navigating to the root and calling:
+Recipients of the `.egg` and `.whl` files need to have Python and `pip` set up on their machines, but do not need to have Kedro installed. The project is installed to the root of a folder with the relevant `conf/` and `data/` subfolders, by navigating to the root and calling:
 
 ```console
 pip install <path-to-wheel-file>
+```
+
+Or when using the .egg file:
+
+```console
+easy_install <path-to-egg-file>
 ```
 
 After having installed your project on the remote server, run the Kedro project as follows from the root of the project:
@@ -66,9 +70,7 @@ python -m project_name
 ```
 
 ## CLI-based
-If neither containers nor packages are viable options for your project, you can also run it on a production server by cloning your project codebase to the server using the [Kedro CLI](../development/commands_reference.md).
-
-You will need to follow these steps to get your project running:
+If neither containers nor packages are viable options for your project, you can also run it on a production server by cloning your project codebase to the server. You will need to follow these steps to get your project running:
 
 ### Use GitHub workflow to copy your project
 This workflow posits that development of the Kedro project is done on a local environment under version control by Git. Commits are pushed to a remote server (e.g. GitHub, GitLab, Bitbucket, etc.).

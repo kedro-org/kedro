@@ -1,10 +1,8 @@
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files from specified paths.
 """
-from __future__ import annotations
-
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable, List
 
 from kedro.config.abstract_config import AbstractConfigLoader
 from kedro.config.common import _get_config_from_patterns, _remove_duplicates
@@ -70,8 +68,8 @@ class ConfigLoader(AbstractConfigLoader):
         self,
         conf_source: str,
         env: str = None,
-        runtime_params: dict[str, Any] = None,
-        config_patterns: dict[str, list[str]] = None,
+        runtime_params: Dict[str, Any] = None,
+        config_patterns: Dict[str, List[str]] = None,
         *,
         base_env: str = "base",
         default_run_env: str = "local",
@@ -127,7 +125,7 @@ class ConfigLoader(AbstractConfigLoader):
         """Property method to return deduplicated configuration paths."""
         return _remove_duplicates(self._build_conf_paths())
 
-    def get(self, *patterns: str) -> dict[str, Any]:  # type: ignore
+    def get(self, *patterns: str) -> Dict[str, Any]:  # type: ignore
         return _get_config_from_patterns(
             conf_paths=self.conf_paths, patterns=list(patterns)
         )

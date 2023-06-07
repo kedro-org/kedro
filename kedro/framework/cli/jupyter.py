@@ -1,8 +1,6 @@
 """A collection of helper functions to integrate with Jupyter/IPython
 and CLI commands for working with Kedro catalog.
 """
-from __future__ import annotations
-
 import json
 import os
 import shutil
@@ -10,7 +8,7 @@ import sys
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 from warnings import warn
 
 import click
@@ -302,7 +300,7 @@ def _export_nodes(filepath: Path, output_path: Path) -> None:
         warn(f"Skipping notebook '{filepath}' - no nodes to export.")
 
 
-def _append_source_code(cell: dict[str, Any], path: Path) -> None:
+def _append_source_code(cell: Dict[str, Any], path: Path) -> None:
     source_code = "".join(cell["source"]).strip() + "\n"
     with path.open(mode="a") as file_:
         file_.write(source_code)

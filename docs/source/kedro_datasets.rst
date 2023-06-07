@@ -38,15 +38,13 @@ kedro_datasets
    kedro_datasets.pillow.ImageDataSet
    kedro_datasets.plotly.JSONDataSet
    kedro_datasets.plotly.PlotlyDataSet
-   kedro_datasets.polars.CSVDataSet
    kedro_datasets.redis.PickleDataSet
-   kedro_datasets.snowflake.SnowparkTableDataSet
    kedro_datasets.spark.DeltaTableDataSet
    kedro_datasets.spark.SparkDataSet
    kedro_datasets.spark.SparkHiveDataSet
    kedro_datasets.spark.SparkJDBCDataSet
    kedro_datasets.svmlight.SVMLightDataSet
-   kedro_datasets.tensorflow.TensorFlowModelDataSet
+   kedro_datasets.tensorflow.TensorFlowModelDataset
    kedro_datasets.text.TextDataSet
    kedro_datasets.tracking.JSONDataSet
    kedro_datasets.tracking.MetricsDataSet

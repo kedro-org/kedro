@@ -73,7 +73,6 @@ Currently, the core Kedro team consists of:
 [Nero Okwa](https://github.com/NeroOkwa),
 [Nok Lam Chan](https://github.com/noklam),
 [Rashida Kanchwala](https://github.com/rashidakanchwala),
-[Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla),
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Stephanie Kaiser](https://github.com/stephkaiser),
 [Tynan DeBold](https://github.com/tynandebold) and

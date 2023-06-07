@@ -3,13 +3,11 @@ a Directed Acyclic Graph, sequentially or in parallel. The ``Pipeline`` class
 offers quick access to input dependencies,
 produced outputs and execution order.
 """
-from __future__ import annotations
-
 import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Iterable
+from typing import Dict, Iterable, List, Set, Tuple, Union
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -20,7 +18,7 @@ from kedro.pipeline.node import Node, _to_list
 TRANSCODING_SEPARATOR = "@"
 
 
-def _transcode_split(element: str) -> tuple[str, str]:
+def _transcode_split(element: str) -> Tuple[str, str]:
     """Split the name by the transcoding separator.
     If the transcoding part is missing, empty string will be put in.
 
@@ -79,9 +77,9 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
     def __init__(
         self,
-        nodes: Iterable[Node | Pipeline],
+        nodes: Iterable[Union[Node, "Pipeline"]],
         *,
-        tags: str | Iterable[str] | None = None,
+        tags: Union[str, Iterable[str]] = None,
     ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
@@ -152,13 +150,13 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         _validate_unique_confirms(nodes)
 
         # input -> nodes with input
-        self._nodes_by_input: dict[str, set[Node]] = defaultdict(set)
+        self._nodes_by_input: Dict[str, Set[Node]] = defaultdict(set)
         for node in nodes:
             for input_ in node.inputs:
                 self._nodes_by_input[_strip_transcoding(input_)].add(node)
 
         # output -> node with output
-        self._nodes_by_output: dict[str, Node] = {}
+        self._nodes_by_output: Dict[str, Node] = {}
         for node in nodes:
             for output in node.outputs:
                 self._nodes_by_output[_strip_transcoding(output)] = node
@@ -203,7 +201,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             return NotImplemented
         return Pipeline(set(self.nodes + other.nodes))
 
-    def all_inputs(self) -> set[str]:
+    def all_inputs(self) -> Set[str]:
         """All inputs for all nodes in the pipeline.
 
         Returns:
@@ -212,7 +210,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         """
         return set.union(set(), *(node.inputs for node in self.nodes))
 
-    def all_outputs(self) -> set[str]:
+    def all_outputs(self) -> Set[str]:
         """All outputs of all nodes in the pipeline.
 
         Returns:
@@ -221,13 +219,13 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         """
         return set.union(set(), *(node.outputs for node in self.nodes))
 
-    def _remove_intermediates(self, datasets: set[str]) -> set[str]:
+    def _remove_intermediates(self, datasets: Set[str]) -> Set[str]:
         intermediate = {_strip_transcoding(i) for i in self.all_inputs()} & {
             _strip_transcoding(o) for o in self.all_outputs()
         }
         return {d for d in datasets if _strip_transcoding(d) not in intermediate}
 
-    def inputs(self) -> set[str]:
+    def inputs(self) -> Set[str]:
         """The names of free inputs that must be provided at runtime so that
         the pipeline is runnable. Does not include intermediate inputs which
         are produced and consumed by the inner pipeline nodes. Resolves
@@ -239,7 +237,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         """
         return self._remove_intermediates(self.all_inputs())
 
-    def outputs(self) -> set[str]:
+    def outputs(self) -> Set[str]:
         """The names of outputs produced when the whole pipeline is run.
         Does not include intermediate outputs that are consumed by
         other pipeline nodes. Resolves transcoded names where necessary.
@@ -250,7 +248,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         """
         return self._remove_intermediates(self.all_outputs())
 
-    def data_sets(self) -> set[str]:
+    def data_sets(self) -> Set[str]:
         """The names of all data sets used by the ``Pipeline``,
         including inputs and outputs.
 
@@ -323,7 +321,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         )
 
     @property
-    def node_dependencies(self) -> dict[Node, set[Node]]:
+    def node_dependencies(self) -> Dict[Node, Set[Node]]:
         """All dependencies of nodes where the first Node has a direct dependency on
         the second Node.
 
@@ -331,7 +329,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             Dictionary where keys are nodes and values are sets made up of
             their parent nodes. Independent nodes have this as empty sets.
         """
-        dependencies: dict[Node, set[Node]] = {node: set() for node in self._nodes}
+        dependencies: Dict[Node, Set[Node]] = {node: set() for node in self._nodes}
         for parent in self._nodes:
             for output in parent.outputs:
                 for child in self._nodes_by_input[_strip_transcoding(output)]:
@@ -340,7 +338,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return dependencies
 
     @property
-    def nodes(self) -> list[Node]:
+    def nodes(self) -> List[Node]:
         """Return a list of the pipeline nodes in topological order, i.e. if
         node A needs to be run before node B, it will appear earlier in the
         list.
@@ -352,7 +350,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return list(chain.from_iterable(self._topo_sorted_nodes))
 
     @property
-    def grouped_nodes(self) -> list[list[Node]]:
+    def grouped_nodes(self) -> List[List[Node]]:
         """Return a list of the pipeline nodes in topologically ordered groups,
         i.e. if node A needs to be run before node B, it will appear in an
         earlier group.
@@ -363,7 +361,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         """
         return copy.copy(self._topo_sorted_nodes)
 
-    def only_nodes(self, *node_names: str) -> Pipeline:
+    def only_nodes(self, *node_names: str) -> "Pipeline":
         """Create a new ``Pipeline`` which will contain only the specified
         nodes by name.
 
@@ -402,7 +400,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes = [self._nodes_by_name[name] for name in node_names]
         return Pipeline(nodes)
 
-    def only_nodes_with_namespace(self, node_namespace: str) -> Pipeline:
+    def only_nodes_with_namespace(self, node_namespace: str) -> "Pipeline":
         """Creates a new ``Pipeline`` containing only nodes with the specified
         namespace.
 
@@ -427,8 +425,8 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return Pipeline(nodes)
 
     def _get_nodes_with_inputs_transcode_compatible(
-        self, datasets: set[str]
-    ) -> set[Node]:
+        self, datasets: Set[str]
+    ) -> Set[Node]:
         """Retrieves nodes that use the given `datasets` as inputs.
         If provided a name, but no format, for a transcoded dataset, it
         includes all nodes that use inputs with that name, otherwise it
@@ -458,8 +456,8 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return relevant_nodes
 
     def _get_nodes_with_outputs_transcode_compatible(
-        self, datasets: set[str]
-    ) -> set[Node]:
+        self, datasets: Set[str]
+    ) -> Set[Node]:
         """Retrieves nodes that output to the given `datasets`.
         If provided a name, but no format, for a transcoded dataset, it
         includes the node that outputs to that name, otherwise it matches
@@ -490,7 +488,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         return relevant_nodes
 
-    def only_nodes_with_inputs(self, *inputs: str) -> Pipeline:
+    def only_nodes_with_inputs(self, *inputs: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which depend
         directly on the provided inputs.
         If provided a name, but no format, for a transcoded input, it
@@ -516,7 +514,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         return Pipeline(nodes)
 
-    def from_inputs(self, *inputs: str) -> Pipeline:
+    def from_inputs(self, *inputs: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which depend
         directly or transitively on the provided inputs.
         If provided a name, but no format, for a transcoded input, it
@@ -539,7 +537,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         """
         starting = set(inputs)
-        result: set[Node] = set()
+        result: Set[Node] = set()
         next_nodes = self._get_nodes_with_inputs_transcode_compatible(starting)
 
         while next_nodes:
@@ -556,7 +554,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         return Pipeline(result)
 
-    def only_nodes_with_outputs(self, *outputs: str) -> Pipeline:
+    def only_nodes_with_outputs(self, *outputs: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which are directly
         required to produce the provided outputs.
         If provided a name, but no format, for a transcoded dataset, it
@@ -581,7 +579,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         return Pipeline(nodes)
 
-    def to_outputs(self, *outputs: str) -> Pipeline:
+    def to_outputs(self, *outputs: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which are directly
         or transitively required to produce the provided outputs.
         If provided a name, but no format, for a transcoded dataset, it
@@ -604,7 +602,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         """
         starting = set(outputs)
-        result: set[Node] = set()
+        result: Set[Node] = set()
         next_nodes = self._get_nodes_with_outputs_transcode_compatible(starting)
 
         while next_nodes:
@@ -620,7 +618,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         return Pipeline(result)
 
-    def from_nodes(self, *node_names: str) -> Pipeline:
+    def from_nodes(self, *node_names: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which depend
         directly or transitively on the provided nodes.
 
@@ -641,7 +639,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         res += self.from_inputs(*map(_strip_transcoding, res.all_outputs()))
         return res
 
-    def to_nodes(self, *node_names: str) -> Pipeline:
+    def to_nodes(self, *node_names: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes required directly
         or transitively by the provided nodes.
 
@@ -662,7 +660,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         res += self.to_outputs(*map(_strip_transcoding, res.all_inputs()))
         return res
 
-    def only_nodes_with_tags(self, *tags: str) -> Pipeline:
+    def only_nodes_with_tags(self, *tags: str) -> "Pipeline":
         """Creates a new ``Pipeline`` object with the nodes which contain *any*
         of the provided tags. The resulting ``Pipeline`` is empty if no tags
         are provided.
@@ -689,7 +687,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         from_inputs: Iterable[str] = None,
         to_outputs: Iterable[str] = None,
         node_namespace: str = None,
-    ) -> Pipeline:
+    ) -> "Pipeline":
         """Creates a new ``Pipeline`` object with the nodes that meet all of the
         specified filtering conditions.
 
@@ -771,7 +769,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             )
         return filtered_pipeline
 
-    def tag(self, tags: str | Iterable[str]) -> Pipeline:
+    def tag(self, tags: Union[str, Iterable[str]]) -> "Pipeline":
         """Tags all the nodes in the pipeline.
 
         Args:
@@ -802,9 +800,9 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return json.dumps(pipeline_versioned)
 
 
-def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
-    seen_nodes: set[str] = set()
-    duplicates: dict[Pipeline | None, set[str]] = defaultdict(set)
+def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Union[Node, Pipeline]]):
+    seen_nodes: Set[str] = set()
+    duplicates: Dict[Union[Pipeline, None], Set[str]] = defaultdict(set)
 
     def _check_node(node_: Node, pipeline_: Pipeline = None):
         name = node_.name
@@ -837,7 +835,7 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
         )
 
 
-def _validate_unique_outputs(nodes: list[Node]) -> None:
+def _validate_unique_outputs(nodes: List[Node]) -> None:
     outputs = chain.from_iterable(node.outputs for node in nodes)
     outputs = map(_strip_transcoding, outputs)
     duplicates = [key for key, value in Counter(outputs).items() if value > 1]
@@ -848,7 +846,7 @@ def _validate_unique_outputs(nodes: list[Node]) -> None:
         )
 
 
-def _validate_unique_confirms(nodes: list[Node]) -> None:
+def _validate_unique_confirms(nodes: List[Node]) -> None:
     confirms = chain.from_iterable(node.confirms for node in nodes)
     confirms = map(_strip_transcoding, confirms)
     duplicates = [key for key, value in Counter(confirms).items() if value > 1]
@@ -859,7 +857,7 @@ def _validate_unique_confirms(nodes: list[Node]) -> None:
         )
 
 
-def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
+def _validate_transcoded_inputs_outputs(nodes: List[Node]) -> None:
     """Users should not be allowed to refer to a transcoded dataset both
     with and without the separator.
     """
@@ -885,7 +883,7 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
         )
 
 
-def _topologically_sorted(node_dependencies) -> list[list[Node]]:
+def _topologically_sorted(node_dependencies) -> List[List[Node]]:
     """Topologically group and sort (order) nodes such that no node depends on
     a node that appears in the same or a later group.
 
@@ -899,7 +897,7 @@ def _topologically_sorted(node_dependencies) -> list[list[Node]]:
         executed on the second step, etc.
     """
 
-    def _circle_error_message(error_data: dict[str, str]) -> str:
+    def _circle_error_message(error_data: Dict[str, str]) -> str:
         """Error messages provided by the toposort library will
         refer to indices that are used as an intermediate step.
         This method can be used to replace that message with

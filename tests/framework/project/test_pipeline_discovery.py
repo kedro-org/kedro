@@ -98,12 +98,12 @@ def test_find_pipelines_skips_modules_with_unexpected_return_value_type(
     (pipeline_dir / "__init__.py").write_text(
         textwrap.dedent(
             """
-            from __future__ import annotations
+            from typing import Dict
 
             from kedro.pipeline import Pipeline, node, pipeline
 
 
-            def create_pipeline(**kwargs) -> dict[str, Pipeline]:
+            def create_pipeline(**kwargs) -> Dict[str, Pipeline]:
                 return {
                     "pipe1": pipeline([node(lambda: 1, None, "pipe1")]),
                     "pipe2": pipeline([node(lambda: 2, None, "pipe2")]),

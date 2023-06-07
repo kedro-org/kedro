@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 import boto3
 import pandas as pd
@@ -45,7 +43,7 @@ class DummyDataSet(AbstractDataSet):  # pragma: no cover
     def __init__(self, filepath):
         pass
 
-    def _describe(self) -> dict[str, Any]:
+    def _describe(self) -> Dict[str, Any]:
         return {"dummy": True}
 
     def _load(self) -> Any:

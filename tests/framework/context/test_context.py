@@ -1,17 +1,18 @@
+from __future__ import annotations
+
 import configparser
 import json
 import logging
 import re
 import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
 import pytest
 import toml
 import yaml
 from attrs.exceptions import FrozenInstanceError
-from omegaconf import OmegaConf
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
@@ -40,19 +41,19 @@ class BadCatalog:  # pylint: disable=too-few-public-methods
     """
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
 
 
-def _write_toml(filepath: Path, config: Dict):
+def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     toml_str = toml.dumps(config)
     filepath.write_text(toml_str)
 
 
-def _write_json(filepath: Path, config: Dict):
+def _write_json(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     json_str = json.dumps(config)
     filepath.write_text(json_str)
@@ -377,7 +378,7 @@ def test_convert_paths_raises_error_on_relative_project_path():
     ],
 )
 def test_convert_paths_to_absolute_posix_for_all_known_filepath_keys(
-    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+    project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
 
@@ -398,7 +399,7 @@ def test_convert_paths_to_absolute_posix_for_all_known_filepath_keys(
     ],
 )
 def test_convert_paths_to_absolute_posix_not_changing_non_relative_path(
-    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+    project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
 
@@ -414,7 +415,7 @@ def test_convert_paths_to_absolute_posix_not_changing_non_relative_path(
     ],
 )
 def test_convert_paths_to_absolute_posix_converts_full_windows_path_to_posix(
-    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+    project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
 
@@ -488,13 +489,8 @@ def test_validate_layers_error(layers, conflicting_datasets, mocker):
             {"a": {"a.c": {"a.c.b": 4}}},
             {"a": {"a.a": 1, "a.b": 2, "a.c": {"a.c.a": 3, "a.c.b": 4}}},
         ),
-        (
-            {"a": OmegaConf.create({"b": 1}), "x": 3},
-            {"a": {"c": 2}},
-            {"a": {"b": 1, "c": 2}, "x": 3},
-        ),
     ],
 )
-def test_update_nested_dict(old_dict: Dict, new_dict: Dict, expected: Dict):
+def test_update_nested_dict(old_dict: dict, new_dict: dict, expected: dict):
     _update_nested_dict(old_dict, new_dict)  # _update_nested_dict change dict in place
     assert old_dict == expected

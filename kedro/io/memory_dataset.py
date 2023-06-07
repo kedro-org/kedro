@@ -1,8 +1,9 @@
 """``MemoryDataSet`` is a data set implementation which handles in-memory data.
 """
+from __future__ import annotations
 
 import copy
-from typing import Any, Dict
+from typing import Any
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
@@ -33,7 +34,9 @@ class MemoryDataSet(AbstractDataSet):
 
     """
 
-    def __init__(self, data: Any = _EMPTY, copy_mode: str = None):
+    def __init__(
+        self, data: Any = _EMPTY, copy_mode: str = None, metadata: dict[str, Any] = None
+    ):
         """Creates a new instance of ``MemoryDataSet`` pointing to the
         provided Python object.
 
@@ -42,9 +45,12 @@ class MemoryDataSet(AbstractDataSet):
             copy_mode: The copy mode used to copy the data. Possible
                 values are: "deepcopy", "copy" and "assign". If not
                 provided, it is inferred based on the data type.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
         """
         self._data = _EMPTY
         self._copy_mode = copy_mode
+        self.metadata = metadata
         if data is not _EMPTY:
             self._save(data)
 
@@ -66,7 +72,7 @@ class MemoryDataSet(AbstractDataSet):
     def _release(self) -> None:
         self._data = _EMPTY
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         if self._data is not _EMPTY:
             return {"data": f"<{type(self._data).__name__}>"}
         # the string representation of datasets leaves out __init__

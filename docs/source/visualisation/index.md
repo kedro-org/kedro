@@ -14,5 +14,4 @@ pip install kedro-viz
 
 kedro-viz_visualisation
 visualise_charts_with_plotly
-experiment_tracking
 ```

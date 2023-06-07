@@ -1,12 +1,14 @@
 """This module provides user-friendly functions for creating nodes as parts
 of Kedro pipelines.
 """
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
 import re
 from collections import Counter
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Callable, Iterable
 from warnings import warn
 
 from more_itertools import spy, unzip
@@ -20,12 +22,12 @@ class Node:
     def __init__(
         self,
         func: Callable,
-        inputs: Union[None, str, List[str], Dict[str, str]],
-        outputs: Union[None, str, List[str], Dict[str, str]],
+        inputs: None | str | list[str] | dict[str, str],
+        outputs: None | str | list[str] | dict[str, str],
         *,
         name: str = None,
-        tags: Union[str, Iterable[str]] = None,
-        confirms: Union[str, List[str]] = None,
+        tags: str | Iterable[str] | None = None,
+        confirms: str | list[str] | None = None,
         namespace: str = None,
     ):
         """Create a node in the pipeline by providing a function to be called
@@ -37,12 +39,12 @@ class Node:
             inputs: The name or the list of the names of variables used as
                 inputs to the function. The number of names should match
                 the number of arguments in the definition of the provided
-                function. When Dict[str, str] is provided, variable names
+                function. When dict[str, str] is provided, variable names
                 will be mapped to function argument names.
             outputs: The name or the list of the names of variables used
                 as outputs to the function. The number of names should match
                 the number of outputs returned by the provided function.
-                When Dict[str, str] is provided, variable names will be mapped
+                When dict[str, str] is provided, variable names will be mapped
                 to the named outputs the function returns.
             name: Optional node name to be used when displaying the node in
                 logs or any other visualisations.
@@ -175,7 +177,7 @@ class Node:
             f"{repr(self._name)})"
         )
 
-    def __call__(self, **kwargs) -> Dict[str, Any]:
+    def __call__(self, **kwargs) -> dict[str, Any]:
         return self.run(inputs=kwargs)
 
     @property
@@ -209,7 +211,7 @@ class Node:
         self._func = func
 
     @property
-    def tags(self) -> Set[str]:
+    def tags(self) -> set[str]:
         """Return the tags assigned to the node.
 
         Returns:
@@ -218,7 +220,7 @@ class Node:
         """
         return set(self._tags)
 
-    def tag(self, tags: Union[str, Iterable[str]]) -> "Node":
+    def tag(self, tags: str | Iterable[str]) -> Node:
         """Create a new ``Node`` which is an exact copy of the current one,
             but with more tags added to it.
 
@@ -257,7 +259,7 @@ class Node:
         return self._func_name.replace("_", " ").title()
 
     @property
-    def namespace(self) -> Optional[str]:
+    def namespace(self) -> str | None:
         """Node's namespace.
 
         Returns:
@@ -266,7 +268,7 @@ class Node:
         return self._namespace
 
     @property
-    def inputs(self) -> List[str]:
+    def inputs(self) -> list[str]:
         """Return node inputs as a list, in the order required to bind them properly to
         the node's function.
 
@@ -279,7 +281,7 @@ class Node:
         return _to_list(self._inputs)
 
     @property
-    def outputs(self) -> List[str]:
+    def outputs(self) -> list[str]:
         """Return node outputs as a list preserving the original order
             if possible.
 
@@ -290,7 +292,7 @@ class Node:
         return _to_list(self._outputs)
 
     @property
-    def confirms(self) -> List[str]:
+    def confirms(self) -> list[str]:
         """Return dataset names to confirm as a list.
 
         Returns:
@@ -298,7 +300,7 @@ class Node:
         """
         return _to_list(self._confirms)
 
-    def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
+    def run(self, inputs: dict[str, Any] = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results
         in a dictionary.
 
@@ -359,7 +361,7 @@ class Node:
             )
             raise exc
 
-    def _run_with_no_inputs(self, inputs: Dict[str, Any]):
+    def _run_with_no_inputs(self, inputs: dict[str, Any]):
         if inputs:
             raise ValueError(
                 f"Node {str(self)} expected no inputs, "
@@ -369,7 +371,7 @@ class Node:
 
         return self._func()
 
-    def _run_with_one_input(self, inputs: Dict[str, Any], node_input: str):
+    def _run_with_one_input(self, inputs: dict[str, Any], node_input: str):
         if len(inputs) != 1 or node_input not in inputs:
             raise ValueError(
                 f"Node {str(self)} expected one input named '{node_input}', "
@@ -379,7 +381,7 @@ class Node:
 
         return self._func(inputs[node_input])
 
-    def _run_with_list(self, inputs: Dict[str, Any], node_inputs: List[str]):
+    def _run_with_list(self, inputs: dict[str, Any], node_inputs: list[str]):
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs) != set(inputs.keys()):
             raise ValueError(
@@ -390,7 +392,7 @@ class Node:
         # Ensure the function gets the inputs in the correct order
         return self._func(*(inputs[item] for item in node_inputs))
 
-    def _run_with_dict(self, inputs: Dict[str, Any], node_inputs: Dict[str, str]):
+    def _run_with_dict(self, inputs: dict[str, Any], node_inputs: dict[str, str]):
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs.values()) != set(inputs.keys()):
             raise ValueError(
@@ -500,11 +502,11 @@ class Node:
             )
 
     @staticmethod
-    def _process_inputs_for_bind(inputs: Union[None, str, List[str], Dict[str, str]]):
+    def _process_inputs_for_bind(inputs: None | str | list[str] | dict[str, str]):
         # Safeguard that we do not mutate list inputs
         inputs = copy.copy(inputs)
-        args: List[str] = []
-        kwargs: Dict[str, str] = {}
+        args: list[str] = []
+        kwargs: dict[str, str] = {}
         if isinstance(inputs, str):
             args = [inputs]
         elif isinstance(inputs, list):
@@ -523,12 +525,12 @@ def _node_error_message(msg) -> str:
 
 def node(
     func: Callable,
-    inputs: Union[None, str, List[str], Dict[str, str]],
-    outputs: Union[None, str, List[str], Dict[str, str]],
+    inputs: None | str | list[str] | dict[str, str],
+    outputs: None | str | list[str] | dict[str, str],
     *,
     name: str = None,
-    tags: Union[str, Iterable[str]] = None,
-    confirms: Union[str, List[str]] = None,
+    tags: str | Iterable[str] | None = None,
+    confirms: str | list[str] | None = None,
     namespace: str = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
@@ -540,11 +542,11 @@ def node(
         inputs: The name or the list of the names of variables used as inputs
             to the function. The number of names should match the number of
             arguments in the definition of the provided function. When
-            Dict[str, str] is provided, variable names will be mapped to
+            dict[str, str] is provided, variable names will be mapped to
             function argument names.
         outputs: The name or the list of the names of variables used as outputs
             to the function. The number of names should match the number of
-            outputs returned by the provided function. When Dict[str, str]
+            outputs returned by the provided function. When dict[str, str]
             is provided, variable names will be mapped to the named outputs the
             function returns.
         name: Optional node name to be used when displaying the node in logs or
@@ -567,7 +569,7 @@ def node(
         >>> import numpy as np
         >>>
         >>> def clean_data(cars: pd.DataFrame,
-        >>>                boats: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+        >>>                boats: pd.DataFrame) -> dict[str, pd.DataFrame]:
         >>>     return dict(cars_df=cars.dropna(), boats_df=boats.dropna())
         >>>
         >>> def halve_dataframe(data: pd.DataFrame) -> List[pd.DataFrame]:
@@ -597,7 +599,7 @@ def node(
     )
 
 
-def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
+def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: dict[str, str]):
     """Convert a dict representation of the node inputs to a list, ensuring
     the appropriate order for binding them to the node's function.
     """
@@ -605,11 +607,11 @@ def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
     return [*sig.args, *sig.kwargs.values()]
 
 
-def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List[str]:
+def _to_list(element: None | str | Iterable[str] | dict[str, str]) -> list[str]:
     """Make a list out of node inputs/outputs.
 
     Returns:
-        List[str]: Node input/output names as a list to standardise.
+        list[str]: Node input/output names as a list to standardise.
     """
 
     if element is None:

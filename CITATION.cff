@@ -43,6 +43,6 @@ authors:
 - family-names: Theisen
   given-names: Merel
 title: Kedro
-version: 0.18.8
-date-released: 2023-05-02
+version: 0.18.9
+date-released: 2023-05-31
 url: https://github.com/kedro-org/kedro

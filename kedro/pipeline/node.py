@@ -163,7 +163,7 @@ class Node:
 
     def __str__(self):
         def _set_to_str(xset):
-            return f"[{','.join(xset)}]"
+            return f"[{';'.join(xset)}]"
 
         out_str = _set_to_str(self.outputs) if self._outputs else "None"
         in_str = _set_to_str(self.inputs) if self._inputs else "None"
@@ -353,7 +353,12 @@ class Node:
 
         # purposely catch all exceptions
         except Exception as exc:
-            self._logger.error("Node '%s' failed with error: \n%s", str(self), str(exc))
+            self._logger.error(
+                "Node %s failed with error: \n%s",
+                str(self),
+                str(exc),
+                extra={"markup": True},
+            )
             raise exc
 
     def _run_with_no_inputs(self, inputs: dict[str, Any]):

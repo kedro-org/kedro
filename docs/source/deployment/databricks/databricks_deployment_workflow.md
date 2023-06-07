@@ -6,7 +6,7 @@ Databricks jobs are a way to execute code on Databricks clusters, allowing you t
 
 By packaging your Kedro project and running it on Databricks, you can execute your pipeline without the need for a notebook. This approach is particularly well-suited for production, as it provides a structured and reproducible way to run your code. However, it is not ideal for development, where rapid iteration is necessary. For guidance on developing a Kedro project for Databricks in a rapid build-test loop, see the [development workflow guide](./databricks_development_workflow.md).
 
-Running your packaged project as a Databricks job is very different to running it from a notebook. Running a Kedro project on a job cluster is significantly slower than running it as a notebook on a cluster that has already been started, as the job cluster has to be provisioned and started for each run. In addition, there is no way to change your project's code once it has been packaged. Instead, you must create a new package after making any changes.
+Running your packaged project as a Databricks job is very different to running it from a notebook. Running a Kedro project on a job cluster is significantly slower than running it as a notebook on a cluster that has already been started, as the job cluster has to be provisioned and started for each run. In addition, there is no way to change your project's code once it has been packaged. Instead, you must create a new package after changing your code and upload it to Databricks again.
 
 Here are some typical use cases for running a packaged Kedro project as a Databricks job:
 

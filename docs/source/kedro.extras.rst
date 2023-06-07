@@ -11,8 +11,6 @@ kedro.extras
    :toctree:
    :recursive:
 
-   kedro.extras.extensions
-   kedro.extras.logging
 
 .. toctree::
    :hidden:

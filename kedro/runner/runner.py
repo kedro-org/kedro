@@ -1,7 +1,6 @@
 """``AbstractRunner`` is the base class for all ``Pipeline`` runner
 implementations.
 """
-from __future__ import annotations
 
 import inspect
 import itertools as it
@@ -15,7 +14,7 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Iterable, Iterator
+from typing import Any, Dict, Iterable, Iterator, List, Set
 
 from more_itertools import interleave
 from pluggy import PluginManager
@@ -51,7 +50,7 @@ class AbstractRunner(ABC):
         catalog: DataCatalog,
         hook_manager: PluginManager = None,
         session_id: str = None,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
 
@@ -97,7 +96,7 @@ class AbstractRunner(ABC):
 
     def run_only_missing(
         self, pipeline: Pipeline, catalog: DataCatalog, hook_manager: PluginManager
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
         datasets provided by ``catalog``, and save results back to the
         same objects.
@@ -215,7 +214,7 @@ class AbstractRunner(ABC):
 
 def _find_persistent_ancestors(
     pipeline: Pipeline, children: Iterable[Node], catalog: DataCatalog
-) -> set[Node]:
+) -> Set[Node]:
     """Breadth-first search approach to finding the complete set of
     persistent ancestors of an iterable of ``Node``s. Persistent
     ancestors exclusively have persisted ``Dataset``s as inputs.
@@ -245,7 +244,7 @@ def _find_persistent_ancestors(
     return ancestor_nodes_to_run
 
 
-def _enumerate_parents(pipeline: Pipeline, child: Node) -> list[Node]:
+def _enumerate_parents(pipeline: Pipeline, child: Node) -> List[Node]:
     """For a given ``Node``, returns a list containing the direct parents
     of that ``Node`` in the given ``Pipeline``.
 
@@ -327,11 +326,11 @@ def run_node(
 def _collect_inputs_from_hook(
     node: Node,
     catalog: DataCatalog,
-    inputs: dict[str, Any],
+    inputs: Dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
     session_id: str = None,
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     # pylint: disable=too-many-arguments
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
@@ -362,11 +361,11 @@ def _collect_inputs_from_hook(
 def _call_node_run(
     node: Node,
     catalog: DataCatalog,
-    inputs: dict[str, Any],
+    inputs: Dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
     session_id: str = None,
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     # pylint: disable=too-many-arguments
     try:
         outputs = node.run(inputs)
@@ -455,7 +454,7 @@ def _run_node_async(
         return return_ds
 
     with ThreadPoolExecutor() as pool:
-        inputs: dict[str, Future] = {}
+        inputs: Dict[str, Future] = {}
 
         for name in node.inputs:
             inputs[name] = pool.submit(_synchronous_dataset_load, name)

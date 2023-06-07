@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import PurePosixPath
-from typing import Any
+from typing import Any, List
 
 import pytest
 
@@ -11,7 +9,7 @@ from kedro.io.core import AbstractDataSet, _parse_filepath, get_filepath_str
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
 # Excludes None, as None values are not shown in the str representation.
-FALSE_BUILTINS: list[Any] = [
+FALSE_BUILTINS: List[Any] = [
     False,
     0,
     0.0,

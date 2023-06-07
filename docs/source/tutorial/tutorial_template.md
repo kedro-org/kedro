@@ -49,7 +49,7 @@ pytest-mock>=1.7.1, <2.0
 pytest~=7.2
 
 # Kedro dependencies and datasets to work with different data formats (including CSV, Excel, and Parquet)
-kedro~=0.18.9
+kedro~=0.18.8
 kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.1
 kedro-telemetry~=0.2.0
 kedro-viz~=6.0 # Visualise pipelines

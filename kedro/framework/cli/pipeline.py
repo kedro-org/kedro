@@ -1,11 +1,9 @@
 """A collection of CLI commands for working with Kedro pipelines."""
-from __future__ import annotations
-
 import re
 import shutil
 from pathlib import Path
 from textwrap import indent
-from typing import NamedTuple
+from typing import List, NamedTuple, Tuple
 
 import click
 
@@ -175,7 +173,7 @@ def delete_pipeline(
     )
 
 
-def _echo_deletion_warning(message: str, **paths: list[Path]):
+def _echo_deletion_warning(message: str, **paths: List[Path]):
     paths = {key: values for key, values in paths.items() if values}
 
     if paths:
@@ -283,7 +281,7 @@ def _get_pipeline_artifacts(
 
 def _get_artifacts_to_package(
     project_metadata: ProjectMetadata, module_path: str, env: str
-) -> tuple[Path, Path, Path]:
+) -> Tuple[Path, Path, Path]:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = project_metadata.source_dir / project_metadata.package_name
     project_conf_path = project_metadata.project_path / settings.CONF_SOURCE

@@ -1,9 +1,9 @@
 """This module contains unit test for the cli command 'kedro new'
 """
-from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from typing import Dict
 
 import pytest
 import yaml
@@ -38,7 +38,7 @@ def mock_cookiecutter(mocker):
     return mocker.patch("cookiecutter.main.cookiecutter")
 
 
-def _write_yaml(filepath: Path, config: dict):
+def _write_yaml(filepath: Path, config: Dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)

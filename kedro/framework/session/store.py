@@ -1,9 +1,7 @@
 """This module implements a dict-like store object used to persist Kedro sessions."""
-from __future__ import annotations
-
 import logging
 from collections import UserDict
-from typing import Any
+from typing import Any, Dict
 
 
 class BaseSessionStore(UserDict):
@@ -21,7 +19,7 @@ class BaseSessionStore(UserDict):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    def read(self) -> dict[str, Any]:
+    def read(self) -> Dict[str, Any]:
         """Read the data from the session store.
 
         Returns:

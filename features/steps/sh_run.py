@@ -1,14 +1,12 @@
-from __future__ import annotations
-
 import shlex
 import subprocess
-from typing import Any
+from typing import Any, List, Union
 
 import psutil
 
 
 def run(
-    cmd: list | str, split: bool = True, print_output: bool = False, **kwargs: Any
+    cmd: Union[list, str], split: bool = True, print_output: bool = False, **kwargs: Any
 ) -> subprocess.CompletedProcess:
     """Run a shell command.
 
@@ -47,7 +45,7 @@ def run(
     return result
 
 
-def check_run(cmd: list | str, print_output: bool = False) -> None:
+def check_run(cmd: Union[list, str], print_output: bool = False) -> None:
     """
     Run cmd using subprocess.check_call (throws error if non-zero value
     returned)
@@ -76,7 +74,7 @@ class ChildTerminatingPopen(subprocess.Popen):
         dies (so-called orphan processes)
     """
 
-    def __init__(self, cmd: list[str], **kwargs) -> None:
+    def __init__(self, cmd: List[str], **kwargs) -> None:
         """
         Initializer pipes stderr and stdout.
 

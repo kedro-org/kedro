@@ -2,12 +2,11 @@
 be used to run the ``Pipeline`` in parallel groups formed by toposort
 using threads.
 """
-from __future__ import annotations
-
 import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
+from typing import Set
 
 from pluggy import PluginManager
 
@@ -104,7 +103,7 @@ class ThreadRunner(AbstractRunner):
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())
-        done_nodes: set[Node] = set()
+        done_nodes: Set[Node] = set()
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)

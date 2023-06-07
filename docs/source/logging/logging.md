@@ -7,7 +7,7 @@ By default, Python only shows logging messages at level `WARNING` and above. Ked
 
 ## Project-side logging configuration
 
-The easiest way to customise logging is to create a `conf/logging.yml` and configure it with the ``KEDRO_LOGGING_CONFIG` environment variable.
+The easiest way to customise logging is to create a `conf/logging.yml` file and configure it with the ``KEDRO_LOGGING_CONFIG` environment variable.
 
 To use this environment variable, set it to the path of your desired logging configuration file before running any Kedro commands. For example, if you have a logging configuration file located at `/path/to/logging.yml`, you can set `KEDRO_LOGGING_CONFIG` as follows:
 
@@ -21,8 +21,6 @@ After setting the environment variable, any subsequent Kedro commands will use t
 You can find an example of `logging.yml` here:
 <details>
 <summary><b>Click to expand</b></summary>
-```yml
-
 version: 1
 
 disable_existing_loggers: False
@@ -64,26 +62,25 @@ loggers:
 
 root:
   handlers: [rich, info_file_handler]
-```
+
 </details>
 
 In addition to the `rich` handler defined in Kedro's framework, the [project-side `conf/base/logging.yml`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/conf/base/logging.yml) defines two further logging handlers:
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting
 * `info_file_handler`: write logs of level `INFO` and above to `info.log`
 
-The logging handlers that are actually used by default are `rich` and `info_file_handler`.
+The logging handler that are actually used by default is `rich`.
 
 The project-side logging configuration also ensures that [logs emitted from your project's logger](#perform-logging-in-your-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
 
 We now give some common examples of how you might like to change your project's logging configuration.
 
 
-
 ### Enable file-based logging
 
-You might sometimes want to enable file-based logging, e.g. if you have many logs it's easier to search in a file than a console. By default, it is disable because it may not work on a read-only file system such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
+You might sometimes want to enable file-based logging, e.g. if you want to audit your logs, it's easier to search in a file than a console. By default, it is disable because it may not work on a read-only file system such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
 
-To enable file-base logging, you can change the handlers shown in the above example from the `root` logger as follows:
+If you want to enable file-based logging, you can change the handlers shown in the example above from the root logger as follows:
 ```diff
  root:
 -  handlers: [console]

@@ -1,6 +1,9 @@
-# Databricks development workflow
+# Development a Kedro project using your local environment
 
-This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos and the PySpark Iris starter. This workflow enables you to use your local environment for development and Databricks notebooks for testing. It has several advantages for development relative to using only Databricks notebooks as it enables the use of powerful development features offered by an IDE that are not available on Databricks notebooks:
+
+This guide demonstrates a workflow for developing Kedro projects on Databricks using your local environment for development, then using dbx and Databricks Repos to sync code for testing on Databricks.
+
+By working in your local environment, you can take advantage of features within an IDE that are not available on Databricks notebooks:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
 - Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
@@ -8,9 +11,11 @@ This guide demonstrates a development workflow for Kedro projects on Databricks 
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
 
+If you prefer to develop a projects in notebooks rather than an in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
+
 ## What this page covers
 
-This tutorial introduces a project development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. The main steps in this workflow are:
+The main steps in this tutorial are as follows:
 
 - [Create a virtual environment and install and configure dbx.](#install-kedro-and-dbx-in-a-new-virtual-environment)
 - [Create a new Kedro project using the PySpark Iris starter.](#create-a-new-kedro-project)

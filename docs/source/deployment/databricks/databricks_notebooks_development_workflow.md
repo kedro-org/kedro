@@ -1,6 +1,7 @@
-# Developing Kedro projects on Databricks using notebooks
+# Develop a Kedro project within a Databricks workspace
 
-This guide demonstrates a workflow for developing Kedro projects on Databricks using only a Databricks Repo and a Databricks notebook. The approach explained on this page enables you to develop and test your Kedro projects entirely within the Databricks workspace.
+
+This guide demonstrates a workflow for developing Kedro projects on Databricks using only a Databricks Repo and a Databricks notebook. You will learn how to develop and test your Kedro projects entirely within the Databricks workspace.
 
 This method of developing a Kedro project for use on Databricks is ideal for developers who prefer developing their projects in notebooks rather than an in an IDE. It also avoids the overhead of setting up and syncing a local environment with Databricks. If you want to take advantage of the powerful features of an IDE to develop your project, consider following the [guide for developing a Kedro project for Databricks using your local environment](./databricks_ide_development_workflow.md).
 
@@ -8,7 +9,7 @@ In this guide, you will store your project's code in a repository on [GitHub](ht
 
 ## What this page covers
 
-This tutorial introduces a project development workflow for Kedro projects using only the Databricks workspace. The main steps in this workflow are:
+This tutorial introduces a Kedro project development workflow using only the Databricks workspace. The main steps in this workflow are:
 
 - [Create a new Kedro project using the `databricks-iris` starter.](#create-a-new-kedro-project)
 - [Create a Databricks notebook to run your project.](#create-a-new-databricks-notebook)

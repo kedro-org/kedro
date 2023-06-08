@@ -193,11 +193,11 @@ class DataCatalog:
         # Keep a record of all patterns in the catalog.
         # {dataset pattern name : dataset pattern body}
         self.dataset_patterns = dict(dataset_patterns or {})
-        self.sorted_dataset_patterns = sorted(
+        self._sorted_dataset_patterns = sorted(
             self.dataset_patterns.keys(),
             key=lambda x: (_specificity(x), -x.count("{"), x),
         )
-
+        self._pattern_name_matches_cache: dict[str, str] = {}
         # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -327,8 +327,9 @@ class DataCatalog:
             # try to match it against the data factories in the catalog. If it's a match,
             # resolve it to a dataset instance and add it to the catalog, so it only needs
             # to be matched once and not everytime the dataset is used in the pipeline.
-            matched_dataset = self.match_name_against_dataset_factories(data_set_name)
-            if matched_dataset:
+            if self.exists_in_catalog(data_set_name):
+                pattern = self._pattern_name_matches_cache[data_set_name]
+                matched_dataset = self._get_resolved_dataset(data_set_name, pattern)
                 self.add(data_set_name, matched_dataset)
             else:
                 error_msg = f"DataSet '{data_set_name}' not found in the catalog"
@@ -356,6 +357,28 @@ class DataCatalog:
             )
 
         return data_set
+
+    def _get_resolved_dataset(
+        self, dataset_name: str, matched_pattern: str
+    ) -> AbstractDataSet:
+        result = parse(matched_pattern, dataset_name)
+        template_copy = copy.deepcopy(self.dataset_patterns[matched_pattern])
+        for key, value in template_copy.items():
+            # Find all dataset fields that need to be resolved with
+            # the values that were matched.
+            if isinstance(value, Iterable) and "}" in value:
+                string_value = str(value)
+                # result.named: gives access to all dict items in the match result.
+                # format_map fills in dict values into a string with {...} placeholders
+                # of the same key name.
+                try:
+                    template_copy[key] = string_value.format_map(result.named)
+                except KeyError as exc:
+                    raise DataSetError(
+                        f"Unable to resolve '{key}' for the pattern '{matched_pattern}'"
+                    ) from exc
+            # Create dataset from catalog template.
+        return AbstractDataSet.from_config(dataset_name, template_copy)
 
     def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set.
@@ -568,41 +591,6 @@ class DataCatalog:
 
             self.add(data_set_name, data_set, replace)
 
-    def match_name_against_dataset_factories(
-        self, dataset_input_name: str
-    ) -> AbstractDataSet | None:
-        """
-        For a given dataset name, try to match it against the dataset patterns in the catalog.
-        If it's a match, return the dataset instance.
-        """
-        dataset = None
-        # Loop through all dataset patterns and check if the given dataset name has a match.
-        for pattern in self.sorted_dataset_patterns:
-            result = parse(pattern, dataset_input_name)
-            # If there's a match resolve the rest of the pattern template to create
-            # a dataset instance. A result can be None or contain a dictionary of matched items:
-            if result:
-                template_copy = copy.deepcopy(self.dataset_patterns[pattern])
-                # Match results to patterns in catalog entry
-                for key, value in template_copy.items():
-                    # Find all dataset fields that need to be resolved with
-                    # the values that were matched.
-                    if isinstance(value, Iterable) and "}" in value:
-                        string_value = str(value)
-                        # result.named: gives access to all dict items in the match result.
-                        # format_map fills in dict values into a string with {...} placeholders
-                        # of the same key name.
-                        try:
-                            template_copy[key] = string_value.format_map(result.named)
-                        except KeyError as exc:
-                            raise DataSetError(
-                                f"Unable to resolve '{key}' for the pattern '{pattern}'"
-                            ) from exc
-                # Create dataset from catalog template.
-                dataset = AbstractDataSet.from_config(dataset_input_name, template_copy)
-                break
-        return dataset
-
     def list(self, regex_search: str | None = None) -> list[str]:
         """
         List of all ``DataSet`` names registered in the catalog.
@@ -650,14 +638,28 @@ class DataCatalog:
 
     def exists_in_catalog(self, dataset_name: str) -> bool:
         """Check if a dataset exists in the catalog as an exact match or if it matches a pattern."""
-        if dataset_name in self._data_sets:
-            return True
-
-        if self.dataset_patterns and any(
-            parse(pattern, dataset_name) for pattern in self.dataset_patterns
+        if (
+            dataset_name in self._data_sets
+            or dataset_name in self._pattern_name_matches_cache
         ):
             return True
+        matched_pattern = self.match_name_against_pattern(dataset_name)
+        if self.dataset_patterns and matched_pattern:
+            # cache the "dataset_name -> pattern" match
+            self._pattern_name_matches_cache[dataset_name] = matched_pattern
+            return True
         return False
+
+    def match_name_against_pattern(self, dataset_name: str) -> str | None:
+        """Match a dataset name against existing patterns"""
+        # Loop through all dataset patterns and check if the given dataset name has a match.
+        for pattern in self._sorted_dataset_patterns:
+            result = parse(pattern, dataset_name)
+            # If there's a match resolve the rest of the pattern template to create
+            # a dataset instance. A result can be None or contain a dictionary of matched items:
+            if result:
+                return pattern
+        return None
 
     def shallow_copy(self) -> DataCatalog:
         """Returns a shallow copy of the current object.

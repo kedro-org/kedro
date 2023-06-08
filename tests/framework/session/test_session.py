@@ -15,6 +15,7 @@ from kedro.config import AbstractConfigLoader, ConfigLoader, OmegaConfigLoader
 from kedro.framework.cli.utils import _split_params
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
+    LOGGING,
     ValidationError,
     Validator,
     _HasSharedParentClassValidator,
@@ -392,7 +393,6 @@ class TestKedroSession:
         self, fake_project, caplog, mock_package_name, mocker
     ):
         caplog.set_level(logging.DEBUG, logger="kedro")
-        from kedro.framework.project import LOGGING
 
         mock_logging = mocker.patch.object(LOGGING, "configure")
         session = KedroSession.create(mock_package_name, fake_project)

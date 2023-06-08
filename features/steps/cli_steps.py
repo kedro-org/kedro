@@ -1,20 +1,20 @@
 """Behave step definitions for the cli_scenarios feature."""
 
 import json
-from pathlib import Path
 import shutil
 import textwrap
+from pathlib import Path
 from time import time
 
 import behave
-from behave import given, then, when
 import requests
 import toml
 import yaml
+from behave import given, then, when
 
+import kedro
 from features.steps import util
 from features.steps.sh_run import ChildTerminatingPopen, check_run, run
-import kedro
 
 OK_EXIT_CODE = 0
 

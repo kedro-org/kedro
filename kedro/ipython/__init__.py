@@ -16,11 +16,7 @@ from IPython.core.magic_arguments import argument, magic_arguments, parse_argstr
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import PARAMS_ARG_HELP
 from kedro.framework.cli.utils import ENV_HELP, _split_params
-from kedro.framework.project import (  # noqa
-    LOGGING,
-    configure_project,
-    pipelines,
-)
+from kedro.framework.project import LOGGING, configure_project, pipelines  # noqa
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
 

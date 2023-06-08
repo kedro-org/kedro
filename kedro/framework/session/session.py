@@ -19,11 +19,7 @@ from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
-from kedro.framework.project import (
-    pipelines,
-    settings,
-    validate_settings,
-)
+from kedro.framework.project import pipelines, settings, validate_settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner

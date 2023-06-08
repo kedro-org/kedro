@@ -176,7 +176,7 @@ class KedroContext:
     config_loader: ConfigLoader
     _hook_manager: PluginManager
     env: str | None = None
-    _extra_params: dict[str, Any] = field(default=None, converter=deepcopy)
+    _extra_params: dict[str, Any] | None = field(default=None, converter=deepcopy)
 
     """Create a context object by providing the root of a Kedro project and
     the environment configuration subfolders (see ``kedro.config.ConfigLoader``)

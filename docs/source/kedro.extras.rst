@@ -7,11 +7,6 @@ kedro.extras
 
 .. rubric:: Modules
 
-.. autosummary::
-   :toctree:
-   :recursive:
-
-
 .. toctree::
    :hidden:
 

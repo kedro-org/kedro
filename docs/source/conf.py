@@ -11,6 +11,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+from __future__ import annotations
 
 import importlib
 import os
@@ -18,7 +19,6 @@ import re
 import sys
 from inspect import getmembers, isclass, isfunction
 from pathlib import Path
-from typing import List, Tuple
 
 from click import secho, style
 
@@ -26,8 +26,8 @@ from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
-project = "Kedro"
-author = "Kedro"
+project = "kedro"
+author = "kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -55,7 +55,7 @@ extensions = [
     "notfound.extension",
 ]
 
-# enable autosummary plugin (table of contents for modules/classes/class
+# enable autosummary plugin  (table of contents for modules/classes/class
 # methods)
 autosummary_generate = True
 autosummary_generate_overwrite = False
@@ -102,6 +102,9 @@ type_targets = {
         "tuple",
         "Any",
         "Dict",
+        "dict",
+        "list",
+        "set",
         "typing.Dict",
         "typing.Iterable",
         "typing.List",
@@ -122,7 +125,9 @@ type_targets = {
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",
+        "Path",
         "pathlib.Path",
+        "PurePosixPath",
         "pathlib.PurePosixPath",
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
@@ -133,6 +138,7 @@ type_targets = {
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
         "kedro_datasets.pandas.json_dataset.JSONDataSet",
         "pluggy._manager.PluginManager",
+        "PluginManager",
         "_DI",
         "_DO",
         # The statements below were added after subclassing UserDict in AbstractConfigLoader.
@@ -185,7 +191,7 @@ html_theme = "sphinx_rtd_theme"
 here = Path(__file__).parent.absolute()
 html_logo = str(here / "kedro_logo.svg")
 
-# Theme options are theme-specific and customize the look and feel of a theme
+# Theme options are theme-specific and customise the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
@@ -194,6 +200,9 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # html_extra_path used to define a path to robots.txt which is used by webcrawlers
 # to ignore or allow certain links.
 html_extra_path = [str(here / "robots.txt")]
+
+# Likewise for search console verification
+html_extra_path = [str(here / "googlebce3ad2fda582ae8.html")]
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
@@ -329,7 +338,7 @@ def remove_arrows_in_examples(lines):
         lines[i] = line.replace(">>>", "")
 
 
-def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
+def autolink_replacements(what: str) -> list[tuple[str, str, str]]:
     """
     Create a list containing replacement tuples of the form:
     (``regex``, ``replacement``, ``obj``) for all classes and methods which are
@@ -401,7 +410,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
     return replacements, suggestions
 
 
-def log_suggestions(lines: List[str], name: str):
+def log_suggestions(lines: list[str], name: str):
     """Use the ``suggestions`` list to log in the terminal places where the
     developer has forgotten to surround with double back-ticks class
     name/function name references.

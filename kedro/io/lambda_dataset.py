@@ -2,7 +2,9 @@
 providing custom load, save, and exists methods without extending
 ``AbstractDataSet``.
 """
-from typing import Any, Callable, Dict, Optional
+from __future__ import annotations
+
+from typing import Any, Callable
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
@@ -29,7 +31,7 @@ class LambdaDataSet(AbstractDataSet):
         >>> data_set = LambdaDataSet(load, None)
     """
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         def _to_str(func):
             if not func:
                 return None
@@ -74,12 +76,14 @@ class LambdaDataSet(AbstractDataSet):
         else:
             self.__release()
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
-        load: Optional[Callable[[], Any]],
-        save: Optional[Callable[[Any], None]],
+        load: Callable[[], Any] | None,
+        save: Callable[[Any], None] | None,
         exists: Callable[[], bool] = None,
         release: Callable[[], None] = None,
+        metadata: dict[str, Any] = None,
     ):
         """Creates a new instance of ``LambdaDataSet`` with references to the
         required input/output data set methods.
@@ -89,6 +93,8 @@ class LambdaDataSet(AbstractDataSet):
             save: Method to save data to a data set.
             exists: Method to check whether output data already exists.
             release: Method to release any cached information.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             DataSetError: If a method is specified, but is not a Callable.
@@ -111,3 +117,4 @@ class LambdaDataSet(AbstractDataSet):
         self.__save = save
         self.__exists = exists
         self.__release = release
+        self.metadata = metadata

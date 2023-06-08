@@ -71,10 +71,6 @@ The main steps are:
 - Select a name and expiration time for your token, choose an expiration time.
 - Select which repositories your token will allow access to and define the token permissions.
 
-```{note}
-Make sure that `repo` scopes are enabled for your token.
-```
-
 ### Push your Kedro project to the GitHub repository
 
 At the command line, initialise Git in your project root directory:

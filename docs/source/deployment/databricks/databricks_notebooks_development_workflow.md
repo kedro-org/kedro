@@ -284,6 +284,14 @@ You can see that your model's accuracy has changed now that you are using a diff
 If your cluster terminates, you must re-run your entire notebook, as libraries installed using `%pip install ...` are ephemeral. If not, repeating this step is only necessary if your project's dependencies change.
 ```
 
+### Managing your Databricks Repo
+
+Your Databricks Repo now has untracked changes that are not synced with your GitHub repository. To track your changes and sync your Repo, you can use the corresponding [Git operations in Databricks Repos](https://docs.databricks.com/repos/git-operations-with-repos.html). A basic overview of the steps to achieve this is:
+
+- Commit your changes in your Databricks Repo.
+- Push the changes to the GitHub repository linked to your Databricks Repo.
+- Check that the latest commits are visible in your GitHub repository.
+
 ## Summary
 
 This guide demonstrated a development workflow on Databricks using only the Databricks workspace. This approach is ideal for users who prefer to develop using notebooks and avoids having to set up and sync a local environment with Databricks.

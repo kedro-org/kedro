@@ -7,64 +7,6 @@ By default, Python only shows logging messages at level `WARNING` and above. Ked
 
 ## Project-side logging configuration
 
-The easiest way to customise logging is to create a `conf/logging.yml` file and configure it with the `KEDRO_LOGGING_CONFIG` environment variable.
-
-To use this environment variable, set it to the path of your desired logging configuration file before running any Kedro commands. For example, if you have a logging configuration file located at `/path/to/logging.yml`, you can set `KEDRO_LOGGING_CONFIG` as follows:
-
-```bash
-export KEDRO_LOGGING_CONFIG=<project_root>/conf/logging.yml
-```
-
-After setting the environment variable, any subsequent Kedro commands will use the logging configuration file at the specified path.
-
-### `logging.yml`
-You can find an example of `logging.yml` here:
-<details>
-<summary><b>Click to expand</b></summary>
-version: 1
-
-disable_existing_loggers: False
-
-formatters:
-  simple:
-    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-handlers:
-  console:
-    class: logging.StreamHandler
-    level: INFO
-    formatter: simple
-    stream: ext://sys.stdout
-
-  info_file_handler:
-    class: logging.handlers.RotatingFileHandler
-    level: INFO
-    formatter: simple
-    filename: info.log
-    maxBytes: 10485760 # 10MB
-    backupCount: 20
-    encoding: utf8
-    delay: True
-
-  rich:
-    class: kedro.logging.RichHandler
-    rich_tracebacks: True
-    # Advance options for customisation.
-    # See https://docs.kedro.org/en/stable/logging/logging.html#project-side-logging-configuration
-    # tracebacks_show_locals: False
-
-loggers:
-  kedro:
-    level: INFO
-
-  {{ cookiecutter.python_package }}:
-    level: INFO
-
-root:
-  handlers: [rich, info_file_handler]
-
-</details>
-
 In addition to the `rich` handler defined in Kedro's framework, the [project-side `conf/base/logging.yml`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/conf/base/logging.yml) defines two further logging handlers:
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting
 * `info_file_handler`: write logs of level `INFO` and above to `info.log`

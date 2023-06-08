@@ -21,16 +21,21 @@
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 
-# Upcoming Release 0.18.10
+# Upcoming Release 0.18.11
 
 ## Major features and improvements
-* Added support for variable interpolation in the catalog with the `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.10
+
+## Major features and improvements
+* Rebrand across all documentation and Kedro assets.
+* Added support for variable interpolation in the catalog with the `OmegaConfigLoader`.
 
 # Release 0.18.9
 

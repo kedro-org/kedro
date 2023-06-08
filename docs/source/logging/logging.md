@@ -7,7 +7,7 @@ By default, Python only shows logging messages at level `WARNING` and above. Ked
 
 ## Project-side logging configuration
 
-The easiest way to customise logging is to create a `conf/logging.yml` file and configure it with the ``KEDRO_LOGGING_CONFIG` environment variable.
+The easiest way to customise logging is to create a `conf/logging.yml` file and configure it with the `KEDRO_LOGGING_CONFIG` environment variable.
 
 To use this environment variable, set it to the path of your desired logging configuration file before running any Kedro commands. For example, if you have a logging configuration file located at `/path/to/logging.yml`, you can set `KEDRO_LOGGING_CONFIG` as follows:
 

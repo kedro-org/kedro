@@ -161,7 +161,7 @@ def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> N
                 old_dict[key] = value
 
 
-def _expand_full_path(project_path: Union[str, Path]) -> Path:
+def _expand_full_path(project_path: str | Path) -> Path:
     return Path(project_path).expanduser().resolve()
 
 

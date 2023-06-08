@@ -13,7 +13,7 @@
 * Removed deprecated `kedro docs` command.
 
 ### ConfigLoader
-* `logging` is removed from `ConfigLoader`, it is recommended to use the environment variable`KEDRO_LOGGING_CONFIG`.
+* `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.
 
 ### Other
 * Removed deprecated `kedro.extras.ColorHandler`.
@@ -25,7 +25,7 @@
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 ### Logging
-`logging.yml` is now independent of Kedro's environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
+`logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
 # Upcoming Release 0.18.10
 

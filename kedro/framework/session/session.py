@@ -156,7 +156,7 @@ class KedroSession:
             conf_source=conf_source,
         )
 
-        # have to explicitlyv type session_data otherwise mypy will complain
+        # have to explicitly type session_data otherwise mypy will complain
         # possibly related to this: https://github.com/python/mypy/issues/1430
         session_data: dict[str, Any] = {
             "package_name": session._package_name,

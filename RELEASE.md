@@ -6,6 +6,7 @@
 
 ## Breaking changes to the API
 
+
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
 # Upcoming Release 0.18.11
@@ -15,7 +16,7 @@
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
-
+* Logging is decoupled from `ConfigLoader`, use `KEDRO_LOGGING_CONFIG` to configure logging.
 ## Upcoming deprecations for Kedro 0.19.0
 
 # Release 0.18.10

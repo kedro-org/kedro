@@ -3,7 +3,6 @@
 
 Kedro uses [Python's `logging` library](https://docs.python.org/3/library/logging.html). Configuration is provided as a dictionary according to the [Python logging configuration schema](https://docs.python.org/3/library/logging.config.html#logging-config-dictschema) in [Default configuration built into the Kedro framework](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml).
 
-## Advance Logging
 You can alter this configuration and provide different configurations for different run environment according to the [standard Kedro mechanism for handling configuration](../configuration/configuration_basics.md).
 
 ```{note}

@@ -27,16 +27,21 @@
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
-# Upcoming Release 0.18.10
+# Upcoming Release 0.18.11
 
 ## Major features and improvements
-* Added support for variable interpolation in the catalog with the `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.10
+
+## Major features and improvements
+* Rebrand across all documentation and Kedro assets.
+* Added support for variable interpolation in the catalog with the `OmegaConfigLoader`.
 
 # Release 0.18.9
 

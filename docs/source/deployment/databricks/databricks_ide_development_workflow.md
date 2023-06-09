@@ -1,4 +1,4 @@
-# Develop a Kedro project using your local environment
+# Develop a Kedro project for Databricks using an IDE
 
 This guide demonstrates a workflow for developing Kedro projects on Databricks using your local environment for development, then using dbx and Databricks Repos to sync code for testing on Databricks.
 

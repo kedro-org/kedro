@@ -8,6 +8,22 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+# Upcoming Release 0.18.11
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.10
+
+## Major features and improvements
+* Rebrand across all documentation and Kedro assets.
+* Added support for variable interpolation in the catalog with the `OmegaConfigLoader`.
+
 # Release 0.18.9
 
 ## Major features and improvements
@@ -34,7 +50,6 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [https://github.com/debugger24](https://github.com/debugger24)
 
 ## Upcoming deprecations for Kedro 0.19.0
-
 
 # Release 0.18.8
 

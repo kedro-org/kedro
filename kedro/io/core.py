@@ -7,6 +7,7 @@ import abc
 import copy
 import logging
 import re
+import sys
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -31,6 +32,8 @@ HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
 
+_DEPRECATED_ERROR_CLASSES = ["DataSetError", "DataSetNotFoundError", "DataSetAlreadyExistsError"]
+
 
 class DatasetError(Exception):
     """``DatasetError`` raised by ``AbstractDataSet`` implementations
@@ -43,10 +46,7 @@ class DatasetError(Exception):
     pass
 
 
-class DataSetError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = DatasetError
+DataSetError = DatasetError
 
 
 class DatasetNotFoundError(DatasetError):
@@ -57,10 +57,7 @@ class DatasetNotFoundError(DatasetError):
     pass
 
 
-class DataSetNotFoundError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = DatasetNotFoundError
+DataSetNotFoundError = DatasetNotFoundError
 
 
 class DatasetAlreadyExistsError(DatasetError):
@@ -71,10 +68,33 @@ class DatasetAlreadyExistsError(DatasetError):
     pass
 
 
-class DataSetAlreadyExistsError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
+DataSetAlreadyExistsError = DatasetAlreadyExistsError
 
-    _DeprecatedClassMeta__alias = DatasetAlreadyExistsError
+
+class Wrapper(object):
+    """Convert module to class to intercept ``__getattr__()`` operation.
+
+    Code implementation copied from https://stackoverflow.com/a/40546615
+    """
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+
+    def __getattr__(self, name):
+        value = getattr(self.wrapped, name)
+
+        if name in _DEPRECATED_ERROR_CLASSES:
+            alias = value._DeprecatedClassMeta__alias
+            warnings.warn(
+                f"{name} has been renamed to {alias.__name__}, and the "
+                f"alias will be removed Kedro 0.19.0",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
+        return value
+
+
+sys.modules[__name__] = Wrapper(sys.modules[__name__])
 
 
 class VersionNotFoundError(DatasetError):

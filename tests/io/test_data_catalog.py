@@ -762,7 +762,7 @@ class TestDataCatalogDatasetFactories:
     @pytest.mark.parametrize(
         "dataset_name, expected",
         [
-            ("audi_cars", False),
+            ("audi_cars", True),
             ("tesla_cars", True),
             ("row_boats", True),
             ("boats", False),

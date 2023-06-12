@@ -26,8 +26,8 @@ from kedro import __version__ as release
 
 # -- Project information -----------------------------------------------------
 
-project = "Kedro"
-author = "Kedro"
+project = "kedro"
+author = "kedro"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
@@ -191,7 +191,7 @@ html_theme = "sphinx_rtd_theme"
 here = Path(__file__).parent.absolute()
 html_logo = str(here / "kedro_logo.svg")
 
-# Theme options are theme-specific and customize the look and feel of a theme
+# Theme options are theme-specific and customise the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
@@ -200,6 +200,9 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # html_extra_path used to define a path to robots.txt which is used by webcrawlers
 # to ignore or allow certain links.
 html_extra_path = [str(here / "robots.txt")]
+
+# Likewise for search console verification
+html_extra_path = [str(here / "googlebce3ad2fda582ae8.html")]
 
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False

@@ -4,7 +4,7 @@ Kedro plugins allow you to create new features for Kedro and inject additional c
 
 ## Overview
 
-Kedro uses [`setuptools`](https://setuptools.readthedocs.io/en/latest/setuptools.html), which is a collection of enhancements to the Python `distutils` to allow developers to build and distribute Python packages. Kedro uses various entry points in [`pkg_resources`](https://setuptools.readthedocs.io/en/latest/setuptools.html) to provide plugin functionality.
+Kedro's extension mechanism is built on [`pluggy`](https://pluggy.readthedocs.io/), a solid plugin management library that was created for the [pytest](https://docs.pytest.org/) ecosystem. `pluggy` relies on [entry points](https://packaging.python.org/en/latest/specifications/entry-points/), a Python mechanism for packages to provide components that can be discovered by other packages using [`importlib.metadata`](https://docs.python.org/3/library/importlib.metadata.html#entry-points).
 
 ## Example of a simple plugin
 
@@ -84,7 +84,7 @@ setup(
 After that you can use this starter with `kedro new --starter=test_plugin_starter`.
 
 ```{note}
-If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.8.`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
+If your starter lives on a git repository, by default Kedro attempts to use a tag or branch labelled with your version of Kedro, e.g. `0.18.10.`. This means that you can host different versions of your starter template on the same repository, and the correct one will automatically be used. If you do not wish to follow this structure, you should override it with the `checkout` flag, e.g. `kedro new --starter=test_plugin_starter --checkout=main`.
 ```
 
 ## Working with `click`
@@ -189,7 +189,7 @@ When you are ready to submit your code:
 2. Choose a command approach: `global` and / or `project` commands:
    - All `global` commands should be provided as a single `click` group
    - All `project` commands should be provided as another `click` group
-   - The `click` groups are declared through the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html)
+   - The `click` groups are declared through the [entry points mechanism](https://setuptools.pypa.io/en/latest/userguide/entry_point.html)
 3. Include a `README.md` describing your plugin's functionality and all dependencies that should be included
 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
 

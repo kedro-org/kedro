@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 
-.. image:: https://raw.githubusercontent.com/kedro-org/kedro/develop/static/img/kedro_banner.png
+.. image:: https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png
     :alt: Kedro logo
     :class: kedro-logo
 
@@ -42,6 +42,10 @@ Welcome to Kedro's documentation!
 .. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack
     :target: https://slack.kedro.org
     :alt: Kedro's Slack organisation
+
+.. image:: https://img.shields.io/badge/slack-archive-blue.svg?label=Kedro%20Slack%20
+    :target: https://www.linen.dev/s/kedro
+    :alt: Kedro's Slack archive
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black
@@ -125,7 +129,7 @@ Welcome to Kedro's documentation!
 .. toctree::
    :maxdepth: 2
 
-   integrations/index.md
+   integrations/pyspark_integration.md
 
 .. toctree::
    :maxdepth: 2

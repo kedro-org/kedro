@@ -404,7 +404,7 @@ CSVDataSet(
 ```
 
 
-## Load multiple datasets with similar configuration
+## Load multiple datasets with similar configuration using YAML anchors
 
 Different datasets might use the same file format, load and save arguments, and be stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets, so that you need not spend time copying and pasting dataset configurations in the `catalog.yml` file.
 
@@ -461,7 +461,75 @@ airplanes:
 
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
+## Load multiple dataset with similar configuration using dataset factory patterns
+For catalog entries that share a lot of the same configurations, you could also use the dataset factory pattern introduced in Kedro 0.18.11. This syntax allows you to
+reduce the number of similar catalog entries by matching it to a factory pattern.
 
+Consider the following catalog entries:
+```yaml
+factory_data:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/factory_data.csv
+
+
+process_data:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/process_data.csv
+```
+The datasets in this catalog can be generalised to the following pattern:
+```yaml
+"{name}_data":
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/{name}_data.csv
+```
+When `factory_data` or `process_data` is used in your pipeline, it would be matched to the factory pattern above. Two things to keep in mind are that the factory pattern name should be enclosed in
+quotes and that the placeholders used in the catalog entry body should be present in the factory pattern name.
+
+You can also use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset entries share `type`, `file_format` and `save_args`:
+```yaml
+processing.factory_data:
+  type: spark.SparkDataSet
+  filepath: data/processing/factory_data.pq
+  file_format: parquet
+  save_args:
+    mode: overwrite
+
+processing.process_data:
+  type: spark.SparkDataSet
+  filepath: data/processing/process_data.pq
+  file_format: parquet
+  save_args:
+    mode: overwrite
+
+modelling.metrics:
+  type: spark.SparkDataSet
+  filepath: data/modelling/factory_data.pq
+  file_format: parquet
+  save_args:
+    mode: overwrite
+```
+This could be generalised to the following pattern:
+```yaml
+"{namespace}.{dataset_name}":
+  type: spark.SparkDataSet
+  filepath: data/{namespace}/{dataset_name}.pq
+  file_format: parquet
+  save_args:
+    mode: overwrite
+```
+
+You can also have multiple factory patterns in your catalog. However, doing so can lead to a situation where a dataset name from your pipeline might match multiple patterns.
+To overcome this, Kedro sorts all the potential matches for the dataset name in the pipeline and picks the best match. If there is an explicit entry for the dataset in the catalog,
+that would be picked over any factory pattern, then the pattern with the highest number of matching characters, and finally the pattern with the highest number of placeholders in the pattern name.
+
+
+You can use dataset factory pattern to define a catch-all dataset factory pattern which would overwrite the default `MemoryDataSet` creation.
+```yaml
+"{default_dataset}":
+  type: pandas.CSVDataSet
+  filepath: <directory>/{default_dataset}.csv
+
+```
 ## Transcode datasets
 
 You might come across a situation where you would like to read the same file using two different dataset implementations. Use transcoding when you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations.

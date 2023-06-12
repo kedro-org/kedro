@@ -8,7 +8,7 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from s3fs import S3FileSystem
 
-from kedro.io import DatasetError
+from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 

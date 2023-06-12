@@ -31,7 +31,11 @@ HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
 
-_DEPRECATED_ERROR_CLASSES = ["DataSetError", "DataSetNotFoundError", "DataSetAlreadyExistsError"]
+_DEPRECATED_ERROR_CLASSES = [
+    "DataSetError",
+    "DataSetNotFoundError",
+    "DataSetAlreadyExistsError",
+]
 
 
 class DatasetError(Exception):

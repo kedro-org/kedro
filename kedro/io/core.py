@@ -7,7 +7,6 @@ import abc
 import copy
 import logging
 import re
-import sys
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -21,7 +20,7 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
-from kedro.utils import DeprecatedClassMeta, load_obj
+from kedro.utils import load_obj
 
 warnings.simplefilter("default", DeprecationWarning)
 

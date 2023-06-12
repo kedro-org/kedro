@@ -6,9 +6,6 @@ from .cached_dataset import CachedDataSet, CachedDataset
 from .core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
-    DataSetAlreadyExistsError,
-    DataSetError,
-    DataSetNotFoundError,
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
@@ -23,6 +20,15 @@ from .partitioned_dataset import (
     PartitionedDataSet,
     PartitionedDataset,
 )
+
+
+def __getattr__(name):
+    import kedro.io.core
+
+    if name in kedro.io.core._DEPRECATED_ERROR_CLASSES:
+        return getattr(kedro.io.core, name)
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
+
 
 __all__ = [
     "AbstractDataSet",

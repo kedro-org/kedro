@@ -97,9 +97,54 @@ def config_with_dataset_factories():
             },
             "audi_cars": {
                 "type": "pandas.ParquetDataSet",
-                "filepath": "data/01_raw/audi_cars.xls",
+                "filepath": "data/01_raw/audi_cars.pq",
             },
-            "boats": {"type": "pandas.CSVDataSet", "filepath": "data/01_raw/boats.csv"},
+            "{type}_boats": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{type}_boats.csv",
+            },
+        },
+    }
+
+
+@pytest.fixture
+def config_with_dataset_factories_with_default(config_with_dataset_factories):
+    config_with_dataset_factories["catalog"]["{default_dataset}"] = {
+        "type": "pandas.CSVDataSet",
+        "filepath": "data/01_raw/{default_dataset}.csv",
+    }
+    return config_with_dataset_factories
+
+
+@pytest.fixture
+def config_with_dataset_factories_bad_pattern(config_with_dataset_factories):
+    config_with_dataset_factories["catalog"]["{type}@planes"] = {
+        "type": "pandas.ParquetDataSet",
+        "filepath": "data/01_raw/{brand}_plane.pq",
+    }
+    return config_with_dataset_factories
+
+
+@pytest.fixture
+def config_with_dataset_factories_only_patterns():
+    return {
+        "catalog": {
+            "{default}": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{default}.csv",
+            },
+            "{namespace}_{dataset}": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{namespace}_{dataset}.pq",
+            },
+            "{country}_companies": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{country}_companies.csv",
+            },
+            "{dataset}s": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{dataset}s.csv",
+            },
         },
     }
 
@@ -704,6 +749,7 @@ class TestDataCatalogVersioned:
 
 class TestDataCatalogDatasetFactories:
     def test_match_added_to_datasets_on_get(self, config_with_dataset_factories):
+        """Check that the datasets that match patterns are only added when fetched"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
         assert "{brand}_cars" not in catalog._data_sets
         assert "tesla_cars" not in catalog._data_sets
@@ -716,21 +762,37 @@ class TestDataCatalogDatasetFactories:
     @pytest.mark.parametrize(
         "dataset_name, expected",
         [
-            ("audi_cars", True),
+            ("audi_cars", False),
             ("tesla_cars", True),
-            ("row_boat", False),
+            ("row_boats", True),
+            ("boats", False),
             ("tesla_card", False),
         ],
     )
     def test_exists_in_catalog(
         self, config_with_dataset_factories, dataset_name, expected
     ):
-        """Check that the exists in"""
+        """Check that the dataset exists in catalog when it matches a pattern
+        or is in the catalog"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
         assert catalog.exists_in_catalog(dataset_name) == expected
 
-    def test_pattern_match_cache_updated(self):
-        assert True
+    @pytest.mark.parametrize(
+        "dataset_name, expected",
+        [
+            ("tesla_cars", True),
+            ("row_boats", True),
+            ("boats", False),
+            ("ford_cars", True),
+            ("sail_boats", True),
+        ],
+    )
+    def test_exists_in_catalog_cache_updated(
+        self, config_with_dataset_factories, dataset_name, expected
+    ):
+        """Check that the pattern match cache is updated when exists_in_catalog() is called"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        assert catalog.exists_in_catalog(dataset_name) == expected
 
     def test_patterns_not_in_catalog_datasets(self, config_with_dataset_factories):
         """Check that the pattern is not in the catalog datasets"""
@@ -740,30 +802,52 @@ class TestDataCatalogDatasetFactories:
         assert "audi_cars" not in catalog.dataset_patterns
         assert "{brand}_cars" in catalog.dataset_patterns
 
-    def test_pattern_matching_only_one_match(self):
-        """Check that dataset names are added to the catalog when one pattern exists"""
-        assert True
-
-    def test_explicit_entry_not_overwritten(self):
+    def test_explicit_entry_not_overwritten(self, config_with_dataset_factories):
         """Check that the existing catalog entry is not overwritten by config in pattern"""
-        assert True
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        audi_cars = catalog._get_dataset("audi_cars")
+        assert isinstance(audi_cars, ParquetDataSet)
 
-    def test_dataset_not_in_catalog_when_no_pattern_match(self):
+    @pytest.mark.parametrize(
+        "dataset_name,pattern",
+        [
+            ("missing", "DataSet 'missing' not found in the catalog"),
+            ("tesla@cars", "DataSet 'tesla@cars' not found in the catalog"),
+        ],
+    )
+    def test_dataset_not_in_catalog_when_no_pattern_match(
+        self, config_with_dataset_factories, dataset_name, pattern
+    ):
         """Check that the dataset is not added to the catalog when there is no pattern"""
-        assert True
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            catalog._get_dataset(dataset_name)
 
-    def test_dataset_pattern_ordering(self):
+    def test_dataset_pattern_ordering(
+        self, config_with_dataset_factories_only_patterns
+    ):
         """Check that the patterns are ordered correctly according to the parsing rules"""
-        assert True
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
+        ordered_catalog = [
+            "{country}_companies",
+            "{namespace}_{dataset}",
+            "{dataset}s",
+            "{default}",
+        ]
+        assert catalog._sorted_dataset_patterns == ordered_catalog
 
-    def test_pattern_matching_multiple_patterns(self):
-        """Check that the patterns are matched correctly when multiple patterns exist"""
-        assert True
+    def test_default_dataset(self, config_with_dataset_factories_with_default):
+        """Check that default dataset is used when no other pattern matches"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_with_default)
+        assert "jet@planes" not in catalog._data_sets
+        jet_dataset = catalog._get_dataset("jet@planes")
+        assert isinstance(jet_dataset, CSVDataSet)
 
-    def test_config_parsed_from_pattern(self):
-        """Check that the body of the dataset entry is correctly parsed"""
-        assert True
-
-    def test_unmatched_key_error_when_parsing_config(self):
+    def test_unmatched_key_error_when_parsing_config(
+        self, config_with_dataset_factories_bad_pattern
+    ):
         """Check error raised when key mentioned in the config is not in pattern name"""
-        assert True
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_bad_pattern)
+        pattern = "Unable to resolve 'filepath' for the pattern '{type}@planes'"
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            catalog._get_dataset("jet@planes")

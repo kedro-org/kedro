@@ -1,4 +1,4 @@
-# Develop a Kedro project within a Databricks workspace
+# Use a Databricks workspace to develop a Kedro project
 
 This guide demonstrates a workflow for developing Kedro projects on Databricks using only a Databricks Repo and a Databricks notebook. You will learn how to develop and test your Kedro projects entirely within the Databricks workspace.
 

@@ -46,18 +46,12 @@ class DatasetError(Exception):
     pass
 
 
-DataSetError = DatasetError
-
-
 class DatasetNotFoundError(DatasetError):
     """``DatasetNotFoundError`` raised by ``DataCatalog`` class in case of
     trying to use a non-existing data set.
     """
 
     pass
-
-
-DataSetNotFoundError = DatasetNotFoundError
 
 
 class DatasetAlreadyExistsError(DatasetError):
@@ -68,33 +62,17 @@ class DatasetAlreadyExistsError(DatasetError):
     pass
 
 
-DataSetAlreadyExistsError = DatasetAlreadyExistsError
-
-
-class Wrapper(object):
-    """Convert module to class to intercept ``__getattr__()`` operation.
-
-    Code implementation copied from https://stackoverflow.com/a/40546615
-    """
-    def __init__(self, wrapped):
-        self.wrapped = wrapped
-
-    def __getattr__(self, name):
-        value = getattr(self.wrapped, name)
-
-        if name in _DEPRECATED_ERROR_CLASSES:
-            alias = value._DeprecatedClassMeta__alias
-            warnings.warn(
-                f"{name} has been renamed to {alias.__name__}, and the "
-                f"alias will be removed Kedro 0.19.0",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        return value
-
-
-sys.modules[__name__] = Wrapper(sys.modules[__name__])
+def __getattr__(name):
+    if name in _DEPRECATED_ERROR_CLASSES:
+        alias = name.replace("DataSet", "Dataset")
+        warnings.warn(
+            f"{name} has been renamed to {alias}, and the alias will be removed in "
+            f"Kedro 0.19.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return globals()[alias]
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 class VersionNotFoundError(DatasetError):

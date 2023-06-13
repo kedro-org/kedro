@@ -463,7 +463,7 @@ In this example, the default `csv` configuration is inserted into `airplanes` an
 
 ## Load multiple datasets with similar configuration using dataset factories
 For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.11. This syntax allows you to generalise the configuration and
-reduce the number of similar catalog entries by matching it to a factory pattern.
+reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
 ### Example 1: Generalise datasets with similar names and types into one dataset factory
 Consider the following catalog entries:
@@ -483,12 +483,12 @@ The datasets in this catalog can be generalised to the following dataset factory
   type: pandas.CSVDataSet
   filepath: data/01_raw/{name}_data.csv
 ```
-When `factory_data` or `process_data` is used in your pipeline, it is matched to the factory pattern `{name}_data`. The factory pattern must be enclosed in
-quotes.
+When `factory_data` or `process_data` is used in your pipeline, it is matched to the factory pattern `{name}_data`. The factory pattern must always be enclosed in
+quotes to avoid YAML parsing errors.
 
 
 ### Example 2: Generalise datasets with similar types into one dataset factory
-You can also combine all the datasets of the same type and configuration details. For example, consider the following
+You can also combine all the datasets with the same type and configuration details. For example, consider the following
 catalog with three datasets named `reviews`, `shuttles` and `reviews` of the type `pandas.CSVDataSet`:
 ```yaml
 shuttles:

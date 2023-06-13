@@ -462,9 +462,10 @@ airplanes:
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
 ## Load multiple datasets with similar configuration using dataset factories
-For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.11. This syntax allows you to generalise the configuration and 
+For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.11. This syntax allows you to generalise the configuration and
 reduce the number of similar catalog entries by matching it to a factory pattern.
 
+### Example 1: Generalise datasets with similar names and types into one dataset factory
 Consider the following catalog entries:
 ```yaml
 factory_data:
@@ -476,14 +477,73 @@ process_data:
   type: pandas.CSVDataSet
   filepath: data/01_raw/process_data.csv
 ```
-The datasets in this catalog can be generalised to the following pattern:
+The datasets in this catalog can be generalised to the following dataset factory:
 ```yaml
 "{name}_data":
   type: pandas.CSVDataSet
   filepath: data/01_raw/{name}_data.csv
 ```
-When `factory_data` or `process_data` is used in your pipeline, it is matched to the factory pattern above. The factory pattern name should be enclosed in
-quotes and the placeholders used in the catalog entry body should be included in the factory pattern name.
+When `factory_data` or `process_data` is used in your pipeline, it is matched to the factory pattern `{name}_data`. The factory pattern must be enclosed in
+quotes.
+
+
+### Example 2: Generalise datasets with similar types into one dataset factory
+You can also combine all the datasets of the same type and configuration details. For example, consider the following
+catalog with three datasets named `reviews`, `shuttles` and `reviews` of the type `pandas.CSVDataSet`:
+```yaml
+shuttles:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/shuttles.csv
+
+reviews:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/reviews.csv
+
+companies:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/companies.csv
+```
+These datasets can be combined into the following dataset factory:
+```yaml
+"{dataset_name}#csv":
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/{dataset_name}.csv
+```
+You will then have to update the pipelines in your project located at `src/<project_name>/<pipeline_name>/pipeline.py` to refer to these datasets as `shuttles#csv`,
+`reviews#csv` and `companies#csv`.
+```python
+from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
+        [
+            node(
+                func=preprocess_companies,
+                inputs="companies#csv",
+                outputs="preprocessed_companies",
+                name="preprocess_companies_node",
+            ),
+            node(
+                func=preprocess_shuttles,
+                inputs="shuttles#csv",
+                outputs="preprocessed_shuttles",
+                name="preprocess_shuttles_node",
+            ),
+            node(
+                func=create_model_input_table,
+                inputs=[
+                    "preprocessed_shuttles",
+                    "preprocessed_companies",
+                    "reviews#csv",
+                ],
+                outputs="model_input_table",
+                name="create_model_input_table_node",
+            ),
+        ]
+    )
+```
+### Example 3: Generalise datasets with similar types using into one dataset factory with multiple placeholders
 
 You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset entries share `type`, `file_format` and `save_args`:
 ```yaml
@@ -517,12 +577,29 @@ This could be generalised to the following pattern:
   save_args:
     mode: overwrite
 ```
+All the placeholders used in the catalog entry body must exist in the factory pattern name.
 
-You can have multiple factory patterns in your catalog. However, doing so can lead to a situation where a dataset name from your pipeline might match multiple patterns.
-To overcome this, Kedro sorts all the potential matches for the dataset name in the pipeline and picks the best match. If there is an explicit entry for the dataset in the catalog,
-that would be picked over any factory pattern, then the pattern with the highest number of matching characters, and finally the pattern with the highest number of placeholders in the pattern name.
+### Example 4: Generalise datasets using multiple dataset factories
+You can have multiple dataset factories in your catalog. For example:
+```yaml
+"{namespace}.{dataset_name}@spark":
+  type: spark.SparkDataSet
+  filepath: data/{namespace}/{dataset_name}.pq
+  file_format: parquet
 
+"{dataset_name}@csv":
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/{dataset_name}.csv
+```
 
+Having multiple dataset factories in your catalog can lead to a situation where a dataset name from your pipeline might
+match multiple patterns. To overcome this, Kedro sorts all the potential matches for the dataset name in the pipeline and picks the best match.
+The matches are ranked according to the following criteria :
+1. Number of exact character matches between the dataset name and the factory pattern. For example, a dataset named `factory_data$csv` would match `{dataset}_data$csv` over `{dataset_name}$csv`.
+2. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
+3. Alphabetical order
+
+### Example 5: Generalise all datasets with a catch-all dataset factory to overwrite the default `MemoryDataSet`
 You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataSet` creation.
 ```yaml
 "{default_dataset}":
@@ -530,6 +607,9 @@ You can use dataset factories to define a catch-all pattern which will overwrite
   filepath: <directory>/{default_dataset}.csv
 
 ```
+Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
+as `pandas.CSVDataSet`.
+
 ## Transcode datasets
 
 You might come across a situation where you would like to read the same file using two different dataset implementations. Use transcoding when you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations.

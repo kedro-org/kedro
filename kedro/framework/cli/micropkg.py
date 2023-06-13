@@ -8,7 +8,7 @@ import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Iterable, List, Tuple, Union
+from typing import Any, Iterable, Iterator, List, Tuple, Union
 
 import click
 from build.util import project_wheel_metadata
@@ -51,42 +51,47 @@ setup(
 
 
 class _EquivalentRequirement(Requirement):
-    # See https://github.com/pypa/packaging/issues/644#issuecomment-1567982812
+    """Parse a requirement according to PEP 508.
 
-    @property
-    def canonical_name(self) -> str:
-        """Canonicalized name according to the rules of PEP 503."""
-        return canonicalize_name(self.name)
+    This class overrides __eq__ to be backwards compatible with pkg_resources.Requirement
+    while making __str__ and __hash__ use the non-canonicalized name
+    as agreed in https://github.com/pypa/packaging/issues/644,
 
-    def _to_str(self, name: str) -> str:
-        parts: list[str] = [name]
+    Implementation taken from https://github.com/pypa/packaging/pull/696/
+    """
+
+    def _iter_parts(self, name: str) -> Iterator[str]:
+        yield name
 
         if self.extras:
             formatted_extras = ",".join(sorted(self.extras))
-            parts.append(f"[{formatted_extras}]")
+            yield f"[{formatted_extras}]"
 
         if self.specifier:
-            parts.append(str(self.specifier))
+            yield str(self.specifier)
 
         if self.url:
-            parts.append(f"@ {self.url}")
+            yield f"@ {self.url}"
             if self.marker:
-                parts.append(" ")
+                yield " "
 
         if self.marker:
-            parts.append(f"; {self.marker}")
-
-        return "".join(parts)
+            yield f"; {self.marker}"
 
     def __str__(self) -> str:
-        return self._to_str(self.name)
+        return "".join(self._iter_parts(self.name))
 
     def __hash__(self) -> int:
-        return hash((self.__class__.__name__, self._to_str(self.canonical_name)))
+        return hash(
+            (
+                self.__class__.__name__,
+                *self._iter_parts(canonicalize_name(self.name)),
+            )
+        )
 
     def __eq__(self, other: Any) -> bool:
         return (
-            self.canonical_name == other.canonical_name
+            canonicalize_name(self.name) == canonicalize_name(other.name)
             and self.extras == other.extras
             and self.specifier == other.specifier
             and self.url == other.url

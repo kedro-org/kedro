@@ -197,7 +197,7 @@ def _pull_package(
         # temp_dir_path is the parent directory of the project root dir
         contents = [member for member in temp_dir_path.iterdir() if member.is_dir()]
         if len(contents) != 1:
-            raise RuntimeError(
+            raise KedroCliError(
                 "Invalid sdist was extracted: exactly one directory was expected, "
                 f"got {contents}"
             )
@@ -227,7 +227,7 @@ def _pull_package(
             # with the result of a `micropkg package`,
             # and in general if the distribution only contains one package (most likely),
             # but helps give a sensible error message otherwise
-            raise RuntimeError(
+            raise KedroCliError(
                 "Invalid package contents: exactly one package was expected, "
                 f"got {packages}"
             )

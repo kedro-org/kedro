@@ -106,11 +106,8 @@ def _specificity(pattern: str) -> int:
         pattern:
     Returns:
     """
-    pattern_variables = parse(pattern, pattern).named
-    for k in pattern_variables:
-        pattern_variables[k] = ""
-    specific_characters = pattern.format(**pattern_variables)
-    return -len(specific_characters)
+    result = re.sub(r"\{.*?\}", "", pattern)
+    return -len(result)
 
 
 class _FrozenDatasets:
@@ -193,10 +190,15 @@ class DataCatalog:
         # Keep a record of all patterns in the catalog.
         # {dataset pattern name : dataset pattern body}
         self.dataset_patterns = dict(dataset_patterns or {})
+        # Sort all the patterns according to the parsing rules -
+        # 1. Decreasing specificity (-(no of characters outside the brackets))
+        # 2. Decreasing number of placeholders (no of curly brackets)
+        # 3. Alphabetical
         self._sorted_dataset_patterns = sorted(
             self.dataset_patterns.keys(),
-            key=lambda x: (_specificity(x), -x.count("{"), x),
+            key=lambda pattern: (_specificity(pattern), -pattern.count("{"), pattern),
         )
+        # Cache that stores {name : matched_pattern}
         self._pattern_name_matches_cache: dict[str, str] = {}
         # import the feed dict
         if feed_dict:

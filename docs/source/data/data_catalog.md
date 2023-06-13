@@ -461,8 +461,8 @@ airplanes:
 
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
-## Load multiple dataset with similar configuration using dataset factory patterns
-For catalog entries that share a lot of the same configurations, you could also use the dataset factory pattern introduced in Kedro 0.18.11. This syntax allows you to
+## Load multiple datasets with similar configuration using dataset factories
+For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.11. This syntax allows you to generalise the configuration and 
 reduce the number of similar catalog entries by matching it to a factory pattern.
 
 Consider the following catalog entries:
@@ -482,10 +482,10 @@ The datasets in this catalog can be generalised to the following pattern:
   type: pandas.CSVDataSet
   filepath: data/01_raw/{name}_data.csv
 ```
-When `factory_data` or `process_data` is used in your pipeline, it would be matched to the factory pattern above. Two things to keep in mind are that the factory pattern name should be enclosed in
-quotes and that the placeholders used in the catalog entry body should be present in the factory pattern name.
+When `factory_data` or `process_data` is used in your pipeline, it is matched to the factory pattern above. The factory pattern name should be enclosed in
+quotes and the placeholders used in the catalog entry body should be included in the factory pattern name.
 
-You can also use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset entries share `type`, `file_format` and `save_args`:
+You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset entries share `type`, `file_format` and `save_args`:
 ```yaml
 processing.factory_data:
   type: spark.SparkDataSet
@@ -518,12 +518,12 @@ This could be generalised to the following pattern:
     mode: overwrite
 ```
 
-You can also have multiple factory patterns in your catalog. However, doing so can lead to a situation where a dataset name from your pipeline might match multiple patterns.
+You can have multiple factory patterns in your catalog. However, doing so can lead to a situation where a dataset name from your pipeline might match multiple patterns.
 To overcome this, Kedro sorts all the potential matches for the dataset name in the pipeline and picks the best match. If there is an explicit entry for the dataset in the catalog,
 that would be picked over any factory pattern, then the pattern with the highest number of matching characters, and finally the pattern with the highest number of placeholders in the pattern name.
 
 
-You can use dataset factory pattern to define a catch-all dataset factory pattern which would overwrite the default `MemoryDataSet` creation.
+You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataSet` creation.
 ```yaml
 "{default_dataset}":
   type: pandas.CSVDataSet

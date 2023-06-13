@@ -85,9 +85,6 @@ class _EquivalentRequirement(Requirement):
         return hash((self.__class__.__name__, self._to_str(self.canonical_name)))
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, (Requirement, _EquivalentRequirement)):
-            return NotImplemented
-
         return (
             self.canonical_name == other.canonical_name
             and self.extras == other.extras

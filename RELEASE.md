@@ -13,6 +13,8 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Reworked micropackaging workflow to use standard Python packaging practices.
+* Make `kedro micropkg package` accept `--verbose`.
 
 ## Breaking changes to the API
 

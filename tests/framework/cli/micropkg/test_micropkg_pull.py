@@ -600,6 +600,17 @@ class TestMicropkgPullCommand:
             return_value=tmp_path,
         )
 
+        # Mock needed to avoid an error when build.util.project_wheel_metadata
+        # calls tempfile.TemporaryDirectory, which is mocked
+        class _FakeWheelMetadata:
+            def get_all(self, name, failobj=None):  # pylint: disable=unused-argument
+                return []
+
+        mocker.patch(
+            "kedro.framework.cli.micropkg.project_wheel_metadata",
+            return_value=_FakeWheelMetadata(),
+        )
+
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
 

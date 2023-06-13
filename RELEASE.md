@@ -14,6 +14,9 @@
 
 ## Bug fixes and other changes
 
+## Documentation changes
+* Added documentation for developing a Kedro project using a Databricks workspace.
+
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0

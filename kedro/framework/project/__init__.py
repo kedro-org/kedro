@@ -252,6 +252,11 @@ def configure_project(package_name: str):
     global PACKAGE_NAME
     PACKAGE_NAME = package_name
 
+    # Don't overwite any defined project log level in KEDRO_LOGGING_CONFIG
+    if PACKAGE_NAME and PACKAGE_NAME not in LOGGING["loggers"].keys():
+        LOGGING["loggers"].update({PACKAGE_NAME : {"level" : "INFO"}})
+        LOGGING.configure(LOGGING.data)
+
 
 def configure_logging(logging_config: dict[str, Any]) -> None:
     """Configure logging according to ``logging_config`` dictionary."""

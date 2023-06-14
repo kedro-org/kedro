@@ -10,26 +10,17 @@ tasks:
       echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
     init: |
       make sign-off
-      pip install -r test_requirements.txt --user
-      gp sync-done kedro
-    command: |
-      pre-commit install --install-hooks
-      clear
-  # Generate a test Kedro project at /workspace/project using the local Kedro version.
-  - name: test-project
-    init: |
-      gp sync-await kedro
-      export PIP_USER=no
-      cd /workspace
-      pip install -e /workspace/kedro --no-deps
-      source ~/.bashrc
+      pip install kedro --user
+    # Generate a test Kedro project at /workspace/project using the local Kedro version.
       yes project | kedro new -s pandas-iris --checkout main
-    command: |
-      pip install -e /workspace/kedro --no-deps
       cd /workspace/project
+      pip install -e /workspace/kedro --no-deps -r ../kedro/test_requirements.txt --user
+      pre-commit install --install-hooks
+
+    command: |
       clear
       kedro info
-
+  
 github:
   prebuilds:
     # enable for the master/default branch (defaults to true)

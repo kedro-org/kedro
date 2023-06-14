@@ -6,7 +6,6 @@ Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/
 By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`.
 
 ## Perform logging in your project
-
 To perform logging in your own code (e.g. in a node), you are advised to do as follows:
 
 ```python
@@ -15,6 +14,7 @@ import logging
 log = logging.getLogger(__name__)
 log.warning("Issue warning")
 log.info("Send information")
+log.debug("Useful information for debugging")
 ```
 
 ```{note}
@@ -26,8 +26,8 @@ You can take advantage of rich's [console markup](https://rich.readthedocs.io/en
 log.error("[bold red blink]Important error message![/]", extra={"markup": True})
 ```
 
-## Show DEBUG level messages
-In your `logging.yml`, you can change the level of log messages that you wish to see.
+### Show DEBUG level messages
+To see your `DEBUG` level message, you can change the level of log messages that you wish to see in `logging.yml`.
 
 ```yml
 loggers:
@@ -35,34 +35,21 @@ loggers:
     level: INFO
 
   your_python_pacakge:
-    level: INFO
+    level: DEBUG  # Change this to DEBUG
 ```
 
-For example, if you want to show the `DEBUG` level message of your own project. You need to update your `logging.yml` as follow:
-
-```yml
-loggers:
-  kedro:
-    level: INFO
-
-  your_python_pacakge:
-    level: DEBUG
-```
-
-# Customise Logging
-
+## Customise Logging
 In addition to the `rich` handler defined in Kedro's framework, the [project-side `conf/logging.yml`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/conf/base/logging.yml) defines two further logging handlers:
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting
 * `info_file_handler`: write logs of level `INFO` and above to `info.log`
 
-The logging handlers that are actually used by default are `rich` and `info_file_handler`.
+The logging handlers that are actually used by default is `rich`.
 
-The project-side logging configuration also ensures that [logs emitted from your project's logger](#perform-logging-in-your-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
+The default logging configuration also ensures that [logs emitted from your project's logger](#perform-logging-in-your-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
 
 We now give some common examples of how you might like to change your project's logging configuration.
 
-## Using `KEDRO_LOGGING_CONFIG` environment variable
-
+### Using `KEDRO_LOGGING_CONFIG` environment variable
 In order to customise logging, you need to specify the path of your logging configuration file via setting the environment variable `KEDRO_LOGGING_CONFIG`, which overrides the default Kedro's `default_logging.yml` For example, you can set `KEDRO_LOGGING_CONFIG` as follows:
 
 ```bash
@@ -96,6 +83,18 @@ rich:
 
 A comprehensive list of available options can be found in the [RichHandler documentation](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler).
 
+## Enable file-based logging
+
+File-based logging in Python projects aids troubleshooting and debugging. It offers better visibility into application's behavior and it's easy to search. However, it does not work well with read-only system such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
+
+To enable file-based logging,  add `info_file_handler` in your `root` logger as follows in your `conf/logging.yml` as follow:
+```diff
+ root:
+-  handlers: [console]
++  handlers: [console, info_file_handler]
+```
+
+By default it only tracks `INFO` level message, but it can be configured to capture any level of logs.
 
 ## Use plain console logging
 
@@ -107,7 +106,7 @@ To use plain rather than rich logging, swap the `rich` handler for the `console`
 +  handlers: [console]
 ```
 
-### Rich logging in a dumb terminal
+## Rich logging in a dumb terminal
 
 Rich [detects whether your terminal is capable](https://rich.readthedocs.io/en/stable/console.html#terminal-detection) of displaying richly formatted messages. If your terminal is "dumb" then formatting is automatically stripped out so that the logs are just plain text. This is likely to happen if you perform `kedro run` on CI (e.g. GitHub Actions or CircleCI).
 
@@ -121,18 +120,6 @@ export COLUMNS=120 LINES=25
 You must provide a value for both `COLUMNS` and `LINES` even if you only wish to change the width of the log message. Rich's default values for these variables are `COLUMNS=80` and `LINE=25`.
 ```
 
-### Rich logging in Jupyter
+## Rich logging in Jupyter
 
 Rich also formats the logs in JupyterLab and Jupyter Notebook. The size of the output console does not adapt to your window but can be controlled through the `JUPYTER_COLUMNS` and `JUPYTER_LINES` environment variables. The default values (115 and 100 respectively) should be suitable for most users, but if you require a different output console size then you should alter the values of `JUPYTER_COLUMNS` and `JUPYTER_LINES`.
-## Enable file-based logging
-
-File-based logging in Python projects aids troubleshooting and debugging. It offers better visibility into application's behavior and it's easy to search. However, it does not work well with read-only system such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
-
-To enable file-based logging,  add `info_file_handler` in your `root` logger as follows in your `conf/logging.yml` as follow:
-```diff
- root:
--  handlers: [console]
-+  handlers: [console, info_file_handler]
-```
-
-By default it only tracks `INFO` level message, but it can be configured to capture any level of logs.

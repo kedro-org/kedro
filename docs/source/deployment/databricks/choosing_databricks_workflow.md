@@ -1,19 +1,19 @@
 # Choosing the Right Kedro Workflow for Databricks
 
-Kedro supports three main workflows for Databricks: the Databricks Deployment Workflow, the Databricks Development Workflow, and the workflow for Developing Kedro projects on Databricks using notebooks. Each of these workflows serves different needs, and this guide will help you choose the right one for your situation.
+Databricks offers integration with Kedro through three principal workflows: The Databricks Deployment Workflow, the Databricks Development Workflow, and the Workflow for Developing Kedro projects on Databricks using notebooks. To enhance your development experience, it is crucial to choose the workflow that best fits your project's needs. Let's break down the advantages and use-cases of each workflow to help you make an informed decision.
 
 ## Databricks Deployment Workflow
 
-This workflow is suited for more advanced requirements, where your code needs to be executed in a structured and reproducible way. It is ideal for production deployment as it supports CI/CD and automated/scheduled runs. However, if your project requires rapid iteration, this workflow may not be the best choice as it lacks the flexibility needed for rapid development.
+The Deployment Workflow is the go-to choice when dealing with complex project requirements that call for a high degree of structure and reproducibility. It's your best bet for a production setup given its support for CI/CD, automated/scheduled runs and other advanced use-cases. That being said, it might not be the ideal choice for projects requiring quick iterations due to its relatively rigid nature.
 
 
 ## Databricks Development Workflow
 
-This workflow is perfect if you are looking for an environment that supports rapid development and testing. It leverages powerful IDE features and provides the flexibility for iterative development and modifications. This workflow is also suitable for beginners who are still getting familiar with Kedro. While it can be used for production deployment, a transition to the Databricks Deployment Workflow may be needed for a production-ready setup.
+If you're in the early stages of learning Kedro, or your project requires constant testing and adjustments, the Development Workflow is the way to go. This workflow allows you to make the most of your local IDE's capabilities for faster, error-free development. It is perfect for development stages and can handle production deployment, but you might need to transition to the Deployment Workflow to fully optimize your project for production.
 
 ## Developing Kedro projects on Databricks using notebooks
 
-If you prefer developing and testing your projects in notebooks, this workflow is for you. It allows you to work entirely within the Databricks workspace, which can be particularly useful if you want to avoid the overhead of setting up and syncing a local environment with Databricks. This workflow also supports rapid iteration. However, like the Databricks Development Workflow, a transition to the Databricks Deployment Workflow may be needed for production.
+This workflow is crafted for those who enjoy developing and testing their projects directly within notebooks. If you wish to avoid the overhead of setting up and syncing a local environment with Databricks, then this is your workflow. The flexibility for quick iterations is there, however, transitioning to the Deployment Workflow might be necessary when preparing your project for production.
 
 ## Decision-Making Flowchart
 
@@ -32,4 +32,4 @@ graph TD
   G -->|No| J[Use Databricks Deployment Workflow]
 ```
 
-Remember, the workflow you choose should meet the needs of your project, whether that's rapid development, notebook-based development, or production-ready deployment. Always consider these factors and your own familiarity with Kedro when choosing your workflow.
+Remember, the right workflow is the one that aligns best with your project's requirements, whether that's quick development, notebook-based coding, or a production-ready setup. Make sure to consider these factors alongside your comfort level with Kedro when making your decision.

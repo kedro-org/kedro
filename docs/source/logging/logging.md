@@ -1,9 +1,7 @@
-
 # Default logging configuration
+Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the Rich logging handler to format messages. We also use the Rich traceback handler to render exceptions.
 
-Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the [Rich logging handler](https://rich.readthedocs.io/en/stable/logging.html) to format messages. We also use the [Rich traceback handler](https://rich.readthedocs.io/en/stable/traceback.html) to render exceptions.
-
-By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`.
+By default, Python only shows logging messages at level WARNING and above. Kedro's logging configuration specifies that INFO level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a kedro run.
 
 ## Perform logging in your project
 To perform logging in your own code (e.g. in a node), you are advised to do as follows:
@@ -38,6 +36,8 @@ loggers:
     level: DEBUG  # Change this to DEBUG
 ```
 
+By changing the level value to `DEBUG` for the desired logger (e.g., <your_python_package>), you will start seeing `DEBUG` level messages in the log output.
+
 ## Customise Logging
 In addition to the `rich` handler defined in Kedro's framework, the [project-side `conf/logging.yml`](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/conf/base/logging.yml) defines two further logging handlers:
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting
@@ -47,7 +47,7 @@ The logging handlers that are actually used by default is `rich`.
 
 The default logging configuration also ensures that [logs emitted from your project's logger](#perform-logging-in-your-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
 
-We now give some common examples of how you might like to change your project's logging configuration.
+Now, let's provide some common examples of how you might like to change your project's logging configuration.
 
 ### Using `KEDRO_LOGGING_CONFIG` environment variable
 In order to customise logging, you need to specify the path of your logging configuration file via setting the environment variable `KEDRO_LOGGING_CONFIG`, which overrides the default Kedro's `default_logging.yml` For example, you can set `KEDRO_LOGGING_CONFIG` as follows:

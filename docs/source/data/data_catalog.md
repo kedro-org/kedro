@@ -487,9 +487,9 @@ When `factory_data` or `process_data` is used in your pipeline, it is matched to
 quotes to avoid YAML parsing errors.
 
 
-### Example 2: Generalise datasets with similar types into one dataset factory
+### Example 2: Generalise datasets of the same type into one dataset factory
 You can also combine all the datasets with the same type and configuration details. For example, consider the following
-catalog with three datasets named `reviews`, `shuttles` and `reviews` of the type `pandas.CSVDataSet`:
+catalog with three datasets named `reviews`, `shuttles` and `companies` of the type `pandas.CSVDataSet`:
 ```yaml
 shuttles:
   type: pandas.CSVDataSet
@@ -543,9 +543,9 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
-### Example 3: Generalise datasets with similar types using into one dataset factory with multiple placeholders
+### Example 3: Generalise datasets of the same type using namespaces into one dataset factory with multiple placeholders
 
-You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset entries share `type`, `file_format` and `save_args`:
+You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset entries share `type`, `file_format` and `save_args` and all datasets are part of a namespace:
 ```yaml
 processing.factory_data:
   type: spark.SparkDataSet
@@ -604,7 +604,7 @@ You can use dataset factories to define a catch-all pattern which will overwrite
 ```yaml
 "{default_dataset}":
   type: pandas.CSVDataSet
-  filepath: <directory>/{default_dataset}.csv
+  filepath: data/{default_dataset}.csv
 
 ```
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog

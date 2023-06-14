@@ -5,6 +5,7 @@
 ```{toctree}
 :maxdepth: 1
 
+choosing_databricks_workflow.md
 databricks_notebooks_development_workflow.md
 databricks_ide_development_workflow.md
 databricks_deployment_workflow

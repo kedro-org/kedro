@@ -1,4 +1,4 @@
-image: gitpod/workspace-full:legacy-dazzle-v1
+image: gitpod/workspace-python-3.10:2023-04-20-16-32-37
 
 tasks:
   # We want packages installed during the pre-build init steps to go to /workspace
@@ -6,20 +6,20 @@ tasks:
   # but pre-commit requires PIP_USER=no. Hence we set PIP_USER=no and use
   # pip install --user to install to /workspace.
   - name: kedro
-    before: |
-      echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
+    # before: |
+    #   echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
     init: |
       make sign-off
-      pip install kedro --user
+      pip install -e /workspace/kedro
+      cd /workspace
       yes project | kedro new -s pandas-iris --checkout main
-      cd /workspace/project
-      pip install -e /workspace/kedro --no-deps -r ../kedro/test_requirements.txt --user
+      pip install -e /workspace/kedro -r /workspace/kedro/test_requirements.txt
       pre-commit install --install-hooks
 
     command: |
       clear
       kedro info
-  
+
 github:
   prebuilds:
     # enable for the master/default branch (defaults to true)

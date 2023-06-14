@@ -16,6 +16,9 @@
 * Reworked micropackaging workflow to use standard Python packaging practices.
 * Make `kedro micropkg package` accept `--verbose`.
 
+## Documentation changes
+* Added documentation for developing a Kedro project using a Databricks workspace.
+
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0

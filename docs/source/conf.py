@@ -201,6 +201,9 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # to ignore or allow certain links.
 html_extra_path = [str(here / "robots.txt")]
 
+# Likewise for search console verification
+html_extra_path = [str(here / "googlebce3ad2fda582ae8.html")]
+
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
 

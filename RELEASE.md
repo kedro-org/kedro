@@ -32,6 +32,11 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Reworked micropackaging workflow to use standard Python packaging practices.
+* Make `kedro micropkg package` accept `--verbose`.
+
+## Documentation changes
+* Added documentation for developing a Kedro project using a Databricks workspace.
 
 ## Breaking changes to the API
 

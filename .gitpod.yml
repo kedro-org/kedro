@@ -11,7 +11,6 @@ tasks:
     init: |
       make sign-off
       pip install kedro --user
-    # Generate a test Kedro project at /workspace/project using the local Kedro version.
       yes project | kedro new -s pandas-iris --checkout main
       cd /workspace/project
       pip install -e /workspace/kedro --no-deps -r ../kedro/test_requirements.txt --user

@@ -104,7 +104,8 @@ extras_require = {
         "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
-        "kedro-datasets[all]~=1.4.0",
+        "kedro-datasets[all]@git+https://github.com/kedro-org/kedro-plugins@fix/setup-pickle#subdirectory=kedro-datasets",
+
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),

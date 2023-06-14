@@ -104,7 +104,7 @@ extras_require = {
         "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
-        "kedro-datasets[all]~=1.4",
+        "kedro-datasets[all]~=1.4.1",
 
     ],
     "geopandas": _collect_requirements(geopandas_require),

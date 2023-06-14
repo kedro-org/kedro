@@ -1,4 +1,4 @@
-image: gitpod/workspace-python-3.10:2023-04-20-16-32-37
+image: gitpod/workspace-python-3.8:2023-05-08-21-16-55  # make build-docs only work on 3.8 because of certain datasets
 
 tasks:
   # We want packages installed during the pre-build init steps to go to /workspace
@@ -13,7 +13,8 @@ tasks:
       pip install -e /workspace/kedro
       cd /workspace
       yes project | kedro new -s pandas-iris --checkout main
-      pip install -e /workspace/kedro -r /workspace/kedro/test_requirements.txt
+      pip install -r /workspace/kedro/test_requirements.txt
+      cd /workspace/kedro
       pre-commit install --install-hooks
 
     command: |

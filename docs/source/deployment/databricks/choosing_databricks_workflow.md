@@ -9,7 +9,7 @@ The Deployment Workflow is the go-to choice when dealing with complex project re
 
 ## Databricks Development Workflow
 
-If you're in the early stages of learning Kedro, or your project requires constant testing and adjustments, the Development Workflow is the way to go. This workflow allows you to make the most of your local IDE's capabilities for faster, error-free development. It is perfect for development stages and can handle production deployment, but you might need to transition to the Deployment Workflow to fully optimize your project for production.
+If you're in the early stages of learning Kedro, or your project requires constant testing and adjustments, the Development Workflow is the way to go. This workflow allows you to make the most of your local IDE's capabilities for faster, error-free development. It is perfect for development stages and can handle production deployment, but you might need to transition to the Deployment Workflow to fully optimise your project for production.
 
 ## Developing Kedro projects on Databricks using notebooks
 

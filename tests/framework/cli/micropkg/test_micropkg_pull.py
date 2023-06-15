@@ -1,8 +1,8 @@
 import filecmp
 import shutil
+import tarfile
 import textwrap
 from pathlib import Path
-from tarfile import TarInfo
 from unittest.mock import Mock
 
 import pytest
@@ -424,33 +424,6 @@ class TestMicropkgPullCommand:
             "file", fs_arg_1=1, fs_arg_2={"fs_arg_2_nested_1": 2}
         )
 
-    def test_pull_two_egg_info(
-        self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
-    ):
-        """Test for pulling an sdist file with more than one
-        dist-info directory.
-        """
-        call_pipeline_create(fake_project_cli, fake_metadata)
-        call_micropkg_package(fake_project_cli, fake_metadata)
-        sdist_file = (
-            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
-        )
-        assert sdist_file.is_file()
-
-        (tmp_path / f"{PIPELINE_NAME}-0.1" / "dummy.egg-info").mkdir(parents=True)
-
-        mocker.patch(
-            "kedro.framework.cli.micropkg.tempfile.TemporaryDirectory",
-            return_value=tmp_path,
-        )
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["micropkg", "pull", str(sdist_file)],
-            obj=fake_metadata,
-        )
-        assert result.exit_code
-        assert "Error: More than 1 or no egg-info files found" in result.output
-
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize("alias", [None, "alias_path"])
     def test_pull_tests_missing(
@@ -627,6 +600,17 @@ class TestMicropkgPullCommand:
             return_value=tmp_path,
         )
 
+        # Mock needed to avoid an error when build.util.project_wheel_metadata
+        # calls tempfile.TemporaryDirectory, which is mocked
+        class _FakeWheelMetadata:
+            def get_all(self, name, failobj=None):  # pylint: disable=unused-argument
+                return []
+
+        mocker.patch(
+            "kedro.framework.cli.micropkg.project_wheel_metadata",
+            return_value=_FakeWheelMetadata(),
+        )
+
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
 
@@ -645,6 +629,8 @@ class TestMicropkgPullCommand:
             [
                 "download",
                 "--no-deps",
+                "--no-binary",
+                ":all:",
                 "--dest",
                 str(tmp_path),
                 package_name,
@@ -695,7 +681,16 @@ class TestMicropkgPullCommand:
         assert result.exit_code
 
         python_call_mock.assert_called_once_with(
-            "pip", ["download", "--no-deps", "--dest", str(tmp_path), invalid_pypi_name]
+            "pip",
+            [
+                "download",
+                "--no-deps",
+                "--no-binary",
+                ":all:",
+                "--dest",
+                str(tmp_path),
+                invalid_pypi_name,
+            ],
         )
 
         assert pypi_error_message in result.stdout
@@ -750,11 +745,100 @@ class TestMicropkgPullCommand:
         assert result.exit_code
         filesystem_mock.assert_called_once_with(protocol)
         python_call_mock.assert_called_once_with(
-            "pip", ["download", "--no-deps", "--dest", str(tmp_path), package_path]
+            "pip",
+            [
+                "download",
+                "--no-deps",
+                "--no-binary",
+                ":all:",
+                "--dest",
+                str(tmp_path),
+                package_path,
+            ],
         )
         assert exception_message in result.output
         assert "Trying to use 'pip download'..." in result.output
         assert error_message in result.output
+
+    def test_micropkg_pull_invalid_sdist(
+        self, fake_project_cli, fake_repo_path, fake_metadata, tmp_path
+    ):
+        """
+        Test for pulling an invalid sdist file locally with more than one package.
+        """
+        error_message = (
+            "Invalid sdist was extracted: exactly one directory was expected"
+        )
+
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_micropkg_package(fake_project_cli, fake_metadata)
+
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        )
+        assert sdist_file.is_file()
+
+        with tarfile.open(sdist_file, "r:gz") as tar:
+            tar.extractall(tmp_path)
+
+        # Create extra project
+        extra_project = tmp_path / f"{PIPELINE_NAME}-0.1_extra"
+        extra_project.mkdir()
+        (extra_project / "README.md").touch()
+
+        # Recreate sdist
+        sdist_file.unlink()
+        with tarfile.open(sdist_file, "w:gz") as tar:
+            # Adapted from https://stackoverflow.com/a/65820259/554319
+            for fn in tmp_path.iterdir():
+                tar.add(fn, arcname=fn.relative_to(tmp_path))
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["micropkg", "pull", str(sdist_file)],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 1
+        assert error_message in result.stdout
+
+    def test_micropkg_pull_invalid_package_contents(
+        self, fake_project_cli, fake_repo_path, fake_metadata, tmp_path
+    ):
+        """
+        Test for pulling an invalid sdist file locally with more than one package.
+        """
+        error_message = "Invalid package contents: exactly one package was expected"
+
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_micropkg_package(fake_project_cli, fake_metadata)
+
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        )
+        assert sdist_file.is_file()
+
+        with tarfile.open(sdist_file, "r:gz") as tar:
+            tar.extractall(tmp_path)
+
+        # Create extra package
+        extra_package = tmp_path / f"{PIPELINE_NAME}-0.1" / f"{PIPELINE_NAME}_extra"
+        extra_package.mkdir()
+        (extra_package / "__init__.py").touch()
+
+        # Recreate sdist
+        sdist_file.unlink()
+        with tarfile.open(sdist_file, "w:gz") as tar:
+            # Adapted from https://stackoverflow.com/a/65820259/554319
+            for fn in tmp_path.iterdir():
+                tar.add(fn, arcname=fn.relative_to(tmp_path))
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["micropkg", "pull", str(sdist_file)],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 1
+        assert error_message in result.stdout
 
     @pytest.mark.parametrize(
         "tar_members,path_name",
@@ -771,7 +855,7 @@ class TestMicropkgPullCommand:
         """Test for checking path traversal attempt in tar file"""
         tar = Mock()
         tar.getmembers.return_value = [
-            TarInfo(name=tar_name) for tar_name in tar_members
+            tarfile.TarInfo(name=tar_name) for tar_name in tar_members
         ]
         path = Path(path_name)
         with pytest.raises(Exception, match="Failed to safely extract tar file."):

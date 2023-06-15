@@ -1,6 +1,8 @@
-# Databricks development workflow
+# Use an IDE, dbx and Databricks Repos to develop a Kedro project
 
-This guide demonstrates a development workflow for Kedro projects on Databricks using Databricks Repos and the PySpark Iris starter. This workflow enables you to use your local environment for development and Databricks notebooks for testing. It has several advantages for development relative to using only Databricks notebooks as it enables the use of powerful development features offered by an IDE that are not available on Databricks notebooks:
+This guide demonstrates a workflow for developing Kedro projects on Databricks using your local environment for development, then using dbx and Databricks Repos to sync code for testing on Databricks.
+
+By working in your local environment, you can take advantage of features within an IDE that are not available on Databricks notebooks:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
 - Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
@@ -8,13 +10,15 @@ This guide demonstrates a development workflow for Kedro projects on Databricks 
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
 
+If you prefer to develop a projects in notebooks rather than an in an IDE, you should follow our guide on [how to develop a Kedro project within a Databricks workspace](./databricks_notebooks_development_workflow.md) instead.
+
 ## What this page covers
 
-This tutorial introduces a project development workflow on Databricks, using your local development environment, dbx, and Databricks Repos to sync code. The main steps in this workflow are:
+The main steps in this tutorial are as follows:
 
 - [Create a virtual environment and install and configure dbx.](#install-kedro-and-dbx-in-a-new-virtual-environment)
-- [Create a new Kedro project using the PySpark Iris starter.](#create-a-new-kedro-project)
-- [Create a repo on Databricks and sync your project using dbx.](#create-a-repo-on-databricks)
+- [Create a new Kedro project using the `databricks-iris` starter.](#create-a-new-kedro-project)
+- [Create a Repo on Databricks and sync your project using dbx.](#create-a-repo-on-databricks)
 - [Upload project data to a location accessible by Kedro when run on Databricks (such as DBFS).](#upload-project-data-to-dbfs)
 - [Create a Databricks notebook to run your project.](#create-a-new-databricks-notebook)
 - [Modify your project in your local environment and test the changes on Databricks in an iterative loop.](#modify-your-project-and-test-the-changes)
@@ -71,30 +75,30 @@ pip install kedro dbx --upgrade
 4. Run `databricks fs ls dbfs:/` at the command line to verify your authentication.
 
 ```{note}
-dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
+dbx is an extension of the Databricks CLI, a command-line program for interacting with Databricks without using its UI. You will use dbx to sync your project's code with Databricks. While Git can sync code to Databricks Repos, dbx is preferred for development as it avoids creating new commits for every change, even if those changes do not work.
 ```
 
 ### Create a new Kedro project
 
-Create a Kedro project with the PySpark Iris starter using the following command in your local environment:
+Create a Kedro project with the `databricks-iris` starter using the following command in your local environment:
 
 ```bash
-kedro new --starter=pyspark-iris
+kedro new --starter=databricks-iris
 ```
 
-Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the PySpark Iris starter template.
+Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
 
-### Create a repo on Databricks
+### Create a Repo on Databricks
 
-Create a new repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
+Create a new Repo on Databricks by navigating to `New` tab in the Databricks workspace UI side bar and clicking `Repo` in the drop-down menu that appears.
 
 In this guide, you will not sync your project with a remote Git provider, so uncheck `Create repo by cloning a Git repository` and enter `iris-databricks` as the name of your new repository:
 
-![Create a new repo on Databricks](../../meta/images/databricks_repo_creation.png)
+![Create a new Repo on Databricks](../../meta/images/databricks_repo_creation.png)
 
-### Sync code with your Databricks repo using dbx
+### Sync code with your Databricks Repo using dbx
 
-The next step is to use dbx to sync your project to your repo.
+The next step is to use dbx to sync your project to your Repo.
 
 **Open a new terminal instance**, activate your conda environment, and navigate to your project directory and start `dbx sync`:
 
@@ -104,7 +108,7 @@ cd <project_root>
 dbx sync repo --dest-repo iris-databricks --source .
 ```
 
-This command will sync your local directory (`--source .`) with your repo (`--dest-repo iris-databricks`) on Databricks. When started for the first time, `dbx sync` will write output similar to the following to your terminal:
+This command will sync your local directory (`--source .`) with your Repo (`--dest-repo iris-databricks`) on Databricks. When started for the first time, `dbx sync` will write output similar to the following to your terminal:
 
 ```bash
 ...
@@ -116,19 +120,19 @@ This command will sync your local directory (`--source .`) with your repo (`--de
 
 **Keep the second terminal (running dbx sync) alive during development; closing it stops syncing new changes.**
 
-`dbx sync` will automatically sync any further changes made in your local project directory with your Databricks repo while it runs.
+`dbx sync` will automatically sync any further changes made in your local project directory with your Databricks Repo while it runs.
 
 ```{note}
 Syncing with dbx is one-way only, meaning changes you make using the Databricks Repos code editor will not be reflected in your local environment. Only make changes to your project in your local environment while syncing, not in the editor that Databricks Repos provides.
 ```
 
-### Create a `conf/local` directory in your Databricks repo
+### Create a `conf/local` directory in your Databricks Repo
 
-Kedro requires your project to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks repo, so you must create it manually.
+Kedro requires your project to have a `conf/local` directory to exist to successfully run, even if it is empty. `dbx sync` does not copy the contents of your local `conf/local` directory to your Databricks Repo, so you must create it manually.
 
 Open the Databricks workspace UI and using the panel on the left, navigate to `Repos -> <databricks_username> -> iris-databricks -> conf`, right click and select `Create -> Folder` as in the image below:
 
-![Create a conf folder in Databricks repo](../../meta/images/databricks_conf_folder_creation.png)
+![Create a conf folder in Databricks Repo](../../meta/images/databricks_conf_folder_creation.png)
 
 Name the new folder `local`. In this guide, we have no local credentials to store and so we will leave the newly created folder empty. Your `conf/local` and `local` directories should now look like the following:
 
@@ -136,7 +140,9 @@ Name the new folder `local`. In this guide, we have no local credentials to stor
 
 ### Upload project data to DBFS
 
-When run on Databricks, Kedro cannot access data stored in your project's directory. Therefore, you will need to upload your project's data to an accessible location. In this guide, we will store the data on the Databricks File System (DBFS). The PySpark Iris starter contains an environment that is set up to access data stored in DBFS (`conf/databricks`). To learn more about environments in Kedro configuration, see the [configuration documentation](../../configuration/configuration_basics.md#configuration-environments).
+When run on Databricks, Kedro cannot access data stored in your project's directory. Therefore, you will need to upload your project's data to an accessible location. In this guide, we will store the data on the Databricks File System (DBFS).
+
+The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md#the-data-catalog) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
 There are several ways to upload data to DBFS. In this guide, it is recommended to use [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html) because of the convenience it offers. At the command line in your local environment, use the following Databricks CLI command to upload your locally stored data to DBFS:
 
@@ -167,7 +173,7 @@ You should see the contents of the project's `data/` directory printed to your t
 
 Now that your project is available on Databricks, you can run it on a cluster using a notebook.
 
-To run the Python code from your Databricks repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
+To run the Python code from your Databricks Repo, [create a new Python notebook](https://docs.databricks.com/notebooks/notebooks-manage.html#create-a-notebook) in your workspace. Name it `iris-databricks` for traceability and attach it to your cluster:
 
 ![Create a new notebook on Databricks](../../meta/images/databricks_notebook_creation.png)
 
@@ -187,10 +193,10 @@ Open your newly-created notebook and create **four new cells** inside it. You wi
 %load_ext kedro.ipython
 ```
 
-3. Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. The `--env=databricks` option will make Kedro use the `databricks` environment. The `databricks` environment is defined in the PySpark Iris starter and directs Kedro to use the configuration in the `conf/databricks` directory. Add the following code to the third new cell to load your Kedro project:
+3. Loading the extension allows you to use the `%reload_kedro` line magic to load your Kedro project. Add the following code to the third new cell to load your Kedro project:
 
 ```ipython
-%reload_kedro /Workspace/Repos/<databricks_username>/iris-databricks --env=databricks
+%reload_kedro /Workspace/Repos/<databricks_username>/iris-databricks
 ```
 
 4. Loading your Kedro project with the `%reload_kedro` line magic will define four global variables in your notebook: `context`, `session`, `catalog` and `pipelines`. You will use the `session` variable to run your project. Add the following code to the fourth new cell to run your Kedro project:
@@ -215,10 +221,9 @@ You should see logging output while the cell is running. After execution finishe
 
 ```bash
 ...
-[08/09/22 11:23:30] INFO     Model has accuracy of 0.960 on test data.                                        nodes.py:74
-                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
-                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
-                    INFO     Pipeline execution completed successfully.                                      runner.py:89
+2023-06-06 17:21:53,221 - iris_databricks.nodes - INFO - Model has an accuracy of 0.960 on test data.
+2023-06-06 17:21:53,222 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
+2023-06-06 17:21:53,224 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
 ## Modify your project and test the changes
@@ -227,9 +232,9 @@ Now that your project has run successfully once, you can make changes using the 
 
 ### Modify the training / test split ratio
 
-The PySpark Iris starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by editing your project in your local environment, then sync it with the Databricks repo using `dbx`, and then run the modified project on Databricks to observe the different result.
+The `databricks-iris` starter uses a default 80-20 ratio of training data to test data when training the classifier. In this section, you will change this ratio to 70-30 by editing your project in your local environment, then sync it with the Databricks Repo using `dbx`, and then run the modified project on Databricks to observe the different result.
 
-Open the file `<project_root>/conf/base/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks repo:
+Open the file `<project_root>/conf/base/parameters.yml` in your local environment. Edit the line `train_fraction: 0.8` to `train_fraction: 0.7` and save your changes. Look in the terminal where `dbx sync` is running, you should see it automatically sync your changes with your Databricks Repo:
 
 ```bash
 ...
@@ -243,10 +248,9 @@ Return to your Databricks notebook. Re-run the third and fourth cells in your no
 
 ```bash
 ...
-[08/09/22 11:23:30] INFO     Model has accuracy of 0.953 on test data.                                        nodes.py:74
-                    INFO     Saving data to 'metrics' (MetricsDataSet)...                             data_catalog.py:382
-                    INFO     Completed 3 out of 3 tasks                                           sequential_runner.py:85
-                    INFO     Pipeline execution completed successfully.                                      runner.py:89
+2023-06-06 17:23:19,561 - iris_databricks.nodes - INFO - Model has an accuracy of 0.972 on test data.
+2023-06-06 17:23:19,562 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
+2023-06-06 17:23:19,564 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
 You can see that your model's accuracy has changed now that you are using a different classifier to produce the result.

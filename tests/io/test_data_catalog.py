@@ -793,6 +793,8 @@ class TestDataCatalogDatasetFactories:
         """Check that the pattern match cache is updated when exists_in_catalog() is called"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
         assert catalog.exists_in_catalog_config(dataset_name) == expected
+        if expected:
+            assert dataset_name in catalog._pattern_matches_cache
 
     def test_patterns_not_in_catalog_datasets(self, config_with_dataset_factories):
         """Check that the pattern is not in the catalog datasets"""

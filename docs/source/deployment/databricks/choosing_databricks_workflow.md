@@ -10,12 +10,13 @@ To enhance your development experience, it is crucial to choose the workflow tha
 
 ## [Use a Databricks workspace to develop a Kedro project](./databricks_notebooks_development_workflow.md)
 
-This workflow is crafted for those who enjoy developing and testing their projects directly within notebooks. If you wish to avoid the overhead of setting up and syncing a local environment with Databricks, then this is your workflow. The flexibility for quick iterations is there, though transitioning to a [job-based deployment](#Use-a-Databricks-job-to-deploy-a-Kedro-project) might be necessary when preparing your project for production.
+This workflow is crafted for those who enjoy developing and testing their projects directly within notebooks. If you wish to avoid the overhead of setting up and syncing a local environment with Databricks, then this is your workflow. The flexibility for quick iterations is there, though transitioning to a [job-based deployment](#heading-target) might be necessary when preparing your project for production.
 
 ## [Use an IDE, dbx and Databricks Repos to develop a Kedro project](./databricks_ide_development_workflow.md)
 
 If you're in the early stages of learning Kedro, or your project requires constant testing and adjustments, this workflow is the way to go. This workflow allows you to make the most of your local IDE's capabilities for faster, error-free development. It is perfect for development stages and can handle production deployment, but you might need to transition to the Deployment Workflow to fully optimise your project for production.
 
+(heading-target)=
 ## [Use a Databricks job to deploy a Kedro project](./databricks_deployment_workflow.md)
 
 This workflow is the go-to choice when dealing with complex project requirements that call for a high degree of structure and reproducibility. It's your best bet for a production setup given its support for CI/CD, automated/scheduled runs and other advanced use-cases. That being said, it might not be the ideal choice for projects requiring quick iterations due to its relatively rigid nature.
@@ -30,7 +31,7 @@ graph TD
   B -->|Yes| C[Use a Databricks workspace to develop a Kedro project]
   B -->|No| D{Are you a beginner with Kedro?}
   D -->|Yes| E[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
-  D -->|No| F{Do you have advanced project requirements?}
+  D -->|No| F{Do you have advanced project requirements<br>e.g. CI/CD, Scheduling, Production Ready, Complex Pipelines, etc.?}
   F -->|Yes| G{Is rapid development needed for your project needs?}
   F -->|No| H[Use a Databricks job to deploy a Kedro project]
   G -->|Yes| I[Use an IDE, dbx and Databricks Repos to develop a Kedro project]

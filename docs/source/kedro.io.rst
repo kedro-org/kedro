@@ -30,3 +30,6 @@ kedro.io
    kedro.io.DataSetAlreadyExistsError
    kedro.io.DataSetError
    kedro.io.DataSetNotFoundError
+   kedro.io.DatasetAlreadyExistsError
+   kedro.io.DatasetError
+   kedro.io.DatasetNotFoundError

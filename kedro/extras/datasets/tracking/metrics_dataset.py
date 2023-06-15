@@ -7,7 +7,7 @@ import json
 from typing import Dict, NoReturn
 
 from kedro.extras.datasets.json import JSONDataSet
-from kedro.io.core import DatasetError, get_filepath_str
+from kedro.io.core import DataSetError, get_filepath_str
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -47,7 +47,7 @@ class MetricsDataSet(JSONDataSet):
     versioned = True
 
     def _load(self) -> NoReturn:
-        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
+        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(self, data: Dict[str, float]) -> None:
         """Converts all values in the data from a ``MetricsDataSet`` to float to make sure
@@ -57,7 +57,7 @@ class MetricsDataSet(JSONDataSet):
             for key, value in data.items():
                 data[key] = float(value)
         except ValueError as exc:
-            raise DatasetError(
+            raise DataSetError(
                 f"The MetricsDataSet expects only numeric values. {exc}"
             ) from exc
 

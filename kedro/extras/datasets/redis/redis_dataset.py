@@ -9,7 +9,7 @@ from typing import Any, Dict
 
 import redis
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataSet, DataSetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -163,7 +163,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     # accepted by pickle.loads.
     def _load(self) -> Any:
         if not self.exists():
-            raise DatasetError(f"The provided key {self._key} does not exists.")
+            raise DataSetError(f"The provided key {self._key} does not exists.")
         imported_backend = importlib.import_module(self._backend)
         return imported_backend.loads(  # type: ignore
             self._redis_db.get(self._key), **self._load_args
@@ -178,7 +178,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
                 **self._redis_set_args,
             )
         except Exception as exc:
-            raise DatasetError(
+            raise DataSetError(
                 f"{data.__class__} was not serialised due to: {exc}"
             ) from exc
 
@@ -186,6 +186,6 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
         try:
             return bool(self._redis_db.exists(self._key))
         except Exception as exc:
-            raise DatasetError(
+            raise DataSetError(
                 f"The existence of key {self._key} could not be established due to: {exc}"
             ) from exc

@@ -11,7 +11,7 @@ import holoviews as hv
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DatasetError,
+    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -111,7 +111,7 @@ class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, NoReturn]):
         }
 
     def _load(self) -> NoReturn:
-        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
+        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(self, data: HoloViews) -> None:
         bytes_buffer = io.BytesIO()

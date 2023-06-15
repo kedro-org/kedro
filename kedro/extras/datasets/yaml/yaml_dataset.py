@@ -10,7 +10,7 @@ import yaml
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DatasetError,
+    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -141,7 +141,7 @@ class YAMLDataSet(AbstractVersionedDataSet[Dict, Dict]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DatasetError:
+        except DataSetError:
             return False
 
         return self._fs.exists(load_path)

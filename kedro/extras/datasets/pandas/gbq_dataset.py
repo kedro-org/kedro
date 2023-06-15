@@ -14,7 +14,7 @@ from google.oauth2.credentials import Credentials
 
 from kedro.io.core import (
     AbstractDataSet,
-    DatasetError,
+    DataSetError,
     get_filepath_str,
     get_protocol_and_path,
     validate_on_forbidden_chars,
@@ -103,7 +103,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
                 All defaults are preserved, but "progress_bar", which is set to False.
 
         Raises:
-            DatasetError: When ``load_args['location']`` and ``save_args['location']``
+            DataSetError: When ``load_args['location']`` and ``save_args['location']``
                 are different.
         """
         # Handle default load and save arguments
@@ -168,7 +168,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
         load_location = self._load_args.get("location")
 
         if save_location != load_location:
-            raise DatasetError(
+            raise DataSetError(
                 """"load_args['location']" is different from "save_args['location']". """
                 "The 'location' defines where BigQuery data is stored, therefore has "
                 "to be the same for save and load args. "
@@ -242,17 +242,17 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             filepath: A path to a file with a sql query statement.
 
         Raises:
-            DatasetError: When ``sql`` and ``filepath`` parameters are either both empty
+            DataSetError: When ``sql`` and ``filepath`` parameters are either both empty
                 or both provided, as well as when the `save()` method is invoked.
         """
         if sql and filepath:
-            raise DatasetError(
+            raise DataSetError(
                 "'sql' and 'filepath' arguments cannot both be provided."
                 "Please only provide one."
             )
 
         if not (sql or filepath):
-            raise DatasetError(
+            raise DataSetError(
                 "'sql' and 'filepath' arguments cannot both be empty."
                 "Please provide a sql query or path to a sql query file."
             )
@@ -312,4 +312,4 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         )
 
     def _save(self, data: None) -> NoReturn:
-        raise DatasetError("'save' is not supported on GBQQueryDataSet")
+        raise DataSetError("'save' is not supported on GBQQueryDataSet")

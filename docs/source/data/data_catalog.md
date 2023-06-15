@@ -543,9 +543,59 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
-### Example 3: Generalise datasets of the same type using namespaces into one dataset factory with multiple placeholders
+### Example 3: Generalise datasets using namespaces into one dataset factory
+You can also generalise the catalog entries for datasets belonging to namespaced modular pipelines. Consider the
+following pipeline which takes in a `model_input_table` and outputs two regressors belonging to the
+`active_modelling_pipeline` and the `candidate_modelling_pipeline` namespaces:
+```python
+from kedro.pipeline import Pipeline, node
+from kedro.pipeline.modular_pipeline import pipeline
 
-You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset entries share `type`, `file_format` and `save_args` and all datasets are part of a namespace:
+from .nodes import evaluate_model, split_data, train_model
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    pipeline_instance = pipeline(
+        [
+            node(
+                func=split_data,
+                inputs=["model_input_table", "params:model_options"],
+                outputs=["X_train", "y_train"],
+                name="split_data_node",
+            ),
+            node(
+                func=train_model,
+                inputs=["X_train", "y_train"],
+                outputs="regressor",
+                name="train_model_node",
+            ),
+        ]
+    )
+    ds_pipeline_1 = pipeline(
+        pipe=pipeline_instance,
+        inputs="model_input_table",
+        namespace="active_modelling_pipeline",
+    )
+    ds_pipeline_2 = pipeline(
+        pipe=pipeline_instance,
+        inputs="model_input_table",
+        namespace="candidate_modelling_pipeline",
+    )
+
+    return ds_pipeline_1 + ds_pipeline_2
+```
+You can now have one dataset factory pattern in your catalog instead of two separate entries for `active_modelling_pipeline.regressor`
+and `candidate_modelling_pipeline.regressor` as below:
+```yaml
+{namespace}.regressor:
+  type: pickle.PickleDataSet
+  filepath: data/06_models/regressor_{namespace}.pkl
+  versioned: true
+```
+### Example 4: Generalise datasets of the same type in different layers into one dataset factory with multiple placeholders
+
+You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset
+entries share `type`, `file_format` and `save_args`:
 ```yaml
 processing.factory_data:
   type: spark.SparkDataSet
@@ -570,16 +620,16 @@ modelling.metrics:
 ```
 This could be generalised to the following pattern:
 ```yaml
-"{namespace}.{dataset_name}":
+"{layer}.{dataset_name}":
   type: spark.SparkDataSet
-  filepath: data/{namespace}/{dataset_name}.pq
+  filepath: data/{layer}/{dataset_name}.pq
   file_format: parquet
   save_args:
     mode: overwrite
 ```
 All the placeholders used in the catalog entry body must exist in the factory pattern name.
 
-### Example 4: Generalise datasets using multiple dataset factories
+### Example 5: Generalise datasets using multiple dataset factories
 You can have multiple dataset factories in your catalog. For example:
 ```yaml
 "{namespace}.{dataset_name}@spark":
@@ -599,7 +649,7 @@ The matches are ranked according to the following criteria :
 2. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
 3. Alphabetical order
 
-### Example 5: Generalise all datasets with a catch-all dataset factory to overwrite the default `MemoryDataSet`
+### Example 6: Generalise all datasets with a catch-all dataset factory to overwrite the default `MemoryDataSet`
 You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataSet` creation.
 ```yaml
 "{default_dataset}":

@@ -16,9 +16,9 @@ This workflow is crafted for those who enjoy developing and testing their projec
 
 If you're in the early stages of learning Kedro, or your project requires constant testing and adjustments, this workflow is the way to go. This workflow allows you to make the most of your local IDE's capabilities for faster, error-free development. It is perfect for development stages and can handle production deployment, but you might need to transition to the Deployment Workflow to fully optimise your project for production.
 
+(heading-target)=
 ## [Use a Databricks job to deploy a Kedro project](./databricks_deployment_workflow.md)
 
-(heading-target)=
 This workflow is the go-to choice when dealing with complex project requirements that call for a high degree of structure and reproducibility. It's your best bet for a production setup given its support for CI/CD, automated/scheduled runs and other advanced use-cases. That being said, it might not be the ideal choice for projects requiring quick iterations due to its relatively rigid nature.
 
 ## Decision-Making Flowchart

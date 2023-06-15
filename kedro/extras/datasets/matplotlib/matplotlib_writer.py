@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DatasetError,
+    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -190,7 +190,7 @@ class MatplotlibWriter(
         }
 
     def _load(self) -> NoReturn:
-        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
+        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(
         self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]

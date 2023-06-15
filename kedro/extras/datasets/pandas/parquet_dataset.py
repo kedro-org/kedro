@@ -14,7 +14,7 @@ import pyarrow.parquet as pq
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
-    DatasetError,
+    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -195,12 +195,12 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         if Path(save_path).is_dir():
-            raise DatasetError(
+            raise DataSetError(
                 f"Saving {self.__class__.__name__} to a directory is not supported."
             )
 
         if "partition_cols" in self._save_args:
-            raise DatasetError(
+            raise DataSetError(
                 f"{self.__class__.__name__} does not support save argument "
                 f"'partition_cols'. Please use 'kedro.io.PartitionedDataSet' instead."
             )
@@ -216,7 +216,7 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DatasetError:
+        except DataSetError:
             return False
 
         return self._fs.exists(load_path)

@@ -12,7 +12,7 @@ import fsspec
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DatasetError,
+    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -221,7 +221,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 imported_backend = importlib.import_module(self._backend)
                 imported_backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
-                raise DatasetError(
+                raise DataSetError(
                     f"{data.__class__} was not serialised due to: {exc}"
                 ) from exc
 
@@ -230,7 +230,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DatasetError:
+        except DataSetError:
             return False
 
         return self._fs.exists(load_path)

@@ -1,4 +1,4 @@
-"""``GeoJSONLocalDataset`` is an ``AbstractVersionedDataSet`` to save and load GeoJSON files.
+"""``GeoJSONDataSet`` is an ``AbstractVersionedDataSet`` to save and load GeoJSON files.
 """
 __all__ = ["GeoJSONDataSet"]
 

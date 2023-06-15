@@ -510,7 +510,8 @@ These datasets can be combined into the following dataset factory:
   filepath: data/01_raw/{dataset_name}.csv
 ```
 You will then have to update the pipelines in your project located at `src/<project_name>/<pipeline_name>/pipeline.py` to refer to these datasets as `shuttles#csv`,
-`reviews#csv` and `companies#csv`.
+`reviews#csv` and `companies#csv`. Adding a suffix or a prefix to the dataset names and the dataset factory patterns, like `#csv` here, ensures that the dataset
+names are matched with the intended pattern.
 ```python
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
 

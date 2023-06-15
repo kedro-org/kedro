@@ -261,7 +261,7 @@ class TestTensorFlowModelDataset:
 
     def test_exists_with_exception(self, tf_model_dataset, mocker):
         """Test `exists` method invocation when `get_filepath_str` raises an exception."""
-        mocker.patch("kedro.io.core.get_filepath_str", side_effect=DataSetError)
+        mocker.patch("kedro.io.core.get_filepath_str", side_effect=DatasetError)
         assert not tf_model_dataset.exists()
 
     def test_save_and_overwrite_existing_model(

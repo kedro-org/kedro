@@ -77,7 +77,9 @@ class AbstractRunner(ABC):
         # Check which datasets used in the pipeline aren't in the catalog and don't match
         # a pattern in the catalog
         unregistered_ds = [
-            ds for ds in pipeline.data_sets() if not catalog.exists_in_catalog(ds)
+            ds
+            for ds in pipeline.data_sets()
+            if not catalog.exists_in_catalog_config(ds)
         ]
 
         # Check if there are any input datasets that aren't in the catalog and

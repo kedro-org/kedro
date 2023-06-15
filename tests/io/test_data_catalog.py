@@ -769,13 +769,13 @@ class TestDataCatalogDatasetFactories:
             ("tesla_card", False),
         ],
     )
-    def test_exists_in_catalog(
+    def test_exists_in_catalog_config(
         self, config_with_dataset_factories, dataset_name, expected
     ):
         """Check that the dataset exists in catalog when it matches a pattern
         or is in the catalog"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        assert catalog.exists_in_catalog(dataset_name) == expected
+        assert catalog.exists_in_catalog_config(dataset_name) == expected
 
     @pytest.mark.parametrize(
         "dataset_name, expected",
@@ -787,12 +787,12 @@ class TestDataCatalogDatasetFactories:
             ("sail_boats", True),
         ],
     )
-    def test_exists_in_catalog_cache_updated(
+    def test_exists_in_catalog_config_cache_updated(
         self, config_with_dataset_factories, dataset_name, expected
     ):
         """Check that the pattern match cache is updated when exists_in_catalog() is called"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        assert catalog.exists_in_catalog(dataset_name) == expected
+        assert catalog.exists_in_catalog_config(dataset_name) == expected
 
     def test_patterns_not_in_catalog_datasets(self, config_with_dataset_factories):
         """Check that the pattern is not in the catalog datasets"""

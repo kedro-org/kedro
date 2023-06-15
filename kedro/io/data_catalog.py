@@ -97,17 +97,17 @@ def _sub_nonword_chars(data_set_name: str) -> str:
 
 
 def _specificity(pattern: str) -> int:
-    """Helper function to check length of exactly matched characters not inside brackets
+    """Helper function to check the length of exactly matched characters not inside brackets
     Example -
     specificity("{namespace}.companies") = 10
     specificity("{namespace}.{dataset}") = 1
     specificity("france.companies") = 16
     Args:
-        pattern:
-    Returns:
+        pattern: The factory pattern
     """
+    # Remove all the placeholders from the pattern
     result = re.sub(r"\{.*?\}", "", pattern)
-    return -len(result)
+    return len(result)
 
 
 class _FrozenDatasets:
@@ -191,15 +191,19 @@ class DataCatalog:
         # {dataset pattern name : dataset pattern body}
         self.dataset_patterns = dict(dataset_patterns or {})
         # Sort all the patterns according to the parsing rules -
-        # 1. Decreasing specificity (-(no of characters outside the brackets))
+        # 1. Decreasing specificity (no of characters outside the brackets)
         # 2. Decreasing number of placeholders (no of curly brackets)
         # 3. Alphabetical
         self._sorted_dataset_patterns = sorted(
             self.dataset_patterns.keys(),
-            key=lambda pattern: (_specificity(pattern), -pattern.count("{"), pattern),
+            key=lambda pattern: (
+                -(_specificity(pattern)),
+                -pattern.count("{"),
+                pattern,
+            ),
         )
         # Cache that stores {name : matched_pattern}
-        self._pattern_name_matches_cache: dict[str, str] = {}
+        self._pattern_matches_cache: dict[str, str] = {}
         # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -329,9 +333,9 @@ class DataCatalog:
             # try to match it against the data factories in the catalog. If it's a match,
             # resolve it to a dataset instance and add it to the catalog, so it only needs
             # to be matched once and not everytime the dataset is used in the pipeline.
-            if self.exists_in_catalog(data_set_name):
-                pattern = self._pattern_name_matches_cache[data_set_name]
-                matched_dataset = self._get_resolved_dataset(data_set_name, pattern)
+            if self.exists_in_catalog_config(data_set_name):
+                pattern = self._pattern_matches_cache[data_set_name]
+                matched_dataset = self._resolve_dataset(data_set_name, pattern)
                 self.add(data_set_name, matched_dataset)
             else:
                 error_msg = f"DataSet '{data_set_name}' not found in the catalog"
@@ -360,14 +364,14 @@ class DataCatalog:
 
         return data_set
 
-    def _get_resolved_dataset(
+    def _resolve_dataset(
         self, dataset_name: str, matched_pattern: str
     ) -> AbstractDataSet:
+        """Get resolved AbstractDataSet from a factory config"""
         result = parse(matched_pattern, dataset_name)
         template_copy = copy.deepcopy(self.dataset_patterns[matched_pattern])
+        # Resolve the factory config for the dataset
         for key, value in template_copy.items():
-            # Find all dataset fields that need to be resolved with
-            # the values that were matched.
             if isinstance(value, Iterable) and "}" in value:
                 string_value = str(value)
                 # result.named: gives access to all dict items in the match result.
@@ -379,7 +383,7 @@ class DataCatalog:
                     raise DataSetError(
                         f"Unable to resolve '{key}' for the pattern '{matched_pattern}'"
                     ) from exc
-            # Create dataset from catalog template.
+        # Create dataset from catalog template.
         return AbstractDataSet.from_config(dataset_name, template_copy)
 
     def load(self, name: str, version: str = None) -> Any:
@@ -638,27 +642,25 @@ class DataCatalog:
             ) from exc
         return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 
-    def exists_in_catalog(self, dataset_name: str) -> bool:
+    def exists_in_catalog_config(self, dataset_name: str) -> bool:
         """Check if a dataset exists in the catalog as an exact match or if it matches a pattern."""
         if (
             dataset_name in self._data_sets
-            or dataset_name in self._pattern_name_matches_cache
+            or dataset_name in self._pattern_matches_cache
         ):
             return True
-        matched_pattern = self.match_name_against_pattern(dataset_name)
-        if self.dataset_patterns and matched_pattern:
+        matched_pattern = self.match_name_against_patterns(dataset_name)
+        if matched_pattern:
             # cache the "dataset_name -> pattern" match
-            self._pattern_name_matches_cache[dataset_name] = matched_pattern
+            self._pattern_matches_cache[dataset_name] = matched_pattern
             return True
         return False
 
-    def match_name_against_pattern(self, dataset_name: str) -> str | None:
+    def match_name_against_patterns(self, dataset_name: str) -> str | None:
         """Match a dataset name against existing patterns"""
         # Loop through all dataset patterns and check if the given dataset name has a match.
         for pattern in self._sorted_dataset_patterns:
             result = parse(pattern, dataset_name)
-            # If there's a match resolve the rest of the pattern template to create
-            # a dataset instance. A result can be None or contain a dictionary of matched items:
             if result:
                 return pattern
         return None
@@ -676,7 +678,11 @@ class DataCatalog:
         )
 
     def __eq__(self, other):
-        return (self._data_sets, self.layers) == (other._data_sets, other.layers)
+        return (self._data_sets, self.layers, self.dataset_patterns) == (
+            other._data_sets,
+            other.layers,
+            other.dataset_patterns,
+        )
 
     def confirm(self, name: str) -> None:
         """Confirm a dataset by its name.

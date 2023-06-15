@@ -1,4 +1,5 @@
-![Kedro Logo Banner](https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png)
+![Kedro Logo Banner - Light](.github/demo-dark.png#gh-dark-mode-only)
+![Kedro Logo Banner - Dark](.github/demo-light.png#gh-light-mode-only)
 [![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
@@ -8,7 +9,6 @@
 ![Develop Branch Build](https://img.shields.io/circleci/build/github/kedro-org/kedro/develop?label=develop)
 [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://docs.kedro.org/)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/6711/badge)](https://bestpractices.coreinfrastructure.org/projects/6711)
-
 
 ## What is Kedro?
 
@@ -32,21 +32,18 @@ conda install -c conda-forge kedro
 
 Our [Get Started guide](https://docs.kedro.org/en/stable/get_started/install.html) contains full installation instructions, and includes how to set up Python virtual environments.
 
-
 ## What are the main features of Kedro?
 
 ![Kedro-Viz Pipeline Visualisation](https://github.com/kedro-org/kedro-viz/blob/main/.github/img/banner.png)
-*A pipeline visualisation generated using [Kedro-Viz](https://github.com/kedro-org/kedro-viz)*
+_A pipeline visualisation generated using [Kedro-Viz](https://github.com/kedro-org/kedro-viz)_
 
-
-| Feature | What is this? |
-|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Project Template | A standard, modifiable and easy-to-use project template based on [Cookiecutter Data Science](https://github.com/drivendata/cookiecutter-data-science/). |
-| Data Catalog | A series of lightweight data connectors used to save and load data across many different file formats and file systems, including local and network file systems, cloud object stores, and HDFS. The Data Catalog also includes data and model versioning for file-based systems. |
-| Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/kedro-org/kedro-viz). |
-| Coding Standards | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`flake8`](https://github.com/PyCQA/flake8), [`isort`](https://github.com/PyCQA/isort) and [`black`](https://github.com/psf/black) and make use of the standard Python logging library. |
-| Flexible Deployment | Deployment strategies that include single or distributed-machine deployment as well as additional support for deploying on Argo, Prefect, Kubeflow, AWS Batch and Databricks. |
-
+| Feature              | What is this?                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project Template     | A standard, modifiable and easy-to-use project template based on [Cookiecutter Data Science](https://github.com/drivendata/cookiecutter-data-science/).                                                                                                                                                                                                                                        |
+| Data Catalog         | A series of lightweight data connectors used to save and load data across many different file formats and file systems, including local and network file systems, cloud object stores, and HDFS. The Data Catalog also includes data and model versioning for file-based systems.                                                                                                              |
+| Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/kedro-org/kedro-viz).                                                                                                                                                                                                                                  |
+| Coding Standards     | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`flake8`](https://github.com/PyCQA/flake8), [`isort`](https://github.com/PyCQA/isort) and [`black`](https://github.com/psf/black) and make use of the standard Python logging library. |
+| Flexible Deployment  | Deployment strategies that include single or distributed-machine deployment as well as additional support for deploying on Argo, Prefect, Kubeflow, AWS Batch and Databricks.                                                                                                                                                                                                                  |
 
 ## How do I use Kedro?
 
@@ -59,31 +56,27 @@ For new and intermediate Kedro users, there's a comprehensive section on [how to
 
 Further documentation is available for more advanced Kedro usage and deployment. We also recommend the [glossary](https://docs.kedro.org/en/stable/resources/glossary.html) and the [API reference documentation](/kedro) for additional information.
 
-
 ## Why does Kedro exist?
 
 Kedro is built upon our collective best-practice (and mistakes) trying to deliver real-world ML applications that have vast amounts of raw unvetted data. We developed Kedro to achieve the following:
- - To address the main shortcomings of Jupyter notebooks, one-off scripts, and glue-code because there is a focus on
-  creating **maintainable data science code**
- - To enhance **team collaboration** when different team members have varied exposure to software engineering concepts
- - To increase efficiency, because applied concepts like modularity and separation of concerns inspire the creation of
-  **reusable analytics code**
 
+- To address the main shortcomings of Jupyter notebooks, one-off scripts, and glue-code because there is a focus on
+  creating **maintainable data science code**
+- To enhance **team collaboration** when different team members have varied exposure to software engineering concepts
+- To increase efficiency, because applied concepts like modularity and separation of concerns inspire the creation of
+  **reusable analytics code**
 
 ## The humans behind Kedro
 
 The [Kedro product team](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html#kedro-maintainers) and a number of [open source contributors from across the world](https://github.com/kedro-org/kedro/releases) maintain Kedro.
 
-
 ## Can I contribute?
 
 Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
 
-
 ## Where can I learn more?
 
 There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://docs.kedro.org/en/stable/faq/faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
-
 
 ## Who likes Kedro?
 
@@ -131,7 +124,6 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [XP](https://youtu.be/wgnGOVNkXqU?t=2210).
 
 Kedro won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/). Kedro has received an [honorable mention in the User Experience category in Fast Company’s 2022 Innovation by Design Awards](https://www.fastcompany.com/90772252/user-experience-innovation-by-design-2022).
-
 
 ## How can I cite Kedro?
 

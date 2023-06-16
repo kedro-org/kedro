@@ -20,7 +20,7 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
-from kedro.utils import load_obj
+from kedro.utils import DeprecatedClassMeta, load_obj
 
 warnings.simplefilter("default", DeprecationWarning)
 
@@ -36,7 +36,6 @@ _DEPRECATED_ERROR_CLASSES = [
     "DataSetNotFoundError",
     "DataSetAlreadyExistsError",
 ]
-
 
 class DatasetError(Exception):
     """``DatasetError`` raised by ``AbstractDataSet`` implementations

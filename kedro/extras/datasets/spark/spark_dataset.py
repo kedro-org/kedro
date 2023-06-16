@@ -18,7 +18,7 @@ from s3fs import S3FileSystem
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -346,7 +346,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         filepath = schema.get("filepath")
         if not filepath:
-            raise DataSetError(
+            raise DatasetError(
                 "Schema load argument does not specify a 'filepath' attribute. Please"
                 "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
             )
@@ -363,7 +363,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             try:
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:
-                raise DataSetError(
+                raise DatasetError(
                     f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please"
                     f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
                 ) from exc
@@ -417,7 +417,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             and self._file_format == "delta"
             and write_mode not in supported_modes
         ):
-            raise DataSetError(
+            raise DatasetError(
                 f"It is not possible to perform 'save()' for file format 'delta' "
                 f"with mode '{write_mode}' on 'SparkDataSet'. "
                 f"Please use 'spark.DeltaTableDataSet' instead."

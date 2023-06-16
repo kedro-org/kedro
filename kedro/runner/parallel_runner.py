@@ -23,29 +23,30 @@ from kedro.framework.hooks.manager import (
     _register_hooks_setuptools,
 )
 from kedro.framework.project import settings
-from kedro.io import DataCatalog, DataSetError, MemoryDataSet
+from kedro.io import DataCatalog, DatasetError, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
+from kedro.utils import DeprecatedClassMeta
 
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61
 
 
-class _SharedMemoryDataSet:
-    """``_SharedMemoryDataSet`` is a wrapper class for a shared MemoryDataSet in SyncManager.
+class _SharedMemoryDataset:
+    """``_SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
     It is not inherited from AbstractDataSet class.
     """
 
     def __init__(self, manager: SyncManager):
-        """Creates a new instance of ``_SharedMemoryDataSet``,
+        """Creates a new instance of ``_SharedMemoryDataset``,
         and creates shared memorydataset attribute.
 
         Args:
             manager: An instance of multiprocessing manager for shared objects.
 
         """
-        self.shared_memory_dataset = manager.MemoryDataSet()  # type: ignore
+        self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
 
     def __getattr__(self, name):
         # This if condition prevents recursive call when deserialising
@@ -54,7 +55,7 @@ class _SharedMemoryDataSet:
         return getattr(self.shared_memory_dataset, name)
 
     def save(self, data: Any):
-        """Calls save method of a shared MemoryDataSet in SyncManager."""
+        """Calls save method of a shared MemoryDataset in SyncManager."""
         try:
             self.shared_memory_dataset.save(data)
         except Exception as exc:
@@ -62,21 +63,27 @@ class _SharedMemoryDataSet:
             try:
                 pickle.dumps(data)
             except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
-                raise DataSetError(
+                raise DatasetError(
                     f"{str(data.__class__)} cannot be serialised. ParallelRunner "
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
             raise exc
 
 
+class _SharedMemoryDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=too-few-public-methods
+
+    _DeprecatedClassMeta__alias = _SharedMemoryDataset
+
+
 class ParallelRunnerManager(SyncManager):
-    """``ParallelRunnerManager`` is used to create shared ``MemoryDataSet``
+    """``ParallelRunnerManager`` is used to create shared ``MemoryDataset``
     objects as default data sets in a pipeline.
     """
 
 
 ParallelRunnerManager.register(  # pylint: disable=no-member
-    "MemoryDataSet", MemoryDataSet
+    "MemoryDataset", MemoryDataset
 )
 
 
@@ -167,18 +174,18 @@ class ParallelRunner(AbstractRunner):
 
     def create_default_data_set(  # type: ignore
         self, ds_name: str
-    ) -> _SharedMemoryDataSet:
+    ) -> _SharedMemoryDataset:
         """Factory method for creating the default dataset for the runner.
 
         Args:
             ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of ``_SharedMemoryDataSet`` to be used for all
+            An instance of ``_SharedMemoryDataset`` to be used for all
             unregistered datasets.
 
         """
-        return _SharedMemoryDataSet(self._manager)
+        return _SharedMemoryDataset(self._manager)
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
@@ -233,7 +240,7 @@ class ParallelRunner(AbstractRunner):
         for name, data_set in data_sets.items():
             if (
                 name in pipeline.all_outputs()
-                and isinstance(data_set, MemoryDataSet)
+                and isinstance(data_set, MemoryDataset)
                 and not isinstance(data_set, BaseProxy)
             ):
                 memory_datasets.append(name)
@@ -243,7 +250,7 @@ class ParallelRunner(AbstractRunner):
                 f"The following data sets are memory data sets: "
                 f"{sorted(memory_datasets)}\n"
                 f"ParallelRunner does not support output to externally created "
-                f"MemoryDataSets"
+                f"MemoryDatasets"
             )
 
     def _get_required_workers_count(self, pipeline: Pipeline):

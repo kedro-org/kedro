@@ -1,4 +1,4 @@
-"""``LambdaDataSet`` is an implementation of ``AbstractDataSet`` which allows for
+"""``LambdaDataset`` is an implementation of ``AbstractDataSet`` which allows for
 providing custom load, save, and exists methods without extending
 ``AbstractDataSet``.
 """
@@ -6,29 +6,30 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.utils import DeprecatedClassMeta
 
 
-class LambdaDataSet(AbstractDataSet):
-    """``LambdaDataSet`` loads and saves data to a data set.
+class LambdaDataset(AbstractDataSet):
+    """``LambdaDataset`` loads and saves data to a data set.
     It relies on delegating to specific implementation such as csv, sql, etc.
 
-    ``LambdaDataSet`` class captures Exceptions while performing operations on
-    composed ``DataSet`` implementations. The composed data set is
+    ``LambdaDataset`` class captures Exceptions while performing operations on
+    composed ``Dataset`` implementations. The composed data set is
     responsible for providing information on how to resolve the issue when
     possible. This information should be available through str(error).
 
     Example:
     ::
 
-        >>> from kedro.io import LambdaDataSet
+        >>> from kedro.io import LambdaDataset
         >>> import pandas as pd
         >>>
         >>> file_name = "test.csv"
         >>> def load() -> pd.DataFrame:
         >>>     raise FileNotFoundError("'{}' csv file not found."
         >>>                             .format(file_name))
-        >>> data_set = LambdaDataSet(load, None)
+        >>> data_set = LambdaDataset(load, None)
     """
 
     def _describe(self) -> dict[str, Any]:
@@ -51,17 +52,17 @@ class LambdaDataSet(AbstractDataSet):
 
     def _save(self, data: Any) -> None:
         if not self.__save:
-            raise DataSetError(
+            raise DatasetError(
                 "Cannot save to data set. No 'save' function "
-                "provided when LambdaDataSet was created."
+                "provided when LambdaDataset was created."
             )
         self.__save(data)
 
     def _load(self) -> Any:
         if not self.__load:
-            raise DataSetError(
+            raise DatasetError(
                 "Cannot load data set. No 'load' function "
-                "provided when LambdaDataSet was created."
+                "provided when LambdaDataset was created."
             )
         return self.__load()
 
@@ -85,7 +86,7 @@ class LambdaDataSet(AbstractDataSet):
         release: Callable[[], None] = None,
         metadata: dict[str, Any] = None,
     ):
-        """Creates a new instance of ``LambdaDataSet`` with references to the
+        """Creates a new instance of ``LambdaDataset`` with references to the
         required input/output data set methods.
 
         Args:
@@ -97,7 +98,7 @@ class LambdaDataSet(AbstractDataSet):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DataSetError: If a method is specified, but is not a Callable.
+            DatasetError: If a method is specified, but is not a Callable.
 
         """
 
@@ -108,8 +109,8 @@ class LambdaDataSet(AbstractDataSet):
             ("release", release),
         ]:
             if value is not None and not callable(value):
-                raise DataSetError(
-                    f"'{name}' function for LambdaDataSet must be a Callable. "
+                raise DatasetError(
+                    f"'{name}' function for LambdaDataset must be a Callable. "
                     f"Object of type '{value.__class__.__name__}' provided instead."
                 )
 
@@ -118,3 +119,9 @@ class LambdaDataSet(AbstractDataSet):
         self.__exists = exists
         self.__release = release
         self.metadata = metadata
+
+
+class LambdaDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
+    _DeprecatedClassMeta__alias = LambdaDataset

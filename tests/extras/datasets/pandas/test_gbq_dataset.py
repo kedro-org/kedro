@@ -6,7 +6,7 @@ from google.cloud.exceptions import NotFound
 from pandas.testing import assert_frame_equal
 
 from kedro.extras.datasets.pandas import GBQQueryDataSet, GBQTableDataSet
-from kedro.io.core import DataSetError
+from kedro.io.core import DatasetError
 
 DATASET = "dataset"
 TABLE_NAME = "table_name"
@@ -103,7 +103,7 @@ class TestGBQDataSet:
             "kedro.extras.datasets.pandas.gbq_dataset.pd.read_gbq"
         )
         mocked_read_gbq.side_effect = ValueError
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             gbq_dataset.load()
 
     @pytest.mark.parametrize("load_args", [{"location": "l1"}], indirect=True)
@@ -112,7 +112,7 @@ class TestGBQDataSet:
         """Check the error when initializing instance if save_args and load_args
         'location' are different."""
         pattern = r""""load_args\['location'\]" is different from "save_args\['location'\]"."""
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             GBQTableDataSet(
                 dataset=DATASET,
                 table_name=TABLE_NAME,
@@ -182,7 +182,7 @@ class TestGBQDataSet:
     )
     def test_validation_of_dataset_and_table_name(self, dataset, table_name):
         pattern = "Neither white-space nor semicolon are allowed.*"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             GBQTableDataSet(dataset=dataset, table_name=table_name)
 
     def test_credentials_propagation(self, mocker):
@@ -217,7 +217,7 @@ class TestGBQQueryDataSet:
             r"'sql' and 'filepath' arguments cannot both be empty\."
             r"Please provide a sql query or path to a sql query file\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             GBQQueryDataSet(sql="", filepath="", credentials=None)
 
     @pytest.mark.parametrize(
@@ -284,7 +284,7 @@ class TestGBQQueryDataSet:
     def test_save_error(self, gbq_sql_dataset, dummy_dataframe):
         """Check the error when trying to save to the data set"""
         pattern = r"'save' is not supported on GBQQueryDataSet"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             gbq_sql_dataset.save(dummy_dataframe)
 
     def test_str_representation_sql(self, gbq_sql_dataset, sql_file):
@@ -311,5 +311,5 @@ class TestGBQQueryDataSet:
             r"'sql' and 'filepath' arguments cannot both be provided."
             r"Please only provide one."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             GBQQueryDataSet(sql=SQL_QUERY, filepath=sql_file)

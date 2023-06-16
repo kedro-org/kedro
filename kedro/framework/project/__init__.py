@@ -226,6 +226,11 @@ class _ProjectLogging(UserDict):
         logging.config.dictConfig(logging_config)
         self.data = logging_config
 
+    def set_project_logging(self, package_name: str):
+        if package_name not in self.data["loggers"]:
+            self.data["loggers"][package_name] = {"level": "INFO"}
+            self.configure(self.data)
+
 
 PACKAGE_NAME = None
 LOGGING = _ProjectLogging()
@@ -252,10 +257,8 @@ def configure_project(package_name: str):
     global PACKAGE_NAME
     PACKAGE_NAME = package_name
 
-    # Don't overwite any defined project log level in KEDRO_LOGGING_CONFIG
-    if PACKAGE_NAME and PACKAGE_NAME not in LOGGING["loggers"].keys():
-        LOGGING["loggers"].update({PACKAGE_NAME: {"level": "INFO"}})
-        LOGGING.configure(LOGGING.data)
+    if PACKAGE_NAME:
+        LOGGING.set_project_logging(PACKAGE_NAME)
 
 
 def configure_logging(logging_config: dict[str, Any]) -> None:

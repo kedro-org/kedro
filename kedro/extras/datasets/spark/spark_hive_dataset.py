@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql.functions import col, lit, row_number
 
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -102,17 +102,17 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
             or directly in the Spark conf folder.
 
         Raises:
-            DataSetError: Invalid configuration supplied
+            DatasetError: Invalid configuration supplied
         """
         _write_modes = ["append", "error", "errorifexists", "upsert", "overwrite"]
         if write_mode not in _write_modes:
             valid_modes = ", ".join(_write_modes)
-            raise DataSetError(
+            raise DatasetError(
                 f"Invalid 'write_mode' provided: {write_mode}. "
                 f"'write_mode' must be one of: {valid_modes}"
             )
         if write_mode == "upsert" and not table_pk:
-            raise DataSetError("'table_pk' must be set to utilise 'upsert' read mode")
+            raise DatasetError("'table_pk' must be set to utilise 'upsert' read mode")
 
         self._write_mode = write_mode
         self._table_pk = table_pk or []
@@ -166,7 +166,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         if self._write_mode == "upsert":
             # check if _table_pk is a subset of df columns
             if not set(self._table_pk) <= set(self._load().columns):
-                raise DataSetError(
+                raise DatasetError(
                     f"Columns {str(self._table_pk)} selected as primary key(s) not found in "
                     f"table {self._full_table_address}"
                 )
@@ -203,7 +203,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
         if data_dtypes != hive_dtypes:
             new_cols = data_dtypes - hive_dtypes
             missing_cols = hive_dtypes - data_dtypes
-            raise DataSetError(
+            raise DatasetError(
                 f"Dataset does not match hive table schema.\n"
                 f"Present on insert only: {sorted(new_cols)}\n"
                 f"Present on schema only: {sorted(missing_cols)}"

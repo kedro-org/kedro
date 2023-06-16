@@ -34,7 +34,7 @@ flowchart TD
   D -->|Yes| E[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
   D -->|No| F{Do you have advanced project requirements<br>e.g. CI/CD, scheduling, production-ready, complex pipelines, etc.?}
   F -->|Yes| G{Is rapid development needed for your project needs?}
-  F -->|No| H[Use a Databricks job to deploy a Kedro project]
+  F -->|No| H[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
   G -->|Yes| I[Use an IDE, dbx and Databricks Repos to develop a Kedro project]
   G -->|No| J[Use a Databricks job to deploy a Kedro project]
 ```

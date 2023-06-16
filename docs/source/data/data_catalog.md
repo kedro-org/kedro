@@ -489,17 +489,17 @@ quotes to avoid YAML parsing errors.
 
 ### Example 2: Generalise datasets of the same type into one dataset factory
 You can also combine all the datasets with the same type and configuration details. For example, consider the following
-catalog with three datasets named `reviews`, `shuttles` and `companies` of the type `pandas.CSVDataSet`:
+catalog with three datasets named `boats`, `cars` and `planes` of the type `pandas.CSVDataSet`:
 ```yaml
-shuttles:
+boats:
   type: pandas.CSVDataSet
   filepath: data/01_raw/shuttles.csv
 
-reviews:
+cars:
   type: pandas.CSVDataSet
   filepath: data/01_raw/reviews.csv
 
-companies:
+planes:
   type: pandas.CSVDataSet
   filepath: data/01_raw/companies.csv
 ```
@@ -509,8 +509,8 @@ These datasets can be combined into the following dataset factory:
   type: pandas.CSVDataSet
   filepath: data/01_raw/{dataset_name}.csv
 ```
-You will then have to update the pipelines in your project located at `src/<project_name>/<pipeline_name>/pipeline.py` to refer to these datasets as `shuttles#csv`,
-`reviews#csv` and `companies#csv`. Adding a suffix or a prefix to the dataset names and the dataset factory patterns, like `#csv` here, ensures that the dataset
+You will then have to update the pipelines in your project located at `src/<project_name>/<pipeline_name>/pipeline.py` to refer to these datasets as `boats#csv`,
+`cars#csv` and `planes#csv`. Adding a suffix or a prefix to the dataset names and the dataset factory patterns, like `#csv` here, ensures that the dataset
 names are matched with the intended pattern.
 ```python
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
@@ -520,23 +520,29 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(
-                func=preprocess_companies,
-                inputs="companies#csv",
-                outputs="preprocessed_companies",
-                name="preprocess_companies_node",
+                func=preprocess_boats,
+                inputs="boats#csv",
+                outputs="preprocessed_boats",
+                name="preprocess_boats_node",
             ),
             node(
-                func=preprocess_shuttles,
-                inputs="shuttles#csv",
-                outputs="preprocessed_shuttles",
-                name="preprocess_shuttles_node",
+                func=preprocess_cars,
+                inputs="cars#csv",
+                outputs="preprocessed_cars",
+                name="preprocess_cars_node",
+            ),
+            node(
+                func=preprocess_planes,
+                inputs="planes#csv",
+                outputs="preprocessed_planes",
+                name="preprocess_planes_node",
             ),
             node(
                 func=create_model_input_table,
                 inputs=[
-                    "preprocessed_shuttles",
-                    "preprocessed_companies",
-                    "reviews#csv",
+                    "preprocessed_boats",
+                    "preprocessed_planes",
+                    "preprocessed_cars",
                 ],
                 outputs="model_input_table",
                 name="create_model_input_table_node",

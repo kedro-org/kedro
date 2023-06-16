@@ -1,5 +1,15 @@
 # Databricks
 
+```{toctree}
+:maxdepth: 1
+:hidden:
+
+databricks_notebooks_development_workflow.md
+databricks_ide_development_workflow.md
+databricks_deployment_workflow
+databricks_visualisation
+```
+
 Databricks offers integration with Kedro through three principal workflows, which range across a spectrum and combine local development with Databricks.
 
 Let's break down the advantages and use cases of each workflow to help you make an informed decision and choose the workflow that best fits your project's needs.
@@ -42,14 +52,3 @@ flowchart TD
 ```
 
 Remember, the best choice of workflow is the one that aligns best with your project's requirements, whether that's quick development, notebook-based coding, or a production-ready setup. Make sure to consider these factors alongside your comfort level with Kedro when making your decision.
-
-
-```{toctree}
-:maxdepth: 1
-:hidden:
-
-databricks_notebooks_development_workflow.md
-databricks_ide_development_workflow.md
-databricks_deployment_workflow
-databricks_visualisation
-```

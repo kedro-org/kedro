@@ -37,6 +37,11 @@ _DEPRECATED_ERROR_CLASSES = [
     "DataSetAlreadyExistsError",
 ]
 
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+DataSetError: type[Exception]
+DataSetNotFoundError: type[DatasetError]
+DataSetAlreadyExistsError: type[DatasetError]
+
 
 class DatasetError(Exception):
     """``DatasetError`` raised by ``AbstractDataSet`` implementations

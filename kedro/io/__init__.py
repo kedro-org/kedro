@@ -21,6 +21,11 @@ from .partitioned_dataset import (
     PartitionedDataset,
 )
 
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+DataSetError: type[Exception]
+DataSetNotFoundError: type[DatasetError]
+DataSetAlreadyExistsError: type[DatasetError]
+
 
 def __getattr__(name):
     import kedro.io.core

@@ -4,7 +4,7 @@ Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/
 By default, Python only shows logging messages at level WARNING and above. Kedro's logging configuration specifies that INFO level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a kedro run.
 
 ## Perform logging in your project
-To perform logging in your own code (e.g. in a node), you are advised to do as follows:
+To add logging to your own code (e.g. in a node), you are advised to do as follows:
 
 ```python
 import logging

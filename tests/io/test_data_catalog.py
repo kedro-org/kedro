@@ -813,8 +813,8 @@ class TestDataCatalogDatasetFactories:
     @pytest.mark.parametrize(
         "dataset_name,pattern",
         [
-            ("missing", "DataSet 'missing' not found in the catalog"),
-            ("tesla@cars", "DataSet 'tesla@cars' not found in the catalog"),
+            ("missing", "Dataset 'missing' not found in the catalog"),
+            ("tesla@cars", "Dataset 'tesla@cars' not found in the catalog"),
         ],
     )
     def test_dataset_not_in_catalog_when_no_pattern_match(

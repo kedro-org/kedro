@@ -338,7 +338,7 @@ class DataCatalog:
                 matched_dataset = self._resolve_dataset(data_set_name, pattern)
                 self.add(data_set_name, matched_dataset)
             else:
-                error_msg = f"DataSet '{data_set_name}' not found in the catalog"
+                error_msg = f"Dataset '{data_set_name}' not found in the catalog"
 
                 # Flag to turn on/off fuzzy-matching which can be time consuming and
                 # slow down plugins like `kedro-viz`

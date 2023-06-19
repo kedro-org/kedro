@@ -21,7 +21,7 @@ from more_itertools import interleave
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataSet, DataCatalog
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -296,7 +296,8 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     """
     for node_input in node.inputs:
-        if not catalog.exists_in_catalog_config(node_input):
+        # pylint: disable=protected-access
+        if isinstance(catalog._data_sets[node_input], MemoryDataset):
             return False
     return True
 

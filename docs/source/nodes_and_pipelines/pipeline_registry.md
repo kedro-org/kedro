@@ -4,8 +4,8 @@ Projects generated using Kedro 0.17.2 or later define their pipelines in `src/<p
 
 ```python
 
-import space_flights.pipelines.data_processing as dp
-import space_flights.pipelines.data_science as ds
+import spaceflights.pipelines.data_processing as dp
+import spaceflights.pipelines.data_science as ds
 
 def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipelines.

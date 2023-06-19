@@ -3,7 +3,7 @@ from pyspark.sql import DataFrame as SparkDataFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, when
 
-from kedro.io import MemoryDataSet
+from kedro.io import MemoryDataset
 
 
 def _update_spark_df(data, idx, jdx, value):
@@ -32,7 +32,7 @@ def spark_data_frame(spark_session):
 
 @pytest.fixture
 def memory_dataset(spark_data_frame):
-    return MemoryDataSet(data=spark_data_frame)
+    return MemoryDataset(data=spark_data_frame)
 
 
 def test_load_modify_original_data(memory_dataset, spark_data_frame):
@@ -45,7 +45,7 @@ def test_load_modify_original_data(memory_dataset, spark_data_frame):
 def test_save_modify_original_data(spark_data_frame):
     """Check that the data set object is not updated when the original
     SparkDataFrame is changed."""
-    memory_dataset = MemoryDataSet()
+    memory_dataset = MemoryDataset()
     memory_dataset.save(spark_data_frame)
     spark_data_frame = _update_spark_df(spark_data_frame, 1, 1, "new value")
 
@@ -64,4 +64,4 @@ def test_load_returns_same_spark_object(memory_dataset, spark_data_frame):
 
 def test_str_representation(memory_dataset):
     """Test string representation of the data set"""
-    assert "MemoryDataSet(data=<DataFrame>)" in str(memory_dataset)
+    assert "MemoryDataset(data=<DataFrame>)" in str(memory_dataset)

@@ -10,7 +10,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 from kedro.extras.datasets.spark import SparkHiveDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 
 TESTSPARKDIR = "test_spark_dir"
 
@@ -192,7 +192,7 @@ class TestSparkHiveDataSet:
     def test_upsert_config_err(self):
         # no pk provided should prompt config error
         with pytest.raises(
-            DataSetError, match="'table_pk' must be set to utilise 'upsert' read mode"
+            DatasetError, match="'table_pk' must be set to utilise 'upsert' read mode"
         ):
             SparkHiveDataSet(database="default_1", table="table_1", write_mode="upsert")
 
@@ -238,7 +238,7 @@ class TestSparkHiveDataSet:
             table_pk=_test_columns,
         )
         with pytest.raises(
-            DataSetError,
+            DatasetError,
             match=re.escape(
                 f"Columns {str(_test_columns)} selected as primary key(s) "
                 f"not found in table default_1.table_1",
@@ -252,7 +252,7 @@ class TestSparkHiveDataSet:
             "'write_mode' must be one of: "
             "append, error, errorifexists, upsert, overwrite"
         )
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             SparkHiveDataSet(
                 database="default_1",
                 table="table_1",
@@ -271,7 +271,7 @@ class TestSparkHiveDataSet:
             write_mode="append",
         )
         with pytest.raises(
-            DataSetError,
+            DatasetError,
             match=r"Dataset does not match hive table schema\.\n"
             r"Present on insert only: \[\('age', 'int'\)\]\n"
             r"Present on schema only: \[\('additional_column_on_hive', 'int'\)\]",
@@ -292,7 +292,7 @@ class TestSparkHiveDataSet:
             database="default_1", table="table_doesnt_exist", write_mode="append"
         )
         with pytest.raises(
-            DataSetError,
+            DatasetError,
             match=r"Failed while loading data from data set "
             r"SparkHiveDataSet\(database=default_1, format=hive, "
             r"table=table_doesnt_exist, table_pk=\[\], write_mode=append\)\.\n"

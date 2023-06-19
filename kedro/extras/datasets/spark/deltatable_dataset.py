@@ -12,7 +12,7 @@ from kedro.extras.datasets.spark.spark_dataset import (
     _split_filepath,
     _strip_dbfs_prefix,
 )
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -92,7 +92,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         return DeltaTable.forPath(self._get_spark(), load_path)
 
     def _save(self, data: None) -> NoReturn:
-        raise DataSetError(f"{self.__class__.__name__} is a read only dataset type")
+        raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def _exists(self) -> bool:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))

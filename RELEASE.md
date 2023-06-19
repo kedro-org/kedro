@@ -13,6 +13,11 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Reworked micropackaging workflow to use standard Python packaging practices.
+* Make `kedro micropkg package` accept `--verbose`.
+
+## Documentation changes
+* Added documentation for developing a Kedro project using a Databricks workspace.
 
 ## Breaking changes to the API
 
@@ -177,7 +182,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added support for `tf.device` in `TensorFlowModelDataset`.
 * Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 * Updated Experiment Tracking docs with working examples.
-* Updated MatplotlibWriter Dataset, TextDataset, plotly.PlotlyDataSet and plotly.JSONDataSet docs with working examples.
+* Updated `MatplotlibWriter`, `text.TextDataSet`, `plotly.PlotlyDataSet` and `plotly.JSONDataSet` docs with working examples.
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
 * Refactored `ShelveStore` to its own module to ensure multiprocessing works with it.
 * `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.

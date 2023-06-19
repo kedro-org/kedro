@@ -13,7 +13,7 @@ import pandas as pd
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -157,7 +157,7 @@ class ExcelDataSet(
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
 
         Raises:
-            DataSetError: If versioning is enabled while in append mode.
+            DatasetError: If versioning is enabled while in append mode.
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
@@ -190,7 +190,7 @@ class ExcelDataSet(
         self._writer_args.setdefault("engine", engine or "openpyxl")  # type: ignore
 
         if version and self._writer_args.get("mode") == "a":  # type: ignore
-            raise DataSetError(
+            raise DatasetError(
                 "'ExcelDataSet' doesn't support versioning in append mode."
             )
 
@@ -249,7 +249,7 @@ class ExcelDataSet(
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

@@ -157,7 +157,7 @@ class DataCatalog:
         data_sets: dict[str, AbstractDataSet] = None,
         feed_dict: dict[str, Any] = None,
         layers: dict[str, set[str]] = None,
-        dataset_patterns: dict[str, Any] = None,
+        dataset_patterns: dict[str, dict[str, Any]] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -305,7 +305,7 @@ class DataCatalog:
 
         layers: dict[str, set[str]] = defaultdict(set)
         for ds_name, ds_config in catalog.items():
-            # Assume that any name with } in it is a dataset factory to be matched.
+            # Assume that any name with "}" in it is a dataset factory to be matched.
             if "}" in ds_name:
                 # Add each factory to the dataset_patterns dict.
                 dataset_patterns[ds_name] = ds_config
@@ -328,7 +328,7 @@ class DataCatalog:
     def _get_dataset(
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
-        if data_set_name not in self._data_sets
+        if data_set_name not in self._data_sets:
             # When a dataset is "used" in the pipeline that's not in the recorded catalog datasets,
             # try to match it against the data factories in the catalog. If it's a match,
             # resolve it to a dataset instance and add it to the catalog, so it only needs
@@ -352,7 +352,7 @@ class DataCatalog:
                             f" - did you mean one of these instead: {suggestions}"
                         )
 
-                raise DataSetNotFoundError(error_msg)
+                raise DatasetNotFoundError(error_msg)
 
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):
@@ -380,7 +380,7 @@ class DataCatalog:
                 try:
                     template_copy[key] = string_value.format_map(result.named)
                 except KeyError as exc:
-                    raise DataSetError(
+                    raise DatasetError(
                         f"Unable to resolve '{key}' for the pattern '{matched_pattern}'"
                     ) from exc
         # Create dataset from catalog template.

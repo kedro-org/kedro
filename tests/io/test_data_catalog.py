@@ -822,7 +822,7 @@ class TestDataCatalogDatasetFactories:
     ):
         """Check that the dataset is not added to the catalog when there is no pattern"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             catalog._get_dataset(dataset_name)
 
     def test_dataset_pattern_ordering(
@@ -851,5 +851,5 @@ class TestDataCatalogDatasetFactories:
         """Check error raised when key mentioned in the config is not in pattern name"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories_bad_pattern)
         pattern = "Unable to resolve 'filepath' for the pattern '{type}@planes'"
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             catalog._get_dataset("jet@planes")

@@ -11,6 +11,7 @@
 # Upcoming Release 0.18.11
 
 ## Major features and improvements
+* Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
 
 ## Bug fixes and other changes
 * Reworked micropackaging workflow to use standard Python packaging practices.

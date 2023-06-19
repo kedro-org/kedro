@@ -21,7 +21,7 @@ from more_itertools import interleave
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
+from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -32,7 +32,7 @@ class AbstractRunner(ABC):
     """
 
     def __init__(self, is_async: bool = False):
-        """Instantiates the runner classs.
+        """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
@@ -296,8 +296,7 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     """
     for node_input in node.inputs:
-        # pylint: disable=protected-access
-        if isinstance(catalog._data_sets[node_input], MemoryDataset):
+        if not catalog.exists_in_catalog_config(node_input):
             return False
     return True
 
@@ -441,7 +440,7 @@ def _run_node_sequential(
     items: Iterable = outputs.items()
     # if all outputs are iterators, then the node is a generator node
     if all(isinstance(d, Iterator) for d in outputs.values()):
-        # Python dictionaries are ordered so we are sure
+        # Python dictionaries are ordered, so we are sure
         # the keys and the chunk streams are in the same order
         # [a, b, c]
         keys = list(outputs.keys())

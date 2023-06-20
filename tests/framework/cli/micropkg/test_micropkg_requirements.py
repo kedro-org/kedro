@@ -81,6 +81,9 @@ class TestMicropkgRequirements:
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
     ):
         """Pipeline requirements.txt and project requirements.txt."""
+        # FIXME: This assumes that requirements live in `requirements.txt`,
+        # but in the new project template they are split
+        # between `pyproject.toml` (library deps) and `requirements.txt` (development deps)
         project_requirements_txt = fake_repo_path / "requirements.txt"
         with open(project_requirements_txt, "a", encoding="utf-8") as file:
             file.write(COMPLEX_REQUIREMENTS)

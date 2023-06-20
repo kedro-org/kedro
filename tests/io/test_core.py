@@ -7,7 +7,12 @@ from typing import Any
 
 import pytest
 
-from kedro.io.core import _DEPRECATED_ERROR_CLASSES, AbstractDataSet, _parse_filepath, get_filepath_str
+from kedro.io.core import (
+    _DEPRECATED_ERROR_CLASSES,
+    AbstractDataSet,
+    _parse_filepath,
+    get_filepath_str,
+)
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
 # Excludes None, as None values are not shown in the str representation.
@@ -31,7 +36,7 @@ FALSE_BUILTINS: list[Any] = [
 @pytest.mark.parametrize("package", ["kedro.io", "kedro.io.core"])
 def test_deprecation(name, package):
     with pytest.warns(DeprecationWarning, match=f"{name} has been renamed"):
-        exec(f"from {package} import {name}")
+        exec(f"from {package} import {name}")  # pylint: disable=exec-used
 
 
 class MyDataSet(AbstractDataSet):

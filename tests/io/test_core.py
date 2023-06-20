@@ -33,11 +33,11 @@ FALSE_BUILTINS: list[Any] = [
 ]
 
 
-@pytest.mark.parametrize("name", _DEPRECATED_ERROR_CLASSES)
-@pytest.mark.parametrize("package", ["kedro.io", "kedro.io.core"])
-def test_deprecation(name, package):
-    with pytest.warns(DeprecationWarning, match=f"{repr(name)} has been renamed"):
-        getattr(importlib.import_module(package), name)
+@pytest.mark.parametrize("module_name", ["kedro.io", "kedro.io.core"])
+@pytest.mark.parametrize("class_name", _DEPRECATED_ERROR_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module(module_name), class_name)
 
 
 class MyDataSet(AbstractDataSet):

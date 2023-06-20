@@ -41,7 +41,7 @@ Pillow~=9.0
 plotly>=4.8.0, <6.0
 pre-commit>=2.9.2, <3.0  # The hook `mypy` requires pre-commit version 2.9.2.
 psutil==5.8.0
-pyarrow>=1.0, <7.0
+pyarrow>=7.0
 pylint>=2.17.0, <3.0
 pyproj~=3.0
 pyspark>=2.2, <4.0; python_version <= '3.10'
@@ -63,4 +63,4 @@ tensorflow>=2.0
 triad>=0.6.7, <1.0
 trufflehog~=2.1
 xlsxwriter~=1.0
-numpy>=1.22.0; python_version >= '3.11' # https://app.circleci.com/pipelines/github/kedro-org/kedro/23400/workflows/b606d6de-3711-4b6f-a2e0-aeae936bce50/jobs/268580
+# numpy>=1.22.0; python_version >= '3.11' # https://app.circleci.com/pipelines/github/kedro-org/kedro/23400/workflows/b606d6de-3711-4b6f-a2e0-aeae936bce50/jobs/268580

@@ -159,7 +159,7 @@ def package(metadata: ProjectMetadata):
             "build",
             "--wheel",
             "--outdir",
-            "../dist",
+            "dist",
         ],
         cwd=str(project_path),
     )

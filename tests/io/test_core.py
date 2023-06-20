@@ -35,7 +35,7 @@ FALSE_BUILTINS: list[Any] = [
 @pytest.mark.parametrize("name", _DEPRECATED_ERROR_CLASSES)
 @pytest.mark.parametrize("package", ["kedro.io", "kedro.io.core"])
 def test_deprecation(name, package):
-    with pytest.warns(DeprecationWarning, match=f"{name} has been renamed"):
+    with pytest.warns(DeprecationWarning, match=f"{repr(name)} has been renamed"):
         exec(f"from {package} import {name}")  # pylint: disable=exec-used
 
 

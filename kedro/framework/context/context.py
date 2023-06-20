@@ -13,7 +13,6 @@ from pluggy import PluginManager
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
-from kedro.pipeline.pipeline import _transcode_split
 
 
 def _is_relative_path(path_string: str) -> bool:

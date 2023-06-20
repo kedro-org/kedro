@@ -664,19 +664,6 @@ def _drop_comment(line):
     return line.partition(" #")[0]
 
 
-def _make_install_requires(requirements_txt: Path) -> list[str]:
-    """Parses each line of requirements.txt into a version specifier valid to put in
-    install_requires.
-    Matches pkg_resources.parse_requirements"""
-    if not requirements_txt.exists():
-        return []
-    return [
-        str(_EquivalentRequirement(_drop_comment(requirement_line)))
-        for requirement_line in requirements_txt.read_text().splitlines()
-        if requirement_line and not requirement_line.startswith("#")
-    ]
-
-
 def _create_nested_package(project: Project, package_path: Path) -> Path:
     # fails if parts of the path exists already
     packages = package_path.parts
@@ -840,9 +827,8 @@ def _generate_sdist_file(
 
         # Build a pyproject.toml on the fly
         try:
-            install_requires = _make_install_requires(
-                metadata.project_path / "requirements.txt"  # type: ignore
-            )
+            library_meta = project_wheel_metadata(metadata.project_path)
+            install_requires = _get_all_library_reqs(library_meta)
         except Exception as exc:
             click.secho("FAILED", fg="red")
             cls = exc.__class__

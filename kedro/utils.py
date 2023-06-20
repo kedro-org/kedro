@@ -45,8 +45,9 @@ class DeprecatedClassMeta(type):
 
                 if alias is not None:
                     warn(
-                        f"{mcs.__name__} has been renamed to {alias.__name__}, and the "
-                        f"alias will be removed in Kedro 0.19.0",
+                        f"{repr(mcs.__name__)} has been renamed to "
+                        f"{repr(alias.__name__)}, and the alias will "
+                        f"be removed in Kedro 0.19.0",
                         DeprecationWarning,
                         stacklevel=2,
                     )
@@ -63,8 +64,9 @@ class DeprecatedClassMeta(type):
 
             if alias is not None:
                 warn(
-                    f"{base.__name__} has been renamed to {alias.__name__}, and the "
-                    f"alias will be removed in Kedro 0.19.0",
+                    f"{repr(base.__name__)} has been renamed to "
+                    f"{repr(alias.__name__)}, and the alias will be "
+                    f"removed in Kedro 0.19.0",
                     DeprecationWarning,
                     stacklevel=2,
                 )

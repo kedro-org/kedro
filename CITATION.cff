@@ -21,6 +21,8 @@ authors:
   given-names: Rashida
 - family-names: Katiyar
   given-names: Ankita
+- family-names: Kumar Pilla
+  given-names: Ravi
 - family-names: Koh
   given-names: Amanda
 - family-names: Mackay
@@ -43,6 +45,6 @@ authors:
 - family-names: Theisen
   given-names: Merel
 title: Kedro
-version: 0.18.8
-date-released: 2023-05-02
+version: 0.18.10
+date-released: 2023-06-08
 url: https://github.com/kedro-org/kedro

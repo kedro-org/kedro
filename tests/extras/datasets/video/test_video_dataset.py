@@ -5,7 +5,7 @@ from utils import TEST_FPS, assert_videos_equal
 
 from kedro.extras.datasets.video import VideoDataSet
 from kedro.extras.datasets.video.video_dataset import FileVideo, SequenceVideo
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 
 S3_BUCKET_NAME = "test_bucket"
 S3_KEY_PATH = "video"
@@ -121,7 +121,7 @@ class TestVideoDataSet:
     def test_load_missing_file(self, empty_dataset_mp4):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set VideoDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             empty_dataset_mp4.load()
 
     def test_save_s3(self, mp4_object, mocked_s3_bucket, tmp_path):

@@ -30,7 +30,7 @@ This following pages provide information for deployment to, or integration with,
 * [AWS Step functions](aws_step_functions.md)
 * [Azure](azure.md)
 * [Dask](dask.md)
-* [Databricks](../integrations/databricks_workspace.md)
+* [Databricks](./databricks/index.md)
 * [Kubeflow Workflows](kubeflow.md)
 * [Prefect](prefect.md)
 * [Vertex AI](vertexai.md)
@@ -55,7 +55,7 @@ amazon_sagemaker
 aws_step_functions
 azure
 dask
-databricks
+databricks/index
 kubeflow
 prefect
 vertexai

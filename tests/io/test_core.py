@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import PurePosixPath
@@ -36,7 +37,7 @@ FALSE_BUILTINS: list[Any] = [
 @pytest.mark.parametrize("package", ["kedro.io", "kedro.io.core"])
 def test_deprecation(name, package):
     with pytest.warns(DeprecationWarning, match=f"{repr(name)} has been renamed"):
-        exec(f"from {package} import {name}")  # pylint: disable=exec-used
+        getattr(importlib.import_module(package), name)
 
 
 class MyDataSet(AbstractDataSet):

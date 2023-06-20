@@ -110,6 +110,22 @@ def _specificity(pattern: str) -> int:
     return len(result)
 
 
+def _sort_dataset_factory_patterns(dataset_patterns: list) -> list:
+    """Helper function to ort all the patterns according to the parsing rules -
+    1. Decreasing specificity (no of characters outside the brackets)
+    2. Decreasing number of placeholders (no of curly brackets)
+    3. Alphabetical
+    """
+    return sorted(
+        dataset_patterns,
+        key=lambda pattern: (
+            -(_specificity(pattern)),
+            -pattern.count("{"),
+            pattern,
+        ),
+    )
+
+
 class _FrozenDatasets:
     """Helper class to access underlying loaded datasets."""
 
@@ -191,16 +207,8 @@ class DataCatalog:
         # {dataset pattern name : dataset pattern body}
         self.dataset_patterns = dict(dataset_patterns or {})
         # Sort all the patterns according to the parsing rules -
-        # 1. Decreasing specificity (no of characters outside the brackets)
-        # 2. Decreasing number of placeholders (no of curly brackets)
-        # 3. Alphabetical
-        self._sorted_dataset_patterns = sorted(
-            self.dataset_patterns.keys(),
-            key=lambda pattern: (
-                -(_specificity(pattern)),
-                -pattern.count("{"),
-                pattern,
-            ),
+        self._sorted_dataset_patterns = _sort_dataset_factory_patterns(
+            list(self.dataset_patterns.keys())
         )
         # Cache that stores {name : matched_pattern}
         self._pattern_matches_cache: dict[str, str] = {}
@@ -328,31 +336,30 @@ class DataCatalog:
     def _get_dataset(
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
-        if data_set_name not in self._data_sets:
-            # When a dataset is "used" in the pipeline that's not in the recorded catalog datasets,
-            # try to match it against the data factories in the catalog. If it's a match,
-            # resolve it to a dataset instance and add it to the catalog, so it only needs
-            # to be matched once and not everytime the dataset is used in the pipeline.
-            if self.exists_in_catalog_config(data_set_name):
+        if self.exists_in_catalog_config(data_set_name):
+            if data_set_name not in self._data_sets:
+                # When a dataset is "used" in the pipeline that's not in the
+                # recorded catalog datasets, match it against the data factories
+                # in the catalog, resolve it to a dataset instance and add it to
+                # the catalog, so it only needs to be matched once and not
+                # everytime the dataset is used in the pipeline.
                 pattern = self._pattern_matches_cache[data_set_name]
                 matched_dataset = self._resolve_dataset(data_set_name, pattern)
                 self.add(data_set_name, matched_dataset)
-            else:
-                error_msg = f"Dataset '{data_set_name}' not found in the catalog"
+        else:
+            error_msg = f"Dataset '{data_set_name}' not found in the catalog"
 
-                # Flag to turn on/off fuzzy-matching which can be time consuming and
-                # slow down plugins like `kedro-viz`
-                if suggest:
-                    matches = difflib.get_close_matches(
-                        data_set_name, self._data_sets.keys()
-                    )
-                    if matches:
-                        suggestions = ", ".join(matches)
-                        error_msg += (
-                            f" - did you mean one of these instead: {suggestions}"
-                        )
+            # Flag to turn on/off fuzzy-matching which can be time consuming and
+            # slow down plugins like `kedro-viz`
+            if suggest:
+                matches = difflib.get_close_matches(
+                    data_set_name, self._data_sets.keys()
+                )
+                if matches:
+                    suggestions = ", ".join(matches)
+                    error_msg += f" - did you mean one of these instead: {suggestions}"
 
-                raise DatasetNotFoundError(error_msg)
+            raise DatasetNotFoundError(error_msg)
 
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):

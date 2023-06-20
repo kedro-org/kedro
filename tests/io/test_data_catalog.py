@@ -26,6 +26,7 @@ from kedro.io.core import (
     generate_timestamp,
     parse_dataset_definition,
 )
+from kedro.io.data_catalog import _sort_dataset_factory_patterns
 
 
 @pytest.fixture
@@ -825,18 +826,44 @@ class TestDataCatalogDatasetFactories:
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             catalog._get_dataset(dataset_name)
 
-    def test_dataset_pattern_ordering(
-        self, config_with_dataset_factories_only_patterns
-    ):
+    @pytest.mark.parametrize(
+        "unordered_list,ordered_list",
+        [
+            (
+                [
+                    "{default}",
+                    "{country}_companies",
+                    "{dataset_name}s",
+                    "{country}_{dataset}",
+                ],
+                [
+                    "{country}_companies",
+                    "{country}_{dataset}",
+                    "{dataset_name}s",
+                    "{default}",
+                ],
+            ),
+            (
+                [
+                    "{brand}_cars",
+                    "{brand}_scooters",
+                    "{brand}_planes",
+                ],
+                [
+                    "{brand}_scooters",
+                    "{brand}_planes",
+                    "{brand}_cars",
+                ],
+            ),
+            (
+                ["{brand}_{vehicle}", "{dataset}a"],
+                ["{brand}_{vehicle}", "{dataset}a"],
+            ),
+        ],
+    )
+    def test_dataset_pattern_sorting(self, unordered_list, ordered_list):
         """Check that the patterns are ordered correctly according to the parsing rules"""
-        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
-        ordered_catalog = [
-            "{country}_companies",
-            "{namespace}_{dataset}",
-            "{dataset}s",
-            "{default}",
-        ]
-        assert catalog._sorted_dataset_patterns == ordered_catalog
+        assert _sort_dataset_factory_patterns(unordered_list) == ordered_list
 
     def test_default_dataset(self, config_with_dataset_factories_with_default):
         """Check that default dataset is used when no other pattern matches"""

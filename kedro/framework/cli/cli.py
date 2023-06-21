@@ -6,10 +6,12 @@ import importlib
 import sys
 import webbrowser
 from collections import defaultdict
+from functools import reduce
 from pathlib import Path
 from typing import Sequence
 
 import click
+from trogon import tui
 
 from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
@@ -48,6 +50,15 @@ def cli():  # pragma: no cover
     information, type ``kedro info``.
 
     """
+    pass
+
+
+@tui(name="kedro")
+@click.group(
+    name="Kedro",
+)
+def project_group_unified():  # pragma: no cover
+    """Group to unify all project commands under"""
     pass
 
 
@@ -113,7 +124,7 @@ class KedroCLI(CommandCollection):
 
         super().__init__(
             ("Global commands", self.global_groups),
-            ("Project specific commands", self.project_groups),
+            ("Project specific commands", self._merge_commands(self.project_groups)),
         )
 
     def main(
@@ -200,6 +211,17 @@ class KedroCLI(CommandCollection):
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
         return [*built_in, *plugins, user_defined]
+
+    @staticmethod
+    def _merge_commands(
+        groups: Sequence[click.MultiCommand],
+    ) -> Sequence[click.BaseCommand]:
+        if groups:
+            commands = reduce(lambda a, b: {**a, **b}, [x.commands for x in groups])
+            for name, cmd in commands.items():
+                project_group_unified.add_command(name=name, cmd=cmd)
+            return [project_group_unified]
+        return groups
 
 
 def main():  # pragma: no cover

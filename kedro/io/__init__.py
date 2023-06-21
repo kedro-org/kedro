@@ -49,8 +49,6 @@ __all__ = [
     "DataSetError",
     "DatasetError",
     "DataSetNotFoundError",
-    "DatasetAlreadyExistsError",
-    "DatasetError",
     "DatasetNotFoundError",
     "IncrementalDataSet",
     "IncrementalDataset",

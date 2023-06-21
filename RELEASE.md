@@ -34,6 +34,7 @@
 ## Major features and improvements
 * `kedro run --params` now updates interpolated parameters correctly when using `OmegaConfigLoader`.
 * Added `metadata` attribute to `kedro.io` datasets. This is ignored by Kedro, but may be consumed by users or external plugins.
+* Added `kedro.logging.RichHandler`. This replaces the default `rich.logging.RichHandler` and is more flexible, user can turn off the `rich` traceback if needed.
 
 ## Bug fixes and other changes
 * `OmegaConfigLoader` will return a `dict` instead of `DictConfig`.

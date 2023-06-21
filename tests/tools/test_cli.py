@@ -28,6 +28,7 @@ DEFAULT_KEDRO_COMMANDS = [
     "run",
     "starter",
     "test",
+    "tui",
 ]
 
 

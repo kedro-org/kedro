@@ -53,15 +53,6 @@ def cli():  # pragma: no cover
     pass
 
 
-@tui(name="kedro")
-@click.group(
-    name="Kedro",
-)
-def project_group_unified():  # pragma: no cover
-    """Group to unify all project commands under"""
-    pass
-
-
 @cli.command()
 def info():
     """Get more information about kedro."""
@@ -217,6 +208,13 @@ class KedroCLI(CommandCollection):
         groups: Sequence[click.MultiCommand],
     ) -> Sequence[click.BaseCommand]:
         if groups:
+
+            @tui(name="kedro")
+            @click.group(name="Kedro")
+            def project_group_unified():  # pragma: no cover
+                """Group to unify all project commands under"""
+                pass
+
             commands = reduce(lambda a, b: {**a, **b}, [x.commands for x in groups])
             for name, cmd in commands.items():
                 project_group_unified.add_command(name=name, cmd=cmd)

@@ -9,7 +9,7 @@ from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
 from kedro.extras.datasets.dask import ParquetDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 
 FILE_NAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
@@ -76,7 +76,7 @@ class TestParquetDataSet:
     def test_incorrect_credentials_load(self):
         """Test that incorrect credential keys won't instantiate dataset."""
         pattern = r"unexpected keyword argument"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             ParquetDataSet(
                 filepath=S3_PATH,
                 credentials={
@@ -88,7 +88,7 @@ class TestParquetDataSet:
     def test_empty_credentials_load(self, bad_credentials):
         parquet_data_set = ParquetDataSet(filepath=S3_PATH, credentials=bad_credentials)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             parquet_data_set.load().compute()
 
     def test_pass_credentials(self, mocker):
@@ -97,7 +97,7 @@ class TestParquetDataSet:
         client_mock = mocker.patch("botocore.session.Session.create_client")
         s3_data_set = ParquetDataSet(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             s3_data_set.load().compute()
 
         assert client_mock.call_count == 1

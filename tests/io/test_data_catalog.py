@@ -13,11 +13,11 @@ from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
-    DataSetAlreadyExistsError,
-    DataSetError,
-    DataSetNotFoundError,
-    LambdaDataSet,
-    MemoryDataSet,
+    DatasetAlreadyExistsError,
+    DatasetError,
+    DatasetNotFoundError,
+    LambdaDataset,
+    MemoryDataset,
 )
 from kedro.io.core import (
     _DEFAULT_PACKAGES,
@@ -102,18 +102,18 @@ def multi_catalog():
 
 @pytest.fixture
 def memory_catalog():
-    ds1 = MemoryDataSet({"data": 42})
-    ds2 = MemoryDataSet([1, 2, 3, 4, 5])
+    ds1 = MemoryDataset({"data": 42})
+    ds2 = MemoryDataset([1, 2, 3, 4, 5])
     return DataCatalog({"ds1": ds1, "ds2": ds2})
 
 
 @pytest.fixture
 def conflicting_feed_dict():
-    ds1 = MemoryDataSet({"data": 0})
+    ds1 = MemoryDataset({"data": 0})
     return {"ds1": ds1, "ds3": 1}
 
 
-class BadDataSet(AbstractDataSet):  # pragma: no cover
+class BadDataset(AbstractDataSet):  # pragma: no cover
     def __init__(self, filepath):
         self.filepath = filepath
         raise Exception("Naughty!")  # pylint: disable=broad-exception-raised
@@ -131,7 +131,7 @@ class BadDataSet(AbstractDataSet):  # pragma: no cover
 @pytest.fixture
 def bad_config(filepath):
     return {
-        "bad": {"type": "tests.io.test_data_catalog.BadDataSet", "filepath": filepath}
+        "bad": {"type": "tests.io.test_data_catalog.BadDataset", "filepath": filepath}
     }
 
 
@@ -176,27 +176,27 @@ class TestDataCatalog:
         """Check the error when attempting to load a data set
         from nonexistent source"""
         pattern = r"Failed while loading data from data set CSVDataSet"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
     def test_add_data_set_twice(self, data_catalog, data_set):
         """Check the error when attempting to add the data set twice"""
-        pattern = r"DataSet 'test' has already been registered"
-        with pytest.raises(DataSetAlreadyExistsError, match=pattern):
+        pattern = r"Dataset 'test' has already been registered"
+        with pytest.raises(DatasetAlreadyExistsError, match=pattern):
             data_catalog.add("test", data_set)
 
     def test_load_from_unregistered(self):
         """Check the error when attempting to load unregistered data set"""
         catalog = DataCatalog(data_sets={})
-        pattern = r"DataSet 'test' not found in the catalog"
-        with pytest.raises(DataSetNotFoundError, match=pattern):
+        pattern = r"Dataset 'test' not found in the catalog"
+        with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.load("test")
 
     def test_save_to_unregistered(self, dummy_dataframe):
         """Check the error when attempting to save to unregistered data set"""
         catalog = DataCatalog(data_sets={})
-        pattern = r"DataSet 'test' not found in the catalog"
-        with pytest.raises(DataSetNotFoundError, match=pattern):
+        pattern = r"Dataset 'test' not found in the catalog"
+        with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.save("test", dummy_dataframe)
 
     def test_feed_dict(self, memory_catalog, conflicting_feed_dict):
@@ -215,13 +215,13 @@ class TestDataCatalog:
 
     def test_exists_not_implemented(self, caplog):
         """Test calling `exists` on the data set, which didn't implement it"""
-        catalog = DataCatalog(data_sets={"test": LambdaDataSet(None, None)})
+        catalog = DataCatalog(data_sets={"test": LambdaDataset(None, None)})
         result = catalog.exists("test")
 
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "'exists()' not implemented for 'LambdaDataSet'. "
+            "'exists()' not implemented for 'LambdaDataset'. "
             "Assuming output does not exist." in log_record.message
         )
         assert result is False
@@ -232,18 +232,18 @@ class TestDataCatalog:
 
     def test_release_unregistered(self, data_catalog):
         """Check the error when calling `release` on unregistered data set"""
-        pattern = r"DataSet \'wrong_key\' not found in the catalog"
-        with pytest.raises(DataSetNotFoundError, match=pattern) as e:
+        pattern = r"Dataset \'wrong_key\' not found in the catalog"
+        with pytest.raises(DatasetNotFoundError, match=pattern) as e:
             data_catalog.release("wrong_key")
         assert "did you mean" not in str(e.value)
 
     def test_release_unregistered_typo(self, data_catalog):
         """Check the error when calling `release` on mistyped data set"""
         pattern = (
-            "DataSet 'text' not found in the catalog"
+            "Dataset 'text' not found in the catalog"
             " - did you mean one of these instead: test"
         )
-        with pytest.raises(DataSetNotFoundError, match=re.escape(pattern)):
+        with pytest.raises(DatasetNotFoundError, match=re.escape(pattern)):
             data_catalog.release("text")
 
     def test_multi_catalog_list(self, multi_catalog):
@@ -320,20 +320,20 @@ class TestDataCatalog:
         data_catalog.confirm("mocked")
         mock_ds.confirm.assert_called_once_with()
         assert caplog.record_tuples == [
-            ("kedro.io.data_catalog", logging.INFO, "Confirming DataSet 'mocked'")
+            ("kedro.io.data_catalog", logging.INFO, "Confirming dataset 'mocked'")
         ]
 
     @pytest.mark.parametrize(
         "dataset_name,error_pattern",
         [
-            ("missing", "DataSet 'missing' not found in the catalog"),
-            ("test", "DataSet 'test' does not have 'confirm' method"),
+            ("missing", "Dataset 'missing' not found in the catalog"),
+            ("test", "Dataset 'test' does not have 'confirm' method"),
         ],
     )
     def test_bad_confirm(self, data_catalog, dataset_name, error_pattern):
         """Test confirming a non existent dataset or one that
         does not have `confirm` method"""
-        with pytest.raises(DataSetError, match=re.escape(error_pattern)):
+        with pytest.raises(DatasetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
 
     def test_layers(self, data_catalog, data_catalog_from_config):
@@ -355,10 +355,10 @@ class TestDataCatalogFromConfig:
         in the config"""
         del sane_config["catalog"]["boats"]["type"]
         pattern = (
-            "An exception occurred when parsing config for DataSet 'boats':\n"
-            "'type' is missing from DataSet catalog configuration"
+            "An exception occurred when parsing config for dataset 'boats':\n"
+            "'type' is missing from dataset catalog configuration"
         )
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_invalid_module(self, sane_config):
@@ -368,7 +368,7 @@ class TestDataCatalogFromConfig:
         ] = "kedro.invalid_module_name.io.CSVDataSet"
 
         error_msg = "Class 'kedro.invalid_module_name.io.CSVDataSet' not found"
-        with pytest.raises(DataSetError, match=re.escape(error_msg)):
+        with pytest.raises(DatasetError, match=re.escape(error_msg)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_relative_import(self, sane_config):
@@ -376,7 +376,7 @@ class TestDataCatalogFromConfig:
         sane_config["catalog"]["boats"]["type"] = ".CSVDataSetInvalid"
 
         pattern = "'type' class path does not support relative paths"
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_import_kedro_datasets(self, sane_config, mocker):
@@ -403,31 +403,31 @@ class TestDataCatalogFromConfig:
         sane_config["catalog"]["boats"]["type"] = "kedro.io.CSVDataSetInvalid"
 
         pattern = (
-            "An exception occurred when parsing config for DataSet 'boats':\n"
+            "An exception occurred when parsing config for dataset 'boats':\n"
             "Class 'kedro.io.CSVDataSetInvalid' not found"
         )
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_invalid_data_set(self, sane_config):
         """Check the error if the type points to invalid class"""
         sane_config["catalog"]["boats"]["type"] = "DataCatalog"
         pattern = (
-            "An exception occurred when parsing config for DataSet 'boats':\n"
-            "DataSet type 'kedro.io.data_catalog.DataCatalog' is invalid: "
+            "An exception occurred when parsing config for dataset 'boats':\n"
+            "Dataset type 'kedro.io.data_catalog.DataCatalog' is invalid: "
             "all data set types must extend 'AbstractDataSet'"
         )
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_invalid_arguments(self, sane_config):
         """Check the error if the data set config contains invalid arguments"""
         sane_config["catalog"]["boats"]["save_and_load_args"] = False
         pattern = (
-            r"DataSet 'boats' must only contain arguments valid for "
+            r"Dataset 'boats' must only contain arguments valid for "
             r"the constructor of '.*CSVDataSet'"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**sane_config)
 
     def test_empty_config(self):
@@ -488,7 +488,7 @@ class TestDataCatalogFromConfig:
                 return ["CSVDataSet"]
 
         mocker.patch("kedro.io.core.load_obj", side_effect=dummy_load)
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**sane_config)
 
     def test_idempotent_catalog(self, sane_config):
@@ -499,16 +499,16 @@ class TestDataCatalogFromConfig:
 
     def test_error_dataset_init(self, bad_config):
         """Check the error when trying to instantiate erroneous data set"""
-        pattern = r"Failed to instantiate DataSet \'bad\' of type '.*BadDataSet'"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = r"Failed to instantiate dataset \'bad\' of type '.*BadDataset'"
+        with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(bad_config, None)
 
     def test_confirm(self, tmp_path, caplog, mocker):
         """Confirm the dataset"""
-        mock_confirm = mocker.patch("kedro.io.IncrementalDataSet.confirm")
+        mock_confirm = mocker.patch("kedro.io.IncrementalDataset.confirm")
         catalog = {
             "ds_to_confirm": {
-                "type": "IncrementalDataSet",
+                "type": "IncrementalDataset",
                 "dataset": "pandas.CSVDataSet",
                 "path": str(tmp_path),
             }
@@ -519,7 +519,7 @@ class TestDataCatalogFromConfig:
             (
                 "kedro.io.data_catalog",
                 logging.INFO,
-                "Confirming DataSet 'ds_to_confirm'",
+                "Confirming dataset 'ds_to_confirm'",
             )
         ]
         mock_confirm.assert_called_once_with()
@@ -527,15 +527,15 @@ class TestDataCatalogFromConfig:
     @pytest.mark.parametrize(
         "dataset_name,pattern",
         [
-            ("missing", "DataSet 'missing' not found in the catalog"),
-            ("boats", "DataSet 'boats' does not have 'confirm' method"),
+            ("missing", "Dataset 'missing' not found in the catalog"),
+            ("boats", "Dataset 'boats' does not have 'confirm' method"),
         ],
     )
     def test_bad_confirm(self, sane_config, dataset_name, pattern):
         """Test confirming non existent dataset or the one that
         does not have `confirm` method"""
         data_catalog = DataCatalog.from_config(**sane_config)
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             data_catalog.confirm(dataset_name)
 
 
@@ -599,7 +599,7 @@ class TestDataCatalogVersioned:
         version = generate_timestamp()
         load_version = {"non-boart": version}
         pattern = r"\'load_versions\' keys \[non-boart\] are not found in the catalog\."
-        with pytest.raises(DataSetNotFoundError, match=pattern):
+        with pytest.raises(DatasetNotFoundError, match=pattern):
             DataCatalog.from_config(**sane_config, load_versions=load_version)
 
     def test_compare_tracking_and_other_dataset_versioned(
@@ -654,7 +654,7 @@ class TestDataCatalogVersioned:
         catalog = DataCatalog.from_config(**sane_config)
         catalog.save("boats", dummy_dataframe)
 
-        with pytest.raises(DataSetError):
+        with pytest.raises(DatasetError):
             catalog.load("boats", version="first")
 
     def test_replacing_nonword_characters(self):
@@ -681,5 +681,5 @@ class TestDataCatalogVersioned:
             f"Did not find any versions for {versioned_dataset}. "
             f"This could be due to insufficient permission."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_dataset.load()

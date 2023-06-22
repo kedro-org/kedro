@@ -11,7 +11,7 @@ from pandas._testing import assert_frame_equal
 from s3fs import S3FileSystem
 
 from kedro.extras.datasets.pandas import GenericDataSet
-from kedro.io import DataSetError, Version
+from kedro.io import DatasetError, Version
 from kedro.io.core import PROTOCOL_DELIMITER, generate_timestamp
 
 
@@ -102,7 +102,7 @@ class TestGenericSasDataSet:
             "'file_format' parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             sas_data_set.save(dummy_dataframe)
         # Pandas does not implement a SAS writer
 
@@ -110,7 +110,7 @@ class TestGenericSasDataSet:
         # SAS reader requires a format param e.g. sas7bdat
         filepath_sas.write_bytes(sas_binary)
         pattern = "you must specify a format string"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             sas_data_set_bad_config.load()
 
     @pytest.mark.parametrize(
@@ -270,7 +270,7 @@ class TestGenericCSVDataSetVersioned:
     def test_no_versions(self, versioned_csv_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for GenericDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_csv_data_set.load()
 
     def test_exists(self, versioned_csv_data_set, dummy_dataframe):
@@ -287,7 +287,7 @@ class TestGenericCSVDataSetVersioned:
             r"Save path \'.+\' for GenericDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_csv_data_set.save(dummy_dataframe)
 
     @pytest.mark.parametrize(
@@ -320,7 +320,7 @@ class TestGenericCSVDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_csv_data_set._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_csv_data_set.save(dummy_dataframe)
 
         # Remove non-versioned dataset and try again
@@ -346,7 +346,7 @@ class TestBadGenericDataSet:
             "https://pandas.pydata.org/docs/reference/io.html"
         )
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             _ = ds.load()
 
         pattern2 = (
@@ -354,7 +354,7 @@ class TestBadGenericDataSet:
             "parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
         )
-        with pytest.raises(DataSetError, match=pattern2):
+        with pytest.raises(DatasetError, match=pattern2):
             ds.save(pd.DataFrame([1]))
 
     @pytest.mark.parametrize(
@@ -373,11 +373,11 @@ class TestBadGenericDataSet:
             f"'{file_format}' as it does not support a filepath target/source"
         )
 
-        with pytest.raises(DataSetError, match=error):
+        with pytest.raises(DatasetError, match=error):
             _ = GenericDataSet(
                 filepath="/file/thing.file", file_format=file_format
             ).load()
-        with pytest.raises(DataSetError, match=error):
+        with pytest.raises(DatasetError, match=error):
             GenericDataSet(filepath="/file/thing.file", file_format=file_format).save(
                 pd.DataFrame([1])
             )

@@ -21,7 +21,7 @@ from more_itertools import interleave
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -263,7 +263,7 @@ def _enumerate_parents(pipeline: Pipeline, child: Node) -> list[Node]:
 
 def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
     """Check if a ``Node`` exclusively has persisted Datasets as inputs.
-    If at least one input is a ``MemoryDataSet``, return False.
+    If at least one input is a ``MemoryDataset``, return False.
 
     Args:
         node: the ``Node`` to check the inputs of.
@@ -271,12 +271,12 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     Returns:
         True if the ``Node`` being checked exclusively has inputs that
-        are not ``MemoryDataSet``, else False.
+        are not ``MemoryDataset``, else False.
 
     """
     for node_input in node.inputs:
         # pylint: disable=protected-access
-        if isinstance(catalog._data_sets[node_input], MemoryDataSet):
+        if isinstance(catalog._data_sets[node_input], MemoryDataset):
             return False
     return True
 

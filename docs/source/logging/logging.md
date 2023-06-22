@@ -1,10 +1,10 @@
 # Default logging configuration
 Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the Rich logging handler to format messages. We also use the Rich traceback handler to render exceptions.
 
-By default, Python only shows logging messages at level WARNING and above. Kedro's logging configuration specifies that INFO level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a kedro run.
+By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a kedro run.
 
 ## Perform logging in your project
-To add logging to your own code (e.g. in a node), you are advised to do as follows:
+To add logging to your own code (e.g. in a node):
 
 ```python
 import logging
@@ -19,13 +19,13 @@ log.debug("Useful information for debugging")
 The name of a logger corresponds to a key in the `loggers`  section in `logging.yml` (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
 ```
 
-You can take advantage of rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) when enabled in your logging calls:
+You can take advantage of Rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) when enabled in your logging calls:
 ```python
 log.error("[bold red blink]Important error message![/]", extra={"markup": True})
 ```
 
 ### Show DEBUG level messages
-To see your `DEBUG` level message, you can change the level of log messages that you wish to see in `logging.yml`.
+To see `DEBUG` level messages, change the level of logging in `logging.yml`.
 
 ```yml
 loggers:
@@ -41,7 +41,7 @@ By changing the level value to `DEBUG` for the desired logger (e.g., <your_pytho
 ## Customise Logging
 
 ### Using `KEDRO_LOGGING_CONFIG` environment variable
-In order to customise logging, you need to specify the path of your logging configuration file via setting the environment variable `KEDRO_LOGGING_CONFIG`, which overrides the default Kedro's `default_logging.yml`. We recommend to put your `logging.yml` inside the `conf` folder. For example, you can set `KEDRO_LOGGING_CONFIG` as follows:
+To customise logging, specify the path of your logging configuration file by setting the environment variable `KEDRO_LOGGING_CONFIG` to override the default, which is Kedro's `default_logging.yml`. We recommend you put `logging.yml` inside the `conf` folder. For example, you can set `KEDRO_LOGGING_CONFIG` as follows:
 
 ```bash
 export KEDRO_LOGGING_CONFIG=<project_root>/conf/logging.yml
@@ -55,7 +55,7 @@ If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will defaul
 
 
 # Advance Logging
-In addition to the `rich` handler defined in Kedro's framework, we provide a `logging.yml` template that you can use to start with.
+In addition to the `rich` handler defined in Kedro's framework, we provide a `logging.yml` template.
 
 <details>
 <summary><b>Click to expand the `logging.yml` template</b></summary>
@@ -107,7 +107,7 @@ root:
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting
 * `info_file_handler`: write logs of level `INFO` and above to `info.log`
 
-The logging handlers that are actually used by default is `rich`.
+The logging handlers used by default are from `rich`.
 
 The default logging configuration also ensures that [logs emitted from your project's logger](#perform-logging-in-your-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
 
@@ -136,7 +136,7 @@ A comprehensive list of available options can be found in the [RichHandler docum
 
 ## Enable file-based logging
 
-File-based logging in Python projects aids troubleshooting and debugging. It offers better visibility into application's behavior and it's easy to search. However, it does not work well with read-only system such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
+File-based logging in Python projects aids troubleshooting and debugging. It offers better visibility into application's behaviour and it's easy to search. However, it does not work well with read-only systems such as [Databricks Repos](https://docs.databricks.com/repos/index.html).
 
 To enable file-based logging,  add `info_file_handler` in your `root` logger as follows in your `conf/logging.yml` as follow:
 ```diff

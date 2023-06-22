@@ -1,16 +1,14 @@
 """``kedro.io`` provides functionality to read and write to a
 number of data sets. At the core of the library is the ``AbstractDataSet`` class.
 """
+from __future__ import annotations
 
 from .cached_dataset import CachedDataSet, CachedDataset
 from .core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
-    DataSetAlreadyExistsError,
     DatasetAlreadyExistsError,
-    DataSetError,
     DatasetError,
-    DataSetNotFoundError,
     DatasetNotFoundError,
     Version,
 )
@@ -23,6 +21,22 @@ from .partitioned_dataset import (
     PartitionedDataSet,
     PartitionedDataset,
 )
+
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+DataSetError: type[Exception]
+DataSetNotFoundError: type[DatasetError]
+DataSetAlreadyExistsError: type[DatasetError]
+
+
+def __getattr__(name):
+    import kedro.io.core  # pylint: disable=import-outside-toplevel
+
+    if name in (
+        kedro.io.core._DEPRECATED_ERROR_CLASSES  # pylint: disable=protected-access
+    ):
+        return getattr(kedro.io.core, name)
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
+
 
 __all__ = [
     "AbstractDataSet",

@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
+from kedro.io import AbstractDataSet, DataCatalog, DatasetError, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ThreadRunner
@@ -16,7 +16,7 @@ from tests.runner.conftest import exception_fn, identity, return_none, sink, sou
 class TestValidThreadRunner:
     def test_create_default_data_set(self):
         data_set = ThreadRunner().create_default_data_set("")
-        assert isinstance(data_set, MemoryDataSet)
+        assert isinstance(data_set, MemoryDataset)
 
     def test_thread_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict({"A": 42})
@@ -33,7 +33,7 @@ class TestValidThreadRunner:
         assert result["Z"] == (42, 42, 42)
 
     def test_memory_dataset_input(self, fan_out_fan_in):
-        catalog = DataCatalog({"A": MemoryDataSet("42")})
+        catalog = DataCatalog({"A": MemoryDataset("42")})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == ("42", "42", "42")
@@ -105,13 +105,13 @@ class TestInvalidThreadRunner:
         pipeline = modular_pipeline(
             [node(identity, "A", "B"), node(return_none, "B", "C")]
         )
-        catalog = DataCatalog({"A": MemoryDataSet("42")})
-        pattern = "Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        catalog = DataCatalog({"A": MemoryDataset("42")})
+        pattern = "Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
             ThreadRunner().run(pipeline, catalog)
 
 
-class LoggingDataSet(AbstractDataSet):
+class LoggingDataset(AbstractDataSet):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name
@@ -141,9 +141,9 @@ class TestThreadRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "in": LoggingDataSet(log, "in", "stuff"),
-                "middle": LoggingDataSet(log, "middle"),
-                "out": LoggingDataSet(log, "out"),
+                "in": LoggingDataset(log, "in", "stuff"),
+                "middle": LoggingDataset(log, "middle"),
+                "out": LoggingDataset(log, "out"),
             }
         )
         ThreadRunner().run(pipeline, catalog)
@@ -164,8 +164,8 @@ class TestThreadRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "first": LoggingDataSet(log, "first"),
-                "second": LoggingDataSet(log, "second"),
+                "first": LoggingDataset(log, "first"),
+                "second": LoggingDataset(log, "second"),
             }
         )
         runner.run(pipeline, catalog)
@@ -189,7 +189,7 @@ class TestThreadRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
+        catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
         runner.run(pipeline, catalog)
 
         # we want to the release after both the loads
@@ -207,8 +207,8 @@ class TestThreadRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "ds@save": LoggingDataSet(log, "save"),
-                "ds@load": LoggingDataSet(log, "load"),
+                "ds@save": LoggingDataset(log, "save"),
+                "ds@load": LoggingDataset(log, "load"),
             }
         )
 

@@ -1,5 +1,5 @@
 """
-This module contains ``CachedDataSet``, a dataset wrapper which caches in memory the data saved,
+This module contains ``CachedDataset``, a dataset wrapper which caches in memory the data saved,
 so that the user avoids io operations with slow storage media
 """
 from __future__ import annotations
@@ -8,21 +8,22 @@ import logging
 from typing import Any
 
 from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataSet, Version
-from kedro.io.memory_dataset import MemoryDataSet
+from kedro.io.memory_dataset import MemoryDataset
+from kedro.utils import DeprecatedClassMeta
 
 
-class CachedDataSet(AbstractDataSet):
-    """``CachedDataSet`` is a dataset wrapper which caches in memory the data saved,
+class CachedDataset(AbstractDataSet):
+    """``CachedDataset`` is a dataset wrapper which caches in memory the data saved,
     so that the user avoids io operations with slow storage media.
 
-    You can also specify a ``CachedDataSet`` in catalog.yml:
+    You can also specify a ``CachedDataset`` in catalog.yml:
     ::
 
         >>> test_ds:
-        >>>    type: CachedDataSet
+        >>>    type: CachedDataset
         >>>    versioned: true
         >>>    dataset:
-        >>>       type: pandas.CSVDataSet
+        >>>       type: pandas.CSVDataset
         >>>       filepath: example.csv
 
     Please note that if your dataset is versioned, this should be indicated in the wrapper
@@ -41,11 +42,11 @@ class CachedDataSet(AbstractDataSet):
         copy_mode: str = None,
         metadata: dict[str, Any] = None,
     ):
-        """Creates a new instance of ``CachedDataSet`` pointing to the
+        """Creates a new instance of ``CachedDataset`` pointing to the
         provided Python object.
 
         Args:
-            dataset: A Kedro DataSet object or a dictionary to cache.
+            dataset: A Kedro Dataset object or a dictionary to cache.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -69,7 +70,7 @@ class CachedDataSet(AbstractDataSet):
                 "The argument type of 'dataset' should be either a dict/YAML "
                 "representation of the dataset, or the actual dataset object."
             )
-        self._cache = MemoryDataSet(copy_mode=copy_mode)
+        self._cache = MemoryDataset(copy_mode=copy_mode)
         self.metadata = metadata
 
     def _release(self) -> None:
@@ -81,7 +82,7 @@ class CachedDataSet(AbstractDataSet):
         if VERSIONED_FLAG_KEY in config:
             raise ValueError(
                 "Cached datasets should specify that they are versioned in the "
-                "'CachedDataSet', not in the wrapped dataset."
+                "'CachedDataset', not in the wrapped dataset."
             )
         if version:
             config[VERSIONED_FLAG_KEY] = True
@@ -117,3 +118,9 @@ class CachedDataSet(AbstractDataSet):
         logging.getLogger(__name__).warning("%s: clearing cache to pickle.", str(self))
         self._cache.release()
         return self.__dict__
+
+
+class CachedDataSet(metaclass=DeprecatedClassMeta):
+    # pylint: disable=missing-class-docstring, too-few-public-methods
+
+    _DeprecatedClassMeta__alias = CachedDataset

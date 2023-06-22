@@ -263,10 +263,11 @@ class PartitionedDataset(AbstractDataSet):
         ]
 
     def _join_protocol(self, path: str) -> str:
-        if self._path.startswith(self._protocol) and not path.startswith(
-            self._protocol
+        protocol_prefix = f"{self._protocol}://"
+        if self._path.startswith(protocol_prefix) and not path.startswith(
+            protocol_prefix
         ):
-            return f"{self._protocol}://{path}"
+            return f"{protocol_prefix}{path}"
         return path
 
     def _partition_to_path(self, path: str):

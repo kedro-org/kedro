@@ -16,27 +16,13 @@ log.debug("Useful information for debugging")
 ```
 
 ```{note}
-The name of a logger corresponds to a key in the `loggers`  section in `logging.yml` (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
+The name of a logger corresponds to a key in the `loggers` section of the logging configuration file (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
 ```
 
 You can take advantage of Rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) when enabled in your logging calls:
 ```python
 log.error("[bold red blink]Important error message![/]", extra={"markup": True})
 ```
-
-### Show DEBUG level messages
-To see `DEBUG` level messages, change the level of logging in `logging.yml`.
-
-```yml
-loggers:
-  kedro:
-    level: INFO
-
-  your_python_pacakge:
-    level: DEBUG  # Change this to DEBUG
-```
-
-By changing the level value to `DEBUG` for the desired logger (e.g., <your_python_package>), you will start seeing `DEBUG` level messages in the log output.
 
 ## Customise Logging
 
@@ -53,8 +39,21 @@ After setting the environment variable, any subsequent Kedro commands will use t
 If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will default to using the logging configuration file at the project's default location of  Kedro's `default_logging.yml`.
 ```
 
+### Show DEBUG level messages
+To see `DEBUG` level messages, change the level of logging in `logging.yml`.
 
-# Advance Logging
+```yml
+loggers:
+  kedro:
+    level: INFO
+
+  your_python_pacakge:
+    level: DEBUG  # Change this to DEBUG
+```
+
+By changing the level value to `DEBUG` for the desired logger (e.g., <your_python_package>), you will start seeing `DEBUG` level messages in the log output.
+
+# Advanced Logging
 In addition to the `rich` handler defined in Kedro's framework, we provide a `logging.yml` template.
 
 <details>

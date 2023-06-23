@@ -227,6 +227,15 @@ class TestKedroContext:
             == (dummy_context._project_path / "horses.csv").as_posix()
         )
 
+    def test_get_catalog_validates_transcoded_datasets(self, dummy_context, mocker):
+        mock_validate = mocker.patch(
+            "kedro.framework.context.context._validate_transcoded_datasets"
+        )
+        mock_transcoded_split = mocker.patch("kedro.pipeline.pipeline._transcode_split")
+        catalog = dummy_context.catalog
+        mock_validate.assert_called_once_with(catalog)
+        mock_transcoded_split.assert_called_once_with(catalog)
+
     def test_catalog(self, dummy_context, dummy_dataframe):
         assert dummy_context.catalog.layers == {"raw": {"boats"}}
         dummy_context.catalog.save("cars", dummy_dataframe)

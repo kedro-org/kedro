@@ -117,10 +117,10 @@ def _convert_paths_to_absolute_posix(
 
     return conf_dictionary
 
+
 def _validate_transcoded_datasets(catalog: DataCatalog):
-    print(catalog._data_sets.keys())
     for dataset_name in catalog._data_sets.keys():
-        _ , _ = _transcode_split(dataset_name)
+        _, _ = _transcode_split(dataset_name)
 
 
 def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:

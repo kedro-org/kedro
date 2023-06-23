@@ -15,6 +15,7 @@ filelock>=3.4.0, <4.0
 gcsfs>=2021.4, <=2023.1; python_version == '3.7'
 gcsfs>=2023.1, <2023.3; python_version >= '3.8'
 geopandas>=0.6.0, <1.0
+h5py>3.5.0
 hdfs>=2.5.8, <3.0
 holoviews~=1.13.0
 import-linter[toml]==1.8.0
@@ -42,7 +43,7 @@ plotly>=4.8.0, <6.0
 pre-commit>=2.9.2, <3.0  # The hook `mypy` requires pre-commit version 2.9.2.
 psutil==5.8.0
 pyarrow>=1.0, <7.0
-pylint>=2.5.2, <3.0
+pylint>=2.17.0, <3.0
 pyproj~=3.0
 pyspark>=2.2, <4.0
 pytest-cov~=3.0

@@ -26,7 +26,7 @@ from kedro.extras.datasets.spark.spark_dataset import (
     _dbfs_glob,
     _get_dbutils,
 )
-from kedro.io import DataCatalog, DataSetError, Version
+from kedro.io import DataCatalog, DatasetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
@@ -286,7 +286,7 @@ class TestSparkDataSet:
             f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
         )
 
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             SparkDataSet(
                 filepath=filepath,
                 file_format="csv",
@@ -301,7 +301,7 @@ class TestSparkDataSet:
             "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
         )
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SparkDataSet(
                 filepath=filepath,
                 file_format="csv",
@@ -347,7 +347,7 @@ class TestSparkDataSet:
         spark_data_set = SparkDataSet(filepath=filepath)
         spark_data_set.save(sample_spark_df)
 
-        with pytest.raises(DataSetError):
+        with pytest.raises(DatasetError):
             spark_data_set.save(sample_spark_df)
 
     def test_save_overwrite_mode(self, tmp_path, sample_spark_df):
@@ -369,7 +369,7 @@ class TestSparkDataSet:
             f"Please use 'spark.DeltaTableDataSet' instead."
         )
 
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
             _ = SparkDataSet(
                 filepath=filepath, file_format="delta", save_args={"mode": mode}
             )
@@ -411,7 +411,7 @@ class TestSparkDataSet:
             side_effect=AnalysisException("Other Exception", []),
         )
 
-        with pytest.raises(DataSetError, match="Other Exception"):
+        with pytest.raises(DatasetError, match="Other Exception"):
             spark_data_set.exists()
 
     @pytest.mark.parametrize("is_async", [False, True])
@@ -448,7 +448,7 @@ class TestSparkDataSet:
 class TestSparkDataSetVersionedLocal:
     def test_no_version(self, versioned_dataset_local):
         pattern = r"Did not find any versions for SparkDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_local.load()
 
     def test_load_latest(self, versioned_dataset_local, sample_spark_df):
@@ -506,7 +506,7 @@ class TestSparkDataSetVersionedLocal:
             r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_local.save(sample_spark_df)
 
     def test_versioning_existing_dataset(
@@ -688,7 +688,7 @@ class TestSparkDataSetVersionedDBFS:
 class TestSparkDataSetVersionedS3:
     def test_no_version(self, versioned_dataset_s3):
         pattern = r"Did not find any versions for SparkDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_s3.load()
 
     def test_load_latest(self, mocker, versioned_dataset_s3):
@@ -770,7 +770,7 @@ class TestSparkDataSetVersionedS3:
             r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_dataset_s3.save(mocked_spark_df)
 
         mocked_spark_df.write.save.assert_not_called()
@@ -804,7 +804,7 @@ class TestSparkDataSetVersionedHdfs:
         versioned_hdfs = SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
         pattern = r"Did not find any versions for SparkDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hdfs.load()
 
         hdfs_walk.assert_called_once_with(HDFS_PREFIX)
@@ -910,7 +910,7 @@ class TestSparkDataSetVersionedHdfs:
             r"Save path '.+' for SparkDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hdfs.save(mocked_spark_df)
 
         hdfs_status.assert_called_once_with(
@@ -966,7 +966,7 @@ class TestDataFlowSequentialRunner:
         """SparkDataSet(load) -> node -> PickleDataSet (save)"""
         pipeline = modular_pipeline([node(identity, "spark_in", "pickle_ds")])
         pattern = ".* was not serialised due to.*"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
     def test_spark_memory_spark(self, is_async, data_catalog):

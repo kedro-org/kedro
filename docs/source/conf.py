@@ -122,6 +122,7 @@ type_targets = {
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.runner.parallel_runner._SharedMemoryDataSet",
+        "kedro.runner.parallel_runner._SharedMemoryDataset",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",
@@ -317,7 +318,6 @@ KEDRO_MODULES = [
     "kedro.runner",
     "kedro.config",
     "kedro.extras.datasets",
-    "kedro.extras.logging",
     "kedro_datasets",
 ]
 

@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from kedro.extras.datasets.spark import SparkJDBCDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def test_missing_url():
         "'url' argument cannot be empty. Please provide a JDBC"
         " URL of the form 'jdbc:subprotocol:subname'."
     )
-    with pytest.raises(DataSetError, match=error_message):
+    with pytest.raises(DatasetError, match=error_message):
         SparkJDBCDataSet(url=None, table="dummy_table")
 
 
@@ -49,7 +49,7 @@ def test_missing_table():
         "'table' argument cannot be empty. Please provide"
         " the name of the table to load or save data to."
     )
-    with pytest.raises(DataSetError, match=error_message):
+    with pytest.raises(DatasetError, match=error_message):
         SparkJDBCDataSet(url="dummy_url", table=None)
 
 
@@ -83,7 +83,7 @@ def test_save_args(spark_jdbc_args_save_load):
 
 def test_except_bad_credentials(spark_jdbc_args_credentials_with_none_password):
     pattern = r"Credential property 'password' cannot be None(.+)"
-    with pytest.raises(DataSetError, match=pattern):
+    with pytest.raises(DatasetError, match=pattern):
         mock_save(spark_jdbc_args_credentials_with_none_password)
 
 

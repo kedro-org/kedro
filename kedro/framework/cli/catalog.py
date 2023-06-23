@@ -13,12 +13,7 @@ from kedro.framework.startup import ProjectMetadata
 
 def _create_session(package_name: str, **kwargs):
     kwargs.setdefault("save_on_close", False)
-    try:
-        return KedroSession.create(package_name, **kwargs)
-    except Exception as exc:
-        raise KedroCliError(
-            f"Unable to instantiate Kedro session.\nError: {exc}"
-        ) from exc
+    return KedroSession.create(package_name, **kwargs)
 
 
 # pylint: disable=missing-function-docstring
@@ -47,14 +42,19 @@ def catalog():
 @click.pass_obj
 def list_datasets(metadata: ProjectMetadata, pipeline, env):
     """Show datasets per type."""
-    title = "DataSets in '{}' pipeline"
+    title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
     mentioned = "Datasets mentioned in pipeline"
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
-    catalog_ds = set(context.catalog.list())
+    try:
+        datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
+        catalog_ds = set(context.catalog.list())
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro Catalog.\nError: {exc}"
+        ) from exc
 
     target_pipelines = pipeline or pipelines.keys()
 
@@ -77,7 +77,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
 
         if default_ds:
-            used_by_type["DefaultDataSet"].extend(default_ds)
+            used_by_type["DefaultDataset"].extend(default_ds)
 
         data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
         result[title.format(pipe)] = {key: value for key, value in data if value}
@@ -113,9 +113,9 @@ def _map_type_to_datasets(datasets, datasets_meta):
 def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     """Create Data Catalog YAML configuration with missing datasets.
 
-    Add `MemoryDataSet` datasets to Data Catalog YAML configuration file
-    for each dataset in a registered pipeline if it is missing from
-    the `DataCatalog`.
+    Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
+    file for each dataset in a registered pipeline if it is missing from
+    the ``DataCatalog``.
 
     The catalog configuration will be saved to
     `<conf_source>/<env>/catalog/<pipeline_name>.yml` file.
@@ -167,7 +167,7 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
         catalog_config = {}
 
     for ds_name in missing_ds:
-        catalog_config[ds_name] = {"type": "MemoryDataSet"}
+        catalog_config[ds_name] = {"type": "MemoryDataset"}
 
     # Create only `catalog` folder under existing environment
     # (all parent folders must exist).

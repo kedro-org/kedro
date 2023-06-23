@@ -16,13 +16,13 @@ from typing import Any
 from kedro.io.core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
-    DataSetAlreadyExistsError,
-    DataSetError,
-    DataSetNotFoundError,
+    DatasetAlreadyExistsError,
+    DatasetError,
+    DatasetNotFoundError,
     Version,
     generate_timestamp,
 )
-from kedro.io.memory_dataset import MemoryDataSet
+from kedro.io.memory_dataset import MemoryDataset
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
@@ -95,7 +95,7 @@ def _sub_nonword_chars(data_set_name: str) -> str:
 
 
 class _FrozenDatasets:
-    """Helper class to access underlying loaded datasets"""
+    """Helper class to access underlying loaded datasets."""
 
     def __init__(
         self,
@@ -216,9 +216,9 @@ class DataCatalog:
             data sets, created and ready to use.
 
         Raises:
-            DataSetError: When the method fails to create any of the data
+            DatasetError: When the method fails to create any of the data
                 sets from their config.
-            DataSetNotFoundError: When `load_versions` refers to a dataset that doesn't
+            DatasetNotFoundError: When `load_versions` refers to a dataset that doesn't
                 exist in the catalog.
 
         Example:
@@ -264,7 +264,7 @@ class DataCatalog:
 
         missing_keys = load_versions.keys() - catalog.keys()
         if missing_keys:
-            raise DataSetNotFoundError(
+            raise DatasetNotFoundError(
                 f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
             )
@@ -287,7 +287,7 @@ class DataCatalog:
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
         if data_set_name not in self._data_sets:
-            error_msg = f"DataSet '{data_set_name}' not found in the catalog"
+            error_msg = f"Dataset '{data_set_name}' not found in the catalog"
 
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
@@ -299,7 +299,7 @@ class DataCatalog:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
 
-            raise DataSetNotFoundError(error_msg)
+            raise DatasetNotFoundError(error_msg)
 
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):
@@ -323,7 +323,7 @@ class DataCatalog:
             The loaded data as configured.
 
         Raises:
-            DataSetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a data set with the given name
                 has not yet been registered.
 
         Example:
@@ -343,7 +343,10 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from '%s' (%s)...", name, type(dataset).__name__
+            "Loading data from [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
         )
 
         result = dataset.load()
@@ -359,7 +362,7 @@ class DataCatalog:
                 data set.
 
         Raises:
-            DataSetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a data set with the given name
                 has not yet been registered.
 
         Example:
@@ -381,7 +384,12 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to '%s' (%s)...", name, type(dataset).__name__)
+        self._logger.info(
+            "Saving data to [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
 
         dataset.save(data)
 
@@ -399,7 +407,7 @@ class DataCatalog:
         """
         try:
             dataset = self._get_dataset(name)
-        except DataSetNotFoundError:
+        except DatasetNotFoundError:
             return False
         return dataset.exists()
 
@@ -410,7 +418,7 @@ class DataCatalog:
             name: A data set to be checked.
 
         Raises:
-            DataSetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a data set with the given name
                 has not yet been registered.
         """
         dataset = self._get_dataset(name)
@@ -426,11 +434,11 @@ class DataCatalog:
                 registered yet.
             data_set: A data set object to be associated with the given data
                 set name.
-            replace: Specifies whether to replace an existing ``DataSet``
+            replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
 
         Raises:
-            DataSetAlreadyExistsError: When a data set with the same name
+            DatasetAlreadyExistsError: When a data set with the same name
                 has already been registered.
 
         Example:
@@ -446,10 +454,14 @@ class DataCatalog:
         """
         if data_set_name in self._data_sets:
             if replace:
-                self._logger.warning("Replacing DataSet '%s'", data_set_name)
+                self._logger.warning(
+                    "Replacing dataset [dark_orange]%s[/dark_orange]",
+                    data_set_name,
+                    extra={"markup": True},
+                )
             else:
-                raise DataSetAlreadyExistsError(
-                    f"DataSet '{data_set_name}' has already been registered"
+                raise DatasetAlreadyExistsError(
+                    f"Dataset '{data_set_name}' has already been registered"
                 )
         self._data_sets[data_set_name] = data_set
         self.datasets = _FrozenDatasets(self.datasets, {data_set_name: data_set})
@@ -460,13 +472,13 @@ class DataCatalog:
         """Adds a group of new data sets to the ``DataCatalog``.
 
         Args:
-            data_sets: A dictionary of ``DataSet`` names and data set
+            data_sets: A dictionary of dataset names and dataset
                 instances.
-            replace: Specifies whether to replace an existing ``DataSet``
+            replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
 
         Raises:
-            DataSetAlreadyExistsError: When a data set with the same name
+            DatasetAlreadyExistsError: When a data set with the same name
                 has already been registered.
 
         Example:
@@ -490,12 +502,12 @@ class DataCatalog:
             self.add(name, data_set, replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
-        """Adds instances of ``MemoryDataSet``, containing the data provided
+        """Adds instances of ``MemoryDataset``, containing the data provided
         through feed_dict.
 
         Args:
             feed_dict: A feed dict with data to be added in memory.
-            replace: Specifies whether to replace an existing ``DataSet``
+            replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
 
         Example:
@@ -518,13 +530,13 @@ class DataCatalog:
             if isinstance(feed_dict[data_set_name], AbstractDataSet):
                 data_set = feed_dict[data_set_name]
             else:
-                data_set = MemoryDataSet(data=feed_dict[data_set_name])
+                data_set = MemoryDataset(data=feed_dict[data_set_name])
 
             self.add(data_set_name, data_set, replace)
 
     def list(self, regex_search: str | None = None) -> list[str]:
         """
-        List of all ``DataSet`` names registered in the catalog.
+        List of all dataset names registered in the catalog.
         This can be filtered by providing an optional regular expression
         which will only return matching keys.
 
@@ -532,7 +544,7 @@ class DataCatalog:
             regex_search: An optional regular expression which can be provided
                 to limit the data sets returned by a particular pattern.
         Returns:
-            A list of ``DataSet`` names available which match the
+            A list of dataset names available which match the
             `regex_search` criteria (if provided). All data set names are returned
             by default.
 
@@ -584,13 +596,17 @@ class DataCatalog:
         Args:
             name: Name of the dataset.
         Raises:
-            DataSetError: When the dataset does not have `confirm` method.
+            DatasetError: When the dataset does not have `confirm` method.
 
         """
-        self._logger.info("Confirming DataSet '%s'", name)
+        self._logger.info(
+            "Confirming dataset [dark_orange]%s[/dark_orange]",
+            name,
+            extra={"markup": True},
+        )
         data_set = self._get_dataset(name)
 
         if hasattr(data_set, "confirm"):
             data_set.confirm()  # type: ignore
         else:
-            raise DataSetError(f"DataSet '{name}' does not have 'confirm' method")
+            raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")

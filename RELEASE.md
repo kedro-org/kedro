@@ -6,14 +6,36 @@
 
 ## Breaking changes to the API
 
+### DataSets
+* Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+
+### CLI
+* Removed deprecated `kedro docs` command.
+
+### ConfigLoader
+* `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.
+
+### Other
+* Removed deprecated `kedro.extras.ColorHandler`.
+* The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
+* Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+### DataSets
+* If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
+### Logging
+`logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
 # Upcoming Release 0.18.11
 
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Reworked micropackaging workflow to use standard Python packaging practices.
+* Make `kedro micropkg package` accept `--verbose`.
+
+## Documentation changes
+* Added documentation for developing a Kedro project using a Databricks workspace.
 
 ## Breaking changes to the API
 * Logging is decoupled from `ConfigLoader`, use `KEDRO_LOGGING_CONFIG` to configure logging.
@@ -79,6 +101,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [MaximeSteinmetz](https://github.com/MaximeSteinmetz)
 
+
 # Release 0.18.7
 
 ## Major features and improvements
@@ -90,6 +113,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 ## Bug fixes and other changes
 * Added a guide and tooling for developing Kedro for Databricks.
 * Implemented missing dict-like interface for `_ProjectPipeline`.
+
 
 # Release 0.18.6
 
@@ -104,6 +128,7 @@ A regression introduced in Kedro version `0.18.5` caused the `Kedro-Viz` console
 * delete any erroneous session entries created with Kedro 0.18.5 from your session_store.db stored at `<project-path>/data/session_store.db`.
 
 Thanks to Kedroids tomohiko kato, [tsanikgr](https://github.com/tsanikgr) and [maddataanalyst](https://github.com/maddataanalyst) for very detailed reports about the bug.
+
 
 # Release 0.18.5
 
@@ -178,7 +203,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added support for `tf.device` in `TensorFlowModelDataset`.
 * Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 * Updated Experiment Tracking docs with working examples.
-* Updated MatplotlibWriter Dataset, TextDataset, plotly.PlotlyDataSet and plotly.JSONDataSet docs with working examples.
+* Updated `MatplotlibWriter`, `text.TextDataSet`, `plotly.PlotlyDataSet` and `plotly.JSONDataSet` docs with working examples.
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
 * Refactored `ShelveStore` to its own module to ensure multiprocessing works with it.
 * `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.
@@ -279,6 +304,7 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Bug fixes and other changes
 * Removed fatal error from being logged when a Kedro session is created in a directory without git.
+* `KedroContext` is now an `attrs`'s frozen class and `config_loader` is available as public attribute.
 * Fixed `CONFIG_LOADER_CLASS` validation so that `TemplatedConfigLoader` can be specified in settings.py. Any `CONFIG_LOADER_CLASS` must be a subclass of `AbstractConfigLoader`.
 * Added runner name to the `run_params` dictionary used in pipeline hooks.
 * Updated [Databricks documentation](https://docs.kedro.org/en/0.18.1/deployment/databricks.html) to include how to get it working with IPython extension and Kedro-Viz.
@@ -291,6 +317,10 @@ We are grateful to the following for submitting PRs that contributed to this rel
 
 ## Upcoming deprecations for Kedro 0.19.0
 * `kedro docs` will be removed in 0.19.0.
+
+## Upcoming deprecations for Kedro 0.19.0
+* `kedro docs` will be removed in 0.19.0.
+
 
 # Release 0.18.0
 

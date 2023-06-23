@@ -7,7 +7,7 @@ from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.tracking import JSONDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -63,7 +63,7 @@ class TestJSONDataSet:
     def test_load_fail(self, json_dataset, dummy_data):
         json_dataset.save(dummy_data)
         pattern = r"Loading not supported for 'JSONDataSet'"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             json_dataset.load()
 
     def test_exists(self, json_dataset, dummy_data):
@@ -150,7 +150,7 @@ class TestJSONDataSet:
             r"Save path \'.+\' for JSONDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             explicit_versioned_json_dataset.save(dummy_data)
 
     @pytest.mark.parametrize(
@@ -177,9 +177,9 @@ class TestJSONDataSet:
             explicit_versioned_json_dataset.save(dummy_data)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             JSONDataSet(
                 filepath="https://example.com/file.json", version=Version(None, None)
             )

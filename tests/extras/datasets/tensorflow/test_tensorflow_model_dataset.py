@@ -8,7 +8,7 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from s3fs import S3FileSystem
 
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -155,7 +155,7 @@ class TestTensorFlowModelDataset:
         pattern = (
             r"Failed while loading data from data set TensorFlowModelDataset\(.*\)"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             tf_model_dataset.load()
 
     def test_exists(self, tf_model_dataset, dummy_tf_base_model):
@@ -212,7 +212,7 @@ class TestTensorFlowModelDataset:
             r"saving to the Tensorflow SavedModel format \(by setting save_format=\"tf\"\) "
             r"or using `save_weights`."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             hdf5_data_set.save(dummy_tf_subclassed_model)
 
     @pytest.mark.parametrize(
@@ -261,7 +261,7 @@ class TestTensorFlowModelDataset:
 
     def test_exists_with_exception(self, tf_model_dataset, mocker):
         """Test `exists` method invocation when `get_filepath_str` raises an exception."""
-        mocker.patch("kedro.io.core.get_filepath_str", side_effect=DataSetError)
+        mocker.patch("kedro.io.core.get_filepath_str", side_effect=DatasetError)
         assert not tf_model_dataset.exists()
 
     def test_save_and_overwrite_existing_model(
@@ -344,7 +344,7 @@ class TestTensorFlowModelDatasetVersioned:
             r"Save path \'.+\' for TensorFlowModelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_tf_model_dataset.save(dummy_tf_base_model)
 
     @pytest.mark.parametrize(
@@ -369,9 +369,9 @@ class TestTensorFlowModelDatasetVersioned:
             versioned_tf_model_dataset.save(dummy_tf_base_model)
 
     def test_http_filesystem_no_versioning(self, tensorflow_model_dataset):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             tensorflow_model_dataset(
                 filepath="https://example.com/file.tf", version=Version(None, None)
             )
@@ -385,7 +385,7 @@ class TestTensorFlowModelDatasetVersioned:
     def test_no_versions(self, versioned_tf_model_dataset):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for TensorFlowModelDataset\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_tf_model_dataset.load()
 
     def test_version_str_repr(self, tf_model_dataset, versioned_tf_model_dataset):

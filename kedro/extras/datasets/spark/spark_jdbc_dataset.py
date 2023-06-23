@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from pyspark.sql import DataFrame, SparkSession
 
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DatasetError
 
 __all__ = ["SparkJDBCDataSet"]
 
@@ -100,19 +100,19 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
                 https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
 
         Raises:
-            DataSetError: When either ``url`` or ``table`` is empty or
+            DatasetError: When either ``url`` or ``table`` is empty or
                 when a property is provided with a None value.
         """
 
         if not url:
-            raise DataSetError(
+            raise DatasetError(
                 "'url' argument cannot be empty. Please "
                 "provide a JDBC URL of the form "
                 "'jdbc:subprotocol:subname'."
             )
 
         if not table:
-            raise DataSetError(
+            raise DatasetError(
                 "'table' argument cannot be empty. Please "
                 "provide the name of the table to load or save "
                 "data to."
@@ -135,7 +135,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
             # Check credentials for bad inputs.
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:
-                    raise DataSetError(
+                    raise DatasetError(
                         f"Credential property '{cred_key}' cannot be None. "
                         f"Please provide a value."
                     )

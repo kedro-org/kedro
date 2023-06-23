@@ -8,7 +8,7 @@ from itertools import chain
 
 from pluggy import PluginManager
 
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner, run_node
 
@@ -40,7 +40,7 @@ class SequentialRunner(AbstractRunner):
             for all unregistered data sets.
 
         """
-        return MemoryDataSet()
+        return MemoryDataset()
 
     def _run(
         self,

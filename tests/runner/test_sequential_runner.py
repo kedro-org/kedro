@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DataSetError, LambdaDataSet
+from kedro.io import AbstractDataSet, DataCatalog, DatasetError, LambdaDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
@@ -53,8 +53,8 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert outputs["ds3"]["data"] == 42
 
     def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
-        pattern = "Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = "Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
             SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
     def test_result_saved_not_returned(self, is_async, saving_result_pipeline):
@@ -68,8 +68,8 @@ class TestSeqentialRunnerBranchlessPipeline:
 
         catalog = DataCatalog(
             {
-                "ds": LambdaDataSet(load=_load, save=_save),
-                "dsX": LambdaDataSet(load=_load, save=_save),
+                "ds": LambdaDataset(load=_load, save=_save),
+                "dsX": LambdaDataset(load=_load, save=_save),
             }
         )
         output = SequentialRunner(is_async=is_async).run(
@@ -125,7 +125,7 @@ class TestSequentialRunnerBranchedPipeline:
             )
 
 
-class LoggingDataSet(AbstractDataSet):
+class LoggingDataset(AbstractDataSet):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name
@@ -155,9 +155,9 @@ class TestSequentialRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "in": LoggingDataSet(log, "in", "stuff"),
-                "middle": LoggingDataSet(log, "middle"),
-                "out": LoggingDataSet(log, "out"),
+                "in": LoggingDataset(log, "in", "stuff"),
+                "middle": LoggingDataset(log, "middle"),
+                "out": LoggingDataset(log, "out"),
             }
         )
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
@@ -176,8 +176,8 @@ class TestSequentialRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "first": LoggingDataSet(log, "first"),
-                "second": LoggingDataSet(log, "second"),
+                "first": LoggingDataset(log, "first"),
+                "second": LoggingDataset(log, "second"),
             }
         )
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
@@ -199,7 +199,7 @@ class TestSequentialRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
+        catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we want to the release after both the loads
@@ -212,8 +212,8 @@ class TestSequentialRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "ds@save": LoggingDataSet(log, "save"),
-                "ds@load": LoggingDataSet(log, "load"),
+                "ds@save": LoggingDataset(log, "save"),
+                "ds@load": LoggingDataset(log, "load"),
             }
         )
 

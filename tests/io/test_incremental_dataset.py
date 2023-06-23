@@ -13,7 +13,7 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.text import TextDataSet
-from kedro.io import AbstractDataSet, DataSetError, IncrementalDataSet
+from kedro.io import AbstractDataSet, DatasetError, IncrementalDataset
 from kedro.io.data_catalog import CREDENTIALS_KEY
 
 DATASET = "kedro.extras.datasets.pandas.CSVDataSet"
@@ -41,7 +41,7 @@ def local_csvs(tmp_path, partitioned_data_pandas):
     return local_dir
 
 
-class DummyDataSet(AbstractDataSet):  # pragma: no cover
+class DummyDataset(AbstractDataSet):  # pragma: no cover
     def __init__(self, filepath):
         pass
 
@@ -63,11 +63,11 @@ def dummy_lt_func(value1: str, value2: str):
     return value1 < value2
 
 
-class TestIncrementalDataSetLocal:
+class TestIncrementalDatasetLocal:
     def test_load_and_confirm(self, local_csvs, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
-        an IncrementalDataSet"""
-        pds = IncrementalDataSet(str(local_csvs), DATASET)
+        an IncrementalDataset"""
+        pds = IncrementalDataset(str(local_csvs), DATASET)
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
         for partition_id, data in loaded.items():
@@ -87,11 +87,11 @@ class TestIncrementalDataSetLocal:
         assert reloaded_after_release == {}
 
     def test_save(self, local_csvs):
-        """Test saving a new partition into an IncrementalDataSet"""
+        """Test saving a new partition into an IncrementalDataset"""
         df = pd.DataFrame({"dummy": [1, 2, 3]})
         new_partition_key = "p05/data.csv"
         new_partition_path = local_csvs / new_partition_key
-        pds = IncrementalDataSet(str(local_csvs), DATASET)
+        pds = IncrementalDataset(str(local_csvs), DATASET)
 
         assert not new_partition_path.exists()
         assert new_partition_key not in pds.load()
@@ -121,7 +121,7 @@ class TestIncrementalDataSetLocal:
     def test_filename_suffix(self, filename_suffix, expected_partitions, local_csvs):
         """Test how specifying filename_suffix affects the available
         partitions and their names"""
-        pds = IncrementalDataSet(
+        pds = IncrementalDataset(
             str(local_csvs), DATASET, filename_suffix=filename_suffix
         )
         loaded = pds.load()
@@ -152,7 +152,7 @@ class TestIncrementalDataSetLocal:
     ):
         """Test how forcing checkpoint value affects the available partitions
         if the checkpoint file does not exist"""
-        pds = IncrementalDataSet(str(local_csvs), DATASET, checkpoint=forced_checkpoint)
+        pds = IncrementalDataset(str(local_csvs), DATASET, checkpoint=forced_checkpoint)
         loaded = pds.load()
         assert loaded.keys() == expected_partitions
 
@@ -187,11 +187,11 @@ class TestIncrementalDataSetLocal:
     ):
         """Test how forcing checkpoint value affects the available partitions
         if the checkpoint file exists"""
-        IncrementalDataSet(str(local_csvs), DATASET).confirm()
-        checkpoint = local_csvs / IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME
+        IncrementalDataset(str(local_csvs), DATASET).confirm()
+        checkpoint = local_csvs / IncrementalDataset.DEFAULT_CHECKPOINT_FILENAME
         assert checkpoint.read_text() == "p04/data.csv"
 
-        pds = IncrementalDataSet(str(local_csvs), DATASET, checkpoint=forced_checkpoint)
+        pds = IncrementalDataset(str(local_csvs), DATASET, checkpoint=forced_checkpoint)
         assert pds._checkpoint.exists()
         loaded = pds.load()
         assert loaded.keys() == expected_partitions
@@ -202,7 +202,7 @@ class TestIncrementalDataSetLocal:
     def test_force_checkpoint_no_partitions(self, forced_checkpoint, local_csvs):
         """Test that forcing the checkpoint to certain values results in no
         partitions being returned"""
-        pds = IncrementalDataSet(str(local_csvs), DATASET, checkpoint=forced_checkpoint)
+        pds = IncrementalDataset(str(local_csvs), DATASET, checkpoint=forced_checkpoint)
         loaded = pds.load()
         assert loaded == {}
 
@@ -217,7 +217,7 @@ class TestIncrementalDataSetLocal:
         checkpoint_path = local_csvs / "checkpoint_folder" / "checkpoint_file"
         assert not checkpoint_path.exists()
 
-        IncrementalDataSet(
+        IncrementalDataset(
             str(local_csvs), DATASET, checkpoint={"filepath": str(checkpoint_path)}
         ).confirm()
         assert checkpoint_path.is_file()
@@ -228,14 +228,14 @@ class TestIncrementalDataSetLocal:
         [
             (None, TextDataSet),
             ({"type": "kedro.extras.datasets.pickle.PickleDataSet"}, PickleDataSet),
-            ({"type": "tests.io.test_incremental_dataset.DummyDataSet"}, DummyDataSet),
+            ({"type": "tests.io.test_incremental_dataset.DummyDataset"}, DummyDataset),
         ],
     )
     def test_checkpoint_type(
         self, tmp_path, checkpoint_config, expected_checkpoint_class
     ):
         """Test configuring a different checkpoint dataset type"""
-        pds = IncrementalDataSet(str(tmp_path), DATASET, checkpoint=checkpoint_config)
+        pds = IncrementalDataset(str(tmp_path), DATASET, checkpoint=checkpoint_config)
         assert isinstance(pds._checkpoint, expected_checkpoint_class)
 
     @pytest.mark.parametrize(
@@ -243,13 +243,13 @@ class TestIncrementalDataSetLocal:
         [
             (
                 {"versioned": True},
-                "'IncrementalDataSet' does not support versioning "
+                "'IncrementalDataset' does not support versioning "
                 "of the checkpoint. Please remove 'versioned' key from the "
                 "checkpoint definition.",
             ),
             (
                 {"version": None},
-                "'IncrementalDataSet' does not support versioning "
+                "'IncrementalDataset' does not support versioning "
                 "of the checkpoint. Please remove 'version' key from the "
                 "checkpoint definition.",
             ),
@@ -257,8 +257,8 @@ class TestIncrementalDataSetLocal:
     )
     def test_version_not_allowed(self, tmp_path, checkpoint_config, error_pattern):
         """Test that invalid checkpoint configurations raise expected errors"""
-        with pytest.raises(DataSetError, match=re.escape(error_pattern)):
-            IncrementalDataSet(str(tmp_path), DATASET, checkpoint=checkpoint_config)
+        with pytest.raises(DatasetError, match=re.escape(error_pattern)):
+            IncrementalDataset(str(tmp_path), DATASET, checkpoint=checkpoint_config)
 
     @pytest.mark.parametrize(
         "pds_config,fs_creds,dataset_creds,checkpoint_creds",
@@ -312,7 +312,7 @@ class TestIncrementalDataSetLocal:
     def test_credentials(self, pds_config, fs_creds, dataset_creds, checkpoint_creds):
         """Test correctness of credentials propagation into the dataset and
         checkpoint constructors"""
-        pds = IncrementalDataSet(str(Path.cwd()), **pds_config)
+        pds = IncrementalDataset(str(Path.cwd()), **pds_config)
         assert pds._credentials == fs_creds
         assert pds._dataset_config[CREDENTIALS_KEY] == dataset_creds
         assert pds._checkpoint_config[CREDENTIALS_KEY] == checkpoint_creds
@@ -339,7 +339,7 @@ class TestIncrementalDataSetLocal:
             "force_checkpoint": "p02/data.csv",
             "comparison_func": comparison_func,
         }
-        pds = IncrementalDataSet(str(local_csvs), DATASET, checkpoint=checkpoint_config)
+        pds = IncrementalDataset(str(local_csvs), DATASET, checkpoint=checkpoint_config)
         assert pds.load().keys() == expected_partitions
 
 
@@ -378,8 +378,8 @@ class TestPartitionedDataSetS3:
 
     def test_load_and_confirm(self, mocked_csvs_in_s3, partitioned_data_pandas):
         """Test the standard flow for loading, confirming and reloading
-        a IncrementalDataSet in S3"""
-        pds = IncrementalDataSet(mocked_csvs_in_s3, DATASET)
+        a IncrementalDataset in S3"""
+        pds = IncrementalDataset(mocked_csvs_in_s3, DATASET)
         assert pds._checkpoint._protocol == "s3"
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
@@ -396,7 +396,7 @@ class TestPartitionedDataSetS3:
         self, mocked_csvs_in_s3, partitioned_data_pandas, mocker
     ):
         s3a_path = f"s3a://{mocked_csvs_in_s3.split('://', 1)[1]}"
-        pds = IncrementalDataSet(s3a_path, DATASET)
+        pds = IncrementalDataset(s3a_path, DATASET)
         assert pds._protocol == "s3a"
         assert pds._checkpoint._protocol == "s3"
 
@@ -436,7 +436,7 @@ class TestPartitionedDataSetS3:
     ):
         """Test how forcing checkpoint value affects the available partitions
         in S3 if the checkpoint file does not exist"""
-        pds = IncrementalDataSet(
+        pds = IncrementalDataset(
             mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
         )
         loaded = pds.load()
@@ -473,14 +473,14 @@ class TestPartitionedDataSetS3:
         """Test how forcing checkpoint value affects the available partitions
         in S3 if the checkpoint file exists"""
         # create checkpoint and assert that it exists
-        IncrementalDataSet(mocked_csvs_in_s3, DATASET).confirm()
+        IncrementalDataset(mocked_csvs_in_s3, DATASET).confirm()
         checkpoint_path = (
-            f"{mocked_csvs_in_s3}/{IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME}"
+            f"{mocked_csvs_in_s3}/{IncrementalDataset.DEFAULT_CHECKPOINT_FILENAME}"
         )
         checkpoint_value = TextDataSet(checkpoint_path).load()
         assert checkpoint_value == "p04/data.csv"
 
-        pds = IncrementalDataSet(
+        pds = IncrementalDataset(
             mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
         )
         assert pds._checkpoint.exists()
@@ -493,7 +493,7 @@ class TestPartitionedDataSetS3:
     def test_force_checkpoint_no_partitions(self, forced_checkpoint, mocked_csvs_in_s3):
         """Test that forcing the checkpoint to certain values results in no
         partitions returned from S3"""
-        pds = IncrementalDataSet(
+        pds = IncrementalDataset(
             mocked_csvs_in_s3, DATASET, checkpoint=forced_checkpoint
         )
         loaded = pds.load()

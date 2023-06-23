@@ -13,6 +13,7 @@ from pluggy import PluginManager
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
+from kedro.pipeline.pipeline import _transcode_split
 
 
 def _is_relative_path(path_string: str) -> bool:
@@ -115,6 +116,11 @@ def _convert_paths_to_absolute_posix(
             conf_dictionary[conf_key] = PureWindowsPath(conf_value).as_posix()
 
     return conf_dictionary
+
+def _validate_transcoded_datasets(catalog: DataCatalog):
+    print(catalog._data_sets.keys())
+    for dataset_name in catalog._data_sets.keys():
+        _ , _ = _transcode_split(dataset_name)
 
 
 def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
@@ -265,6 +271,7 @@ class KedroContext:
 
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)
+        _validate_transcoded_datasets(catalog)
         self._hook_manager.hook.after_catalog_created(
             catalog=catalog,
             conf_catalog=conf_catalog,

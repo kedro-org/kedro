@@ -4,10 +4,10 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 from __future__ import annotations
 
 import operator
+import warnings
 from copy import deepcopy
 from typing import Any, Callable
 from urllib.parse import urlparse
-from warnings import warn
 
 from cachetools import Cache, cachedmethod
 
@@ -19,7 +19,7 @@ from kedro.io.core import (
     parse_dataset_definition,
 )
 from kedro.io.data_catalog import CREDENTIALS_KEY
-from kedro.utils import DeprecatedClassMeta, load_obj
+from kedro.utils import load_obj
 
 DATASET_CREDENTIALS_KEY = "dataset_credentials"
 CHECKPOINT_CREDENTIALS_KEY = "checkpoint_credentials"
@@ -30,6 +30,10 @@ KEY_PROPAGATION_WARNING = (
 )
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
+
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+PartitionedDataSet: AbstractDataSet
+IncrementalDataSet: AbstractDataSet
 
 
 class PartitionedDataset(AbstractDataSet):
@@ -230,7 +234,7 @@ class PartitionedDataset(AbstractDataSet):
 
         self._filepath_arg = filepath_arg
         if self._filepath_arg in self._dataset_config:
-            warn(
+            warnings.warn(
                 f"'{self._filepath_arg}' key must not be specified in the dataset "
                 f"definition as it will be overwritten by partition path"
             )
@@ -336,12 +340,6 @@ class PartitionedDataset(AbstractDataSet):
     def _release(self) -> None:
         super()._release()
         self._invalidate_caches()
-
-
-class PartitionedDataSet(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = PartitionedDataset
 
 
 class IncrementalDataset(PartitionedDataset):
@@ -560,8 +558,20 @@ class IncrementalDataset(PartitionedDataset):
             self._checkpoint.save(partition_ids[-1])  # checkpoint to last partition
 
 
-class IncrementalDataSet(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
+_DEPRECATED_ERROR_CLASSES = {
+    "PartitionedDataSet": PartitionedDataset,
+    "IncrementalDataSet": IncrementalDataset,
+}
 
-    # pylint: disable=unused-private-member
-    __DeprecatedClassMeta__alias = IncrementalDataset
+
+def __getattr__(name):
+    if name in _DEPRECATED_ERROR_CLASSES:
+        alias = _DEPRECATED_ERROR_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro 0.19.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

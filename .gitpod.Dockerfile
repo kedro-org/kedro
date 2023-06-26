@@ -7,3 +7,4 @@ RUN pyenv install 3.8.15\
 # VideoDataSet
 RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1
 RUN sudo apt-get install make
+RUN npm install -g @mermaid-js/mermaid-cli

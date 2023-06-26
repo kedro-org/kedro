@@ -107,7 +107,6 @@ root:
 
 The logging handlers used by default are from `rich`.
 
-The default logging configuration also ensures that [logs emitted from your project's logger](#how-to-perform-logging-in-your-kedro-project) should be shown if they are `INFO` level or above (as opposed to the Python default of `WARNING`).
 
 The following section illustrates some common examples of how to change your project's logging configuration.
 

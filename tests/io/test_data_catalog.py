@@ -320,11 +320,10 @@ class TestDataCatalog:
         data_catalog.confirm("mocked")
         mock_ds.confirm.assert_called_once_with()
         assert caplog.record_tuples == [
-
             (
                 "kedro.io.data_catalog",
                 logging.INFO,
-                "Confirming dataset [dark_orange]mocked[/dark_orange]",
+                "Confirming dataset 'mocked'",
             )
         ]
 
@@ -524,7 +523,7 @@ class TestDataCatalogFromConfig:
             (
                 "kedro.io.data_catalog",
                 logging.INFO,
-                "Confirming dataset [dark_orange]ds_to_confirm[/dark_orange]",
+                "Confirming dataset 'ds_to_confirm'",
             )
         ]
         mock_confirm.assert_called_once_with()

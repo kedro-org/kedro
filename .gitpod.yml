@@ -1,26 +1,26 @@
 image:
   file: .gitpod.Dockerfile
-# tasks:
-#   # We want packages installed during the pre-build init steps to go to /workspace
-#   # rather than ~ so that they are persisted. Gitpod sets PIP_USER=yes to ensure this,
-#   # but pre-commit requires PIP_USER=no. Hence we set PIP_USER=no and use
-#   # pip install --user to install to /workspace.
-#   - name: kedro
-#     # before: |
-#     #   echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
-#     init: |
-#       make sign-off
-#       sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1
-#       pip install -e /workspace/kedro
-#       cd /workspace
-#       yes project | kedro new -s pandas-iris --checkout main
-#       pip install -r /workspace/kedro/test_requirements.txt /workspace/project/src/requirements.txt
-#       cd /workspace/kedro
-#       pre-commit install --install-hooks
+tasks:
+  # We want packages installed during the pre-build init steps to go to /workspace
+  # rather than ~ so that they are persisted. Gitpod sets PIP_USER=yes to ensure this,
+  # but pre-commit requires PIP_USER=no. Hence we set PIP_USER=no and use
+  # pip install --user to install to /workspace.
+  - name: kedro
+    # before: |
+    #   echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
+    init: |
+      make sign-off
+      sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1
+      pip install -e /workspace/kedro
+      cd /workspace
+      yes project | kedro new -s pandas-iris --checkout main
+      pip install -r /workspace/kedro/test_requirements.txt /workspace/project/src/requirements.txt
+      cd /workspace/kedro
+      pre-commit install --install-hooks
 
-#     command: |
-#       clear
-#       kedro info
+    command: |
+      clear
+      kedro info
 
 github:
   prebuilds:

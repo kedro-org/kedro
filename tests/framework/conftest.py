@@ -2,6 +2,7 @@ import pytest
 
 from kedro.framework.project import configure_logging
 
+
 @pytest.fixture
 def default_logging_config():
     logging_config = {
@@ -15,8 +16,11 @@ def default_logging_config():
     }
     return logging_config
 
+
 @pytest.fixture(autouse=True)
-def reset_logging(default_logging_config):
+def reset_logging(request, default_logging_config):
     yield
+    if "nologreset" in request.keywords:
+        return
+
     configure_logging(default_logging_config)
-    

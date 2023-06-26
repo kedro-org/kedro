@@ -97,9 +97,6 @@ loggers:
   kedro:
     level: INFO
 
-  {{ cookiecutter.python_package }}:
-    level: INFO
-
 root:
   handlers: [rich]
 ```

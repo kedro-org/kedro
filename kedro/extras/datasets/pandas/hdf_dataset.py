@@ -11,7 +11,7 @@ import pandas as pd
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -191,7 +191,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

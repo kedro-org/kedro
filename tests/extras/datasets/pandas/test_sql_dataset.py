@@ -7,7 +7,7 @@ import pytest
 import sqlalchemy
 
 from kedro.extras.datasets.pandas import SQLQueryDataSet, SQLTableDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 
 TABLE_NAME = "table_a"
 CONNECTION = "sqlite:///kedro.db"
@@ -73,7 +73,7 @@ class TestSQLTableDataSet:
     def test_empty_table_name(self):
         """Check the error when instantiating with an empty table"""
         pattern = r"'table\_name' argument cannot be empty\."
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLTableDataSet(table_name="", credentials={"con": CONNECTION})
 
     def test_empty_connection(self):
@@ -83,7 +83,7 @@ class TestSQLTableDataSet:
             r"'con' argument cannot be empty\. "
             r"Please provide a SQLAlchemy connection string\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": ""})
 
     def test_driver_missing(self, mocker):
@@ -92,7 +92,7 @@ class TestSQLTableDataSet:
             "kedro.extras.datasets.pandas.sql_dataset.create_engine",
             side_effect=ImportError("No module named 'mysqldb'"),
         )
-        with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
+        with pytest.raises(DatasetError, match=ERROR_PREFIX + "mysqlclient"):
             SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
 
     def test_unknown_sql(self):
@@ -101,7 +101,7 @@ class TestSQLTableDataSet:
         than on load or save operation.
         """
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": FAKE_CONN_STR})
 
     def test_unknown_module(self, mocker):
@@ -112,7 +112,7 @@ class TestSQLTableDataSet:
             side_effect=ImportError("No module named 'unknown_module'"),
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
 
     def test_str_representation_table(self, table_data_set):
@@ -255,7 +255,7 @@ class TestSQLQueryDataSet:
             r"'sql' and 'filepath' arguments cannot both be empty\."
             r"Please provide a sql query or path to a sql query file\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataSet(sql="", filepath="", credentials={"con": CONNECTION})
 
     def test_empty_con_error(self):
@@ -264,7 +264,7 @@ class TestSQLQueryDataSet:
             r"'con' argument cannot be empty\. Please provide "
             r"a SQLAlchemy connection string"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": ""})
 
     @pytest.mark.parametrize(
@@ -320,7 +320,7 @@ class TestSQLQueryDataSet:
         mocker.patch(
             "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
-        with pytest.raises(DataSetError, match=ERROR_PREFIX + "mysqlclient"):
+        with pytest.raises(DatasetError, match=ERROR_PREFIX + "mysqlclient"):
             SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION})
 
     def test_invalid_module(self, mocker):
@@ -331,7 +331,7 @@ class TestSQLQueryDataSet:
             "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         pattern = ERROR_PREFIX + r"Invalid module some\_module"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION})
 
     def test_load_unknown_module(self, mocker):
@@ -342,20 +342,20 @@ class TestSQLQueryDataSet:
             "kedro.extras.datasets.pandas.sql_dataset.create_engine", side_effect=_err
         )
         pattern = ERROR_PREFIX + r"No module named \'unknown\_module\'"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": CONNECTION})
 
     def test_load_unknown_sql(self):
         """Check the error when unknown SQL dialect is provided
         in the connection string"""
         pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR})
 
     def test_save_error(self, query_data_set, dummy_dataframe):
         """Check the error when trying to save to the data set"""
         pattern = r"'save' is not supported on SQLQueryDataSet"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             query_data_set.save(dummy_dataframe)
 
     def test_str_representation_sql(self, query_data_set, sql_file):
@@ -384,7 +384,7 @@ class TestSQLQueryDataSet:
             r"'sql' and 'filepath' arguments cannot both be provided."
             r"Please only provide one."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataSet(sql=SQL_QUERY, filepath=sql_file)
 
     def test_create_connection_only_once(self, mocker):

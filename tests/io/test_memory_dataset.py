@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from kedro.io import DataSetError, MemoryDataSet
+from kedro.io import DatasetError, MemoryDataset
 from kedro.io.memory_dataset import _copy_with_mode, _infer_copy_mode
 
 
@@ -49,7 +49,7 @@ def new_data():
 
 @pytest.fixture
 def memory_dataset(input_data):
-    return MemoryDataSet(data=input_data)
+    return MemoryDataset(data=input_data)
 
 
 @pytest.fixture
@@ -62,14 +62,14 @@ def mocked_copy_with_mode(mocker):
     return mocker.patch("kedro.io.memory_dataset._copy_with_mode")
 
 
-class TestMemoryDataSet:
+class TestMemoryDataset:
     def test_load(self, memory_dataset, input_data):
         """Test basic load"""
         loaded_data = memory_dataset.load()
         assert _check_equals(loaded_data, input_data)
 
     def test_load_none(self):
-        loaded_data = MemoryDataSet(None).load()
+        loaded_data = MemoryDataset(None).load()
         assert loaded_data is None
 
     def test_load_infer_mode(
@@ -88,7 +88,7 @@ class TestMemoryDataSet:
         assert _check_equals(mocked_copy_with_mode.call_args[0][0], input_data)
 
     def test_save(self, memory_dataset, input_data, new_data):
-        """Test overriding the data set"""
+        """Test overriding the dataset"""
         memory_dataset.save(data=new_data)
         reloaded = memory_dataset.load()
         assert not _check_equals(reloaded, input_data)
@@ -110,13 +110,13 @@ class TestMemoryDataSet:
         assert _check_equals(mocked_copy_with_mode.call_args[0][0], new_data)
 
     def test_load_modify_original_data(self, memory_dataset, input_data):
-        """Check that the data set object is not updated when the original
+        """Check that the dataset object is not updated when the original
         object is changed."""
         input_data = _update_data(input_data, 1, 1, -5)
         assert not _check_equals(memory_dataset.load(), input_data)
 
     def test_save_modify_original_data(self, memory_dataset, new_data):
-        """Check that the data set object is not updated when the original
+        """Check that the dataset object is not updated when the original
         object is changed."""
         memory_dataset.save(new_data)
         new_data = _update_data(new_data, 1, 1, "new value")
@@ -137,37 +137,37 @@ class TestMemoryDataSet:
 
     def test_create_without_data(self):
         """Test instantiation without data"""
-        assert MemoryDataSet() is not None
+        assert MemoryDataset() is not None
 
     def test_loading_none(self):
-        """Check the error when attempting to load the data set that doesn't
+        """Check the error when attempting to load the dataset that doesn't
         contain any data"""
-        pattern = r"Data for MemoryDataSet has not been saved yet\."
-        with pytest.raises(DataSetError, match=pattern):
-            MemoryDataSet().load()
+        pattern = r"Data for MemoryDataset has not been saved yet\."
+        with pytest.raises(DatasetError, match=pattern):
+            MemoryDataset().load()
 
     def test_saving_none(self):
-        """Check the error when attempting to save the data set without
+        """Check the error when attempting to save the dataset without
         providing the data"""
-        pattern = r"Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
-            MemoryDataSet().save(None)
+        pattern = r"Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
+            MemoryDataset().save(None)
 
     @pytest.mark.parametrize(
         "input_data,expected",
         [
-            ("dummy_dataframe", "MemoryDataSet(data=<DataFrame>)"),
-            ("dummy_numpy_array", "MemoryDataSet(data=<ndarray>)"),
+            ("dummy_dataframe", "MemoryDataset(data=<DataFrame>)"),
+            ("dummy_numpy_array", "MemoryDataset(data=<ndarray>)"),
         ],
         indirect=["input_data"],
     )
     def test_str_representation(self, memory_dataset, input_data, expected):
-        """Test string representation of the data set"""
+        """Test string representation of the dataset"""
         assert expected in str(memory_dataset)
 
     def test_exists(self, new_data):
         """Test `exists` method invocation"""
-        data_set = MemoryDataSet()
+        data_set = MemoryDataset()
         assert not data_set.exists()
 
         data_set.save(new_data)
@@ -202,7 +202,7 @@ def test_copy_mode_deepcopy(data):
 def test_copy_mode_invalid_string():
     """Test _copy_with_mode with invalid string"""
     pattern = "Invalid copy mode: alice. Possible values are: deepcopy, copy, assign."
-    with pytest.raises(DataSetError, match=re.escape(pattern)):
+    with pytest.raises(DatasetError, match=re.escape(pattern)):
         _copy_with_mode(None, copy_mode="alice")
 
 

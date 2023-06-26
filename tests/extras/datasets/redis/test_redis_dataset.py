@@ -10,7 +10,7 @@ import redis
 from pandas.testing import assert_frame_equal
 
 from kedro.extras.datasets.redis import PickleDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 
 
 @pytest.fixture(params=["pickle"])
@@ -105,7 +105,7 @@ class TestPickleDataSet:
     def test_exists_raises_error(self, pickle_data_set):
         """Check the error when trying to assert existence with no redis server."""
         pattern = r"The existence of key "
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pickle_data_set.exists()
 
     @pytest.mark.parametrize(
@@ -130,14 +130,14 @@ class TestPickleDataSet:
         """Check the error when trying to load missing file."""
         pattern = r"The provided key "
         mocker.patch("redis.StrictRedis.exists", return_value=False)
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pickle_data_set.load()
 
     def test_unserialisable_data(self, pickle_data_set, dummy_object, mocker):
         mocker.patch("pickle.dumps", side_effect=pickle.PickleError)
         pattern = r".+ was not serialised due to:.*"
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pickle_data_set.save(dummy_object)
 
     def test_invalid_backend(self, mocker):

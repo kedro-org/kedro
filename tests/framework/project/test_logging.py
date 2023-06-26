@@ -10,20 +10,6 @@ from kedro.framework.project import LOGGING, configure_logging, configure_projec
 
 
 @pytest.fixture
-def default_logging_config():
-    logging_config = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "handlers": {
-            "rich": {"class": "kedro.logging.RichHandler", "rich_tracebacks": True}
-        },
-        "loggers": {"kedro": {"level": "INFO"}},
-        "root": {"handlers": ["rich"]},
-    }
-    return logging_config
-
-
-@pytest.fixture
 def default_logging_config_with_project():
     logging_config = {
         "version": 1,
@@ -35,11 +21,6 @@ def default_logging_config_with_project():
         "root": {"handlers": ["rich"]},
     }
     return logging_config
-
-
-@pytest.fixture(autouse=True)
-def reset_logging(default_logging_config):
-    configure_logging(default_logging_config)
 
 
 def test_default_logging_config(default_logging_config):

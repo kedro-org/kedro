@@ -60,6 +60,7 @@ In addition to the `rich` handler defined in Kedro's framework, we provide a `lo
 
 <details>
 <summary><b>Click to expand the `logging.yml` template</b></summary>
+<code>
 
 ```yaml
 version: 1
@@ -101,6 +102,7 @@ loggers:
 root:
   handlers: [rich]
 ```
+</code>
 </details>
 
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting

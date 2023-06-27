@@ -9,15 +9,13 @@ To add logging to your own code (e.g. in a node):
 ```python
 import logging
 
-log = logging.getLogger(__name__)
-log.warning("Issue warning")
-log.info("Send information")
-log.debug("Useful information for debugging")
+logger = logging.getLogger(__name__)
+logger.warning("Issue warning")
+logger.info("Send information")
+logger.debug("Useful information for debugging")
 ```
 
-```{note}
-The name of a logger corresponds to a key in the `loggers` section of the logging configuration file (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
-```
+
 
 You can take advantage of Rich's [console markup](https://rich.readthedocs.io/en/stable/markup.html) in your logging calls:
 
@@ -27,7 +25,7 @@ log.error("[bold red blink]Important error message![/]", extra={"markup": True})
 
 ## How to customise Kedro logging
 
-To customise logging in your Kedro project, you need to specify the path to a project-specific logging configuration file. Change the environment variable `KEDRO_LOGGING_CONFIG` to override the default logging configuration, which is Kedro's `default_logging.yml`. Point the variable instead to your project-specific configuration, which we recommend you name `logging.yml` and store inside the project's`conf` folder. 
+To customise logging in your Kedro project, you need to specify the path to a project-specific logging configuration file. Change the environment variable `KEDRO_LOGGING_CONFIG` to override the default logging configuration. Point the variable instead to your project-specific configuration, which we recommend you name `logging.yml` and store inside the project's`conf` folder. 
 
 For example, you can set `KEDRO_LOGGING_CONFIG` by typing the following into your terminal:
 
@@ -42,21 +40,7 @@ If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will defaul
 ```
 
 ### How to show DEBUG level messages
-To see `DEBUG` level messages, change the level of logging in your project-specific logging configuration file (`logging.yml`):
-
-```yaml
-loggers:
-  kedro:
-    level: INFO
-
-  your_python_package:
-    level: DEBUG  # Change this to DEBUG
-```
-
-By changing the level value to `DEBUG` for the desired logger (e.g., `<your_python_package>`), you will start seeing `DEBUG` level messages in the log output.
-
-## Advanced logging
-In addition to the `rich` handler defined in Kedro's framework, we provide a `logging.yml` template.
+To see `DEBUG` level messages, change the level of logging in your project-specific logging configuration file (`logging.yml`). We provide a `logging.yml` template.:
 
 <details>
 <summary><b>Click to expand the `logging.yml` template</b></summary>
@@ -98,6 +82,9 @@ handlers:
 loggers:
   kedro:
     level: INFO
+    
+  your_python_package:
+    level: INFO
 
 root:
   handlers: [rich]
@@ -105,14 +92,28 @@ root:
 </code>
 </details>
 
+
+```diff
+ root:
+   your_python_package:
+-   level: INFO
++   level: DEBUG
+```
+
+```{note}
+The name of a logger corresponds to a key in the `loggers` section of the logging configuration file (e.g. `kedro`). See [Python's logging documentation](https://docs.python.org/3/library/logging.html#logger-objects) for more information.
+```
+
+By changing the level value to `DEBUG` for the desired logger (e.g., `<your_python_package>`), you will start seeing `DEBUG` level messages in the log output.
+
+## Advanced logging
+
+In addition to the `rich` handler defined in Kedro's framework, we provide two additional handlers in the template.
+
 * `console`: show logs on standard output (typically your terminal screen) without any rich formatting
 * `info_file_handler`: write logs of level `INFO` and above to `info.log`
 
-The logging handlers used by default are from `rich`.
-
-
 The following section illustrates some common examples of how to change your project's logging configuration.
-
 ## How to customise the `rich` handler
 
 Kedro's `kedro.logging.RichHandler` is a subclass of [`rich.logging.RichHandler`](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler) and supports the same set of arguments. By default, `rich_tracebacks` is set to `True` to use `rich` to render exceptions. However, you can disable it by setting `rich_tracebacks: False`.
@@ -125,11 +126,11 @@ When `rich_tracebacks` is set to `True`, the configuration is propagated to [`ri
 
 For instance, you can enable the display of local variables inside `logging.yml` to aid with debugging.
 
-```yaml
-rich:
-  class: kedro.logging.RichHandler
-  rich_tracebacks: True
-  tracebacks_show_locals: True
+```diff
+  rich:
+    class: kedro.logging.RichHandler
+    rich_tracebacks: True
++   tracebacks_show_locals: True
 ```
 
 A comprehensive list of available options can be found in the [RichHandler documentation](https://rich.readthedocs.io/en/stable/reference/logging.html#rich.logging.RichHandler).

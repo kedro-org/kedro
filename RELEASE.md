@@ -23,6 +23,8 @@
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+* Renamed `CachedDataSet`, `LambdaDataSet`, `IncrementalDataSet`, `MemoryDataSet` and `PartitionedDataSet` to `CachedDataset`, `LambdaDataset`, `IncrementalDataset`, `MemoryDataset` and `PartitionedDataset`, respectively.
+* Renamed `DataSetError`, `DataSetAlreadyExistsError` and `DataSetNotFoundError` to `DatasetError`, `DatasetAlreadyExistsError`, and `DatasetNotFoundError`, respectively.
 
 # Release 0.18.10
 

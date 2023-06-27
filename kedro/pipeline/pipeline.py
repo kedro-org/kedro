@@ -872,6 +872,8 @@ def _validate_transcoded_inputs_outputs(nodes: list[Node]) -> None:
 
     invalid = set()
     for dataset_name in all_inputs_outputs:
+        if not isinstance(dataset_name, str):
+            raise KedroPipelineError("A BETTER ERROR MESSAGE")
         name = _strip_transcoding(dataset_name)
         if name != dataset_name and name in all_inputs_outputs:
             invalid.add(name)
@@ -924,3 +926,7 @@ class CircularDependencyError(Exception):
     """
 
     pass
+
+
+class KedroPipelineError(Exception):
+    """Error occurred when loading pipeline and running pipeline."""

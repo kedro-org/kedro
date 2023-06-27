@@ -344,7 +344,7 @@ def exec_notebook(context, command):
 def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
     while time() < timeout_start + timeout:
-        stdout = context.result.stdout.readline()
+        stdout, _ = context.result.communicate(timeout=timeout)
         if "http://127.0.0.1:" in stdout:
             break
 
@@ -355,7 +355,7 @@ def wait_for_notebook_to_run(context, timeout):
 @when('Wait until the process is finished for up to "{timeout:d}" seconds')
 def wait(context, timeout):
     """Wait for child process to terminate."""
-    context.result.wait(timeout)
+    context.result.communicate(timeout=timeout)
 
 
 @when("I execute the test jupyter notebook and save changes")

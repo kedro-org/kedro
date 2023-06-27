@@ -262,19 +262,19 @@ class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
 ```
 </details>
 
-## Integration with `PartitionedDataSet`
+## Integration with `PartitionedDataset`
 
 Currently, the `ImageDataSet` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-Kedro's [`PartitionedDataSet`](../data/kedro_io.md#partitioned-dataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+Kedro's [`PartitionedDataset`](../data/kedro_io.md#partitioned-dataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
 
-To use `PartitionedDataSet` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataSet` loads all PNG files from the data directory using `ImageDataSet`:
+To use `PartitionedDataset` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataset` loads all PNG files from the data directory using `ImageDataSet`:
 
 ```yaml
 # in conf/base/catalog.yml
 
 pokemon:
-  type: PartitionedDataSet
+  type: PartitionedDataset
   dataset: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
   path: data/01_raw/pokemon-images-and-types/images/images
   filename_suffix: ".png"
@@ -298,7 +298,7 @@ $ ls -la data/01_raw/pokemon-images-and-types/images/images/*.png | wc -l
 ## Versioning
 
 ```{note}
-Versioning doesn't work with `PartitionedDataSet`. You can't use both of them at the same time.
+Versioning doesn't work with `PartitionedDataset`. You can't use both of them at the same time.
 ```
 To add [Versioning](../data/kedro_io.md#versioning) support to the new dataset we need to extend the
  [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataSet) to:

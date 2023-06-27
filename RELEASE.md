@@ -3,7 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
+* Compare for protocol and delimiter in `PartitionedDataset` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
 
 ## Breaking changes to the API
 
@@ -540,7 +540,7 @@ The parameters should look like this:
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
 * Relaxed the bounds on the `plotly` requirement for `plotly.PlotlyDataSet` and the `pyarrow` requirement for `pandas.ParquetDataSet`.
 * `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
-* Added new `overwrite` argument to `PartitionedDataSet` and `MatplotlibWriter` to enable deletion of existing partitions and plots on dataset `save`.
+* Added new `overwrite` argument to `PartitionedDataset` and `MatplotlibWriter` to enable deletion of existing partitions and plots on dataset `save`.
 * `kedro pipeline pull` now works when the project requirements contains entries such as `-r`, `--extra-index-url` and local wheel files ([Issue #913](https://github.com/kedro-org/kedro/issues/913)).
 * Fixed slow startup because of catalog processing by reducing the exponential growth of extra processing during `_FrozenDatasets` creations.
 * Removed `.coveragerc` from the Kedro project template. `coverage` settings are now given in `pyproject.toml`.
@@ -620,7 +620,7 @@ The parameters should look like this:
 * Fixed a bug where `kedro ipython` and `kedro jupyter notebook` didn't work if the `PYTHONPATH` was already set.
 * Update the IPython extension to allow passing `env` and `extra_params` to `reload_kedro`  similar to how the IPython script works.
 * `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
-* `PartitionedDataSet` now supports lazily materializing data on save.
+* `PartitionedDataset` now supports lazily materializing data on save.
 * `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
 * Fixed an issue where spark.SparkDataSet with enabled versioning would throw a VersionNotFoundError when using databricks-connect from a remote machine and saving to dbfs filesystem.
 * `EmailMessageDataSet` added to doctree.
@@ -805,7 +805,7 @@ from kedro.framework.session import KedroSession
 * The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when running `kedro pipeline create`. Use `kedro catalog create` to replace this functionality.
 * Removed `include_examples` prompt from `kedro new`. To generate boilerplate example code, you should use a Kedro starter.
 * Changed the `--verbose` flag from a global command to a project-specific command flag (e.g `kedro --verbose new` becomes `kedro new --verbose`).
-* Dropped support of the `dataset_credentials` key in credentials in `PartitionedDataSet`.
+* Dropped support of the `dataset_credentials` key in credentials in `PartitionedDataset`.
 * `get_source_dir()` was removed from `kedro/framework/cli/utils.py`.
 * Dropped support of `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path` keys by `get_project_context()` function (`kedro/framework/cli/cli.py`).
 * `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
@@ -908,7 +908,7 @@ Check your source directory. If you defined a different source directory (`sourc
 
 ## Bug fixes and other changes
 * Fixed `TypeError` when converting dict inputs to a node made from a wrapped `partial` function.
-* `PartitionedDataSet` improvements:
+* `PartitionedDataset` improvements:
   - Supported passing arguments to the underlying filesystem.
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
@@ -1122,9 +1122,9 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
   * Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
   * Documented installation of development version of Kedro in the [FAQ section](https://docs.kedro.org/en/0.16.0/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
   * Added missing `_exists` method to `MyOwnDataSet` example in 04_user_guide/08_advanced_io.
-* Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
+* Fixed a bug where `PartitionedDataset` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
 * Added ability to read partitioned parquet file from a directory in `pandas.ParquetDataSet`.
-* Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataSet` and `IncrementalDataSet` for per-instance cache invalidation.
+* Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataset` and `IncrementalDataSet` for per-instance cache invalidation.
 * Implemented custom glob function for `SparkDataSet` when running on Databricks.
 * Fixed a bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 * Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
@@ -1141,7 +1141,7 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
 * `get_last_load_version` and `get_last_save_version` have been renamed to `resolve_load_version` and `resolve_save_version` on ``AbstractVersionedDataSet``, the results of which are cached.
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
 * ``TextDataSet`` no longer has `load_args` and `save_args`. These can instead be specified under `open_args_load` or `open_args_save` in `fs_args`.
-* `PartitionedDataSet` and `IncrementalDataSet` method `invalidate_cache` was made private: `_invalidate_caches`.
+* `PartitionedDataset` and `IncrementalDataSet` method `invalidate_cache` was made private: `_invalidate_caches`.
 
 ### Other
 * Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time.
@@ -1302,7 +1302,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 | `biosequence.BioSequenceDataSet` | Work with bio-sequence objects using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem | `kedro.extras.datasets.biosequence` |
 | `pandas.GBQTableDataSet`         | Work with Google BigQuery                                                                                                                        | `kedro.extras.datasets.pandas`      |
 | `pandas.FeatherDataSet`          | Work with feather files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem        | `kedro.extras.datasets.pandas`      |
-| `IncrementalDataSet`             | Inherit from `PartitionedDataSet` and remembers the last processed partition                                                                     | `kedro.io`                          |
+| `IncrementalDataSet`             | Inherit from `PartitionedDataset` and remembers the last processed partition                                                                     | `kedro.io`                          |
 
 ### Files with a new location
 
@@ -1373,7 +1373,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 * Bumped minimum required pandas version to 0.24.0 to make use of `pandas.DataFrame.to_numpy` (recommended alternative to `pandas.DataFrame.values`).
 * Docs improvements.
 * `Pipeline.transform` skips modifying node inputs/outputs containing `params:` or `parameters` keywords.
-* Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+* Support for `dataset_credentials` key in the credentials for `PartitionedDataset` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 * Datasets can have a new `confirm` function which is called after a successful node function execution if the node contains `confirms` argument with such dataset name.
 * Make the resume prompt on pipeline run failure use `--from-nodes` instead of `--from-inputs` to avoid unnecessarily re-running nodes that had already executed.
 * When closed, Jupyter notebook kernels are automatically terminated after 30 seconds of inactivity by default. Use `--idle-timeout` option to update it.
@@ -1402,7 +1402,7 @@ You can also load data incrementally whenever it is dumped into a directory with
   - `ParquetGCSDataSet` dataset in `contrib` for working with Parquet files in Google Cloud Storage.
   - `JSONGCSDataSet` dataset in `contrib` for working with JSON files in Google Cloud Storage.
   - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
-  - `PartitionedDataSet` for working with datasets split across multiple files.
+  - `PartitionedDataset` for working with datasets split across multiple files.
   - `JSONDataSet` dataset for working with JSON files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem. It doesn't support `http(s)` protocol for now.
 * Added `s3fs_args` to all S3 datasets.
 * Pipelines can be deducted with `pipeline1 - pipeline2`.

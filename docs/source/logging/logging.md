@@ -1,7 +1,7 @@
 # Default logging configuration
 Kedro's [default logging configuration](https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml) defines a handler called `rich` that uses the Rich logging handler to format messages. We also use the Rich traceback handler to render exceptions.
 
-By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a kedro run.
+By default, Python only shows logging messages at level `WARNING` and above. Kedro's logging configuration specifies that `INFO` level messages from Kedro should also be emitted. This makes it easier to track the progress of your pipeline when you perform a `kedro run`.
 
 ## How to perform logging in your Kedro project
 To add logging to your own code (e.g. in a node):
@@ -27,8 +27,9 @@ log.error("[bold red blink]Important error message![/]", extra={"markup": True})
 
 ## How to customise Kedro logging
 
-### Using `KEDRO_LOGGING_CONFIG` environment variable
-To customise logging, specify the path of your logging configuration file by setting the environment variable `KEDRO_LOGGING_CONFIG` to override the default, which is Kedro's `default_logging.yml`. We recommend you put `logging.yml` inside the `conf` folder. For example, you can set `KEDRO_LOGGING_CONFIG` as follows:
+To customise logging in your Kedro project, you need to specify the path to a project-specific logging configuration file. Change the environment variable `KEDRO_LOGGING_CONFIG` to override the default logging configuration, which is Kedro's `default_logging.yml`. Point the variable instead to your project-specific configuration, which we recommend you name `logging.yml` and store inside the project's`conf` folder. 
+
+For example, you can set `KEDRO_LOGGING_CONFIG` by typing the following into your terminal:
 
 ```bash
 export KEDRO_LOGGING_CONFIG=<project_root>/conf/logging.yml
@@ -40,21 +41,21 @@ After setting the environment variable, any subsequent Kedro commands will use t
 If the `KEDRO_LOGGING_CONFIG` environment variable is not set, Kedro will default to using the logging configuration file at the project's default location of  Kedro's `default_logging.yml`.
 ```
 
-### Show DEBUG level messages
-To see `DEBUG` level messages, change the level of logging in `logging.yml`:
+### How to show DEBUG level messages
+To see `DEBUG` level messages, change the level of logging in your project-specific logging configuration file (`logging.yml`):
 
 ```yaml
 loggers:
   kedro:
     level: INFO
 
-  your_python_pacakge:
+  your_python_package:
     level: DEBUG  # Change this to DEBUG
 ```
 
-By changing the level value to `DEBUG` for the desired logger (e.g., <your_python_package>), you will start seeing `DEBUG` level messages in the log output.
+By changing the level value to `DEBUG` for the desired logger (e.g., `<your_python_package>`), you will start seeing `DEBUG` level messages in the log output.
 
-# Advanced logging
+## Advanced logging
 In addition to the `rich` handler defined in Kedro's framework, we provide a `logging.yml` template.
 
 <details>
@@ -143,7 +144,7 @@ To enable file-based logging,  add `info_file_handler` in your `root` logger as 
 +  handlers: [rich, info_file_handler]
 ```
 
-By default it only tracks `INFO` level message, but it can be configured to capture any level of logs.
+By default it only tracks `INFO` level messages, but it can be configured to capture any level of logs.
 
 ## How to use plain console logging
 

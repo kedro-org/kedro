@@ -138,10 +138,10 @@ You should see output similar to the below:
 [08/09/22 16:43:11] INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
-                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 1 tasks                                  sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                             runner.py:89
-                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
 
 ```
 </details>
@@ -161,16 +161,16 @@ You should see output similar to the following:
                     INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
-                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 2 tasks                                  sequential_runner.py:85
                     INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
 [08/09/22 16:46:08] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
                              -> [preprocessed_shuttles]
-                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataSet)...       data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataset)...       data_catalog.py:382
                     INFO     Completed 2 out of 2 tasks                                  sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                             runner.py:89
-                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
-                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataSet)...    data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataset)...    data_catalog.py:343
 
 ```
 </details>
@@ -193,7 +193,7 @@ preprocessed_shuttles:
 ```
 </details>
 
-If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
+If you remove these lines from `catalog.yml`, Kedro still runs the pipeline successfully and automatically stores the preprocessed data, in memory, as temporary Python objects of the [MemoryDataset](/kedro.io.MemoryDataset) class. Once all nodes that depend on a temporary dataset have executed, Kedro clears the dataset and the Python garbage collector releases the memory.
 
 
 ## Create a table for model input
@@ -295,24 +295,24 @@ You should see output similar to the following:
                     INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
-                    INFO     Saving data to 'preprocessed_companies' (MemoryDataSet)...      data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 3 tasks                                  sequential_runner.py:85
                     INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
 [08/09/22 17:01:25] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
                              -> [preprocessed_shuttles]
 
-                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataSet)...       data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_shuttles' (MemoryDataset)...       data_catalog.py:382
                     INFO     Completed 2 out of 3 tasks                                  sequential_runner.py:85
-                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataSet)...    data_catalog.py:343
-                    INFO     Loading data from 'preprocessed_companies' (MemoryDataSet)...   data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_shuttles' (MemoryDataset)...    data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
                     INFO     Loading data from 'reviews' (CSVDataSet)...                     data_catalog.py:343
                     INFO     Running node: create_model_input_table_node:                            node.py:327
                              create_model_input_table([preprocessed_shuttles,preprocessed_companies,
                              reviews]) -> [model_input_table]
-[08/09/22 17:01:28] INFO     Saving data to 'model_input_table' (MemoryDataSet)...           data_catalog.py:382
+[08/09/22 17:01:28] INFO     Saving data to 'model_input_table' (MemoryDataset)...           data_catalog.py:382
 [08/09/22 17:01:29] INFO     Completed 3 out of 3 tasks                                  sequential_runner.py:85
                     INFO     Pipeline execution completed successfully.                             runner.py:89
-                    INFO     Loading data from 'model_input_table' (MemoryDataSet)...        data_catalog.py:343
+                    INFO     Loading data from 'model_input_table' (MemoryDataset)...        data_catalog.py:343
 ```
 </details>
 

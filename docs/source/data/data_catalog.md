@@ -359,14 +359,14 @@ The list of all available parameters is given in the [Paramiko documentation](ht
 
 You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
 
-This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
+This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
 
 ```yaml
 # <conf_root>/<env>/catalog/<pipeline_name>.yml
 rockets:
-  type: MemoryDataSet
+  type: MemoryDataset
 scooters:
-  type: MemoryDataSet
+  type: MemoryDataset
 ```
 
 ## Adding parameters
@@ -601,9 +601,9 @@ This use is not recommended unless you are prototyping in notebooks.
 #### Save data to memory
 
 ```python
-from kedro.io import MemoryDataSet
+from kedro.io import MemoryDataset
 
-memory = MemoryDataSet(data=None)
+memory = MemoryDataset(data=None)
 io.add("cars_cache", memory)
 io.save("cars_cache", "Memory can store anything.")
 io.load("car_cache")

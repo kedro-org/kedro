@@ -325,17 +325,17 @@ We can now `kedro run` in the terminal. The output shows `X_train`, `X_test`, `y
 ```
 ...
 [02/10/23 12:42:55] INFO     Loading data from 'example_iris_data' (ChunkWiseCSVDataSet)...                 data_catalog.py:343
-                    INFO     Loading data from 'parameters' (MemoryDataSet)...                              data_catalog.py:343
+                    INFO     Loading data from 'parameters' (MemoryDataset)...                              data_catalog.py:343
                     INFO     Running node: split: split_data([example_iris_data,parameters]) ->                     node.py:329
                              [X_train,X_test,y_train,y_test]
-                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                    data_catalog.py:382
-                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                     data_catalog.py:382
-                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                    data_catalog.py:382
-                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                     data_catalog.py:382
-                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                    data_catalog.py:382
-                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                     data_catalog.py:382
-                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                    data_catalog.py:382
-                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                     data_catalog.py:382
+                    INFO     Saving data to 'X_train' (MemoryDataset)...                                    data_catalog.py:382
+                    INFO     Saving data to 'X_test' (MemoryDataset)...                                     data_catalog.py:382
+                    INFO     Saving data to 'y_train' (MemoryDataset)...                                    data_catalog.py:382
+                    INFO     Saving data to 'y_test' (MemoryDataset)...                                     data_catalog.py:382
+                    INFO     Saving data to 'X_train' (MemoryDataset)...                                    data_catalog.py:382
+                    INFO     Saving data to 'X_test' (MemoryDataset)...                                     data_catalog.py:382
+                    INFO     Saving data to 'y_train' (MemoryDataset)...                                    data_catalog.py:382
+                    INFO     Saving data to 'y_test' (MemoryDataset)...                                     data_catalog.py:382
                     INFO     Completed 1 out of 3 tasks                                                 sequential_runner.py:85
 ...
 ```

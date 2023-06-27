@@ -495,7 +495,7 @@ kedro catalog list --pipeline=ds,de
 
 ##### Create a Data Catalog YAML configuration file
 
-The following command creates a Data Catalog YAML configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
+The following command creates a Data Catalog YAML configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
 
 ```bash
 kedro catalog create --pipeline=<pipeline_name>

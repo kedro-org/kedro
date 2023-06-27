@@ -778,7 +778,7 @@ from kedro.framework.session import KedroSession
 * In a significant change, [we have introduced `KedroSession`](https://docs.kedro.org/en/0.17.0/04_kedro_project_setup/03_session.html) which is responsible for managing the lifecycle of a Kedro run.
 * Created a new Kedro Starter: `kedro new --starter=mini-kedro`. It is possible to [use the DataCatalog as a standalone component](https://github.com/kedro-org/kedro-starters/tree/master/mini-kedro) in a Jupyter notebook and transition into the rest of the Kedro framework.
 * Added `DatasetSpecs` with Hooks to run before and after datasets are loaded from/saved to the catalog.
-* Added a command: `kedro catalog create`. For a registered pipeline, it creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset that is missing from `DataCatalog`.
+* Added a command: `kedro catalog create`. For a registered pipeline, it creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataset` datasets for each dataset that is missing from `DataCatalog`.
 * Added `settings.py` and `pyproject.toml` (to replace `.kedro.yml`) for project configuration, in line with Python best practice.
 * `ProjectContext` is no longer needed, unless for very complex customisations. `KedroContext`, `ProjectHooks` and `settings.py` together implement sensible default behaviour. As a result `context_path` is also now an _optional_ key in `pyproject.toml`.
 * Removed `ProjectContext` from `src/<package_name>/run.py`.
@@ -1284,7 +1284,7 @@ You can also load data incrementally whenever it is dumped into a directory with
   - `kedro.io`
   - `kedro.extras.datasets`
   - Import path, specified in `type`
-* Added an optional `copy_mode` flag to `CachedDataSet` and `MemoryDataSet` to specify (`deepcopy`, `copy` or `assign`) the copy mode to use when loading and saving.
+* Added an optional `copy_mode` flag to `CachedDataSet` and `MemoryDataset` to specify (`deepcopy`, `copy` or `assign`) the copy mode to use when loading and saving.
 
 ### New Datasets
 
@@ -1504,7 +1504,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 * Documented the architecture of Kedro showing how we think about library, project and framework components.
 * `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on the Kedro project structure.
 * Fixed TypeError when validating partial function's signature.
-* After a node failure during a pipeline run, a resume command will be suggested in the logs. This command will not work if the required inputs are MemoryDataSets.
+* After a node failure during a pipeline run, a resume command will be suggested in the logs. This command will not work if the required inputs are MemoryDatasets.
 
 ## Breaking changes to the API
 
@@ -1615,7 +1615,7 @@ These steps should have brought your project to Kedro 0.15.0. There might be som
 * Fix local project source not having priority over the same source installed as a package, leading to local updates not being recognised.
 
 ## Breaking changes to the API
-* Remove the max_loads argument from the `MemoryDataSet` constructor and from the `AbstractRunner.create_default_data_set` method.
+* Remove the max_loads argument from the `MemoryDataset` constructor and from the `AbstractRunner.create_default_data_set` method.
 
 ## Thanks for supporting contributions
 [Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb)

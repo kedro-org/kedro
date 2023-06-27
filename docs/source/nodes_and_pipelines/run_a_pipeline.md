@@ -57,13 +57,13 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 
 ```python
 # in src/<package_name>/runner.py
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
 from pluggy import PluginManager
 
 
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
 
@@ -84,7 +84,7 @@ class DryRunner(AbstractRunner):
             for all unregistered data sets.
 
         """
-        return MemoryDataSet()
+        return MemoryDataset()
 
     def _run(
         self,
@@ -204,14 +204,14 @@ By using `DataCatalog` from the IO module we are still able to write pure functi
 
 Through `DataCatalog`, we can control where inputs are loaded from, where intermediate variables get persisted and ultimately the location to which output variables are written.
 
-In a simple example, we define a `MemoryDataSet` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, then instantiate `SequentialRunner` and call its `run` method with the pipeline and data catalog instances:
+In a simple example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, then instantiate `SequentialRunner` and call its `run` method with the pipeline and data catalog instances:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 
 ```python
-io = DataCatalog(dict(xs=MemoryDataSet()))
+io = DataCatalog(dict(xs=MemoryDataset()))
 ```
 
 ```python

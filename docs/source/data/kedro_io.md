@@ -474,23 +474,23 @@ def create_partitions() -> Dict[str, Callable[[], Any]]:
 When using lazy saving, the dataset will be written _after_ the `after_node_run` [hook](../hooks/introduction).
 ```
 
-### Incremental loads with `IncrementalDataSet`
+### Incremental loads with `IncrementalDataset`
 
-[IncrementalDataSet](/kedro.io.IncrementalDataSet) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataSet` addresses the use case when partitions have to be processed incrementally, i.e. each subsequent pipeline run should only process the partitions which were not processed by the previous runs.
+[IncrementalDataset](/kedro.io.IncrementalDataset) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, i.e. each subsequent pipeline run should only process the partitions which were not processed by the previous runs.
 
-This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataSet` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
+This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
 
 The checkpoint file is only created _after_ [the partitioned dataset is explicitly confirmed](#incremental-dataset-confirm).
 
 #### Incremental dataset load
 
-Loading `IncrementalDataSet` works similarly to [`PartitionedDataset`](#partitioned-dataset-load) with several exceptions:
-1. `IncrementalDataSet` loads the data _eagerly_, so the values in the returned dictionary represent the actual data stored in the corresponding partition, rather than a pointer to the load function. `IncrementalDataSet` considers a partition relevant for processing if its ID satisfies the comparison function, given the checkpoint value.
-2. `IncrementalDataSet` _does not_ raise a `DataSetError` if load finds no partitions to return - an empty dictionary is returned instead. An empty list of available partitions is part of a normal workflow for `IncrementalDataSet`.
+Loading `IncrementalDataset` works similarly to [`PartitionedDataset`](#partitioned-dataset-load) with several exceptions:
+1. `IncrementalDataset` loads the data _eagerly_, so the values in the returned dictionary represent the actual data stored in the corresponding partition, rather than a pointer to the load function. `IncrementalDataset` considers a partition relevant for processing if its ID satisfies the comparison function, given the checkpoint value.
+2. `IncrementalDataset` _does not_ raise a `DataSetError` if load finds no partitions to return - an empty dictionary is returned instead. An empty list of available partitions is part of a normal workflow for `IncrementalDataset`.
 
 #### Incremental dataset save
 
-The `IncrementalDataSet` save operation is identical to the [save operation of the `PartitionedDataset`](#partitioned-dataset-save).
+The `IncrementalDataset` save operation is identical to the [save operation of the `PartitionedDataset`](#partitioned-dataset-save).
 
 #### Incremental dataset confirm
 
@@ -503,7 +503,7 @@ Partitioned dataset checkpoint update is triggered by an explicit `confirms` ins
 ```python
 from kedro.pipeline import node
 
-# process and then confirm `IncrementalDataSet` within the same node
+# process and then confirm `IncrementalDataset` within the same node
 node(
     process_partitions,
     inputs="my_partitioned_dataset",
@@ -545,17 +545,17 @@ pipeline(
 
 Important notes about the confirmation operation:
 
-* Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro.io.IncrementalDataSet) method is called on the dataset object.
+* Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro.io.IncrementalDataset) method is called on the dataset object.
 * A pipeline cannot contain more than one node confirming the same dataset.
 
 
 #### Checkpoint configuration
 
-`IncrementalDataSet` does not require explicit configuration of the checkpoint unless there is a need to deviate from the defaults. To update the checkpoint configuration, add a `checkpoint` key containing the valid dataset configuration. This may be required if, say, the pipeline has read-only permissions to the location of partitions (or write operations are undesirable for any other reason). In such cases, `IncrementalDataSet` can be configured to save the checkpoint elsewhere. The `checkpoint` key also supports partial config updates where only some checkpoint attributes are overwritten, while the defaults are kept for the rest:
+`IncrementalDataset` does not require explicit configuration of the checkpoint unless there is a need to deviate from the defaults. To update the checkpoint configuration, add a `checkpoint` key containing the valid dataset configuration. This may be required if, say, the pipeline has read-only permissions to the location of partitions (or write operations are undesirable for any other reason). In such cases, `IncrementalDataset` can be configured to save the checkpoint elsewhere. The `checkpoint` key also supports partial config updates where only some checkpoint attributes are overwritten, while the defaults are kept for the rest:
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataSet
+  type: IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataSet
   checkpoint:
@@ -572,7 +572,7 @@ Along with the standard dataset attributes, `checkpoint` config also accepts two
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataSet
+  type: IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataSet
   checkpoint:
@@ -583,7 +583,7 @@ my_partitioned_dataset:
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataSet
+  type: IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataSet
   checkpoint:
@@ -596,7 +596,7 @@ Specification of `force_checkpoint` is also supported via the shorthand notation
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataSet
+  type: IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataSet
   checkpoint: 2020-01-01/data.csv
@@ -608,7 +608,7 @@ If you need to force the partitioned dataset to load all available partitions, s
 
 ```yaml
 my_partitioned_dataset:
-  type: IncrementalDataSet
+  type: IncrementalDataset
   path: s3://my-bucket-name/path/to/folder
   dataset: pandas.CSVDataSet
   checkpoint: ""

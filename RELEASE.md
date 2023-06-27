@@ -1122,9 +1122,9 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
   * Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
   * Documented installation of development version of Kedro in the [FAQ section](https://docs.kedro.org/en/0.16.0/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
   * Added missing `_exists` method to `MyOwnDataSet` example in 04_user_guide/08_advanced_io.
-* Fixed a bug where `PartitionedDataset` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
+* Fixed a bug where `PartitionedDataset` and `IncrementalDataset` were not working with `s3a` or `s3n` protocol.
 * Added ability to read partitioned parquet file from a directory in `pandas.ParquetDataSet`.
-* Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataset` and `IncrementalDataSet` for per-instance cache invalidation.
+* Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataset` and `IncrementalDataset` for per-instance cache invalidation.
 * Implemented custom glob function for `SparkDataSet` when running on Databricks.
 * Fixed a bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 * Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
@@ -1141,7 +1141,7 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
 * `get_last_load_version` and `get_last_save_version` have been renamed to `resolve_load_version` and `resolve_save_version` on ``AbstractVersionedDataSet``, the results of which are cached.
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
 * ``TextDataSet`` no longer has `load_args` and `save_args`. These can instead be specified under `open_args_load` or `open_args_save` in `fs_args`.
-* `PartitionedDataset` and `IncrementalDataSet` method `invalidate_cache` was made private: `_invalidate_caches`.
+* `PartitionedDataset` and `IncrementalDataset` method `invalidate_cache` was made private: `_invalidate_caches`.
 
 ### Other
 * Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time.
@@ -1272,7 +1272,7 @@ weather:
   file_format: csv
 ```
 
-You can also load data incrementally whenever it is dumped into a directory with the extension to [`PartionedDataSet`](https://docs.kedro.org/en/0.15.6/04_user_guide/08_advanced_io.html#partitioned-dataset), a feature that allows you to load a directory of files. The [`IncrementalDataSet`](https://docs.kedro.org/en/0.15.6/04_user_guide/08_advanced_io.html#incremental-loads-with-incrementaldataset) stores the information about the last processed partition in a `checkpoint`, read more about this feature [**here**](https://docs.kedro.org/en/0.15.6/04_user_guide/08_advanced_io.html#incremental-loads-with-incrementaldataset).
+You can also load data incrementally whenever it is dumped into a directory with the extension to [`PartionedDataSet`](https://docs.kedro.org/en/0.15.6/04_user_guide/08_advanced_io.html#partitioned-dataset), a feature that allows you to load a directory of files. The [`IncrementalDataset`](https://docs.kedro.org/en/0.15.6/04_user_guide/08_advanced_io.html#incremental-loads-with-incrementaldataset) stores the information about the last processed partition in a `checkpoint`, read more about this feature [**here**](https://docs.kedro.org/en/0.15.6/04_user_guide/08_advanced_io.html#incremental-loads-with-incrementaldataset).
 
 ### New features
 
@@ -1302,7 +1302,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 | `biosequence.BioSequenceDataSet` | Work with bio-sequence objects using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem | `kedro.extras.datasets.biosequence` |
 | `pandas.GBQTableDataSet`         | Work with Google BigQuery                                                                                                                        | `kedro.extras.datasets.pandas`      |
 | `pandas.FeatherDataSet`          | Work with feather files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem        | `kedro.extras.datasets.pandas`      |
-| `IncrementalDataSet`             | Inherit from `PartitionedDataset` and remembers the last processed partition                                                                     | `kedro.io`                          |
+| `IncrementalDataset`             | Inherit from `PartitionedDataset` and remembers the last processed partition                                                                     | `kedro.io`                          |
 
 ### Files with a new location
 

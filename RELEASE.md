@@ -1284,7 +1284,7 @@ You can also load data incrementally whenever it is dumped into a directory with
   - `kedro.io`
   - `kedro.extras.datasets`
   - Import path, specified in `type`
-* Added an optional `copy_mode` flag to `CachedDataSet` and `MemoryDataset` to specify (`deepcopy`, `copy` or `assign`) the copy mode to use when loading and saving.
+* Added an optional `copy_mode` flag to `CachedDataset` and `MemoryDataset` to specify (`deepcopy`, `copy` or `assign`) the copy mode to use when loading and saving.
 
 ### New Datasets
 
@@ -1340,7 +1340,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 |                           | `JSONLocalDataSet`                                             |
 |                           | `HDFLocalDataSet`                                              |
 |                           | `HDFS3DataSet`                                                 |
-|                           | `kedro.contrib.io.cached.CachedDataSet`                        |
+|                           | `kedro.contrib.io.cached.CachedDataset`                        |
 |                           | `kedro.contrib.io.catalog_with_default.DataCatalogWithDefault` |
 |                           | `MatplotlibLocalWriter`                                        |
 |                           | `MatplotlibS3Writer`                                           |
@@ -1526,7 +1526,7 @@ You can also load data incrementally whenever it is dumped into a directory with
   -  `CSVHTTPDataSet` to load CSV using HTTP(s) links.
   - `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage.
   - `ParquetS3DataSet` in `contrib` for usage with pandas. (by [@mmchougule](https://github.com/mmchougule))
-  - `CachedDataSet` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
+  - `CachedDataset` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
   - `YAMLLocalDataSet` in `contrib` to load and save local YAML files. (by [@Minyus](https://github.com/Minyus))
 
 ## Bug fixes and other changes

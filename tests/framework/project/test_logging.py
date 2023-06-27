@@ -24,7 +24,7 @@ def default_logging_config_with_project():
 
 
 def test_default_logging_config(default_logging_config):
-    assert LOGGING.data == default_logging_config
+    assert LOGGING.data == default_logging_config 
     assert "rich" in {handler.name for handler in logging.getLogger().handlers}
     assert logging.getLogger("kedro").level == logging.INFO
 

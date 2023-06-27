@@ -243,7 +243,7 @@ Out[11]: {'v': 0.666666666666667}
 
 ## Output to a file
 
-We can also use IO to save outputs to a file. In this example, we define a custom `LambdaDataSet` that would serialise the output to a file locally:
+We can also use IO to save outputs to a file. In this example, we define a custom `LambdaDataset` that would serialise the output to a file locally:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -260,14 +260,14 @@ def load():
         return pickle.load(f)
 
 
-pickler = LambdaDataSet(load=load, save=save)
+pickler = LambdaDataset(load=load, save=save)
 io.add("v", pickler)
 ```
 </details>
 
 It is important to make sure that the data catalog variable name `v` matches the name `v` in the pipeline definition.
 
-Next we can confirm that this `LambdaDataSet` behaves correctly:
+Next we can confirm that this `LambdaDataset` behaves correctly:
 
 <details>
 <summary><b>Click to expand</b></summary>

@@ -454,11 +454,7 @@ class DataCatalog:
         """
         if data_set_name in self._data_sets:
             if replace:
-                self._logger.warning(
-                    "Replacing dataset [dark_orange]%s[/dark_orange]",
-                    data_set_name,
-                    extra={"markup": True},
-                )
+                self._logger.warning("Replacing dataset '%s'", data_set_name)
             else:
                 raise DatasetAlreadyExistsError(
                     f"Dataset '{data_set_name}' has already been registered"
@@ -599,11 +595,7 @@ class DataCatalog:
             DatasetError: When the dataset does not have `confirm` method.
 
         """
-        self._logger.info(
-            "Confirming dataset [dark_orange]%s[/dark_orange]",
-            name,
-            extra={"markup": True},
-        )
+        self._logger.info("Confirming dataset '%s'", name)
         data_set = self._get_dataset(name)
 
         if hasattr(data_set, "confirm"):

@@ -1127,7 +1127,7 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
 * Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataset` and `IncrementalDataset` for per-instance cache invalidation.
 * Implemented custom glob function for `SparkDataSet` when running on Databricks.
 * Fixed a bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
-* Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
+* Improved the error message for `DatasetNotFoundError` to suggest possible dataset names user meant to type.
 * Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 

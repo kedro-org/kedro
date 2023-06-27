@@ -248,14 +248,14 @@ jobs:
           steps:
             - run:
                 name: Run unit tests in parallel
-                command: make test
+                command: PYTEST_ADDOPTS="-v" make test
       - when:
           condition:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests sequentially
-                command: pytest tests --cov-config pyproject.toml
+                command: pytest -v tests --cov-config pyproject.toml
 
 
   win_unit_tests:

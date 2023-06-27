@@ -164,8 +164,11 @@ commands:
           name: Install GDAL, Fiona and pytables
           command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
       - run:
+          name: Show pip information
+          command: conda activate kedro_builder; pip debug --verbose
+      - run:
           name: Install all requirements
-          command: conda activate kedro_builder; pip install -r test_requirements.txt -U
+          command: conda activate kedro_builder; pip install -v -r test_requirements.txt -U
       - run:
           name: Print Python environment
           command: conda activate kedro_builder; make print-python-env

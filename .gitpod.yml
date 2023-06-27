@@ -10,7 +10,6 @@ tasks:
     #   echo PIP_USER=no >> ~/.bashrc && export PIP_USER=no
     init: |
       make sign-off
-      sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1
       pip install -e /workspace/kedro
       cd /workspace
       yes project | kedro new -s pandas-iris --checkout main

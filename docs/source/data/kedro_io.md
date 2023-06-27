@@ -1,7 +1,7 @@
 # Kedro IO
 
 
-In this tutorial, we cover advanced uses of [the Kedro IO module](/kedro.io) to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
+In this tutorial, we cover advanced uses of [the Kedro IO module](/kedro.io) to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DatasetError](/kedro.io.DatasetError).
 
 ## Error handling
 
@@ -16,7 +16,7 @@ io = DataCatalog(data_sets=dict())  # empty catalog
 
 try:
     cars_df = io.load("cars")
-except DataSetError:
+except DatasetError:
     print("Error raised.")
 ```
 
@@ -184,7 +184,7 @@ io.save("test_data_set", data1)
 reloaded = io.load("test_data_set")
 assert data1.equals(reloaded)
 
-# raises DataSetError since the path
+# raises DatasetError since the path
 # data/01_raw/test.csv/my_exact_version/test.csv already exists
 io.save("test_data_set", data2)
 ```
@@ -206,7 +206,7 @@ io = DataCatalog({"test_data_set": test_data_set})
 
 io.save("test_data_set", data1)  # emits a UserWarning due to version inconsistency
 
-# raises DataSetError since the data/01_raw/test.csv/exact_load_version/test.csv
+# raises DatasetError since the data/01_raw/test.csv/exact_load_version/test.csv
 # file does not exist
 reloaded = io.load("test_data_set")
 ```
@@ -332,8 +332,8 @@ Requires you only to specify a class of the underlying dataset either as a strin
 
 Full notation allows you to specify a dictionary with the full underlying dataset definition _except_ the following arguments:
 * The argument that receives the partition path (`filepath` by default) - if specified, a `UserWarning` will be emitted stating that this value will be overridden by individual partition paths
-* `credentials` key - specifying it will result in a `DataSetError` being raised; dataset credentials should be passed into the `credentials` argument of the `PartitionedDataset` rather than the underlying dataset definition - see the section below on [partitioned dataset credentials](#partitioned-dataset-credentials) for details
-* `versioned` flag - specifying it will result in a `DataSetError` being raised; versioning cannot be enabled for the underlying datasets
+* `credentials` key - specifying it will result in a `DatasetError` being raised; dataset credentials should be passed into the `credentials` argument of the `PartitionedDataset` rather than the underlying dataset definition - see the section below on [partitioned dataset credentials](#partitioned-dataset-credentials) for details
+* `versioned` flag - specifying it will result in a `DatasetError` being raised; versioning cannot be enabled for the underlying datasets
 
 #### Partitioned dataset credentials
 
@@ -486,7 +486,7 @@ The checkpoint file is only created _after_ [the partitioned dataset is explicit
 
 Loading `IncrementalDataset` works similarly to [`PartitionedDataset`](#partitioned-dataset-load) with several exceptions:
 1. `IncrementalDataset` loads the data _eagerly_, so the values in the returned dictionary represent the actual data stored in the corresponding partition, rather than a pointer to the load function. `IncrementalDataset` considers a partition relevant for processing if its ID satisfies the comparison function, given the checkpoint value.
-2. `IncrementalDataset` _does not_ raise a `DataSetError` if load finds no partitions to return - an empty dictionary is returned instead. An empty list of available partitions is part of a normal workflow for `IncrementalDataset`.
+2. `IncrementalDataset` _does not_ raise a `DatasetError` if load finds no partitions to return - an empty dictionary is returned instead. An empty list of available partitions is part of a normal workflow for `IncrementalDataset`.
 
 #### Incremental dataset save
 

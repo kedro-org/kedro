@@ -11,7 +11,6 @@ kedro.extras.datasets
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.extras.datasets.api.APIDataSet
    kedro.extras.datasets.biosequence.BioSequenceDataSet
    kedro.extras.datasets.dask.ParquetDataSet
    kedro.extras.datasets.email.EmailMessageDataSet

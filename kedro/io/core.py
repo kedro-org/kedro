@@ -20,7 +20,7 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
-from kedro.utils import DeprecatedClassMeta, load_obj
+from kedro.utils import load_obj
 
 warnings.simplefilter("default", DeprecationWarning)
 
@@ -30,6 +30,11 @@ VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
+
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+DataSetError: type[Exception]
+DataSetNotFoundError: type[DatasetError]
+DataSetAlreadyExistsError: type[DatasetError]
 
 
 class DatasetError(Exception):
@@ -43,24 +48,12 @@ class DatasetError(Exception):
     pass
 
 
-class DataSetError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = DatasetError
-
-
 class DatasetNotFoundError(DatasetError):
     """``DatasetNotFoundError`` raised by ``DataCatalog`` class in case of
     trying to use a non-existing data set.
     """
 
     pass
-
-
-class DataSetNotFoundError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = DatasetNotFoundError
 
 
 class DatasetAlreadyExistsError(DatasetError):
@@ -71,10 +64,24 @@ class DatasetAlreadyExistsError(DatasetError):
     pass
 
 
-class DataSetAlreadyExistsError(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
+_DEPRECATED_ERROR_CLASSES = {
+    "DataSetError": DatasetError,
+    "DataSetNotFoundError": DatasetNotFoundError,
+    "DataSetAlreadyExistsError": DatasetAlreadyExistsError,
+}
 
-    _DeprecatedClassMeta__alias = DatasetAlreadyExistsError
+
+def __getattr__(name):
+    if name in _DEPRECATED_ERROR_CLASSES:
+        alias = _DEPRECATED_ERROR_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro 0.19.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 class VersionNotFoundError(DatasetError):

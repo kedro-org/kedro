@@ -401,7 +401,7 @@ class TestPartitionedDatasetLocal:
         assert pds._credentials == global_creds
 
 
-BUCKET_NAME = "fake_bucket_name"
+BUCKET_NAME = "s3_fake_bucket_name"
 S3_DATASET_DEFINITION = [
     "pandas.CSVDataSet",
     "kedro.extras.datasets.pandas.CSVDataSet",

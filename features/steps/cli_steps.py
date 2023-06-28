@@ -344,7 +344,7 @@ def exec_notebook(context, command):
 def wait_for_notebook_to_run(context, timeout):
     timeout_start = time()
     while time() < timeout_start + timeout:
-        stdout, _ = context.result.stdout.readline()
+        stdout = context.result.stdout.readline()
         if "http://127.0.0.1:" in stdout:
             break
 

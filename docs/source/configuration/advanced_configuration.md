@@ -119,13 +119,21 @@ CONFIG_LOADER_CLASS = OmegaConfigLoader
 
 This section contains a set of guidance for advanced configuration requirements of standard Kedro projects:
 
-* [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
-* [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
-* [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
-* [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
-* [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
-* [How to use custom resolvers in the `OmegaConfigLoader`](#how-to-use-custom-resolvers-in-the-omegaconfigloader)
-* [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
+- [Advanced configuration](#advanced-configuration)
+  - [TemplatedConfigLoader](#templatedconfigloader)
+    - [Provide template values through globals](#provide-template-values-through-globals)
+  - [OmegaConfigLoader](#omegaconfigloader)
+  - [Advanced Kedro configuration](#advanced-kedro-configuration)
+    - [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
+    - [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
+    - [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
+    - [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
+    - [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+      - [Parameters](#parameters)
+      - [Catalog](#catalog)
+      - [Other configuration files](#other-configuration-files)
+    - [How to use custom resolvers in the `OmegaConfigLoader`](#how-to-use-custom-resolvers-in-the-omegaconfigloader)
+    - [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
 ### How to change which configuration files are loaded
 If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
@@ -238,7 +246,7 @@ data:
 Since both of the file names (`parameters.yml` and `parameters_globals.yml`) match the config pattern for parameters, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
 
 #### Catalog
-From Kedro `0.18.10` templating also works for catalog files. To enable templating in the catalog you need to ensure that the template values are within the catalog files or the name of the file that contains the template values follows the same config pattern specified for catalogs.
+From Kedro `0.18.11` templating also works for catalog files. To enable templating in the catalog you need to ensure that the template values are within the catalog files or the name of the file that contains the template values follows the same config pattern specified for catalogs.
 By default, the config pattern for catalogs is: `["catalog*", "catalog*/**", "**/catalog*"]`.
 
 Additionally, any template values in the catalog need to start with an underscore `_`. This is because of how catalog entries are validated. Templated values will neither trigger a key duplication error nor appear in the resulting configuration dictionary.

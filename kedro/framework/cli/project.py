@@ -44,7 +44,7 @@ FROM_NODES_HELP = """A list of node names which should be used as a starting poi
 TO_NODES_HELP = """A list of node names which should be used as an end point."""
 NODE_ARG_HELP = """Run only nodes with specified names."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
-Available runners: 'SequentialRunner', 'ParallelRunner' and 'ThreadRun'."""
+Available runners: 'SequentialRunner', 'ParallelRunner' and 'ThreadRunner'."""
 ASYNC_ARG_HELP = """Load and save node inputs and outputs asynchronously
 with threads. If not specified, load and save datasets synchronously."""
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag

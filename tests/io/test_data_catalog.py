@@ -322,7 +322,7 @@ class TestDataCatalog:
             mock_ds.confirm.assert_called_once_with()
             assert caplog.record_tuples == [
                 ("kedro.io.data_catalog", logging.INFO, "Confirming dataset 'mocked'")
-        ]
+            ]
 
     @pytest.mark.parametrize(
         "dataset_name,error_pattern",
@@ -675,8 +675,10 @@ class TestDataCatalogVersioned:
         assert "ds3__csv" in catalog.datasets.__dict__
         assert "jalapeño" in catalog.datasets.__dict__
 
-    def test_no_versions_with_cloud_protocol(self):
+    def test_no_versions_with_cloud_protocol(self, monkeypatch):
         """Check the error if no versions are available for load from cloud storage"""
+        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummmy")
+        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummmy")
         version = Version(load=None, save=None)
         versioned_dataset = CSVDataSet("s3://bucket/file.csv", version=version)
         pattern = re.escape(

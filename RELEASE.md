@@ -9,7 +9,19 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.11
+# Upcoming Release 0.18.12
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Documentation changes
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.11
 
 ## Major features and improvements
 * Added `databricks-iris` as an official starter.
@@ -20,10 +32,6 @@
 
 ## Documentation changes
 * Added documentation for developing a Kedro project using a Databricks workspace.
-
-## Breaking changes to the API
-
-## Upcoming deprecations for Kedro 0.19.0
 
 # Release 0.18.10
 

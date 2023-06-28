@@ -22,6 +22,6 @@ Feature: Jupyter targets in new project
     Given I have added a test jupyter notebook
     When I execute the test jupyter notebook and save changes
     And I execute the kedro jupyter command "convert --all"
-    And Wait until the process is finished
+    And Wait until the process is finished for up to "120" seconds
     Then I should get a successful exit code
     And Code cell with node tag should be converted into kedro node

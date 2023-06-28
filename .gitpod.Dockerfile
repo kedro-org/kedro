@@ -7,8 +7,8 @@
 # You could use `gitpod/workspace-full` as well.
 FROM gitpod/workspace-python
 
-RUN pyenv install 3.11 \
-    && pyenv global 3.11
+RUN pyenv install 3.11.1 \
+    && pyenv global 3.11.1
 
 # VideoDataSet
 # RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1

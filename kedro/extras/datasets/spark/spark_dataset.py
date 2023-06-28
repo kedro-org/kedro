@@ -402,8 +402,10 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             self._get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
             if (
-                exception.desc.startswith("Path does not exist:")
-                or "is not a Delta table" in exception.desc
+                exception.desc.startswith(
+                    "Path does not exist:"
+                )  # pylint: disable=no-member
+                or "is not a Delta table" in exception.desc  # pylint: disable=no-member
             ):
                 return False
             raise

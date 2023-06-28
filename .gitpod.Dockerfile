@@ -4,7 +4,7 @@ FROM gitpod/workspace-full:2023-05-08-21-16-55
 # RUN pyenv install 3.8.15\
 #     && pyenv global 3.8.15
 
-RUN pyenv install 3.11.2
+RUN pyenv install 3.11.2 \
     && pyenv global 3.11.2
 
 # VideoDataSet

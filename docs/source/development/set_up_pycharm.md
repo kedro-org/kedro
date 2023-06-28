@@ -67,7 +67,7 @@ Edit the new Run configuration as follows:
 Replace **Script path** with path obtained above and **Working directory** with the path of your project directory and then click **OK**.
 
 ```{note}
-**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/logging.md).
+**Emulate terminal in output console** enables PyCharm to show [rich terminal output](../logging/index.md).
 ```
 
 To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar (if that toolbar is not visible, you can enable it by going to **View > Toolbar**). Click the green triangle:

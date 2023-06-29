@@ -12,6 +12,7 @@
 # Upcoming Release 0.18.11
 
 ## Major features and improvements
+* Added `databricks-iris` as an official starter.
 
 ## Bug fixes and other changes
 * Reworked micropackaging workflow to use standard Python packaging practices.

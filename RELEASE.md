@@ -20,7 +20,6 @@
 * Removed deprecated `kedro.extras.ColorHandler`.
 * The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 * Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
-*
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 ### DataSets
@@ -41,7 +40,7 @@
 * Added documentation for developing a Kedro project using a Databricks workspace.
 
 ## Breaking changes to the API
-
+* Logging is decoupled from `ConfigLoader`, use `KEDRO_LOGGING_CONFIG` to configure logging.
 ## Upcoming deprecations for Kedro 0.19.0
 
 # Release 0.18.10

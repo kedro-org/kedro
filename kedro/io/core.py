@@ -768,7 +768,7 @@ _DEPRECATED_CLASSES = {
     "DataSetError": DatasetError,
     "DataSetNotFoundError": DatasetNotFoundError,
     "DataSetAlreadyExistsError": DatasetAlreadyExistsError,
-    "AbstractDataSet": AbstractDataSet,
+    "AbstractDataSet": AbstractDataset,
     "AbstractVersionedDataSet": AbstractVersionedDataset,
 }
 
@@ -784,5 +784,3 @@ def __getattr__(name):
         )
         return alias
     raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
-
-

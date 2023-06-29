@@ -24,6 +24,7 @@
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+* Renamed `AbstractDataSet` and `AbstractVersionedDataSet` to `AbstractDataset` and `AbstractVersionedDataset`, respectively.
 
 # Release 0.18.10
 

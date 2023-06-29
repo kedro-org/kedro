@@ -203,14 +203,14 @@ import fsspec
 import pandas as pd
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
 
 
-class ChunkWiseCSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
+class ChunkWiseCSVDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``ChunkWiseCSVDataSet`` loads/saves data from/to a CSV file using an underlying
     filesystem. It uses pandas to handle the CSV file.
     """

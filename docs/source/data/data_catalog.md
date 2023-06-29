@@ -578,7 +578,7 @@ gear = cars["gear"].values
 The following steps happened behind the scenes when `load` was called:
 
 - The value `cars` was located in the Data Catalog
-- The corresponding `AbstractDataSet` object was retrieved
+- The corresponding `AbstractDataset` object was retrieved
 - The `load` method of this dataset was called
 - This `load` method delegated the loading to the underlying pandas `read_csv` function
 

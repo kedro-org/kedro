@@ -7,8 +7,6 @@ import warnings
 
 from .cached_dataset import CachedDataset
 from .core import (
-    AbstractDataset,
-    AbstractVersionedDataset,
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,

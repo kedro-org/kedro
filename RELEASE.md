@@ -31,7 +31,8 @@
 * Make `kedro micropkg package` accept `--verbose`.
 
 ## Documentation changes
-* Added documentation for developing a Kedro project using a Databricks workspace.
+* Significant improvements to the documentation that covers working with Databricks and Kedro, including a new page for workspace-only development, and a guide to choosing the best workflow for your use case.
+
 
 # Release 0.18.10
 

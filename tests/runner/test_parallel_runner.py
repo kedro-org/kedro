@@ -9,7 +9,7 @@ import pytest
 
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
-    AbstractDataSet,
+    AbstractDataset,
     DataCatalog,
     DatasetError,
     LambdaDataset,
@@ -228,7 +228,7 @@ class TestInvalidParallelRunner:
             runner.run(fan_out_fan_in, catalog)
 
 
-class LoggingDataset(AbstractDataSet):
+class LoggingDataset(AbstractDataset):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name

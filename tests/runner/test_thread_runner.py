@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DatasetError, MemoryDataset
+from kedro.io import AbstractDataset, DataCatalog, DatasetError, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ThreadRunner
@@ -111,7 +111,7 @@ class TestInvalidThreadRunner:
             ThreadRunner().run(pipeline, catalog)
 
 
-class LoggingDataset(AbstractDataSet):
+class LoggingDataset(AbstractDataset):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name

@@ -6,15 +6,15 @@ import copy
 import warnings
 from typing import Any
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 _EMPTY = object()
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-MemoryDataSet: AbstractDataSet
+MemoryDataSet: AbstractDataset
 
 
-class MemoryDataset(AbstractDataSet):
+class MemoryDataset(AbstractDataset):
     """``MemoryDataset`` loads and saves data from/to an in-memory
     Python object.
 

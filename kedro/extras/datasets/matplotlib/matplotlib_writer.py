@@ -11,7 +11,7 @@ import fsspec
 import matplotlib.pyplot as plt
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -24,7 +24,7 @@ from kedro.io.core import (
 
 
 class MatplotlibWriter(
-    AbstractVersionedDataSet[
+    AbstractVersionedDataset[
         Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
     ]
 ):

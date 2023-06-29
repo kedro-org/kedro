@@ -12,7 +12,7 @@ from scipy.sparse.csr import csr_matrix
 from sklearn.datasets import dump_svmlight_file, load_svmlight_file
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -29,7 +29,7 @@ _DI = Tuple[Union[ndarray, csr_matrix], ndarray]
 _DO = Tuple[csr_matrix, ndarray]
 
 
-class SVMLightDataSet(AbstractVersionedDataSet[_DI, _DO]):
+class SVMLightDataSet(AbstractVersionedDataset[_DI, _DO]):
     """``SVMLightDataSet`` loads/saves data from/to a svmlight/libsvm file using an
     underlying filesystem (e.g.: local, S3, GCS). It uses sklearn functions
     ``dump_svmlight_file`` to save and ``load_svmlight_file`` to load a file.

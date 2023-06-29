@@ -6,14 +6,14 @@ from typing import Any, Dict, Iterable, List, NoReturn, Union
 import requests
 from requests.auth import AuthBase
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class APIDataSet(AbstractDataSet[None, requests.Response]):
+class APIDataSet(AbstractDataset[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 

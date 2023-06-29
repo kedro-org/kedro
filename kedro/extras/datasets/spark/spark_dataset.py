@@ -1,4 +1,4 @@
-"""``AbstractVersionedDataSet`` implementation to access Spark dataframes using
+"""``AbstractVersionedDataset`` implementation to access Spark dataframes using
 ``pyspark``
 """
 import json
@@ -17,7 +17,7 @@ from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -161,7 +161,7 @@ class KedroHdfsInsecureClient(InsecureClient):
         return sorted(matched)
 
 
-class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
+class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
     """``SparkDataSet`` loads and saves Spark dataframes.
 
     Example usage for the

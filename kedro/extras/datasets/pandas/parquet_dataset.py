@@ -13,7 +13,7 @@ import pyarrow.parquet as pq
 
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
+class ParquetDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``ParquetDataSet`` loads/saves data from/to a Parquet file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 

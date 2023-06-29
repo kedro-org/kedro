@@ -12,7 +12,7 @@ import pandas as pd
 
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExcelDataSet(
-    AbstractVersionedDataSet[
+    AbstractVersionedDataset[
         Union[pd.DataFrame, Dict[str, pd.DataFrame]],
         Union[pd.DataFrame, Dict[str, pd.DataFrame]],
     ]

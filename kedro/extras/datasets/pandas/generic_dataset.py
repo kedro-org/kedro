@@ -10,7 +10,7 @@ import fsspec
 import pandas as pd
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -34,7 +34,7 @@ NON_FILE_SYSTEM_TARGETS = [
 ]
 
 
-class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
+class GenericDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """`pandas.GenericDataSet` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.

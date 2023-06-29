@@ -10,7 +10,7 @@ import pytest
 
 from kedro.io.core import (
     _DEPRECATED_ERROR_CLASSES,
-    AbstractDataSet,
+    AbstractDataset,
     _parse_filepath,
     get_filepath_str,
 )
@@ -40,7 +40,7 @@ def test_deprecation(module_name, class_name):
         getattr(importlib.import_module(module_name), class_name)
 
 
-class MyDataSet(AbstractDataSet):
+class MyDataSet(AbstractDataset):
     def __init__(self, var=None):
         self.var = var
 

@@ -3,8 +3,6 @@ number of data sets. At the core of the library is the ``AbstractDataSet`` class
 """
 from __future__ import annotations
 
-import warnings
-
 from .cached_dataset import CachedDataset, CachedDataSet
 from .core import (
     AbstractDataSet,

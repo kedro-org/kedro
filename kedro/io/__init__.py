@@ -7,6 +7,8 @@ import warnings
 
 from .cached_dataset import CachedDataset
 from .core import (
+    AbstractDataset,
+    AbstractVersionedDataset,
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
@@ -20,7 +22,6 @@ from .partitioned_dataset import IncrementalDataset, PartitionedDataset
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", DeprecationWarning)
     from .cached_dataset import CachedDataSet
-    from .core import AbstractDataSet, AbstractVersionedDataSet
     from .lambda_dataset import LambdaDataSet
     from .memory_dataset import MemoryDataSet
     from .partitioned_dataset import IncrementalDataSet, PartitionedDataSet

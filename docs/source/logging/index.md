@@ -97,8 +97,11 @@ root:
 
 You need to change the line:
 ```diff
- root:
-   your_python_package:
+loggers:
+  kedro:
+    level: INFO
+
+  your_python_package:
 -   level: INFO
 +   level: DEBUG
 ```

@@ -7,7 +7,7 @@ from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.text import TextDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 STRING = "Write to text file."
@@ -58,7 +58,7 @@ class TestTextDataSet:
     def test_load_missing_file(self, txt_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set TextDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             txt_data_set.load()
 
     @pytest.mark.parametrize(
@@ -118,7 +118,7 @@ class TestTextDataSetVersioned:
     def test_no_versions(self, versioned_txt_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for TextDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_txt_data_set.load()
 
     def test_exists(self, versioned_txt_data_set):
@@ -135,7 +135,7 @@ class TestTextDataSetVersioned:
             r"Save path \'.+\' for TextDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_txt_data_set.save(STRING)
 
     @pytest.mark.parametrize(
@@ -157,9 +157,9 @@ class TestTextDataSetVersioned:
             versioned_txt_data_set.save(STRING)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             TextDataSet(
                 filepath="https://example.com/file.txt", version=Version(None, None)
             )
@@ -178,7 +178,7 @@ class TestTextDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_txt_data_set._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_txt_data_set.save(STRING)
 
         # Remove non-versioned dataset and try again

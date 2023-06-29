@@ -122,6 +122,7 @@ type_targets = {
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.runner.parallel_runner._SharedMemoryDataSet",
+        "kedro.runner.parallel_runner._SharedMemoryDataset",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",
@@ -550,6 +551,7 @@ myst_heading_anchors = 5
 # https://github.com/kedro-org/kedro/issues/1772
 mermaid_output_format = "png"
 # https://github.com/mermaidjs/mermaid.cli#linux-sandbox-issue
+# https://github.com/mermaid-js/mermaid-cli/issues/544
 mermaid_params = ["-p", here / "puppeteer-config.json", "-s", "2"]
 # https://github.com/kedro-org/kedro/issues/2451
 mermaid_version = mermaid_init_js = ""

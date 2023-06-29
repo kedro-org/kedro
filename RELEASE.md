@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
 
 ## Breaking changes to the API
 
@@ -11,6 +12,7 @@
 # Upcoming Release 0.18.11
 
 ## Major features and improvements
+* Added `databricks-iris` as an official starter.
 
 ## Bug fixes and other changes
 * Reworked micropackaging workflow to use standard Python packaging practices.
@@ -182,7 +184,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * Added support for `tf.device` in `TensorFlowModelDataset`.
 * Updated error message for `VersionNotFoundError` to handle insufficient permission issues for cloud storage.
 * Updated Experiment Tracking docs with working examples.
-* Updated MatplotlibWriter Dataset, TextDataset, plotly.PlotlyDataSet and plotly.JSONDataSet docs with working examples.
+* Updated `MatplotlibWriter`, `text.TextDataSet`, `plotly.PlotlyDataSet` and `plotly.JSONDataSet` docs with working examples.
 * Modified implementation of the Kedro IPython extension to use `local_ns` rather than a global variable.
 * Refactored `ShelveStore` to its own module to ensure multiprocessing works with it.
 * `kedro.extras.datasets.pandas.SQLQueryDataSet` now takes optional argument `execution_options`.

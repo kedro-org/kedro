@@ -1,3 +1,4 @@
 {
-  "args": ["--no-sandbox"]
+  "args": ["--no-sandbox"],
+  "headless": "old"
 }

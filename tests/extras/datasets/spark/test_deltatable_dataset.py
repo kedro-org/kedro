@@ -5,7 +5,7 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
-from kedro.io import DataCatalog, DataSetError
+from kedro.io import DataCatalog, DatasetError
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
@@ -46,7 +46,7 @@ class TestDeltaTableDataSet:
         assert not delta_ds.exists()
 
         pattern = "DeltaTableDataSet is a read only dataset type"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             delta_ds.save(sample_spark_df)
 
         # check that indeed nothing is written
@@ -69,7 +69,7 @@ class TestDeltaTableDataSet:
             delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
         )
 
-        with pytest.raises(DataSetError, match="Other Exception"):
+        with pytest.raises(DatasetError, match="Other Exception"):
             delta_ds.exists()
 
     @pytest.mark.parametrize("is_async", [False, True])

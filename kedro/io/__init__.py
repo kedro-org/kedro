@@ -21,8 +21,8 @@ from .partitioned_dataset import IncrementalDataset, PartitionedDataset
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", DeprecationWarning)
-    from .core import AbstractDataSet, AbstractVersionedDataSet
     from .cached_dataset import CachedDataSet
+    from .core import AbstractDataSet, AbstractVersionedDataSet
     from .lambda_dataset import LambdaDataSet
     from .memory_dataset import MemoryDataSet
     from .partitioned_dataset import IncrementalDataSet, PartitionedDataSet
@@ -39,9 +39,7 @@ AbstractVersionedDataSet: type[AbstractDataset]
 def __getattr__(name):
     import kedro.io.core  # pylint: disable=import-outside-toplevel
 
-    if name in (
-        kedro.io.core._DEPRECATED_CLASSES  # pylint: disable=protected-access
-    ):
+    if name in (kedro.io.core._DEPRECATED_CLASSES):  # pylint: disable=protected-access
         return getattr(kedro.io.core, name)
     raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 

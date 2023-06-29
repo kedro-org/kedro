@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 
 from kedro.io.core import (
-    _DEPRECATED_ERROR_CLASSES,
+    _DEPRECATED_CLASSES,
     AbstractDataset,
     _parse_filepath,
     get_filepath_str,
@@ -34,7 +34,7 @@ FALSE_BUILTINS: list[Any] = [
 
 
 @pytest.mark.parametrize("module_name", ["kedro.io", "kedro.io.core"])
-@pytest.mark.parametrize("class_name", _DEPRECATED_ERROR_CLASSES)
+@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
     with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
         getattr(importlib.import_module(module_name), class_name)

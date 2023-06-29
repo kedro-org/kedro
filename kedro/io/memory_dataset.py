@@ -11,7 +11,7 @@ from kedro.io.core import AbstractDataset, DatasetError
 _EMPTY = object()
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-MemoryDataSet: AbstractDataset
+MemoryDataSet: type[AbstractDataset]
 
 
 class MemoryDataset(AbstractDataset):

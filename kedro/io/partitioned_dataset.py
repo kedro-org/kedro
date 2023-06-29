@@ -32,8 +32,8 @@ KEY_PROPAGATION_WARNING = (
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-PartitionedDataSet: AbstractDataset
-IncrementalDataSet: AbstractDataset
+PartitionedDataSet: type[AbstractDataset]
+IncrementalDataSet: type[AbstractDataset]
 
 
 class PartitionedDataset(AbstractDataset):
@@ -558,15 +558,15 @@ class IncrementalDataset(PartitionedDataset):
             self._checkpoint.save(partition_ids[-1])  # checkpoint to last partition
 
 
-_DEPRECATED_ERROR_CLASSES = {
+_DEPRECATED_CLASSES = {
     "PartitionedDataSet": PartitionedDataset,
     "IncrementalDataSet": IncrementalDataset,
 }
 
 
 def __getattr__(name):
-    if name in _DEPRECATED_ERROR_CLASSES:
-        alias = _DEPRECATED_ERROR_CLASSES[name]
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",

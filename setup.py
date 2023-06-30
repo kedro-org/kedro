@@ -105,8 +105,7 @@ extras_require = {
         "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
         # "kedro-datasets[all]~=1.4.1",
-        "kedro-datasets[all]@git+https://github.com/kedro-org/kedro-plugins@fix/rst-indentation-managedtabledataset#subdirectory=kedro-datasets"
-
+        "kedro-datasets[all]@git+https://github.com/kedro-org/kedro-plugins@fix/rst-indentation-managedtabledataset#subdirectory=kedro-datasets",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),

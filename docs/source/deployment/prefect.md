@@ -2,10 +2,10 @@
 
 This page explains how to run your Kedro pipeline using [Prefect 2.0](https://www.prefect.io/products/core/), an open-source workflow management system.
 
-In scope of this deployment, we are interested in a self hosted [Prefect Server](https://docs.prefect.io/2.10.17/host/), an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends Prefect 2.0. We will use an [Agent that dequeues submitted flow runs from a Work Queue](https://docs.prefect.io/2.10.17/tutorial/deployments/#why-workpools-and-workers).
+The scope of this documentation is the deployment to a self hosted [Prefect Server](https://docs.prefect.io/2.10.17/host/), which is an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends Prefect 2.0. We will use an [Agent that dequeues submitted flow runs from a Work Queue](https://docs.prefect.io/2.10.17/tutorial/deployments/#why-workpools-and-workers).
 
 ```{note}
-This deployment has been tested using Kedro 0.18.10 with Prefect version 2.10.17. If you want to [make a deployment with Prefect 1.0](https://docs.kedro.org/en/0.18.10/deployment/prefect.html) you may want to check older versions.
+This deployment has been tested using Kedro 0.18.10 with Prefect version 2.10.17. If you want to deploy with Prefect 1.0, we recommend you review [earlier versions of Kedro's Prefect deployment documentation](https://docs.kedro.org/en/0.18.9/deployment/prefect.html).
 ```
 
 ## Prerequisites

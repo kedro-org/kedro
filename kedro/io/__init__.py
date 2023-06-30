@@ -3,9 +3,7 @@ number of data sets. At the core of the library is the ``AbstractDataset`` class
 """
 from __future__ import annotations
 
-import warnings
-
-from .cached_dataset import CachedDataset
+from .cached_dataset import CachedDataset, CachedDataSet
 from .core import (
     AbstractDataset,
     AbstractVersionedDataset,
@@ -15,17 +13,14 @@ from .core import (
     Version,
 )
 from .data_catalog import DataCatalog
-from .lambda_dataset import LambdaDataset
-from .memory_dataset import MemoryDataset
-from .partitioned_dataset import IncrementalDataset, PartitionedDataset
-
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", DeprecationWarning)
-    from .cached_dataset import CachedDataSet
-    from .lambda_dataset import LambdaDataSet
-    from .memory_dataset import MemoryDataSet
-    from .partitioned_dataset import IncrementalDataSet, PartitionedDataSet
-
+from .lambda_dataset import LambdaDataset, LambdaDataSet
+from .memory_dataset import MemoryDataset, MemoryDataSet
+from .partitioned_dataset import (
+    IncrementalDataset,
+    IncrementalDataSet,
+    PartitionedDataset,
+    PartitionedDataSet,
+)
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 DataSetError: type[Exception]

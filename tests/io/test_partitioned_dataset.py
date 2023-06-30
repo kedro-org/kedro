@@ -401,7 +401,7 @@ class TestPartitionedDatasetLocal:
         assert pds._credentials == global_creds
 
 
-BUCKET_NAME = "s3_fake_bucket_name"
+BUCKET_NAME = "fake_bucket_name"
 S3_DATASET_DEFINITION = [
     "pandas.CSVDataSet",
     "kedro.extras.datasets.pandas.CSVDataSet",
@@ -470,6 +470,19 @@ class TestPartitionedDatasetS3:
             for partition_id in loaded_partitions
         ]
         mocked_ds.assert_has_calls(expected, any_order=True)
+
+    @pytest.mark.parametrize(
+        "partition_path", ["s3_bucket/dummy.csv", "fake_bucket/dummy.csv"]
+    )
+    def test_join_protocol_with_bucket_name_startswith_protocol(
+        self, mocked_csvs_in_s3, partition_path
+    ):
+        """Make sure protocol is joined correctly for the edge case when
+        bucket name starts with the protocol name, i.e. `s3://s3_bucket/dummy_.txt`
+        """
+
+        pds = PartitionedDataset(mocked_csvs_in_s3, "pandas.CSVDataSet")
+        assert pds._join_protocol(partition_path) == f"s3://{partition_path}"
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_save(self, dataset, mocked_csvs_in_s3):

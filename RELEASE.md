@@ -34,8 +34,18 @@
 * Significant improvements to the documentation that covers working with Databricks and Kedro, including a new page for workspace-only development, and a guide to choosing the best workflow for your use case.
 
 ## Upcoming deprecations for Kedro 0.19.0
-* All instances of `<Name>DataSet` have been renamed to `<Name>Dataset`. Using `<Name>DataSet`
-will emit a `DeprecationWarning` and will not be available `0.19.0`.
+* Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" and error classes starting with "DataSet" are deprecated and will be removed in 0.19.0. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+
+| Type                        | Deprecated Alias            | Location                       |
+| --------------------------- | --------------------------- | ------------------------------ |
+| `CachedDataset`             | `CachedDataSet`             | `kedro.io.cached_dataset`      |
+| `LambdaDataset`             | `LambdaDataSet`             | `kedro.io.lambda_dataset`      |
+| `IncrementalDataset`        | `IncrementalDataSet`        | `kedro.io.partitioned_dataset` |
+| `MemoryDataset`             | `MemoryDataSet`             | `kedro.io.memory_dataset`      |
+| `PartitionedDataset`        | `PartitionedDataSet`        | `kedro.io.partitioned_dataset` |
+| `DatasetError`              | `DataSetError`              | `kedro.io.core`                |
+| `DatasetAlreadyExistsError` | `DataSetAlreadyExistsError` | `kedro.io.core`                |
+| `DatasetNotFoundError`      | `DataSetNotFoundError`      | `kedro.io.core`                |
 
 # Release 0.18.10
 

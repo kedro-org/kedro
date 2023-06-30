@@ -1,40 +1,70 @@
 # Prefect
 
-This page explains how to run your Kedro pipeline using [Prefect Core](https://www.prefect.io/products/core/), an open-source workflow management system.
+This page explains how to run your Kedro pipeline using [Prefect 2.0](https://www.prefect.io/products/core/), an open-source workflow management system.
 
-In scope of this deployment, we are interested in [Prefect Server](https://docs.prefect.io/orchestration/server/overview.html#what-is-prefect-server), an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends the Prefect Core. Prefect Server ships out-of-the-box with a fully featured user interface.
+In scope of this deployment, we are interested in a self hosted [Prefect Server](https://docs.prefect.io/2.10.17/host/), an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends Prefect 2.0. We will use an [Agent that dequeues submitted flow runs from a Work Queue](https://docs.prefect.io/2.10.17/tutorial/deployments/#why-workpools-and-workers).
 
 ```{note}
-This deployment has been tested using kedro 0.17.6, 0.17.7 and 0.18.2 with prefect version 1.1.0.
-
-The current implementation has not been tested with prefect 2.0.0.
+This deployment has been tested using Kedro 0.18.10 with Prefect version 2.10.17. If you want to [make a deployment with Prefect 1.0](https://docs.kedro.org/en/0.18.10/deployment/prefect.html) you may want to check older versions.
 ```
 
 ## Prerequisites
 
-To use Prefect Core and Prefect Server, ensure you have the following prerequisites in place:
+To use Prefect 2.0 and Prefect Server, ensure you have the following prerequisites in place:
 
-- [Prefect Core is installed](https://docs.prefect.io/core/getting_started/install.html) on your machine
-- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are installed and Docker Engine is running
-- [Prefect Server is up and running](https://docs.prefect.io/orchestration/Server/deploy-local.html)
-- `PREFECT__LOGGING__EXTRA_LOGGERS` environment variable is set (this is required to get Kedro logs published):
+- [Prefect 2.0 is installed](https://docs.prefect.io/2.10.17/getting-started/installation/#installing-the-latest-version) on your machine
 
-```console
-export PREFECT__LOGGING__EXTRA_LOGGERS="['kedro']"
+## Setup
+
+Configure your `PREFECT_API_URL` to point to your local Prefect instance:
+
+```bash
+prefect config set PREFECT_API_URL="http://127.0.0.1:4200/api"
 ```
 
-## How to run your Kedro pipeline using Prefect
+For each new Kedro project you create, you need to decide whether to opt into [usage analytics](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-telemetry). Your decision is recorded in the `.telemetry` file stored in the project root.
 
-### Convert your Kedro pipeline to Prefect flow
+```{important}
+When you run a Kedro project locally, you are asked on the first `kedro` command for the project, but in this use case, the project will hang unless you follow these instructions.
+```
 
-To build a [Prefect flow](https://docs.prefect.io/core/concepts/flows.html) for your Kedro pipeline programmatically and register it with the Prefect API, use the following Python script, which should be stored in your project’s root directory:
+Create a `.telemetry` file manually and put it in the **root of your Kedro project** and add your preference to give or decline consent. To do this, specify either `true` (to give consent) or `false`. The example given below accepts Kedro's usage analytics.
+
+```text
+consent: true
+```
+
+Run a Prefect Server instance:
+
+```bash
+prefect server start
+```
+
+In a separate terminal, [create a work pool](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-pool-configuration) to organize the work and [create a work queue](https://docs.prefect.io/2.10.17/concepts/work-pools/#work-queues) for your agent to pull from:
+
+```bash
+prefect work-pool create --type prefect-agent <work_pool_name>
+prefect work-queue create --pool <work_pool_name> <work_queue_name>
+```
+
+Now run a Prefect Agent that subscribes to a work queue inside the work pool you created:
+
+```bash
+prefect agent start --pool <work_pool_name> --work-queue <work_queue_name>
+```
+
+## How to run your Kedro pipeline using Prefect 2.0
+
+### Convert your Kedro pipeline to Prefect 2.0 flow
+
+To build a [Prefect flow](https://docs.prefect.io/core/concepts/flows.html) for your Kedro pipeline programmatically and register it with the Prefect API, use the following Python script, which should be stored in your project’s **root directory**:
 
 ```python
 # <project_root>/register_prefect_flow.py
-from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
-
 import click
+from pathlib import Path
+from typing import Dict, List, Union, Callable
+
 from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
@@ -42,204 +72,194 @@ from kedro.framework.startup import bootstrap_project
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline.node import Node
 from kedro.runner import run_node
-from prefect import Client, Flow, Task
-from prefect.exceptions import ClientError
+
+from prefect import flow, task, get_run_logger
+from prefect.deployments import Deployment
 
 
 @click.command()
-@click.option("-p", "--pipeline", "pipeline_name", default=None)
-@click.option("--env", "-e", type=str, default=None)
-@click.option("--package_name", "package_name", default="kedro_prefect")
-def prefect_deploy(pipeline_name, env, package_name):
+@click.option("-p", "--pipeline", "pipeline_name", default="__default__")
+@click.option("--env", "-e", type=str, default="base")
+@click.option("--deployment_name", "deployment_name", default="example")
+@click.option("--work_pool_name", "work_pool_name", default="default")
+@click.option("--work_queue_name", "work_queue_name", default="default")
+@click.option("--version", "version", default="1.0")
+def prefect_deploy(
+    pipeline_name, env, deployment_name, work_pool_name, work_queue_name, version
+):
     """Register a Kedro pipeline as a Prefect flow."""
 
-    # Project path and metadata required for session initialization task.
-    project_path = Path.cwd()
-    metadata = bootstrap_project(project_path)
-
+    # Pipeline name to execute
     pipeline_name = pipeline_name or "__default__"
-    pipeline = pipelines.get(pipeline_name)
 
-    tasks = {}
-    for node, parent_nodes in pipeline.node_dependencies.items():
-        # Use a function for task instantiation which avoids duplication of
-        # tasks
-        _, tasks = instantiate_task(node, tasks)
-
-        parent_tasks = []
-        for parent in parent_nodes:
-            parent_task, tasks = instantiate_task(parent, tasks)
-            parent_tasks.append(parent_task)
-
-        tasks[node._unique_key]["parent_tasks"] = parent_tasks
-
-    # Below task is used to instantiate a KedroSession within the scope of a
-    # Prefect flow
-    init_task = KedroInitTask(
-        pipeline_name=pipeline_name,
-        project_path=project_path,
-        package_name=package_name,
-        env=env,
+    # Use standard deployment configuration for local execution. If you require a different
+    # infrastructure, check the API docs for Deployments at: https://docs.prefect.io/latest/api-ref/prefect/deployments/
+    deployment = Deployment.build_from_flow(
+        flow=my_flow,
+        name=deployment_name,
+        path=str(Path.cwd()),
+        version=version,
+        parameters={
+            "pipeline_name": pipeline_name,
+            "env": env,
+        },
+        infra_overrides={"env": {"PREFECT_LOGGING_LEVEL": "DEBUG"}},
+        work_pool_name=work_pool_name,
+        work_queue_name=work_queue_name,
     )
 
-    with Flow(pipeline_name) as flow:
-        generate_flow(init_task, tasks)
-        instantiate_client(metadata.project_name)
-
-    # Register the flow with the server
-    flow.register(project_name=metadata.project_name)
-
-    # Start a local agent that can communicate between the server
-    # and your flow code
-    flow.run_agent()
+    deployment.apply()
 
 
-class KedroInitTask(Task):
-    """Task to initialize KedroSession"""
+@flow(name="my_flow")
+def my_flow(pipeline_name: str, env: str):
+    logger = get_run_logger()
+    project_path = Path.cwd()
 
-    def __init__(
-        self,
-        pipeline_name: str,
-        package_name: str,
-        project_path: Union[Path, str] = None,
-        env: str = None,
-        extra_params: Dict[str, Any] = None,
-        *args,
-        **kwargs,
-    ):
-        self.project_path = Path(project_path or Path.cwd()).resolve()
-        self.extra_params = extra_params
-        self.pipeline_name = pipeline_name
-        self.env = env
-        super().__init__(name=f"{package_name}_init", *args, **kwargs)
+    metadata = bootstrap_project(project_path)
+    logger.info("Project name: %s", metadata.project_name)
 
-    def run(self) -> Dict[str, Union[DataCatalog, str]]:
-        """
-        Initializes a Kedro session and returns the DataCatalog and
-        KedroSession
-        """
-        # bootstrap project within task / flow scope
-        bootstrap_project(self.project_path)
+    logger.info("Initializing Kedro...")
+    execution_config = kedro_init(
+        pipeline_name=pipeline_name, project_path=project_path, env=env
+    )
 
-        session = KedroSession.create(
-            project_path=self.project_path,
-            env=self.env,
-            extra_params=self.extra_params,  # noqa: E501
-        )
-        # Note that for logging inside a Prefect task self.logger is used.
-        self.logger.info("Session created with ID %s", session.session_id)
-        pipeline = pipelines.get(self.pipeline_name)
-        context = session.load_context()
-        catalog = context.catalog
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())  # NOQA
-        for ds_name in unregistered_ds:
-            catalog.add(ds_name, MemoryDataSet())
-        return {"catalog": catalog, "sess_id": session.session_id}
+    logger.info("Building execution layers...")
+    execution_layers = init_kedro_tasks_by_execution_layer(
+        pipeline_name, execution_config
+    )
+
+    for layer in execution_layers:
+        logger.info("Running layer...")
+        for node_task in layer:
+            logger.info("Running node...")
+            node_task()
 
 
-class KedroTask(Task):
-    """Kedro node as a Prefect task."""
+@task()
+def kedro_init(
+    pipeline_name: str,
+    project_path: Path,
+    env: str,
+):
+    """
+    Initializes a Kedro session and returns the DataCatalog and
+    KedroSession
+    """
+    # bootstrap project within task / flow scope
 
-    def __init__(self, node: Node):
-        self._node = node
-        super().__init__(name=node.name, tags=node.tags)
+    logger = get_run_logger()
+    logger.info("Bootstrapping project")
+    bootstrap_project(project_path)
 
-    def run(self, task_dict: Dict[str, Union[DataCatalog, str]]):
-        run_node(
-            self._node,
-            task_dict["catalog"],
-            _create_hook_manager(),
-            task_dict["sess_id"],
-        )
+    session = KedroSession.create(
+        project_path=project_path,
+        env=env,
+    )
+    # Note that for logging inside a Prefect task logger is used.
+    logger.info("Session created with ID %s", session.session_id)
+    pipeline = pipelines.get(pipeline_name)
+    logger.info("Loading context...")
+    context = session.load_context()
+    catalog = context.catalog
+    logger.info("Registering datasets...")
+    unregistered_ds = pipeline.data_sets() - set(catalog.list())  # NOQA
+    for ds_name in unregistered_ds:
+        catalog.add(ds_name, MemoryDataSet())
+    return {"catalog": catalog, "sess_id": session.session_id}
+
+
+def init_kedro_tasks_by_execution_layer(
+    pipeline_name: str,
+    execution_config: Union[None, Dict[str, Union[DataCatalog, str]]] = None,
+) -> List[List[Callable]]:
+    """
+    Inits the Kedro tasks ordered topologically in groups, which implies that an earlier group
+    is the dependency of later one.
+
+    Args:
+        pipeline_name (str): The pipeline name to execute
+        execution_config (Union[None, Dict[str, Union[DataCatalog, str]]], optional):
+        The required execution config for each node. Defaults to None.
+
+    Returns:
+        List[List[Callable]]: A list of topologically ordered task groups
+    """
+
+    pipeline = pipelines.get(pipeline_name)
+
+    execution_layers = []
+
+    # Return a list of the pipeline nodes in topologically ordered groups,
+    #  i.e. if node A needs to be run before node B, it will appear in an
+    #  earlier group.
+    for layer in pipeline.grouped_nodes:
+        execution_layer = []
+        for node in layer:
+            # Use a function for task instantiation which avoids duplication of
+            # tasks
+            task = instantiate_task(node, execution_config)
+            execution_layer.append(task)
+        execution_layers.append(execution_layer)
+
+    return execution_layers
+
+
+def kedro_task(
+    node: Node, task_dict: Union[None, Dict[str, Union[DataCatalog, str]]] = None
+):
+    run_node(
+        node,
+        task_dict["catalog"],
+        _create_hook_manager(),
+        task_dict["sess_id"],
+    )
 
 
 def instantiate_task(
     node: Node,
-    tasks: Dict[str, Dict[str, Union[KedroTask, List[KedroTask]]]],
-) -> Tuple[KedroTask, Dict[str, Dict[str, Union[KedroTask, List[KedroTask]]]]]:
+    execution_config: Union[None, Dict[str, Union[DataCatalog, str]]] = None,
+) -> Callable:
     """
-    Function pulls node task from <tasks> dictionary. If node task not
-    available in <tasks> the function instantiates the tasks and adds
-    it to <tasks>. In this way we avoid duplicate instantiations of
-    the same node task.
+    Function that wraps a Node inside a task for future execution
 
     Args:
         node: Kedro node for which a Prefect task is being created.
-        tasks: dictionary mapping node names to a dictionary containing
-        node tasks and parent node tasks.
+        execution_config: The configurations required for the node to execute
+        that includes catalogs and session id
 
-    Returns: Prefect task for the passed node and task dictionary.
+    Returns: Prefect task for the passed node
 
     """
-    if tasks.get(node._unique_key) is not None:
-        node_task = tasks[node._unique_key]["task"]
-    else:
-        node_task = KedroTask(node)
-        tasks[node._unique_key] = {"task": node_task}
-
-    # return tasks as it is mutated. We want to make this obvious to the user.
-    return node_task, tasks  # type: ignore[return-value]
-
-
-def generate_flow(
-    init_task: KedroInitTask,
-    tasks: Dict[str, Dict[str, Union[KedroTask, List[KedroTask]]]],
-):
-    """
-    Constructs a Prefect flow given a task dictionary. Task dictionary
-    maps Kedro node names to a dictionary containing a node task and its
-    parents.
-
-    Args:
-        init_task: Prefect initialisation tasks. Used to instantiate a Kedro
-        session within the scope of a Prefect flow.
-        tasks: dictionary mapping Kedro node names to a dictionary
-        containing a corresponding node task and its parents.
-
-    Returns: None
-    """
-    child_task_dict = init_task
-    for task in tasks.values():
-        node_task = task["task"]
-        if len(task["parent_tasks"]) == 0:
-            # When a task has no parent only the session init task should
-            # precede it.
-            parent_tasks = [init_task]
-        else:
-            parent_tasks = task["parent_tasks"]
-        # Set upstream tasks and bind required kwargs.
-        # Note: Unpacking the return from init tasks will generate two
-        # sub-tasks in the prefect graph. To avoid this we pass the init
-        # return on unpacked.
-        node_task.bind(upstream_tasks=parent_tasks, task_dict=child_task_dict)
-
-
-def instantiate_client(project_name: str):
-    """Initiates Prefect client"""
-    client = Client()
-    try:
-        client.create_project(project_name=project_name)
-    except ClientError:
-        raise
+    return task(lambda: kedro_task(node, execution_config)).with_options(name=node.name)
 
 
 if __name__ == "__main__":
     prefect_deploy()
 ```
 
-```{note}
-The script launches a [local agent](https://docs.prefect.io/orchestration/agents/local.html). Remember to stop the agent with Ctrl-C when you complete.
+Then, run the deployment script in other terminal:
+
+```bash
+python register_prefect_flow.py --work_pool_name <work_pool_name> --work_queue_name <work_queue_name>
 ```
 
+```{note}
+Be sure that your Prefect Server is up and running. Verify that the deployment script arguments match the work pool and work queue names.
+```
 
 ### Run Prefect flow
 
-Now, having the flow registered, you can use [Prefect UI](https://docs.prefect.io/orchestration/ui/dashboard.html) to orchestrate and monitor it.
+Now, having the flow registered, you can use [Prefect Server UI](https://docs.prefect.io/2.10.17/host/) to orchestrate and monitor it.
 
-Navigate to http://localhost:8080/default?flows= to see your registered flow.
+Navigate to http://localhost:4200/deployments to see your registered flow.
 
-![](../meta/images/prefect_flows.png)
+![prefect_2_flow_deployment](../meta/images/prefect_2_flow_deployment.png)
 
-Click on the flow to open it and then trigger your flow using the "RUN"/"QUICK RUN" button.
+Click on the flow to open it and then trigger your flow using the "RUN" > "QUICK RUN" button and leave the parameters by default. If you want to run a specific pipeline you can replace the `__default__` value.
 
-![](../meta/images/prefect_flow_details.png)
+```{note}
+Be sure that both your Prefect Server and Agent are up and running.
+```
+
+![prefect_2_flow_details](../meta/images/prefect_2_flow_details.png)

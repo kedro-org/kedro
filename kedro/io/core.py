@@ -22,8 +22,6 @@ from cachetools.keys import hashkey
 
 from kedro.utils import load_obj
 
-warnings.simplefilter("default", DeprecationWarning)
-
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"

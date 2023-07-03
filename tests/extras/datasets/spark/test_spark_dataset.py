@@ -408,7 +408,7 @@ class TestSparkDataSet:
         mocker.patch.object(
             spark_data_set,
             "_get_spark",
-            side_effect=AnalysisException("Other Exception", []),
+            side_effect=AnalysisException("Other Exception"),
         )
 
         with pytest.raises(DatasetError, match="Other Exception"):

@@ -47,6 +47,15 @@
 | `DatasetAlreadyExistsError` | `DataSetAlreadyExistsError` | `kedro.io.core`                |
 | `DatasetNotFoundError`      | `DataSetNotFoundError`      | `kedro.io.core`                |
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [jmalovera10](https://github.com/jmalovera10)
+* [debugger24](https://github.com/debugger24)
+* [juliushetzel](https://github.com/juliushetzel)
+* [jacobweiss2305](https://github.com/jacobweiss2305)
+* [eduardoconto](https://github.com/eduardoconto)
+
 # Release 0.18.10
 
 ## Major features and improvements

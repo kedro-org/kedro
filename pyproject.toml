@@ -191,7 +191,7 @@ select = [
     # isort
     "I"
 ]
-ignore = ["E501"]
+ignore = ["E501"]  # Black take care off line-too-long
 unfixable = []
 
 [tool.ruff.flake8-builtins]

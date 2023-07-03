@@ -70,14 +70,15 @@ repos:
           - id: pyupgrade
             args: [--py36-plus]
 
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      # Ruff version.
+      rev: v0.0.270
+      hooks:
+        - id: ruff
+          exclude: "^kedro/templates/|^features/steps/test_starter/"
+
     - repo: local
       hooks:
-          - id: ruff
-            name: "Ruff"
-            language: system
-            types: [file, python]
-            exclude: ^kedro/templates/|^features/steps/test_starter
-            entry: ruff
           - id: black
             name: "Black"
             language: system

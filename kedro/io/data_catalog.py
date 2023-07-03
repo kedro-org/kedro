@@ -283,7 +283,7 @@ class DataCatalog:
                 ds_layer = ds_config.pop("layer", None)
                 if ds_layer is not None:
                     layers[ds_layer].add(ds_name)
-                data_sets[ds_name] = cls._create_dataset(
+                data_sets[ds_name] = AbstractDataSet.from_config(
                     ds_name, ds_config, load_versions.get(ds_name), save_version
                 )
         dataset_layers = layers or None
@@ -325,14 +325,6 @@ class DataCatalog:
                 return pattern
         return None
 
-    @staticmethod
-    def _create_dataset(
-        ds_name, ds_config, load_version=None, save_version=None
-    ) -> AbstractDataSet:
-        return AbstractDataSet.from_config(
-            ds_name, ds_config, load_version, save_version
-        )
-
     @classmethod
     def _sort_patterns(
         cls, data_set_patterns: dict[str, dict[str, Any]]
@@ -372,8 +364,7 @@ class DataCatalog:
     def _get_dataset(
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
-
-        if data_set_name not in self._data_sets:
+        if data_set_name not in self:
             error_msg = f"Dataset '{data_set_name}' not found in the catalog"
 
             # Flag to turn on/off fuzzy-matching which can be time consuming and
@@ -403,13 +394,15 @@ class DataCatalog:
             return True
         matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
         if matched_pattern:
+            # If the dataset is a patterned dataset, materialise it and add it to
+            # the catalog
             data_set_config = self._resolve_config(data_set_name, matched_pattern)
             ds_layer = data_set_config.pop("layer", None)
             if ds_layer:
                 if not self.layers:
                     self.layers = {}
                 self.layers.setdefault(ds_layer, set()).add(data_set_name)
-            data_set = self._create_dataset(
+            data_set = AbstractDataSet.from_config(
                 data_set_name,
                 data_set_config,
                 self._load_versions.get(data_set_name),

@@ -405,10 +405,8 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
                 message = exception.desc
             else:
                 message = exception.message
-            if (
-                message.startswith("Path does not exist:")
-                or "is not a Delta table" in message
-            ):
+
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
         return True

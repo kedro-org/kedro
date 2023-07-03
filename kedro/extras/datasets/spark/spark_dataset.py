@@ -401,10 +401,10 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         try:
             self._get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
-            if hasattr(exception, "desc"):  # Pyspark <3.4
-                message = exception.desc
-            else:
-                message = exception.message
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = (
+                exception.desc if hasattr(exception, "desc") else exception.message
+            )
 
             if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False

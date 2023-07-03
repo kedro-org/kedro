@@ -2,6 +2,7 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 requires = ["setuptools>=65.5.1"]  # PEP 518 specifications
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "kedro"

@@ -10,7 +10,7 @@ from s3fs import S3FileSystem
 from shapely.geometry import Point
 
 from kedro.extras.datasets.geopandas import GeoJSONDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 
 
@@ -74,7 +74,7 @@ class TestGeoJSONDataSet:
     def test_load_missing_file(self, geojson_data_set):
         """Check the error while trying to load from missing source."""
         pattern = r"Failed while loading data from data set GeoJSONDataSet"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             geojson_data_set.load()
 
     def test_exists(self, geojson_data_set, dummy_dataframe):
@@ -165,7 +165,7 @@ class TestGeoJSONDataSetVersioned:
     def test_no_versions(self, versioned_geojson_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for GeoJSONDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_geojson_data_set.load()
 
     def test_exists(self, versioned_geojson_data_set, dummy_dataframe):
@@ -182,7 +182,7 @@ class TestGeoJSONDataSetVersioned:
             r"Save path \'.+\' for GeoJSONDataSet\(.+\) must not "
             r"exist if versioning is enabled"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_geojson_data_set.save(dummy_dataframe)
 
     @pytest.mark.parametrize(
@@ -204,9 +204,9 @@ class TestGeoJSONDataSetVersioned:
             versioned_geojson_data_set.save(dummy_dataframe)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             GeoJSONDataSet(
                 filepath="https://example/file.geojson", version=Version(None, None)
             )
@@ -223,7 +223,7 @@ class TestGeoJSONDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_geojson_data_set._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_geojson_data_set.save(dummy_dataframe)
 
         # Remove non-versioned dataset and try again

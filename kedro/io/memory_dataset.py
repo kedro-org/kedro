@@ -1,28 +1,32 @@
-"""``MemoryDataSet`` is a data set implementation which handles in-memory data.
+"""``MemoryDataset`` is a data set implementation which handles in-memory data.
 """
 from __future__ import annotations
 
 import copy
+import warnings
 from typing import Any
 
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DatasetError
 
 _EMPTY = object()
 
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+MemoryDataSet: AbstractDataSet
 
-class MemoryDataSet(AbstractDataSet):
-    """``MemoryDataSet`` loads and saves data from/to an in-memory
+
+class MemoryDataset(AbstractDataSet):
+    """``MemoryDataset`` loads and saves data from/to an in-memory
     Python object.
 
     Example:
     ::
 
-        >>> from kedro.io import MemoryDataSet
+        >>> from kedro.io import MemoryDataset
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
-        >>> data_set = MemoryDataSet(data=data)
+        >>> data_set = MemoryDataset(data=data)
         >>>
         >>> loaded_data = data_set.load()
         >>> assert loaded_data.equals(data)
@@ -37,7 +41,7 @@ class MemoryDataSet(AbstractDataSet):
     def __init__(
         self, data: Any = _EMPTY, copy_mode: str = None, metadata: dict[str, Any] = None
     ):
-        """Creates a new instance of ``MemoryDataSet`` pointing to the
+        """Creates a new instance of ``MemoryDataset`` pointing to the
         provided Python object.
 
         Args:
@@ -56,7 +60,7 @@ class MemoryDataSet(AbstractDataSet):
 
     def _load(self) -> Any:
         if self._data is _EMPTY:
-            raise DataSetError("Data for MemoryDataSet has not been saved yet.")
+            raise DatasetError("Data for MemoryDataset has not been saved yet.")
 
         copy_mode = self._copy_mode or _infer_copy_mode(self._data)
         data = _copy_with_mode(self._data, copy_mode=copy_mode)
@@ -117,7 +121,7 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
         copy_mode: The copy mode to use, one of "deepcopy", "copy" and "assign".
 
     Raises:
-        DataSetError: If copy_mode is specified, but isn't valid
+        DatasetError: If copy_mode is specified, but isn't valid
             (i.e: not one of deepcopy, copy, assign)
 
     Returns:
@@ -130,9 +134,22 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
     elif copy_mode == "assign":
         copied_data = data
     else:
-        raise DataSetError(
+        raise DatasetError(
             f"Invalid copy mode: {copy_mode}. "
             f"Possible values are: deepcopy, copy, assign."
         )
 
     return copied_data
+
+
+def __getattr__(name):
+    if name == "MemoryDataSet":
+        alias = MemoryDataset
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro 0.19.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
@@ -10,9 +11,9 @@ from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
-    DataSetError,
-    LambdaDataSet,
-    MemoryDataSet,
+    DatasetError,
+    LambdaDataset,
+    MemoryDataset,
 )
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
@@ -21,7 +22,7 @@ from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
     _run_node_synchronization,
-    _SharedMemoryDataSet,
+    _SharedMemoryDataset,
 )
 from tests.runner.conftest import (
     exception_fn,
@@ -33,6 +34,12 @@ from tests.runner.conftest import (
 )
 
 
+def test_deprecation():
+    class_name = "_SharedMemoryDataSet"
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module("kedro.runner.parallel_runner"), class_name)
+
+
 @pytest.mark.skipif(
     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
@@ -40,7 +47,7 @@ class TestValidParallelRunner:
     def test_create_default_data_set(self):
         # data_set is a proxy to a dataset in another process.
         data_set = ParallelRunner().create_default_data_set("")
-        assert isinstance(data_set, _SharedMemoryDataSet)
+        assert isinstance(data_set, _SharedMemoryDataset)
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
@@ -63,7 +70,7 @@ class TestValidParallelRunner:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_memory_dataset_input(self, is_async, fan_out_fan_in):
         pipeline = modular_pipeline([fan_out_fan_in])
-        catalog = DataCatalog({"A": MemoryDataSet("42")})
+        catalog = DataCatalog({"A": MemoryDataset("42")})
         result = ParallelRunner(is_async=is_async).run(pipeline, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
@@ -149,10 +156,10 @@ class TestInvalidParallelRunner:
 
     def test_memory_dataset_output(self, is_async, fan_out_fan_in):
         """ParallelRunner does not support output to externally
-        created MemoryDataSets.
+        created MemoryDatasets.
         """
         pipeline = modular_pipeline([fan_out_fan_in])
-        catalog = DataCatalog({"C": MemoryDataSet()}, {"A": 42})
+        catalog = DataCatalog({"C": MemoryDataset()}, {"A": 42})
         with pytest.raises(AttributeError, match="['C']"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
@@ -160,9 +167,9 @@ class TestInvalidParallelRunner:
         pipeline = modular_pipeline(
             [node(identity, "A", "B"), node(return_none, "B", "C")]
         )
-        catalog = DataCatalog({"A": MemoryDataSet("42")})
-        pattern = "Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        catalog = DataCatalog({"A": MemoryDataset("42")})
+        pattern = "Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_data_set_not_serialisable(self, is_async, fan_out_fan_in):
@@ -177,7 +184,7 @@ class TestInvalidParallelRunner:
             assert arg == 0  # pragma: no cover
 
         # Data set A cannot be serialised
-        catalog = DataCatalog({"A": LambdaDataSet(load=_load, save=_save)})
+        catalog = DataCatalog({"A": LambdaDataset(load=_load, save=_save)})
 
         pipeline = modular_pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
@@ -193,7 +200,7 @@ class TestInvalidParallelRunner:
             rf"memory datasets can only be used with serialisable data"
         )
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_unable_to_schedule_all_nodes(
@@ -221,7 +228,7 @@ class TestInvalidParallelRunner:
             runner.run(fan_out_fan_in, catalog)
 
 
-class LoggingDataSet(AbstractDataSet):
+class LoggingDataset(AbstractDataSet):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name
@@ -244,7 +251,7 @@ class LoggingDataSet(AbstractDataSet):
 
 if not sys.platform.startswith("win"):
     ParallelRunnerManager.register(  # pylint: disable=no-member
-        "LoggingDataSet", LoggingDataSet
+        "LoggingDataset", LoggingDataset
     )
 
 
@@ -263,9 +270,9 @@ class TestParallelRunnerRelease:
         # pylint: disable=no-member
         catalog = DataCatalog(
             {
-                "in": runner._manager.LoggingDataSet(log, "in", "stuff"),
-                "middle": runner._manager.LoggingDataSet(log, "middle"),
-                "out": runner._manager.LoggingDataSet(log, "out"),
+                "in": runner._manager.LoggingDataset(log, "in", "stuff"),
+                "middle": runner._manager.LoggingDataset(log, "middle"),
+                "out": runner._manager.LoggingDataset(log, "out"),
             }
         )
         ParallelRunner().run(pipeline, catalog)
@@ -287,8 +294,8 @@ class TestParallelRunnerRelease:
         # pylint: disable=no-member
         catalog = DataCatalog(
             {
-                "first": runner._manager.LoggingDataSet(log, "first"),
-                "second": runner._manager.LoggingDataSet(log, "second"),
+                "first": runner._manager.LoggingDataset(log, "first"),
+                "second": runner._manager.LoggingDataset(log, "second"),
             }
         )
         runner.run(pipeline, catalog)
@@ -314,7 +321,7 @@ class TestParallelRunnerRelease:
         )
         # pylint: disable=no-member
         catalog = DataCatalog(
-            {"dataset": runner._manager.LoggingDataSet(log, "dataset")}
+            {"dataset": runner._manager.LoggingDataset(log, "dataset")}
         )
         runner.run(pipeline, catalog)
 
@@ -334,8 +341,8 @@ class TestParallelRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "ds@save": LoggingDataSet(log, "save"),
-                "ds@load": LoggingDataSet(log, "load"),
+                "ds@save": LoggingDataset(log, "save"),
+                "ds@load": LoggingDataset(log, "load"),
             }
         )
 

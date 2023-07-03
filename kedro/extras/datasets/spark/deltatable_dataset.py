@@ -100,7 +100,11 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         try:
             self._get_spark().read.load(path=load_path, format="delta")
         except AnalysisException as exception:
-            if "is not a Delta table" in exception.desc:  # pylint: disable=no-member
+            if hasattr(exception, "desc"):  # Pyspark < 3.4
+                message = exception.desc
+            else:
+                message = exception.message
+            if "is not a Delta table" in message:  # pylint: disable=no-member
                 return False
             raise
 

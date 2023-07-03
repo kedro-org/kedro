@@ -105,7 +105,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
                 exception.desc if hasattr(exception, "desc") else exception.message
             )
 
-            if "is not a Delta table" in message:
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
 

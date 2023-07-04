@@ -3,25 +3,59 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
 
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.11
+# Upcoming Release 0.18.12
 
 ## Major features and improvements
+
+## Bug fixes and other changes
+
+## Documentation changes
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.11
+
+## Major features and improvements
+* Added `databricks-iris` as an official starter.
 
 ## Bug fixes and other changes
 * Reworked micropackaging workflow to use standard Python packaging practices.
 * Make `kedro micropkg package` accept `--verbose`.
 
 ## Documentation changes
-* Added documentation for developing a Kedro project using a Databricks workspace.
-
-## Breaking changes to the API
+* Significant improvements to the documentation that covers working with Databricks and Kedro, including a new page for workspace-only development, and a guide to choosing the best workflow for your use case.
+* Updated documentation for deploying with Prefect for version 2.0.
 
 ## Upcoming deprecations for Kedro 0.19.0
+* Renamed dataset and error classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" and error classes starting with "DataSet" are deprecated and will be removed in 0.19.0. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+
+| Type                        | Deprecated Alias            | Location                       |
+| --------------------------- | --------------------------- | ------------------------------ |
+| `CachedDataset`             | `CachedDataSet`             | `kedro.io.cached_dataset`      |
+| `LambdaDataset`             | `LambdaDataSet`             | `kedro.io.lambda_dataset`      |
+| `IncrementalDataset`        | `IncrementalDataSet`        | `kedro.io.partitioned_dataset` |
+| `MemoryDataset`             | `MemoryDataSet`             | `kedro.io.memory_dataset`      |
+| `PartitionedDataset`        | `PartitionedDataSet`        | `kedro.io.partitioned_dataset` |
+| `DatasetError`              | `DataSetError`              | `kedro.io.core`                |
+| `DatasetAlreadyExistsError` | `DataSetAlreadyExistsError` | `kedro.io.core`                |
+| `DatasetNotFoundError`      | `DataSetNotFoundError`      | `kedro.io.core`                |
+
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [jmalovera10](https://github.com/jmalovera10)
+* [debugger24](https://github.com/debugger24)
+* [juliushetzel](https://github.com/juliushetzel)
+* [jacobweiss2305](https://github.com/jacobweiss2305)
+* [eduardoconto](https://github.com/eduardoconto)
 
 # Release 0.18.10
 

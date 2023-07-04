@@ -408,8 +408,7 @@ class DataCatalog:
                 self._load_versions.get(data_set_name),
                 self._save_version,
             )
-            if data_set.exists():
-                self.add(data_set_name, data_set)
+            self.add(data_set_name, data_set)
             return True
         return False
 

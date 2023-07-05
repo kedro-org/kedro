@@ -14,9 +14,9 @@ There are a variety of Python tools available to use with your Kedro projects. T
 - **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
 check for styling inconsistencies and reformat your files in place.
 [You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
-- **`ruff`** is a fast linter that replace `flake8`, `isort` and `pylint`.
-  - It helps your code compliant to [`pep8`](https://pypi.org/project/pep8/).
-  - It reformat code by sorting imports alphabetically and automatically separating them into sections by
+- **`ruff`** is a fast linter that replaces `flake8`, `isort` and `pylint`.
+  - It helps to make your code compliant to [`pep8`](https://pypi.org/project/pep8/).
+  - It reformats code by sorting imports alphabetically and automatically separating them into sections by
 type. [You can read more in the `isort` documentation](https://pycqa.github.io/isort/).
 
 

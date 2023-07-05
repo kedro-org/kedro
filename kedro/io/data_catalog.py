@@ -14,6 +14,7 @@ from collections import defaultdict
 from typing import Any, Iterable
 
 from parse import parse
+from typinh import TypeAli
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -29,6 +30,8 @@ from kedro.io.memory_dataset import MemoryDataset
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
 WORDS_REGEX_PATTERN = re.compile(r"\W+")
+
+Patterns = dict[str, dict[str, Any]]
 
 
 def _get_credentials(
@@ -186,8 +189,8 @@ class DataCatalog:
         self.layers = layers
         # Keep a record of all patterns in the catalog.
         # {dataset pattern name : dataset pattern body}
-        self._dataset_patterns = dict(dataset_patterns or {})
-        self._load_versions = dict(load_versions or {})
+        self._dataset_patterns = dataset_patterns or {}
+        self._load_versions = load_versions or {}
         self._save_version = save_version
 
         if feed_dict:
@@ -319,14 +322,10 @@ class DataCatalog:
     @staticmethod
     def _is_pattern(pattern: str):
         """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
-        if "{" in pattern:
-            return True
-        return False
+        return True if "{" in pattern else False
 
     @staticmethod
-    def _match_pattern(
-        data_set_patterns: dict[str, dict[str, Any]], data_set_name: str
-    ) -> str | None:
+    def _match_pattern(data_set_patterns: Patterns, data_set_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary containing patterns"""
         for pattern, _ in data_set_patterns.items():
             result = parse(pattern, data_set_name)
@@ -335,9 +334,7 @@ class DataCatalog:
         return None
 
     @classmethod
-    def _sort_patterns(
-        cls, data_set_patterns: dict[str, dict[str, Any]]
-    ) -> dict[str, dict[str, Any]]:
+    def _sort_patterns(cls, data_set_patterns: Patterns) -> Patterns:
         """Sort a dictionary of dataset patterns according to parsing rules -
         1. Decreasing specificity (number of characters outside the curly brackets)
         2. Decreasing number of placeholders (number of curly bracket pairs)
@@ -372,6 +369,7 @@ class DataCatalog:
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
         matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
+        print(f)
         if data_set_name not in self._data_sets and matched_pattern:
             # If the dataset is a patterned dataset, materialise it and add it to
             # the catalog

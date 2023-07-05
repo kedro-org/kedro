@@ -22,8 +22,10 @@ from kedro.framework.project import (
     _ProjectSettings,
 )
 from kedro.framework.session import KedroSession
+from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
+from kedro.runner import SequentialRunner
 
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
@@ -880,6 +882,28 @@ class TestKedroSession:
             pipeline=mock_pipeline,
             catalog=mock_catalog,
         )
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_session_raise_error_with_invalid_runner_instance(  # pylint: disable=too-many-locals
+        self,
+        fake_project,
+        mock_package_name,
+        mocker,
+    ):
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={
+                "__default__": mocker.Mock(),
+            },
+        )
+
+        session = KedroSession.create(mock_package_name, fake_project)
+        with pytest.raises(
+            KedroSessionError,
+            match="KedroSession expect an instance of Runner, make sure you are passing an instance instead of a class.",
+        ):
+            # Execute run with SequentialRunner class instead of SequentialRunner()
+            session.run(runner=SequentialRunner)
 
 
 @pytest.fixture

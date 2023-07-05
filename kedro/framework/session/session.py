@@ -417,6 +417,10 @@ class KedroSession:
         # Run the runner
         hook_manager = self._hook_manager
         runner = runner or SequentialRunner()
+        if not isinstance(runner, AbstractRunner):
+            raise KedroSessionError(
+                "KedroSession expect an instance of Runner, make sure you are passing an instance instead of a class."
+            )
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )

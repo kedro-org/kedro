@@ -161,6 +161,15 @@ class DataCatalog:
                 to a set of data set names, according to the
                 data engineering convention. For more details, see
                 https://docs.kedro.org/en/stable/resources/glossary.html#layers-data-engineering-convention
+            dataset_patterns: A dictionary of data set factory patterns
+                and corresponding data set configuration
+            load_versions: A mapping between data set names and versions
+                to load. Has no effect on data sets without enabled versioning.
+            save_version: Version string to be used for ``save`` operations
+                by all data sets with enabled versioning. It must: a) be a
+                case-insensitive string that conforms with operating system
+                filename limitations, b) always return the latest version when
+                sorted in lexicographical order.
 
         Example:
         ::
@@ -330,8 +339,8 @@ class DataCatalog:
         cls, data_set_patterns: dict[str, dict[str, Any]]
     ) -> dict[str, dict[str, Any]]:
         """Sort a dictionary of dataset patterns according to parsing rules -
-        1. Decreasing specificity (no of characters outside the curly brackets
-        2. Decreasing number of placeholders (no of curly bracket pairs)
+        1. Decreasing specificity (number of characters outside the curly brackets)
+        2. Decreasing number of placeholders (number of curly bracket pairs)
         3. Alphabetically
         """
         sorted_keys = sorted(
@@ -354,8 +363,6 @@ class DataCatalog:
         specificity("{namespace}.companies") = 10
         specificity("{namespace}.{dataset}") = 1
         specificity("france.companies") = 16
-        Args:
-            pattern: The factory pattern
         """
         # Remove all the placeholders from the pattern and count the number of remaining chars
         result = re.sub(r"\{.*?\}", "", pattern)
@@ -364,7 +371,24 @@ class DataCatalog:
     def _get_dataset(
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
-        if data_set_name not in self:
+        matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
+        if data_set_name not in self._data_sets and matched_pattern:
+            # If the dataset is a patterned dataset, materialise it and add it to
+            # the catalog
+            data_set_config = self._resolve_config(data_set_name, matched_pattern)
+            ds_layer = data_set_config.pop("layer", None)
+            if ds_layer:
+                if not self.layers:
+                    self.layers = {}
+                self.layers.setdefault(ds_layer, set()).add(data_set_name)
+            data_set = AbstractDataSet.from_config(
+                data_set_name,
+                data_set_config,
+                self._load_versions.get(data_set_name),
+                self._save_version,
+            )
+            self.add(data_set_name, data_set)
+        if data_set_name not in self._data_sets:
             error_msg = f"Dataset '{data_set_name}' not found in the catalog"
 
             # Flag to turn on/off fuzzy-matching which can be time consuming and
@@ -388,27 +412,9 @@ class DataCatalog:
         return data_set
 
     def __contains__(self, data_set_name):
-        """Check if an item is in the catalog as a materialised dataset or pattern,
-        add to catalog if it is a pattern"""
-        if data_set_name in self._data_sets:
-            return True
+        """Check if an item is in the catalog as a materialised dataset or pattern"""
         matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
-        if matched_pattern:
-            # If the dataset is a patterned dataset, materialise it and add it to
-            # the catalog
-            data_set_config = self._resolve_config(data_set_name, matched_pattern)
-            ds_layer = data_set_config.pop("layer", None)
-            if ds_layer:
-                if not self.layers:
-                    self.layers = {}
-                self.layers.setdefault(ds_layer, set()).add(data_set_name)
-            data_set = AbstractDataSet.from_config(
-                data_set_name,
-                data_set_config,
-                self._load_versions.get(data_set_name),
-                self._save_version,
-            )
-            self.add(data_set_name, data_set)
+        if data_set_name in self._data_sets or matched_pattern:
             return True
         return False
 

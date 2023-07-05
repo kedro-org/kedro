@@ -323,9 +323,9 @@ class DataCatalog:
             return True
         return False
 
-    @classmethod
+    @staticmethod
     def _match_pattern(
-        cls, data_set_patterns: dict[str, dict[str, Any]], data_set_name: str
+        data_set_patterns: dict[str, dict[str, Any]], data_set_name: str
     ) -> str | None:
         """Match a dataset name against patterns in a dictionary containing patterns"""
         for pattern, _ in data_set_patterns.items():

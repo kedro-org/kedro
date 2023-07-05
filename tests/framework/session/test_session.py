@@ -900,9 +900,7 @@ class TestKedroSession:
                 "__default__": mocker.Mock(),
             },
         )
-        mock_runner_class = mocker.patch(
-            "kedro.runner.SequentialRunner", auto_spec=True
-        )
+        mock_runner_class = mocker.patch("kedro.runner.SequentialRunner")
 
         session = KedroSession.create(mock_package_name, fake_project)
         with pytest.raises(

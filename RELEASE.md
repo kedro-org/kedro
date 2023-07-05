@@ -16,6 +16,7 @@
 ## Bug fixes and other changes
 
 ## Documentation changes
+- Recommended `ruff` as the linter and remove mentions of `pylint`, `isort`, `flake8`.
 
 ## Breaking changes to the API
 

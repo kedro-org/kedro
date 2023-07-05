@@ -378,8 +378,7 @@ class DataCatalog:
             data_set_config = self._resolve_config(data_set_name, matched_pattern)
             ds_layer = data_set_config.pop("layer", None)
             if ds_layer:
-                if not self.layers:
-                    self.layers = {}
+                self.layers = self.layers or {}
                 self.layers.setdefault(ds_layer, set()).add(data_set_name)
             data_set = AbstractDataSet.from_config(
                 data_set_name,

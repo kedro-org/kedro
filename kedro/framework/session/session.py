@@ -272,9 +272,7 @@ class KedroSession:
             extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
-        self._hook_manager.hook.after_context_created(  # pylint: disable=no-member
-            context=context
-        )
+        self._hook_manager.hook.after_context_created(context=context)
 
         return context
 
@@ -354,7 +352,6 @@ class KedroSession:
             These are returned in a dictionary, where the keys are defined
             by the node outputs.
         """
-        # pylint: disable=protected-access,no-member
         # Report project name
         self._logger.info("Kedro project %s", self._project_path.name)
 
@@ -419,9 +416,9 @@ class KedroSession:
         runner = runner or SequentialRunner()
         if not isinstance(runner, AbstractRunner):
             raise KedroSessionError(
-                "KedroSession expect an instance of Runner, make sure you are passing an instance instead of a class."
+                "KedroSession expect an instance of Runner instead of a class. Have you forgotten the `()` at the end of the statement?"
             )
-        hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
+        hook_manager.hook.before_pipeline_run(
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 

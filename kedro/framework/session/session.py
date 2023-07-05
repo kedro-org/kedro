@@ -406,7 +406,7 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(
+        catalog = context._get_catalog(  # pylint: disable=protected-access
             save_version=save_version,
             load_versions=load_versions,
         )
@@ -416,7 +416,8 @@ class KedroSession:
         runner = runner or SequentialRunner()
         if not isinstance(runner, AbstractRunner):
             raise KedroSessionError(
-                "KedroSession expect an instance of Runner instead of a class. Have you forgotten the `()` at the end of the statement?"
+                "KedroSession expect an instance of Runner instead of a class."
+                "Have you forgotten the `()` at the end of the statement?"
             )
         hook_manager.hook.before_pipeline_run(
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog

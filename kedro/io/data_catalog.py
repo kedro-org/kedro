@@ -386,6 +386,13 @@ class DataCatalog:
                 self._load_versions.get(data_set_name),
                 self._save_version,
             )
+            if self._specificity(matched_pattern) == 0:
+                self._logger.warning(
+                    "The dataset '%s' is using the catch-all pattern '%s'",
+                    data_set_name,
+                    matched_pattern,
+                )
+
             self.add(data_set_name, data_set)
         if data_set_name not in self._data_sets:
             error_msg = f"Dataset '{data_set_name}' not found in the catalog"

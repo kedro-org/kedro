@@ -818,11 +818,17 @@ class TestDataCatalogDatasetFactories:
         ]
         assert list(catalog._dataset_patterns.keys()) == sorted_keys_expected
 
-    def test_default_dataset(self, config_with_dataset_factories_with_default):
+    def test_default_dataset(self, config_with_dataset_factories_with_default, caplog):
         """Check that default dataset is used when no other pattern matches"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories_with_default)
         assert "jet@planes" not in catalog._data_sets
         jet_dataset = catalog._get_dataset("jet@planes")
+        log_record = caplog.records[0]
+        assert log_record.levelname == "WARNING"
+        assert (
+            "The dataset 'jet@planes' is using the catch-all pattern '{default_dataset}'"
+            in log_record.message
+        )
         assert isinstance(jet_dataset, CSVDataSet)
 
     def test_unmatched_key_error_when_parsing_config(

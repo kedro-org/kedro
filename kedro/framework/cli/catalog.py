@@ -13,12 +13,7 @@ from kedro.framework.startup import ProjectMetadata
 
 def _create_session(package_name: str, **kwargs):
     kwargs.setdefault("save_on_close", False)
-    try:
-        return KedroSession.create(package_name, **kwargs)
-    except Exception as exc:
-        raise KedroCliError(
-            f"Unable to instantiate Kedro session.\nError: {exc}"
-        ) from exc
+    return KedroSession.create(package_name, **kwargs)
 
 
 # pylint: disable=missing-function-docstring
@@ -53,8 +48,13 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
-    catalog_ds = set(context.catalog.list())
+    try:
+        datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
+        catalog_ds = set(context.catalog.list())
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro Catalog.\nError: {exc}"
+        ) from exc
 
     target_pipelines = pipeline or pipelines.keys()
 

@@ -1,6 +1,6 @@
 # Configuration
 
-This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters.md), [credentials](./credentials.md), the [data catalog](../data/data_catalog.md), and [logging information](../logging/logging.md).
+This section contains detailed information about Kedro project configuration, which you can use to store settings for your project such as [parameters](./parameters.md), [credentials](./credentials.md), the [data catalog](../data/data_catalog.md), and [logging information](../logging/index.md).
 
 Kedro makes use of a configuration loader to load any project configuration files, and the available configuration loader classes are:
 
@@ -61,14 +61,13 @@ Configuration files will be matched according to file name and type rules. Suppo
 ### Configuration patterns
 Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.
 
-By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
+By default those patterns are set as follows for the configuration of catalog, parameters and credentials:
 
 ```python
 config_patterns = {
     "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
     "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
     "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
-    "logging": ["logging*", "logging*/**", "**/logging*"],
 }
 ```
 
@@ -78,13 +77,22 @@ If you want to change change the way configuration is loaded, you can either [cu
 
 This section contains a set of guidance for the most common configuration requirements of standard Kedro projects:
 
-* [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
-* [How to change the configuration source folder at run time](#how-to-change-the-configuration-source-folder-at-runtime)
-* [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
-* [How to access configuration in code](#how-to-access-configuration-in-code)
-* [How to specify additional configuration environments ](#how-to-specify-additional-configuration-environments)
-* [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
-* [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
+- [Configuration](#configuration)
+  - [Configuration source](#configuration-source)
+  - [Configuration environments](#configuration-environments)
+    - [Base](#base)
+    - [Local](#local)
+  - [Configuration loading](#configuration-loading)
+    - [Configuration file names](#configuration-file-names)
+    - [Configuration patterns](#configuration-patterns)
+  - [How to use Kedro configuration](#how-to-use-kedro-configuration)
+    - [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
+    - [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
+    - [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
+    - [How to access configuration in code](#how-to-access-configuration-in-code)
+    - [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
+    - [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
+    - [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
 
 ### How to change the setting for a configuration source folder
 To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md) as follows:

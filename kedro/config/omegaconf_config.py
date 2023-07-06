@@ -47,9 +47,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         >>> conf_path = str(project_path / settings.CONF_SOURCE)
         >>> conf_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
         >>>
-        >>> conf_logging = conf_loader["logging"]
-        >>> logging.config.dictConfig(conf_logging)  # set logging conf
-        >>>
         >>> conf_catalog = conf_loader["catalog"]
         >>> conf_params = conf_loader["parameters"]
 
@@ -105,7 +102,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
-            "logging": ["logging*", "logging*/**", "**/logging*"],
         }
         self.config_patterns.update(config_patterns or {})
 

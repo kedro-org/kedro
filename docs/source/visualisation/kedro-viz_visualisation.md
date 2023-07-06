@@ -111,6 +111,7 @@ shuttles:
   metadata: 
     kedro-viz:
       layer: raw
+
 preprocessed_companies:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_companies.pq

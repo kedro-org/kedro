@@ -14,6 +14,7 @@ kedro_datasets
    kedro_datasets.api.APIDataSet
    kedro_datasets.biosequence.BioSequenceDataSet
    kedro_datasets.dask.ParquetDataSet
+   kedro_datasets.databricks.ManagedTableDataSet
    kedro_datasets.email.EmailMessageDataSet
    kedro_datasets.geopandas.GeoJSONDataSet
    kedro_datasets.holoviews.HoloviewsWriter
@@ -45,6 +46,7 @@ kedro_datasets
    kedro_datasets.spark.SparkDataSet
    kedro_datasets.spark.SparkHiveDataSet
    kedro_datasets.spark.SparkJDBCDataSet
+   kedro_datasets.spark.SparkStreamingDataSet
    kedro_datasets.svmlight.SVMLightDataSet
    kedro_datasets.tensorflow.TensorFlowModelDataSet
    kedro_datasets.text.TextDataSet

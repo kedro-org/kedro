@@ -69,6 +69,7 @@ _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
     KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
     KedroStarterSpec("spaceflights", _STARTERS_REPO, "spaceflights"),
+    KedroStarterSpec("databricks-iris", _STARTERS_REPO, "databricks-iris"),
 ]
 # Set the origin for official starters
 for starter_spec in _OFFICIAL_STARTER_SPECS:

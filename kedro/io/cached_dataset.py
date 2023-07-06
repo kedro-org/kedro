@@ -5,11 +5,14 @@ so that the user avoids io operations with slow storage media
 from __future__ import annotations
 
 import logging
+import warnings
 from typing import Any
 
 from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataSet, Version
 from kedro.io.memory_dataset import MemoryDataset
-from kedro.utils import DeprecatedClassMeta
+
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+CachedDataSet: AbstractDataSet
 
 
 class CachedDataset(AbstractDataSet):
@@ -120,7 +123,14 @@ class CachedDataset(AbstractDataSet):
         return self.__dict__
 
 
-class CachedDataSet(metaclass=DeprecatedClassMeta):
-    # pylint: disable=missing-class-docstring, too-few-public-methods
-
-    _DeprecatedClassMeta__alias = CachedDataset
+def __getattr__(name):
+    if name == "CachedDataSet":
+        alias = CachedDataset
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro 0.19.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

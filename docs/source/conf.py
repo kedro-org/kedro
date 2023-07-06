@@ -202,9 +202,6 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # to ignore or allow certain links.
 html_extra_path = [str(here / "robots.txt")]
 
-# Likewise for search console verification
-html_extra_path = [str(here / "googlebce3ad2fda582ae8.html")]
-
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
 
@@ -551,6 +548,7 @@ myst_heading_anchors = 5
 # https://github.com/kedro-org/kedro/issues/1772
 mermaid_output_format = "png"
 # https://github.com/mermaidjs/mermaid.cli#linux-sandbox-issue
+# https://github.com/mermaid-js/mermaid-cli/issues/544
 mermaid_params = ["-p", here / "puppeteer-config.json", "-s", "2"]
 # https://github.com/kedro-org/kedro/issues/2451
 mermaid_version = mermaid_init_js = ""

@@ -113,7 +113,7 @@ repos:
             - "--ignore=E203,E266,E501,W503"
             exclude: "^kedro/templates/|^features/steps/test_starter/"
     - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v0.961
+      rev: v1.4.1
       hooks:
           - id: mypy
             args: [--allow-redefinition, --ignore-missing-imports]

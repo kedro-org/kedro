@@ -368,7 +368,6 @@ class DataCatalog:
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
         matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
-        print(f)
         if data_set_name not in self._data_sets and matched_pattern:
             # If the dataset is a patterned dataset, materialise it and add it to
             # the catalog

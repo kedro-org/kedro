@@ -388,9 +388,10 @@ class DataCatalog:
             )
             if self._specificity(matched_pattern) == 0:
                 self._logger.warning(
-                    "The dataset '%s' is using the catch-all pattern '%s'",
-                    data_set_name,
+                    "Config from the dataset factory pattern '%s' in the catalog will be used to "
+                    "override the default MemoryDataset creation for the dataset '%s'",
                     matched_pattern,
+                    data_set_name,
                 )
 
             self.add(data_set_name, data_set)

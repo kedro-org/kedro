@@ -826,8 +826,9 @@ class TestDataCatalogDatasetFactories:
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "The dataset 'jet@planes' is using the catch-all pattern '{default_dataset}'"
-            in log_record.message
+            "Config from the dataset factory pattern '{default_dataset}' "
+            "in the catalog will be used to override the default "
+            "MemoryDataset creation for the dataset 'jet@planes'" in log_record.message
         )
         assert isinstance(jet_dataset, CSVDataSet)
 

@@ -186,8 +186,8 @@ class DataCatalog:
         self.layers = layers
         # Keep a record of all patterns in the catalog.
         # {dataset pattern name : dataset pattern body}
-        self._dataset_patterns = dict(dataset_patterns or {})
-        self._load_versions = dict(load_versions or {})
+        self._dataset_patterns = dataset_patterns or {}
+        self._load_versions = load_versions or {}
         self._save_version = save_version
 
         if feed_dict:
@@ -319,9 +319,7 @@ class DataCatalog:
     @staticmethod
     def _is_pattern(pattern: str):
         """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
-        if "{" in pattern:
-            return True
-        return False
+        return "{" in pattern
 
     @staticmethod
     def _match_pattern(

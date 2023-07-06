@@ -5,7 +5,7 @@ import yaml
 from click.testing import CliRunner
 
 from kedro.extras.datasets.pandas import CSVDataSet
-from kedro.io import DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
@@ -43,8 +43,8 @@ class TestCatalogListCommand:
 
         assert not result.exit_code
         expected_dict = {
-            "DataSets in 'pipeline' pipeline": {},
-            "DataSets in 'second' pipeline": {},
+            "Datasets in 'pipeline' pipeline": {},
+            "Datasets in 'second' pipeline": {},
         }
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
@@ -58,7 +58,7 @@ class TestCatalogListCommand:
         )
 
         assert not result.exit_code
-        expected_dict = {f"DataSets in '{PIPELINE_NAME}' pipeline": {}}
+        expected_dict = {f"Datasets in '{PIPELINE_NAME}' pipeline": {}}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
     def test_not_found_pipeline(self, fake_project_cli, fake_metadata):
@@ -81,9 +81,9 @@ class TestCatalogListCommand:
         mocked_context = fake_load_context.return_value
         catalog_data_sets = {
             "iris_data": CSVDataSet("test.csv"),
-            "intermediate": MemoryDataSet(),
-            "parameters": MemoryDataSet(),
-            "params:data_ratio": MemoryDataSet(),
+            "intermediate": MemoryDataset(),
+            "parameters": MemoryDataset(),
+            "params:data_ratio": MemoryDataset(),
             "not_used": CSVDataSet("test2.csv"),
         }
 
@@ -103,15 +103,15 @@ class TestCatalogListCommand:
         assert not result.exit_code
         # 'parameters' and 'params:data_ratio' should not appear in the response
         expected_dict = {
-            f"DataSets in '{PIPELINE_NAME}' pipeline": {
+            f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
                     "CSVDataSet": ["iris_data"],
-                    "MemoryDataSet": ["intermediate"],
+                    "MemoryDataset": ["intermediate"],
                 },
                 "Datasets not mentioned in pipeline": {"CSVDataSet": ["not_used"]},
             }
         }
-        key = f"DataSets in '{PIPELINE_NAME}' pipeline"
+        key = f"Datasets in '{PIPELINE_NAME}' pipeline"
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
@@ -139,14 +139,14 @@ class TestCatalogListCommand:
 
         assert not result.exit_code
         expected_dict = {
-            f"DataSets in '{PIPELINE_NAME}' pipeline": {
+            f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
                     "CSVDataSet": ["some_dataset"],
-                    "DefaultDataSet": ["intermediate"],
+                    "DefaultDataset": ["intermediate"],
                 }
             }
         }
-        key = f"DataSets in '{PIPELINE_NAME}' pipeline"
+        key = f"Datasets in '{PIPELINE_NAME}' pipeline"
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
@@ -210,10 +210,10 @@ class TestCatalogCreateCommand:
         assert data_catalog_file.is_file()
 
         expected_catalog_config = {
-            "example_test_x": {"type": "MemoryDataSet"},
-            "example_test_y": {"type": "MemoryDataSet"},
-            "example_train_x": {"type": "MemoryDataSet"},
-            "example_train_y": {"type": "MemoryDataSet"},
+            "example_test_x": {"type": "MemoryDataset"},
+            "example_test_y": {"type": "MemoryDataset"},
+            "example_train_x": {"type": "MemoryDataset"},
+            "example_train_y": {"type": "MemoryDataset"},
         }
         catalog_config = yaml.safe_load(data_catalog_file.read_text())
         assert catalog_config == expected_catalog_config
@@ -291,9 +291,9 @@ class TestCatalogCreateCommand:
 
         expected_catalog_config = {
             "example_test_x": catalog_config["example_test_x"],
-            "example_test_y": {"type": "MemoryDataSet"},
-            "example_train_x": {"type": "MemoryDataSet"},
-            "example_train_y": {"type": "MemoryDataSet"},
+            "example_test_y": {"type": "MemoryDataset"},
+            "example_train_x": {"type": "MemoryDataset"},
+            "example_train_y": {"type": "MemoryDataset"},
         }
         catalog_config = yaml.safe_load(data_catalog_file.read_text())
         assert catalog_config == expected_catalog_config

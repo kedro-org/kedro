@@ -7,7 +7,7 @@ import requests
 import requests_mock
 
 from kedro.extras.datasets.api import APIDataSet
-from kedro.io.core import DataSetError
+from kedro.io.core import DatasetError
 
 POSSIBLE_METHODS = ["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"]
 
@@ -73,7 +73,7 @@ class TestAPIDataSet:
             status_code=requests.codes.FORBIDDEN,
         )
 
-        with pytest.raises(DataSetError, match="Failed to fetch data"):
+        with pytest.raises(DatasetError, match="Failed to fetch data"):
             api_data_set.load()
 
     def test_socket_error(self, requests_mocker, method):
@@ -82,7 +82,7 @@ class TestAPIDataSet:
         )
         requests_mocker.register_uri(method, TEST_URL_WITH_PARAMS, exc=socket.error)
 
-        with pytest.raises(DataSetError, match="Failed to connect"):
+        with pytest.raises(DatasetError, match="Failed to connect"):
             api_data_set.load()
 
     def test_read_only_mode(self, method):
@@ -90,7 +90,7 @@ class TestAPIDataSet:
         Saving is disabled on the data set.
         """
         api_data_set = APIDataSet(url=TEST_URL, method=method)
-        with pytest.raises(DataSetError, match="is a read only data set type"):
+        with pytest.raises(DatasetError, match="is a read only data set type"):
             api_data_set.save({})
 
     def test_exists_http_error(self, requests_mocker, method):
@@ -108,7 +108,7 @@ class TestAPIDataSet:
             text="Nope, not found",
             status_code=requests.codes.FORBIDDEN,
         )
-        with pytest.raises(DataSetError, match="Failed to fetch data"):
+        with pytest.raises(DatasetError, match="Failed to fetch data"):
             api_data_set.exists()
 
     def test_exists_ok(self, requests_mocker, method):

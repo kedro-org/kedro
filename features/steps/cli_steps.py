@@ -352,10 +352,10 @@ def wait_for_notebook_to_run(context, timeout):
         raise TimeoutError("Failed to run Jupyter server in time")
 
 
-@when("Wait until the process is finished")
-def wait(context):
+@when('Wait until the process is finished for up to "{timeout:d}" seconds')
+def wait(context, timeout):
     """Wait for child process to terminate."""
-    context.result.wait()
+    context.result.wait(timeout)
 
 
 @when("I execute the test jupyter notebook and save changes")

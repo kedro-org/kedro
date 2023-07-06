@@ -27,7 +27,7 @@ pip @ https://github.com/pypa/pip/archive/1.3.1.zip#sha1=da9234ees
 """
 
 # These requirements can be used in requirements.txt but not in METADATA Requires-Dist.
-# They cannot be parsed by pkg_resources.
+# They cannot be parsed by packaging.
 COMPLEX_REQUIREMENTS = """--extra-index-url https://this.wont.work
 -r other_requirements.txt
 ./path/to/package.whl

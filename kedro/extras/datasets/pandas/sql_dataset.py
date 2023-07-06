@@ -12,7 +12,7 @@ from sqlalchemy.exc import NoSuchModuleError
 
 from kedro.io.core import (
     AbstractDataSet,
-    DataSetError,
+    DatasetError,
     get_filepath_str,
     get_protocol_and_path,
 )
@@ -72,19 +72,19 @@ def _find_known_drivers(module_import_error: ImportError) -> Optional[str]:
     return None
 
 
-def _get_missing_module_error(import_error: ImportError) -> DataSetError:
+def _get_missing_module_error(import_error: ImportError) -> DatasetError:
     missing_module_instruction = _find_known_drivers(import_error)
 
     if missing_module_instruction is None:
-        return DataSetError(
+        return DatasetError(
             f"{DRIVER_ERROR_MESSAGE}Loading failed with error:\n\n{str(import_error)}"
         )
 
-    return DataSetError(f"{DRIVER_ERROR_MESSAGE}{missing_module_instruction}")
+    return DatasetError(f"{DRIVER_ERROR_MESSAGE}{missing_module_instruction}")
 
 
-def _get_sql_alchemy_missing_error() -> DataSetError:
-    return DataSetError(
+def _get_sql_alchemy_missing_error() -> DatasetError:
+    return DatasetError(
         "The SQL dialect in your connection is not supported by "
         "SQLAlchemy. Please refer to "
         "https://docs.sqlalchemy.org/en/13/core/engines.html#supported-databases "
@@ -194,14 +194,14 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
                 It has ``index=False`` in the default parameters.
 
         Raises:
-            DataSetError: When either ``table_name`` or ``con`` is empty.
+            DatasetError: When either ``table_name`` or ``con`` is empty.
         """
 
         if not table_name:
-            raise DataSetError("'table_name' argument cannot be empty.")
+            raise DatasetError("'table_name' argument cannot be empty.")
 
         if not (credentials and "con" in credentials and credentials["con"]):
-            raise DataSetError(
+            raise DatasetError(
                 "'con' argument cannot be empty. Please "
                 "provide a SQLAlchemy connection string."
             )
@@ -375,22 +375,22 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 useful for handling large datasets.
 
         Raises:
-            DataSetError: When either ``sql`` or ``con`` parameters is empty.
+            DatasetError: When either ``sql`` or ``con`` parameters is empty.
         """
         if sql and filepath:
-            raise DataSetError(
+            raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be provided."
                 "Please only provide one."
             )
 
         if not (sql or filepath):
-            raise DataSetError(
+            raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be empty."
                 "Please provide a sql query or path to a sql query file."
             )
 
         if not (credentials and "con" in credentials and credentials["con"]):
-            raise DataSetError(
+            raise DatasetError(
                 "'con' argument cannot be empty. Please "
                 "provide a SQLAlchemy connection string."
             )
@@ -461,4 +461,4 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         return pd.read_sql_query(con=engine, **load_args)
 
     def _save(self, data: None) -> NoReturn:
-        raise DataSetError("'save' is not supported on SQLQueryDataSet")
+        raise DatasetError("'save' is not supported on SQLQueryDataSet")

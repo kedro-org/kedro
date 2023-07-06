@@ -9,7 +9,7 @@ from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.plotly import JSONDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER
 
 
@@ -52,7 +52,7 @@ class TestJSONDataSet:
     def test_load_missing_file(self, json_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set JSONDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             json_data_set.load()
 
     @pytest.mark.parametrize("save_args", [{"pretty": True}])

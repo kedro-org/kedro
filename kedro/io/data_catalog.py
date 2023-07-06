@@ -321,7 +321,7 @@ class DataCatalog:
     @staticmethod
     def _is_pattern(pattern: str):
         """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
-        return True if "{" in pattern else False
+        return "{" in pattern
 
     @staticmethod
     def _match_pattern(data_set_patterns: Patterns, data_set_name: str) -> str | None:

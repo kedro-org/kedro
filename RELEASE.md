@@ -11,6 +11,7 @@
 # Upcoming Release 0.18.12
 
 ## Major features and improvements
+* Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
 
 ## Bug fixes and other changes
 

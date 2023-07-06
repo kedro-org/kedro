@@ -72,9 +72,12 @@ The previews are shown as follows:
 
 Click on each dataset node see a small preview in the metadata panel:
 
+
 ![](../meta/images/preview_datasets_metadata.png)
 
-View the larger preview of the dataset by clicking the 'Expand Preview' button on the bottom of the metadata panel.
+
+View the larger preview of the dataset by clicking the `Expand Preview Table` button on the bottom of the metadata panel.
+
 
 ![](../meta/images/preview_datasets_expanded.png)
 

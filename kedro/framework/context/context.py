@@ -119,8 +119,21 @@ def _convert_paths_to_absolute_posix(
 
 
 def _validate_transcoded_datasets(catalog: DataCatalog):
+    """Validates transcoded datasets are correctly named
+
+    Args:
+        catalog (DataCatalog): The catalog object containing the
+        datasets to be validated.
+
+    Raises:
+        ValueError: If a dataset name does not conform to the expected
+        transcoding naming conventions,a ValueError is raised by the
+        `_transcode_split` function.
+
+    """
+    # pylint: disable=protected-access
     for dataset_name in catalog._data_sets.keys():
-        _, _ = _transcode_split(dataset_name)
+        _transcode_split(dataset_name)
 
 
 def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:

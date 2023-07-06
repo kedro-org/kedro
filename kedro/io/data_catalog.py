@@ -14,7 +14,6 @@ from collections import defaultdict
 from typing import Any, Iterable
 
 from parse import parse
-from typinh import TypeAli
 
 from kedro.io.core import (
     AbstractDataSet,

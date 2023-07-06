@@ -66,7 +66,7 @@ By convention, a [pipeline can be defined as having different layers](../resourc
 
 For example, the [data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
-As of Kedro version 18.9, we've made a change to the way layers are defined in the Data Catalog. The definition is now included under the kedro-viz metadata, where previously it was an attribute specified within a dataset's definition. 
+In Kedro version 0.18.9 we changed the way layers are defined in the Data Catalog. The definition is now included under the `metadata` key for `kedro-viz` (previously it was an attribute specified within a dataset's definition). 
 
 Here's an example of how to use the kedro-viz metadata to define layers:
 
@@ -79,16 +79,17 @@ companies:
       layer: raw
 ```
 
-Prior to Kedro 18.9, layers were specified directly within a dataset's definition in the Data Catalog:
+In earlier versions of Kedro, layers were specified within a dataset's definition in the Data Catalog, but this will **no longer be supported** from Kedro version 0.19.0. From that version onwards, your `catalog.yml` must specify layers as metadata.
 
-```yaml
+```diff
 companies:
   type: pandas.CSVDataSet
   filepath: data/01_raw/companies.csv
-  layer: raw
+-  layer: raw
++   metadata: 
++     kedro-viz:
++       layer: raw  
 ```
-
-The previous way of defining layers will **no longer be supported** from Kedro version 19.0. From that version onwards, you need to modify your `catalog.yml` to use the new method and specify layers as metadata.
 
 Open `catalog.yml` for the completed spaceflights tutorial and define layers in the following way:
 

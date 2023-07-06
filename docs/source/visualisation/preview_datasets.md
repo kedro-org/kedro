@@ -23,7 +23,7 @@ When your project is ready, navigate to the root directory of the project.
 
 Kedro-viz currently supports preview of two types of datasets:
 
-* `pandas.CSVDataset` 
+* `pandas.CSVDataset`
 * `pandas.ExcelDataset`
 
 
@@ -60,7 +60,7 @@ shuttles:
 
 
 
-## Previewing Data on Kedro-viz 
+## Previewing Data on Kedro-viz
 
 After you've configured the Data Catalog, you can preview the datasets on Kedro-Viz. Start Kedro-Viz by running the following command in your terminal:
 
@@ -80,5 +80,3 @@ View the larger preview of the dataset by clicking the `Expand Preview Table` bu
 
 
 ![](../meta/images/preview_datasets_expanded.png)
-
-

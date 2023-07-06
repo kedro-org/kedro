@@ -66,7 +66,7 @@ By convention, a [pipeline can be defined as having different layers](../resourc
 
 For example, the [data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
-In Kedro version 0.18.9 we changed the way layers are defined in the Data Catalog. The definition is now included under the `metadata` key for `kedro-viz` (previously it was an attribute specified within a dataset's definition). 
+In Kedro version 0.18.9 we changed the way layers are defined in the Data Catalog. The definition is now included under the `metadata` key for `kedro-viz` (previously it was an attribute specified within a dataset's definition).
 
 Here's an example of how to use the kedro-viz metadata to define layers:
 
@@ -74,7 +74,7 @@ Here's an example of how to use the kedro-viz metadata to define layers:
 companies:
   type: pandas.CSVDataSet
   filepath: data/01_raw/companies.csv
-  metadata: 
+  metadata:
     kedro-viz:
       layer: raw
 ```
@@ -86,9 +86,9 @@ companies:
   type: pandas.CSVDataSet
   filepath: data/01_raw/companies.csv
 -  layer: raw
-+   metadata: 
++   metadata:
 +     kedro-viz:
-+       layer: raw  
++       layer: raw
 ```
 
 Open `catalog.yml` for the completed spaceflights tutorial and define layers in the following way:
@@ -97,42 +97,42 @@ Open `catalog.yml` for the completed spaceflights tutorial and define layers in 
 companies:
   type: pandas.CSVDataSet
   filepath: data/01_raw/companies.csv
-  metadata: 
+  metadata:
     kedro-viz:
       layer: raw
 
 reviews:
   type: pandas.CSVDataSet
   filepath: data/01_raw/reviews.csv
-  metadata: 
+  metadata:
     kedro-viz:
       layer: raw
 
 shuttles:
   type: pandas.ExcelDataSet
   filepath: data/01_raw/shuttles.xlsx
-  metadata: 
+  metadata:
     kedro-viz:
       layer: raw
 
 preprocessed_companies:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_companies.pq
-  metadata: 
+  metadata:
     kedro-viz:
       layer: raw
 
 preprocessed_shuttles:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_shuttles.pq
-  metadata: 
+  metadata:
     kedro-viz:
       layer: raw
 
 model_input_table:
   type: pandas.ParquetDataSet
   filepath: data/03_primary/model_input_table.pq
-  metadata: 
+  metadata:
     kedro-viz:
       layer: raw
 
@@ -140,7 +140,7 @@ regressor:
   type: pickle.PickleDataSet
   filepath: data/06_models/regressor.pickle
   versioned: true
-  metadata: 
+  metadata:
     kedro-viz:
       layer: raw
 ```

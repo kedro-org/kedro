@@ -60,7 +60,7 @@ shuttles:
 
 
 
-### Previewing Data on Kedro-viz 
+## Previewing Data on Kedro-viz 
 
 After you've configured the Data Catalog, you can preview the datasets on Kedro-Viz. Start Kedro-Viz by running the following command in your terminal:
 

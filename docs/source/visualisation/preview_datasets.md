@@ -19,7 +19,7 @@ When prompted for a project name, you can enter anything, but we will assume `Sp
 
 When your project is ready, navigate to the root directory of the project.
 
-### Configure the Data Catalog
+## Configure the Data Catalog
 
 Kedro-viz currently supports preview of two types of datasets:
 

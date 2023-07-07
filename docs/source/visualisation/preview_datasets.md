@@ -70,7 +70,7 @@ kedro viz
 
 The previews are shown as follows:
 
-Click on each dataset node see a small preview in the metadata panel:
+Click on each dataset node to see a small preview in the metadata panel:
 
 
 ![](../meta/images/preview_datasets_metadata.png)

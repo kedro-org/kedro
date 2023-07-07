@@ -1,4 +1,4 @@
-FROM gitpod/workspace-full:2023-05-08-21-16-55
+FROM gitpod/workspace-full
 
 # Some datasets work on 3.8 only
 RUN pyenv install 3.11.1\

@@ -11,7 +11,7 @@ import difflib
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable
 
 from parse import parse
 
@@ -25,6 +25,8 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
+
+Patterns = Dict[str, Dict[str, Any]]
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
@@ -300,7 +302,7 @@ class DataCatalog:
         missing_keys = [
             key
             for key in load_versions.keys()
-            if not (cls._match_pattern(sorted_patterns, key) or key in catalog)
+            if not (key in catalog or cls._match_pattern(sorted_patterns, key))
         ]
         if missing_keys:
             raise DatasetNotFoundError(
@@ -322,20 +324,17 @@ class DataCatalog:
         return "{" in pattern
 
     @staticmethod
-    def _match_pattern(
-        data_set_patterns: dict[str, dict[str, Any]], data_set_name: str
-    ) -> str | None:
+    def _match_pattern(data_set_patterns: Patterns, data_set_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary containing patterns"""
-        for pattern, _ in data_set_patterns.items():
-            result = parse(pattern, data_set_name)
-            if result:
-                return pattern
-        return None
+        matches = [
+            pattern
+            for pattern in data_set_patterns.keys()
+            if parse(pattern, data_set_name)
+        ]
+        return next(filter(None, matches), None)
 
     @classmethod
-    def _sort_patterns(
-        cls, data_set_patterns: dict[str, dict[str, Any]]
-    ) -> dict[str, dict[str, Any]]:
+    def _sort_patterns(cls, data_set_patterns: Patterns) -> dict[str, dict[str, Any]]:
         """Sort a dictionary of dataset patterns according to parsing rules -
         1. Decreasing specificity (number of characters outside the curly brackets)
         2. Decreasing number of placeholders (number of curly bracket pairs)
@@ -349,10 +348,7 @@ class DataCatalog:
                 pattern,
             ),
         )
-        sorted_patterns = {}
-        for key in sorted_keys:
-            sorted_patterns[key] = data_set_patterns[key]
-        return sorted_patterns
+        return {key: data_set_patterns[key] for key in sorted_keys}
 
     @staticmethod
     def _specificity(pattern: str) -> int:

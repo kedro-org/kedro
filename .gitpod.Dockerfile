@@ -1,8 +1,8 @@
 FROM gitpod/workspace-full
 
 # Some datasets work on 3.8 only
-RUN pyenv install 3.11.1\
-    && pyenv global 3.11.1
+RUN pyenv install 3.8.15\
+    && pyenv global 3.8.15
 
 # VideoDataSet
 RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1

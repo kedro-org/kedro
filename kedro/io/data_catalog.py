@@ -145,7 +145,7 @@ class DataCatalog:
         data_sets: dict[str, AbstractDataSet] = None,
         feed_dict: dict[str, Any] = None,
         layers: dict[str, set[str]] = None,
-        dataset_patterns: dict[str, dict[str, Any]] = None,
+        dataset_patterns: Patterns = None,
         load_versions: dict[str, str] = None,
         save_version: str = None,
     ) -> None:

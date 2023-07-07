@@ -68,7 +68,7 @@ For example, the [data engineering convention](https://towardsdatascience.com/th
 
 In Kedro version 0.18.9 we changed the way layers are defined in the Data Catalog. The definition is now included under the `metadata` key for `kedro-viz` (previously it was an attribute specified within a dataset's definition).
 
-Here's an example of how to use the kedro-viz metadata to define layers:
+Here's an example of how to use the Kedro-Viz metadata to define layers:
 
 ```yaml
 companies:

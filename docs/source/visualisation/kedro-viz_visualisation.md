@@ -120,21 +120,21 @@ preprocessed_companies:
   filepath: data/02_intermediate/preprocessed_companies.pq
   metadata:
     kedro-viz:
-      layer: raw
+      layer: intermediate
 
 preprocessed_shuttles:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_shuttles.pq
   metadata:
     kedro-viz:
-      layer: raw
+      layer: intermediate
 
 model_input_table:
   type: pandas.ParquetDataSet
   filepath: data/03_primary/model_input_table.pq
   metadata:
     kedro-viz:
-      layer: raw
+      layer: primary
 
 regressor:
   type: pickle.PickleDataSet
@@ -142,7 +142,7 @@ regressor:
   versioned: true
   metadata:
     kedro-viz:
-      layer: raw
+      layer: models
 ```
 
 The visualisation now includes the layers:

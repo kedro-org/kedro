@@ -326,12 +326,12 @@ class DataCatalog:
     @staticmethod
     def _match_pattern(data_set_patterns: Patterns, data_set_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary containing patterns"""
-        matches = [
+        matches = (
             pattern
             for pattern in data_set_patterns.keys()
             if parse(pattern, data_set_name)
-        ]
-        return next(filter(None, matches), None)
+        )
+        return next(matches, None)
 
     @classmethod
     def _sort_patterns(cls, data_set_patterns: Patterns) -> dict[str, dict[str, Any]]:

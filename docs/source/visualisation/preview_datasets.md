@@ -26,7 +26,7 @@ Kedro-Viz version 6.3.0 currently supports preview of two types of datasets:
 * `pandas.ExcelDataset`
 
 
-To enable the preview of these datasets, you need to add the `preview_args` attribute to the `kedro-viz` configuration under the `metadata` section in the Data Catalog:
+To enable dataset preview, add the `preview_args` attribute to the kedro-viz configuration under the `metadata` section in the Data Catalog. Within preview_args, specify `nrows` as the number of rows to preview for the dataset.
 
 ```yaml
 companies:

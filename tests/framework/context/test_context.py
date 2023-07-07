@@ -22,7 +22,6 @@ from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
     _is_relative_path,
     _update_nested_dict,
-    _validate_layers_for_transcoding,
 )
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.project import (
@@ -232,10 +231,18 @@ class TestKedroContext:
             ds_path.as_posix() == (dummy_context.project_path / "horses.csv").as_posix()
         )
 
-    def test_get_catalog_validates_layers(self, dummy_context, mocker):
-        mock_validate = mocker.patch(
-            "kedro.framework.context.context._validate_layers_for_transcoding"
+    def test_get_catalog_validates_transcoded_datasets(self, dummy_context, mocker):
+        mock_transcode_split = mocker.patch(
+            "kedro.framework.context.context._transcode_split"
         )
+        catalog = dummy_context.catalog
+        for dataset_name in catalog._data_sets.keys():
+            mock_transcode_split.assert_any_call(dataset_name)
+
+        mock_validate = mocker.patch(
+            "kedro.framework.context.context._validate_transcoded_datasets"
+        )
+
         catalog = dummy_context.catalog
 
         mock_validate.assert_called_once_with(catalog)
@@ -418,50 +425,6 @@ def test_convert_paths_to_absolute_posix_converts_full_windows_path_to_posix(
     project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
-
-
-@pytest.mark.parametrize(
-    "layers",
-    [
-        {"raw": {"A"}, "interm": {"B", "C"}},
-        {"raw": {"A"}, "interm": {"B@2", "B@1"}},
-        {"raw": {"C@1"}, "interm": {"A", "B@1", "B@2", "B@3"}},
-    ],
-)
-def test_validate_layers(layers, mocker):
-    mock_catalog = mocker.MagicMock()
-    mock_catalog.layers = layers
-
-    _validate_layers_for_transcoding(mock_catalog)  # it shouldn't raise any error
-
-
-@pytest.mark.parametrize(
-    "layers,conflicting_datasets",
-    [
-        ({"raw": {"A", "B@1"}, "interm": {"B@2"}}, ["B@2"]),
-        ({"raw": {"A"}, "interm": {"B@1", "B@2"}, "prm": {"B@3"}}, ["B@3"]),
-        (
-            {
-                "raw": {"A@1"},
-                "interm": {"B@1", "B@2"},
-                "prm": {"B@3", "B@4"},
-                "other": {"A@2"},
-            },
-            ["A@2", "B@3", "B@4"],
-        ),
-    ],
-)
-def test_validate_layers_error(layers, conflicting_datasets, mocker):
-    mock_catalog = mocker.MagicMock()
-    mock_catalog.layers = layers
-    error_str = ", ".join(conflicting_datasets)
-
-    pattern = (
-        f"Transcoded datasets should have the same layer. "
-        f"Mismatch found for: {error_str}"
-    )
-    with pytest.raises(ValueError, match=re.escape(pattern)):
-        _validate_layers_for_transcoding(mock_catalog)
 
 
 @pytest.mark.parametrize(

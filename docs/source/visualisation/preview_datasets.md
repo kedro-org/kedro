@@ -21,7 +21,7 @@ When your project is ready, navigate to the root directory of the project.
 
 ## Configure the Data Catalog
 
-Kedro-viz currently supports preview of two types of datasets:
+Kedro-Viz version whatever_it_is currently supports preview of two types of datasets:
 
 * `pandas.CSVDataset`
 * `pandas.ExcelDataset`

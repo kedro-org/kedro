@@ -1,7 +1,6 @@
 # Preview data in Kedro-Viz
 
-This page describes how to preview data from different datasets in a Kedro project with Kedro-Viz. Kedro-viz currently supports preview of `CSVDatasets` and `ExcelDatasets`
-
+This page describes how to preview data from different datasets in a Kedro project with Kedro-Viz. Dataset preview was introduced in Kedro-Viz version 6.3.0, which offers preview for `CSVDatasets` and `ExcelDatasets`.
 
 We use the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) to demonstrate how to add data preview for the `customer`, `shuttle` and `reviews` datasets. Even if you have not yet worked through the tutorial, you can still follow this example; you'll need to use the [Kedro starter for the spaceflights tutorial](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights) to generate a copy of the project with working code in place.
 
@@ -21,7 +20,7 @@ When your project is ready, navigate to the root directory of the project.
 
 ## Configure the Data Catalog
 
-Kedro-Viz version whatever_it_is currently supports preview of two types of datasets:
+Kedro-Viz version 6.3.0 currently supports preview of two types of datasets:
 
 * `pandas.CSVDataset`
 * `pandas.ExcelDataset`

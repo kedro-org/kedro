@@ -10,11 +10,11 @@ As a project grows and goes through various stages of development it becomes imp
 
 ## Set up Python tools
 There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use
-[`black`](https://github.com/psf/black), [`ruff`](https://github.com/PyCQA/flake8)
+[`black`](https://github.com/psf/black), [`ruff`](https://github.com/PyCQA/flake8).
 - **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
 check for styling inconsistencies and reformat your files in place.
 [You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
-- **`ruff`** is a fast linter that replaces `flake8`, `isort` and `pylint`.
+- **`ruff`** is a fast linter that replaces [`flake8`](https://flake8.pycqa.org/en/latest/),  [`pylint`](https://pylint.readthedocs.io/en/latest/), [`pyupgrade`](https://github.com/asottile/pyupgrade) and [`isort`](https://pycqa.github.io/isort/).
   - It helps to make your code compliant to [`pep8`](https://pypi.org/project/pep8/).
   - It reformats code by sorting imports alphabetically and automatically separating them into sections by
 type. [You can read more in the `isort` documentation](https://pycqa.github.io/isort/).
@@ -38,11 +38,25 @@ Alternatively, you can individually install the linting tools using the followin
 pip install black ruff
 ```
 #### Configure `ruff`
-`ruff` read configurations from `pyproject.toml` within your project root.
-- [tool.black]
-- [tool.isort]
-- [tool.pylint]
-- [tool.ruff]
+`ruff` read configurations from `pyproject.toml` within your project root. You can enable different rule sets within the `[tool.ruff]` section. For example, the rule set `F` is equivalent to `Pyflakes`.
+
+To start with `ruff`, we recommend adding this section to enable a few basic rules sets.
+```toml
+[tool.ruff]
+select = [
+    "F",  # Pyflakes
+    "E",  # Pycodestyle
+    "W",  # Pycodestyle
+    "UP",  # pyupgrade
+    "I"  # isort
+]
+ignore = ["E501"]  # Black take care off line-too-long
+```
+
+```{note}
+It is a good practice to [split your line when it is too long](https://beta.ruff.rs/docs/rules/line-too-long/), so it can be read easily even in a small screen. `ruff` treats this slightly different from `black`, when using together we recommend to disable this rule, i.e. `E501` to avoid conflicts.
+```
+
 #### Configure `flake8`
 
 Store your `flake8` configuration in a file named `setup.cfg` within your project root. The Kedro starters use the [following configuration](https://github.com/kedro-org/kedro-starters/blob/main/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/setup.cfg):

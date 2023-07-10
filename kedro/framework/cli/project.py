@@ -310,8 +310,7 @@ def activate_nbstripout(
     try:
         res = subprocess.run(  # pylint: disable=subprocess-run-check
             ["git", "rev-parse", "--git-dir"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
         )
         if res.returncode:
             raise KedroCliError("Not a git repository. Run 'git init' first.")

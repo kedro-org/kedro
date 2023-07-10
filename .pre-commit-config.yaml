@@ -4,12 +4,6 @@
 default_stages: [commit, manual]
 
 repos:
-    - repo: https://github.com/astral-sh/ruff-pre-commit
-      # Ruff version.
-      rev: v0.0.270
-      hooks:
-        - id: ruff
-          exclude: "^kedro/templates/|^features/steps/test_starter/"
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v2.2.3
       hooks:
@@ -47,7 +41,6 @@ repos:
             - types-toml
             - attrs
 
-
     - repo: https://github.com/asottile/blacken-docs
       rev: v1.12.1
       hooks:
@@ -55,17 +48,12 @@ repos:
             additional_dependencies: [black~=22.0]
             entry: blacken-docs --skip-errors
 
-    - repo: https://github.com/asottile/pyupgrade
-      rev: v2.26.0
-      hooks:
-          - id: pyupgrade
-            args: [--py36-plus]
-
     - repo: https://github.com/astral-sh/ruff-pre-commit
       # Ruff version.
       rev: v0.0.270
       hooks:
         - id: ruff
+          args: [--fix, --exit-non-zero-on-fix]
           exclude: "^kedro/templates/|^features/steps/test_starter/"
 
     - repo: local
@@ -118,3 +106,5 @@ repos:
             types: [file, python]
             exclude: ^kedro/templates/|^tests/|^features/steps/test_starter
             entry: bandit -ll
+
+# Manual only

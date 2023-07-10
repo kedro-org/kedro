@@ -228,7 +228,7 @@ def add_test_jupyter_nb(context):
     """Create a test jupyter notebook using TEST_JUPYTER_ORG."""
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
-        "wt",
+        "w",
         encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_ORG)
@@ -365,7 +365,7 @@ def simulate_nb_execution(context):
     """
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
-        "wt",
+        "w",
         encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_AFTER_EXEC)

@@ -70,8 +70,7 @@ class PlotlyDataSet(JSONDataSet):
 
     """
 
-    # noqa: too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         plotly_args: Dict[str, Any],

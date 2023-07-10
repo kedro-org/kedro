@@ -71,8 +71,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint:disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         database: str,
         table: str,

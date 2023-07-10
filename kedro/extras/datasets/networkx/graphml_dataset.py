@@ -43,7 +43,7 @@ class GraphMLDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # noqa: too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,

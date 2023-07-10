@@ -250,7 +250,7 @@ class LoggingDataset(AbstractDataSet):
 
 
 if not sys.platform.startswith("win"):
-    ParallelRunnerManager.register(  # pylint: disable=no-member
+    ParallelRunnerManager.register(  # noqa: no-member
         "LoggingDataset", LoggingDataset
     )
 
@@ -267,7 +267,7 @@ class TestParallelRunnerRelease:
         pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        # pylint: disable=no-member
+        # noqa: no-member
         catalog = DataCatalog(
             {
                 "in": runner._manager.LoggingDataset(log, "in", "stuff"),
@@ -291,7 +291,7 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        # pylint: disable=no-member
+        # noqa: no-member
         catalog = DataCatalog(
             {
                 "first": runner._manager.LoggingDataset(log, "first"),
@@ -319,7 +319,7 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        # pylint: disable=no-member
+        # noqa: no-member
         catalog = DataCatalog(
             {"dataset": runner._manager.LoggingDataset(log, "dataset")}
         )

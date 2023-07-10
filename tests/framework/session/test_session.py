@@ -22,6 +22,7 @@ from kedro.framework.project import (
     _ProjectSettings,
 )
 from kedro.framework.session import KedroSession
+from kedro.framework.session.session import KedroSessionError
 from kedro.framework.session.shelvestore import ShelveStore
 from kedro.framework.session.store import BaseSessionStore
 
@@ -39,6 +40,16 @@ class BadConfigLoader:  # pylint: disable=too-few-public-methods
     """
     ConfigLoader class that doesn't subclass `AbstractConfigLoader`, for testing only.
     """
+
+
+@pytest.fixture
+def mock_runner(mocker):
+    mock_runner = mocker.patch(
+        "kedro.runner.sequential_runner.SequentialRunner",
+        autospec=True,
+    )
+    mock_runner.__name__ = "MockRunner"
+    return mock_runner
 
 
 @pytest.fixture
@@ -588,6 +599,7 @@ class TestKedroSession:
         fake_pipeline_name,
         mock_context_class,
         mock_package_name,
+        mock_runner,
         mocker,
     ):
         """Test running the project via the session"""
@@ -604,10 +616,6 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner = mocker.patch(
-            "kedro.runner.sequential_runner.SequentialRunner",
-            autospec=True,
-        )
         mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
@@ -654,6 +662,7 @@ class TestKedroSession:
         fake_pipeline_name,
         mock_context_class,
         mock_package_name,
+        mock_runner,
         mocker,
     ):
         """Test running the project more than once via the session"""
@@ -670,8 +679,6 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
-        mock_runner = mocker.Mock()
-        mock_runner.__name__ = "SequentialRunner"
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         message = (
@@ -718,12 +725,9 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
-    def test_run_non_existent_pipeline(self, fake_project, mock_package_name, mocker):
-        mock_runner = mocker.patch(
-            "kedro.runner.sequential_runner.SequentialRunner",
-            autospec=True,
-        )
-        mock_runner.__name__ = "SequentialRunner"
+    def test_run_non_existent_pipeline(
+        self, fake_project, mock_package_name, mock_runner
+    ):
 
         pattern = (
             "Failed to find the pipeline named 'doesnotexist'. "
@@ -743,6 +747,7 @@ class TestKedroSession:
         fake_pipeline_name,
         mock_context_class,
         mock_package_name,
+        mock_runner,
         mocker,
     ):
         """Test exception being raised during the run"""
@@ -759,11 +764,6 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         error = FakeException("You shall not pass!")
-        mock_runner = mocker.patch(
-            "kedro.runner.sequential_runner.SequentialRunner",
-            autospec=True,
-        )
-        mock_runner.__name__ = "SequentialRunner"
         mock_runner.run.side_effect = error  # runner.run() raises an error
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
@@ -813,6 +813,7 @@ class TestKedroSession:
         fake_pipeline_name,
         mock_context_class,
         mock_package_name,
+        mock_runner,
         mocker,
     ):
         """Test exception being raised during the first run and
@@ -829,13 +830,17 @@ class TestKedroSession:
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
+        session = KedroSession.create(mock_package_name, fake_project)
+
+        broken_runner = mocker.patch(
+            "kedro.runner.SequentialRunner",
+            autospec=True,
+        )
+        broken_runner.__name__ = "BrokenRunner"
         error = FakeException("You shall not pass!")
-        broken_runner = mocker.Mock()
-        broken_runner.__name__ = "SequentialRunner"
         broken_runner.run.side_effect = error  # runner.run() raises an error
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
-        session = KedroSession.create(mock_package_name, fake_project)
         with pytest.raises(FakeException):
             # Execute run with broken runner
             session.run(runner=broken_runner, pipeline_name=fake_pipeline_name)
@@ -867,19 +872,43 @@ class TestKedroSession:
         mock_hook.after_pipeline_run.assert_not_called()
 
         # Execute run another time with fixed runner
-        fixed_runner = mocker.Mock()
-        fixed_runner.__name__ = "SequentialRunner"
+        fixed_runner = mock_runner
         session.run(runner=fixed_runner, pipeline_name=fake_pipeline_name)
 
         fixed_runner.run.assert_called_once_with(
             mock_pipeline, mock_catalog, session._hook_manager, fake_session_id
         )
+
+        record_data["runner"] = "MockRunner"
         mock_hook.after_pipeline_run.assert_called_once_with(
             run_params=record_data,
             run_result=fixed_runner.run.return_value,
             pipeline=mock_pipeline,
             catalog=mock_catalog,
         )
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_session_raise_error_with_invalid_runner_instance(
+        self,
+        fake_project,
+        mock_package_name,
+        mocker,
+    ):
+        mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={
+                "__default__": mocker.Mock(),
+            },
+        )
+        mock_runner_class = mocker.patch("kedro.runner.SequentialRunner")
+
+        session = KedroSession.create(mock_package_name, fake_project)
+        with pytest.raises(
+            KedroSessionError,
+            match="KedroSession expect an instance of Runner instead of a class.",
+        ):
+            # Execute run with SequentialRunner class instead of SequentialRunner()
+            session.run(runner=mock_runner_class)
 
 
 @pytest.fixture

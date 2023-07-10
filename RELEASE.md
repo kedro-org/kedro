@@ -3,7 +3,6 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
 
 ## Breaking changes to the API
 
@@ -12,6 +11,7 @@
 # Upcoming Release 0.18.12
 
 ## Major features and improvements
+* Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
 
 ## Bug fixes and other changes
 
@@ -30,6 +30,7 @@
 ## Bug fixes and other changes
 * Reworked micropackaging workflow to use standard Python packaging practices.
 * Make `kedro micropkg package` accept `--verbose`.
+* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
 
 ## Documentation changes
 * Significant improvements to the documentation that covers working with Databricks and Kedro, including a new page for workspace-only development, and a guide to choosing the best workflow for your use case.

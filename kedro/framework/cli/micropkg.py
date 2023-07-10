@@ -36,17 +36,19 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.startup import ProjectMetadata
 
-_SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
+_PYPROJECT_TOML_TEMPLATE = """
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
-setup(
-    name="{name}",
-    version="{version}",
-    description="Micro-package `{name}`",
-    packages=find_packages(),
-    include_package_data=True,
-    install_requires={install_requires},
-)
+[project]
+name = "{name}"
+version = "{version}"
+description = "Micro-package `{name}`"
+dependencies = {install_requires}
+
+[tool.setuptools.packages]
+find = {{}}
 """
 
 
@@ -212,7 +214,7 @@ def _pull_package(
         # without making assumptions on the project metadata.
         library_meta = project_wheel_metadata(project_root_dir)
 
-        # Project name will be `my-pipeline` even if `setup.py` says `my_pipeline`
+        # Project name will be `my-pipeline` even if `pyproject.toml` says `my_pipeline`
         # because standards mandate normalization of names for comparison,
         # see https://packaging.python.org/en/latest/specifications/core-metadata/#name
         # The proper way to get it would be
@@ -836,7 +838,7 @@ def _generate_sdist_file(
         if conf_target.is_dir() and alias:
             _rename_files(conf_target, micropkg_name, alias)
 
-        # Build a setup.py on the fly
+        # Build a pyproject.toml on the fly
         try:
             install_requires = _make_install_requires(
                 package_source / "requirements.txt"  # type: ignore
@@ -847,7 +849,7 @@ def _generate_sdist_file(
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
         _generate_manifest_file(temp_dir_path)
-        _generate_setup_file(package_name, version, install_requires, temp_dir_path)
+        _generate_pyproject_file(package_name, version, install_requires, temp_dir_path)
 
         package_file = destination / _get_sdist_name(name=package_name, version=version)
 
@@ -883,19 +885,19 @@ def _generate_manifest_file(output_dir: Path):
     )
 
 
-def _generate_setup_file(
+def _generate_pyproject_file(
     package_name: str, version: str, install_requires: list[str], output_dir: Path
 ) -> Path:
-    setup_file = output_dir / "setup.py"
+    pyproject_file = output_dir / "pyproject.toml"
 
-    setup_file_context = {
+    pyproject_file_context = {
         "name": package_name,
         "version": version,
         "install_requires": install_requires,
     }
 
-    setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
-    return setup_file
+    pyproject_file.write_text(_PYPROJECT_TOML_TEMPLATE.format(**pyproject_file_context))
+    return pyproject_file
 
 
 def _get_package_artifacts(

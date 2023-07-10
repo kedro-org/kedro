@@ -73,7 +73,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         conf_source: str,
         env: str = None,
@@ -234,7 +234,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             Resulting configuration dictionary.
 
         """
-        # pylint: disable=too-many-locals
+        # noqa: too-many-locals
 
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
@@ -320,7 +320,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
                 if overlapping_keys:
                     sorted_keys = ", ".join(sorted(overlapping_keys))
-                    if len(sorted_keys) > 100:
+                    if len(sorted_keys) > 100:  # noqa: PLR2004
                         sorted_keys = sorted_keys[:100] + "..."
                     duplicates.append(
                         f"Duplicate keys found in {filepath1} and {filepath2}: {sorted_keys}"

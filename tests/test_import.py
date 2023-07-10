@@ -1,34 +1,27 @@
-import importlib
-import warnings
 import pytest
 
-def test_import_kedro_with_no_official_support_raise_error(mocker, monkeypatch):
-    """Test importing kedro should fails with python>=3.11 should fails"""
-    import kedro
-    with mocker.patch("kedro.sys"):
+import kedro
+
+
+def test_import_kedro_with_no_official_support_raise_error(mocker):
+    """Test importing kedro with python>=3.11 should fail"""
+    mocker.patch("kedro.sys.version_info", (3, 11))
+
+    # We use the parent class to avoid issues with `exec_module`
+    with pytest.raises(UserWarning) as excinfo:
         kedro.__loader__.exec_module(kedro)
 
-@pytest.mark.filterwarnings("default:Kedro")
-def test_import_kedro_success(mocker):
-    """Test importing kedro should fails with python>=3.11 should fails"""
-    import kedro
-    with mocker.patch("kedro.sys"):
+    assert "Kedro is not yet fully compatible" in str(excinfo.value)
+
+
+def test_import_kedro_with_no_official_support_emits_warning(mocker):
+    """Test importing kedro python>=3.11 and controlled warnings should work"""
+    mocker.patch("kedro.sys.version_info", (3, 11))
+    mocker.patch("kedro.sys.warnoptions", ["default:Kedro is not yet fully compatible"])
+
+    # We use the parent class to avoid issues with `exec_module`
+    with pytest.warns(UserWarning) as record:
         kedro.__loader__.exec_module(kedro)
 
-def test_import_kedro_success_with_env_variable(mocker, monkeypatch):
-    """Test importing kedro should fails with python>=3.11 should fails"""
-    import kedro
-    monkeypatch.setenv("PYTHONWARNINGS", "default:Kedro")
-    with mocker.patch("kedro.sys"):
-        kedro.__loader__.exec_module(kedro)
-
-def test_import_kedro_success_with_env_variable(mocker, monkeypatch):
-    """Test importing kedro should fails with python>=3.11 should fails"""
-    import kedro
-    with mocker.patch("kedro.sys"):
-        kedro.__loader__.exec_module(kedro)
-    
-@pytest.mark.filterwarnings("default:Kedro")
-def test_import_kedro_slient_warning(mocker, monkeypatch):
-    """Test importing kedro when warning is silent"""
-    import kedro
+    assert len(record) == 1
+    assert "Kedro is not yet fully compatible" in record[0].message.args[0]

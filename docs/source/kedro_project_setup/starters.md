@@ -164,7 +164,7 @@ Here is the layout of the project as a Cookiecutter template:
        ├── __main__.py
        └── settings.py
     ├── requirements.txt
-    ├── setup.py
+    ├── pyproject.toml
     └── tests
 ```
 

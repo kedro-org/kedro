@@ -74,7 +74,7 @@ To follow this tutorial, ensure you have the following:
     ├── plugins
     ├── pyproject.toml
     ├── requirements.txt
-    ├── setup.cfg
+    ├── .flake8
     └── src
     ```
 

@@ -50,7 +50,7 @@ pandas_require = {
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
     "pandas.GenericDataSet": [PANDAS],
 }
-pickle_require = {"pickle.PickleDataSet": ["compress-pickle[lz4]~=1.2.0"]}
+pickle_require = {"pickle.PickleDataSet": ["compress-pickle[lz4]~=2.1.0"]}
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=9.0"]}
 video_require = {
     "video.VideoDataSet": ["opencv-python~=4.5.5.64"]
@@ -140,7 +140,7 @@ extras_require["test"] = [
     "biopython~=1.73",
     "blacken-docs==1.9.2",
     "black~=22.0",
-    "compress-pickle[lz4]~=1.2.0",
+    "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
     "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
     "delta-spark~=1.2.1",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
@@ -175,7 +175,7 @@ extras_require["test"] = [
     "plotly>=4.8.0, <6.0",
     "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "psutil~=5.8",
-    "pyarrow>=1.0, <7.0",
+    "pyarrow>=6.0",
     "pylint>=2.17.0, <3.0",
     "pyproj~=3.0",
     "pyspark>=2.2, <4.0",

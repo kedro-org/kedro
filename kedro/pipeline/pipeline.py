@@ -679,7 +679,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes = [node for node in self.nodes if tags & node.tags]
         return Pipeline(nodes)
 
-    # pylint: disable=too-many-arguments
+    # noqa: too-many-arguments
     def filter(
         self,
         tags: Iterable[str] = None,

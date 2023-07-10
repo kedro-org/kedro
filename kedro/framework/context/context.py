@@ -167,7 +167,7 @@ class KedroContext:
         hook_manager: PluginManager,
         env: str = None,
         extra_params: dict[str, Any] = None,
-    ):  # pylint: disable=too-many-arguments
+    ):  # noqa: too-many-arguments
         """Create a context object by providing the root of a Kedro project and
         the environment configuration subfolders
         (see ``kedro.config.ConfigLoader``)

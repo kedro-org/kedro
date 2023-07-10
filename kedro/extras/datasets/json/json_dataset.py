@@ -56,7 +56,7 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
 
     DEFAULT_SAVE_ARGS = {"indent": 2}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
+    # noqa: too-many-arguments
     def __init__(
         self,
         filepath: str,

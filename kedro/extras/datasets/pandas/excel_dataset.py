@@ -113,7 +113,7 @@ class ExcelDataSet(
     DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
 
-    # pylint: disable=too-many-arguments
+    # noqa: too-many-arguments
     def __init__(
         self,
         filepath: str,

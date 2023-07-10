@@ -185,7 +185,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-# pylint: disable=too-many-arguments
+# noqa: too-many-arguments
 def _pull_package(
     package_path: str,
     metadata: ProjectMetadata,
@@ -521,7 +521,7 @@ def _refactor_code_for_unpacking(
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
+def _install_files(  # noqa: too-many-arguments, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
@@ -811,7 +811,7 @@ def _refactor_code_for_package(
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 
 
-# pylint: disable=too-many-arguments,too-many-locals
+# noqa: too-many-arguments,too-many-locals
 def _generate_sdist_file(
     micropkg_name: str,
     destination: Path,

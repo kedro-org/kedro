@@ -48,7 +48,8 @@ select = [
     "E",  # Pycodestyle
     "W",  # Pycodestyle
     "UP",  # pyupgrade
-    "I"  # isort
+    "I",  # isort
+    "PL", # Pylint
 ]
 ignore = ["E501"]  # Black take care off line-too-long
 ```

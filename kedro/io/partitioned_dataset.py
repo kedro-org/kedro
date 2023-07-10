@@ -135,7 +135,7 @@ class PartitionedDataset(AbstractDataSet):
 
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: too-many-arguments
         self,
         path: str,
         dataset: str | type[AbstractDataSet] | dict[str, Any],
@@ -381,7 +381,7 @@ class IncrementalDataset(PartitionedDataset):
     DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataSet"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
-    # pylint: disable=too-many-arguments
+    # noqa: too-many-arguments
     def __init__(
         self,
         path: str,

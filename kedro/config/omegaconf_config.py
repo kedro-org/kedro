@@ -207,7 +207,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
-    def load_and_merge_dir_config(  # pylint: disable=too-many-arguments
+    def load_and_merge_dir_config(  # noqa: too-many-arguments
         self,
         conf_path: str,
         patterns: Iterable[str],

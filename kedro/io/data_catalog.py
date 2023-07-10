@@ -140,7 +140,7 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: too-many-arguments
         self,
         data_sets: dict[str, AbstractDataSet] = None,
         feed_dict: dict[str, Any] = None,

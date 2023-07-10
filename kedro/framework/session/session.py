@@ -99,7 +99,7 @@ class KedroSession:
 
     """
 
-    # pylint: disable=too-many-arguments
+    # noqa: too-many-arguments
     def __init__(
         self,
         session_id: str,
@@ -125,7 +125,7 @@ class KedroSession:
         )
 
     @classmethod
-    def create(  # pylint: disable=too-many-arguments
+    def create(  # noqa: too-many-arguments
         cls,
         package_name: str = None,
         project_path: Path | str | None = None,
@@ -304,7 +304,7 @@ class KedroSession:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def run(  # pylint: disable=too-many-arguments,too-many-locals
+    def run(  # noqa: too-many-arguments,too-many-locals
         self,
         pipeline_name: str = None,
         tags: Iterable[str] = None,

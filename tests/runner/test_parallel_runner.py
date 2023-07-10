@@ -103,7 +103,7 @@ class TestMaxWorkers:
         cpu_cores,
         user_specified_number,
         expected_number,
-    ):  # pylint: disable=too-many-arguments
+    ):  # noqa: too-many-arguments
         """
         The system has 2 cores, but we initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 processes.

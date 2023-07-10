@@ -118,28 +118,22 @@ def _convert_paths_to_absolute_posix(
     return conf_dictionary
 
 
-def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
-    """Check that transcoded names that correspond to
-    the same dataset also belong to the same layer.
+def _validate_transcoded_datasets(catalog: DataCatalog):
+    """Validates transcoded datasets are correctly named
+
+    Args:
+        catalog (DataCatalog): The catalog object containing the
+        datasets to be validated.
+
+    Raises:
+        ValueError: If a dataset name does not conform to the expected
+        transcoding naming conventions,a ValueError is raised by the
+        `_transcode_split` function.
+
     """
-
-    def _find_conflicts():
-        base_names_to_layer = {}
-        for current_layer, dataset_names in catalog.layers.items():
-            for name in dataset_names:
-                base_name, _ = _transcode_split(name)
-                known_layer = base_names_to_layer.setdefault(base_name, current_layer)
-                if current_layer != known_layer:
-                    yield name
-                else:
-                    base_names_to_layer[base_name] = current_layer
-
-    conflicting_datasets = sorted(_find_conflicts())
-    if conflicting_datasets:
-        error_str = ", ".join(conflicting_datasets)
-        raise ValueError(
-            f"Transcoded datasets should have the same layer. Mismatch found for: {error_str}"
-        )
+    # pylint: disable=protected-access
+    for dataset_name in catalog._data_sets.keys():
+        _transcode_split(dataset_name)
 
 
 def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
@@ -290,8 +284,7 @@ class KedroContext:
 
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)
-        if catalog.layers:
-            _validate_layers_for_transcoding(catalog)
+        _validate_transcoded_datasets(catalog)
         self._hook_manager.hook.after_catalog_created(
             catalog=catalog,
             conf_catalog=conf_catalog,

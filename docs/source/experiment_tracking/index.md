@@ -106,7 +106,7 @@ For collaborative experiment tracking, Kedro-Viz saves your experiments as SQLit
 > Note: In Kedro-Viz version 6.2, the only way to set up credentials for accessing your cloud storage is through environment variables.
 
 ```bash
-export KEDRO_SQLITE_STORE_USERNAME ="your_unique__username"
+export KEDRO_SQLITE_STORE_USERNAME="your_unique__username"
 
 ```
 

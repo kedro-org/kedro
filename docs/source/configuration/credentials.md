@@ -15,7 +15,7 @@ The following examples all use the default `ConfigLoader` class.
 from kedro.config import ConfigLoader
 from kedro.framework.project import settings
 
-conf_path = str(project_path / settings.CONF_SOURCE)
+conf_path = f"{project_path}/{settings.CONF_SOURCE}"
 conf_loader = ConfigLoader(conf_source=conf_path)
 credentials = conf_loader["credentials"]
 ```
@@ -28,7 +28,7 @@ Calling `conf_loader[key]` in the example above throws a `MissingConfigException
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
-conf_path = str(project_path / settings.CONF_SOURCE)
+conf_path = f"{project_path}/{settings.CONF_SOURCE}"
 conf_loader = ConfigLoader(conf_source=conf_path)
 
 try:

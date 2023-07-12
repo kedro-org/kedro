@@ -105,9 +105,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         }
         self.config_patterns.update(config_patterns or {})
 
-        # In the first iteration of the OmegaConfigLoader we'll keep the resolver turned-off.
-        # It's easier to introduce them step by step, but removing them would be a breaking change.
-        self._clear_omegaconf_resolvers()
+        # Deactivate oc.env built-in resolver for OmegaConf
+        OmegaConf.clear_resolver("oc.env")
 
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
@@ -341,14 +340,3 @@ class OmegaConfigLoader(AbstractConfigLoader):
             OmegaConf.clear_resolver("oc.env")
         else:
             OmegaConf.resolve(config)
-
-    @staticmethod
-    def _clear_omegaconf_resolvers():
-        """Clear the built-in OmegaConf resolvers."""
-        OmegaConf.clear_resolver("oc.env")
-        OmegaConf.clear_resolver("oc.create")
-        OmegaConf.clear_resolver("oc.deprecated")
-        OmegaConf.clear_resolver("oc.decode")
-        OmegaConf.clear_resolver("oc.select")
-        OmegaConf.clear_resolver("oc.dict.keys")
-        OmegaConf.clear_resolver("oc.dict.values")

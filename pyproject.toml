@@ -92,7 +92,8 @@ unsafe-load-any-extension = false
 [tool.pylint.messages_control]
 disable = [
     "ungrouped-imports",
-    "duplicate-code"
+    "duplicate-code",
+    "wrong-import-order",  # taken care of by isort
 ]
 enable = ["useless-suppression"]
 [tool.pylint.refactoring]

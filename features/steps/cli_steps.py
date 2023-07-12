@@ -11,6 +11,7 @@ import requests
 import toml
 import yaml
 from behave import given, then, when
+from packaging.requirements import Requirement
 
 import kedro
 from features.steps import util
@@ -414,7 +415,7 @@ def update_kedro_req(context: behave.runner.Context):
         old_reqs = reqs_path.read_text().splitlines()
         new_reqs = []
         for req in old_reqs:
-            if req.startswith("kedro"):
+            if req.startswith("kedro") and Requirement(req).name.lower() == "kedro":
                 # Do not include kedro as it's preinstalled in the environment
                 pass
             else:

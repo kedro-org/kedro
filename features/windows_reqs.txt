@@ -7,3 +7,4 @@ psutil~=5.8
 requests~=2.20
 toml~=0.10.1
 PyYAML>=4.2, <7.0
+packaging>=20.0

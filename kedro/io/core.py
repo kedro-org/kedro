@@ -30,9 +30,9 @@ PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-DataSetError: type[Exception]
-DataSetNotFoundError: type[DatasetError]
-DataSetAlreadyExistsError: type[DatasetError]
+DataSetError: type[DatasetError]
+DataSetNotFoundError: type[DatasetNotFoundError]
+DataSetAlreadyExistsError: type[DatasetAlreadyExistsError]
 
 
 class DatasetError(Exception):

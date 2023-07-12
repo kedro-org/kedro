@@ -33,7 +33,7 @@ from kedro.runner.runner import AbstractRunner, run_node
 _MAX_WINDOWS_WORKERS = 61
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-_SharedMemoryDataSet: Any
+_SharedMemoryDataSet: type[_SharedMemoryDataset]
 
 
 class _SharedMemoryDataset:

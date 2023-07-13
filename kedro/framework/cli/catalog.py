@@ -93,9 +93,9 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         if default_ds:
             used_by_type["DefaultDataset"].extend(default_ds)
 
-        data = ((not_mentioned, dict(unused_by_type)), (factories, dict(factory_ds_by_type)), (mentioned, dict(used_by_type)))
+        data = ((mentioned, dict(used_by_type)), (factories, dict(factory_ds_by_type)), (not_mentioned, dict(unused_by_type)))
         result[title.format(pipe)] = {key: value for key, value in data if value}
-
+    print(result)
     secho(yaml.dump(result))
 
 

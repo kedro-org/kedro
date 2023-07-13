@@ -1,5 +1,6 @@
 """A collection of CLI commands for working with Kedro catalog."""
 from collections import defaultdict
+from itertools import chain
 
 import click
 import yaml
@@ -50,11 +51,14 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
     mentioned = "Datasets mentioned in pipeline"
+    factories = "Datasets generated from factories"
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
-    catalog_ds = set(context.catalog.list())
+
+    catalog = context.catalog
+    datasets_meta = catalog._data_sets  # pylint: disable=protected-access
+    catalog_ds = set(catalog.list())
 
     target_pipelines = pipeline or pipelines.keys()
 
@@ -73,13 +77,23 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         default_ds = pipeline_ds - catalog_ds
         used_ds = catalog_ds - unused_ds
 
+        # resolve any factory datasets in the pipeline
+        factory_ds_by_type = defaultdict(list)
+        for ds in default_ds:
+            matched_pattern = catalog._match_pattern(catalog._dataset_patterns, ds)
+            if matched_pattern:
+                ds_config = catalog._resolve_config(ds, matched_pattern)
+                factory_ds_by_type[ds_config["type"]].append(ds)
+
+        default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
+
         unused_by_type = _map_type_to_datasets(unused_ds, datasets_meta)
         used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
 
         if default_ds:
             used_by_type["DefaultDataset"].extend(default_ds)
 
-        data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
+        data = ((not_mentioned, dict(unused_by_type)), (factories, dict(factory_ds_by_type)), (mentioned, dict(used_by_type)))
         result[title.format(pipe)] = {key: value for key, value in data if value}
 
     secho(yaml.dump(result))

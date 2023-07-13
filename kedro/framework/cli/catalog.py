@@ -33,7 +33,7 @@ def catalog():
     """Commands for working with catalog."""
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals,protected-access
 @catalog.command("list")
 @env_option
 @click.option(
@@ -57,7 +57,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     context = session.load_context()
 
     data_catalog = context.catalog
-    datasets_meta = data_catalog._data_sets  # pylint: disable=protected-access
+    datasets_meta = data_catalog._data_sets
     catalog_ds = set(data_catalog.list())
 
     target_pipelines = pipeline or pipelines.keys()
@@ -79,11 +79,11 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
 
         # resolve any factory datasets in the pipeline
         factory_ds_by_type = defaultdict(list)
-        for ds in default_ds:
-            matched_pattern = data_catalog._match_pattern(data_catalog._dataset_patterns, ds)   # pylint: disable=protected-access
+        for ds_name in default_ds:
+            matched_pattern = data_catalog._match_pattern(data_catalog._dataset_patterns, ds_name)
             if matched_pattern:
-                ds_config = data_catalog._resolve_config(ds, matched_pattern)   # pylint: disable=protected-access
-                factory_ds_by_type[ds_config["type"]].append(ds)
+                ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
+                factory_ds_by_type[ds_config["type"]].append(ds_name)
 
         default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
 

@@ -80,7 +80,9 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         # resolve any factory datasets in the pipeline
         factory_ds_by_type = defaultdict(list)
         for ds_name in default_ds:
-            matched_pattern = data_catalog._match_pattern(data_catalog._dataset_patterns, ds_name)
+            matched_pattern = data_catalog._match_pattern(
+                data_catalog._dataset_patterns, ds_name
+            )
             if matched_pattern:
                 ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
                 factory_ds_by_type[ds_config["type"]].append(ds_name)

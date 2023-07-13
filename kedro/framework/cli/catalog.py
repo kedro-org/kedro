@@ -56,9 +56,9 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    catalog = context.catalog
-    datasets_meta = catalog._data_sets  # pylint: disable=protected-access
-    catalog_ds = set(catalog.list())
+    data_catalog = context.catalog
+    datasets_meta = data_catalog._data_sets  # pylint: disable=protected-access
+    catalog_ds = set(data_catalog.list())
 
     target_pipelines = pipeline or pipelines.keys()
 
@@ -80,9 +80,9 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         # resolve any factory datasets in the pipeline
         factory_ds_by_type = defaultdict(list)
         for ds in default_ds:
-            matched_pattern = catalog._match_pattern(catalog._dataset_patterns, ds)
+            matched_pattern = data_catalog._match_pattern(data_catalog._dataset_patterns, ds)   # pylint: disable=protected-access
             if matched_pattern:
-                ds_config = catalog._resolve_config(ds, matched_pattern)
+                ds_config = data_catalog._resolve_config(ds, matched_pattern)   # pylint: disable=protected-access
                 factory_ds_by_type[ds_config["type"]].append(ds)
 
         default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
@@ -93,9 +93,12 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         if default_ds:
             used_by_type["DefaultDataset"].extend(default_ds)
 
-        data = ((mentioned, dict(used_by_type)), (factories, dict(factory_ds_by_type)), (not_mentioned, dict(unused_by_type)))
+        data = (
+            (mentioned, dict(used_by_type)),
+            (factories, dict(factory_ds_by_type)),
+            (not_mentioned, dict(unused_by_type)),
+        )
         result[title.format(pipe)] = {key: value for key, value in data if value}
-    print(result)
     secho(yaml.dump(result))
 
 

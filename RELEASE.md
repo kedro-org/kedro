@@ -13,6 +13,7 @@
 ## Major features and improvements
 * Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
 * Activated all built-in resolvers by default for `OmegaConfigLoader` except for `oc.env`.
+* Added `kedro catalog factories` CLI command.
 
 ## Bug fixes and other changes
 * Updated `kedro catalog list` to work with dataset factories.

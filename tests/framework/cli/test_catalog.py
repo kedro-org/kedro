@@ -45,10 +45,10 @@ def fake_catalog_config():
 @pytest.fixture
 def fake_catalog_with_factories():
     config = {
-        "some_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
-        "a_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
-        "b_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
-        "other_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+        "an_example_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+        "an_example_{place}_{holder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+        "on_{example_placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+        "an_{example_placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
     }
     return config
 
@@ -393,10 +393,10 @@ def test_list_catalog_factories(
     assert not result.exit_code
 
     expected_patterns_sorted = [
-        "other_{placeholder}",
-        "some_{placeholder}",
-        "a_{placeholder}",
-        "b_{placeholder}",
+        "an_example_{place}_{holder}",
+        "an_example_{placeholder}",
+        "an_{example_placeholder}",
+        "on_{example_placeholder}",
     ]
 
     assert yaml_dump_mock.call_count == 1

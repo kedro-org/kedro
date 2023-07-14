@@ -43,7 +43,7 @@ def fake_catalog_config():
 
 
 @pytest.fixture
-def fake_catalog_with_factories():
+def fake_catalog_with_overlapping_factories():
     config = {
         "an_example_{placeholder}": {
             "type": "dummy_type",
@@ -393,11 +393,11 @@ def test_list_catalog_factories(
     fake_metadata,
     mocker,
     fake_load_context,
-    fake_catalog_with_factories,
+    fake_catalog_with_overlapping_factories,
 ):
     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     mocked_context = fake_load_context.return_value
-    mocked_context.catalog = DataCatalog.from_config(fake_catalog_with_factories)
+    mocked_context.catalog = DataCatalog.from_config(fake_catalog_with_overlapping_factories)
 
     result = CliRunner().invoke(
         fake_project_cli, ["catalog", "factories"], obj=fake_metadata

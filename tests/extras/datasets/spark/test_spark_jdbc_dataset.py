@@ -111,3 +111,10 @@ def test_load_args(mocker, spark_jdbc_args_save_load):
     spark.read.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )
+
+
+def test_get_spark(mocker, spark_jdbc_args):
+    spark = mocker.patch("pyspark.sql.SparkSession")
+    data_set = SparkJDBCDataSet(**spark_jdbc_args)
+    data_set._get_spark()
+    spark.builder.getOrCreate.assert_called_once()

@@ -114,7 +114,7 @@ def test_load_args(mocker, spark_jdbc_args_save_load):
 
 
 def test_get_spark(mocker, spark_jdbc_args):
-    spark = mocker.patch("pyspark.sql.SparkSession")
+    mock_get_or_create = mocker.patch("pyspark.sql.SparkSession.builder.getOrCreate")
     data_set = SparkJDBCDataSet(**spark_jdbc_args)
     data_set._get_spark()
-    spark.builder.getOrCreate.assert_called_once()
+    mock_get_or_create.assert_called_once()

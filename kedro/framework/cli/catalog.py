@@ -179,6 +179,18 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
         click.echo("All datasets are already configured.")
 
 
+@catalog.command("factories")
+@env_option
+@click.pass_obj
+def list_patterns(metadata: ProjectMetadata, env):
+    "Show all factory patterns in catalog, ranked by priority by which they are matched"
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    catalog_factories = context.catalog._dataset_patterns
+    click.echo(yaml.dump(list(catalog_factories.keys())))
+
+
 def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
     if catalog_path.is_file():
         catalog_config = yaml.safe_load(catalog_path.read_text()) or {}

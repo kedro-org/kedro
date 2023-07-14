@@ -45,10 +45,22 @@ def fake_catalog_config():
 @pytest.fixture
 def fake_catalog_with_factories():
     config = {
-        "an_example_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
-        "an_example_{place}_{holder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
-        "on_{example_placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
-        "an_{example_placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+        "an_example_{placeholder}": {
+            "type": "dummy_type",
+            "filepath": "dummy_filepath",
+        },
+        "an_example_{place}_{holder}": {
+            "type": "dummy_type",
+            "filepath": "dummy_filepath",
+        },
+        "on_{example_placeholder}": {
+            "type": "dummy_type",
+            "filepath": "dummy_filepath",
+        },
+        "an_{example_placeholder}": {
+            "type": "dummy_type",
+            "filepath": "dummy_filepath",
+        },
     }
     return config
 

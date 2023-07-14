@@ -15,6 +15,7 @@
 * Activated all built-in resolvers by default for `OmegaConfigLoader` except for `oc.env`.
 
 ## Bug fixes and other changes
+* Updated `kedro catalog list` to work with dataset factories.
 
 ## Documentation changes
 

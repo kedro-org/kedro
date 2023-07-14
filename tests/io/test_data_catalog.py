@@ -88,6 +88,68 @@ def sane_config_with_tracking_ds(tmp_path):
 
 
 @pytest.fixture
+def config_with_dataset_factories():
+    return {
+        "catalog": {
+            "{brand}_cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{brand}_cars.csv",
+            },
+            "audi_cars": {
+                "type": "pandas.ParquetDataSet",
+                "filepath": "data/01_raw/audi_cars.pq",
+            },
+            "{type}_boats": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{type}_boats.csv",
+            },
+        },
+    }
+
+
+@pytest.fixture
+def config_with_dataset_factories_with_default(config_with_dataset_factories):
+    config_with_dataset_factories["catalog"]["{default_dataset}"] = {
+        "type": "pandas.CSVDataSet",
+        "filepath": "data/01_raw/{default_dataset}.csv",
+    }
+    return config_with_dataset_factories
+
+
+@pytest.fixture
+def config_with_dataset_factories_bad_pattern(config_with_dataset_factories):
+    config_with_dataset_factories["catalog"]["{type}@planes"] = {
+        "type": "pandas.ParquetDataSet",
+        "filepath": "data/01_raw/{brand}_plane.pq",
+    }
+    return config_with_dataset_factories
+
+
+@pytest.fixture
+def config_with_dataset_factories_only_patterns():
+    return {
+        "catalog": {
+            "{default}": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{default}.csv",
+            },
+            "{namespace}_{dataset}": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{namespace}_{dataset}.pq",
+            },
+            "{country}_companies": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{country}_companies.csv",
+            },
+            "{dataset}s": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{dataset}s.csv",
+            },
+        },
+    }
+
+
+@pytest.fixture
 def data_set(filepath):
     return CSVDataSet(filepath=filepath, save_args={"index": False})
 
@@ -687,3 +749,151 @@ class TestDataCatalogVersioned:
         )
         with pytest.raises(DatasetError, match=pattern):
             versioned_dataset.load()
+
+
+class TestDataCatalogDatasetFactories:
+    def test_match_added_to_datasets_on_get(self, config_with_dataset_factories):
+        """Check that the datasets that match patterns are only added when fetched"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        assert "{brand}_cars" not in catalog._data_sets
+        assert "tesla_cars" not in catalog._data_sets
+        assert "{brand}_cars" in catalog._dataset_patterns
+
+        tesla_cars = catalog._get_dataset("tesla_cars")
+        assert isinstance(tesla_cars, CSVDataSet)
+        assert "tesla_cars" in catalog._data_sets
+
+    @pytest.mark.parametrize(
+        "dataset_name, expected",
+        [
+            ("audi_cars", True),
+            ("tesla_cars", True),
+            ("row_boats", True),
+            ("boats", False),
+            ("tesla_card", False),
+        ],
+    )
+    def test_exists_in_catalog_config(
+        self, config_with_dataset_factories, dataset_name, expected
+    ):
+        """Check that the dataset exists in catalog when it matches a pattern
+        or is in the catalog"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        assert (dataset_name in catalog) == expected
+
+    def test_patterns_not_in_catalog_datasets(self, config_with_dataset_factories):
+        """Check that the pattern is not in the catalog datasets"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        assert "audi_cars" in catalog._data_sets
+        assert "{brand}_cars" not in catalog._data_sets
+        assert "audi_cars" not in catalog._dataset_patterns
+        assert "{brand}_cars" in catalog._dataset_patterns
+
+    def test_explicit_entry_not_overwritten(self, config_with_dataset_factories):
+        """Check that the existing catalog entry is not overwritten by config in pattern"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        audi_cars = catalog._get_dataset("audi_cars")
+        assert isinstance(audi_cars, ParquetDataSet)
+
+    @pytest.mark.parametrize(
+        "dataset_name,pattern",
+        [
+            ("missing", "Dataset 'missing' not found in the catalog"),
+            ("tesla@cars", "Dataset 'tesla@cars' not found in the catalog"),
+        ],
+    )
+    def test_dataset_not_in_catalog_when_no_pattern_match(
+        self, config_with_dataset_factories, dataset_name, pattern
+    ):
+        """Check that the dataset is not added to the catalog when there is no pattern"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            catalog._get_dataset(dataset_name)
+
+    def test_sorting_order_patterns(self, config_with_dataset_factories_only_patterns):
+        """Check that the sorted order of the patterns is correct according
+        to parsing rules"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_only_patterns)
+        sorted_keys_expected = [
+            "{country}_companies",
+            "{namespace}_{dataset}",
+            "{dataset}s",
+            "{default}",
+        ]
+        assert list(catalog._dataset_patterns.keys()) == sorted_keys_expected
+
+    def test_default_dataset(self, config_with_dataset_factories_with_default, caplog):
+        """Check that default dataset is used when no other pattern matches"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_with_default)
+        assert "jet@planes" not in catalog._data_sets
+        jet_dataset = catalog._get_dataset("jet@planes")
+        log_record = caplog.records[0]
+        assert log_record.levelname == "WARNING"
+        assert (
+            "Config from the dataset factory pattern '{default_dataset}' "
+            "in the catalog will be used to override the default "
+            "MemoryDataset creation for the dataset 'jet@planes'" in log_record.message
+        )
+        assert isinstance(jet_dataset, CSVDataSet)
+
+    def test_unmatched_key_error_when_parsing_config(
+        self, config_with_dataset_factories_bad_pattern
+    ):
+        """Check error raised when key mentioned in the config is not in pattern name"""
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_bad_pattern)
+        pattern = "Unable to resolve 'filepath' for the pattern '{type}@planes'"
+        with pytest.raises(DatasetError, match=re.escape(pattern)):
+            catalog._get_dataset("jet@planes")
+
+    def test_factory_layer(self, config_with_dataset_factories):
+        """Check that layer is correctly processed for patterned datasets"""
+        config_with_dataset_factories["catalog"]["{brand}_cars"]["layer"] = "raw"
+        catalog = DataCatalog.from_config(**config_with_dataset_factories)
+        _ = catalog._get_dataset("tesla_cars")
+        assert catalog.layers["raw"] == {"tesla_cars"}
+
+    def test_factory_config_versioned(
+        self, config_with_dataset_factories, filepath, dummy_dataframe
+    ):
+        """Test load and save of versioned data sets from config"""
+        config_with_dataset_factories["catalog"]["{brand}_cars"]["versioned"] = True
+        config_with_dataset_factories["catalog"]["{brand}_cars"]["filepath"] = filepath
+
+        assert "tesla_cars" not in config_with_dataset_factories
+
+        # Decompose `generate_timestamp` to keep `current_ts` reference.
+        current_ts = datetime.now(tz=timezone.utc)
+        fmt = (
+            "{d.year:04d}-{d.month:02d}-{d.day:02d}T{d.hour:02d}"
+            ".{d.minute:02d}.{d.second:02d}.{ms:03d}Z"
+        )
+        version = fmt.format(d=current_ts, ms=current_ts.microsecond // 1000)
+
+        catalog = DataCatalog.from_config(
+            **config_with_dataset_factories,
+            load_versions={"tesla_cars": version},
+            save_version=version,
+        )
+
+        catalog.save("tesla_cars", dummy_dataframe)
+        path = Path(
+            config_with_dataset_factories["catalog"]["{brand}_cars"]["filepath"]
+        )
+        path = path / version / path.name
+        assert path.is_file()
+
+        reloaded_df = catalog.load("tesla_cars")
+        assert_frame_equal(reloaded_df, dummy_dataframe)
+
+        reloaded_df_version = catalog.load("tesla_cars", version=version)
+        assert_frame_equal(reloaded_df_version, dummy_dataframe)
+
+        # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
+        actual_timestamp = datetime.strptime(
+            catalog.datasets.tesla_cars.resolve_load_version(),  # pylint: disable=no-member
+            VERSION_FORMAT,
+        )
+        expected_timestamp = current_ts.replace(
+            microsecond=current_ts.microsecond // 1000 * 1000, tzinfo=None
+        )
+        assert actual_timestamp == expected_timestamp

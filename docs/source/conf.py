@@ -202,9 +202,6 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # to ignore or allow certain links.
 html_extra_path = [str(here / "robots.txt")]
 
-# Likewise for search console verification
-html_extra_path = [str(here / "googlebce3ad2fda582ae8.html")]
-
 # Removes, from all docs, the copyright footer.
 html_show_copyright = False
 
@@ -227,7 +224,8 @@ linkcheck_ignore = [
     "https://github.com/kedro-org/kedro/blob/main/kedro/framework/project/default_logging.yml",
     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
-    "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password"
+    "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
+    "https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/api/snowflake.snowpark.DataFrameWriter.saveAsTable.html"
 ]
 
 # retry before render a link broken (fix for "too many requests")

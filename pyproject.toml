@@ -10,7 +10,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro helps you build production-ready data and analytics pipelines"
-requires-python = ">=3.7, <3.12"
+requires-python = ">=3.7"
 keywords = [
     "pipelines",
     "machine learning",

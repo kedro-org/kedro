@@ -463,7 +463,7 @@ airplanes:
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
 ## Load multiple datasets with similar configuration using dataset factories
-For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.11. This syntax allows you to generalise the configuration and
+For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.12. This syntax allows you to generalise the configuration and
 reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
 ### Example 1: Generalise datasets with similar names and types into one dataset factory

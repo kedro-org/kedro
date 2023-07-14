@@ -35,7 +35,7 @@ def fake_catalog_config():
     config = {
         "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataSet",
-            "filepath": "test.parquet",
+            "filepath": "test.pq",
         },
         "csv_{factory_pattern}": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
     }

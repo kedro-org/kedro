@@ -397,7 +397,9 @@ def test_list_catalog_factories(
 ):
     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     mocked_context = fake_load_context.return_value
-    mocked_context.catalog = DataCatalog.from_config(fake_catalog_with_overlapping_factories)
+    mocked_context.catalog = DataCatalog.from_config(
+        fake_catalog_with_overlapping_factories
+    )
 
     result = CliRunner().invoke(
         fake_project_cli, ["catalog", "factories"], obj=fake_metadata

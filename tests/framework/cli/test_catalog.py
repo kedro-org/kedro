@@ -42,6 +42,17 @@ def fake_catalog_config():
     return config
 
 
+@pytest.fixture
+def fake_catalog_with_factories():
+    config = {
+        "some_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+        "a_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+        "b_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+        "other_{placeholder}": {"type": "dummy_type", "filepath": "dummy_filepath"},
+    }
+    return config
+
+
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
 )
@@ -360,3 +371,33 @@ class TestCatalogCreateCommand:
 
         assert result.exit_code
         assert "Unable to instantiate Kedro session" in result.output
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
+)
+def test_list_catalog_factories(
+    fake_project_cli,
+    fake_metadata,
+    mocker,
+    fake_load_context,
+    fake_catalog_with_factories,
+):
+    yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    mocked_context = fake_load_context.return_value
+    mocked_context.catalog = DataCatalog.from_config(fake_catalog_with_factories)
+
+    result = CliRunner().invoke(
+        fake_project_cli, ["catalog", "factories"], obj=fake_metadata
+    )
+    assert not result.exit_code
+
+    expected_patterns_sorted = [
+        "other_{placeholder}",
+        "some_{placeholder}",
+        "a_{placeholder}",
+        "b_{placeholder}",
+    ]
+
+    assert yaml_dump_mock.call_count == 1
+    assert yaml_dump_mock.call_args[0][0] == expected_patterns_sorted

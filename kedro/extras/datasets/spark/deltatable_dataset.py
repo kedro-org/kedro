@@ -85,10 +85,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
 
     @staticmethod
     def _get_spark() -> Optional[pyspark.sql.SparkSession]:
-        spark = pyspark.sql.SparkSession.builder.appName("Test").getOrCreate()
-        if spark is None:
-            raise DatasetError("Failed to start Spark cluster")
-        return spark
+        return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DeltaTable:
         load_path = self._fs_prefix + str(self._filepath)

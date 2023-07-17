@@ -116,5 +116,6 @@ def test_load_args(mocker, spark_jdbc_args_save_load):
 def test_get_spark(mocker, spark_jdbc_args):
     mock_get_or_create = mocker.patch("pyspark.sql.SparkSession.builder.getOrCreate")
     data_set = SparkJDBCDataSet(**spark_jdbc_args)
-    data_set._get_spark()
+    spark = data_set._get_spark()
+    assert spark is not None
     mock_get_or_create.assert_called_once()

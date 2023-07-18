@@ -185,8 +185,7 @@ def pull_package(  # noqa: unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-# noqa: too-many-arguments
-def _pull_package(
+def _pull_package(  # noqa: too-many-arguments
     package_path: str,
     metadata: ProjectMetadata,
     env: str = None,
@@ -328,7 +327,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 )
 @click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
-def package_micropkg(
+def package_micropkg(  # noqa: too-many-arguments
     metadata: ProjectMetadata,
     module_path,
     env,
@@ -336,7 +335,7 @@ def package_micropkg(
     destination,
     all_flag,
     **kwargs,
-):  # noqa: unused-argument
+):
     """Package up a modular pipeline or micro-package as a Python source distribution."""
     if not module_path and not all_flag:
         click.secho(
@@ -440,7 +439,7 @@ def _rename_files(conf_source: Path, old_name: str, new_name: str):
         config_file.rename(config_file.parent / new_config_name)
 
 
-def _refactor_code_for_unpacking(
+def _refactor_code_for_unpacking(  # noqa: too-many-arguments
     project: Project,
     package_path: Path,
     tests_path: Path,
@@ -811,8 +810,7 @@ def _refactor_code_for_package(
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 
 
-# noqa: too-many-arguments,too-many-locals
-def _generate_sdist_file(
+def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
     micropkg_name: str,
     destination: Path,
     source_paths: tuple[_SourcePathType, ...],

@@ -10,11 +10,11 @@ As a project grows and goes through various stages of development it becomes imp
 
 ## Set up Python tools
 There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use
-[`black`](https://github.com/psf/black), [`ruff`](https://github.com/PyCQA/flake8).
+[`black`](https://github.com/psf/black), [`ruff`](https://beta.ruff.rs).
 - **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
 check for styling inconsistencies and reformat your files in place.
 [You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
-- **`ruff`** is a fast linter that replaces [`flake8`](https://flake8.pycqa.org/en/latest/),  [`pylint`](https://pylint.readthedocs.io/en/latest/), [`pyupgrade`](https://github.com/asottile/pyupgrade) and [`isort`](https://pycqa.github.io/isort/).
+- **`ruff`** is a fast linter that replaces `flake8`, `pylint`, `pyupgrade`, `isort` and [more](https://beta.ruff.rs/docs/rules/).
   - It helps to make your code compliant to [`pep8`](https://pypi.org/project/pep8/).
   - It reformats code by sorting imports alphabetically and automatically separating them into sections by
 type. [You can read more in the `isort` documentation](https://pycqa.github.io/isort/).

@@ -56,7 +56,7 @@ def _assert_pkg_name_ok(pkg_name: str):
     if not re.match(r"^[a-zA-Z_]", pkg_name):
         message = base_message + " It must start with a letter or underscore."
         raise KedroCliError(message)
-    if len(pkg_name) < 2:
+    if len(pkg_name) < 2:  # noqa: PLR2004
         message = base_message + " It must be at least 2 characters long."
         raise KedroCliError(message)
     if not re.match(r"^\w+$", pkg_name[1:]):

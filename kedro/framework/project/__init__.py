@@ -249,7 +249,7 @@ def configure_project(package_name: str):
     # global variable to make it easily accessible. This is used by validate_settings()
     # below, and also by ParallelRunner on Windows, as package_name is required every
     # time a new subprocess is spawned.
-    global PACKAGE_NAME
+    global PACKAGE_NAME  # noqa: PLW0603
     PACKAGE_NAME = package_name
 
 
@@ -299,7 +299,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     return obj
 
 
-def find_pipelines() -> dict[str, Pipeline]:
+def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.

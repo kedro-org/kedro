@@ -285,7 +285,7 @@ class DataCatalog:
         layers: dict[str, set[str]] = defaultdict(set)
 
         for ds_name, ds_config in catalog.items():
-            ds_config = _resolve_credentials(
+            ds_config = _resolve_credentials(  # noqa: PLW2901
                 ds_config, credentials
             )  # noqa: redefined-loop-name
             if cls._is_pattern(ds_name):

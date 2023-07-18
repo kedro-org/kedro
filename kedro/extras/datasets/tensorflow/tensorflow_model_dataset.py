@@ -133,7 +133,9 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(
+                    PurePath(path) / TEMPORARY_H5_FILE
+                )  # noqa: redefined-loop-name
                 self._fs.copy(load_path, path)
             else:
                 self._fs.get(load_path, path, recursive=True)
@@ -152,7 +154,9 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(
+                    PurePath(path) / TEMPORARY_H5_FILE
+                )  # noqa: redefined-loop-name
 
             tf.keras.models.save_model(data, path, **self._save_args)
 

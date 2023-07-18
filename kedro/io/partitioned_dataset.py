@@ -314,7 +314,7 @@ class PartitionedDataset(AbstractDataSet):
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
             if callable(partition_data):
-                partition_data = partition_data()
+                partition_data = partition_data()  # noqa: redefined-loop-name
             dataset.save(partition_data)
         self._invalidate_caches()
 

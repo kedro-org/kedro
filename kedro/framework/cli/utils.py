@@ -222,7 +222,7 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
     pattern = re.compile(package_name + r"([^\w]|$)")
     with reqs_path.open("r", encoding="utf-8") as reqs_file:
         for req_line in reqs_file:
-            req_line = req_line.strip()
+            req_line = req_line.strip()  # noqa: redefined-loop-name
             if pattern.search(req_line):
                 return req_line
 
@@ -428,7 +428,7 @@ def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
 
     load_versions_dict = {}
     for load_version in value:
-        load_version = load_version.strip()
+        load_version = load_version.strip()  # noqa: PLW2901
         load_version_list = load_version.split(":", 1)
         if len(load_version_list) != 2:
             raise KedroCliError(
@@ -453,7 +453,7 @@ def _split_params(ctx, param, value):
             # which should not be replaced by =
             pass
         else:
-            item = item.replace(":", "=", 1)
+            item = item.replace(":", "=", 1)  # noqa: redefined-loop-name
         items = item.split("=", 1)
         if len(items) != 2:
             ctx.fail(

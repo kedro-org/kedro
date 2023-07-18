@@ -15,6 +15,7 @@
 * Activated all built-in resolvers by default for `OmegaConfigLoader` except for `oc.env`.
 
 ## Bug fixes and other changes
+* Consolidated dependencies and optional dependencies in `pyproject.toml`.
 
 ## Documentation changes
 

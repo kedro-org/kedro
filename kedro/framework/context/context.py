@@ -147,11 +147,10 @@ def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> N
     for key, value in new_dict.items():
         if key not in old_dict:
             old_dict[key] = value
+        elif isinstance(old_dict[key], dict) and isinstance(value, dict):
+            _update_nested_dict(old_dict[key], value)
         else:
-            if isinstance(old_dict[key], dict) and isinstance(value, dict):
-                _update_nested_dict(old_dict[key], value)
-            else:
-                old_dict[key] = value
+            old_dict[key] = value
 
 
 class KedroContext:

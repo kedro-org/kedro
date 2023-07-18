@@ -131,7 +131,7 @@ def _validate_transcoded_datasets(catalog: DataCatalog):
         `_transcode_split` function.
 
     """
-    # pylint: disable=protected-access
+    # noqa: protected-access
     for dataset_name in catalog._data_sets.keys():
         _transcode_split(dataset_name)
 

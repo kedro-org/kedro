@@ -555,7 +555,7 @@ def check_additional_cell_added(context):
         encoding="utf-8",
     ) as test_nb_fh:
         context.nb_data = json.load(test_nb_fh)
-        assert len(context.nb_data["cells"]) == 2
+        assert len(context.nb_data["cells"]) == 2  # noqa: PLR2004
 
 
 @then("the output should be empty in all the cells in the jupyter notebook")

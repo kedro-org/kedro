@@ -1,6 +1,6 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
-# pylint: disable=redefined-outer-name,unused-argument,global-statement
+# noqa: redefined-outer-name,unused-argument,global-statement
 from __future__ import annotations
 
 import importlib
@@ -131,7 +131,7 @@ def _load_data_wrapper(func):
     Taking inspiration from dynaconf.utils.functional.new_method_proxy
     """
 
-    # pylint: disable=protected-access
+    # noqa: protected-access
     def inner(self, *args, **kwargs):
         self._load_data()
         return func(self._content, *args, **kwargs)
@@ -208,7 +208,7 @@ class _ProjectPipelines(MutableMapping):
 
 
 class _ProjectLogging(UserDict):
-    # pylint: disable=super-init-not-called
+    # noqa: super-init-not-called
     def __init__(self):
         """Initialise project logging. The path to logging configuration is given in
         environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
@@ -325,7 +325,7 @@ def find_pipelines() -> dict[str, Pipeline]:
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
     try:
         pipeline_module = importlib.import_module(pipeline_module_name)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:  # noqa: broad-except
         if str(exc) != f"No module named '{pipeline_module_name}'":
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
@@ -355,7 +355,7 @@ def find_pipelines() -> dict[str, Pipeline]:
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
-        except:  # pylint: disable=bare-except  # noqa: E722
+        except:  # noqa: bare-except  # noqa: E722
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()

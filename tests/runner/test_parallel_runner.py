@@ -250,9 +250,7 @@ class LoggingDataset(AbstractDataSet):
 
 
 if not sys.platform.startswith("win"):
-    ParallelRunnerManager.register(  # noqa: no-member
-        "LoggingDataset", LoggingDataset
-    )
+    ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
 
 
 @pytest.mark.skipif(

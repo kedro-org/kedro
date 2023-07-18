@@ -101,7 +101,7 @@ class _EquivalentRequirement(Requirement):
         )
 
 
-def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
+def _check_module_path(ctx, param, value):  # noqa: unused-argument
     if value and not re.match(r"^[\w.]+$", value):
         message = (
             "The micro-package location you provided is not a valid Python module path"
@@ -110,7 +110,7 @@ def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def micropkg_cli():  # pragma: no cover
     pass
@@ -150,7 +150,7 @@ def micropkg():
     help="Location of a configuration file for the fsspec filesystem used to pull the package.",
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def pull_package(  # pylint:disable=unused-argument, too-many-arguments
+def pull_package(  # noqa: unused-argument, too-many-arguments
     metadata: ProjectMetadata,
     package_path,
     env,
@@ -255,7 +255,7 @@ def _pull_package(
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import anyconfig  # for performance reasons
 
     config_dict = anyconfig.load(metadata.config_file)
@@ -279,7 +279,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
 
 def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import anyconfig  # for performance reasons
 
     config_dict = anyconfig.load(metadata.config_file)
@@ -336,7 +336,7 @@ def package_micropkg(
     destination,
     all_flag,
     **kwargs,
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Package up a modular pipeline or micro-package as a Python source distribution."""
     if not module_path and not all_flag:
         click.secho(
@@ -362,7 +362,7 @@ def package_micropkg(
 
 
 def _get_fsspec_filesystem(location: str, fs_args: str | None):
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import anyconfig
     import fsspec
 
@@ -373,7 +373,7 @@ def _get_fsspec_filesystem(location: str, fs_args: str | None):
 
     try:
         return fsspec.filesystem(protocol, **fs_args_config)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:  # noqa: broad-except
         # Specified protocol is not supported by `fsspec`
         # or requires extra dependencies
         click.secho(str(exc), fg="red")
@@ -391,7 +391,7 @@ def safe_extract(tar, path):
     for member in tar.getmembers():
         member_path = path / member.name
         if not _is_within_directory(path, member_path):
-            # pylint: disable=broad-exception-raised
+            # noqa: broad-exception-raised
             raise Exception("Failed to safely extract tar file.")
     tar.extractall(path)  # nosec B202
 

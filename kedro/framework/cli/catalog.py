@@ -21,7 +21,7 @@ def _create_session(package_name: str, **kwargs):
         ) from exc
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def catalog_cli():  # pragma: no cover
     pass
@@ -32,7 +32,7 @@ def catalog():
     """Commands for working with catalog."""
 
 
-# pylint: disable=too-many-locals
+# noqa: too-many-locals
 @catalog.command("list")
 @env_option
 @click.option(
@@ -53,7 +53,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
+    datasets_meta = context.catalog._data_sets  # noqa: protected-access
     catalog_ds = set(context.catalog.list())
 
     target_pipelines = pipeline or pipelines.keys()
@@ -140,7 +140,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
 
     catalog_datasets = {
         ds_name
-        for ds_name in context.catalog._data_sets.keys()  # pylint: disable=protected-access
+        for ds_name in context.catalog._data_sets.keys()  # noqa: protected-access
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 

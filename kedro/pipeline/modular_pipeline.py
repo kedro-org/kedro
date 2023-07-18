@@ -212,7 +212,7 @@ def pipeline(
     if not any([inputs, outputs, parameters, namespace]):
         return pipe
 
-    # pylint: disable=protected-access
+    # noqa: protected-access
     inputs = _get_dataset_names_mapping(inputs)
     outputs = _get_dataset_names_mapping(outputs)
     parameters = _get_param_names_mapping(parameters)

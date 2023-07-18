@@ -1,5 +1,5 @@
 """This module defines a dedicated hook manager for hooks that extends Kedro CLI behaviour."""
-# pylint: disable=global-statement,invalid-name
+# noqa: global-statement,invalid-name
 import logging
 
 from pluggy import PluginManager

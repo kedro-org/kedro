@@ -29,11 +29,9 @@ DataSetAlreadyExistsError: type[DatasetError]
 
 
 def __getattr__(name):
-    import kedro.io.core  # pylint: disable=import-outside-toplevel
+    import kedro.io.core  # noqa: import-outside-toplevel
 
-    if name in (
-        kedro.io.core._DEPRECATED_ERROR_CLASSES  # pylint: disable=protected-access
-    ):
+    if name in (kedro.io.core._DEPRECATED_ERROR_CLASSES):  # noqa: protected-access
         return getattr(kedro.io.core, name)
     raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 

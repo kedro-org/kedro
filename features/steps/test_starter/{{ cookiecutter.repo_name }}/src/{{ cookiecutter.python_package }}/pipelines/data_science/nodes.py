@@ -3,7 +3,7 @@ just for illustrating basic Kedro features.
 
 Delete this when you start working on your own Kedro project.
 """
-# pylint: disable=invalid-name
+# noqa: invalid-name
 from __future__ import annotations
 
 import logging

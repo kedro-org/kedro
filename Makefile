@@ -13,6 +13,9 @@ install-pip-setuptools:
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
 
+fix-lint:
+	pre-commit run -a --hook-stage manual
+
 test:
 	pytest --numprocesses 4 --dist loadfile
 

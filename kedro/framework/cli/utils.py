@@ -430,7 +430,7 @@ def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
     for load_version in value:
         load_version = load_version.strip()  # noqa: PLW2901
         load_version_list = load_version.split(":", 1)
-        if len(load_version_list) != 2:
+        if len(load_version_list) != 2:  # noqa: PLR2004
             raise KedroCliError(
                 f"Expected the form of 'load_version' to be "
                 f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
@@ -455,7 +455,7 @@ def _split_params(ctx, param, value):
         else:
             item = item.replace(":", "=", 1)  # noqa: redefined-loop-name
         items = item.split("=", 1)
-        if len(items) != 2:
+        if len(items) != 2:  # noqa: PLR2004
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "
                 f"Item `{items[0]}` must contain "

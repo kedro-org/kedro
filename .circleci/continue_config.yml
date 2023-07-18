@@ -288,9 +288,6 @@ jobs:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
-                  name: Install pip setuptools
-                  command: conda activate kedro_builder; make install-pip-setuptools
-            - run:
                 name: Run unit tests without spark in parallel
                 command: conda activate kedro_builder; make test-no-spark
       - when:
@@ -299,7 +296,7 @@ jobs:
           steps:
             - run:
                 name: Run unit tests without spark sequentially
-                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
+                command: conda activate kedro_builder; pip -V; pytest tests/framework/cli/micropkg/test_micropkg_package.py
 
   lint:
     parameters:

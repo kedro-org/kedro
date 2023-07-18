@@ -54,7 +54,7 @@ repos:
       hooks:
         - id: ruff
           name: "ruff on kedro/"
-          args: ["--fix", "show-fixes", "--exit-non-zero-on-fix"]
+          args: ["--fix", "--show-fixes", "--exit-non-zero-on-fix"]
           exclude: "^kedro/templates/|^features/steps/test_starter/|tests|docs"
     - repo: https://github.com/astral-sh/ruff-pre-commit
       # Ruff version.
@@ -64,7 +64,7 @@ repos:
           name: "ruff on tests/ and docs/"
           # PLR2004: Magic value used
           # PLR0913: Too many arguments
-          args: ["--fix", "show-fixes", "--exit-non-zero-on-fix", "--ignore=PLR2004,PLR0913"]
+          args: ["--fix", "--show-fixes", "--exit-non-zero-on-fix", "--ignore=PLR2004,PLR0913"]
           # include: "tests"
           exclude: "^kedro/templates/|^features/steps/test_starter/|kedro"
 

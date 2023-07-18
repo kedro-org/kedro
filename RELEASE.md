@@ -12,8 +12,10 @@
 
 ## Major features and improvements
 * Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
+* Activated all built-in resolvers by default for `OmegaConfigLoader` except for `oc.env`.
 
 ## Bug fixes and other changes
+* Consolidated dependencies and optional dependencies in `pyproject.toml`.
 
 ## Documentation changes
 - Recommended `ruff` as the linter and remove mentions of `pylint`, `isort`, `flake8`.

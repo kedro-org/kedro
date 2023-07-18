@@ -10,7 +10,7 @@ from typing import Any, Callable
 from kedro.io.core import AbstractDataSet, DatasetError
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-LambdaDataSet: AbstractDataSet
+LambdaDataSet: type[LambdaDataset]
 
 
 class LambdaDataset(AbstractDataSet):

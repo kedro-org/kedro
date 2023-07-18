@@ -32,8 +32,8 @@ KEY_PROPAGATION_WARNING = (
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-PartitionedDataSet: AbstractDataSet
-IncrementalDataSet: AbstractDataSet
+PartitionedDataSet: type[PartitionedDataset]
+IncrementalDataSet: type[IncrementalDataset]
 
 
 class PartitionedDataset(AbstractDataSet):

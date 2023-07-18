@@ -12,7 +12,7 @@ from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataSet, Version
 from kedro.io.memory_dataset import MemoryDataset
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-CachedDataSet: AbstractDataSet
+CachedDataSet: type[CachedDataset]
 
 
 class CachedDataset(AbstractDataSet):

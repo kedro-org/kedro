@@ -23,9 +23,9 @@ from .partitioned_dataset import (
 )
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-DataSetError: type[Exception]
-DataSetNotFoundError: type[DatasetError]
-DataSetAlreadyExistsError: type[DatasetError]
+DataSetError: type[DatasetError]
+DataSetNotFoundError: type[DatasetNotFoundError]
+DataSetAlreadyExistsError: type[DatasetAlreadyExistsError]
 
 
 def __getattr__(name):

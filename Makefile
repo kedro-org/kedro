@@ -51,7 +51,7 @@ package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
-	pip install -r test_requirements.txt
+	pip install .[test]
 
 install-pre-commit: install-test-requirements
 	pre-commit install --install-hooks

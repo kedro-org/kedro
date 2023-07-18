@@ -288,6 +288,9 @@ jobs:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
+                  name: Install pip setuptools
+                  command: conda activate kedro_builder; make install-pip-setuptools
+            - run:
                 name: Run unit tests without spark in parallel
                 command: conda activate kedro_builder; make test-no-spark
       - when:

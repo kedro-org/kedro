@@ -205,7 +205,6 @@ ignore_imports = [
 
 [tool.ruff]
 line-length = 88
-fix = false
 show-fixes = true
 # select = ["A", "B", "C", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
 select = [

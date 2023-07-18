@@ -14,7 +14,7 @@ lint:
 	pre-commit run -a --hook-stage manual $(hook)
 
 test:
-	pytest --numprocesses 4 --dist loadfile
+	pytest
 
 test-no-spark:
 	pytest --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile

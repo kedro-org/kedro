@@ -99,8 +99,7 @@ class KedroSession:
 
     """
 
-    # noqa: too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         session_id: str,
         package_name: str = None,

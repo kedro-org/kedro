@@ -159,7 +159,7 @@ class KedroContext:
     Kedro's main functionality.
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         package_name: str,
         project_path: Path | str,
@@ -167,7 +167,7 @@ class KedroContext:
         hook_manager: PluginManager,
         env: str = None,
         extra_params: dict[str, Any] = None,
-    ):  # noqa: too-many-arguments
+    ):
         """Create a context object by providing the root of a Kedro project and
         the environment configuration subfolders
         (see ``kedro.config.ConfigLoader``)

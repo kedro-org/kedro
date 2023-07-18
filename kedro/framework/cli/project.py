@@ -412,8 +412,7 @@ def activate_nbstripout(metadata: ProjectMetadata, **kwargs):  # noqa: unused-ar
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-# noqa: too-many-arguments,unused-argument,too-many-locals
-def run(
+def run(  # noqa: too-many-arguments,unused-argument,too-many-locals
     tag,
     tags,
     env,

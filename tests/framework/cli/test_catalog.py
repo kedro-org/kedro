@@ -45,6 +45,10 @@ def fake_catalog_config():
 @pytest.fixture
 def fake_catalog_with_overlapping_factories():
     config = {
+        "an_example_dataset": {
+            "type": "pandas.CSVDataSet",
+            "filepath": "dummy_filepath",
+        },
         "an_example_{placeholder}": {
             "type": "dummy_type",
             "filepath": "dummy_filepath",

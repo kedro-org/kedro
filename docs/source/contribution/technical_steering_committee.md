@@ -79,7 +79,7 @@ Currently, the core Kedro team consists of:
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Stephanie Kaiser](https://github.com/stephkaiser),
 [Tynan DeBold](https://github.com/tynandebold),
-[Vladimir Nikolic](), and
+[Vladimir Nikolic](https://github.com/vladimir-mck), and
 [Yetunde Dada](https://github.com/yetudada).
 
 Former core team members with significant contributions include:

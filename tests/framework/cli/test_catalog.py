@@ -162,7 +162,7 @@ class TestCatalogListCommand:
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
-    def test_generated_dataset(
+    def test_list_factory_generated_datasets(
         self,
         fake_project_cli,
         fake_metadata,

@@ -16,7 +16,7 @@
 
 ## Bug fixes and other changes
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
-* Updated `kedro catalog list` to work with dataset factories.
+* Updated `kedro catalog list` to show datasets generated with factories.
 
 ## Documentation changes
 

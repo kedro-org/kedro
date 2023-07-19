@@ -66,46 +66,83 @@ By convention, a [pipeline can be defined as having different layers](../resourc
 
 For example, the [data engineering convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71) labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
-You can add a `layer` attribute to the datasets in the Data Catalog, which is reflected in the Kedro-Viz visualisation.
+In Kedro version 0.18.9 we changed the way layers are defined in the Data Catalog. The definition is now included under the `metadata` key for `kedro-viz` (previously it was an attribute specified within a dataset's definition).
 
-Open `catalog.yml` for the completed spaceflights tutorial and replace the existing code with the following:
+Here's an example of how to use the Kedro-Viz metadata to define layers:
 
 ```yaml
 companies:
   type: pandas.CSVDataSet
   filepath: data/01_raw/companies.csv
-  layer: raw
+  metadata:
+    kedro-viz:
+      layer: raw
+```
+
+In earlier versions of Kedro, layers were specified within a dataset's definition in the Data Catalog, but this will **no longer be supported** from Kedro version 0.19.0. From that version onwards, your `catalog.yml` must specify layers as metadata.
+
+```diff
+companies:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/companies.csv
+-  layer: raw
++   metadata:
++     kedro-viz:
++       layer: raw
+```
+
+Open `catalog.yml` for the completed spaceflights tutorial and define layers in the following way:
+
+```yaml
+companies:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/companies.csv
+  metadata:
+    kedro-viz:
+      layer: raw
 
 reviews:
   type: pandas.CSVDataSet
   filepath: data/01_raw/reviews.csv
-  layer: raw
+  metadata:
+    kedro-viz:
+      layer: raw
 
 shuttles:
   type: pandas.ExcelDataSet
   filepath: data/01_raw/shuttles.xlsx
-  layer: raw
+  metadata:
+    kedro-viz:
+      layer: raw
 
 preprocessed_companies:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_companies.pq
-  layer: intermediate
+  metadata:
+    kedro-viz:
+      layer: intermediate
 
 preprocessed_shuttles:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/preprocessed_shuttles.pq
-  layer: intermediate
+  metadata:
+    kedro-viz:
+      layer: intermediate
 
 model_input_table:
   type: pandas.ParquetDataSet
   filepath: data/03_primary/model_input_table.pq
-  layer: primary
+  metadata:
+    kedro-viz:
+      layer: primary
 
 regressor:
   type: pickle.PickleDataSet
   filepath: data/06_models/regressor.pickle
   versioned: true
-  layer: models
+  metadata:
+    kedro-viz:
+      layer: models
 ```
 
 The visualisation now includes the layers:

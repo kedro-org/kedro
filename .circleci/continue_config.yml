@@ -61,7 +61,7 @@ commands:
           command: conda install -c conda-forge pytables -y
       - run:
           name: Install requirements and test requirements
-          command: pip install --upgrade -r test_requirements.txt
+          command: pip install --upgrade .[test]
       - run:
           # this is needed to fix java cacerts so
           # spark can automatically download packages from mvn
@@ -146,7 +146,7 @@ commands:
     steps:
       - restore_cache:
           name: Restore package cache
-          key: kedro-deps-v1-win-{{ checksum "dependency/requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+          key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
         # We don't restore the conda environment cache for python 3.10 as it conflicts with the
         # 'Install GDAL, Fiona and pytables' step breaking the conda environment (missing zlib.dll).
       - unless:
@@ -155,7 +155,7 @@ commands:
           steps:
             - restore_cache:
                 name: Restore conda environment cache
-                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "dependency/requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one
@@ -168,7 +168,7 @@ commands:
           command: conda activate kedro_builder; pip debug --verbose
       - run:
           name: Install all requirements
-          command: conda activate kedro_builder; pip install -v -r test_requirements.txt -U
+          command: conda activate kedro_builder; pip install -v -U .[test]
       - run:
           name: Print Python environment
           command: conda activate kedro_builder; make print-python-env
@@ -337,7 +337,7 @@ jobs:
           steps:
           - save_cache:
               name: Save Python package cache
-              key: kedro-deps-v1-win-{{ checksum "dependency/requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+              key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
               paths:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs
@@ -350,7 +350,7 @@ jobs:
           steps:
             - save_cache:
                 name: Save conda environment cache
-                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "dependency/requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
                 paths:
                   - c:\tools\miniconda3\envs\kedro_builder
       - run:

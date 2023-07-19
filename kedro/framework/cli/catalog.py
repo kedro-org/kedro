@@ -183,7 +183,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
 @env_option
 @click.pass_obj
 def list_patterns(metadata: ProjectMetadata, env):
-    "Show all factory patterns in catalog, ranked by priority by which they are matched"
+    "Show all factory patterns in the catalog, ranked by priority by which they are matched."
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 

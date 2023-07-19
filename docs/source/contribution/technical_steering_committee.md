@@ -65,7 +65,7 @@ Currently, the core Kedro team consists of:
 [Dmitry Sorokin](),
 [Huong Nguyen](https://github.com/Huongg),
 [Ivan Danov](https://github.com/idanov),
-[Jitendra Gundaniya](),
+[Jitendra Gundaniya](https://github.com/jitu5),
 [Jo Stichbury](https://github.com/stichbury),
 [Joel Schwarzmann](https://github.com/datajoely),
 [Juan Luis Cano](https://github.com/astrojuanlu),
@@ -78,7 +78,7 @@ Currently, the core Kedro team consists of:
 [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla),
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Stephanie Kaiser](https://github.com/stephkaiser),
-[Tynan DeBold](https://github.com/tynandebold), 
+[Tynan DeBold](https://github.com/tynandebold),
 [Vladimir Nikolic](), and
 [Yetunde Dada](https://github.com/yetudada).
 

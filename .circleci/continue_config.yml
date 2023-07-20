@@ -151,7 +151,7 @@ commands:
         # 'Install GDAL, Fiona and pytables' step breaking the conda environment (missing zlib.dll).
       - unless:
           condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
+            equal: [ "3.7", <<parameters.python_version>> ]
           steps:
             - restore_cache:
                 name: Restore conda environment cache
@@ -247,14 +247,14 @@ jobs:
       - setup
       - unless:
           condition:
-            equal: ["3.10", <<parameters.python_version>>]
+            equal: ["3.7", <<parameters.python_version>>]
           steps:
             - run:
                 name: Run unit tests in parallel
                 command: PYTEST_ADDOPTS="-v" make test
       - when:
           condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
+            equal: [ "3.7", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests sequentially
@@ -285,14 +285,14 @@ jobs:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - unless:
           condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
+            equal: [ "3.7", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests without spark in parallel
                 command: conda activate kedro_builder; pip -V; make test-no-spark
       - when:
           condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
+            equal: [ "3.7", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests without spark sequentially
@@ -349,7 +349,7 @@ jobs:
         # 'Install GDAL, Fiona and pytables' and 'Restore conda environment cache' steps.
       - unless:
           condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
+            equal: [ "3.7", <<parameters.python_version>> ]
           steps:
             - save_cache:
                 name: Save conda environment cache
@@ -445,14 +445,14 @@ jobs:
           command: make lint
       - unless:
           condition:
-            equal: ["3.10", <<parameters.python_version>>]
+            equal: [3.7", <<parameters.python_version>>]
           steps:
             - run:
                 name: Run unit tests in parallel
                 command: make test
       - when:
           condition:
-            equal: [ "3.10", <<parameters.python_version>> ]
+            equal: [ "3.7", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests sequentially

@@ -289,14 +289,14 @@ jobs:
           steps:
             - run:
                 name: Run unit tests without spark in parallel
-                command: conda activate kedro_builder; make test-no-spark
+                command: conda activate kedro_builder; pip -V; make test-no-spark
       - when:
           condition:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests without spark sequentially
-                command: conda activate kedro_builder; pip -V; pytest tests/framework/cli/micropkg/test_micropkg_package.py
+                command: conda activate kedro_builder; pip -V; pytest tests --no-cov --ignore tests/extras/datasets/spark
 
   lint:
     parameters:

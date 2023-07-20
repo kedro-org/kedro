@@ -406,7 +406,7 @@ def test_list_catalog_factories(
     )
 
     result = CliRunner().invoke(
-        fake_project_cli, ["catalog", "factory list"], obj=fake_metadata
+        fake_project_cli, ["catalog", "factory", "list"], obj=fake_metadata
     )
     assert not result.exit_code
 

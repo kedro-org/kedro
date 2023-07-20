@@ -179,7 +179,11 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
         click.echo("All datasets are already configured.")
 
 
-@catalog.command("factory list")
+@catalog.group()
+def factory():
+    """Command for working with catalog factories"""
+
+@factory.command("list")
 @env_option
 @click.pass_obj
 def list_patterns(metadata: ProjectMetadata, env):

@@ -181,13 +181,14 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
 
 @catalog.group()
 def factory():
-    """Command for working with catalog factories"""
+    """Commands for working with catalog dataset factories"""
+
 
 @factory.command("list")
 @env_option
 @click.pass_obj
-def list_patterns(metadata: ProjectMetadata, env):
-    "Show all factory patterns in the catalog, ranked by priority by which they are matched."
+def list_factories(metadata: ProjectMetadata, env):
+    """Show all dataset factories in the catalog, ranked by priority by which they are matched."""
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 

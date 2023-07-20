@@ -193,7 +193,10 @@ def list_factories(metadata: ProjectMetadata, env):
     context = session.load_context()
 
     catalog_factories = context.catalog._dataset_patterns
-    click.echo(yaml.dump(list(catalog_factories.keys())))
+    if catalog_factories:
+        click.echo(yaml.dump(list(catalog_factories.keys())))
+    else:
+        click.echo("There are no dataset factories in the catalog.")
 
 
 def _add_missing_datasets_to_catalog(missing_ds, catalog_path):

@@ -139,14 +139,14 @@ class TestCLITools:
         assert isinstance(help_cli_structure, dict)
         assert isinstance(help_cli_structure["kedro"], dict)
 
-        for k, v in help_cli_structure["kedro"].items():
+        cli_commands = list(help_cli_structure["kedro"].items())
+
+        while cli_commands:
+            k, v = cli_commands[0]
+            cli_commands.pop(0)
             assert isinstance(k, str)
             if isinstance(v, dict):
-                for sub_key in v:
-                    assert isinstance(help_cli_structure["kedro"][k][sub_key], str)
-                    assert help_cli_structure["kedro"][k][sub_key].startswith(
-                        "Usage:  [OPTIONS]"
-                    )
+                cli_commands = cli_commands + list(v.items())
             elif isinstance(v, str):
                 assert v.startswith("Usage:  [OPTIONS]")
 

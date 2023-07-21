@@ -103,7 +103,7 @@ def _setup_minimal_env(context):
             "pip",
             "install",
             "-U",
-            "pip>=21.2, <23.2",  # pip==23.2 breaks pip-tools 7.0 and not support Python 3.7
+            "pip==23.1.2",  # pip==23.2 breaks pip-tools 7.0 and not support Python 3.7
             "setuptools>=65.5.1",
             "wheel",
         ],

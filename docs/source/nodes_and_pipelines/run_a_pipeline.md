@@ -111,7 +111,6 @@ class DryRunner(AbstractRunner):
         self._logger.info(
             "Actual run would execute %d nodes:\n%s",
             len(nodes),
-            "\n",
             pipeline.describe(),
         )
         self._logger.info("Checking inputs...")

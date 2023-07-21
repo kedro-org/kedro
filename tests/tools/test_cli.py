@@ -139,18 +139,18 @@ class TestCLITools:
         assert isinstance(help_cli_structure, dict)
         assert isinstance(help_cli_structure["kedro"], dict)
 
-        self.recursive_cli_structure_test(help_cli_structure["kedro"])
+        self.recursively_check_cli_structure(help_cli_structure["kedro"])
 
         assert sorted(list(help_cli_structure["kedro"])) == sorted(
             DEFAULT_KEDRO_COMMANDS
         )
 
-    def recursive_cli_structure_test(self, structure):
+    def recursively_check_cli_structure(self, structure):
         for k, v in structure.items():
             assert isinstance(k, str)
             if isinstance(v, str):
                 assert v.startswith("Usage:  [OPTIONS]")
             elif isinstance(v, dict):
-                self.recursive_cli_structure_test(v)
+                self.recursively_check_cli_structure(v)
             else:  # Should never be reached
                 pytest.fail()

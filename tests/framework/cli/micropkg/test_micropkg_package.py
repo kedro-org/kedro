@@ -27,6 +27,10 @@ class TestMicropkgPackageCommand:
 
         with tarfile.open(sdist_file, "r") as tar:
             sdist_contents = set(tar.getnames())
+        print(tar.closed)
+        tar.close()
+        print("after")
+        print(tar.closed)
 
         expected_files = {
             f"{package_name}-{version}/{package_name}/__init__.py",

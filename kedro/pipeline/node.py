@@ -480,8 +480,8 @@ class Node:
                 ) from exc
 
     def _validate_unique_outputs(self):
-        c = Counter(self.outputs)
-        diff = {k for k in c if c[k] > 1}
+        cnt = Counter(self.outputs)
+        diff = {k for k in cnt if cnt[k] > 1}
         if diff:
             raise ValueError(
                 f"Failed to create node {self} due to duplicate "

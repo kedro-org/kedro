@@ -41,8 +41,8 @@ class TestMicropkgPackageCommand:
         assert expected_files <= sdist_contents
 
     @pytest.mark.skipif(
-        sys.platform.startswith("win") and sys.version_info <= (3, 8, 0),
-        reason="Due to unknown bug in Window Python 3.7",
+        sys.platform.startswith("win") and sys.version_info <= (3, 10, 0),
+        reason="Due to unknown bug in Window Python < 3.10",
     )
     @pytest.mark.parametrize(
         "options,package_name,success_message",

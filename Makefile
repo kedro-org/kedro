@@ -14,13 +14,13 @@ lint:
 	pre-commit run -a --hook-stage manual $(hook)
 
 test:
-	pytest --no-cov --ignore tests/extras/datasets/spark
+	pytest --numprocesses logical --dist loadfile
 
 test-no-spark:
-	pytest --no-cov --ignore tests/extras/datasets/spark
+	pytest --no-cov --ignore tests/extras/datasets/spark --numprocesses logical --dist loadfile
 
 test-no-datasets:
-	pytest --no-cov --ignore tests/extras/datasets/
+	pytest --no-cov --ignore tests/extras/datasets/ --numprocesses logical --dist loadfile
 
 e2e-tests:
 	behave

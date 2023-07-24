@@ -161,6 +161,9 @@ commands:
         # Dependency resolution works best when installing these altogether in one
         # `conda install` command rather than one at a time in several sequential `conda install`s.
       - run:
+          name: Install pip setuptools
+          command: conda activate kedro_builder; make install-pip-setuptools
+      - run:
           name: Install GDAL, Fiona and pytables
           command: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
       - run:

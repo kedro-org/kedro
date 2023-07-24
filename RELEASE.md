@@ -16,6 +16,7 @@
 
 ## Bug fixes and other changes
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
+* Made validation of unique node outputs much faster.
 
 ## Documentation changes
 

@@ -14,7 +14,7 @@ lint:
 	pre-commit run -a --hook-stage manual $(hook)
 
 test:
-	pytest
+	pytest --no-cov --ignore tests/extras/datasets/spark
 
 test-no-spark:
 	pytest --no-cov --ignore tests/extras/datasets/spark

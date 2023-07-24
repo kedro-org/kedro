@@ -41,7 +41,7 @@ class TestMicropkgPackageCommand:
         assert expected_files <= sdist_contents
 
     @pytest.mark.skipif(
-        not sys.platform.startswith("win") and not sys.version_info <= (3, 8, 0),
+        sys.platform.startswith("win") and sys.version_info <= (3, 8, 0),
         reason="Due to unknown bug in Window Python 3.7",
     )
     @pytest.mark.parametrize(

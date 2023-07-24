@@ -1,0 +1,130 @@
+name: Running tests and linter
+
+on:
+  workflow_call:
+    inputs:
+      plugin:
+        type: string
+
+jobs:
+  unit-tests:
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{matrix.python-version}}
+      - name: Cache python packages for Linux
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
+          restore-keys: ${{inputs.plugin}}
+      - name: Cache python packages for Windows
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache@v3
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
+          restore-keys: ${{inputs.plugin}}
+      - name: Install Kedro
+        run: pip install git+https://github.com/kedro-org/kedro@main
+      - name: Install dependencies
+        run: |
+          cd ${{ inputs.plugin }}
+          pip install ".[test]"
+      - name: pip freeze
+        run: pip freeze
+      - name: Run unit tests for Linux / all plugins
+        if: matrix.os != 'windows-latest'
+        run: make plugin=${{ inputs.plugin }} test
+      - name: Run unit tests for Windows / kedro-airflow, kedro-docker, kedro-telemetry
+        if: matrix.os == 'windows-latest' && inputs.plugin != 'kedro-datasets'
+        run: |
+          cd ${{ inputs.plugin }}
+          pytest tests
+      - name: Run unit tests for Windows / kedro-datasets / no spark sequential
+        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets' && matrix.python-version == '3.10'
+        run: |
+          make test-no-spark-sequential
+      - name: Run unit tests for Windows / kedro-datasets / no spark parallel
+        if: matrix.os == 'windows-latest' && inputs.plugin == 'kedro-datasets' && matrix.python-version != '3.10'
+        run: |
+          make test-no-spark
+
+  lint:
+    defaults:
+      run:
+        shell: bash
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+      - name: Cache python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
+          restore-keys: ${{inputs.plugin}}
+      - name: Install dependencies
+        run: |
+            cd ${{ inputs.plugin }}
+            pip install git+https://github.com/kedro-org/kedro@main
+            pip install ".[test]"
+            pip freeze
+      - name: Install pre-commit hooks
+        run: |
+            pre-commit install --install-hooks
+            pre-commit install --hook-type pre-push
+      - name: Run linter
+        run: make plugin=${{ inputs.plugin }} lint
+
+  e2e-tests:
+    # if: inputs.plugin != 'kedro-datasets'
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{matrix.python-version}}
+      - name: Cache python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.plugin}}-${{matrix.os}}-python-${{matrix.python-version}}
+          restore-keys: ${{inputs.plugin}}
+      - name: Install dependencies
+        run: |
+          cd ${{ inputs.plugin }}
+          pip install git+https://github.com/kedro-org/kedro@main
+          pip install ".[test]"
+      - name: pip freeze
+        run: pip freeze
+      - name: Run end to end tests
+        # Custom shell to run kedro-docker e2e-tests because -it flag for `docker run`
+        # isn't supported on Github Actions. See https://github.com/actions/runner/issues/241
+        shell: 'script -q -e -c "bash {0}"'
+        run: make plugin=${{ inputs.plugin }} e2e-tests

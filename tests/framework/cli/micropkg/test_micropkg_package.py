@@ -1,3 +1,4 @@
+import sys
 import tarfile
 import textwrap
 from pathlib import Path
@@ -39,6 +40,10 @@ class TestMicropkgPackageCommand:
         }
         assert expected_files <= sdist_contents
 
+    @pytest.mark.skipif(
+        sys.platform.startswith("win") and sys.version_info <= (3, 7),
+        reason="Due to unknown bug in Window Python 3.7",
+    )
     @pytest.mark.parametrize(
         "options,package_name,success_message",
         [

@@ -1,4 +1,3 @@
-import sys
 import tarfile
 import textwrap
 from pathlib import Path

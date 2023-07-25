@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator, List, Tuple, Union
 
 import click
+import logging
 from build.util import project_wheel_metadata
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
@@ -592,6 +593,7 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
         )
         return micropkg_module.__version__  # type: ignore
     except (AttributeError, ModuleNotFoundError):
+        logger.warning(f"Micropackage version not found in '{metadata.package_name}.{micropkg_module_path}', will take the top-level one in '{metadata.package_name}'")
         # if micropkg version doesn't exist, take the project one
         project_module = import_module(f"{metadata.package_name}")
         return project_module.__version__  # type: ignore

@@ -240,10 +240,6 @@ final_pipeline = (
 * Namespaces can also be arbitrarily nested with the `.` character.
 * `kedro run --namespace=<namespace>` could be used to only run nodes with a specific namespace.
 
-```{note}
-Parameter references (`params:` and `parameters`) will not be namespaced.
-```
-
 </details>
 
 ## How to use a modular pipeline with different parameters

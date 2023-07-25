@@ -43,13 +43,7 @@ def entry_point(mocker, entry_points):
 
 @fixture(scope="module")
 def fake_root_dir(tmp_path_factory):
-    # using tempfile as tmp_path fixture doesn't support module scope
-    # tmpdir = tempfile.mkdtemp()
-    # try:
-    #     yield Path(tmpdir).resolve()
-    # finally:
-    #     shutil.rmtree(tmpdir, ignore_errors=True)
-    return tmp_path_factory.mktemp("cli_tests")
+    return tmp_path_factory.getbasetemp()
 
 
 @fixture(scope="module")

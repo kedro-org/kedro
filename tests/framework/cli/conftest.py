@@ -4,9 +4,7 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
-import shutil
 import sys
-import tempfile
 from importlib import import_module
 from pathlib import Path
 
@@ -44,13 +42,8 @@ def entry_point(mocker, entry_points):
 
 
 @fixture(scope="module")
-def fake_root_dir():
-    # using tempfile as tmp_path fixture doesn't support module scope
-    tmpdir = tempfile.mkdtemp()
-    try:
-        yield Path(tmpdir).resolve()
-    finally:
-        shutil.rmtree(tmpdir, ignore_errors=True)
+def fake_root_dir(tmp_path_factory):
+    return tmp_path_factory.getbasetemp()
 
 
 @fixture(scope="module")

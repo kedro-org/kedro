@@ -495,6 +495,10 @@ class TestMicropkgPackageCommand:
         assert f"{PIPELINE_NAME}/pipeline.py" not in sdist_contents
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win") and sys.version_info < (3, 10, 0),
+    reason="Due to unknown bug in Window Python < 3.10",
+)
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "cleanup_dist", "cleanup_pyproject_toml"
 )

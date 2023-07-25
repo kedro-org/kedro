@@ -119,13 +119,13 @@ commands:
         # `conda install` command rather than one at a time in several sequential `conda install`s.
       - run:
           name: Install GDAL, Fiona and pytables
-          command: conda install -n kedro_builder gdal fiona pytables "pyspark<4.0" make --experimental-solver=libmamba -c conda-forge -y
+          command: conda install -n kedro_builder "biopython<2" gdal fiona pytables "pyspark<4.0" make --experimental-solver=libmamba -c conda-forge -y
       - run:
           name: Show pip information
           command: conda activate kedro_builder; pip debug --verbose
       - run:
           name: Install all requirements
-          command: conda activate kedro_builder; pip install -v -U .[test]
+          command: conda activate kedro_builder; pip install -v -U .[test_windows]
       - run:
           name: Print Python environment
           command: conda activate kedro_builder; make print-python-env

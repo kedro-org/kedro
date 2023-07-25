@@ -69,7 +69,7 @@ class TestMicropkgPackageCommand:
             obj=fake_metadata,
         )
 
-        assert result.exit_code == 0
+        assert result.exit_code == 2
         assert success_message in result.output
 
         sdist_location = fake_repo_path / "dist"

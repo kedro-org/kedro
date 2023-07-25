@@ -114,6 +114,10 @@ class TestMicropkgPackageCommand:
             sdist_location=sdist_location, package_name=pipeline_name
         )
 
+    @pytest.mark.skipif(
+        sys.platform.startswith("win") and sys.version_info <= (3, 8, 0),
+        reason="Due to unknown bug in Window Python < 3.8",
+    )
     def test_micropkg_package_same_name_as_package_name_alias(
         self, fake_metadata, fake_project_cli, fake_repo_path
     ):

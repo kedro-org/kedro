@@ -16,6 +16,10 @@ FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win") and sys.version_info < (3, 10, 0),
+    reason="Due to unknown bug in Window Python < 3.10",
+)
 @pytest.mark.usefixtures("chdir_to_dummy_project", "cleanup_dist")
 class TestMicropkgPackageCommand:
     def assert_sdist_contents_correct(
@@ -40,10 +44,6 @@ class TestMicropkgPackageCommand:
         }
         assert expected_files <= sdist_contents
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win") and sys.version_info <= (3, 10, 0),
-        reason="Due to unknown bug in Window Python < 3.10",
-    )
     @pytest.mark.parametrize(
         "options,package_name,success_message",
         [
@@ -84,10 +84,6 @@ class TestMicropkgPackageCommand:
             sdist_location=sdist_location, package_name=package_name, version="0.1"
         )
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win") and sys.version_info <= (3, 8, 0),
-        reason="Due to unknown bug in Window Python < 3.8",
-    )
     def test_micropkg_package_same_name_as_package_name(
         self, fake_metadata, fake_project_cli, fake_repo_path
     ):
@@ -114,10 +110,6 @@ class TestMicropkgPackageCommand:
             sdist_location=sdist_location, package_name=pipeline_name
         )
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win") and sys.version_info <= (3, 8, 0),
-        reason="Due to unknown bug in Window Python < 3.8",
-    )
     def test_micropkg_package_same_name_as_package_name_alias(
         self, fake_metadata, fake_project_cli, fake_repo_path
     ):

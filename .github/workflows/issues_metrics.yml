@@ -4,11 +4,13 @@ on:
   schedule:
     - cron: '3 2 1 * *'
 
+permissions:
+  issues: write
+
 jobs:
   build:
     name: issue metrics
     runs-on: ubuntu-latest
-    
     steps:
 
     - name: Get dates for last month
@@ -36,12 +38,13 @@ jobs:
     - name: Run issue-metrics tool
       uses: github/issue-metrics@v2
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        SEARCH_QUERY: 'repo:owner/repo is:issue created:${{ env.last_month }} -reason:"not planned"'
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SEARCH_QUERY: 'repo:kedro-org/kedro is:issue created:${{ env.last_month }} -reason:"not planned"'
 
     - name: Create issue
       uses: peter-evans/create-issue-from-file@v4
       with:
         title: Monthly issue metrics report
+        token: ${{ secrets.GITHUB_TOKEN }}
         content-filepath: ./issue_metrics.md
-        assignees: <YOUR_GITHUB_HANDLE_HERE>
+        assignees: noklam

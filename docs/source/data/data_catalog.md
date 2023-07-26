@@ -811,7 +811,7 @@ from kedro.io import MemoryDataSet
 memory = MemoryDataSet(data=None)
 io.add("cars_cache", memory)
 io.save("cars_cache", "Memory can store anything.")
-io.load("car_cache")
+io.load("cars_cache")
 ```
 
 #### Save data to a SQL database for querying

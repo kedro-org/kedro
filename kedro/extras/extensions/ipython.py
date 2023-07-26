@@ -10,7 +10,7 @@ importing the underlying Python functions.
 """
 import warnings
 
-from ...ipython import (  # noqa  # pylint: disable=unused-import
+from ...ipython import (  # noqa  # noqa: unused-import
     load_ipython_extension,
     reload_kedro,
 )

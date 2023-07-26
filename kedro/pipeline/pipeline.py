@@ -32,7 +32,7 @@ def _transcode_split(element: str) -> tuple[str, str]:
     """
     split_name = element.split(TRANSCODING_SEPARATOR)
 
-    if len(split_name) > 2:
+    if len(split_name) > 2:  # noqa: PLR2004
         raise ValueError(
             f"Expected maximum 1 transcoding separator, found {len(split_name) - 1} "
             f"instead: '{element}'."
@@ -71,7 +71,7 @@ class ConfirmNotUniqueError(Exception):
     pass
 
 
-class Pipeline:  # pylint: disable=too-many-public-methods
+class Pipeline:  # noqa: too-many-public-methods
     """A ``Pipeline`` defined as a collection of ``Node`` objects. This class
     treats nodes as part of a graph representation and provides inputs,
     outputs and execution order.
@@ -679,8 +679,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes = [node for node in self.nodes if tags & node.tags]
         return Pipeline(nodes)
 
-    # pylint: disable=too-many-arguments
-    def filter(
+    def filter(  # noqa: too-many-arguments
         self,
         tags: Iterable[str] = None,
         from_nodes: Iterable[str] = None,

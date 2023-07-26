@@ -131,7 +131,7 @@ We will work with you to complete your contribution, but we reserve the right to
        ```
 
 Ensure that your PR builds cleanly before you submit it, by running the CI/CD checks locally, as follows:
-* `make lint`: PEP-8 Standards (`pylint`, `flake8`)
+* `make lint`: PEP-8 Standards (`ruff`, `black`)
 * `make test`: unit tests, 100% coverage (`pytest`, `pytest-cov`)
 * `make e2e-tests`: end-to-end tests (`behave`)
 

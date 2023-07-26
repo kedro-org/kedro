@@ -52,7 +52,7 @@ def call(cmd: list[str], **kwargs):  # pragma: no cover
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
     click.echo(" ".join(shlex.quote(c) for c in cmd))
-    # pylint: disable=subprocess-run-check
+    # noqa: subprocess-run-check
     code = subprocess.run(cmd, **kwargs).returncode
     if code:
         raise click.exceptions.Exit(code=code)
@@ -222,14 +222,14 @@ def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
     pattern = re.compile(package_name + r"([^\w]|$)")
     with reqs_path.open("r", encoding="utf-8") as reqs_file:
         for req_line in reqs_file:
-            req_line = req_line.strip()
+            req_line = req_line.strip()  # noqa: redefined-loop-name
             if pattern.search(req_line):
                 return req_line
 
     raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
-def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
+def _update_verbose_flag(ctx, param, value):  # noqa: unused-argument
     KedroCliError.VERBOSE_ERROR = value
 
 
@@ -265,7 +265,7 @@ class KedroCliError(click.exceptions.ClickException):
 
     def show(self, file=None):
         if file is None:
-            # pylint: disable=protected-access
+            # noqa: protected-access
             file = click._compat.get_text_stderr()
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
@@ -291,12 +291,12 @@ def _clean_pycache(path: Path):
         shutil.rmtree(each, ignore_errors=True)
 
 
-def split_string(ctx, param, value):  # pylint: disable=unused-argument
+def split_string(ctx, param, value):  # noqa: unused-argument
     """Split string by comma."""
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-# pylint: disable=unused-argument,missing-param-doc,missing-type-doc
+# noqa: unused-argument,missing-param-doc,missing-type-doc
 def split_node_names(ctx, param, to_split: str) -> list[str]:
     """Split string by comma, ignoring commas enclosed by square parentheses.
     This avoids splitting the string of nodes names on commas included in
@@ -363,13 +363,13 @@ def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
     return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
 
 
-def _safe_load_entry_point(  # pylint: disable=inconsistent-return-statements
+def _safe_load_entry_point(  # noqa: inconsistent-return-statements
     entry_point,
 ):
     """Load entrypoint safely, if fails it will just skip the entrypoint."""
     try:
         return entry_point.load()
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:  # noqa: broad-except
         logger.warning(
             "Failed to load %s commands from %s. Full exception: %s",
             entry_point.module,
@@ -401,13 +401,13 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
+def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     """CLI callback that replaces command line options
     with values specified in a config file. If command line
     options are passed, they override config file values.
     """
     # for performance reasons
-    import anyconfig  # pylint: disable=import-outside-toplevel
+    import anyconfig  # noqa: import-outside-toplevel
 
     ctx.default_map = ctx.default_map or {}
     section = ctx.info_name
@@ -428,9 +428,9 @@ def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
 
     load_versions_dict = {}
     for load_version in value:
-        load_version = load_version.strip()
+        load_version = load_version.strip()  # noqa: PLW2901
         load_version_list = load_version.split(":", 1)
-        if len(load_version_list) != 2:
+        if len(load_version_list) != 2:  # noqa: PLR2004
             raise KedroCliError(
                 f"Expected the form of 'load_version' to be "
                 f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
@@ -453,9 +453,9 @@ def _split_params(ctx, param, value):
             # which should not be replaced by =
             pass
         else:
-            item = item.replace(":", "=", 1)
+            item = item.replace(":", "=", 1)  # noqa: redefined-loop-name
         items = item.split("=", 1)
-        if len(items) != 2:
+        if len(items) != 2:  # noqa: PLR2004
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "
                 f"Item `{items[0]}` must contain "

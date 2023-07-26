@@ -402,7 +402,7 @@ The `build-docs` command builds [project documentation](../tutorial/package_a_pr
 #### Lint your project
 
 ```{note}
-_This command will be deprecated from Kedro version 0.19.0._
+_This command will be deprecated from Kedro version 0.19.0._. We still recommend to (../development/linting.md) and you can find more help here
 ```
 
 ```bash

@@ -37,7 +37,7 @@ IncrementalDataSet: type[IncrementalDataset]
 
 
 class PartitionedDataset(AbstractDataSet):
-    # pylint: disable=too-many-instance-attributes,protected-access
+    # noqa: too-many-instance-attributes,protected-access
     """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
@@ -135,7 +135,7 @@ class PartitionedDataset(AbstractDataSet):
 
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: too-many-arguments
         self,
         path: str,
         dataset: str | type[AbstractDataSet] | dict[str, Any],
@@ -190,7 +190,7 @@ class PartitionedDataset(AbstractDataSet):
         Raises:
             DatasetError: If versioning is enabled for the underlying dataset.
         """
-        # pylint: disable=import-outside-toplevel
+        # noqa: import-outside-toplevel
         from fsspec.utils import infer_storage_options  # for performance reasons
 
         super().__init__()
@@ -247,7 +247,7 @@ class PartitionedDataset(AbstractDataSet):
     @property
     def _filesystem(self):
         # for performance reasons
-        import fsspec  # pylint: disable=import-outside-toplevel
+        import fsspec  # noqa: import-outside-toplevel
 
         protocol = "s3" if self._protocol in S3_PROTOCOLS else self._protocol
         return fsspec.filesystem(protocol, **self._credentials, **self._fs_args)
@@ -314,7 +314,7 @@ class PartitionedDataset(AbstractDataSet):
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
             if callable(partition_data):
-                partition_data = partition_data()
+                partition_data = partition_data()  # noqa: redefined-loop-name
             dataset.save(partition_data)
         self._invalidate_caches()
 
@@ -381,8 +381,7 @@ class IncrementalDataset(PartitionedDataset):
     DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataSet"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         path: str,
         dataset: str | type[AbstractDataSet] | dict[str, Any],
@@ -500,10 +499,8 @@ class IncrementalDataset(PartitionedDataset):
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> list[str]:
         checkpoint = self._read_checkpoint()
-        checkpoint_path = (
-            self._filesystem._strip_protocol(  # pylint: disable=protected-access
-                self._checkpoint_config[self._filepath_arg]
-            )
+        checkpoint_path = self._filesystem._strip_protocol(  # noqa: protected-access
+            self._checkpoint_config[self._filepath_arg]
         )
 
         def _is_valid_partition(partition) -> bool:

@@ -528,7 +528,7 @@ class TestSparkDataSetVersionedLocal:
     sys.platform.startswith("win"), reason="DBFS doesn't work on Windows"
 )
 class TestSparkDataSetVersionedDBFS:
-    def test_load_latest(  # pylint: disable=too-many-arguments
+    def test_load_latest(  # noqa: too-many-arguments
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
     ):
         mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
@@ -555,7 +555,7 @@ class TestSparkDataSetVersionedDBFS:
 
         assert reloaded.exceptAll(sample_spark_df).count() == 0
 
-    def test_save(  # pylint: disable=too-many-arguments
+    def test_save(  # noqa: too-many-arguments
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
     ):
         mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
@@ -568,7 +568,7 @@ class TestSparkDataSetVersionedDBFS:
         )
         assert (tmp_path / FILENAME / version.save / FILENAME).exists()
 
-    def test_exists(  # pylint: disable=too-many-arguments
+    def test_exists(  # noqa: too-many-arguments
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
     ):
         mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")

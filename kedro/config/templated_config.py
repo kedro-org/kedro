@@ -89,7 +89,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
     https://github.com/jmespath/jmespath.py and https://jmespath.org/.
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         conf_source: str,
         env: str = None,
@@ -264,7 +264,7 @@ def _format_object(val: Any, format_dict: dict[str, Any]) -> Any:
                         f"'{formatted_key}' found"
                     )
 
-                key = formatted_key
+                key = formatted_key  # noqa: PLW2901
 
             new_dict[key] = _format_object(value, format_dict)
 

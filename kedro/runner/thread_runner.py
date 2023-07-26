@@ -81,7 +81,7 @@ class ThreadRunner(AbstractRunner):
             else required_threads
         )
 
-    def _run(  # pylint: disable=too-many-locals,useless-suppression
+    def _run(  # noqa: too-many-locals,useless-suppression
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,

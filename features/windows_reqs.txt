@@ -2,7 +2,7 @@
 # e2e tests on Windows are slow but we don't need to install
 # everything, so just this subset will be enough for CI
 behave==1.2.6
-pandas~=1.3
+pandas~=2.0
 psutil~=5.8
 requests~=2.20
 toml~=0.10.1

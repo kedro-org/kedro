@@ -1,4 +1,4 @@
-name: Run checks on Kedro
+name: Run all checks on Kedro
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
 
-  lint-tests:
+  lint:
     strategy:
       matrix:
         os: [ ubuntu-latest ]

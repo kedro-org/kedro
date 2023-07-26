@@ -103,7 +103,7 @@ def _setup_minimal_env(context):
             "pip",
             "install",
             "-U",
-            "pip>=21.2",
+            "pip>=21.2, <23.2",
             "setuptools>=65.5.1",
             "wheel",
         ],

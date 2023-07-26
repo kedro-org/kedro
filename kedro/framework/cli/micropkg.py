@@ -52,6 +52,8 @@ dependencies = {install_requires}
 find = {{}}
 """
 
+logger = logging.getLogger(__name__)
+
 
 class _EquivalentRequirement(Requirement):
     """Parse a requirement according to PEP 508.

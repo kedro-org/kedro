@@ -140,9 +140,9 @@ def delete_pipeline(
     pipeline_artifacts = _get_pipeline_artifacts(metadata, pipeline_name=name, env=env)
 
     files_to_delete = [
-        pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml"
+        pipeline_artifacts.pipeline_conf / f"{confdir}_{name}.yml"
         for confdir in ("parameters", "catalog")
-        if (pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml").is_file()
+        if (pipeline_artifacts.pipeline_conf / f"{confdir}_{name}.yml").is_file()
     ]
     dirs_to_delete = [
         path

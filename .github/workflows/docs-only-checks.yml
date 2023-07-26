@@ -1,4 +1,4 @@
-name: Run checks on Kedro Docs
+name: Run linter on Kedro Docs
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ "3.7", "3.8", "3.9", "3.10" ]
-    uses: ./.github/workflows/lint-tests.yml
+    uses: ./.github/workflows/lint.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}

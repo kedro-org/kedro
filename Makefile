@@ -8,7 +8,7 @@ clean:
 	pre-commit clean || true
 
 install-pip-setuptools:
-	pip install -U "pip>=21.2" "setuptools>=65.5.1" wheel
+	python -m pip install -U "pip>=21.2, <23.2" "setuptools>=65.5.1" wheel
 
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
@@ -18,6 +18,12 @@ test:
 
 test-no-spark:
 	pytest --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
+
+test-sequential:
+	pytest tests --cov-config pyproject.toml
+
+test-no-spark-sequential:
+	pytest tests --no-cov --ignore tests/extras/datasets/spark
 
 test-no-datasets:
 	pytest --no-cov --ignore tests/extras/datasets/ --numprocesses 4 --dist loadfile

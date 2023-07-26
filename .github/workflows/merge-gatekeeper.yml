@@ -24,4 +24,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           timeout: 1800
           interval: 30
-          ignored: win_e2e_tests-3.7,win_pip_compile-3.9,win_e2e_tests-3.9,win_pip_compile-3.8,lint-3.7,win_pip_compile-3.7,pip_compile-3.7,e2e_tests-3.7,win_unit_tests-3.7,win_unit_tests-3.9,e2e_tests-3.8,win_unit_tests-3.10,win_pip_compile-3.10,win_unit_tests-3.8,e2e_tests-3.9,unit_tests-3.10,unit_tests-3.8,e2e_tests-3.10,lint-3.8,unit_tests-3.9,unit_tests-3.7,win_e2e_tests-3.10,pip_compile-3.8,pip_compile-3.10,win_e2e_tests-3.8,lint-3.9,pip_compile-3.9,lint-3.10,all_circleci_checks_succeeded
+          ignored: 'win_e2e_tests-3.7,ci/circleci: win_pip_compile-3.9,ci/circleci: win_e2e_tests-3.9,ci/circleci: win_pip_compile-3.8,ci/circleci: lint-3.7,ci/circleci: win_pip_compile-3.7,ci/circleci: pip_compile-3.7,ci/circleci: e2e_tests-3.7,ci/circleci: win_unit_tests-3.7,ci/circleci: win_unit_tests-3.9,ci/circleci: e2e_tests-3.8,ci/circleci: win_unit_tests-3.10,ci/circleci: all_circleci_checks_succeeded'

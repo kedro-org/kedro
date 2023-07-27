@@ -62,6 +62,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro build-docs`](#build-the-project-documentation) (deprecated from version 0.19.0)
   * [`kedro build-reqs`](#build-the-projects-dependency-tree) (deprecated from version 0.19.0)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
+  * [`kedro catalog rank`](#rank-dataset-factories-in-the-catalog)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter convert`](#copy-tagged-cells) (deprecated from version 0.19.0)
@@ -402,7 +403,7 @@ The `build-docs` command builds [project documentation](../tutorial/package_a_pr
 #### Lint your project
 
 ```{note}
-_This command will be deprecated from Kedro version 0.19.0._
+_This command will be deprecated from Kedro version 0.19.0._. We still recommend to (../development/linting.md) and you can find more help here
 ```
 
 ```bash
@@ -490,6 +491,14 @@ The command also accepts an optional `--pipeline` argument that allows you to sp
 ```bash
 kedro catalog list --pipeline=ds,de
 ```
+
+##### Rank dataset factories in the catalog
+
+```bash
+kedro catalog rank
+```
+
+The output includes a list of any [dataset factories](../data/data_catalog.md#load-multiple-datasets-with-similar-configuration-using-dataset-factories) in the catalog, ranked by the priority on which they are matched against.
 
 #### Data Catalog
 

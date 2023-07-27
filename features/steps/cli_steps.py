@@ -229,7 +229,7 @@ def add_test_jupyter_nb(context):
     """Create a test jupyter notebook using TEST_JUPYTER_ORG."""
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
-        "wt",
+        "w",
         encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_ORG)
@@ -366,7 +366,7 @@ def simulate_nb_execution(context):
     """
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
-        "wt",
+        "w",
         encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_AFTER_EXEC)
@@ -554,7 +554,7 @@ def check_additional_cell_added(context):
         encoding="utf-8",
     ) as test_nb_fh:
         context.nb_data = json.load(test_nb_fh)
-        assert len(context.nb_data["cells"]) == 2
+        assert len(context.nb_data["cells"]) == 2  # noqa: PLR2004
 
 
 @then("the output should be empty in all the cells in the jupyter notebook")

@@ -1,0 +1,39 @@
+name: Run pip-compile
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        type: string
+      python-version:
+        type: string
+
+jobs:
+  pip-compile:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{inputs.python-version}}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{inputs.python-version}}
+      - run: make install-pip-setuptools
+      - name: Cache python packages for Linux
+        if: inputs.os == 'ubuntu-latest'
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.os}}-python-${{inputs.python-version}}
+      - name: Cache python packages for Windows
+        if: inputs.os == 'windows-latest'
+        uses: actions/cache@v3
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{inputs.os}}-python-${{inputs.python-version}}
+      - name: Install dependencies
+        run: |
+          make install-test-requirements
+          make install-pre-commit
+      - name: Run pip-compile
+        run: make pip-compile

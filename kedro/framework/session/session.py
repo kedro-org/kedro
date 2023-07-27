@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import traceback
+import warnings
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterable
@@ -15,7 +16,7 @@ from typing import Any, Iterable
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
@@ -261,7 +262,15 @@ class KedroSession:
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
         config_loader = self._get_config_loader()
-
+        if isinstance(config_loader, (ConfigLoader, TemplatedConfigLoader)):
+            warnings.warn(
+                f"{type(config_loader).__name__} will be deprecated in Kedro 0.19."
+                f" Please use the OmegaConfigLoader instead. To consult"
+                f" the documentation for OmegaConfigLoader, see here:"
+                f" https://docs.kedro.org/en/stable/configuration/"
+                f"advanced_configuration.html#omegaconfigloader",
+                FutureWarning,
+            )
         context_class = settings.CONTEXT_CLASS
         context = context_class(
             package_name=self._package_name,

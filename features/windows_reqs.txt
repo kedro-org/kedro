@@ -4,7 +4,7 @@
 behave==1.2.6
 pandas~=1.3
 psutil~=5.8
-requests~=2.20
+requests~=2.30
 toml~=0.10.1
 PyYAML>=4.2, <7.0
 packaging>=20.0

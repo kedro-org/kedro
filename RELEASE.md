@@ -16,8 +16,10 @@
 
 ## Bug fixes and other changes
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
+* Pin `pip<23.2` for CI due to a breaking change. See https://github.com/kedro-org/kedro/pull/2813
 
 ## Documentation changes
+- Recommended `ruff` as the linter and remove mentions of `pylint`, `isort`, `flake8`.
 
 ## Breaking changes to the API
 

@@ -286,7 +286,7 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     """
     for node_input in node.inputs:
-        # pylint: disable=protected-access
+        # noqa: protected-access
         if isinstance(catalog._data_sets[node_input], MemoryDataset):
             return False
     return True
@@ -335,7 +335,7 @@ def run_node(
     return node
 
 
-def _collect_inputs_from_hook(
+def _collect_inputs_from_hook(  # noqa: too-many-arguments
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
@@ -343,7 +343,7 @@ def _collect_inputs_from_hook(
     hook_manager: PluginManager,
     session_id: str = None,
 ) -> dict[str, Any]:
-    # pylint: disable=too-many-arguments
+
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
         node=node,
@@ -364,13 +364,12 @@ def _collect_inputs_from_hook(
                     f"'before_node_run' must return either None or a dictionary mapping "
                     f"dataset names to updated values, got '{response_type}' instead."
                 )
-            response = response or {}
-            additional_inputs.update(response)
+            additional_inputs.update(response or {})
 
     return additional_inputs
 
 
-def _call_node_run(
+def _call_node_run(  # noqa: too-many-arguments
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
@@ -378,7 +377,7 @@ def _call_node_run(
     hook_manager: PluginManager,
     session_id: str = None,
 ) -> dict[str, Any]:
-    # pylint: disable=too-many-arguments
+
     try:
         outputs = node.run(inputs)
     except Exception as exc:

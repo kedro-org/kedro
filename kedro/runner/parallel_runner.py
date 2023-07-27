@@ -92,20 +92,18 @@ class ParallelRunnerManager(SyncManager):
     """
 
 
-ParallelRunnerManager.register(  # pylint: disable=no-member
-    "MemoryDataset", MemoryDataset
-)
+ParallelRunnerManager.register("MemoryDataset", MemoryDataset)  # noqa: no-member
 
 
 def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
-    # pylint: disable=import-outside-toplevel,cyclic-import
+    # noqa: import-outside-toplevel,cyclic-import
     from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
     configure_logging(logging_config)
 
 
-def _run_node_synchronization(  # pylint: disable=too-many-arguments
+def _run_node_synchronization(  # noqa: too-many-arguments
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,
@@ -166,7 +164,7 @@ class ParallelRunner(AbstractRunner):
         """
         super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
-        self._manager.start()  # pylint: disable=consider-using-with
+        self._manager.start()  # noqa: consider-using-with
 
         # This code comes from the concurrent.futures library
         # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588
@@ -224,7 +222,7 @@ class ParallelRunner(AbstractRunner):
         will not be synchronized across threads.
         """
 
-        data_sets = catalog._data_sets  # pylint: disable=protected-access
+        data_sets = catalog._data_sets  # noqa: protected-access
 
         unserialisable = []
         for name, data_set in data_sets.items():
@@ -277,7 +275,7 @@ class ParallelRunner(AbstractRunner):
 
         return min(required_processes, self._max_workers)
 
-    def _run(  # pylint: disable=too-many-locals,useless-suppression
+    def _run(  # noqa: too-many-locals,useless-suppression
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
@@ -300,7 +298,7 @@ class ParallelRunner(AbstractRunner):
             Exception: In case of any downstream node failure.
 
         """
-        # pylint: disable=import-outside-toplevel,cyclic-import
+        # noqa: import-outside-toplevel,cyclic-import
 
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)

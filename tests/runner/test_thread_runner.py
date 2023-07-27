@@ -55,7 +55,7 @@ class TestMaxWorkers:
         catalog,
         user_specified_number,
         expected_number,
-    ):  # pylint: disable=too-many-arguments
+    ):  # noqa: too-many-arguments
         """
         We initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 threads.

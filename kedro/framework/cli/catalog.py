@@ -59,8 +59,6 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     data_catalog = context.catalog
     datasets_meta = data_catalog._data_sets
     catalog_ds = set(data_catalog.list())
-    datasets_meta = context.catalog._data_sets
-    catalog_ds = set(context.catalog.list())
 
     target_pipelines = pipeline or pipelines.keys()
 

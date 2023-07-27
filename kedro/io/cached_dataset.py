@@ -96,8 +96,8 @@ class CachedDataset(AbstractDataSet):
 
     def _describe(self) -> dict[str, Any]:
         return {
-            "dataset": self._dataset._describe(),  # pylint: disable=protected-access
-            "cache": self._cache._describe(),  # pylint: disable=protected-access
+            "dataset": self._dataset._describe(),  # noqa: protected-access
+            "cache": self._cache._describe(),  # noqa: protected-access
         }
 
     def _load(self):

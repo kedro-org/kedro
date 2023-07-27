@@ -1,5 +1,5 @@
 """Behave environment setup commands."""
-# pylint: disable=unused-argument
+# noqa: unused-argument
 from __future__ import annotations
 
 import os

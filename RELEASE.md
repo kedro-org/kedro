@@ -16,6 +16,7 @@
 
 ## Bug fixes and other changes
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
+* Updated `kedro catalog list` to show datasets generated with factories.
 * Pin `pip<23.2` for CI due to a breaking change. See https://github.com/kedro-org/kedro/pull/2813
 
 ## Documentation changes

@@ -268,7 +268,8 @@ class KedroSession:
                 f"{type(config_loader).__name__} will be deprecated in Kedro 0.19."
                 f" Please use the OmegaConfigLoader instead. To consult"
                 f" the documentation for OmegaConfigLoader, see here:"
-                f" https://docs.kedro.org/en/stable/configuration/advanced_configuration.html#omegaconfigloader",  # pylint: disable=line-too-long
+                f" https://docs.kedro.org/en/stable/configuration/"
+                f"advanced_configuration.html#omegaconfigloader",
                 FutureWarning,
             )
         context_class = settings.CONTEXT_CLASS

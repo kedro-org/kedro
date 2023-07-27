@@ -40,7 +40,8 @@ def fake_catalog_config():
         "csv_{factory_pattern}": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
     }
     return config
-  
+
+
 @pytest.fixture
 def fake_catalog_with_overlapping_factories():
     config = {

@@ -29,6 +29,7 @@ def mock_pipelines(mocker):
     }
     return mocker.patch("kedro.framework.cli.catalog.pipelines", dummy_pipelines)
 
+
 @pytest.fixture
 def fake_catalog_with_overlapping_factories():
     config = {
@@ -54,6 +55,7 @@ def fake_catalog_with_overlapping_factories():
         },
     }
     return config
+
 
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
@@ -333,6 +335,7 @@ class TestCatalogCreateCommand:
         assert result.exit_code
         assert "Unable to instantiate Kedro session" in result.output
 
+
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
 )
@@ -363,6 +366,7 @@ def test_rank_catalog_factories(
 
     assert yaml_dump_mock.call_count == 1
     assert yaml_dump_mock.call_args[0][0] == expected_patterns_sorted
+
 
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project",

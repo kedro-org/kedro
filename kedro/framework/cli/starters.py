@@ -37,7 +37,7 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 
 
 @define(order=True)
-class KedroStarterSpec:  # pylint: disable=too-few-public-methods
+class KedroStarterSpec:  # noqa: too-few-public-methods
     """Specification of custom kedro starter template
     Args:
         alias: alias of the starter which shows up on `kedro starter list` and is used
@@ -92,7 +92,7 @@ DIRECTORY_ARG_HELP = (
 )
 
 
-# pylint: disable=unused-argument
+# noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
     """Remove readonly files on Windows
     See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
@@ -160,7 +160,7 @@ def _starter_spec_to_dict(
     return format_dict
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
     pass
@@ -347,7 +347,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         KedroCliError: If it fails to generate a project.
     """
     with _filter_deprecation_warnings():
-        # pylint: disable=import-outside-toplevel
+        # noqa: import-outside-toplevel
         from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
@@ -389,7 +389,7 @@ def _get_cookiecutter_dir(
     clones it to ``tmpdir``; if template_path is a file path then directly uses that
     path without copying anything.
     """
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
     from cookiecutter.repository import determine_repo_dir  # for performance reasons
 
@@ -447,7 +447,7 @@ def _fetch_config_from_user_prompts(
         Configuration for starting a new project. This is passed as ``extra_context``
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     from cookiecutter.environment import StrictEnvironment
     from cookiecutter.prompt import read_user_variable, render_variable
 
@@ -472,7 +472,7 @@ def _fetch_config_from_user_prompts(
 
 
 def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     from cookiecutter.generate import generate_context
 
     cookiecutter_context = generate_context(cookiecutter_dir / "cookiecutter.json")
@@ -482,7 +482,7 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
 class _Prompt:
     """Represent a single CLI prompt for `kedro new`"""
 
-    def __init__(self, *args, **kwargs) -> None:  # pylint: disable=unused-argument
+    def __init__(self, *args, **kwargs) -> None:  # noqa: unused-argument
         try:
             self.title = kwargs["title"]
         except KeyError as exc:
@@ -512,7 +512,7 @@ class _Prompt:
 
 def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import git
 
     try:

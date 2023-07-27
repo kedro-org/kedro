@@ -41,7 +41,7 @@ def _is_project(project_path: Union[str, Path]) -> bool:
 
     try:
         return "[tool.kedro]" in metadata_file.read_text(encoding="utf-8")
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa: broad-except
         return False
 
 

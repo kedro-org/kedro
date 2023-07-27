@@ -15,7 +15,7 @@ from kedro.io.core import AbstractDataSet, DatasetError
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-# pylint:disable=too-many-instance-attributes
+# noqa: too-many-instance-attributes
 class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
     """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
@@ -71,8 +71,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint:disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         database: str,
         table: str,
@@ -210,7 +209,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
             )
 
     def _exists(self) -> bool:
-        # noqa # pylint:disable=protected-access
+        # noqa # noqa: protected-access
         return (
             self._get_spark()
             ._jsparkSession.catalog()

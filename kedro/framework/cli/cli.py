@@ -28,7 +28,7 @@ from kedro.framework.cli.utils import (
     _get_entry_points,
     load_entry_points,
 )
-from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
+from kedro.framework.project import LOGGING  # noqa # noqa: unused-import
 from kedro.framework.startup import _is_project, bootstrap_project
 
 LOGO = rf"""
@@ -161,7 +161,7 @@ class KedroCLI(CommandCollection):
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
-        # pylint: disable=line-too-long
+        # noqa: line-too-long
         """Property which loads all project command groups from the
         project and the plugins, then combines them with the built-in ones.
         Built-in commands can be overridden by plugins, which can be

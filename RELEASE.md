@@ -24,6 +24,7 @@
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+* `ConfigLoader` and `TemplatedConfigLoader` will be deprecated. Please use `OmegaConfigLoader` instead.
 
 # Release 0.18.11
 

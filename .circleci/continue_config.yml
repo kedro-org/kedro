@@ -531,7 +531,7 @@ workflows:
       - lint:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - all_circleci_checks_succeeded:
           requires:
             - lint
@@ -547,31 +547,31 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - win_e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - win_unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - lint:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - pip_compile:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - win_pip_compile:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - all_circleci_checks_succeeded:
           requires:
             - e2e_tests
@@ -623,14 +623,14 @@ workflows:
             - kedro-ecr-publish
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
           filters:
             branches:
               only: main
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
           requires:
             - build_docker_image-<<matrix.python_version>>
           filters:
@@ -675,7 +675,7 @@ workflows:
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
       - publish_kedro:
           requires:
             - build_kedro

@@ -363,3 +363,27 @@ def test_rank_catalog_factories(
 
     assert yaml_dump_mock.call_count == 1
     assert yaml_dump_mock.call_args[0][0] == expected_patterns_sorted
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project",
+    "fake_load_context",
+)
+def test_rank_catalog_factories_with_no_factories(
+    fake_project_cli, fake_metadata, fake_load_context
+):
+    mocked_context = fake_load_context.return_value
+
+    catalog_data_sets = {
+        "iris_data": CSVDataSet("test.csv"),
+        "intermediate": MemoryDataset(),
+        "not_used": CSVDataSet("test2.csv"),
+    }
+    mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+
+    result = CliRunner().invoke(
+        fake_project_cli, ["catalog", "rank"], obj=fake_metadata
+    )
+
+    assert not result.exit_code
+    expected_output = "There are no dataset factories in the catalog."
+    assert expected_output in result.output

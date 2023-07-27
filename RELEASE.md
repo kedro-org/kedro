@@ -13,7 +13,7 @@
 ## Major features and improvements
 * Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
 * Activated all built-in resolvers by default for `OmegaConfigLoader` except for `oc.env`.
-* Added `kedro catalog rank` CLI command.
+* Added `kedro catalog rank` CLI command that ranks dataset factories in the catalog by matching priority.
 
 ## Bug fixes and other changes
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.

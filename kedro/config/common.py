@@ -124,7 +124,7 @@ def _load_config_file(
         Parsed configuration.
     """
     # for performance reasons
-    import anyconfig  # pylint: disable=import-outside-toplevel
+    import anyconfig  # noqa: import-outside-toplevel
 
     try:
         # Default to UTF-8, which is Python 3 default encoding, to decode the file
@@ -230,7 +230,7 @@ def _check_duplicate_keys(
 
         if overlapping_keys:
             sorted_keys = ", ".join(sorted(overlapping_keys))
-            if len(sorted_keys) > 100:
+            if len(sorted_keys) > 100:  # noqa: PLR2004
                 sorted_keys = sorted_keys[:100] + "..."
             duplicates.append(f"{processed_file}: {sorted_keys}")
 

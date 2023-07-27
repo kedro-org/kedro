@@ -174,3 +174,18 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
     catalog_path.parent.mkdir(exist_ok=True)
     with catalog_path.open(mode="w") as catalog_file:
         yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)
+
+
+@catalog.command("rank")
+@env_option
+@click.pass_obj
+def rank_catalog_factories(metadata: ProjectMetadata, env):
+    """List all dataset factories in the catalog, ranked by priority by which they are matched."""
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    catalog_factories = context.catalog._dataset_patterns
+    if catalog_factories:
+        click.echo(yaml.dump(list(catalog_factories.keys())))
+    else:
+        click.echo("There are no dataset factories in the catalog.")

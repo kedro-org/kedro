@@ -82,9 +82,9 @@ class TestPackageCommand:
                         "build",
                         "--wheel",
                         "--outdir",
-                        "../dist",
+                        "dist",
                     ],
-                    cwd=str(fake_repo_path / "src"),
+                    cwd=str(fake_repo_path),
                 ),
                 mocker.call(
                     [

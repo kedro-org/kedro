@@ -84,7 +84,8 @@ def ipython(metadata: ProjectMetadata, env, args, **kwargs):  # noqa: unused-arg
 @click.pass_obj  # this will pass the metadata as first argument
 def package(metadata: ProjectMetadata):
     """Package the project as a Python wheel."""
-    source_path = metadata.source_dir
+    # TODO: Detect whether metadata is under project_path or source_path
+    project_path = metadata.project_path
     call(
         [
             sys.executable,
@@ -92,9 +93,9 @@ def package(metadata: ProjectMetadata):
             "build",
             "--wheel",
             "--outdir",
-            "../dist",
+            "dist",
         ],
-        cwd=str(source_path),
+        cwd=str(project_path),
     )
 
     directory = (

@@ -192,7 +192,11 @@ def _create_pipeline(name: str, output_dir: Path) -> Path:
         # noqa: import-outside-toplevel
         from cookiecutter.main import cookiecutter
 
-    template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
+    try:
+        template_path = Path(settings.pipeline_template_path)
+    except AttributeError:
+        template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
+
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
 
     click.echo(f"Creating the pipeline '{name}': ", nl=False)

@@ -107,7 +107,13 @@ def create_pipeline(
             f"Make sure it exists in the project configuration."
         )
 
-    result_path = _create_pipeline(name, package_dir / "pipelines")
+    # Check for existence of a template directory in the project and fall back
+    # TODO will be to also optionally override this from the CLI
+    template_path = Path(metadata.project_path / "templates" / "pipeline")
+    if not template_path.exists():
+        template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
+
+    result_path = _create_pipeline(name, template_path, package_dir / "pipelines")
     _copy_pipeline_tests(name, result_path, package_dir)
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
@@ -187,15 +193,10 @@ def _echo_deletion_warning(message: str, **paths: list[Path]):
         click.echo(indent(paths_str, " " * 2))
 
 
-def _create_pipeline(name: str, output_dir: Path) -> Path:
+def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
     with _filter_deprecation_warnings():
         # noqa: import-outside-toplevel
         from cookiecutter.main import cookiecutter
-
-    try:
-        template_path = Path(settings.pipeline_template_path)
-    except AttributeError:
-        template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
 
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
 

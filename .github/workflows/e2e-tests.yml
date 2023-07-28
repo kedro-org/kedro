@@ -37,7 +37,6 @@ jobs:
           key: ${{inputs.os}}-python-${{inputs.python-version}}
       - name: Install dependencies
         run: |
-          pip --version
           make install-test-requirements
           make install-pre-commit
       - name: pip freeze

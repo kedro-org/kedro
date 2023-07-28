@@ -23,6 +23,7 @@
 
 ## Documentation changes
 - Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
+- Update example of using generator functions in nodes.
 
 ## Breaking changes to the API
 

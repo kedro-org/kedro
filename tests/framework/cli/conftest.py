@@ -78,6 +78,7 @@ def dummy_config(fake_root_dir, fake_metadata):
 
     return config_path
 
+
 def write_file_contents(fname: Path, contents: str):
     """Little helper to make setting up a test template dir easier.
 
@@ -86,8 +87,9 @@ def write_file_contents(fname: Path, contents: str):
     """
     fname.parent.mkdir(parents=True, exist_ok=True)
 
-    with fname.open('w') as f:
+    with fname.open("w") as f:
         f.write(contents)
+
 
 @fixture()
 def fake_local_template_dir(fake_repo_path):
@@ -96,9 +98,11 @@ def fake_local_template_dir(fake_repo_path):
     Note that this is not scoped to module because we don't want to have this folder present in most of the tests,
     so we will tear it down every time.
     """
-    template_path = (fake_repo_path / Path("templates"))
+    template_path = fake_repo_path / Path("templates")
     pipeline_template_path = template_path / Path("pipeline")
-    cookiecutter_template_path = pipeline_template_path / "{{ cookiecutter.pipeline_name }}"
+    cookiecutter_template_path = (
+        pipeline_template_path / "{{ cookiecutter.pipeline_name }}"
+    )
 
     cookiecutter_template_path.mkdir(parents=True)
 
@@ -107,7 +111,7 @@ def fake_local_template_dir(fake_repo_path):
         pipeline_template_path / "cookiecutter.json",
         """
         {"pipeline_name": "default", "kedro_version": "{{ cookiecutter.kedro_version }}"}
-        """.strip()
+        """.strip(),
     )
 
     write_file_contents(
@@ -118,7 +122,8 @@ def fake_local_template_dir(fake_repo_path):
     write_file_contents(cookiecutter_template_path / "__init__.py", "")
 
     write_file_contents(
-        cookiecutter_template_path / r"config/parameters/{{ cookiecutter.pipeline_name }}.yml",
+        cookiecutter_template_path
+        / r"config/parameters/{{ cookiecutter.pipeline_name }}.yml",
         "foo: bar",
     )
 
@@ -130,6 +135,7 @@ def fake_local_template_dir(fake_repo_path):
     yield template_path.resolve()
 
     shutil.rmtree(template_path)
+
 
 @fixture(scope="module")
 def fake_metadata(fake_root_dir):

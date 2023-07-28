@@ -79,7 +79,13 @@ class TestPipelineCreateCommand:
 
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline_template(  # pylint: disable=too-many-locals
-        self, fake_repo_path, fake_project_cli, fake_metadata, env, fake_package_path, fake_local_template_dir
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
+        env,
+        fake_package_path,
+        fake_local_template_dir,
     ):
         pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()
@@ -90,19 +96,28 @@ class TestPipelineCreateCommand:
         cmd += ["-e", env] if env else []
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
-        assert f"Using pipeline template at: '{fake_repo_path / 'templates'}" in result.output
+        assert (
+            f"Using pipeline template at: '{fake_repo_path / 'templates'}"
+            in result.output
+        )
         assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
         assert f"Location: '{pipelines_dir / PIPELINE_NAME}'" in result.output
         assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
 
         # Dummy pipeline rendered correctly
-        assert((pipelines_dir / PIPELINE_NAME / f"pipeline_{PIPELINE_NAME}.py").exists())
+        assert (pipelines_dir / PIPELINE_NAME / f"pipeline_{PIPELINE_NAME}.py").exists()
 
         assert result.exit_code == 0
 
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline_template_command_line_override(  # pylint: disable=too-many-locals
-        self, fake_repo_path, fake_project_cli, fake_metadata, env, fake_package_path, fake_local_template_dir
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
+        env,
+        fake_package_path,
+        fake_local_template_dir,
     ):
         pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()
@@ -121,19 +136,22 @@ class TestPipelineCreateCommand:
         cmd += ["-e", env] if env else []
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
-        assert f"Using pipeline template at: '{fake_repo_path / 'local_templates'}" in result.output
+        assert (
+            f"Using pipeline template at: '{fake_repo_path / 'local_templates'}"
+            in result.output
+        )
         assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
         assert f"Location: '{pipelines_dir / PIPELINE_NAME}'" in result.output
         assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
 
         # Dummy pipeline rendered correctly
-        assert((pipelines_dir / PIPELINE_NAME / f"pipeline_{PIPELINE_NAME}.py").exists())
+        assert (pipelines_dir / PIPELINE_NAME / f"pipeline_{PIPELINE_NAME}.py").exists()
 
         assert result.exit_code == 0
 
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline_skip_config(
-        self, fake_repo_path, fake_project_cli, fake_metadata,  env
+        self, fake_repo_path, fake_project_cli, fake_metadata, env
     ):
         """Test creation of a pipeline with no config"""
 

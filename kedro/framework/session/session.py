@@ -118,6 +118,7 @@ class KedroSession:
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
         _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+        hook_manager.check_pending() # Validate hook_impl respect hook_spec
         self._hook_manager = hook_manager
 
         self._conf_source = conf_source or str(

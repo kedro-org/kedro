@@ -80,8 +80,7 @@ class LambdaDataset(AbstractDataSet):
         else:
             self.__release()
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,

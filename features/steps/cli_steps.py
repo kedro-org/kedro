@@ -11,6 +11,7 @@ import requests
 import toml
 import yaml
 from behave import given, then, when
+from packaging.requirements import Requirement
 
 import kedro
 from features.steps import util
@@ -228,7 +229,7 @@ def add_test_jupyter_nb(context):
     """Create a test jupyter notebook using TEST_JUPYTER_ORG."""
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
-        "wt",
+        "w",
         encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_ORG)
@@ -365,7 +366,7 @@ def simulate_nb_execution(context):
     """
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
-        "wt",
+        "w",
         encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_AFTER_EXEC)
@@ -407,18 +408,16 @@ def update_pyproject_toml(context: behave.runner.Context, new_source_dir):
 
 @given("I have updated kedro requirements")
 def update_kedro_req(context: behave.runner.Context):
-    """Replace kedro as a standalone requirement with a line
-    that includes all of kedro's dependencies (-r kedro/requirements.txt)
-    """
+    """Remove kedro as a standalone requirement."""
     reqs_path = context.root_project_dir / "src" / "requirements.txt"
-    kedro_reqs = f"-r {context.requirements_path.as_posix()}"
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text().splitlines()
         new_reqs = []
         for req in old_reqs:
-            if req.startswith("kedro"):
-                new_reqs.append(kedro_reqs)
+            if req.startswith("kedro") and Requirement(req).name.lower() == "kedro":
+                # Do not include kedro as it's preinstalled in the environment
+                pass
             else:
                 new_reqs.append(req)
         new_reqs = "\n".join(new_reqs)
@@ -551,7 +550,7 @@ def check_additional_cell_added(context):
         encoding="utf-8",
     ) as test_nb_fh:
         context.nb_data = json.load(test_nb_fh)
-        assert len(context.nb_data["cells"]) == 2
+        assert len(context.nb_data["cells"]) == 2  # noqa: PLR2004
 
 
 @then("the output should be empty in all the cells in the jupyter notebook")

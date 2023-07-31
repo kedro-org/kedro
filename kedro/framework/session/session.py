@@ -42,7 +42,7 @@ def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
         git_data["dirty"] = bool(git_status_res.decode().strip())
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa: broad-except
         logger = logging.getLogger(__name__)
         logger.debug("Unable to git describe %s", project_path)
         logger.debug(traceback.format_exc())
@@ -68,7 +68,7 @@ class KedroSessionError(Exception):
     pass
 
 
-# pylint: disable=too-many-instance-attributes
+# noqa: too-many-instance-attributes
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
@@ -93,8 +93,7 @@ class KedroSession:
 
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         session_id: str,
         package_name: str = None,
@@ -119,7 +118,7 @@ class KedroSession:
         )
 
     @classmethod
-    def create(  # pylint: disable=too-many-arguments
+    def create(  # noqa: too-many-arguments
         cls,
         package_name: str = None,
         project_path: Path | str | None = None,
@@ -177,7 +176,7 @@ class KedroSession:
 
         try:
             session_data["username"] = getpass.getuser()
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: broad-except
             logging.getLogger(__name__).debug(
                 "Unable to get username. Full exception: %s", exc
             )
@@ -273,7 +272,7 @@ class KedroSession:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def run(  # pylint: disable=too-many-arguments,too-many-locals
+    def run(  # noqa: too-many-arguments,too-many-locals
         self,
         pipeline_name: str = None,
         tags: Iterable[str] = None,
@@ -375,7 +374,7 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(  # pylint: disable=protected-access
+        catalog = context._get_catalog(  # noqa: protected-access
             save_version=save_version,
             load_versions=load_versions,
         )

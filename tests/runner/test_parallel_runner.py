@@ -103,7 +103,7 @@ class TestMaxWorkers:
         cpu_cores,
         user_specified_number,
         expected_number,
-    ):  # pylint: disable=too-many-arguments
+    ):  # noqa: too-many-arguments
         """
         The system has 2 cores, but we initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 processes.
@@ -250,9 +250,7 @@ class LoggingDataset(AbstractDataSet):
 
 
 if not sys.platform.startswith("win"):
-    ParallelRunnerManager.register(  # pylint: disable=no-member
-        "LoggingDataset", LoggingDataset
-    )
+    ParallelRunnerManager.register("LoggingDataset", LoggingDataset)  # noqa: no-member
 
 
 @pytest.mark.skipif(
@@ -267,7 +265,7 @@ class TestParallelRunnerRelease:
         pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
-        # pylint: disable=no-member
+        # noqa: no-member
         catalog = DataCatalog(
             {
                 "in": runner._manager.LoggingDataset(log, "in", "stuff"),
@@ -291,7 +289,7 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
-        # pylint: disable=no-member
+        # noqa: no-member
         catalog = DataCatalog(
             {
                 "first": runner._manager.LoggingDataset(log, "first"),
@@ -319,7 +317,7 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        # pylint: disable=no-member
+        # noqa: no-member
         catalog = DataCatalog(
             {"dataset": runner._manager.LoggingDataset(log, "dataset")}
         )

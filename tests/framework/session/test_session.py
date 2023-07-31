@@ -575,7 +575,7 @@ class TestKedroSession:
 
         exception = session.store["exception"]
         assert exception["type"] == "tests.framework.session.test_session.FakeException"
-        assert exception["value"] == ""
+        assert not exception["value"]
         assert any(
             "raise FakeException" in tb_line for tb_line in exception["traceback"]
         )

@@ -336,7 +336,7 @@ class TestDataCatalog:
             multi_catalog.list("((")
 
     def test_eq(self, multi_catalog, data_catalog):
-        assert multi_catalog == multi_catalog  # pylint: disable=comparison-with-itself
+        assert multi_catalog == multi_catalog  # noqa: PLR0124
         assert multi_catalog == multi_catalog.shallow_copy()
         assert multi_catalog != data_catalog
 

@@ -9,3 +9,5 @@ static/img/kedro_gitflow.svg
 .coverage.*
 .*\.log
 .*\.iml
+tests/extras/datasets/tensorflow/test_tensorflow_model_dataset.py
+docs/source/meta/images/kedro_gitflow.svg

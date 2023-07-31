@@ -140,7 +140,7 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: too-many-arguments
         self,
         data_sets: dict[str, AbstractDataSet] = None,
         feed_dict: dict[str, Any] = None,
@@ -285,7 +285,9 @@ class DataCatalog:
         layers: dict[str, set[str]] = defaultdict(set)
 
         for ds_name, ds_config in catalog.items():
-            ds_config = _resolve_credentials(ds_config, credentials)
+            ds_config = _resolve_credentials(  # noqa: redefined-loop-name
+                ds_config, credentials
+            )
             if cls._is_pattern(ds_name):
                 # Add each factory to the dataset_patterns dict.
                 dataset_patterns[ds_name] = ds_config
@@ -406,9 +408,7 @@ class DataCatalog:
         if version and isinstance(data_set, AbstractVersionedDataSet):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
-            data_set = data_set._copy(  # pylint: disable=protected-access
-                _version=version
-            )
+            data_set = data_set._copy(_version=version)  # noqa: protected-access
 
         return data_set
 

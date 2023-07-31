@@ -10,25 +10,23 @@ As a project grows and goes through various stages of development it becomes imp
 
 ## Set up Python tools
 There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use
-[`black`](https://github.com/psf/black), [`flake8`](https://github.com/PyCQA/flake8), and
-[`isort`](https://github.com/PyCQA/isort) to format and lint your Kedro projects.
+[`black`](https://github.com/psf/black), [`ruff`](https://beta.ruff.rs).
 - **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
 check for styling inconsistencies and reformat your files in place.
 [You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
-- **`flake8`** is a wrapper around [`pep8`](https://pypi.org/project/pep8/),
-[`pyflakes`](https://pypi.org/project/pyflakes/), and [`mccabe`](https://pypi.org/project/mccabe/) which can lint code and format it with respect to [PEP 8](https://peps.python.org/pep-0008/),
-and check the [cyclomatic complexity](https://www.ibm.com/docs/en/raa/6.1?topic=metrics-cyclomatic-complexity) of your code base.
-[You can read more in the `flake8` documentation](https://flake8.pycqa.org/en/latest/).
-- **`isort`** is a Python library used to reformat code by sorting imports alphabetically and automatically separating them into sections by
+- **`ruff`** is a fast linter that replaces `flake8`, `pylint`, `pyupgrade`, `isort` and [more](https://beta.ruff.rs/docs/rules/).
+  - It helps to make your code compliant to [`pep8`](https://pypi.org/project/pep8/).
+  - It reformats code by sorting imports alphabetically and automatically separating them into sections by
 type. [You can read more in the `isort` documentation](https://pycqa.github.io/isort/).
 
+
 ### Install the tools
-Install `black`, `flake8`, and `isort` by adding the following lines to your project's `src/requirements.txt`
+Install `black` and `ruff` by adding the following lines to your project's `src/requirements.txt`
 file:
 ```text
 black # Used for formatting code
-flake8 # Used for linting and formatting
-isort # Used for formatting code (sorting module imports)
+ruff # Used for linting, formatting and sorting module imports
+
 ```
 To install all the project-specific dependencies, including the linting tools, navigate to the root directory of the
 project and run:
@@ -37,10 +35,29 @@ pip install -r src/requirements.txt
 ```
 Alternatively, you can individually install the linting tools using the following shell commands:
 ```bash
-pip install black
-pip install flake8
-pip install isort
+pip install black ruff
 ```
+#### Configure `ruff`
+`ruff` read configurations from `pyproject.toml` within your project root. You can enable different rule sets within the `[tool.ruff]` section. For example, the rule set `F` is equivalent to `Pyflakes`.
+
+To start with `ruff`, we recommend adding this section to enable a few basic rules sets.
+```toml
+[tool.ruff]
+select = [
+    "F",  # Pyflakes
+    "E",  # Pycodestyle
+    "W",  # Pycodestyle
+    "UP",  # pyupgrade
+    "I",  # isort
+    "PL", # Pylint
+]
+ignore = ["E501"]  # Black take care off line-too-long
+```
+
+```{note}
+It is a good practice to [split your line when it is too long](https://beta.ruff.rs/docs/rules/line-too-long/), so it can be read easily even in a small screen. `ruff` treats this slightly different from `black`, when using together we recommend to disable this rule, i.e. `E501` to avoid conflicts.
+```
+
 #### Configure `flake8`
 
 Store your `flake8` configuration in a file named `setup.cfg` within your project root. The Kedro starters use the [following configuration](https://github.com/kedro-org/kedro-starters/blob/main/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/setup.cfg):
@@ -87,17 +104,11 @@ you want to run before each `commit`.
 Below is a sample `YAML` file with entries for `black`,`flake8`, and `isort`:
 ```yaml
 repos:
-  - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.0.270
     hooks:
-      - id: isort
-        name: isort (python)
-        args: ["--profile", "black"]
-
-  - repo: https://github.com/pycqa/flake8
-    rev: ''  # pick a git hash / tag to point to
-    hooks:
-      - id: flake8
+      - id: ruff
 
   - repo: https://github.com/psf/black
     rev: 22.8.0

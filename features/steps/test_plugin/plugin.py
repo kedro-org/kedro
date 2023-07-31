@@ -11,9 +11,7 @@ logger.setLevel(logging.INFO)
 
 class MyPluginHook:
     @hook_impl
-    def after_catalog_created(
-        self, catalog
-    ):  # pylint: disable=unused-argument, no-self-use
+    def after_catalog_created(self, catalog):  # noqa: unused-argument, no-self-use
         logger.info("Reached after_catalog_created hook")
 
 

@@ -132,7 +132,7 @@ def _validate_transcoded_datasets(catalog: DataCatalog):
         `_transcode_split` function.
 
     """
-    # pylint: disable=protected-access
+    # noqa: protected-access
     for dataset_name in catalog._data_sets.keys():
         _transcode_split(dataset_name)
 
@@ -148,11 +148,10 @@ def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> N
     for key, value in new_dict.items():
         if key not in old_dict:
             old_dict[key] = value
+        elif isinstance(old_dict[key], dict) and isinstance(value, dict):
+            _update_nested_dict(old_dict[key], value)
         else:
-            if isinstance(old_dict[key], dict) and isinstance(value, dict):
-                _update_nested_dict(old_dict[key], value)
-            else:
-                old_dict[key] = value
+            old_dict[key] = value
 
 
 def _expand_full_path(project_path: str | Path) -> Path:

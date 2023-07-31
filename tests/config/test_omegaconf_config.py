@@ -649,3 +649,21 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(str(tmp_path))
         conf.default_run_env = ""
         assert conf["catalog"]["companies"]["type"] == "pandas.CSVDataSet"
+
+    def test_custom_resolvers(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        param_config = {
+            "model_options": {
+                "test_size": "${add: 3, 4}",
+                "random_state": "${plus_2: 1}",
+            }
+        }
+        _write_yaml(base_params, param_config)
+        custom_resolvers = {
+            "add": lambda *x: sum(x),
+            "plus_2": lambda x: x + 2,
+        }
+        conf = OmegaConfigLoader(str(tmp_path), custom_resolvers=custom_resolvers)
+        conf.default_run_env = ""
+        assert conf["parameters"]["model_options"]["test_size"] == 7
+        assert conf["parameters"]["model_options"]["random_state"] == 3

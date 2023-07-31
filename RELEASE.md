@@ -19,10 +19,9 @@
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
 * Made validation of unique node outputs much faster.
 * Updated `kedro catalog list` to show datasets generated with factories.
-* Pinned `pip<23.2` for CI due to a breaking change. See https://github.com/kedro-org/kedro/pull/2813
 
 ## Documentation changes
-- Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
+* Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
 
 ## Breaking changes to the API
 

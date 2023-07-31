@@ -667,3 +667,22 @@ class TestOmegaConfigLoader:
         conf.default_run_env = ""
         assert conf["parameters"]["model_options"]["test_size"] == 7
         assert conf["parameters"]["model_options"]["random_state"] == 3
+
+    def test_overwrite_resolvers(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        # OmegaConf is a singleton, register a resolver to be overwritten
+        OmegaConf.register_new_resolver("custom", lambda x: x + 10)
+
+        param_config = {
+            "model_options": {
+                "test_size": "${custom: 10}",
+            }
+        }
+        _write_yaml(base_params, param_config)
+        custom_resolvers = {
+            "custom": lambda x: x + 20,
+        }
+        conf = OmegaConfigLoader(str(tmp_path), custom_resolvers=custom_resolvers)
+        conf.default_run_env = ""
+        # test_size should be calculated using overwritten custom resolver (x + 20)
+        assert conf["parameters"]["model_options"]["test_size"] == 30

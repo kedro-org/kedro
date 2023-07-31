@@ -53,8 +53,7 @@ class YAMLDataSet(AbstractVersionedDataSet[Dict, Dict]):
 
     DEFAULT_SAVE_ARGS = {"default_flow_style": False}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         save_args: Dict[str, Any] = None,

@@ -68,7 +68,7 @@ OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be sto
 CONF_SOURCE_HELP = """Path of a directory where project configuration is stored."""
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def project_group():  # pragma: no cover
     pass
@@ -76,7 +76,7 @@ def project_group():  # pragma: no cover
 
 @forward_command(project_group, forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
-def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-argument
+def test(metadata: ProjectMetadata, args, **kwargs):  # noqa: ument
     """Run the test suite. (DEPRECATED)"""
     deprecation_message = (
         "DeprecationWarning: Command 'kedro test' is deprecated and "
@@ -101,7 +101,7 @@ def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-a
 @click.pass_obj  # this will pass the metadata as first argument
 def lint(
     metadata: ProjectMetadata, files, check_only, **kwargs
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Run flake8, isort and black. (DEPRECATED)"""
     deprecation_message = (
         "DeprecationWarning: Command 'kedro lint' is deprecated and "
@@ -134,9 +134,7 @@ def lint(
 @forward_command(project_group, forward_help=True)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
-def ipython(
-    metadata: ProjectMetadata, env, args, **kwargs
-):  # pylint: disable=unused-argument
+def ipython(metadata: ProjectMetadata, env, args, **kwargs):  # noqa: unused-argument
     """Open IPython with project specific variables loaded."""
     _check_module_importable("IPython")
 
@@ -238,7 +236,7 @@ def build_docs(metadata: ProjectMetadata, open_docs):
 @click.pass_obj  # this will pass the metadata as first argument
 def build_reqs(
     metadata: ProjectMetadata, input_file, output_file, args, **kwargs
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Run `pip-compile` on src/requirements.txt or the user defined input file and save
     the compiled requirements to src/requirements.lock or the user defined output file.
     (DEPRECATED)
@@ -281,9 +279,7 @@ def build_reqs(
 
 @command_with_verbosity(project_group, "activate-nbstripout")
 @click.pass_obj  # this will pass the metadata as first argument
-def activate_nbstripout(
-    metadata: ProjectMetadata, **kwargs
-):  # pylint: disable=unused-argument
+def activate_nbstripout(metadata: ProjectMetadata, **kwargs):  # noqa: unused-argument
     """Install the nbstripout git hook to automatically clean notebooks. (DEPRECATED)"""
     deprecation_message = (
         "DeprecationWarning: Command 'kedro activate-nbstripout' is deprecated and "
@@ -308,10 +304,9 @@ def activate_nbstripout(
         ) from exc
 
     try:
-        res = subprocess.run(  # pylint: disable=subprocess-run-check
+        res = subprocess.run(  # noqa: subprocess-run-check
             ["git", "rev-parse", "--git-dir"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
         )
         if res.returncode:
             raise KedroCliError("Not a git repository. Run 'git init' first.")
@@ -417,8 +412,7 @@ def activate_nbstripout(
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-# pylint: disable=too-many-arguments,unused-argument,too-many-locals
-def run(
+def run(  # noqa: too-many-arguments,unused-argument,too-many-locals
     tag,
     tags,
     env,

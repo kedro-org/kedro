@@ -24,11 +24,11 @@ dependencies = [
     "importlib-metadata>=3.6; python_version >= '3.8'",
     "importlib_metadata>=3.6, <5.0; python_version < '3.8'",  # The "selectable" entry points were introduced in `importlib_metadata` 3.6 and Python 3.10. Bandit on Python 3.7 relies on a library with `importlib_metadata` < 5.0
     "importlib_resources>=1.3",  # The `files()` API was introduced in `importlib_resources` 1.3 and Python 3.9.
-    "jmespath>=0.9.5, <1.0",
-    "more_itertools~=9.0",
+    "jmespath>=0.9.5, <2.0",
+    "more_itertools>=9,<11",
     "omegaconf~=2.3",
     "parse~=1.19.0",
-    "pip-tools~=6.5",
+    "pip-tools>=6.5,<8",
     "pluggy~=1.0",
     "PyYAML>=4.2, <7.0",
     "rich>=12.0, <14.0",
@@ -78,6 +78,7 @@ exclude = "/templates/|^features/steps/test_starter"
 
 [tool.isort]
 profile = "black"
+
 
 [tool.pylint]
 [tool.pylint.master]
@@ -201,3 +202,18 @@ ignore_imports = [
     "kedro.framework.context.context -> kedro.config",
     "kedro.framework.session.session -> kedro.config"
 ]
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+# select = ["A", "B", "C", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+select = [
+    "F",  # Pyflakes
+    "E",  # Pycodestyle
+    "W",  # Pycodestyle
+    "UP",  # pyupgrade
+    "I",  # isort
+    "PL", # Pylint
+]
+ignore = ["E501"]  # Black take care off line-too-long
+unfixable = []

@@ -13,16 +13,21 @@
 ## Major features and improvements
 * Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
 * Activated all built-in resolvers by default for `OmegaConfigLoader` except for `oc.env`.
+* Added `kedro catalog rank` CLI command that ranks dataset factories in the catalog by matching priority.
 
 ## Bug fixes and other changes
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
+* Made validation of unique node outputs much faster.
+* Updated `kedro catalog list` to show datasets generated with factories.
 * Updated kedro pipeline create to use new /conf file structure.
 
 ## Documentation changes
+* Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
 
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+* `ConfigLoader` and `TemplatedConfigLoader` will be deprecated. Please use `OmegaConfigLoader` instead.
 
 # Release 0.18.11
 

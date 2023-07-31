@@ -1,0 +1,26 @@
+name: Run linter on Kedro Docs
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "docs/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "docs/**"
+
+jobs:
+  lint-tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+    uses: ./.github/workflows/lint.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}

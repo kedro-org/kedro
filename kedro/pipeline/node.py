@@ -19,7 +19,7 @@ class Node:
     run user-provided functions as part of Kedro pipelines.
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         func: Callable,
         inputs: None | str | list[str] | dict[str, str],
@@ -480,11 +480,12 @@ class Node:
                 ) from exc
 
     def _validate_unique_outputs(self):
-        diff = Counter(self.outputs) - Counter(set(self.outputs))
+        cnt = Counter(self.outputs)
+        diff = {k for k in cnt if cnt[k] > 1}
         if diff:
             raise ValueError(
-                f"Failed to create node {self} due to duplicate"
-                f" output(s) {set(diff.keys())}.\nNode outputs must be unique."
+                f"Failed to create node {self} due to duplicate "
+                f"output(s) {diff}.\nNode outputs must be unique."
             )
 
     def _validate_inputs_dif_than_outputs(self):
@@ -518,7 +519,7 @@ def _node_error_message(msg) -> str:
     )
 
 
-def node(
+def node(  # noqa: too-many-arguments
     func: Callable,
     inputs: None | str | list[str] | dict[str, str],
     outputs: None | str | list[str] | dict[str, str],

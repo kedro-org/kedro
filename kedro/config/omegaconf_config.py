@@ -98,7 +98,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 the configuration paths.
             default_run_env: Name of the default run environment. Defaults to `"local"`.
                 Can be overridden by supplying the `env` argument.
-            custom_resolvers:
+            custom_resolvers: A dictionary of custom resolvers to be registered. For more information,
+             see here: https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#custom-resolvers
         """
         self.base_env = base_env
         self.default_run_env = default_run_env

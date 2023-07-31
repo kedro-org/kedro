@@ -16,6 +16,7 @@
 
 ## Bug fixes and other changes
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
+* Updated kedro pipeline create to use new /conf file structure.
 
 ## Documentation changes
 

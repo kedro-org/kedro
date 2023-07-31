@@ -8,7 +8,19 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.12
+# Upcoming Release 0.18.13
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Documentation changes
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.12
 
 ## Major features and improvements
 * Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.

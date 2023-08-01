@@ -312,7 +312,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def _register_new_resolvers(resolvers: dict[str, Callable]):
         """Register custom resolvers"""
         for name, resolver in resolvers.items():
-            OmegaConf.register_new_resolver(name=name, resolver=resolver, replace=True)
+            if not OmegaConf.has_resolver("name"):
+                OmegaConf.register_new_resolver(name=name, resolver=resolver)
 
     @staticmethod
     def _check_duplicates(seen_files_to_keys: dict[Path, set[Any]]):

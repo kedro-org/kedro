@@ -184,19 +184,47 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 ## How to use generator functions in a node
 
-[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255). They are a special kind of function that returns lazy iterators but do not store their entire contents in memory all at once.
-
-To use generators, you need two things
-- change `return` to `yield`
-- Create a [custom dataset](../extend_kedro/custom_datasets.md)  or update the `_load` method to make it appends instead of overwriting the file.
-
+[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255). They are a special kind of function that returns lazy iterators, which are often used for lazy-loading or lazy-saving. It does not store their entire contents in memory all at once so it can be useful to process large dataset that does not fit in memory.
 
 The following code uses a `pandas chunksize` generator to process large datasets within the [`pandas-iris` starter](../kedro_project_setup/starters.md).
+
 
 ### Set up the pandas-iris project
   First set up a project by following the [get started guide](../get_started/new_project.md#create-a-new-project-containing-example-code) to create a Kedro project with the `pandas-iris` starter example code.
 
-Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataSet` in `src/YOUR_PROJECT_NAME/extras/datasets/chunkwise_dataset.py` for your `pandas-iris` project. This dataset is a simplified version of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `a+`.
+
+To use generators, we will do three things:
+- change `return` to `yield`
+- Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataSet`
+- Update `catalog.yml` to use the `ChunkWiseCSVDataSet`
+
+
+
+### Use Generators as Inputs
+Thanks to `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
+
+You need to update your `catalog.yml` as follow:
+```yaml
+example_iris_data:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/iris.csv
+  load_args:
+    chunksize: 1000
+
+X_train_chunk:
+  type: chunk_process.extras.datasets.chunkwise.ChunkWiseCSVDataSet
+  filepath: data/02_intermediate/iris.csv
+  load_args:
+    chunksize: 1000
+  save_args:
+    mode: "a+" # append
+```
+
+### Use Generators as Outputs
+To save data lazily, you will need to create a custom dataset.
+
+
+ This `ChunkWise` is a variant of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `ab+` (append, binary or create mode).
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -225,72 +253,25 @@ class ChunkWiseCSVDataSet(CSVDataSet):
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-
         buf = BytesIO()
         data.to_csv(path_or_buf=buf, **self._save_args)
 
-        with self._fs.open(save_path, mode="ab") as fs_file:
+        with self._fs.open(save_path, mode="ab+") as fs_file:
             fs_file.write(buf.getvalue())
 ```
 </details>
 
-Modify `example_iris_data` in `catalog.yml` by changing `type` to the custom dataset you created above. Add `chunksize: 100` to `load_args` which will return an iterable object. The `chunksize` parameter refers to the number of rows in each chunk.
+After that, you need to make two changes:
+- Update the definition of `split_data` so it use `yield` instead of `return`
 
-```yaml
-example_iris_data:
-  type: YOUR_PROJECT_NAME.extras.datasets.chunkwise_dataset.ChunkWiseCSVDataSet
-  filepath: data/01_raw/iris.csv
-  load_args:
-    chunksize: 100
-```
+Run `kedro run` in your terminal, you should be able to see logs similar to this
 
-Next, in `nodes.py` we repurpose the existing `split_data` function to process chunk-wise data:
 
-```python
-def split_data(
-    data: pd.DataFrame, parameters: Dict[str, Any]
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    """Splits data into features and target training and test sets.
-
-    Args:
-        data: Data containing features and target.
-        parameters: Parameters defined in parameters.yml.
-    Returns:
-        Split data.
-    """
-    # Loop through data in chunks building up the training and test sets
-    for chunk in data:  # Iterate over the chunks from data
-        full_data = pd.concat(
-            [chunk]
-        )  # Converts the TextFileReader object into list of DataFrames
-        data_train = full_data.sample(
-            frac=parameters["train_fraction"], random_state=parameters["random_state"]
-        )
-        data_test = full_data.drop(data_train.index)
-
-        X_train = data_train.drop(columns=parameters["target_column"])
-        X_test = data_test.drop(columns=parameters["target_column"])
-        y_train = data_train[parameters["target_column"]]
-        y_test = data_test[parameters["target_column"]]
-        yield X_train, X_test, y_train, y_test  # Use yield instead of return to get the generator object
-```
-
-We can now `kedro run` in the terminal. The output shows `X_train`, `X_test`, `y_train`, `y_test` saved in chunks:
+You will see the repeat logs indicating the data is saved as multiple chunks.
 
 ```
 ...
-[02/10/23 12:42:55] INFO     Loading data from 'example_iris_data' (ChunkWiseCSVDataSet)...                 data_catalog.py:343
-                    INFO     Loading data from 'parameters' (MemoryDataSet)...                              data_catalog.py:343
-                    INFO     Running node: split: split_data([example_iris_data,parameters]) ->                     node.py:329
-                             [X_train,X_test,y_train,y_test]
-                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                    data_catalog.py:382
-                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                     data_catalog.py:382
-                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                    data_catalog.py:382
-                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                     data_catalog.py:382
-                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                    data_catalog.py:382
-                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                     data_catalog.py:382
-                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                    data_catalog.py:382
-                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                     data_catalog.py:382
-                    INFO     Completed 1 out of 3 tasks                                                 sequential_runner.py:85
+                    INFO     Saving data to 'X_train_chunk' (ChunkWiseCSVDataSet)...      data_catalog.py:514
+                    INFO     Saving data to 'X_train_chunk' (ChunkWiseCSVDataSet)...      data_catalog.py:514
 ...
 ```

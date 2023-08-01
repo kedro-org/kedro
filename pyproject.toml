@@ -215,3 +215,6 @@ select = [
     "PL",  # Pylint
 ]
 ignore = ["E501"]  # Black takes care of line-too-long
+
+[tool.ruff.isort]
+known-first-party = ["kedro"]

@@ -207,11 +207,11 @@ ignore_imports = [
 line-length = 88
 show-fixes = true
 select = [
-    "F",  # Pyflakes
-    "W",  # pycodestyle
-    "E",  # pycodestyle
-    "I",  # isort
-    "UP", # pyupgrade
-    "PL", # Pylint
+    "F",   # Pyflakes
+    "W",   # pycodestyle
+    "E",   # pycodestyle
+    "I",   # isort
+    "UP",  # pyupgrade
+    "PL",  # Pylint
 ]
 ignore = ["E501"]  # Black takes care of line-too-long

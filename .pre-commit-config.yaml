@@ -4,6 +4,14 @@
 default_stages: [commit, manual]
 
 repos:
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      # Ruff version.
+      rev: v0.0.277
+      hooks:
+        - id: ruff
+          args: ["--fix", "--exit-non-zero-on-fix"]
+          exclude: "^kedro/templates/|^features/steps/test_starter/"
+
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v2.2.3
       hooks:
@@ -47,16 +55,6 @@ repos:
           - id: blacken-docs
             additional_dependencies: [black~=22.0]
             entry: blacken-docs --skip-errors
-
-    - repo: https://github.com/astral-sh/ruff-pre-commit
-      # Ruff version.
-      rev: v0.0.277
-      hooks:
-        - id: ruff
-          # PLR2004: Magic value used
-          # PLR0913: Too many arguments
-          args: ["--fix", "--exit-non-zero-on-fix"]
-          exclude: "^kedro/templates/|^features/steps/test_starter/"
 
     - repo: local
       hooks:

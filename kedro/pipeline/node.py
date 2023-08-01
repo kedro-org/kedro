@@ -480,11 +480,12 @@ class Node:
                 ) from exc
 
     def _validate_unique_outputs(self):
-        diff = Counter(self.outputs) - Counter(set(self.outputs))
+        cnt = Counter(self.outputs)
+        diff = {k for k in cnt if cnt[k] > 1}
         if diff:
             raise ValueError(
-                f"Failed to create node {self} due to duplicate"
-                f" output(s) {set(diff.keys())}.\nNode outputs must be unique."
+                f"Failed to create node {self} due to duplicate "
+                f"output(s) {diff}.\nNode outputs must be unique."
             )
 
     def _validate_inputs_dif_than_outputs(self):

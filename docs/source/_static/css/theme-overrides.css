@@ -26,3 +26,10 @@ img[alt^="mermaid-"] {
 .rst-content .important .admonition-title {
   background-color: #f0b37e;
 }
+
+/* Ensure the section title is visible when linked via a hash in the URL */
+:target:before {
+  content: "";
+  display: block;
+  height: 80px;
+}

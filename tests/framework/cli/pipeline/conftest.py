@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import shutil
 
 import pytest
@@ -33,10 +6,29 @@ from kedro.framework.project import settings
 
 
 @pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
+def cleanup_micropackages(fake_repo_path, fake_package_path):
+    packages = {p.name for p in fake_package_path.iterdir() if p.is_dir()}
+
+    yield
+
+    created_packages = {
+        p.name
+        for p in fake_package_path.iterdir()
+        if p.is_dir() and p.name != "__pycache__"
+    }
+    created_packages -= packages
+
+    for micropackage in created_packages:
+        shutil.rmtree(str(fake_package_path / micropackage))
+
+        confs = fake_repo_path / settings.CONF_SOURCE
+        for each in confs.rglob(f"*{micropackage}*"):
+            if each.is_file():
+                each.unlink()
+
+        tests = fake_repo_path / "src" / "tests" / micropackage
+        if tests.is_dir():
+            shutil.rmtree(str(tests))
 
 
 @pytest.fixture(autouse=True)
@@ -61,23 +53,16 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
             if each.is_file():
                 each.unlink()
 
-        dirs_to_delete = (
-            dirpath
-            for pattern in ("parameters", "catalog")
-            for dirpath in confs.rglob(pattern)
-            if dirpath.is_dir() and not any(dirpath.iterdir())
-        )
-        for dirpath in dirs_to_delete:
-            dirpath.rmdir()
+        for pattern in ("parameter", "catalog"):
+            for dirpath in confs.rglob(pattern):
+                if dirpath.is_dir() and not any(dirpath.iterdir()):
+                    dirpath.rmdir()
 
         tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
         if tests.is_dir():
             shutil.rmtree(str(tests))
 
-    # remove requirements.in and reset requirements.txt
-    requirements_in = fake_repo_path / "src" / "requirements.in"
-    if requirements_in.exists():
-        requirements_in.unlink()
+    # reset requirements.txt
     requirements_txt.write_text(requirements)
 
 
@@ -87,3 +72,13 @@ def cleanup_dist(fake_repo_path):
     dist_dir = fake_repo_path / "dist"
     if dist_dir.exists():
         shutil.rmtree(str(dist_dir))
+
+
+@pytest.fixture
+def cleanup_pyproject_toml(fake_repo_path):
+    pyproject_toml = fake_repo_path / "pyproject.toml"
+    existing_toml = pyproject_toml.read_text()
+
+    yield
+
+    pyproject_toml.write_text(existing_toml)

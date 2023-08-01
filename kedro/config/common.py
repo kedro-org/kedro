@@ -1,42 +1,17 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """This module contains methods and facade interfaces for various ConfigLoader
 implementations.
 """
+from __future__ import annotations
 
 import logging
 from glob import iglob
 from pathlib import Path
-from typing import AbstractSet, Any, Dict, Iterable, List, Set
+from typing import AbstractSet, Any, Iterable
 from warnings import warn
 
-from kedro.config import BadConfigException, MissingConfigException
+from yaml.parser import ParserError
+
+from kedro.config.abstract_config import BadConfigException, MissingConfigException
 
 SUPPORTED_EXTENSIONS = [
     ".yml",
@@ -54,7 +29,8 @@ def _get_config_from_patterns(
     conf_paths: Iterable[str],
     patterns: Iterable[str] = None,
     ac_template: bool = False,
-) -> Dict[str, Any]:
+    ac_context: dict[str, Any] = None,
+) -> dict[str, Any]:
     """Recursively scan for configuration files, load and merge them, and
     return them in the form of a config dictionary.
 
@@ -65,6 +41,8 @@ def _get_config_from_patterns(
         ac_template: Boolean flag to indicate whether to use the `ac_template`
             argument of the ``anyconfig.load`` method. Used in the context of
             `_load_config_file` function.
+        ac_context: anyconfig context to pass to ``anyconfig.load`` method.
+            Used in the context of `_load_config_file` function.
 
     Raises:
         ValueError: If 2 or more configuration files inside the same
@@ -83,12 +61,12 @@ def _get_config_from_patterns(
 
     if not patterns:
         raise ValueError(
-            "`patterns` must contain at least one glob "
+            "'patterns' must contain at least one glob "
             "pattern to match config filenames against."
         )
 
-    config = {}  # type: Dict[str, Any]
-    processed_files = set()  # type: Set[Path]
+    config: dict[str, Any] = {}
+    processed_files: set[Path] = set()
 
     for conf_path in conf_paths:
         if not Path(conf_path).is_dir():
@@ -101,17 +79,19 @@ def _get_config_from_patterns(
             Path(conf_path), patterns, processed_files, _config_logger
         )
         new_conf = _load_configs(
-            config_filepaths=config_filepaths, ac_template=ac_template
+            config_filepaths=config_filepaths,
+            ac_template=ac_template,
+            ac_context=ac_context,
         )
 
         common_keys = config.keys() & new_conf.keys()
         if common_keys:
             sorted_keys = ", ".join(sorted(common_keys))
             msg = (
-                "Config from path `%s` will override the following "
-                "existing top-level config keys: %s"
+                "Config from path [magenta]%s[/magenta] will override the "
+                "following existing top-level config keys: '%s'"
             )
-            _config_logger.info(msg, conf_path, sorted_keys)
+            _config_logger.info(msg, conf_path, sorted_keys, extra={"markup": True})
 
         config.update(new_conf)
         processed_files |= set(config_filepaths)
@@ -124,37 +104,58 @@ def _get_config_from_patterns(
     return config
 
 
-def _load_config_file(config_file: Path, ac_template: bool = False) -> Dict[str, Any]:
+def _load_config_file(
+    config_file: Path, ac_template: bool = False, ac_context: dict[str, Any] = None
+) -> dict[str, Any]:
     """Load an individual config file using `anyconfig` as a backend.
 
     Args:
         config_file: Path to a config file to process.
         ac_template: Boolean flag to indicate whether to use the `ac_template`
             argument of the ``anyconfig.load`` method.
+        ac_context: anyconfig context to pass to ``anyconfig.load`` method.
 
     Raises:
         BadConfigException: If configuration is poorly formatted and
             cannot be loaded.
+        ParserError: If file is invalid and cannot be parsed.
 
     Returns:
         Parsed configuration.
     """
     # for performance reasons
-    import anyconfig  # pylint: disable=import-outside-toplevel
+    import anyconfig  # noqa: import-outside-toplevel
 
     try:
         # Default to UTF-8, which is Python 3 default encoding, to decode the file
         with open(config_file, encoding="utf8") as yml:
+            _config_logger.debug(
+                "Loading config file: [bright magenta]%s[/bright magenta]",
+                config_file,
+                extra={"markup": True},
+            )
             return {
                 k: v
-                for k, v in anyconfig.load(yml, ac_template=ac_template).items()
+                for k, v in anyconfig.load(
+                    yml, ac_template=ac_template, ac_context=ac_context
+                ).items()
                 if not k.startswith("_")
             }
     except AttributeError as exc:
         raise BadConfigException(f"Couldn't load config file: {config_file}") from exc
 
+    except ParserError as exc:
+        assert exc.problem_mark is not None
+        line = exc.problem_mark.line
+        cursor = exc.problem_mark.column
+        raise ParserError(
+            f"Invalid YAML file {config_file}, unable to read line {line}, position {cursor}."
+        ) from exc
 
-def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, Any]:
+
+def _load_configs(
+    config_filepaths: list[Path], ac_template: bool, ac_context: dict[str, Any] = None
+) -> dict[str, Any]:
     """Recursively load all configuration files, which satisfy
     a given list of glob patterns from a specific path.
 
@@ -163,6 +164,8 @@ def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, 
         ac_template: Boolean flag to indicate whether to use the `ac_template`
             argument of the ``anyconfig.load`` method. Used in the context of
             `_load_config_file` function.
+        ac_context: anyconfig context to pass to ``anyconfig.load`` method.
+            Used in the context of `_load_config_file` function.
 
     Raises:
         ValueError: If 2 or more configuration files contain the same key(s).
@@ -175,10 +178,12 @@ def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, 
     """
 
     aggregate_config = {}
-    seen_file_to_keys = {}  # type: Dict[Path, AbstractSet[str]]
+    seen_file_to_keys: dict[Path, AbstractSet[str]] = {}
 
     for config_filepath in config_filepaths:
-        single_config = _load_config_file(config_filepath, ac_template=ac_template)
+        single_config = _load_config_file(
+            config_filepath, ac_template=ac_template, ac_context=ac_context
+        )
         _check_duplicate_keys(seen_file_to_keys, config_filepath, single_config)
         seen_file_to_keys[config_filepath] = single_config.keys()
         aggregate_config.update(single_config)
@@ -189,9 +194,9 @@ def _load_configs(config_filepaths: List[Path], ac_template: bool) -> Dict[str, 
 def _lookup_config_filepaths(
     conf_path: Path,
     patterns: Iterable[str],
-    processed_files: Set[Path],
+    processed_files: set[Path],
     logger: Any,
-) -> List[Path]:
+) -> list[Path]:
     config_files = _path_lookup(conf_path, patterns)
 
     seen_files = config_files & processed_files
@@ -207,7 +212,7 @@ def _lookup_config_filepaths(
 
 def _remove_duplicates(items: Iterable[str]):
     """Remove duplicates while preserving the order."""
-    unique_items = []  # type: List[str]
+    unique_items: list[str] = []
     for item in items:
         if item not in unique_items:
             unique_items.append(item)
@@ -220,7 +225,7 @@ def _remove_duplicates(items: Iterable[str]):
 
 
 def _check_duplicate_keys(
-    processed_files: Dict[Path, AbstractSet[str]], filepath: Path, conf: Dict[str, Any]
+    processed_files: dict[Path, AbstractSet[str]], filepath: Path, conf: dict[str, Any]
 ) -> None:
     duplicates = []
 
@@ -229,7 +234,7 @@ def _check_duplicate_keys(
 
         if overlapping_keys:
             sorted_keys = ", ".join(sorted(overlapping_keys))
-            if len(sorted_keys) > 100:
+            if len(sorted_keys) > 100:  # noqa: PLR2004
                 sorted_keys = sorted_keys[:100] + "..."
             duplicates.append(f"{processed_file}: {sorted_keys}")
 
@@ -238,7 +243,7 @@ def _check_duplicate_keys(
         raise ValueError(f"Duplicate keys found in {filepath} and:\n- {dup_str}")
 
 
-def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> Set[Path]:
+def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> set[Path]:
     """Return a set of all configuration files from ``conf_path`` or
     its subdirectories, which satisfy a given list of glob patterns.
 

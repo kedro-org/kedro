@@ -1,67 +1,13 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """Common functions for e2e testing.
 """
+from __future__ import annotations
 
 import os
 import re
-import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from time import sleep, time
-from typing import Any, Callable, Iterator, List
-
-import pandas as pd
-
-
-def get_sample_csv_content():
-    return """col1, col2, col3
-    1, 2, 3
-    4, 5, 6
-    """
-
-
-def get_sample_data_frame():
-    data = {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]}
-    return pd.DataFrame(data)
-
-
-def create_temp_csv():
-    _, csv_file_path = tempfile.mkstemp(suffix=".csv")
-    return csv_file_path
-
-
-def create_sample_csv():
-    csv_file_path = create_temp_csv()
-    with open(csv_file_path, mode="w") as output_file:
-        output_file.write(get_sample_csv_content())
-    return csv_file_path
+from typing import Any, Callable, Iterator
 
 
 @contextmanager
@@ -123,60 +69,11 @@ def wait_for(
 
         sleep(sleep_for)
     raise WaitForException(
-        "func: %s, didn't return within specified timeout: %d" % (func, timeout_)
+        f"func: {func}, didn't return within specified timeout: {timeout_}"
     )
 
 
-def get_logline_count(logfile: str) -> int:
-    """Get line count in logfile
-
-    Note: If logfile doesn't exist will return 0
-
-    Args:
-        logfile: path to logfile
-
-    Returns:
-        line count of logfile
-    """
-    try:
-        with open(logfile) as file_handle:
-            return sum(1 for i in file_handle)
-    except FileNotFoundError:
-        return 0
-
-
-def get_last_logline(logfile: str) -> str:
-    """Get last line of logfile
-
-    Args:
-        logfile: path to logfile
-
-    Returns:
-        last line of logfile
-    """
-    line = ""
-    with open(logfile) as file_handle:
-        for line in file_handle:
-            pass
-
-    return line
-
-
-def get_logfile_path(proj_dir: Path) -> str:
-    """
-    Helper function to fet full path of `pipeline.log` inside project
-
-    Args:
-        proj_dir: path to proj_dir
-
-    Returns:
-        path to `pipeline.log`
-    """
-    log_file = (proj_dir / "logs" / "visualization" / "pipeline.log").absolute()
-    return str(log_file)
-
-
-def parse_csv(text: str) -> List[str]:
+def parse_csv(text: str) -> list[str]:
     """Parse comma separated **double quoted** strings in behave steps
 
     Args:

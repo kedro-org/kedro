@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """A collection of CLI commands for working with Kedro catalog."""
 from collections import defaultdict
 
@@ -41,15 +13,10 @@ from kedro.framework.startup import ProjectMetadata
 
 def _create_session(package_name: str, **kwargs):
     kwargs.setdefault("save_on_close", False)
-    try:
-        return KedroSession.create(package_name, **kwargs)
-    except Exception as exc:
-        raise KedroCliError(
-            f"Unable to instantiate Kedro session.\nError: {exc}"
-        ) from exc
+    return KedroSession.create(package_name, **kwargs)
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def catalog_cli():  # pragma: no cover
     pass
@@ -60,11 +27,12 @@ def catalog():
     """Commands for working with catalog."""
 
 
-# pylint: disable=too-many-locals
+# noqa: too-many-locals
 @catalog.command("list")
 @env_option
 @click.option(
     "--pipeline",
+    "-p",
     type=str,
     default="",
     help="Name of the modular pipeline to run. If not set, "
@@ -74,14 +42,19 @@ def catalog():
 @click.pass_obj
 def list_datasets(metadata: ProjectMetadata, pipeline, env):
     """Show datasets per type."""
-    title = "DataSets in '{}' pipeline"
+    title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
     mentioned = "Datasets mentioned in pipeline"
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
-    datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
-    catalog_ds = set(context.catalog.list())
+    try:
+        datasets_meta = context.catalog._data_sets  # noqa: protected-access
+        catalog_ds = set(context.catalog.list())
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro Catalog.\nError: {exc}"
+        ) from exc
 
     target_pipelines = pipeline or pipelines.keys()
 
@@ -93,7 +66,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         else:
             existing_pls = ", ".join(sorted(pipelines.keys()))
             raise KedroCliError(
-                f"`{pipe}` pipeline not found! Existing pipelines: {existing_pls}"
+                f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
             )
 
         unused_ds = catalog_ds - pipeline_ds
@@ -104,7 +77,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
 
         if default_ds:
-            used_by_type["DefaultDataSet"].extend(default_ds)
+            used_by_type["DefaultDataset"].extend(default_ds)
 
         data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
         result[title.format(pipe)] = {key: value for key, value in data if value}
@@ -130,6 +103,7 @@ def _map_type_to_datasets(datasets, datasets_meta):
 @env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
 @click.option(
     "--pipeline",
+    "-p",
     "pipeline_name",
     type=str,
     required=True,
@@ -139,9 +113,9 @@ def _map_type_to_datasets(datasets, datasets_meta):
 def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     """Create Data Catalog YAML configuration with missing datasets.
 
-    Add `MemoryDataSet` datasets to Data Catalog YAML configuration file
-    for each dataset in a registered pipeline if it is missing from
-    the `DataCatalog`.
+    Add ``MemoryDataset`` datasets to Data Catalog YAML configuration
+    file for each dataset in a registered pipeline if it is missing from
+    the ``DataCatalog``.
 
     The catalog configuration will be saved to
     `<conf_source>/<env>/catalog/<pipeline_name>.yml` file.
@@ -155,7 +129,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     if not pipeline:
         existing_pipelines = ", ".join(sorted(pipelines.keys()))
         raise KedroCliError(
-            f"`{pipeline_name}` pipeline not found! Existing pipelines: {existing_pipelines}"
+            f"'{pipeline_name}' pipeline not found! Existing pipelines: {existing_pipelines}"
         )
 
     pipe_datasets = {
@@ -166,7 +140,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
 
     catalog_datasets = {
         ds_name
-        for ds_name in context.catalog._data_sets.keys()  # pylint: disable=protected-access
+        for ds_name in context.catalog._data_sets.keys()  # noqa: protected-access
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 
@@ -193,7 +167,7 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
         catalog_config = {}
 
     for ds_name in missing_ds:
-        catalog_config[ds_name] = {"type": "MemoryDataSet"}
+        catalog_config[ds_name] = {"type": "MemoryDataset"}
 
     # Create only `catalog` folder under existing environment
     # (all parent folders must exist).

@@ -1,42 +1,17 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files from specified paths, and format template strings
 with the values from the passed dictionary.
 """
+from __future__ import annotations
+
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Iterable
 
 import jmespath
 
-from kedro.config import AbstractConfigLoader
+from kedro.config.abstract_config import AbstractConfigLoader
 from kedro.config.common import _get_config_from_patterns, _remove_duplicates
 
 IDENTIFIER_PATTERN = re.compile(
@@ -114,16 +89,17 @@ class TemplatedConfigLoader(AbstractConfigLoader):
     https://github.com/jmespath/jmespath.py and https://jmespath.org/.
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         conf_source: str,
         env: str = None,
-        runtime_params: Dict[str, Any] = None,
+        runtime_params: dict[str, Any] = None,
+        config_patterns: dict[str, list[str]] = None,
         *,
         base_env: str = "base",
         default_run_env: str = "local",
-        globals_pattern: Optional[str] = None,
-        globals_dict: Optional[Dict[str, Any]] = None,
+        globals_pattern: str | None = None,
+        globals_dict: dict[str, Any] | None = None,
     ):
         """Instantiates a ``TemplatedConfigLoader``.
 
@@ -131,6 +107,9 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             conf_source: Path to use as root directory for loading configuration.
             env: Environment that will take precedence over base.
             runtime_params: Extra parameters passed to a Kedro run.
+            config_patterns: Regex patterns that specify the naming convention for configuration
+                files so they can be loaded. Can be customised by supplying config_patterns as
+                in `CONFIG_LOADER_ARGS` in `settings.py`.
             base_env:
             default_run_env:
             globals_pattern: Optional keyword-only argument specifying a glob
@@ -141,6 +120,13 @@ class TemplatedConfigLoader(AbstractConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
+        self.config_patterns = {
+            "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
+            "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
+            "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
+        }
+        self.config_patterns.update(config_patterns or {})
+
         super().__init__(
             conf_source=conf_source, env=env, runtime_params=runtime_params
         )
@@ -150,7 +136,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         self._config_mapping = (
             _get_config_from_patterns(
                 conf_paths=self.conf_paths,
-                patterns=list(globals_pattern),
+                patterns=[globals_pattern],
                 ac_template=False,
             )
             if globals_pattern
@@ -159,18 +145,31 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         globals_dict = deepcopy(globals_dict) or {}
         self._config_mapping = {**self._config_mapping, **globals_dict}
 
+    def __getitem__(self, key):
+        # Allow bypassing of loading config from patterns if a key and value have been set
+        # explicitly on the ``TemplatedConfigLoader`` instance.
+        if key in self:
+            return super().__getitem__(key)
+        return self.get(*self.config_patterns[key])
+
+    def __repr__(self):  # pragma: no cover
+        return (
+            f"TemplatedConfigLoader(conf_source={self.conf_source}, env={self.env}, "
+            f"config_patterns={self.config_patterns})"
+        )
+
     @property
     def conf_paths(self):
         """Property method to return deduplicated configuration paths."""
         return _remove_duplicates(self._build_conf_paths())
 
-    def get(self, *patterns: str) -> Dict[str, Any]:
+    def get(self, *patterns: str) -> dict[str, Any]:  # type: ignore
         """Tries to resolve the template variables in the config dictionary
         provided by the ``ConfigLoader`` (super class) ``get`` method using the
         dictionary of replacement values obtained in the ``__init__`` method.
 
         Args:
-            patterns: Glob patterns to match. Files, which names match
+            *patterns: Glob patterns to match. Files, which names match
                 any of the specified patterns, will be processed.
 
         Returns:
@@ -178,15 +177,13 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             configuration files. **Note:** any keys that start with `_`
             will be ignored. String values wrapped in `${...}` will be
             replaced with the result of the corresponding JMESpath
-            expression evaluated against globals (see `__init` for more
-            configuration files. **Note:** any keys that start with `_`
-            details).
+            expression evaluated against globals.
 
         Raises:
             ValueError: malformed config found.
         """
         config_raw = _get_config_from_patterns(
-            conf_paths=self.conf_paths, patterns=list(patterns), ac_template=True
+            conf_paths=self.conf_paths, patterns=patterns, ac_template=True
         )
         return _format_object(config_raw, self._config_mapping)
 
@@ -198,7 +195,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         ]
 
 
-def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
+def _format_object(val: Any, format_dict: dict[str, Any]) -> Any:
     """Recursive function that loops through the values of a map. In case another
     map or a list is encountered, it calls itself. When a string is encountered,
     it will use the `format_dict` to replace strings that look like `${expr}`,
@@ -247,8 +244,8 @@ def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
         if value is None:
             if match.group("default") is None:
                 raise ValueError(
-                    "Failed to format pattern '{}': "
-                    "no config value found, no default provided".format(match.group(0))
+                    f"Failed to format pattern '{match.group(0)}': "
+                    f"no config value found, no default provided"
                 )
             return match.group("default")
 
@@ -262,11 +259,11 @@ def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
                 formatted_key = _format_object(key, format_dict)
                 if not isinstance(formatted_key, str):
                     raise ValueError(
-                        "When formatting '{}' key, only string values can be used. "
-                        "'{}' found".format(key, formatted_key)
+                        f"When formatting '{key}' key, only string values can be used. "
+                        f"'{formatted_key}' found"
                     )
 
-                key = formatted_key
+                key = formatted_key  # noqa: PLW2901
 
             new_dict[key] = _format_object(value, format_dict)
 

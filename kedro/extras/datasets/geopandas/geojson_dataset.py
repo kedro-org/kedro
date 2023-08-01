@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """GeoJSONDataSet loads and saves data to a local geojson file. The
 underlying functionality is supported by geopandas, so it supports all
 allowed geopandas (pandas) options for loading and saving geosjon files.
@@ -39,14 +11,22 @@ import geopandas as gpd
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
-class GeoJSONDataSet(AbstractVersionedDataSet):
+
+class GeoJSONDataSet(
+    AbstractVersionedDataSet[
+        gpd.GeoDataFrame, Union[gpd.GeoDataFrame, Dict[str, gpd.GeoDataFrame]]
+    ]
+):
     """``GeoJSONDataSet`` loads/saves data to a GeoJSON file using an underlying filesystem
     (eg: local, S3, GCS).
     The underlying functionality is supported by geopandas, so it supports all
@@ -61,10 +41,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
         >>>
         >>> data = gpd.GeoDataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])
-        >>> # data_set = GeoJSONDataSet(filepath="gcs://bucket/test.geojson",
-        >>>                                save_args=None)
-        >>> data_set = GeoJSONDataSet(filepath="test.geojson",
-        >>>                                save_args=None)
+        >>> data_set = GeoJSONDataSet(filepath="test.geojson", save_args=None)
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>>
@@ -75,8 +52,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"driver": "GeoJSON"}
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -96,10 +72,10 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
                 Note: `http(s)` doesn't support versioning.
             load_args: GeoPandas options for loading GeoJSON files.
                 Here you can find all available arguments:
-                https://geopandas.org/docs/reference/api/geopandas.read_file.html#geopandas.read_file
+                https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html
             save_args: GeoPandas options for saving geojson files.
                 Here you can find all available arguments:
-                https://geopandas.org/docs/reference/api/geopandas.GeoDataFrame.to_file.html
+                https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.to_file.html
                 The default_save_arg driver is 'GeoJSON', all others preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
@@ -158,18 +134,17 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
         return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _release(self) -> None:
         self.invalidate_cache()

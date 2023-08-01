@@ -1,35 +1,10 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
+from __future__ import annotations
+
 import logging
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -38,57 +13,43 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
+from kedro.framework.context.context import KedroContext
 from kedro.framework.hooks import hook_impl
-from kedro.framework.hooks.manager import get_hook_manager
-from kedro.framework.project import _ProjectPipelines, _ProjectSettings
+from kedro.framework.project import (
+    _ProjectPipelines,
+    _ProjectSettings,
+    configure_project,
+)
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.node import Node, node
-from kedro.versioning import Journal
 
 logger = logging.getLogger(__name__)
+
+MOCK_PACKAGE_NAME = "fake_package"
 
 
 @pytest.fixture
 def mock_package_name() -> str:
-    return "mock_package_name"
+    return MOCK_PACKAGE_NAME
 
 
-@pytest.fixture
-def local_logging_config() -> Dict[str, Any]:
-    return {
-        "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {"kedro": {"level": "INFO", "handlers": ["console"]}},
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
-    }
-
-
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
 
 
-def _write_toml(filepath: Path, config: Dict):
+def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     toml_str = toml.dumps(config)
     filepath.write_text(toml_str)
 
 
 def _assert_hook_call_record_has_expected_parameters(
-    call_record: logging.LogRecord, expected_parameters: List[str]
+    call_record: logging.LogRecord, expected_parameters: list[str]
 ):
     """Assert the given call record has all expected parameters."""
     for param in expected_parameters:
@@ -119,27 +80,16 @@ def local_config(tmp_path):
 
 
 @pytest.fixture(autouse=True)
-def clear_hook_manager():
-    yield
-    hook_manager = get_hook_manager()
-    plugins = hook_manager.get_plugins()
-    for plugin in plugins:
-        hook_manager.unregister(plugin)
-
-
-@pytest.fixture(autouse=True)
-def config_dir(tmp_path, local_config, local_logging_config):
+def config_dir(tmp_path, local_config):
     catalog = tmp_path / "conf" / "base" / "catalog.yml"
     credentials = tmp_path / "conf" / "local" / "credentials.yml"
-    logging = tmp_path / "conf" / "local" / "logging.yml"
     pyproject_toml = tmp_path / "pyproject.toml"
     _write_yaml(catalog, local_config)
     _write_yaml(credentials, {"dev_s3": "foo"})
-    _write_yaml(logging, local_logging_config)
     payload = {
         "tool": {
             "kedro": {
-                "project_version": kedro_version,
+                "kedro_init_version": kedro_version,
                 "project_name": "test hooks",
                 "package_name": "test_hooks",
             }
@@ -163,7 +113,7 @@ def dummy_dataframe() -> pd.DataFrame:
 
 @pytest.fixture
 def mock_pipeline() -> Pipeline:
-    return Pipeline(
+    return modular_pipeline(
         [
             node(identity_node, "cars", "planes", name="node1"),
             node(identity_node, "boats", "ships", name="node2"),
@@ -220,12 +170,11 @@ class LoggingHooks:
     def after_catalog_created(
         self,
         catalog: DataCatalog,
-        conf_catalog: Dict[str, Any],
-        conf_creds: Dict[str, Any],
-        feed_dict: Dict[str, Any],
+        conf_catalog: dict[str, Any],
+        conf_creds: dict[str, Any],
+        feed_dict: dict[str, Any],
         save_version: str,
-        load_versions: Dict[str, str],
-        run_id: str,
+        load_versions: dict[str, str],
     ):
         logger.info(
             "Catalog created",
@@ -236,7 +185,6 @@ class LoggingHooks:
                 "feed_dict": feed_dict,
                 "save_version": save_version,
                 "load_versions": load_versions,
-                "run_id": run_id,
             },
         )
 
@@ -245,9 +193,9 @@ class LoggingHooks:
         self,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
+        inputs: dict[str, Any],
         is_async: str,
-        run_id: str,
+        session_id: str,
     ) -> None:
         logger.info(
             "About to run node",
@@ -256,7 +204,7 @@ class LoggingHooks:
                 "catalog": catalog,
                 "inputs": inputs,
                 "is_async": is_async,
-                "run_id": run_id,
+                "session_id": session_id,
             },
         )
 
@@ -265,10 +213,10 @@ class LoggingHooks:
         self,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
-        outputs: Dict[str, Any],
+        inputs: dict[str, Any],
+        outputs: dict[str, Any],
         is_async: str,
-        run_id: str,
+        session_id: str,
     ) -> None:
         logger.info(
             "Ran node",
@@ -278,7 +226,7 @@ class LoggingHooks:
                 "inputs": inputs,
                 "outputs": outputs,
                 "is_async": is_async,
-                "run_id": run_id,
+                "session_id": session_id,
             },
         )
 
@@ -288,9 +236,9 @@ class LoggingHooks:
         error: Exception,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
+        inputs: dict[str, Any],
         is_async: bool,
-        run_id: str,
+        session_id: str,
     ):
         logger.info(
             "Node error",
@@ -300,13 +248,13 @@ class LoggingHooks:
                 "catalog": catalog,
                 "inputs": inputs,
                 "is_async": is_async,
-                "run_id": run_id,
+                "session_id": session_id,
             },
         )
 
     @hook_impl
     def before_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self, run_params: dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         logger.info(
             "About to run pipeline",
@@ -316,8 +264,8 @@ class LoggingHooks:
     @hook_impl
     def after_pipeline_run(
         self,
-        run_params: Dict[str, Any],
-        run_result: Dict[str, Any],
+        run_params: dict[str, Any],
+        run_result: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
     ) -> None:
@@ -335,7 +283,7 @@ class LoggingHooks:
     def on_pipeline_error(
         self,
         error: Exception,
-        run_params: Dict[str, Any],
+        run_params: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
     ) -> None:
@@ -350,70 +298,41 @@ class LoggingHooks:
         )
 
     @hook_impl
-    def before_dataset_loaded(self, dataset_name: str) -> None:
-        logger.info("Before dataset loaded", extra={"dataset_name": dataset_name})
-
-    @hook_impl
-    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_loaded(self, dataset_name: str, node: Node) -> None:
         logger.info(
-            "After dataset loaded", extra={"dataset_name": dataset_name, "data": data}
+            "Before dataset loaded", extra={"dataset_name": dataset_name, "node": node}
         )
 
     @hook_impl
-    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def after_dataset_loaded(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "Before dataset saved", extra={"dataset_name": dataset_name, "data": data}
+            "After dataset loaded",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
     @hook_impl
-    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
+            "Before dataset saved",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
     @hook_impl
-    def register_catalog(
-        self,
-        catalog: Optional[Dict[str, Dict[str, Any]]],
-        credentials: Dict[str, Dict[str, Any]],
-        load_versions: Dict[str, str],
-        save_version: str,
-        journal: Journal,
-    ) -> DataCatalog:
+    def after_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "Registering catalog",
-            extra={
-                "catalog": catalog,
-                "credentials": credentials,
-                "load_versions": load_versions,
-                "save_version": save_version,
-                "journal": journal,
-            },
-        )
-        return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version, journal
+            "After dataset saved",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
-
-@pytest.fixture(autouse=True)
-def patched_validate_module(mocker):
-    """Patching this so KedroSession could be created for testing purpose
-    since KedroSession.create is still calling configure_project at the moment
-    """
-    mocker.patch("kedro.framework.project._validate_module")
+    @hook_impl
+    def after_context_created(self, context: KedroContext) -> None:
+        logger.info("After context created", extra={"context": context})
 
 
 @pytest.fixture
 def project_hooks():
     """A set of project hook implementations that log to stdout whenever it is invoked."""
     return LoggingHooks()
-
-
-@pytest.fixture(autouse=True)
-def mock_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)
@@ -434,9 +353,9 @@ def mock_pipelines(mocker, mock_pipeline):
 
 def _mock_imported_settings_paths(mocker, mock_settings):
     for path in [
-        "kedro.framework.context.context.settings",
         "kedro.framework.session.session.settings",
         "kedro.framework.project.settings",
+        "kedro.runner.parallel_runner.settings",
     ]:
         mocker.patch(path, mock_settings)
     return mock_settings
@@ -454,6 +373,17 @@ def mock_settings(mocker, project_hooks):
 def mock_session(
     mock_settings, mock_package_name, tmp_path
 ):  # pylint: disable=unused-argument
-    return KedroSession.create(
+    configure_project(mock_package_name)
+    session = KedroSession.create(
         mock_package_name, tmp_path, extra_params={"params:key": "value"}
     )
+    yield session
+    session.close()
+
+
+@pytest.fixture(autouse=True)
+def mock_validate_settings(mocker):
+    # KedroSession eagerly validates that a project's settings.py is correct by
+    # importing it. settings.py does not actually exists as part of this test suite
+    # since we are testing session in isolation, so the validation is patched.
+    mocker.patch("kedro.framework.session.session.validate_settings")

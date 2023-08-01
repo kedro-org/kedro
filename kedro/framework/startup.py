@@ -1,34 +1,7 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """This module provides metadata for a Kedro project."""
 import os
 import sys
+import warnings
 from pathlib import Path
 from typing import NamedTuple, Union
 
@@ -49,13 +22,14 @@ class ProjectMetadata(NamedTuple):
     project_path: Path
     project_version: str
     source_dir: Path
+    kedro_init_version: str
 
 
-def _version_mismatch_error(project_version) -> str:
+def _version_mismatch_error(kedro_init_version) -> str:
     return (
-        f"Your Kedro project version {project_version} does not match Kedro package "
+        f"Your Kedro project version {kedro_init_version} does not match Kedro package "
         f"version {kedro_version} you are running. Make sure to update your project "
-        f"template. See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
+        f"template. See https://github.com/kedro-org/kedro/blob/main/RELEASE.md "
         f"for how to migrate your Kedro project."
     )
 
@@ -64,17 +38,15 @@ def _is_project(project_path: Union[str, Path]) -> bool:
     metadata_file = Path(project_path).expanduser().resolve() / _PYPROJECT
     if not metadata_file.is_file():
         return False
+
     try:
-        metadata_dict = anyconfig.load(metadata_file)
-        if "tool" in metadata_dict and "kedro" in metadata_dict["tool"]:
-            return True
-    except Exception:  # pylint: disable=broad-except
+        return "[tool.kedro]" in metadata_file.read_text(encoding="utf-8")
+    except Exception:  # noqa: broad-except
         return False
-    return False
 
 
 def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
-    """Read project metadata from `<project_path>/pyproject.toml` config file,
+    """Read project metadata from `<project_root>/pyproject.toml` config file,
     under the `[tool.kedro]` section.
 
     Args:
@@ -97,7 +69,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             f"Could not find the project configuration file '{_PYPROJECT}' in {project_path}. "
             f"If you have created your project with Kedro "
             f"version <0.17.0, make sure to update your project template. "
-            f"See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md"
+            f"See https://github.com/kedro-org/kedro/blob/main/RELEASE.md"
             f"#migration-guide-from-kedro-016-to-kedro-0170 "
             f"for how to migrate your Kedro project."
         )
@@ -116,21 +88,39 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             f"configuration parameters."
         ) from exc
 
-    mandatory_keys = ["package_name", "project_name", "project_version"]
+    mandatory_keys = ["package_name", "project_name"]
     missing_keys = [key for key in mandatory_keys if key not in metadata_dict]
     if missing_keys:
         raise RuntimeError(f"Missing required keys {missing_keys} from '{_PYPROJECT}'.")
 
+    # Temporary solution to keep project_version backwards compatible to be removed in 0.19.0
+    if "project_version" in metadata_dict:
+        warnings.warn(
+            "project_version in pyproject.toml is deprecated, use kedro_init_version instead",
+            DeprecationWarning,
+        )
+        metadata_dict["kedro_init_version"] = metadata_dict["project_version"]
+    elif "kedro_init_version" in metadata_dict:
+        metadata_dict["project_version"] = metadata_dict["kedro_init_version"]
+    else:
+        raise RuntimeError(
+            f"Missing required key kedro_init_version from '{_PYPROJECT}'."
+        )
+
+    mandatory_keys.append("kedro_init_version")
     # check the match for major and minor version (skip patch version)
-    if metadata_dict["project_version"].split(".")[:2] != kedro_version.split(".")[:2]:
-        raise ValueError(_version_mismatch_error(metadata_dict["project_version"]))
+    if (
+        metadata_dict["kedro_init_version"].split(".")[:2]
+        != kedro_version.split(".")[:2]
+    ):
+        raise ValueError(_version_mismatch_error(metadata_dict["kedro_init_version"]))
 
     source_dir = Path(metadata_dict.get("source_dir", "src")).expanduser()
     source_dir = (project_path / source_dir).resolve()
     metadata_dict["source_dir"] = source_dir
     metadata_dict["config_file"] = pyproject_toml
     metadata_dict["project_path"] = project_path
-    metadata_dict.pop("pipeline", {})  # don't include micro-packaging specs
+    metadata_dict.pop("micropkg", {})  # don't include micro-packaging specs
 
     try:
         return ProjectMetadata(**metadata_dict)
@@ -170,9 +160,9 @@ def _add_src_to_path(source_dir: Path, project_path: Path) -> None:
     if str(source_dir) not in sys.path:
         sys.path.insert(0, str(source_dir))
 
-    python_path = os.getenv("PYTHONPATH") or ""
+    python_path = os.getenv("PYTHONPATH", "")
     if str(source_dir) not in python_path:
-        sep = ";" if python_path else ""
+        sep = os.pathsep if python_path else ""
         os.environ["PYTHONPATH"] = f"{str(source_dir)}{sep}{python_path}"
 
 

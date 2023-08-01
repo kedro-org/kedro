@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """``TextDataSet`` loads/saves data from/to a text file using an underlying
 filesystem (e.g.: local, S3, GCS).
 """
@@ -37,25 +9,40 @@ import fsspec
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
-class TextDataSet(AbstractVersionedDataSet):
+
+class TextDataSet(AbstractVersionedDataSet[str, str]):
     """``TextDataSet`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 
-    Example:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        alice_book:
+          type: text.TextDataSet
+          filepath: data/01_raw/alice.txt
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.text import TextDataSet
         >>>
         >>> string_to_write = "This will go in a file."
         >>>
-        >>> # data_set = TextDataSet(filepath="gcs://bucket/test.md")
         >>> data_set = TextDataSet(filepath="test.md")
         >>> data_set.save(string_to_write)
         >>> reloaded = data_set.load()
@@ -118,11 +105,11 @@ class TextDataSet(AbstractVersionedDataSet):
         self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "version": self._version,
+        }
 
     def _load(self) -> str:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -141,7 +128,7 @@ class TextDataSet(AbstractVersionedDataSet):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

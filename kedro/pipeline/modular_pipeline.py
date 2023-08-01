@@ -1,33 +1,8 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """Helper to integrate modular pipelines into a master pipeline."""
+from __future__ import annotations
+
 import copy
-from typing import AbstractSet, Dict, List, Set, Union
+from typing import AbstractSet, Iterable
 
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import (
@@ -71,7 +46,7 @@ def _validate_inputs_outputs(
 
     if any(_is_parameter(i) for i in inputs):
         raise ModularPipelineError(
-            "Parameters should be specified in the `parameters` argument"
+            "Parameters should be specified in the 'parameters' argument"
         )
 
     free_inputs = {_strip_transcoding(i) for i in pipe.inputs()}
@@ -96,23 +71,22 @@ def _validate_datasets_exist(
     non_existent = (inputs | outputs | parameters) - existing
     if non_existent:
         raise ModularPipelineError(
-            "Failed to map datasets and/or parameters: {}".format(
-                ", ".join(sorted(non_existent))
-            )
+            f"Failed to map datasets and/or parameters: "
+            f"{', '.join(sorted(non_existent))}"
         )
 
 
 def _get_dataset_names_mapping(
-    names: Union[str, Set[str], Dict[str, str]] = None
-) -> Dict[str, str]:
+    names: str | set[str] | dict[str, str] | None = None
+) -> dict[str, str]:
     """Take a name or a collection of dataset names
     and turn it into a mapping from the old dataset names to the provided ones if necessary.
 
     Args:
         names: A dataset name or collection of dataset names.
-            When str or Set[str] is provided, the listed names will stay
+            When str or set[str] is provided, the listed names will stay
             the same as they are named in the provided pipeline.
-            When Dict[str, str] is provided, current names will be
+            When dict[str, str] is provided, current names will be
             mapped to new names in the resultant pipeline.
     Returns:
         A dictionary that maps the old dataset names to the provided ones.
@@ -120,9 +94,9 @@ def _get_dataset_names_mapping(
         >>> _get_dataset_names_mapping("dataset_name")
         {"dataset_name": "dataset_name"}  # a str name will stay the same
         >>> _get_dataset_names_mapping(set(["ds_1", "ds_2"]))
-        {"ds_1": "ds_1", "ds_2": "ds_2"}  # a Set[str] of names will stay the same
+        {"ds_1": "ds_1", "ds_2": "ds_2"}  # a set[str] of names will stay the same
         >>> _get_dataset_names_mapping({"ds_1": "new_ds_1_name"})
-        {"ds_1": "new_ds_1_name"}  # a Dict[str, str] of names will map key to value
+        {"ds_1": "new_ds_1_name"}  # a dict[str, str] of names will map key to value
     """
     if names is None:
         return {}
@@ -140,8 +114,8 @@ def _normalize_param_name(name: str) -> str:
 
 
 def _get_param_names_mapping(
-    names: Union[str, Set[str], Dict[str, str]] = None
-) -> Dict[str, str]:
+    names: str | set[str] | dict[str, str] | None = None
+) -> dict[str, str]:
     """Take a parameter or a collection of parameter names
     and turn it into a mapping from existing parameter names to new ones if necessary.
     It follows the same rule as `_get_dataset_names_mapping` and
@@ -149,9 +123,9 @@ def _get_param_names_mapping(
 
     Args:
         names: A parameter name or collection of parameter names.
-            When str or Set[str] is provided, the listed names will stay
+            When str or set[str] is provided, the listed names will stay
             the same as they are named in the provided pipeline.
-            When Dict[str, str] is provided, current names will be
+            When dict[str, str] is provided, current names will be
             mapped to new names in the resultant pipeline.
     Returns:
         A dictionary that maps the old parameter names to the provided ones.
@@ -159,10 +133,10 @@ def _get_param_names_mapping(
         >>> _get_param_names_mapping("param_name")
         {"params:param_name": "params:param_name"}  # a str name will stay the same
         >>> _get_param_names_mapping(set(["param_1", "param_2"]))
-        # a Set[str] of names will stay the same
+        # a set[str] of names will stay the same
         {"params:param_1": "params:param_1", "params:param_2": "params:param_2"}
         >>> _get_param_names_mapping({"param_1": "new_name_for_param_1"})
-        # a Dict[str, str] of names will map key to valu
+        # a dict[str, str] of names will map key to valu
         {"params:param_1": "params:new_name_for_param_1"}
     """
     params = {}
@@ -176,41 +150,46 @@ def _get_param_names_mapping(
     return params
 
 
-def pipeline(
-    pipe: Pipeline,
+def pipeline(  # noqa: too-many-arguments
+    pipe: Iterable[Node | Pipeline] | Pipeline,
     *,
-    inputs: Union[str, Set[str], Dict[str, str]] = None,
-    outputs: Union[str, Set[str], Dict[str, str]] = None,
-    parameters: Union[str, Set[str], Dict[str, str]] = None,
+    inputs: str | set[str] | dict[str, str] | None = None,
+    outputs: str | set[str] | dict[str, str] | None = None,
+    parameters: str | set[str] | dict[str, str] | None = None,
+    tags: str | Iterable[str] | None = None,
     namespace: str = None,
 ) -> Pipeline:
-    """Create a copy of the pipeline and its nodes,
-    with some dataset names, parameter names and node names modified.
-
+    r"""Create a ``Pipeline`` from a collection of nodes and/or ``Pipeline``\s.
 
     Args:
-        pipe: Original modular pipeline to integrate
+        pipe: The nodes the ``Pipeline`` will be made of. If you
+            provide pipelines among the list of nodes, those pipelines will
+            be expanded and all their nodes will become part of this
+            new pipeline.
         inputs: A name or collection of input names to be exposed as connection points
-            to other pipelines upstream.
-            When str or Set[str] is provided, the listed input names will stay
+            to other pipelines upstream. This is optional; if not provided, the
+            pipeline inputs are automatically inferred from the pipeline structure.
+            When str or set[str] is provided, the listed input names will stay
             the same as they are named in the provided pipeline.
-            When Dict[str, str] is provided, current input names will be
+            When dict[str, str] is provided, current input names will be
             mapped to new names.
             Must only refer to the pipeline's free inputs.
         outputs: A name or collection of names to be exposed as connection points
-            to other pipelines downstream.
-            When str or Set[str] is provided, the listed output names will stay
+            to other pipelines downstream. This is optional; if not provided, the
+            pipeline inputs are automatically inferred from the pipeline structure.
+            When str or set[str] is provided, the listed output names will stay
             the same as they are named in the provided pipeline.
-            When Dict[str, str] is provided, current output names will be
+            When dict[str, str] is provided, current output names will be
             mapped to new names.
             Can refer to both the pipeline's free outputs, as well as
             intermediate results that need to be exposed.
         parameters: A name or collection of parameters to namespace.
-            When str or Set[str] are provided, the listed parameter names will stay
+            When str or set[str] are provided, the listed parameter names will stay
             the same as they are named in the provided pipeline.
-            When Dict[str, str] is provided, current parameter names will be
+            When dict[str, str] is provided, current parameter names will be
             mapped to new names.
             The parameters can be specified without the `params:` prefix.
+        tags: Optional set of tags to be applied to all the pipeline nodes.
         namespace: A prefix to give to all dataset names,
             except those explicitly named with the `inputs`/`outputs`
             arguments, and parameter references (`params:` and `parameters`).
@@ -222,9 +201,18 @@ def pipeline(
             any of the expected types (str, dict, list, or None).
 
     Returns:
-        A new ``Pipeline`` object with the new nodes, modified as requested.
+        A new ``Pipeline`` object.
     """
-    # pylint: disable=protected-access
+    if isinstance(pipe, Pipeline):
+        # To ensure that we are always dealing with a *copy* of pipe.
+        pipe = Pipeline([pipe], tags=tags)
+    else:
+        pipe = Pipeline(pipe, tags=tags)
+
+    if not any([inputs, outputs, parameters, namespace]):
+        return pipe
+
+    # noqa: protected-access
     inputs = _get_dataset_names_mapping(inputs)
     outputs = _get_dataset_names_mapping(outputs)
     parameters = _get_param_names_mapping(parameters)
@@ -271,8 +259,8 @@ def pipeline(
         return name
 
     def _process_dataset_names(
-        datasets: Union[None, str, List[str], Dict[str, str]]
-    ) -> Union[None, str, List[str], Dict[str, str]]:
+        datasets: None | str | list[str] | dict[str, str]
+    ) -> None | str | list[str] | dict[str, str]:
         if datasets is None:
             return None
         if isinstance(datasets, str):
@@ -301,4 +289,4 @@ def pipeline(
 
     new_nodes = [_copy_node(n) for n in pipe.nodes]
 
-    return Pipeline(new_nodes)
+    return Pipeline(new_nodes, tags=tags)

@@ -1,99 +1,109 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
-"""``MatplotlibWriter`` saves matplotlib objects as image file(s) to an underlying
-filesystem (e.g. local, S3, GCS)."""
+"""``MatplotlibWriter`` saves one or more Matplotlib objects as image
+files to an underlying filesystem (e.g. local, S3, GCS)."""
 
 import io
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, NoReturn, Union
+from warnings import warn
 
 import fsspec
 import matplotlib.pyplot as plt
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
-class MatplotlibWriter(AbstractVersionedDataSet):
-    """``MatplotlibWriter`` saves matplotlib objects to image file(s) in an underlying
-    filesystem (e.g. local, S3, GCS).
 
-    Example:
+class MatplotlibWriter(
+    AbstractVersionedDataSet[
+        Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
+    ]
+):
+    """``MatplotlibWriter`` saves one or more Matplotlib objects as
+    image files to an underlying filesystem (e.g. local, S3, GCS).
+
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        output_plot:
+          type: matplotlib.MatplotlibWriter
+          filepath: data/08_reporting/output_plot.png
+          save_args:
+            format: png
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> # Saving single plot
-        >>> plt.plot([1, 2, 3], [4, 5, 6])
-        >>> single_plot_writer = MatplotlibWriter(
-        >>>     filepath="matplot_lib_single_plot.png"
+        >>> fig = plt.figure()
+        >>> plt.plot([1, 2, 3])
+        >>> plot_writer = MatplotlibWriter(
+        >>>     filepath="data/08_reporting/output_plot.png"
         >>> )
         >>> plt.close()
-        >>> single_plot_writer.save(plt)
+        >>> plot_writer.save(fig)
+
+    Example saving a plot as a PDF file:
+    ::
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> # MatplotlibWriter can output other formats as well, such as PDF files.
-        >>> # For this, we need to specify the format:
-        >>> plt.plot([1, 2, 3], [4, 5, 6])
-        >>> single_plot_writer = MatplotlibWriter(
-        >>>     filepath="matplot_lib_single_plot.pdf",
+        >>> fig = plt.figure()
+        >>> plt.plot([1, 2, 3])
+        >>> pdf_plot_writer = MatplotlibWriter(
+        >>>     filepath="data/08_reporting/output_plot.pdf",
         >>>     save_args={"format": "pdf"},
         >>> )
         >>> plt.close()
-        >>> single_plot_writer.save(plt)
+        >>> pdf_plot_writer.save(fig)
+
+    Example saving multiple plots in a folder, using a dictionary:
+    ::
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> # Saving dictionary of plots
-        >>> plots_dict = dict()
+        >>> plots_dict = {}
         >>> for colour in ["blue", "green", "red"]:
-        >>>     plots_dict[colour] = plt.figure()
-        >>>     plt.plot([1, 2, 3], [4, 5, 6], color=colour)
+        >>>     plots_dict[f"{colour}.png"] = plt.figure()
+        >>>     plt.plot([1, 2, 3], color=colour)
+        >>>
         >>> plt.close("all")
         >>> dict_plot_writer = MatplotlibWriter(
-        >>>     filepath="matplotlib_dict"
+        >>>     filepath="data/08_reporting/plots"
         >>> )
         >>> dict_plot_writer.save(plots_dict)
+
+    Example saving multiple plots in a folder, using a list:
+    ::
+
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter
         >>>
-        >>> # Saving list of plots
         >>> plots_list = []
-        >>> for index in range(5):
+        >>> for i in range(5):
         >>>     plots_list.append(plt.figure())
-        >>>     plt.plot([1,2,3],[4,5,6])
+        >>>     plt.plot([i, i + 1, i + 2])
         >>> plt.close("all")
         >>> list_plot_writer = MatplotlibWriter(
-        >>>     filepath="matplotlib_list"
+        >>>     filepath="data/08_reporting/plots"
         >>> )
         >>> list_plot_writer.save(plots_list)
 
@@ -101,21 +111,21 @@ class MatplotlibWriter(AbstractVersionedDataSet):
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
+        overwrite: bool = False,
     ) -> None:
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
-            filepath: Filepath in POSIX format to a matplot object file(s) prefixed with a protocol
-                like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be
-                used. The prefix should be any protocol supported by ``fsspec``.
+            filepath: Filepath in POSIX format to save Matplotlib objects to, prefixed with a
+                protocol like `s3://`. If prefix is not provided, `file` protocol (local filesystem)
+                will be used. The prefix should be any protocol supported by ``fsspec``.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
                 to pass to the filesystem's `open` method through nested key `open_args_save`.
@@ -131,6 +141,9 @@ class MatplotlibWriter(AbstractVersionedDataSet):
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
                 attribute is None, save version will be autogenerated.
+            overwrite: If True, any existing image files will be removed.
+                Only relevant when saving multiple Matplotlib objects at
+                once.
         """
         _credentials = deepcopy(credentials) or {}
         _fs_args = deepcopy(fs_args) or {}
@@ -158,21 +171,33 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-    def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        if overwrite and version is not None:
+            warn(
+                "Setting 'overwrite=True' is ineffective if versioning "
+                "is enabled, since the versioned path must not already "
+                "exist; overriding flag with 'overwrite=False' instead."
+            )
+            overwrite = False
+        self._overwrite = overwrite
 
-    def _load(self) -> None:
-        raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
+    def _describe(self) -> Dict[str, Any]:
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
+
+    def _load(self) -> NoReturn:
+        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(
         self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]
     ) -> None:
         save_path = self._get_save_path()
+
+        if isinstance(data, (list, dict)) and self._overwrite and self._exists():
+            self._fs.rm(get_filepath_str(save_path, self._protocol), recursive=True)
 
         if isinstance(data, list):
             for index, plot in enumerate(data):

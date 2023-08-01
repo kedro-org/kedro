@@ -8,37 +8,29 @@ assignees: ''
 ---
 
 ## Introduction
-
-A high-level, short overview of the problem(s) you are designing a solution for.
+<!-- A high-level, short overview of the problem(s) you are designing a solution for. -->
 
 ## Background
-
-Provide the reader with the context surrounding the problem(s) you are trying to solve.
+<!-- Provide the reader with the context surrounding the problem(s) you are trying to solve. -->
 
 ## Problem
-
-Be as concrete as you can about:
+<!-- Be as concrete as you can about: -->
 
 ### What's in scope
 
 ### What's not in scope
 
 ## Design
-
-Explain your design to the solution here. Diagrams could help.
+<!-- Explain your design to the solution here. Diagrams could help. -->
 
 ### Alternatives considered
-
-Explain the trade off between different alternatives to your solution.
+<!-- Explain the trade off between different alternatives to your solution. -->
 
 ## Testing
-
-Explain the testing strategies to verify your design correctness (if possible).
+<!-- Explain the testing strategies to verify your design correctness (if possible). -->
 
 ## Rollout strategy
-
-Is the change backward compatible? If not, what is the migration strategy?
+<!-- Is the change backward compatible? If not, what is the migration strategy? -->
 
 ## Future iterations
-
-Will there be future iterations of this design?
+<!-- Will there be future iterations of this design? -->

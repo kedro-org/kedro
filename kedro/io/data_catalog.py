@@ -1,66 +1,41 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """``DataCatalog`` stores instances of ``AbstractDataSet`` implementations to
 provide ``load`` and ``save`` capabilities from anywhere in the program. To
 use a ``DataCatalog``, you need to instantiate it with a dictionary of data
 sets. Then it will act as a single point of reference for your calls,
 relaying load and save functions to the underlying data sets.
 """
+from __future__ import annotations
+
 import copy
 import difflib
 import logging
 import re
-import warnings
 from collections import defaultdict
-from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
-from warnings import warn
+from typing import Any, Dict, Iterable
+
+from parse import parse
 
 from kedro.io.core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
-    DataSetAlreadyExistsError,
-    DataSetError,
-    DataSetNotFoundError,
+    DatasetAlreadyExistsError,
+    DatasetError,
+    DatasetNotFoundError,
     Version,
     generate_timestamp,
 )
-from kedro.io.memory_data_set import MemoryDataSet
-from kedro.io.transformers import AbstractTransformer
-from kedro.versioning import Journal
+from kedro.io.memory_dataset import MemoryDataset
+
+Patterns = Dict[str, Dict[str, Any]]
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
+WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
 def _get_credentials(
-    credentials_name: str, credentials: Dict[str, Any]
-) -> Dict[str, Any]:
+    credentials_name: str, credentials: dict[str, Any]
+) -> dict[str, Any]:
     """Return a set of credentials from the provided credentials dict.
 
     Args:
@@ -87,8 +62,8 @@ def _get_credentials(
 
 
 def _resolve_credentials(
-    config: Dict[str, Any], credentials: Dict[str, Any]
-) -> Dict[str, Any]:
+    config: dict[str, Any], credentials: dict[str, Any]
+) -> dict[str, Any]:
     """Return the dataset configuration where credentials are resolved using
     credentials dictionary provided.
 
@@ -120,22 +95,36 @@ def _sub_nonword_chars(data_set_name: str) -> str:
     Returns:
         The name used in `DataCatalog.datasets`.
     """
-    return re.sub(r"\W+", "__", data_set_name)
+    return re.sub(WORDS_REGEX_PATTERN, "__", data_set_name)
 
 
 class _FrozenDatasets:
-    """Helper class to access underlying loaded datasets"""
+    """Helper class to access underlying loaded datasets."""
 
-    def __init__(self, datasets):
-        # Non-word characters in dataset names are replaced with `__`
-        # for easy access to transcoded/prefixed datasets.
-        datasets = {_sub_nonword_chars(key): value for key, value in datasets.items()}
-        self.__dict__.update(**datasets)
+    def __init__(
+        self,
+        *datasets_collections: _FrozenDatasets | dict[str, AbstractDataSet],
+    ):
+        """Return a _FrozenDatasets instance from some datasets collections.
+        Each collection could either be another _FrozenDatasets or a dictionary.
+        """
+        for collection in datasets_collections:
+            if isinstance(collection, _FrozenDatasets):
+                self.__dict__.update(collection.__dict__)
+            else:
+                # Non-word characters in dataset names are replaced with `__`
+                # for easy access to transcoded/prefixed datasets.
+                self.__dict__.update(
+                    {
+                        _sub_nonword_chars(dataset_name): dataset
+                        for dataset_name, dataset in collection.items()
+                    }
+                )
 
     # Don't allow users to add/change attributes on the fly
     def __setattr__(self, key, value):
         msg = "Operation not allowed! "
-        if key in self.__dict__.keys():
+        if key in self.__dict__:
             msg += "Please change datasets through configuration."
         else:
             msg += "Please use DataCatalog.add() instead."
@@ -151,15 +140,14 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
-        data_sets: Dict[str, AbstractDataSet] = None,
-        feed_dict: Dict[str, Any] = None,
-        transformers: Dict[str, List[AbstractTransformer]] = None,
-        default_transformers: List[AbstractTransformer] = None,
-        journal: Journal = None,
-        layers: Dict[str, Set[str]] = None,
+        data_sets: dict[str, AbstractDataSet] = None,
+        feed_dict: dict[str, Any] = None,
+        layers: dict[str, set[str]] = None,
+        dataset_patterns: Patterns = None,
+        load_versions: dict[str, str] = None,
+        save_version: str = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -171,18 +159,19 @@ class DataCatalog:
         Args:
             data_sets: A dictionary of data set names and data set instances.
             feed_dict: A feed dict with data to be added in memory.
-            transformers: A dictionary of lists of transformers to be applied
-                to the data sets.
-            default_transformers: A list of transformers to be applied to any
-                new data sets.
-            journal: Instance of Journal.
             layers: A dictionary of data set layers. It maps a layer name
                 to a set of data set names, according to the
                 data engineering convention. For more details, see
-                https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#what-is-data-engineering-convention
-        Raises:
-            DataSetNotFoundError: When transformers are passed for a non
-                existent data set.
+                https://docs.kedro.org/en/stable/resources/glossary.html#layers-data-engineering-convention
+            dataset_patterns: A dictionary of data set factory patterns
+                and corresponding data set configuration
+            load_versions: A mapping between data set names and versions
+                to load. Has no effect on data sets without enabled versioning.
+            save_version: Version string to be used for ``save`` operations
+                by all data sets with enabled versioning. It must: a) be a
+                case-insensitive string that conforms with operating system
+                filename limitations, b) always return the latest version when
+                sorted in lexicographical order.
 
         Example:
         ::
@@ -197,12 +186,12 @@ class DataCatalog:
         self._data_sets = dict(data_sets or {})
         self.datasets = _FrozenDatasets(self._data_sets)
         self.layers = layers
+        # Keep a record of all patterns in the catalog.
+        # {dataset pattern name : dataset pattern body}
+        self._dataset_patterns = dataset_patterns or {}
+        self._load_versions = load_versions or {}
+        self._save_version = save_version
 
-        self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
-        self._default_transformers = list(default_transformers or [])
-        self._check_and_normalize_transformers()
-        self._journal = journal
-        # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
 
@@ -210,32 +199,14 @@ class DataCatalog:
     def _logger(self):
         return logging.getLogger(__name__)
 
-    def _check_and_normalize_transformers(self):
-        data_sets = self._data_sets.keys()
-        transformers = self._transformers.keys()
-        excess_transformers = transformers - data_sets
-        missing_transformers = data_sets - transformers
-
-        if excess_transformers:
-            raise DataSetNotFoundError(
-                "Unexpected transformers for missing data_sets {}".format(
-                    ", ".join(excess_transformers)
-                )
-            )
-
-        for data_set_name in missing_transformers:
-            self._transformers[data_set_name] = list(self._default_transformers)
-
-    # pylint: disable=too-many-arguments
     @classmethod
     def from_config(
-        cls: Type,
-        catalog: Optional[Dict[str, Dict[str, Any]]],
-        credentials: Dict[str, Dict[str, Any]] = None,
-        load_versions: Dict[str, str] = None,
+        cls,
+        catalog: dict[str, dict[str, Any]] | None,
+        credentials: dict[str, dict[str, Any]] = None,
+        load_versions: dict[str, str] = None,
         save_version: str = None,
-        journal: Journal = None,
-    ) -> "DataCatalog":
+    ) -> DataCatalog:
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
         ``DataCatalog`` with configuration parsed from configuration files.
@@ -259,15 +230,16 @@ class DataCatalog:
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
-            journal: Instance of Journal.
 
         Returns:
             An instantiated ``DataCatalog`` containing all specified
             data sets, created and ready to use.
 
         Raises:
-            DataSetError: When the method fails to create any of the data
+            DatasetError: When the method fails to create any of the data
                 sets from their config.
+            DatasetNotFoundError: When `load_versions` refers to a dataset that doesn't
+                exist in the catalog.
 
         Example:
         ::
@@ -283,7 +255,7 @@ class DataCatalog:
             >>>     "boats": {
             >>>         "type": "pandas.CSVDataSet",
             >>>         "filepath": "s3://aws-bucket-name/boats.csv",
-            >>>         "credentials": "boats_credentials"
+            >>>         "credentials": "boats_credentials",
             >>>         "save_args": {
             >>>             "index": False
             >>>         }
@@ -305,63 +277,169 @@ class DataCatalog:
             >>> catalog.save("boats", df)
         """
         data_sets = {}
+        dataset_patterns = {}
         catalog = copy.deepcopy(catalog) or {}
         credentials = copy.deepcopy(credentials) or {}
-        run_id = journal.run_id if journal else None
-        save_version = save_version or run_id or generate_timestamp()
+        save_version = save_version or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
+        layers: dict[str, set[str]] = defaultdict(set)
 
-        missing_keys = load_versions.keys() - catalog.keys()
+        for ds_name, ds_config in catalog.items():
+            ds_config = _resolve_credentials(  # noqa: redefined-loop-name
+                ds_config, credentials
+            )
+            if cls._is_pattern(ds_name):
+                # Add each factory to the dataset_patterns dict.
+                dataset_patterns[ds_name] = ds_config
+
+            else:
+                ds_layer = ds_config.pop("layer", None)
+                if ds_layer is not None:
+                    layers[ds_layer].add(ds_name)
+                data_sets[ds_name] = AbstractDataSet.from_config(
+                    ds_name, ds_config, load_versions.get(ds_name), save_version
+                )
+        dataset_layers = layers or None
+        sorted_patterns = cls._sort_patterns(dataset_patterns)
+        missing_keys = [
+            key
+            for key in load_versions.keys()
+            if not (key in catalog or cls._match_pattern(sorted_patterns, key))
+        ]
         if missing_keys:
-            warn(
-                f"`load_versions` keys [{', '.join(sorted(missing_keys))}] "
+            raise DatasetNotFoundError(
+                f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
             )
 
-        layers = defaultdict(set)  # type: Dict[str, Set[str]]
-        for ds_name, ds_config in catalog.items():
-            ds_layer = ds_config.pop("layer", None)
-            if ds_layer is not None:
-                layers[ds_layer].add(ds_name)
+        return cls(
+            data_sets=data_sets,
+            layers=dataset_layers,
+            dataset_patterns=sorted_patterns,
+            load_versions=load_versions,
+            save_version=save_version,
+        )
 
-            ds_config = _resolve_credentials(ds_config, credentials)
-            data_sets[ds_name] = AbstractDataSet.from_config(
-                ds_name, ds_config, load_versions.get(ds_name), save_version
-            )
+    @staticmethod
+    def _is_pattern(pattern: str):
+        """Check if a given string is a pattern. Assume that any name with '{' is a pattern."""
+        return "{" in pattern
 
-        dataset_layers = layers or None
-        return cls(data_sets=data_sets, journal=journal, layers=dataset_layers)
+    @staticmethod
+    def _match_pattern(data_set_patterns: Patterns, data_set_name: str) -> str | None:
+        """Match a dataset name against patterns in a dictionary containing patterns"""
+        matches = (
+            pattern
+            for pattern in data_set_patterns.keys()
+            if parse(pattern, data_set_name)
+        )
+        return next(matches, None)
+
+    @classmethod
+    def _sort_patterns(cls, data_set_patterns: Patterns) -> dict[str, dict[str, Any]]:
+        """Sort a dictionary of dataset patterns according to parsing rules -
+        1. Decreasing specificity (number of characters outside the curly brackets)
+        2. Decreasing number of placeholders (number of curly bracket pairs)
+        3. Alphabetically
+        """
+        sorted_keys = sorted(
+            data_set_patterns,
+            key=lambda pattern: (
+                -(cls._specificity(pattern)),
+                -pattern.count("{"),
+                pattern,
+            ),
+        )
+        return {key: data_set_patterns[key] for key in sorted_keys}
+
+    @staticmethod
+    def _specificity(pattern: str) -> int:
+        """Helper function to check the length of exactly matched characters not inside brackets
+        Example -
+        specificity("{namespace}.companies") = 10
+        specificity("{namespace}.{dataset}") = 1
+        specificity("france.companies") = 16
+        """
+        # Remove all the placeholders from the pattern and count the number of remaining chars
+        result = re.sub(r"\{.*?\}", "", pattern)
+        return len(result)
 
     def _get_dataset(
-        self, data_set_name: str, version: Version = None
+        self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataSet:
+        matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
+        if data_set_name not in self._data_sets and matched_pattern:
+            # If the dataset is a patterned dataset, materialise it and add it to
+            # the catalog
+            data_set_config = self._resolve_config(data_set_name, matched_pattern)
+            ds_layer = data_set_config.pop("layer", None)
+            if ds_layer:
+                self.layers = self.layers or {}
+                self.layers.setdefault(ds_layer, set()).add(data_set_name)
+            data_set = AbstractDataSet.from_config(
+                data_set_name,
+                data_set_config,
+                self._load_versions.get(data_set_name),
+                self._save_version,
+            )
+            if self._specificity(matched_pattern) == 0:
+                self._logger.warning(
+                    "Config from the dataset factory pattern '%s' in the catalog will be used to "
+                    "override the default MemoryDataset creation for the dataset '%s'",
+                    matched_pattern,
+                    data_set_name,
+                )
+
+            self.add(data_set_name, data_set)
         if data_set_name not in self._data_sets:
-            error_msg = f"DataSet '{data_set_name}' not found in the catalog"
+            error_msg = f"Dataset '{data_set_name}' not found in the catalog"
 
-            matches = difflib.get_close_matches(data_set_name, self._data_sets.keys())
-            if matches:
-                suggestions = ", ".join(matches)  # type: ignore
-                error_msg += f" - did you mean one of these instead: {suggestions}"
-
-            raise DataSetNotFoundError(error_msg)
-
+            # Flag to turn on/off fuzzy-matching which can be time consuming and
+            # slow down plugins like `kedro-viz`
+            if suggest:
+                matches = difflib.get_close_matches(
+                    data_set_name, self._data_sets.keys()
+                )
+                if matches:
+                    suggestions = ", ".join(matches)
+                    error_msg += f" - did you mean one of these instead: {suggestions}"
+            raise DatasetNotFoundError(error_msg)
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
-            data_set = data_set._copy(  # pylint: disable=protected-access
-                _version=version
-            )
+            data_set = data_set._copy(_version=version)  # noqa: protected-access
 
         return data_set
 
-    def _get_transformed_dataset_function(
-        self, data_set_name: str, operation: str, data_set: AbstractDataSet
-    ) -> Callable:
-        func = getattr(data_set, operation)
-        for transformer in reversed(self._transformers[data_set_name]):
-            func = partial(getattr(transformer, operation), data_set_name, func)
-        return func
+    def __contains__(self, data_set_name):
+        """Check if an item is in the catalog as a materialised dataset or pattern"""
+        matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
+        if data_set_name in self._data_sets or matched_pattern:
+            return True
+        return False
+
+    def _resolve_config(
+        self,
+        data_set_name: str,
+        matched_pattern: str,
+    ) -> dict[str, Any]:
+        """Get resolved AbstractDataSet from a factory config"""
+        result = parse(matched_pattern, data_set_name)
+        config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
+        # Resolve the factory config for the dataset
+        for key, value in config_copy.items():
+            if isinstance(value, Iterable) and "}" in value:
+                # result.named: gives access to all dict items in the match result.
+                # format_map fills in dict values into a string with {...} placeholders
+                # of the same key name.
+                try:
+                    config_copy[key] = str(value).format_map(result.named)
+                except KeyError as exc:
+                    raise DatasetError(
+                        f"Unable to resolve '{key}' for the pattern '{matched_pattern}'"
+                    ) from exc
+        return config_copy
 
     def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set.
@@ -375,7 +453,7 @@ class DataCatalog:
             The loaded data as configured.
 
         Raises:
-            DataSetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a data set with the given name
                 has not yet been registered.
 
         Example:
@@ -395,21 +473,14 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from `%s` (%s)...", name, type(dataset).__name__
+            "Loading data from [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
         )
 
-        func = self._get_transformed_dataset_function(name, "load", dataset)
-        result = func()
+        result = dataset.load()
 
-        version = (
-            dataset.resolve_load_version()
-            if isinstance(dataset, AbstractVersionedDataSet)
-            else None
-        )
-
-        # Log only if versioning is enabled for the data set
-        if self._journal and version:
-            self._journal.log_catalog(name, "load", version)
         return result
 
     def save(self, name: str, data: Any) -> None:
@@ -421,7 +492,7 @@ class DataCatalog:
                 data set.
 
         Raises:
-            DataSetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a data set with the given name
                 has not yet been registered.
 
         Example:
@@ -443,20 +514,14 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to `%s` (%s)...", name, type(dataset).__name__)
-
-        func = self._get_transformed_dataset_function(name, "save", dataset)
-        func(data)
-
-        version = (
-            dataset.resolve_save_version()
-            if isinstance(dataset, AbstractVersionedDataSet)
-            else None
+        self._logger.info(
+            "Saving data to [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
         )
 
-        # Log only if versioning is enabled for the data set
-        if self._journal and version:
-            self._journal.log_catalog(name, "save", version)
+        dataset.save(data)
 
     def exists(self, name: str) -> bool:
         """Checks whether registered data set exists by calling its `exists()`
@@ -472,7 +537,7 @@ class DataCatalog:
         """
         try:
             dataset = self._get_dataset(name)
-        except DataSetNotFoundError:
+        except DatasetNotFoundError:
             return False
         return dataset.exists()
 
@@ -483,7 +548,7 @@ class DataCatalog:
             name: A data set to be checked.
 
         Raises:
-            DataSetNotFoundError: When a data set with the given name
+            DatasetNotFoundError: When a data set with the given name
                 has not yet been registered.
         """
         dataset = self._get_dataset(name)
@@ -499,11 +564,11 @@ class DataCatalog:
                 registered yet.
             data_set: A data set object to be associated with the given data
                 set name.
-            replace: Specifies whether to replace an existing ``DataSet``
+            replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
 
         Raises:
-            DataSetAlreadyExistsError: When a data set with the same name
+            DatasetAlreadyExistsError: When a data set with the same name
                 has already been registered.
 
         Example:
@@ -519,28 +584,27 @@ class DataCatalog:
         """
         if data_set_name in self._data_sets:
             if replace:
-                self._logger.warning("Replacing DataSet '%s'", data_set_name)
+                self._logger.warning("Replacing dataset '%s'", data_set_name)
             else:
-                raise DataSetAlreadyExistsError(
-                    f"DataSet '{data_set_name}' has already been registered"
+                raise DatasetAlreadyExistsError(
+                    f"Dataset '{data_set_name}' has already been registered"
                 )
         self._data_sets[data_set_name] = data_set
-        self._transformers[data_set_name] = list(self._default_transformers)
-        self.datasets = _FrozenDatasets(self._data_sets)
+        self.datasets = _FrozenDatasets(self.datasets, {data_set_name: data_set})
 
     def add_all(
-        self, data_sets: Dict[str, AbstractDataSet], replace: bool = False
+        self, data_sets: dict[str, AbstractDataSet], replace: bool = False
     ) -> None:
         """Adds a group of new data sets to the ``DataCatalog``.
 
         Args:
-            data_sets: A dictionary of ``DataSet`` names and data set
+            data_sets: A dictionary of dataset names and dataset
                 instances.
-            replace: Specifies whether to replace an existing ``DataSet``
+            replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
 
         Raises:
-            DataSetAlreadyExistsError: When a data set with the same name
+            DatasetAlreadyExistsError: When a data set with the same name
                 has already been registered.
 
         Example:
@@ -563,13 +627,13 @@ class DataCatalog:
         for name, data_set in data_sets.items():
             self.add(name, data_set, replace)
 
-    def add_feed_dict(self, feed_dict: Dict[str, Any], replace: bool = False) -> None:
-        """Adds instances of ``MemoryDataSet``, containing the data provided
+    def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
+        """Adds instances of ``MemoryDataset``, containing the data provided
         through feed_dict.
 
         Args:
             feed_dict: A feed dict with data to be added in memory.
-            replace: Specifies whether to replace an existing ``DataSet``
+            replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
 
         Example:
@@ -592,55 +656,13 @@ class DataCatalog:
             if isinstance(feed_dict[data_set_name], AbstractDataSet):
                 data_set = feed_dict[data_set_name]
             else:
-                data_set = MemoryDataSet(data=feed_dict[data_set_name])
+                data_set = MemoryDataset(data=feed_dict[data_set_name])
 
             self.add(data_set_name, data_set, replace)
 
-    def add_transformer(
-        self,
-        transformer: AbstractTransformer,
-        data_set_names: Union[str, Iterable[str]] = None,
-    ):
-        """Add a ``DataSet`` Transformer to the``DataCatalog``.
-        Transformers can modify the way Data Sets are loaded and saved.
-
-        Args:
-            transformer: The transformer instance to add.
-            data_set_names: The Data Sets to add the transformer to.
-                Or None to add the transformer to all Data Sets.
-        Raises:
-            DataSetNotFoundError: When a transformer is being added to a non
-                existent data set.
-            TypeError: When transformer isn't an instance of ``AbstractTransformer``
+    def list(self, regex_search: str | None = None) -> list[str]:
         """
-
-        warnings.warn(
-            "The transformer API will be deprecated in Kedro 0.18.0."
-            "Please use Dataset Hooks to customise the load and save methods."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
-            DeprecationWarning,
-        )
-
-        if not isinstance(transformer, AbstractTransformer):
-            raise TypeError(
-                "Object of type {} is not an instance of AbstractTransformer".format(
-                    type(transformer)
-                )
-            )
-        if data_set_names is None:
-            self._default_transformers.append(transformer)
-            data_set_names = self._transformers.keys()
-        elif isinstance(data_set_names, str):
-            data_set_names = [data_set_names]
-        for data_set_name in data_set_names:
-            if data_set_name not in self._data_sets:
-                raise DataSetNotFoundError(f"No data set called {data_set_name}")
-            self._transformers[data_set_name].append(transformer)
-
-    def list(self, regex_search: Optional[str] = None) -> List[str]:
-        """
-        List of all ``DataSet`` names registered in the catalog.
+        List of all dataset names registered in the catalog.
         This can be filtered by providing an optional regular expression
         which will only return matching keys.
 
@@ -648,7 +670,7 @@ class DataCatalog:
             regex_search: An optional regular expression which can be provided
                 to limit the data sets returned by a particular pattern.
         Returns:
-            A list of ``DataSet`` names available which match the
+            A list of dataset names available which match the
             `regex_search` criteria (if provided). All data set names are returned
             by default.
 
@@ -671,7 +693,7 @@ class DataCatalog:
             return list(self._data_sets.keys())
 
         if not regex_search.strip():
-            logging.warning("The empty string will not match any data sets")
+            self._logger.warning("The empty string will not match any data sets")
             return []
 
         try:
@@ -679,11 +701,11 @@ class DataCatalog:
 
         except re.error as exc:
             raise SyntaxError(
-                f"Invalid regular expression provided: `{regex_search}`"
+                f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
         return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 
-    def shallow_copy(self) -> "DataCatalog":
+    def shallow_copy(self) -> DataCatalog:
         """Returns a shallow copy of the current object.
 
         Returns:
@@ -691,25 +713,17 @@ class DataCatalog:
         """
         return DataCatalog(
             data_sets=self._data_sets,
-            transformers=self._transformers,
-            default_transformers=self._default_transformers,
-            journal=self._journal,
             layers=self.layers,
+            dataset_patterns=self._dataset_patterns,
+            load_versions=self._load_versions,
+            save_version=self._save_version,
         )
 
     def __eq__(self, other):
-        return (
-            self._data_sets,
-            self._transformers,
-            self._default_transformers,
-            self._journal,
-            self.layers,
-        ) == (
+        return (self._data_sets, self.layers, self._dataset_patterns) == (
             other._data_sets,
-            other._transformers,
-            other._default_transformers,
-            other._journal,
             other.layers,
+            other._dataset_patterns,
         )
 
     def confirm(self, name: str) -> None:
@@ -718,13 +732,13 @@ class DataCatalog:
         Args:
             name: Name of the dataset.
         Raises:
-            DataSetError: When the dataset does not have `confirm` method.
+            DatasetError: When the dataset does not have `confirm` method.
 
         """
-        self._logger.info("Confirming DataSet '%s'", name)
+        self._logger.info("Confirming dataset '%s'", name)
         data_set = self._get_dataset(name)
 
         if hasattr(data_set, "confirm"):
             data_set.confirm()  # type: ignore
         else:
-            raise DataSetError(f"DataSet '{name}' does not have 'confirm' method")
+            raise DatasetError(f"Dataset '{name}' does not have 'confirm' method")

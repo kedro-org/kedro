@@ -1,48 +1,20 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """A collection of helper functions to integrate with Jupyter/IPython
 and CLI commands for working with Kedro catalog.
 """
+from __future__ import annotations
+
 import json
 import os
-import re
+import shutil
 import sys
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any
 from warnings import warn
 
 import click
 from click import secho
-from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
-from traitlets import Unicode
 
 from kedro.framework.cli.utils import (
     KedroCliError,
@@ -50,17 +22,10 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
     env_option,
     forward_command,
-    ipython_message,
-    load_entry_points,
     python_call,
 )
+from kedro.framework.project import validate_settings
 from kedro.framework.startup import ProjectMetadata
-
-JUPYTER_IP_HELP = "IP address of the Jupyter server."
-JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
-JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
-terminate its kernel after so many seconds of inactivity. This does not affect
-any open notebooks."""
 
 CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
 including sub-folders."""
@@ -69,131 +34,162 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
-def collect_line_magic():
-    """Interface function for collecting line magic functions from plugin entry points."""
-    return load_entry_points("line_magic")
+class JupyterCommandGroup(click.Group):
+    """A custom class for ordering the `kedro jupyter` command groups"""
+
+    def list_commands(self, ctx):
+        """List commands according to a custom order"""
+        return ["setup", "notebook", "lab", "convert"]
 
 
-class SingleKernelSpecManager(KernelSpecManager):
-    """A custom KernelSpec manager to be used by Kedro projects.
-    It limits the kernels to the default one only,
-    to make it less confusing for users, and gives it a sensible name.
-    """
-
-    default_kernel_name = Unicode(
-        "Kedro", config=True, help="Alternative name for the default kernel"
-    )
-    whitelist = [NATIVE_KERNEL_NAME]
-
-    def get_kernel_spec(self, kernel_name):
-        """
-        This function will only be called by Jupyter to get a KernelSpec
-        for the default kernel.
-        We replace the name by something sensible here.
-        """
-        kernelspec = super().get_kernel_spec(kernel_name)
-
-        if kernel_name == NATIVE_KERNEL_NAME:
-            kernelspec.display_name = self.default_kernel_name
-
-        return kernelspec
-
-
-def _update_ipython_dir(project_path: Path) -> None:
-    os.environ["IPYTHONDIR"] = str(project_path / ".ipython")
-
-
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def jupyter_cli():  # pragma: no cover
     pass
 
 
-@jupyter_cli.group()
+@jupyter_cli.group(cls=JupyterCommandGroup)
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.
     """
 
 
+@forward_command(jupyter, "setup", forward_help=True)
+@click.pass_obj  # this will pass the metadata as first argument
+def setup(metadata: ProjectMetadata, args, **kwargs):  # noqa: unused-argument
+    """Initialise the Jupyter Kernel for a kedro project."""
+    _check_module_importable("ipykernel")
+    validate_settings()
+
+    kernel_name = f"kedro_{metadata.package_name}"
+    kernel_path = _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
+    click.secho(f"\nThe kernel has been created successfully at {kernel_path}")
+
+
 @forward_command(jupyter, "notebook", forward_help=True)
-@click.option(
-    "--ip",
-    "ip_address",
-    type=str,
-    default="127.0.0.1",
-    help="IP address of the Jupyter server.",
-)
-@click.option(
-    "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
-)
-@click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
 def jupyter_notebook(
     metadata: ProjectMetadata,
-    ip_address,
-    all_kernels,
     env,
-    idle_timeout,
     args,
     **kwargs,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # noqa: unused-argument
     """Open Jupyter Notebook with project specific variables loaded."""
-    _check_module_importable("jupyter_core")
+    _check_module_importable("notebook")
+    validate_settings()
 
-    if "-h" not in args and "--help" not in args:
-        ipython_message(all_kernels)
+    kernel_name = f"kedro_{metadata.package_name}"
+    _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
 
-    _update_ipython_dir(metadata.project_path)
-    arguments = _build_jupyter_command(
-        "notebook",
-        ip_address=ip_address,
-        all_kernels=all_kernels,
-        args=args,
-        idle_timeout=idle_timeout,
-        project_name=metadata.project_name,
+    if env:
+        os.environ["KEDRO_ENV"] = env
+
+    python_call(
+        "jupyter",
+        ["notebook", f"--MultiKernelManager.default_kernel_name={kernel_name}"]
+        + list(args),
     )
-
-    python_call_kwargs = _build_jupyter_env(env)
-    python_call("jupyter", arguments, **python_call_kwargs)
 
 
 @forward_command(jupyter, "lab", forward_help=True)
-@click.option("--ip", "ip_address", type=str, default="127.0.0.1", help=JUPYTER_IP_HELP)
-@click.option(
-    "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
-)
-@click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
 def jupyter_lab(
     metadata: ProjectMetadata,
-    ip_address,
-    all_kernels,
     env,
-    idle_timeout,
     args,
     **kwargs,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # noqa: unused-argument
     """Open Jupyter Lab with project specific variables loaded."""
-    _check_module_importable("jupyter_core")
+    _check_module_importable("jupyterlab")
+    validate_settings()
 
-    if "-h" not in args and "--help" not in args:
-        ipython_message(all_kernels)
+    kernel_name = f"kedro_{metadata.package_name}"
+    _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
 
-    _update_ipython_dir(metadata.project_path)
-    arguments = _build_jupyter_command(
-        "lab",
-        ip_address=ip_address,
-        all_kernels=all_kernels,
-        args=args,
-        idle_timeout=idle_timeout,
-        project_name=metadata.project_name,
+    if env:
+        os.environ["KEDRO_ENV"] = env
+
+    python_call(
+        "jupyter",
+        ["lab", f"--MultiKernelManager.default_kernel_name={kernel_name}"] + list(args),
     )
 
-    python_call_kwargs = _build_jupyter_env(env)
-    python_call("jupyter", arguments, **python_call_kwargs)
+
+def _create_kernel(kernel_name: str, display_name: str) -> str:
+    """Creates an IPython kernel for the kedro project. If one with the same kernel_name
+    exists already it will be replaced.
+
+    Installs the default IPython kernel (which points towards `sys.executable`)
+    and customises it to make the launch command load the kedro extension.
+    This is equivalent to the method recommended for creating a custom IPython kernel
+    on the CLI: https://ipython.readthedocs.io/en/stable/install/kernel_install.html.
+
+    On linux this creates a directory ~/.local/share/jupyter/kernels/{kernel_name}
+    containing kernel.json, logo-32x32.png, logo-64x64.png and logo-svg.svg. An example kernel.json
+    looks as follows:
+
+    {
+     "argv": [
+      "/Users/antony_milne/miniconda3/envs/spaceflights/bin/python",
+      "-m",
+      "ipykernel_launcher",
+      "-f",
+      "{connection_file}",
+      "--ext",
+      "kedro.ipython"
+     ],
+     "display_name": "Kedro (spaceflights)",
+     "language": "python",
+     "metadata": {
+      "debugger": false
+     }
+    }
+
+    Args:
+        kernel_name: Name of the kernel to create.
+        display_name: Kernel name as it is displayed in the UI.
+
+    Returns:
+        String of the path of the created kernel.
+
+    Raises:
+        KedroCliError: When kernel cannot be setup.
+    """
+    # These packages are required by jupyter lab and notebook, which we have already
+    # checked are importable, so we don't run _check_module_importable on them.
+    # noqa: import-outside-toplevel
+    from ipykernel.kernelspec import install
+
+    try:
+        # Install with user=True rather than system-wide to minimise footprint and
+        # ensure that we have permissions to write there. Under the hood this calls
+        # jupyter_client.KernelSpecManager.install_kernel_spec, which automatically
+        # removes an old kernel spec if it already exists.
+        kernel_path = install(
+            user=True,
+            kernel_name=kernel_name,
+            display_name=display_name,
+        )
+
+        kernel_json = Path(kernel_path) / "kernel.json"
+        kernel_spec = json.loads(kernel_json.read_text(encoding="utf-8"))
+        kernel_spec["argv"].extend(["--ext", "kedro.ipython"])
+        # indent=1 is to match the default ipykernel style (see
+        # ipykernel.write_kernel_spec).
+        kernel_json.write_text(json.dumps(kernel_spec, indent=1), encoding="utf-8")
+
+        kedro_ipython_dir = Path(__file__).parents[2] / "ipython"
+        shutil.copy(kedro_ipython_dir / "logo-32x32.png", kernel_path)
+        shutil.copy(kedro_ipython_dir / "logo-64x64.png", kernel_path)
+        shutil.copy(kedro_ipython_dir / "logo-svg.svg", kernel_path)
+    except Exception as exc:
+        raise KedroCliError(
+            f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
+        ) from exc
+    return kernel_path
 
 
 @command_with_verbosity(jupyter, "convert")
@@ -209,7 +205,7 @@ def jupyter_lab(
 @click.pass_obj  # this will pass the metadata as first argument
 def convert_notebook(
     metadata: ProjectMetadata, all_flag, overwrite_flag, filepath, env, **kwargs
-):  # pylint: disable=unused-argument, too-many-locals
+):  # noqa: unused-argument, too-many-locals
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
     Cells tagged as `node` will be copied over to a Python file matching
@@ -217,13 +213,18 @@ def convert_notebook(
     *Note*: Make sure your notebooks have unique names!
     FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
     relative and absolute paths are accepted.
-    Should not be provided if --all flag is already present.
+    Should not be provided if --all flag is already present. (DEPRECATED)
     """
+
+    deprecation_message = (
+        "DeprecationWarning: Command 'kedro jupyter convert' is deprecated and "
+        "will not be available from Kedro 0.19.0."
+    )
+    click.secho(deprecation_message, fg="red")
+
     project_path = metadata.project_path
     source_path = metadata.source_dir
     package_name = metadata.package_name
-
-    _update_ipython_dir(project_path)
 
     if not filepath and not all_flag:
         secho(
@@ -270,46 +271,6 @@ def convert_notebook(
     secho("Done!", color="green")  # type: ignore
 
 
-def _build_jupyter_command(  # pylint: disable=too-many-arguments
-    base: str,
-    ip_address: str,
-    all_kernels: bool,
-    args: Iterable[str],
-    idle_timeout: int,
-    project_name: str = "Kedro",
-) -> List[str]:
-    cmd = [
-        base,
-        "--ip",
-        ip_address,
-        f"--MappingKernelManager.cull_idle_timeout={idle_timeout}",
-        f"--MappingKernelManager.cull_interval={idle_timeout}",
-    ]
-
-    if not all_kernels:
-        kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or "Kedro"
-
-        cmd += [
-            "--NotebookApp.kernel_spec_manager_class="
-            "kedro.framework.cli.jupyter.SingleKernelSpecManager",
-            f"--KernelSpecManager.default_kernel_name='{kernel_name}'",
-        ]
-
-    return cmd + list(args)
-
-
-def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
-    """Build the environment dictionary that gets injected into the subprocess running
-    Jupyter. Since the subprocess has access only to the environment variables passed
-    in, we need to copy the current environment and add ``KEDRO_ENV``.
-    """
-    if not kedro_env:
-        return {}
-    jupyter_env = os.environ.copy()
-    jupyter_env["KEDRO_ENV"] = kedro_env
-    return {"env": jupyter_env}
-
-
 def _export_nodes(filepath: Path, output_path: Path) -> None:
     """Copy code from Jupyter cells into nodes in src/<package_name>/nodes/,
     under filename with same name as notebook.
@@ -341,7 +302,7 @@ def _export_nodes(filepath: Path, output_path: Path) -> None:
         warn(f"Skipping notebook '{filepath}' - no nodes to export.")
 
 
-def _append_source_code(cell: Dict[str, Any], path: Path) -> None:
+def _append_source_code(cell: dict[str, Any], path: Path) -> None:
     source_code = "".join(cell["source"]).strip() + "\n"
     with path.open(mode="a") as file_:
         file_.write(source_code)

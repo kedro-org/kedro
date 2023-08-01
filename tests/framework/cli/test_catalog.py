@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import shutil
 
 import pytest
@@ -33,8 +5,9 @@ import yaml
 from click.testing import CliRunner
 
 from kedro.extras.datasets.pandas import CSVDataSet
-from kedro.io import DataCatalog, MemoryDataSet
-from kedro.pipeline import Pipeline, node
+from kedro.io import DataCatalog, MemoryDataset
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 
 @pytest.fixture
@@ -45,19 +18,15 @@ def fake_load_context(mocker):
     )
 
 
-@pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
 PIPELINE_NAME = "pipeline"
 
 
 @pytest.fixture
 def mock_pipelines(mocker):
-    dummy_pipelines = {PIPELINE_NAME: Pipeline([]), "second": Pipeline([])}
+    dummy_pipelines = {
+        PIPELINE_NAME: modular_pipeline([]),
+        "second": modular_pipeline([]),
+    }
     return mocker.patch("kedro.framework.cli.catalog.pipelines", dummy_pipelines)
 
 
@@ -74,8 +43,8 @@ class TestCatalogListCommand:
 
         assert not result.exit_code
         expected_dict = {
-            "DataSets in 'pipeline' pipeline": {},
-            "DataSets in 'second' pipeline": {},
+            "Datasets in 'pipeline' pipeline": {},
+            "Datasets in 'second' pipeline": {},
         }
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
@@ -89,7 +58,7 @@ class TestCatalogListCommand:
         )
 
         assert not result.exit_code
-        expected_dict = {f"DataSets in '{PIPELINE_NAME}' pipeline": {}}
+        expected_dict = {f"Datasets in '{PIPELINE_NAME}' pipeline": {}}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
     def test_not_found_pipeline(self, fake_project_cli, fake_metadata):
@@ -101,7 +70,7 @@ class TestCatalogListCommand:
 
         assert result.exit_code
         expected_output = (
-            "Error: `fake` pipeline not found! Existing pipelines: pipeline, second"
+            "Error: 'fake' pipeline not found! Existing pipelines: pipeline, second"
         )
         assert expected_output in result.output
 
@@ -112,9 +81,9 @@ class TestCatalogListCommand:
         mocked_context = fake_load_context.return_value
         catalog_data_sets = {
             "iris_data": CSVDataSet("test.csv"),
-            "intermediate": MemoryDataSet(),
-            "parameters": MemoryDataSet(),
-            "params:data_ratio": MemoryDataSet(),
+            "intermediate": MemoryDataset(),
+            "parameters": MemoryDataset(),
+            "params:data_ratio": MemoryDataset(),
             "not_used": CSVDataSet("test2.csv"),
         }
 
@@ -134,15 +103,15 @@ class TestCatalogListCommand:
         assert not result.exit_code
         # 'parameters' and 'params:data_ratio' should not appear in the response
         expected_dict = {
-            f"DataSets in '{PIPELINE_NAME}' pipeline": {
+            f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
                     "CSVDataSet": ["iris_data"],
-                    "MemoryDataSet": ["intermediate"],
+                    "MemoryDataset": ["intermediate"],
                 },
                 "Datasets not mentioned in pipeline": {"CSVDataSet": ["not_used"]},
             }
         }
-        key = f"DataSets in '{PIPELINE_NAME}' pipeline"
+        key = f"Datasets in '{PIPELINE_NAME}' pipeline"
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
@@ -170,14 +139,14 @@ class TestCatalogListCommand:
 
         assert not result.exit_code
         expected_dict = {
-            f"DataSets in '{PIPELINE_NAME}' pipeline": {
+            f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
                     "CSVDataSet": ["some_dataset"],
-                    "DefaultDataSet": ["intermediate"],
+                    "DefaultDataset": ["intermediate"],
                 }
             }
         }
-        key = f"DataSets in '{PIPELINE_NAME}' pipeline"
+        key = f"Datasets in '{PIPELINE_NAME}' pipeline"
         assert yaml_dump_mock.call_count == 1
         assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
@@ -186,9 +155,9 @@ def identity(data):
     return data  # pragma: no cover
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestCatalogCreateCommand:
-    PIPELINE_NAME = "de"
+    PIPELINE_NAME = "data_engineering"
 
     @staticmethod
     @pytest.fixture(params=["base"])
@@ -202,7 +171,7 @@ class TestCatalogCreateCommand:
     def test_pipeline_argument_is_required(self, fake_project_cli):
         result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
         assert result.exit_code
-        expected_output = "Error: Missing option '--pipeline'."
+        expected_output = "Error: Missing option '--pipeline' / '-p'."
         assert expected_output in result.output
 
     @pytest.mark.usefixtures("fake_load_context")
@@ -217,7 +186,7 @@ class TestCatalogCreateCommand:
 
         existing_pipelines = ", ".join(sorted(mock_pipelines.keys()))
         expected_output = (
-            f"Error: `fake` pipeline not found! Existing "
+            f"Error: 'fake' pipeline not found! Existing "
             f"pipelines: {existing_pipelines}\n"
         )
         assert expected_output in result.output
@@ -241,10 +210,10 @@ class TestCatalogCreateCommand:
         assert data_catalog_file.is_file()
 
         expected_catalog_config = {
-            "example_test_x": {"type": "MemoryDataSet"},
-            "example_test_y": {"type": "MemoryDataSet"},
-            "example_train_x": {"type": "MemoryDataSet"},
-            "example_train_y": {"type": "MemoryDataSet"},
+            "example_test_x": {"type": "MemoryDataset"},
+            "example_test_y": {"type": "MemoryDataset"},
+            "example_train_x": {"type": "MemoryDataset"},
+            "example_train_y": {"type": "MemoryDataset"},
         }
         catalog_config = yaml.safe_load(data_catalog_file.read_text())
         assert catalog_config == expected_catalog_config
@@ -281,7 +250,7 @@ class TestCatalogCreateCommand:
         }
         mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
         mocked_context.project_path = fake_repo_path
-        mock_pipelines[self.PIPELINE_NAME] = Pipeline(
+        mock_pipelines[self.PIPELINE_NAME] = modular_pipeline(
             [node(identity, "input_data", "output_data")]
         )
 
@@ -322,9 +291,9 @@ class TestCatalogCreateCommand:
 
         expected_catalog_config = {
             "example_test_x": catalog_config["example_test_x"],
-            "example_test_y": {"type": "MemoryDataSet"},
-            "example_train_x": {"type": "MemoryDataSet"},
-            "example_train_y": {"type": "MemoryDataSet"},
+            "example_test_y": {"type": "MemoryDataset"},
+            "example_train_x": {"type": "MemoryDataset"},
+            "example_train_y": {"type": "MemoryDataset"},
         }
         catalog_config = yaml.safe_load(data_catalog_file.read_text())
         assert catalog_config == expected_catalog_config
@@ -337,4 +306,4 @@ class TestCatalogCreateCommand:
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
         assert result.exit_code
-        assert "Unable to instantiate Kedro session" in result.output
+        assert "Unable to instantiate Kedro Catalog" in result.output

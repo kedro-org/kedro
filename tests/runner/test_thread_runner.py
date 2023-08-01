@@ -1,98 +1,39 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
+from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
-from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
-from kedro.pipeline import Pipeline, node
-from kedro.pipeline.decorators import log_time
+from kedro.framework.hooks import _create_hook_manager
+from kedro.io import AbstractDataSet, DataCatalog, DatasetError, MemoryDataset
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ThreadRunner
-
-
-def source():
-    return "stuff"
-
-
-def identity(arg):
-    return arg
-
-
-def sink(arg):  # pylint: disable=unused-argument
-    pass
-
-
-def fan_in(*args):
-    return args
-
-
-def exception_fn(arg):
-    raise Exception("test exception")
-
-
-def return_none(arg):
-    arg = None
-    return arg
-
-
-@pytest.fixture
-def catalog():
-    return DataCatalog()
-
-
-@pytest.fixture
-def fan_out_fan_in():
-    return Pipeline(
-        [
-            node(identity, "A", "B"),
-            node(identity, "B", "C"),
-            node(identity, "B", "D"),
-            node(identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
+from tests.runner.conftest import exception_fn, identity, return_none, sink, source
 
 
 class TestValidThreadRunner:
     def test_create_default_data_set(self):
         data_set = ThreadRunner().create_default_data_set("")
-        assert isinstance(data_set, MemoryDataSet)
+        assert isinstance(data_set, MemoryDataset)
 
     def test_thread_run(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
-    def test_memory_data_set_input(self, fan_out_fan_in):
-        catalog = DataCatalog({"A": MemoryDataSet("42")})
+    def test_thread_run_with_plugin_manager(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict({"A": 42})
+        result = ThreadRunner().run(
+            fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
+        )
+        assert "Z" in result
+        assert result["Z"] == (42, 42, 42)
+
+    def test_memory_dataset_input(self, fan_out_fan_in):
+        catalog = DataCatalog({"A": MemoryDataset("42")})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == ("42", "42", "42")
@@ -114,7 +55,7 @@ class TestMaxWorkers:
         catalog,
         user_specified_number,
         expected_number,
-    ):  # pylint: disable=too-many-arguments
+    ):  # noqa: too-many-arguments
         """
         We initialize the runner with max_workers=4.
         `fan_out_fan_in` pipeline needs 3 threads.
@@ -125,7 +66,7 @@ class TestMaxWorkers:
             wraps=ThreadPoolExecutor,
         )
 
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = ThreadRunner(max_workers=user_specified_number).run(
             fan_out_fan_in, catalog
         )
@@ -141,11 +82,11 @@ class TestMaxWorkers:
 
 class TestIsAsync:
     def test_thread_run(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         pattern = (
-            "`ThreadRunner` doesn't support loading and saving the "
+            "'ThreadRunner' doesn't support loading and saving the "
             "node inputs and outputs asynchronously with threads. "
-            "Setting `is_async` to False."
+            "Setting 'is_async' to False."
         )
         with pytest.warns(UserWarning, match=pattern):
             result = ThreadRunner(is_async=True).run(fan_out_fan_in, catalog)
@@ -155,54 +96,22 @@ class TestIsAsync:
 
 class TestInvalidThreadRunner:
     def test_task_exception(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(feed_dict=dict(A=42))
-        pipeline = Pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
+        catalog.add_feed_dict(feed_dict={"A": 42})
+        pipeline = modular_pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
             ThreadRunner().run(pipeline, catalog)
 
     def test_node_returning_none(self):
-        pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
-        catalog = DataCatalog({"A": MemoryDataSet("42")})
-        pattern = "Saving `None` to a `DataSet` is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        pipeline = modular_pipeline(
+            [node(identity, "A", "B"), node(return_none, "B", "C")]
+        )
+        catalog = DataCatalog({"A": MemoryDataset("42")})
+        pattern = "Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
             ThreadRunner().run(pipeline, catalog)
 
 
-@log_time
-def decorated_identity(*args, **kwargs):
-    return identity(*args, **kwargs)
-
-
-@pytest.fixture
-def decorated_fan_out_fan_in():
-    return Pipeline(
-        [
-            node(decorated_identity, "A", "B"),
-            node(decorated_identity, "B", "C"),
-            node(decorated_identity, "B", "D"),
-            node(decorated_identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
-
-
-class TestThreadRunnerDecorator:
-    def test_decorate_pipeline(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ThreadRunner().run(fan_out_fan_in.decorate(log_time), catalog)
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
-
-    def test_decorated_nodes(self, decorated_fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ThreadRunner().run(decorated_fan_out_fan_in, catalog)
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
-
-
-class LoggingDataSet(AbstractDataSet):
+class LoggingDataset(AbstractDataSet):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name
@@ -219,7 +128,7 @@ class LoggingDataSet(AbstractDataSet):
         self.log.append(("release", self.name))
         self.value = None
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {}
 
 
@@ -227,14 +136,14 @@ class TestThreadRunnerRelease:
     def test_dont_release_inputs_and_outputs(self):
         log = []
 
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
         catalog = DataCatalog(
             {
-                "in": LoggingDataSet(log, "in", "stuff"),
-                "middle": LoggingDataSet(log, "middle"),
-                "out": LoggingDataSet(log, "out"),
+                "in": LoggingDataset(log, "in", "stuff"),
+                "middle": LoggingDataset(log, "middle"),
+                "out": LoggingDataset(log, "out"),
             }
         )
         ThreadRunner().run(pipeline, catalog)
@@ -246,7 +155,7 @@ class TestThreadRunnerRelease:
         runner = ThreadRunner()
         log = []
 
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [
                 node(source, None, "first"),
                 node(identity, "first", "second"),
@@ -255,8 +164,8 @@ class TestThreadRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "first": LoggingDataSet(log, "first"),
-                "second": LoggingDataSet(log, "second"),
+                "first": LoggingDataset(log, "first"),
+                "second": LoggingDataset(log, "second"),
             }
         )
         runner.run(pipeline, catalog)
@@ -273,14 +182,14 @@ class TestThreadRunnerRelease:
         runner = ThreadRunner()
         log = []
 
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [
                 node(source, None, "dataset"),
                 node(sink, "dataset", None, name="bob"),
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
+        catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
         runner.run(pipeline, catalog)
 
         # we want to the release after both the loads
@@ -293,13 +202,13 @@ class TestThreadRunnerRelease:
     def test_release_transcoded(self):
         log = []
 
-        pipeline = Pipeline(
+        pipeline = modular_pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
         catalog = DataCatalog(
             {
-                "ds@save": LoggingDataSet(log, "save"),
-                "ds@load": LoggingDataSet(log, "load"),
+                "ds@save": LoggingDataset(log, "save"),
+                "ds@load": LoggingDataset(log, "load"),
             }
         )
 

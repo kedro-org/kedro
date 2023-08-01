@@ -1,58 +1,33 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """This module provides user-friendly functions for creating nodes as parts
 of Kedro pipelines.
 """
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
 import re
 from collections import Counter
-from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Callable, Iterable
 from warnings import warn
 
+from more_itertools import spy, unzip
 
-class Node:  # pylint: disable=too-many-instance-attributes
+
+class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
     run user-provided functions as part of Kedro pipelines.
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         func: Callable,
-        inputs: Union[None, str, List[str], Dict[str, str]],
-        outputs: Union[None, str, List[str], Dict[str, str]],
+        inputs: None | str | list[str] | dict[str, str],
+        outputs: None | str | list[str] | dict[str, str],
         *,
         name: str = None,
-        tags: Union[str, Iterable[str]] = None,
-        decorators: Iterable[Callable] = None,
-        confirms: Union[str, List[str]] = None,
+        tags: str | Iterable[str] | None = None,
+        confirms: str | list[str] | None = None,
         namespace: str = None,
     ):
         """Create a node in the pipeline by providing a function to be called
@@ -64,17 +39,16 @@ class Node:  # pylint: disable=too-many-instance-attributes
             inputs: The name or the list of the names of variables used as
                 inputs to the function. The number of names should match
                 the number of arguments in the definition of the provided
-                function. When Dict[str, str] is provided, variable names
+                function. When dict[str, str] is provided, variable names
                 will be mapped to function argument names.
             outputs: The name or the list of the names of variables used
                 as outputs to the function. The number of names should match
                 the number of outputs returned by the provided function.
-                When Dict[str, str] is provided, variable names will be mapped
+                When dict[str, str] is provided, variable names will be mapped
                 to the named outputs the function returns.
             name: Optional node name to be used when displaying the node in
                 logs or any other visualisations.
             tags: Optional set of tags to be applied to the node.
-            decorators: Optional list of decorators to be applied to the node.
             confirms: Optional name or the list of the names of the datasets
                 that should be confirmed. This will result in calling
                 ``confirm()`` method of the corresponding data set instance.
@@ -97,29 +71,29 @@ class Node:  # pylint: disable=too-many-instance-attributes
         if not callable(func):
             raise ValueError(
                 _node_error_message(
-                    f"first argument must be a function, not `{type(func).__name__}`."
+                    f"first argument must be a function, not '{type(func).__name__}'."
                 )
             )
 
         if inputs and not isinstance(inputs, (list, dict, str)):
             raise ValueError(
                 _node_error_message(
-                    f"`inputs` type must be one of [String, List, Dict, None], "
-                    f"not `{type(inputs).__name__}`."
+                    f"'inputs' type must be one of [String, List, Dict, None], "
+                    f"not '{type(inputs).__name__}'."
                 )
             )
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
                 _node_error_message(
-                    f"`outputs` type must be one of [String, List, Dict, None], "
-                    f"not `{type(outputs).__name__}`."
+                    f"'outputs' type must be one of [String, List, Dict, None], "
+                    f"not '{type(outputs).__name__}'."
                 )
             )
 
         if not inputs and not outputs:
             raise ValueError(
-                _node_error_message("it must have some `inputs` or `outputs`.")
+                _node_error_message("it must have some 'inputs' or 'outputs'.")
             )
 
         self._validate_inputs(func, inputs)
@@ -135,7 +109,6 @@ class Node:  # pylint: disable=too-many-instance-attributes
         self._name = name
         self._namespace = namespace
         self._tags = set(_to_list(tags))
-        self._decorators = list(decorators or [])
 
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
@@ -152,7 +125,6 @@ class Node:  # pylint: disable=too-many-instance-attributes
             "name": self._name,
             "namespace": self._namespace,
             "tags": self._tags,
-            "decorators": self._decorators,
             "confirms": self._confirms,
         }
         params.update(overwrite_params)
@@ -166,6 +138,9 @@ class Node:  # pylint: disable=too-many-instance-attributes
     def _unique_key(self):
         def hashable(value):
             if isinstance(value, dict):
+                # we sort it because a node with inputs/outputs
+                # {"arg1": "a", "arg2": "b"} is equivalent to
+                # a node with inputs/outputs {"arg2": "b", "arg1": "a"}
                 return tuple(sorted(value.items()))
             if isinstance(value, list):
                 return tuple(value)
@@ -187,21 +162,22 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return hash(self._unique_key)
 
     def __str__(self):
-        def _sorted_set_to_str(xset):
-            return f"[{','.join(sorted(xset))}]"
+        def _set_to_str(xset):
+            return f"[{';'.join(xset)}]"
 
-        out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
-        in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
+        out_str = _set_to_str(self.outputs) if self._outputs else "None"
+        in_str = _set_to_str(self.inputs) if self._inputs else "None"
 
         prefix = self._name + ": " if self._name else ""
         return prefix + f"{self._func_name}({in_str}) -> {out_str}"
 
     def __repr__(self):  # pragma: no cover
-        return "Node({}, {!r}, {!r}, {!r})".format(
-            self._func_name, self._inputs, self._outputs, self._name
+        return (
+            f"Node({self._func_name}, {repr(self._inputs)}, {repr(self._outputs)}, "
+            f"{repr(self._name)})"
         )
 
-    def __call__(self, **kwargs) -> Dict[str, Any]:
+    def __call__(self, **kwargs) -> dict[str, Any]:
         return self.run(inputs=kwargs)
 
     @property
@@ -209,9 +185,9 @@ class Node:  # pylint: disable=too-many-instance-attributes
         name = _get_readable_func_name(self._func)
         if name == "<partial>":
             warn(
-                f"The node producing outputs `{self.outputs}` is made from a `partial` function. "
-                f"Partial functions do not have a `__name__` attribute: consider using "
-                f"`functools.update_wrapper` for better log messages."
+                f"The node producing outputs '{self.outputs}' is made from a 'partial' function. "
+                f"Partial functions do not have a '__name__' attribute: consider using "
+                f"'functools.update_wrapper' for better log messages."
             )
         return name
 
@@ -235,7 +211,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         self._func = func
 
     @property
-    def tags(self) -> Set[str]:
+    def tags(self) -> set[str]:
         """Return the tags assigned to the node.
 
         Returns:
@@ -244,7 +220,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         """
         return set(self._tags)
 
-    def tag(self, tags: Union[str, Iterable[str]]) -> "Node":
+    def tag(self, tags: str | Iterable[str]) -> Node:
         """Create a new ``Node`` which is an exact copy of the current one,
             but with more tags added to it.
 
@@ -283,7 +259,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return self._func_name.replace("_", " ").title()
 
     @property
-    def namespace(self) -> Optional[str]:
+    def namespace(self) -> str | None:
         """Node's namespace.
 
         Returns:
@@ -292,7 +268,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return self._namespace
 
     @property
-    def inputs(self) -> List[str]:
+    def inputs(self) -> list[str]:
         """Return node inputs as a list, in the order required to bind them properly to
         the node's function.
 
@@ -305,7 +281,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return _to_list(self._inputs)
 
     @property
-    def outputs(self) -> List[str]:
+    def outputs(self) -> list[str]:
         """Return node outputs as a list preserving the original order
             if possible.
 
@@ -316,7 +292,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return _to_list(self._outputs)
 
     @property
-    def confirms(self) -> List[str]:
+    def confirms(self) -> list[str]:
         """Return dataset names to confirm as a list.
 
         Returns:
@@ -324,92 +300,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         """
         return _to_list(self._confirms)
 
-    @property
-    def _decorated_func(self):
-        return reduce(lambda g, f: f(g), self._decorators, self._func)
-
-    def decorate(self, *decorators: Callable) -> "Node":
-        """Create a new ``Node`` by applying the provided decorators to the
-        underlying function. If no decorators are passed, it will return a
-        new ``Node`` object, but with no changes to the function.
-
-        Args:
-            decorators: Decorators to be applied on the node function.
-                Decorators will be applied from right to left.
-
-        Returns:
-            A new ``Node`` object with the decorators applied to the function.
-
-        Example:
-        ::
-
-            >>>
-            >>> from functools import wraps
-            >>>
-            >>>
-            >>> def apply_f(func: Callable) -> Callable:
-            >>>     @wraps(func)
-            >>>     def with_f(*args, **kwargs):
-            >>>         args = ["f({})".format(a) for a in args]
-            >>>         return func(*args, **kwargs)
-            >>>     return with_f
-            >>>
-            >>>
-            >>> def apply_g(func: Callable) -> Callable:
-            >>>     @wraps(func)
-            >>>     def with_g(*args, **kwargs):
-            >>>         args = ["g({})".format(a) for a in args]
-            >>>         return func(*args, **kwargs)
-            >>>     return with_g
-            >>>
-            >>>
-            >>> def apply_h(func: Callable) -> Callable:
-            >>>     @wraps(func)
-            >>>     def with_h(*args, **kwargs):
-            >>>         args = ["h({})".format(a) for a in args]
-            >>>         return func(*args, **kwargs)
-            >>>     return with_h
-            >>>
-            >>>
-            >>> def apply_fg(func: Callable) -> Callable:
-            >>>     @wraps(func)
-            >>>     def with_fg(*args, **kwargs):
-            >>>         args = ["fg({})".format(a) for a in args]
-            >>>         return func(*args, **kwargs)
-            >>>     return with_fg
-            >>>
-            >>>
-            >>> def identity(value):
-            >>>     return value
-            >>>
-            >>>
-            >>> # using it as a regular python decorator
-            >>> @apply_f
-            >>> def decorated_identity(value):
-            >>>     return value
-            >>>
-            >>>
-            >>> # wrapping the node function
-            >>> old_node = node(apply_g(decorated_identity), 'input', 'output',
-            >>>                 name='node')
-            >>> # using the .decorate() method to apply multiple decorators
-            >>> new_node = old_node.decorate(apply_h, apply_fg)
-            >>> result = new_node.run(dict(input=1))
-            >>>
-            >>> assert old_node.name == new_node.name
-            >>> assert "output" in result
-            >>> assert result['output'] == "f(g(fg(h(1))))"
-        """
-        warn(
-            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
-            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
-            DeprecationWarning,
-        )
-        return self._copy(decorators=self._decorators + list(reversed(decorators)))
-
-    def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
+    def run(self, inputs: dict[str, Any] = None) -> dict[str, Any]:
         """Run this node using the provided inputs and return its results
         in a dictionary.
 
@@ -448,7 +339,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
             )
 
         try:
-            inputs = dict() if inputs is None else inputs
+            inputs = {} if inputs is None else inputs
             if not self._inputs:
                 outputs = self._run_with_no_inputs(inputs)
             elif isinstance(self._inputs, str):
@@ -462,101 +353,110 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
         # purposely catch all exceptions
         except Exception as exc:
-            self._logger.error("Node `%s` failed with error: \n%s", str(self), str(exc))
+            self._logger.error(
+                "Node %s failed with error: \n%s",
+                str(self),
+                str(exc),
+                extra={"markup": True},
+            )
             raise exc
 
-    def _run_with_no_inputs(self, inputs: Dict[str, Any]):
+    def _run_with_no_inputs(self, inputs: dict[str, Any]):
         if inputs:
             raise ValueError(
-                "Node {} expected no inputs, "
-                "but got the following {} input(s) instead: {}".format(
-                    str(self), len(inputs), list(sorted(inputs.keys()))
-                )
+                f"Node {str(self)} expected no inputs, "
+                f"but got the following {len(inputs)} input(s) instead: "
+                f"{sorted(inputs.keys())}."
             )
 
-        return self._decorated_func()
+        return self._func()
 
-    def _run_with_one_input(self, inputs: Dict[str, Any], node_input: str):
+    def _run_with_one_input(self, inputs: dict[str, Any], node_input: str):
         if len(inputs) != 1 or node_input not in inputs:
             raise ValueError(
-                "Node {} expected one input named '{}', "
-                "but got the following {} input(s) instead: {}".format(
-                    str(self), node_input, len(inputs), list(sorted(inputs.keys()))
-                )
+                f"Node {str(self)} expected one input named '{node_input}', "
+                f"but got the following {len(inputs)} input(s) instead: "
+                f"{sorted(inputs.keys())}."
             )
 
-        return self._decorated_func(inputs[node_input])
+        return self._func(inputs[node_input])
 
-    def _run_with_list(self, inputs: Dict[str, Any], node_inputs: List[str]):
+    def _run_with_list(self, inputs: dict[str, Any], node_inputs: list[str]):
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs) != set(inputs.keys()):
             raise ValueError(
-                "Node {} expected {} input(s) {}, "
-                "but got the following {} input(s) instead: {}.".format(
-                    str(self),
-                    len(node_inputs),
-                    node_inputs,
-                    len(inputs),
-                    list(sorted(inputs.keys())),
-                )
+                f"Node {str(self)} expected {len(node_inputs)} input(s) {node_inputs}, "
+                f"but got the following {len(inputs)} input(s) instead: "
+                f"{sorted(inputs.keys())}."
             )
         # Ensure the function gets the inputs in the correct order
-        return self._decorated_func(*[inputs[item] for item in node_inputs])
+        return self._func(*(inputs[item] for item in node_inputs))
 
-    def _run_with_dict(self, inputs: Dict[str, Any], node_inputs: Dict[str, str]):
+    def _run_with_dict(self, inputs: dict[str, Any], node_inputs: dict[str, str]):
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs.values()) != set(inputs.keys()):
             raise ValueError(
-                "Node {} expected {} input(s) {}, "
-                "but got the following {} input(s) instead: {}.".format(
-                    str(self),
-                    len(set(node_inputs.values())),
-                    list(sorted(set(node_inputs.values()))),
-                    len(inputs),
-                    list(sorted(inputs.keys())),
-                )
+                f"Node {str(self)} expected {len(set(node_inputs.values()))} input(s) "
+                f"{sorted(set(node_inputs.values()))}, "
+                f"but got the following {len(inputs)} input(s) instead: "
+                f"{sorted(inputs.keys())}."
             )
         kwargs = {arg: inputs[alias] for arg, alias in node_inputs.items()}
-        return self._decorated_func(**kwargs)
+        return self._func(**kwargs)
 
     def _outputs_to_dictionary(self, outputs):
         def _from_dict():
-            if set(self._outputs.keys()) != set(outputs.keys()):
+            result, iterator = outputs, None
+            # generator functions are lazy and we need a peek into their first output
+            if inspect.isgenerator(outputs):
+                (result,), iterator = spy(outputs)
+
+            keys = list(self._outputs.keys())
+            names = list(self._outputs.values())
+            if not isinstance(result, dict):
                 raise ValueError(
-                    "Failed to save outputs of node {}.\n"
-                    "The node's output keys {} do not "
-                    "match with the returned output's keys {}.".format(
-                        str(self), set(outputs.keys()), set(self._outputs.keys())
-                    )
+                    f"Failed to save outputs of node {self}.\n"
+                    f"The node output is a dictionary, whereas the "
+                    f"function output is {type(result)}."
                 )
-            return {name: outputs[key] for key, name in self._outputs.items()}
+            if set(keys) != set(result.keys()):
+                raise ValueError(
+                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"The node's output keys {set(result.keys())} "
+                    f"do not match with the returned output's keys {set(keys)}."
+                )
+            if iterator:
+                exploded = map(lambda x: tuple(x[k] for k in keys), iterator)
+                result = unzip(exploded)
+            else:
+                # evaluate this eagerly so we can reuse variable name
+                result = tuple(result[k] for k in keys)
+            return dict(zip(names, result))
 
         def _from_list():
-            if not isinstance(outputs, (list, tuple)):
+            result, iterator = outputs, None
+            # generator functions are lazy and we need a peek into their first output
+            if inspect.isgenerator(outputs):
+                (result,), iterator = spy(outputs)
+
+            if not isinstance(result, (list, tuple)):
                 raise ValueError(
-                    "Failed to save outputs of node {}.\n"
-                    "The node definition contains a list of "
-                    "outputs {}, whereas the node function "
-                    "returned a `{}`.".format(
-                        str(self), self._outputs, type(outputs).__name__
-                    )
+                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"The node definition contains a list of "
+                    f"outputs {self._outputs}, whereas the node function "
+                    f"returned a '{type(result).__name__}'."
                 )
-            if len(outputs) != len(self._outputs):
+            if len(result) != len(self._outputs):
                 raise ValueError(
-                    "Failed to save outputs of node {}.\n"
-                    "The node function returned {} output(s), "
-                    "whereas the node definition contains {} "
-                    "output(s).".format(str(self), len(outputs), len(self._outputs))
+                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"The node function returned {len(result)} output(s), "
+                    f"whereas the node definition contains {len(self._outputs)} "
+                    f"output(s)."
                 )
 
-            return dict(zip(self._outputs, outputs))
-
-        if isinstance(self._outputs, dict) and not isinstance(outputs, dict):
-            raise ValueError(
-                f"Failed to save outputs of node {self}.\n"
-                f"The node output is a dictionary, whereas the "
-                f"function output is not."
-            )
+            if iterator:
+                result = unzip(iterator)
+            return dict(zip(self._outputs, result))
 
         if self._outputs is None:
             return {}
@@ -602,11 +502,11 @@ class Node:  # pylint: disable=too-many-instance-attributes
             )
 
     @staticmethod
-    def _process_inputs_for_bind(inputs: Union[None, str, List[str], Dict[str, str]]):
+    def _process_inputs_for_bind(inputs: None | str | list[str] | dict[str, str]):
         # Safeguard that we do not mutate list inputs
         inputs = copy.copy(inputs)
-        args = []  # type: List[str]
-        kwargs = {}  # type: Dict[str, str]
+        args: list[str] = []
+        kwargs: dict[str, str] = {}
         if isinstance(inputs, str):
             args = [inputs]
         elif isinstance(inputs, list):
@@ -618,19 +518,19 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
 def _node_error_message(msg) -> str:
     return (
-        "Invalid Node definition: {}\n"
-        "Format should be: node(function, inputs, outputs)"
-    ).format(msg)
+        f"Invalid Node definition: {msg}\n"
+        f"Format should be: node(function, inputs, outputs)"
+    )
 
 
-def node(
+def node(  # noqa: too-many-arguments
     func: Callable,
-    inputs: Union[None, str, List[str], Dict[str, str]],
-    outputs: Union[None, str, List[str], Dict[str, str]],
+    inputs: None | str | list[str] | dict[str, str],
+    outputs: None | str | list[str] | dict[str, str],
     *,
     name: str = None,
-    tags: Iterable[str] = None,
-    confirms: Union[str, List[str]] = None,
+    tags: str | Iterable[str] | None = None,
+    confirms: str | list[str] | None = None,
     namespace: str = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
@@ -642,11 +542,11 @@ def node(
         inputs: The name or the list of the names of variables used as inputs
             to the function. The number of names should match the number of
             arguments in the definition of the provided function. When
-            Dict[str, str] is provided, variable names will be mapped to
+            dict[str, str] is provided, variable names will be mapped to
             function argument names.
         outputs: The name or the list of the names of variables used as outputs
             to the function. The number of names should match the number of
-            outputs returned by the provided function. When Dict[str, str]
+            outputs returned by the provided function. When dict[str, str]
             is provided, variable names will be mapped to the named outputs the
             function returns.
         name: Optional node name to be used when displaying the node in logs or
@@ -669,7 +569,7 @@ def node(
         >>> import numpy as np
         >>>
         >>> def clean_data(cars: pd.DataFrame,
-        >>>                boats: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+        >>>                boats: pd.DataFrame) -> dict[str, pd.DataFrame]:
         >>>     return dict(cars_df=cars.dropna(), boats_df=boats.dropna())
         >>>
         >>> def halve_dataframe(data: pd.DataFrame) -> List[pd.DataFrame]:
@@ -699,7 +599,7 @@ def node(
     )
 
 
-def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
+def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: dict[str, str]):
     """Convert a dict representation of the node inputs to a list, ensuring
     the appropriate order for binding them to the node's function.
     """
@@ -707,11 +607,11 @@ def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
     return [*sig.args, *sig.kwargs.values()]
 
 
-def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List[str]:
+def _to_list(element: None | str | Iterable[str] | dict[str, str]) -> list[str]:
     """Make a list out of node inputs/outputs.
 
     Returns:
-        List[str]: Node input/output names as a list to standardise.
+        list[str]: Node input/output names as a list to standardise.
     """
 
     if element is None:
@@ -719,7 +619,7 @@ def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List[s
     if isinstance(element, str):
         return [element]
     if isinstance(element, dict):
-        return sorted(element.values())
+        return list(element.values())
     return list(element)
 
 

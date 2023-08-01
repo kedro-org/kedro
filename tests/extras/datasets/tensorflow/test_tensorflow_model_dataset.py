@@ -1,32 +1,4 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 # pylint: disable=import-outside-toplevel
-
 from pathlib import PurePosixPath
 
 import numpy as np
@@ -36,7 +8,7 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from s3fs import S3FileSystem
 
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -123,6 +95,24 @@ def dummy_tf_base_model(dummy_x_train, dummy_y_train, tf):
 
 
 @pytest.fixture
+def dummy_tf_base_model_new(dummy_x_train, dummy_y_train, tf):
+    # dummy 2 layer model
+    inputs = tf.keras.Input(shape=(2, 1))
+    x = tf.keras.layers.Dense(1)(inputs)
+    x = tf.keras.layers.Dense(1)(x)
+    outputs = tf.keras.layers.Dense(1)(x)
+
+    model = tf.keras.Model(inputs=inputs, outputs=outputs, name="2_layer_dummy")
+    model.compile("rmsprop", "mse")
+    model.fit(dummy_x_train, dummy_y_train, batch_size=64, epochs=1)
+    # from https://www.tensorflow.org/guide/keras/save_and_serialize
+    # Reset metrics before saving so that loaded model has same state,
+    # since metric states are not preserved by Model.save_weights
+    model.reset_metrics()
+    return model
+
+
+@pytest.fixture
 def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     """Demonstrate that own class models cannot be saved
     using HDF5 format but can using TF format
@@ -165,7 +155,7 @@ class TestTensorFlowModelDataset:
         pattern = (
             r"Failed while loading data from data set TensorFlowModelDataset\(.*\)"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             tf_model_dataset.load()
 
     def test_exists(self, tf_model_dataset, dummy_tf_base_model):
@@ -222,7 +212,7 @@ class TestTensorFlowModelDataset:
             r"saving to the Tensorflow SavedModel format \(by setting save_format=\"tf\"\) "
             r"or using `save_weights`."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             hdf5_data_set.save(dummy_tf_subclassed_model)
 
     @pytest.mark.parametrize(
@@ -271,8 +261,21 @@ class TestTensorFlowModelDataset:
 
     def test_exists_with_exception(self, tf_model_dataset, mocker):
         """Test `exists` method invocation when `get_filepath_str` raises an exception."""
-        mocker.patch("kedro.io.core.get_filepath_str", side_effct=DataSetError)
+        mocker.patch("kedro.io.core.get_filepath_str", side_effect=DatasetError)
         assert not tf_model_dataset.exists()
+
+    def test_save_and_overwrite_existing_model(
+        self, tf_model_dataset, dummy_tf_base_model, dummy_tf_base_model_new
+    ):
+        """Test models are correcty overwritten."""
+        tf_model_dataset.save(dummy_tf_base_model)
+
+        tf_model_dataset.save(dummy_tf_base_model_new)
+
+        reloaded = tf_model_dataset.load()
+
+        assert len(dummy_tf_base_model.layers) != len(reloaded.layers)
+        assert len(dummy_tf_base_model_new.layers) == len(reloaded.layers)
 
 
 class TestTensorFlowModelDatasetVersioned:
@@ -338,10 +341,10 @@ class TestTensorFlowModelDatasetVersioned:
         corresponding file for a given save version already exists."""
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         pattern = (
-            r"Save path \`.+\` for TensorFlowModelDataset\(.+\) must "
+            r"Save path \'.+\' for TensorFlowModelDataset\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_tf_model_dataset.save(dummy_tf_base_model)
 
     @pytest.mark.parametrize(
@@ -359,16 +362,16 @@ class TestTensorFlowModelDatasetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            rf"Save version `{save_version}` did not match load version `{load_version}` "
+            rf"Save version '{save_version}' did not match load version '{load_version}' "
             rf"for TensorFlowModelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_tf_model_dataset.save(dummy_tf_base_model)
 
     def test_http_filesystem_no_versioning(self, tensorflow_model_dataset):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             tensorflow_model_dataset(
                 filepath="https://example.com/file.tf", version=Version(None, None)
             )
@@ -382,7 +385,7 @@ class TestTensorFlowModelDatasetVersioned:
     def test_no_versions(self, versioned_tf_model_dataset):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for TensorFlowModelDataset\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_tf_model_dataset.load()
 
     def test_version_str_repr(self, tf_model_dataset, versioned_tf_model_dataset):
@@ -413,3 +416,26 @@ class TestTensorFlowModelDatasetVersioned:
         assert tf_model_dataset._filepath == versioned_tf_model_dataset._filepath
         versioned_tf_model_dataset.save(dummy_tf_base_model)
         assert versioned_tf_model_dataset.exists()
+
+    def test_save_and_load_with_device(
+        self,
+        dummy_tf_base_model,
+        dummy_x_test,
+        filepath,
+        tensorflow_model_dataset,
+        load_version,
+        save_version,
+    ):
+        """Test versioned TensorflowModelDataset can load models using an explicit tf_device"""
+        hdf5_dataset = tensorflow_model_dataset(
+            filepath=filepath,
+            load_args={"tf_device": "/CPU:0"},
+            version=Version(load_version, save_version),
+        )
+
+        predictions = dummy_tf_base_model.predict(dummy_x_test)
+        hdf5_dataset.save(dummy_tf_base_model)
+
+        reloaded = hdf5_dataset.load()
+        new_predictions = reloaded.predict(dummy_x_test)
+        np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)

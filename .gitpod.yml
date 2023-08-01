@@ -1,0 +1,31 @@
+image:
+  file: .gitpod.Dockerfile
+tasks:
+  - name: kedro
+
+    init: |
+      make sign-off
+      pip install -e /workspace/kedro[test]
+      cd /workspace
+      yes project | kedro new -s pandas-iris --checkout main
+      cd /workspace/kedro
+      pre-commit install --install-hooks
+
+    command: |
+      clear
+      kedro info
+
+github:
+  prebuilds:
+    # enable for the master/default branch (defaults to true)
+    master: true
+    # enable for all branches in this repo (defaults to false)
+    branches: true
+    # enable for pull requests coming from this repo (defaults to true)
+    pullRequests: true
+    # enable for pull requests coming from forks (defaults to false)
+    pullRequestsFromForks: true
+    # add a "Review in Gitpod" button as a comment to pull requests (defaults to true)
+    addComment: false
+    # add a "Review in Gitpod" button to pull requests (defaults to false)
+    addBadge: true

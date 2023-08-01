@@ -1,40 +1,14 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
+from __future__ import annotations
 
 import shlex
 import subprocess
-from typing import Any, List, Union
+from typing import Any
 
 import psutil
 
 
 def run(
-    cmd: Union[list, str], split: bool = True, print_output: bool = False, **kwargs: Any
+    cmd: list | str, split: bool = True, print_output: bool = False, **kwargs: Any
 ) -> subprocess.CompletedProcess:
     """Run a shell command.
 
@@ -48,7 +22,7 @@ def run(
         print_output: If True will print previously captured stdout.
             Default is False.
 
-        kwargs: Extra options to pass to subprocess.
+        **kwargs: Extra options to pass to subprocess.
 
     Example:
     ::
@@ -63,9 +37,7 @@ def run(
     if isinstance(cmd, str) and split:
         cmd = shlex.split(cmd)
     # pylint: disable=subprocess-run-check
-    result = subprocess.run(
-        cmd, input="", stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
-    )
+    result = subprocess.run(cmd, input="", capture_output=True, **kwargs)
     result.stdout = result.stdout.decode("utf-8")
     result.stderr = result.stderr.decode("utf-8")
     if print_output:
@@ -73,7 +45,7 @@ def run(
     return result
 
 
-def check_run(cmd: Union[list, str], print_output: bool = False) -> None:
+def check_run(cmd: list | str, print_output: bool = False) -> None:
     """
     Run cmd using subprocess.check_call (throws error if non-zero value
     returned)
@@ -102,7 +74,7 @@ class ChildTerminatingPopen(subprocess.Popen):
         dies (so-called orphan processes)
     """
 
-    def __init__(self, cmd: List[str], **kwargs) -> None:
+    def __init__(self, cmd: list[str], **kwargs) -> None:
         """
         Initializer pipes stderr and stdout.
 
@@ -112,7 +84,7 @@ class ChildTerminatingPopen(subprocess.Popen):
 
         """
         super().__init__(  # type: ignore
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs
         )
 
     def terminate(self) -> None:

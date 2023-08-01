@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 """
@@ -41,7 +13,7 @@ import pandas as pd
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -49,12 +21,40 @@ from kedro.io.core import (
 
 logger = logging.getLogger(__name__)
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
-class CSVDataSet(AbstractVersionedDataSet):
+
+class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 
-    Example:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        cars:
+          type: pandas.CSVDataSet
+          filepath: data/01_raw/company/cars.csv
+          load_args:
+            sep: ","
+            na_values: ["#NA", NA]
+          save_args:
+            index: False
+            date_format: "%Y-%m-%d %H:%M"
+            decimal: .
+
+        motorbikes:
+          type: pandas.CSVDataSet
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
+          credentials: dev_s3
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import CSVDataSet
@@ -63,7 +63,6 @@ class CSVDataSet(AbstractVersionedDataSet):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = CSVDataSet(filepath="gcs://bucket/test.csv")
         >>> data_set = CSVDataSet(filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
@@ -74,8 +73,7 @@ class CSVDataSet(AbstractVersionedDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -137,21 +135,20 @@ class CSVDataSet(AbstractVersionedDataSet):
 
         if "storage_options" in self._save_args or "storage_options" in self._load_args:
             logger.warning(
-                "Dropping `storage_options` for %s, "
-                "please specify them under `fs_args` or `credentials`.",
+                "Dropping 'storage_options' for %s, "
+                "please specify them under 'fs_args' or 'credentials'.",
                 self._filepath,
             )
             self._save_args.pop("storage_options", None)
             self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())
@@ -181,7 +178,7 @@ class CSVDataSet(AbstractVersionedDataSet):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

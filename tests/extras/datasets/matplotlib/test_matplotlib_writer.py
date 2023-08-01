@@ -1,32 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 import json
 from pathlib import Path
 
@@ -38,7 +9,7 @@ from moto import mock_s3
 from s3fs import S3FileSystem
 
 from kedro.extras.datasets.matplotlib import MatplotlibWriter
-from kedro.io import DataSetError, Version
+from kedro.io import DatasetError, Version
 
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}
@@ -126,15 +97,21 @@ def s3fs_cleanup():
     S3FileSystem.cachable = False
 
 
+@pytest.fixture(params=[False])
+def overwrite(request):
+    return request.param
+
+
 @pytest.fixture
 def plot_writer(
-    mocked_s3_bucket, fs_args, save_args
+    mocked_s3_bucket, fs_args, save_args, overwrite
 ):  # pylint: disable=unused-argument
     return MatplotlibWriter(
         filepath=FULL_PATH,
         credentials=AWS_CREDENTIALS,
         fs_args=fs_args,
         save_args=save_args,
+        overwrite=overwrite,
     )
 
 
@@ -205,8 +182,30 @@ class TestMatplotlibWriter:
 
             assert actual_filepath.read_bytes() == download_path.read_bytes()
 
+    @pytest.mark.parametrize(
+        "overwrite,expected_num_plots", [(False, 8), (True, 3)], indirect=["overwrite"]
+    )
+    def test_overwrite(
+        self,
+        mock_list_plot,
+        mock_dict_plot,
+        plot_writer,
+        mocked_s3_bucket,
+        expected_num_plots,
+    ):
+        """Test saving dictionary of plots after list of plots to S3."""
+
+        plot_writer.save(mock_list_plot)
+        plot_writer.save(mock_dict_plot)
+
+        response = mocked_s3_bucket.list_objects(Bucket=BUCKET_NAME)
+        saved_plots = {obj["Key"] for obj in response["Contents"]}
+
+        assert {f"{KEY_PATH}/{colour}" for colour in COLOUR_LIST} <= saved_plots
+        assert len(saved_plots) == expected_num_plots
+
     def test_fs_args(self, tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
-        """Test writing to encrypted bucket"""
+        """Test writing to encrypted bucket."""
         normal_encryped_writer = MatplotlibWriter(
             fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
             filepath=FULL_PATH,
@@ -235,8 +234,8 @@ class TestMatplotlibWriter:
         assert plot_writer._fs_open_args_save == fs_args["open_args_save"]
 
     def test_load_fail(self, plot_writer):
-        pattern = r"Loading not supported for `MatplotlibWriter`"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = r"Loading not supported for 'MatplotlibWriter'"
+        with pytest.raises(DatasetError, match=pattern):
             plot_writer.load()
 
     @pytest.mark.usefixtures("s3fs_cleanup")
@@ -279,11 +278,25 @@ class TestMatplotlibWriterVersioned:
         corresponding matplotlib file for a given save version already exists."""
         versioned_plot_writer.save(mock_single_plot)
         pattern = (
-            r"Save path \`.+\` for MatplotlibWriter\(.+\) must "
+            r"Save path \'.+\' for MatplotlibWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_plot_writer.save(mock_single_plot)
+
+    def test_ineffective_overwrite(self, load_version, save_version):
+        pattern = (
+            "Setting 'overwrite=True' is ineffective if versioning "
+            "is enabled, since the versioned path must not already "
+            "exist; overriding flag with 'overwrite=False' instead."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            versioned_plot_writer = MatplotlibWriter(
+                filepath="/tmp/file.txt",
+                version=Version(load_version, save_version),
+                overwrite=True,
+            )
+        assert not versioned_plot_writer._overwrite
 
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
@@ -297,24 +310,26 @@ class TestMatplotlibWriterVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save version `{0}` did not match load version `{1}` "
-            r"for MatplotlibWriter\(.+\)".format(save_version, load_version)
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for MatplotlibWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_plot_writer.save(mock_single_plot)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             MatplotlibWriter(
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
 
-    def test_no_versions(self, versioned_plot_writer):
+    def test_load_not_supported(self, versioned_plot_writer):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for MatplotlibWriter\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = (
+            rf"Loading not supported for '{versioned_plot_writer.__class__.__name__}'"
+        )
+        with pytest.raises(DatasetError, match=pattern):
             versioned_plot_writer.load()
 
     def test_exists(self, versioned_plot_writer, mock_single_plot):
@@ -384,7 +399,7 @@ class TestMatplotlibWriterVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_plot_writer._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_plot_writer.save(mock_single_plot)
 
         # Remove non-versioned dataset and try again

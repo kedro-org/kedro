@@ -1,38 +1,9 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """This module contains unit test for the cli command 'kedro new'
 """
+from __future__ import annotations
 
-import json
 import shutil
 from pathlib import Path
-from typing import Dict
 
 import pytest
 import yaml
@@ -40,9 +11,13 @@ from click.testing import CliRunner
 from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
-from kedro.framework.cli.starters import _STARTER_ALIASES, TEMPLATE_PATH
+from kedro.framework.cli.starters import (
+    _OFFICIAL_STARTER_SPECS,
+    TEMPLATE_PATH,
+    KedroStarterSpec,
+)
 
-FILES_IN_TEMPLATE = 36
+FILES_IN_TEMPLATE = 29
 
 
 @pytest.fixture
@@ -63,7 +38,7 @@ def mock_cookiecutter(mocker):
     return mocker.patch("cookiecutter.main.cookiecutter")
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
@@ -73,7 +48,7 @@ def _make_cli_prompt_input(project_name="", repo_name="", python_package=""):
     return "\n".join([project_name, repo_name, python_package])
 
 
-# pylint: disable=too-many-arguments
+# noqa: too-many-arguments
 def _assert_template_ok(
     result,
     project_name="New Kedro Project",
@@ -93,9 +68,11 @@ def _assert_template_ok(
     assert len(generated_files) == FILES_IN_TEMPLATE
     assert full_path.exists()
     assert (full_path / ".gitignore").is_file()
-    assert project_name in (full_path / "README.md").read_text()
-    assert "KEDRO" in (full_path / ".gitignore").read_text()
-    assert kedro_version in (full_path / "src" / "requirements.txt").read_text()
+    assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
+    assert "KEDRO" in (full_path / ".gitignore").read_text(encoding="utf-8")
+    assert kedro_version in (full_path / "src" / "requirements.txt").read_text(
+        encoding="utf-8"
+    )
     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
 
@@ -104,15 +81,44 @@ def test_starter_list(fake_kedro_cli):
     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
 
     assert result.exit_code == 0, result.output
-    for alias in _STARTER_ALIASES:
+    for alias in _OFFICIAL_STARTER_SPECS:
         assert alias in result.output
 
 
-def test_cookiecutter_json_matches_prompts_yml():
-    """Validate the contents of the default config file."""
-    cookiecutter_json = json.loads((TEMPLATE_PATH / "cookiecutter.json").read_text())
-    prompts_yml = yaml.safe_load((TEMPLATE_PATH / "prompts.yml").read_text())
-    assert set(cookiecutter_json) == set(prompts_yml) | {"kedro_version"}
+def test_starter_list_with_starter_plugin(fake_kedro_cli, entry_point):
+    """Check that `kedro starter list` prints out the plugin starters."""
+    entry_point.load.return_value = [KedroStarterSpec("valid_starter", "valid_path")]
+    entry_point.module = "valid_starter_module"
+    result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
+    assert result.exit_code == 0, result.output
+    assert "valid_starter_module" in result.output
+
+
+@pytest.mark.parametrize(
+    "specs,expected",
+    [
+        (
+            [{"alias": "valid_starter", "template_path": "valid_path"}],
+            "should be a 'KedroStarterSpec'",
+        ),
+        (
+            [
+                KedroStarterSpec("duplicate", "duplicate"),
+                KedroStarterSpec("duplicate", "duplicate"),
+            ],
+            "has been ignored as it is already defined by",
+        ),
+    ],
+)
+def test_starter_list_with_invalid_starter_plugin(
+    fake_kedro_cli, entry_point, specs, expected
+):
+    """Check that `kedro starter list` prints out the plugin starters."""
+    entry_point.load.return_value = specs
+    entry_point.module = "invalid_starter"
+    result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
+    assert result.exit_code == 0, result.output
+    assert expected in result.output
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -139,47 +145,19 @@ class TestNewFromUserPromptsValid:
             python_package="my_project",
         )
 
-    def test_custom_repo_name(self, fake_kedro_cli):
+    def test_custom_project_name_with_hyphen_and_underscore_and_number(
+        self, fake_kedro_cli
+    ):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
-            input=_make_cli_prompt_input(repo_name="my-repo"),
+            input=_make_cli_prompt_input(project_name="My-Project_ 1"),
         )
         _assert_template_ok(
             result,
-            project_name="New Kedro Project",
-            repo_name="my-repo",
-            python_package="new_kedro_project",
-        )
-
-    def test_custom_python_package(self, fake_kedro_cli):
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new"],
-            input=_make_cli_prompt_input(python_package="my_package"),
-        )
-        _assert_template_ok(
-            result,
-            project_name="New Kedro Project",
-            repo_name="new-kedro-project",
-            python_package="my_package",
-        )
-
-    def test_custom_all(self, fake_kedro_cli):
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new"],
-            input=_make_cli_prompt_input(
-                project_name="My Project",
-                repo_name="my-repo",
-                python_package="my_package",
-            ),
-        )
-        _assert_template_ok(
-            result,
-            project_name="My Project",
-            repo_name="my-repo",
-            python_package="my_package",
+            project_name="My-Project_ 1",
+            repo_name="my-project--1",
+            python_package="my_project__1",
         )
 
     def test_no_prompts(self, fake_kedro_cli):
@@ -193,6 +171,56 @@ class TestNewFromUserPromptsValid:
         _write_yaml(Path("template") / "prompts.yml", {})
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         _assert_template_ok(result)
+
+    def test_custom_prompt_valid_input(self, fake_kedro_cli):
+        shutil.copytree(TEMPLATE_PATH, "template")
+        _write_yaml(
+            Path("template") / "prompts.yml",
+            {
+                "project_name": {"title": "Project Name"},
+                "custom_value": {
+                    "title": "Custom Value",
+                    "regex_validator": "^\\w+(-*\\w+)*$",
+                },
+            },
+        )
+        custom_input = "\n".join(["my-project", "My Project"])
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--starter", "template"],
+            input=custom_input,
+        )
+        _assert_template_ok(
+            result,
+            project_name="My Project",
+            repo_name="my-project",
+            python_package="my_project",
+        )
+
+    def test_custom_prompt_for_essential_variable(self, fake_kedro_cli):
+        shutil.copytree(TEMPLATE_PATH, "template")
+        _write_yaml(
+            Path("template") / "prompts.yml",
+            {
+                "project_name": {"title": "Project Name"},
+                "repo_name": {
+                    "title": "Custom Repo Name",
+                    "regex_validator": "^[a-zA-Z_]\\w{1,}$",
+                },
+            },
+        )
+        custom_input = "\n".join(["My Project", "my_custom_repo"])
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--starter", "template"],
+            input=custom_input,
+        )
+        _assert_template_ok(
+            result,
+            project_name="My Project",
+            repo_name="my_custom_repo",
+            python_package="my_project",
+        )
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -209,33 +237,6 @@ class TestNewFromUserPromptsInvalid:
         assert result.exit_code != 0
         assert "directory already exists" in result.output
 
-    @pytest.mark.parametrize(
-        "repo_name", [".repo\nvalid", "re!po\nvalid", "-repo\nvalid", "repo-\nvalid"]
-    )
-    def test_bad_repo_name(self, fake_kedro_cli, repo_name):
-        """Check the error if the repository name is invalid."""
-        result = CliRunner().invoke(
-            fake_kedro_cli, ["new"], input=_make_cli_prompt_input(repo_name=repo_name)
-        )
-        assert result.exit_code != 0
-        assert (
-            "is an invalid value.\nIt must contain only word symbols" in result.output
-        )
-
-    @pytest.mark.parametrize(
-        "python_package",
-        ["0package\nvalid", "_\nvalid", "package-name\nvalid", "package name\nvalid"],
-    )
-    def test_bad_python_package(self, fake_kedro_cli, python_package):
-        """Check the error if the package name is invalid."""
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new"],
-            input=_make_cli_prompt_input(python_package=python_package),
-        )
-        assert result.exit_code != 0
-        assert "is an invalid value.\nIt must start with a letter" in result.output
-
     def test_prompt_no_title(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
         _write_yaml(Path("template") / "prompts.yml", {"repo_name": {}})
@@ -245,10 +246,55 @@ class TestNewFromUserPromptsInvalid:
 
     def test_prompt_bad_yaml(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
-        (Path("template") / "prompts.yml").write_text("invalid\tyaml")
+        (Path("template") / "prompts.yml").write_text("invalid\tyaml", encoding="utf-8")
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         assert result.exit_code != 0
         assert "Failed to generate project: could not load prompts.yml" in result.output
+
+    def test_invalid_project_name_special_characters(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(project_name="My $Project!"),
+        )
+        assert result.exit_code != 0
+        assert (
+            "is an invalid value for Project Name.\nIt must contain only alphanumeric symbols"
+            in result.output
+        )
+
+    def test_invalid_project_name_too_short(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(project_name="P"),
+        )
+        assert result.exit_code != 0
+        assert (
+            "is an invalid value for Project Name.\nIt must contain only alphanumeric symbols"
+            in result.output
+        )
+
+    def test_custom_prompt_invalid_input(self, fake_kedro_cli):
+        shutil.copytree(TEMPLATE_PATH, "template")
+        _write_yaml(
+            Path("template") / "prompts.yml",
+            {
+                "project_name": {"title": "Project Name"},
+                "custom_value": {
+                    "title": "Custom Value",
+                    "regex_validator": "^\\w+(-*\\w+)*$",
+                },
+            },
+        )
+        custom_input = "\n".join(["My Project", "My Project"])
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--starter", "template"],
+            input=custom_input,
+        )
+        assert result.exit_code != 0
+        assert "'My Project' is an invalid value" in result.output
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -261,6 +307,19 @@ class TestNewFromConfigFileValid:
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+        _assert_template_ok(result, **config)
+
+    def test_custom_required_keys(self, fake_kedro_cli):
+        """Test project created from config."""
+        config = {
+            "project_name": "Project X",
+            "repo_name": "projectx",
+            "python_package": "proj_x",
         }
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(
@@ -322,7 +381,7 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
-        _assert_template_ok(result)
+        _assert_template_ok(result, **config)
 
     def test_empty_prompts(self, fake_kedro_cli):
         config = {
@@ -336,7 +395,7 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
-        _assert_template_ok(result)
+        _assert_template_ok(result, **config)
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -357,13 +416,13 @@ class TestNewFromConfigFileInvalid:
     def test_config_missing_key(self, fake_kedro_cli):
         """Check the error if keys are missing from config file."""
         config = {
-            "project_name": "My Project",
+            "python_package": "my_project",
             "repo_name": "my-project",
         }
         _write_yaml(Path("config.yml"), config)
         result = CliRunner().invoke(fake_kedro_cli, ["new", "-v", "-c", "config.yml"])
         assert result.exit_code != 0
-        assert "python_package not found in config file" in result.output
+        assert "project_name not found in config file" in result.output
 
     def test_config_does_not_exist(self, fake_kedro_cli):
         """Check the error if the config file does not exist."""
@@ -380,7 +439,7 @@ class TestNewFromConfigFileInvalid:
 
     def test_config_bad_yaml(self, fake_kedro_cli):
         """Check the error if config YAML is invalid."""
-        Path("config.yml").write_text("invalid\tyaml")
+        Path("config.yml").write_text("invalid\tyaml", encoding="utf-8")
         result = CliRunner().invoke(fake_kedro_cli, ["new", "-v", "-c", "config.yml"])
         assert result.exit_code != 0
         assert "Failed to generate project: could not load config" in result.output
@@ -422,7 +481,7 @@ class TestNewWithStarterValid:
             input=_make_cli_prompt_input(),
         )
         kwargs = {
-            "template": "git+https://github.com/quantumblacklabs/kedro-starters.git",
+            "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": version,
             "directory": "spaceflights",
         }
@@ -438,7 +497,7 @@ class TestNewWithStarterValid:
             input=_make_cli_prompt_input(),
         )
         kwargs = {
-            "template": "git+https://github.com/quantumblacklabs/kedro-starters.git",
+            "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": "my_checkout",
             "directory": "spaceflights",
         }
@@ -519,7 +578,7 @@ class TestNewWithStarterInvalid:
     @pytest.mark.parametrize(
         "starter, repo",
         [
-            ("spaceflights", "https://github.com/quantumblacklabs/kedro-starters.git"),
+            ("spaceflights", "https://github.com/kedro-org/kedro-starters.git"),
             (
                 "git+https://github.com/fake/fake.git",
                 "https://github.com/fake/fake.git",

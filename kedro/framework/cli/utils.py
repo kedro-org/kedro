@@ -1,33 +1,8 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """Utilities for use with click."""
+from __future__ import annotations
+
 import difflib
+import logging
 import re
 import shlex
 import shutil
@@ -41,12 +16,13 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
+from typing import Iterable, Sequence
 
 import click
-import pkg_resources
+import importlib_metadata
+from omegaconf import OmegaConf
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
 
@@ -59,10 +35,13 @@ ENTRY_POINT_GROUPS = {
     "line_magic": "kedro.line_magic",
     "hooks": "kedro.hooks",
     "cli_hooks": "kedro.cli_hooks",
+    "starters": "kedro.starters",
 }
 
+logger = logging.getLogger(__name__)
 
-def call(cmd: List[str], **kwargs):  # pragma: no cover
+
+def call(cmd: list[str], **kwargs):  # pragma: no cover
     """Run a subprocess command and raise if it fails.
 
     Args:
@@ -73,7 +52,7 @@ def call(cmd: List[str], **kwargs):  # pragma: no cover
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
     click.echo(" ".join(shlex.quote(c) for c in cmd))
-    # pylint: disable=subprocess-run-check
+    # noqa: subprocess-run-check
     code = subprocess.run(cmd, **kwargs).returncode
     if code:
         raise click.exceptions.Exit(code=code)
@@ -102,10 +81,10 @@ def forward_command(group, name=None, forward_help=False):
         func = command_with_verbosity(
             group,
             name=name,
-            context_settings=dict(
-                ignore_unknown_options=True,
-                help_option_names=[] if forward_help else ["-h", "--help"],
-            ),
+            context_settings={
+                "ignore_unknown_options": True,
+                "help_option_names": [] if forward_help else ["-h", "--help"],
+            },
         )(func)
         return func
 
@@ -133,7 +112,7 @@ def _suggest_cli_command(
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: Tuple[str, Sequence[click.MultiCommand]]):
+    def __init__(self, *groups: tuple[str, Sequence[click.MultiCommand]]):
         self.groups = [
             (title, self._merge_same_name_collections(cli_list))
             for title, cli_list in groups
@@ -160,7 +139,7 @@ class CommandCollection(click.CommandCollection):
         """Deduplicate commands by keeping the ones from the last source
         in the list.
         """
-        seen_names: Set[str] = set()
+        seen_names: set[str] = set()
         for cli_collection in reversed(cli_collections):
             for cmd_group in reversed(cli_collection.sources):
                 cmd_group.commands = {  # type: ignore
@@ -180,8 +159,8 @@ class CommandCollection(click.CommandCollection):
 
     @staticmethod
     def _merge_same_name_collections(groups: Sequence[click.MultiCommand]):
-        named_groups: Mapping[str, List[click.MultiCommand]] = defaultdict(list)
-        helps: Mapping[str, list] = defaultdict(list)
+        named_groups: defaultdict[str, list[click.MultiCommand]] = defaultdict(list)
+        helps: defaultdict[str, list] = defaultdict(list)
         for group in groups:
             named_groups[group.name].append(group)
             if group.help:
@@ -199,7 +178,7 @@ class CommandCollection(click.CommandCollection):
             if cli_list
         ]
 
-    def resolve_command(self, ctx: click.core.Context, args: List):
+    def resolve_command(self, ctx: click.core.Context, args: list):
         try:
             return super().resolve_command(ctx, args)
         except click.exceptions.UsageError as exc:
@@ -222,7 +201,7 @@ class CommandCollection(click.CommandCollection):
                     group.format_commands(ctx, formatter)
 
 
-def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
+def get_pkg_version(reqs_path: (str | Path), package_name: str) -> str:
     """Get package version from requirements.txt.
 
     Args:
@@ -238,19 +217,19 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     """
     reqs_path = Path(reqs_path).absolute()
     if not reqs_path.is_file():
-        raise KedroCliError(f"Given path `{reqs_path}` is not a regular file.")
+        raise KedroCliError(f"Given path '{reqs_path}' is not a regular file.")
 
     pattern = re.compile(package_name + r"([^\w]|$)")
-    with reqs_path.open("r") as reqs_file:
+    with reqs_path.open("r", encoding="utf-8") as reqs_file:
         for req_line in reqs_file:
-            req_line = req_line.strip()
+            req_line = req_line.strip()  # noqa: redefined-loop-name
             if pattern.search(req_line):
                 return req_line
 
-    raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
+    raise KedroCliError(f"Cannot find '{package_name}' package in '{reqs_path}'.")
 
 
-def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
+def _update_verbose_flag(ctx, param, value):  # noqa: unused-argument
     KedroCliError.VERBOSE_ERROR = value
 
 
@@ -286,7 +265,7 @@ class KedroCliError(click.exceptions.ClickException):
 
     def show(self, file=None):
         if file is None:
-            # pylint: disable=protected-access
+            # noqa: protected-access
             file = click._compat.get_text_stderr()
         if self.VERBOSE_ERROR:
             click.secho(traceback.format_exc(), nl=False, fg="yellow")
@@ -312,34 +291,53 @@ def _clean_pycache(path: Path):
         shutil.rmtree(each, ignore_errors=True)
 
 
-def split_string(ctx, param, value):  # pylint: disable=unused-argument
+def split_string(ctx, param, value):  # noqa: unused-argument
     """Split string by comma."""
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+# noqa: unused-argument,missing-param-doc,missing-type-doc
+def split_node_names(ctx, param, to_split: str) -> list[str]:
+    """Split string by comma, ignoring commas enclosed by square parentheses.
+    This avoids splitting the string of nodes names on commas included in
+    default node names, which have the pattern
+    <function_name>([<input_name>,...]) -> [<output_name>,...])
+
+    Note:
+        - `to_split` will have such commas if and only if it includes a
+        default node name. User-defined node names cannot include commas
+        or square brackets.
+        - This function will no longer be necessary from Kedro 0.19.*,
+        in which default node names will no longer contain commas
+
+    Args:
+        to_split: the string to split safely
+
+    Returns:
+        A list containing the result of safe-splitting the string.
+    """
+    result = []
+    argument, match_state = "", 0
+    for char in to_split + ",":
+        if char == "[":
+            match_state += 1
+        elif char == "]":
+            match_state -= 1
+        if char == "," and match_state == 0 and argument:
+            argument = argument.strip()
+            result.append(argument)
+            argument = ""
+        else:
+            argument += char
+    return result
+
+
 def env_option(func_=None, **kwargs):
     """Add `--env` CLI option to a function."""
-    default_args = dict(type=str, default=None, help=ENV_HELP)
+    default_args = {"type": str, "default": None, "help": ENV_HELP}
     kwargs = {**default_args, **kwargs}
     opt = click.option("--env", "-e", **kwargs)
     return opt(func_) if func_ else opt
-
-
-def ipython_message(all_kernels=True):
-    """Show a message saying how we have configured the IPython env."""
-    ipy_vars = ["startup_error", "context"]
-    click.secho("-" * 79, fg="cyan")
-    click.secho("Starting a Kedro session with the following variables in scope")
-    click.secho(", ".join(ipy_vars), fg="green")
-    line_magic = click.style("%reload_kedro", fg="green")
-    click.secho(f"Use the line magic {line_magic} to refresh them")
-    click.secho("or to see the error message if they are undefined")
-
-    if not all_kernels:
-        click.secho("The choice of kernels is limited to the default one.", fg="yellow")
-        click.secho("(restart with --all-kernels to get access to others)", fg="yellow")
-
-    click.secho("-" * 79, fg="cyan")
 
 
 @contextmanager
@@ -355,9 +353,30 @@ def _check_module_importable(module_name: str) -> None:
         import_module(module_name)
     except ImportError as exc:
         raise KedroCliError(
-            f"Module `{module_name}` not found. Make sure to install required project "
-            f"dependencies by running the `kedro install` command first."
+            f"Module '{module_name}' not found. Make sure to install required project "
+            f"dependencies by running the 'pip install -r src/requirements.txt' command first."
         ) from exc
+
+
+def _get_entry_points(name: str) -> importlib_metadata.EntryPoints:
+    """Get all kedro related entry points"""
+    return importlib_metadata.entry_points().select(group=ENTRY_POINT_GROUPS[name])
+
+
+def _safe_load_entry_point(  # noqa: inconsistent-return-statements
+    entry_point,
+):
+    """Load entrypoint safely, if fails it will just skip the entrypoint."""
+    try:
+        return entry_point.load()
+    except Exception as exc:  # noqa: broad-except
+        logger.warning(
+            "Failed to load %s commands from %s. Full exception: %s",
+            entry_point.module,
+            entry_point,
+            exc,
+        )
+        return
 
 
 def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
@@ -373,23 +392,22 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         List of entry point commands.
 
     """
-    entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+
     entry_point_commands = []
-    for entry_point in entry_points:
-        try:
-            entry_point_commands.append(entry_point.load())
-        except Exception as exc:
-            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
+    for entry_point in _get_entry_points(name):
+        loaded_entry_point = _safe_load_entry_point(entry_point)
+        if loaded_entry_point:
+            entry_point_commands.append(loaded_entry_point)
     return entry_point_commands
 
 
-def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
+def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     """CLI callback that replaces command line options
     with values specified in a config file. If command line
     options are passed, they override config file values.
     """
     # for performance reasons
-    import anyconfig  # pylint: disable=import-outside-toplevel
+    import anyconfig  # noqa: import-outside-toplevel
 
     ctx.default_map = ctx.default_map or {}
     section = ctx.info_name
@@ -401,20 +419,21 @@ def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-def _reformat_load_versions(  # pylint: disable=unused-argument
-    ctx, param, value
-) -> Dict[str, str]:
+def _reformat_load_versions(ctx, param, value) -> dict[str, str]:
     """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
-    load_versions_dict = {}
+    if param.name == "load_version":
+        _deprecate_options(ctx, param, value)
 
+    load_versions_dict = {}
     for load_version in value:
+        load_version = load_version.strip()  # noqa: PLW2901
         load_version_list = load_version.split(":", 1)
-        if len(load_version_list) != 2:
+        if len(load_version_list) != 2:  # noqa: PLR2004
             raise KedroCliError(
-                f"Expected the form of `load_version` to be "
-                f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                f"Expected the form of 'load_version' to be "
+                f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
                 f"found {load_version} instead"
             )
         load_versions_dict[load_version_list[0]] = load_version_list[1]
@@ -422,75 +441,69 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
     return load_versions_dict
 
 
-def _try_convert_to_numeric(value):
-    try:
-        value = float(value)
-    except ValueError:
-        return value
-    return int(value) if value.is_integer() else value
-
-
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
         return value
-    result = {}
+    dot_list = []
     for item in split_string(ctx, param, value):
-        item = item.split(":", 1)
-        if len(item) != 2:
+        equals_idx = item.find("=")
+        colon_idx = item.find(":")
+        if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
+            # For cases where key-value pair is separated by = and the value contains a colon
+            # which should not be replaced by =
+            pass
+        else:
+            item = item.replace(":", "=", 1)  # noqa: redefined-loop-name
+        items = item.split("=", 1)
+        if len(items) != 2:  # noqa: PLR2004
             ctx.fail(
                 f"Invalid format of `{param.name}` option: "
-                f"Item `{item[0]}` must contain "
-                f"a key and a value separated by `:`."
+                f"Item `{items[0]}` must contain "
+                f"a key and a value separated by `:` or `=`."
             )
-        key = item[0].strip()
+        key = items[0].strip()
         if not key:
             ctx.fail(
                 f"Invalid format of `{param.name}` option: Parameter key "
                 f"cannot be an empty string."
             )
-        value = item[1].strip()
-        result[key] = _try_convert_to_numeric(value)
-    return result
+        dot_list.append(item)
+    conf = OmegaConf.from_dotlist(dot_list)
+    return OmegaConf.to_container(conf)
 
 
-def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
+def _split_load_versions(ctx, param, value):
+    lv_tuple = _get_values_as_tuple([value])
+    return _reformat_load_versions(ctx, param, lv_tuple) if value else {}
+
+
+def _get_values_as_tuple(values: Iterable[str]) -> tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
 
 
-def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
-    """Get path to project level requirements.in, creating it if required.
-
-    Args:
-        source_path: Path to the project `src` folder.
-        create_empty: Whether an empty requirements.in file should be created if
-            requirements.in does not exist and there is also no requirements.txt to
-            copy requirements from.
-
-    Returns:
-        Path to requirements.in.
-
-    Raises:
-        FileNotFoundError: If neither requirements.in nor requirements.txt is found.
-
-    """
-    requirements_in = source_path / "requirements.in"
-    if requirements_in.is_file():
-        return requirements_in
-
-    requirements_txt = source_path / "requirements.txt"
-    if requirements_txt.is_file():
-        click.secho(
-            "No requirements.in found. Copying contents from requirements.txt..."
+def _deprecate_options(ctx, param, value):
+    deprecated_flag = {
+        "node_names": "--node",
+        "tag": "--tag",
+        "load_version": "--load-version",
+    }
+    new_flag = {
+        "node_names": "--nodes",
+        "tag": "--tags",
+        "load_version": "--load-versions",
+    }
+    shorthand_flag = {
+        "node_names": "-n",
+        "tag": "-t",
+        "load_version": "-lv",
+    }
+    if value:
+        deprecation_message = (
+            f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
+            "and will not be available from Kedro 0.19.0. "
+            f"Use the flag '{new_flag[param.name]}' instead. Shorthand "
+            f"'{shorthand_flag[param.name]}' will be updated to use "
+            f"'{new_flag[param.name]}' in Kedro 0.19.0."
         )
-        shutil.copyfile(str(requirements_txt), str(requirements_in))
-        return requirements_in
-
-    if create_empty:
-        click.secho("Creating empty requirements.in...")
-        requirements_in.touch()
-        return requirements_in
-
-    raise FileNotFoundError(
-        "No project requirements.in or requirements.txt found in `/src`. "
-        "Please create either and try again."
-    )
+        click.secho(deprecation_message, fg="red")
+    return value

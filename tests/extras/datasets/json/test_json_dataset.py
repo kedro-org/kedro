@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 from pathlib import Path, PurePosixPath
 
 import pytest
@@ -35,7 +7,7 @@ from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.json import JSONDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -97,7 +69,7 @@ class TestJSONDataSet:
     def test_load_missing_file(self, json_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set JSONDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             json_data_set.load()
 
     @pytest.mark.parametrize(
@@ -160,7 +132,7 @@ class TestJSONDataSetVersioned:
     def test_no_versions(self, versioned_json_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for JSONDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_json_data_set.load()
 
     def test_exists(self, versioned_json_data_set, dummy_data):
@@ -174,10 +146,10 @@ class TestJSONDataSetVersioned:
         corresponding json file for a given save version already exists."""
         versioned_json_data_set.save(dummy_data)
         pattern = (
-            r"Save path \`.+\` for JSONDataSet\(.+\) must "
+            r"Save path \'.+\' for JSONDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_json_data_set.save(dummy_data)
 
     @pytest.mark.parametrize(
@@ -192,17 +164,17 @@ class TestJSONDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            f"Save version `{save_version}` did not match "
-            f"load version `{load_version}` for "
+            f"Save version '{save_version}' did not match "
+            f"load version '{load_version}' for "
             r"JSONDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_data_set.save(dummy_data)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             JSONDataSet(
                 filepath="https://example.com/file.json", version=Version(None, None)
             )
@@ -219,7 +191,7 @@ class TestJSONDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_json_data_set._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_json_data_set.save(dummy_data)
 
         # Remove non-versioned dataset and try again

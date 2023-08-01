@@ -1,31 +1,4 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+import sys
 from pathlib import Path, PurePosixPath
 
 import holoviews as hv
@@ -37,7 +10,7 @@ from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.holoviews import HoloviewsWriter
-from kedro.io import DataSetError, Version
+from kedro.io import DatasetError, Version
 from kedro.io.core import PROTOCOL_DELIMITER
 
 
@@ -61,6 +34,10 @@ def versioned_hv_writer(filepath_png, load_version, save_version):
     return HoloviewsWriter(filepath_png, version=Version(load_version, save_version))
 
 
+@pytest.mark.skipif(
+    sys.version_info.minor == 10,
+    reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
+)
 class TestHoloviewsWriter:
     def test_save_data(self, tmp_path, dummy_hv_object, hv_writer):
         """Test saving Holoviews object."""
@@ -91,8 +68,8 @@ class TestHoloviewsWriter:
         assert writer._fs_open_args_save == fs_args["open_args_save"]
 
     def test_load_fail(self, hv_writer):
-        pattern = r"Loading not supported for `HoloviewsWriter`"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = r"Loading not supported for 'HoloviewsWriter'"
+        with pytest.raises(DatasetError, match=pattern):
             hv_writer.load()
 
     def test_exists(self, dummy_hv_object, hv_writer):
@@ -140,6 +117,10 @@ class TestHoloviewsWriter:
         assert isinstance(data_set._filepath, PurePosixPath)
 
 
+@pytest.mark.skipif(
+    sys.version_info.minor == 10,
+    reason="Python 3.10 needs matplotlib>=3.5 which breaks holoviews.",
+)
 class TestHoloviewsWriterVersioned:
     def test_version_str_repr(self, hv_writer, versioned_hv_writer):
         """Test that version is in string representation of the class instance
@@ -161,10 +142,10 @@ class TestHoloviewsWriterVersioned:
         corresponding file for a given save version already exists."""
         versioned_hv_writer.save(dummy_hv_object)
         pattern = (
-            r"Save path \`.+\` for HoloviewsWriter\(.+\) must "
+            r"Save path \'.+\' for HoloviewsWriter\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)
 
     @pytest.mark.parametrize(
@@ -179,24 +160,26 @@ class TestHoloviewsWriterVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            fr"Save version `{save_version}` did not match load version "
-            fr"`{load_version}` for HoloviewsWriter\(.+\)"
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for HoloviewsWriter\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             HoloviewsWriter(
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
 
-    def test_no_versions(self, versioned_hv_writer):
+    def test_load_not_supported(self, versioned_hv_writer):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for HoloviewsWriter\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = (
+            rf"Loading not supported for '{versioned_hv_writer.__class__.__name__}'"
+        )
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.load()
 
     def test_exists(self, versioned_hv_writer, dummy_hv_object):
@@ -228,7 +211,7 @@ class TestHoloviewsWriterVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_hv_writer._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_hv_writer.save(dummy_hv_object)
 
         # Remove non-versioned dataset and try again

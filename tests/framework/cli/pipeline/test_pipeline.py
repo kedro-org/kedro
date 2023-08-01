@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import os
 import shutil
 from pathlib import Path
@@ -68,16 +41,11 @@ FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline(  # pylint: disable=too-many-locals
-        self,
-        fake_repo_path,
-        fake_project_cli,
-        fake_metadata,
-        env,
-        fake_package_path,
+        self, fake_repo_path, fake_project_cli, fake_metadata, env, fake_package_path
     ):
         """Test creation of a pipeline"""
         pipelines_dir = fake_package_path / "pipelines"
@@ -90,15 +58,11 @@ class TestPipelineCreateCommand:
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
         assert result.exit_code == 0
-        assert (
-            f"To be able to run the pipeline `{PIPELINE_NAME}`, you will need "
-            f"to add it to `register_pipelines()`" in result.output
-        )
 
         # pipeline
-        assert f"Creating the pipeline `{PIPELINE_NAME}`: OK" in result.output
-        assert f"Location: `{pipelines_dir / PIPELINE_NAME}`" in result.output
-        assert f"Pipeline `{PIPELINE_NAME}` was successfully created." in result.output
+        assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
+        assert f"Location: '{pipelines_dir / PIPELINE_NAME}'" in result.output
+        assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
 
         # config
         conf_env = env or "base"
@@ -124,12 +88,8 @@ class TestPipelineCreateCommand:
 
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
         assert result.exit_code == 0
-        assert (
-            f"To be able to run the pipeline `{PIPELINE_NAME}`, you will need "
-            f"to add it to `register_pipelines()`" in result.output
-        )
-        assert f"Creating the pipeline `{PIPELINE_NAME}`: OK" in result.output
-        assert f"Pipeline `{PIPELINE_NAME}` was successfully created." in result.output
+        assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
+        assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
 
         conf_dirs = list((fake_repo_path / settings.CONF_SOURCE).rglob(PIPELINE_NAME))
         assert conf_dirs == []  # no configs created for the pipeline
@@ -205,8 +165,8 @@ class TestPipelineCreateCommand:
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
         assert result.exit_code == 0
-        assert "__init__.py`: SKIPPED" in result.output
-        assert f"parameters{os.sep}{PIPELINE_NAME}.yml`: SKIPPED" in result.output
+        assert "__init__.py': SKIPPED" in result.output
+        assert f"parameters{os.sep}{PIPELINE_NAME}.yml': SKIPPED" in result.output
         assert result.output.count("SKIPPED") == 2  # only 2 files skipped
 
     def test_failed_copy(
@@ -272,7 +232,7 @@ class TestPipelineCreateCommand:
 
         second = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
         assert second.exit_code
-        assert f"Creating the pipeline `{PIPELINE_NAME}`: FAILED" in second.output
+        assert f"Creating the pipeline '{PIPELINE_NAME}': FAILED" in second.output
         assert "directory already exists" in second.output
 
     def test_bad_env(self, fake_project_cli, fake_metadata):
@@ -281,10 +241,10 @@ class TestPipelineCreateCommand:
         cmd = ["pipeline", "create", "-e", env, PIPELINE_NAME]
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
         assert result.exit_code
-        assert f"Unable to locate environment `{env}`" in result.output
+        assert f"Unable to locate environment '{env}'" in result.output
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "make_pipelines")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "make_pipelines")
 class TestPipelineDeleteCommand:
     @pytest.mark.parametrize(
         "make_pipelines,env,expected_conf",
@@ -317,14 +277,14 @@ class TestPipelineDeleteCommand:
             / f"{PIPELINE_NAME}.yml"
         )
 
-        assert f"Deleting `{source_path}`: OK" in result.output
-        assert f"Deleting `{tests_path}`: OK" in result.output
-        assert f"Deleting `{params_path}`: OK" in result.output
+        assert f"Deleting '{source_path}': OK" in result.output
+        assert f"Deleting '{tests_path}': OK" in result.output
+        assert f"Deleting '{params_path}': OK" in result.output
 
-        assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
+        assert f"Pipeline '{PIPELINE_NAME}' was successfully deleted." in result.output
         assert (
-            f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
-            f"`{fake_package_path / 'pipeline_registry.py'}`, you will need to remove it."
+            f"If you added the pipeline '{PIPELINE_NAME}' to 'register_pipelines()' in "
+            f"""'{fake_package_path / "pipeline_registry.py"}', you will need to remove it."""
         ) in result.output
 
         assert not source_path.exists()
@@ -353,14 +313,14 @@ class TestPipelineDeleteCommand:
             / f"{PIPELINE_NAME}.yml"
         )
 
-        assert f"Deleting `{source_path}`" not in result.output
-        assert f"Deleting `{tests_path}`: OK" in result.output
-        assert f"Deleting `{params_path}`: OK" in result.output
+        assert f"Deleting '{source_path}'" not in result.output
+        assert f"Deleting '{tests_path}': OK" in result.output
+        assert f"Deleting '{params_path}': OK" in result.output
 
-        assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
+        assert f"Pipeline '{PIPELINE_NAME}' was successfully deleted." in result.output
         assert (
-            f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
-            f"`{fake_package_path / 'pipeline_registry.py'}`, you will need to remove it."
+            f"If you added the pipeline '{PIPELINE_NAME}' to 'register_pipelines()' in "
+            f"""'{fake_package_path / "pipeline_registry.py"}', you will need to remove it."""
         ) in result.output
 
         assert not source_path.exists()
@@ -383,7 +343,7 @@ class TestPipelineDeleteCommand:
         )
 
         assert result.exit_code, result.output
-        assert f"Deleting `{source_path}`: FAILED" in result.output
+        assert f"Deleting '{source_path}': FAILED" in result.output
 
     @pytest.mark.parametrize(
         "bad_name,error_message",
@@ -399,9 +359,7 @@ class TestPipelineDeleteCommand:
     ):
         """Test error message when bad pipeline name was provided."""
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "delete", "-y", bad_name],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "delete", "-y", bad_name], obj=fake_metadata
         )
         assert result.exit_code
         assert error_message in result.output
@@ -413,7 +371,7 @@ class TestPipelineDeleteCommand:
             obj=fake_metadata,
         )
         assert result.exit_code
-        assert "Pipeline `non_existent` not found." in result.output
+        assert "Pipeline 'non_existent' not found." in result.output
 
     def test_bad_env(self, fake_project_cli, fake_metadata):
         """Test error when provided conf environment does not exist."""
@@ -423,7 +381,7 @@ class TestPipelineDeleteCommand:
             obj=fake_metadata,
         )
         assert result.exit_code
-        assert "Unable to locate environment `invalid_env`" in result.output
+        assert "Unable to locate environment 'invalid_env'" in result.output
 
     @pytest.mark.parametrize("input_", ["n", "N", "random"])
     def test_pipeline_delete_confirmation(
@@ -453,7 +411,7 @@ class TestPipelineDeleteCommand:
         assert str(params_path) in result.output
 
         assert (
-            f"Are you sure you want to delete pipeline `{PIPELINE_NAME}`"
+            f"Are you sure you want to delete pipeline '{PIPELINE_NAME}'"
             in result.output
         )
         assert "Deletion aborted!" in result.output
@@ -494,7 +452,7 @@ class TestPipelineDeleteCommand:
         assert str(params_path) in result.output
 
         assert (
-            f"Are you sure you want to delete pipeline `{PIPELINE_NAME}`"
+            f"Are you sure you want to delete pipeline '{PIPELINE_NAME}'"
             in result.output
         )
         assert "Deletion aborted!" in result.output
@@ -514,7 +472,7 @@ class TestSyncDirs:
         source_dir.mkdir()
         (source_dir / "existing").mkdir()
         (source_dir / "existing" / "source_file").touch()
-        (source_dir / "existing" / "common").write_text("source")
+        (source_dir / "existing" / "common").write_text("source", encoding="utf-8")
         (source_dir / "new").mkdir()
         (source_dir / "new" / "source_file").touch()
         return source_dir
@@ -525,7 +483,7 @@ class TestSyncDirs:
         target.mkdir()
         (target / "existing").mkdir()
         (target / "existing" / "target_file").touch()
-        (target / "existing" / "common").write_text("target")
+        (target / "existing" / "common").write_text("target", encoding="utf-8")
 
         _sync_dirs(source, target)
 
@@ -535,7 +493,7 @@ class TestSyncDirs:
         assert (source / "new" / "source_file").is_file()
 
         assert (target / "existing" / "source_file").is_file()
-        assert (target / "existing" / "common").read_text() == "target"
+        assert (target / "existing" / "common").read_text(encoding="utf-8") == "target"
         assert (target / "existing" / "target_file").exists()
         assert (target / "new" / "source_file").is_file()
 
@@ -551,6 +509,6 @@ class TestSyncDirs:
         assert (source / "new" / "source_file").is_file()
 
         assert (target / "existing" / "source_file").is_file()
-        assert (target / "existing" / "common").read_text() == "source"
+        assert (target / "existing" / "common").read_text(encoding="utf-8") == "source"
         assert not (target / "existing" / "target_file").exists()
         assert (target / "new" / "source_file").is_file()

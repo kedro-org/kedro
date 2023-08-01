@@ -1,28 +1,31 @@
-install: build-docs
-	rm -rf kedro/framework/html
-	cp -r docs/build/html kedro/framework
+install:
 	pip install .
 
 clean:
-	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
+	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info kedro/datasets
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true
 
 install-pip-setuptools:
-	python -m pip install -U "pip>=20.0" "setuptools>=38.0" wheel
-
-legal:
-	python tools/license_and_headers.py
+	python -m pip install -U "pip>=21.2, <23.2" "setuptools>=65.5.1" wheel
 
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
-
 test:
-	pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
+	pytest --numprocesses 4 --dist loadfile
 
 test-no-spark:
-	pytest tests --cov-config pyproject_no_spark.toml --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
+	pytest --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
+
+test-sequential:
+	pytest tests --cov-config pyproject.toml
+
+test-no-spark-sequential:
+	pytest tests --no-cov --ignore tests/extras/datasets/spark
+
+test-no-datasets:
+	pytest --no-cov --ignore tests/extras/datasets/ --numprocesses 4 --dist loadfile
 
 e2e-tests:
 	behave
@@ -36,26 +39,37 @@ secret-scan:
 SPHINXPROJ = Kedro
 
 build-docs:
+	pip install -e ".[docs]"
 	./docs/build-docs.sh "docs"
 
+show-docs:
+	open docs/build/html/index.html
+
 linkcheck:
+	pip install -e ".[docs]"
 	./docs/build-docs.sh "linkcheck"
 
-devserver: build-docs
-	cd docs && npm install && npm start
-
 package: clean install
-	python setup.py sdist bdist_wheel
+	python -m pip install build && python -m build
 
 install-test-requirements:
-	pip install -r test_requirements.txt
+	pip install .[test]
 
 install-pre-commit: install-test-requirements
 	pre-commit install --install-hooks
 
 uninstall-pre-commit:
 	pre-commit uninstall
-	pre-commit uninstall --hook-type pre-push
 
 print-python-env:
 	@./tools/print_env.sh
+
+databricks-build:
+	python -m pip install build && python -m build
+	python ./tools/databricks_build.py
+
+sign-off:
+	echo "git interpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg
+	echo '--trailer "Signed-off-by: $$(git config user.name) <$$(git config user.email)>" \c' >> .git/hooks/commit-msg
+	echo '--in-place "$$1"' >> .git/hooks/commit-msg
+	chmod +x .git/hooks/commit-msg

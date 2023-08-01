@@ -1,36 +1,10 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
+import logging
 from collections import namedtuple
 
 import pytest
 from dynaconf.validator import Validator
 
-from kedro.framework.hooks.manager import _register_hooks, get_hook_manager
+from kedro.framework.hooks.manager import _register_hooks
 from kedro.framework.project import _ProjectSettings
 from kedro.framework.session import KedroSession
 from tests.framework.session.conftest import _mock_imported_settings_paths
@@ -62,19 +36,16 @@ def mock_settings_with_disabled_hooks(mocker, project_hooks, naughty_plugin):
 class TestSessionHookManager:
     """Test the process of registering hooks with the hook manager in a session."""
 
-    def test_assert_register_hooks(self, request, project_hooks):
-        hook_manager = get_hook_manager()
-        assert not hook_manager.is_registered(project_hooks)
-
-        # call the fixture to construct the session
-        request.getfixturevalue("mock_session")
-
+    @pytest.mark.nologreset
+    def test_assert_register_hooks(self, project_hooks, mock_session):
+        hook_manager = mock_session._hook_manager
         assert hook_manager.is_registered(project_hooks)
 
     @pytest.mark.usefixtures("mock_session")
-    def test_calling_register_hooks_twice(self, project_hooks):
+    @pytest.mark.nologreset
+    def test_calling_register_hooks_twice(self, project_hooks, mock_session):
         """Calling hook registration multiple times should not raise"""
-        hook_manager = get_hook_manager()
+        hook_manager = mock_session._hook_manager
 
         assert hook_manager.is_registered(project_hooks)
         _register_hooks(hook_manager, (project_hooks,))
@@ -82,22 +53,23 @@ class TestSessionHookManager:
         assert hook_manager.is_registered(project_hooks)
 
     @pytest.mark.parametrize("num_plugins", [0, 1])
+    @pytest.mark.nologreset
     def test_hooks_registered_when_session_created(
         self, mocker, request, caplog, project_hooks, num_plugins
     ):
-        hook_manager = get_hook_manager()
-        assert not hook_manager.get_plugins()
-
-        load_setuptools_entrypoints = mocker.patch.object(
-            hook_manager, "load_setuptools_entrypoints", return_value=num_plugins
+        caplog.set_level(logging.DEBUG, logger="kedro")
+        load_setuptools_entrypoints = mocker.patch(
+            "pluggy._manager.PluginManager.load_setuptools_entrypoints",
+            return_value=num_plugins,
         )
         distinfo = [("plugin_obj_1", MockDistInfo("test-project-a", "0.1"))]
-        list_distinfo_mock = mocker.patch.object(
-            hook_manager, "list_plugin_distinfo", return_value=distinfo
+        list_distinfo_mock = mocker.patch(
+            "pluggy._manager.PluginManager.list_plugin_distinfo", return_value=distinfo
         )
 
         # call a fixture which creates a session
-        request.getfixturevalue("mock_session")
+        session = request.getfixturevalue("mock_session")
+        hook_manager = session._hook_manager
         assert hook_manager.is_registered(project_hooks)
 
         load_setuptools_entrypoints.assert_called_once_with("kedro.hooks")
@@ -112,6 +84,7 @@ class TestSessionHookManager:
             assert expected_msg in log_messages
 
     @pytest.mark.usefixtures("mock_settings_with_disabled_hooks")
+    @pytest.mark.nologreset
     def test_disabling_auto_discovered_hooks(
         self,
         mocker,
@@ -121,22 +94,25 @@ class TestSessionHookManager:
         naughty_plugin,
         good_plugin,
     ):
-        hook_manager = get_hook_manager()
-        assert not hook_manager.get_plugins()
+        caplog.set_level(logging.DEBUG, logger="kedro")
 
         distinfo = [("plugin_obj_1", naughty_plugin), ("plugin_obj_2", good_plugin)]
-        list_distinfo_mock = mocker.patch.object(
-            hook_manager, "list_plugin_distinfo", return_value=distinfo
+        mocked_distinfo = mocker.patch(
+            "pluggy._manager.PluginManager.list_plugin_distinfo", return_value=distinfo
         )
-        mocker.patch.object(
-            hook_manager, "load_setuptools_entrypoints", return_value=len(distinfo)
-        )
-        unregister_mock = mocker.patch.object(hook_manager, "unregister")
 
+        mocker.patch(
+            "pluggy._manager.PluginManager.load_setuptools_entrypoints",
+            return_value=len(distinfo),
+        )
+        unregister_mock = mocker.patch("pluggy._manager.PluginManager.unregister")
+
+        # create a session that will use the mock_settings_with_disabled_hooks from the fixture.
         KedroSession.create(
             mock_package_name, tmp_path, extra_params={"params:key": "value"}
         )
-        list_distinfo_mock.assert_called_once_with()
+
+        mocked_distinfo.assert_called_once_with()
         unregister_mock.assert_called_once_with(plugin=distinfo[0][0])
 
         # check the logs

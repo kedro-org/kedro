@@ -1,68 +1,20 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """This module provides context for Kedro project."""
+from __future__ import annotations
 
-import functools
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
 
+from attrs import field, frozen
+from pluggy import PluginManager
+
 from kedro.config import ConfigLoader, MissingConfigException
-from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import pipelines, settings
+from kedro.framework.project import settings
 from kedro.io import DataCatalog
-from kedro.io.core import generate_timestamp
-from kedro.pipeline import Pipeline
 from kedro.pipeline.pipeline import _transcode_split
-from kedro.runner.runner import AbstractRunner
-from kedro.runner.sequential_runner import SequentialRunner
-from kedro.versioning import Journal
-
-
-def _deprecate(version):
-    """Decorator to deprecate a few of the context's properties."""
-
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            property_name = func.__name__
-            warn(
-                f"Accessing {property_name} via the context will be deprecated in Kedro {version}.",
-                DeprecationWarning,
-            )
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
 
 
 def _is_relative_path(path_string: str) -> bool:
@@ -71,12 +23,12 @@ def _is_relative_path(path_string: str) -> bool:
     Example:
     ::
         >>> _is_relative_path("data/01_raw") == True
-        >>> _is_relative_path("logs/info.log") == True
+        >>> _is_relative_path("info.log") == True
         >>> _is_relative_path("/tmp/data/01_raw") == False
-        >>> _is_relative_path(r"C:\\logs\\info.log") == False
-        >>> _is_relative_path(r"\\logs\\'info.log") == False
-        >>> _is_relative_path("c:/logs/info.log") == False
-        >>> _is_relative_path("s3://logs/info.log") == False
+        >>> _is_relative_path(r"C:\\info.log") == False
+        >>> _is_relative_path(r"\\'info.log") == False
+        >>> _is_relative_path("c:/info.log") == False
+        >>> _is_relative_path("s3://info.log") == False
 
     Args:
         path_string: The path string to check.
@@ -101,8 +53,8 @@ def _is_relative_path(path_string: str) -> bool:
 
 
 def _convert_paths_to_absolute_posix(
-    project_path: Path, conf_dictionary: Dict[str, Any]
-) -> Dict[str, Any]:
+    project_path: Path, conf_dictionary: dict[str, Any]
+) -> dict[str, Any]:
     """Turn all relative paths inside ``conf_dictionary`` into absolute paths by appending them
     to ``project_path`` and convert absolute Windows paths to POSIX format. This is a hack to
     make sure that we don't have to change user's working directory for logging and datasets to
@@ -116,13 +68,13 @@ def _convert_paths_to_absolute_posix(
         >>>     conf_dictionary={
         >>>         "handlers": {
         >>>             "info_file_handler": {
-        >>>                 "filename": "logs/info.log"
+        >>>                 "filename": "info.log"
         >>>             }
         >>>         }
         >>>     }
         >>> )
         >>> print(conf['handlers']['info_file_handler']['filename'])
-        "/path/to/my/project/logs/info.log"
+        "/path/to/my/project/info.log"
 
     Args:
         project_path: The root directory to prepend to relative path to make absolute path.
@@ -141,7 +93,6 @@ def _convert_paths_to_absolute_posix(
     conf_keys_with_filepath = ("filename", "filepath", "path")
 
     for conf_key, conf_value in conf_dictionary.items():
-
         # if the conf_value is another dictionary, absolutify its paths first.
         if isinstance(conf_value, dict):
             conf_dictionary[conf_key] = _convert_paths_to_absolute_posix(
@@ -168,152 +119,77 @@ def _convert_paths_to_absolute_posix(
     return conf_dictionary
 
 
-def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
-    """Check that transcoded names that correspond to
-    the same dataset also belong to the same layer.
+def _validate_transcoded_datasets(catalog: DataCatalog):
+    """Validates transcoded datasets are correctly named
+
+    Args:
+        catalog (DataCatalog): The catalog object containing the
+        datasets to be validated.
+
+    Raises:
+        ValueError: If a dataset name does not conform to the expected
+        transcoding naming conventions,a ValueError is raised by the
+        `_transcode_split` function.
+
     """
-
-    def _find_conflicts():
-        base_names_to_layer = {}
-        for current_layer, dataset_names in catalog.layers.items():
-            for name in dataset_names:
-                base_name, _ = _transcode_split(name)
-                known_layer = base_names_to_layer.setdefault(base_name, current_layer)
-                if current_layer != known_layer:
-                    yield name
-                else:
-                    base_names_to_layer[base_name] = current_layer
-
-    conflicting_datasets = sorted(_find_conflicts())
-    if conflicting_datasets:
-        error_str = ", ".join(conflicting_datasets)
-        raise ValueError(
-            f"Transcoded datasets should have the same layer. Mismatch found for: {error_str}"
-        )
+    # noqa: protected-access
+    for dataset_name in catalog._data_sets.keys():
+        _transcode_split(dataset_name)
 
 
+def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
+    """Update a nested dict with values of new_dict.
+
+    Args:
+        old_dict: dict to be updated
+        new_dict: dict to use for updating old_dict
+
+    """
+    for key, value in new_dict.items():
+        if key not in old_dict:
+            old_dict[key] = value
+        elif isinstance(old_dict[key], dict) and isinstance(value, dict):
+            _update_nested_dict(old_dict[key], value)
+        else:
+            old_dict[key] = value
+
+
+def _expand_full_path(project_path: str | Path) -> Path:
+    return Path(project_path).expanduser().resolve()
+
+
+@frozen
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
     """
 
-    _CONF_SOURCE = "conf"
-    """CONF_SOURCE: Name of root directory containing project configuration.
-    Default name is "conf"."""
+    _package_name: str
+    project_path: Path = field(converter=_expand_full_path)
+    config_loader: ConfigLoader
+    _hook_manager: PluginManager
+    env: str | None = None
+    _extra_params: dict[str, Any] | None = field(default=None, converter=deepcopy)
 
-    def __init__(
-        self,
-        package_name: str,
-        project_path: Union[Path, str],
-        env: str = None,
-        extra_params: Dict[str, Any] = None,
-    ):
-        """Create a context object by providing the root of a Kedro project and
-        the environment configuration subfolders
-        (see ``kedro.config.ConfigLoader``)
+    """Create a context object by providing the root of a Kedro project and
+    the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
 
-        Raises:
-            KedroContextError: If there is a mismatch
-                between Kedro project version and package version.
+    Raises:
+        KedroContextError: If there is a mismatch
+            between Kedro project version and package version.
 
-        Args:
-            package_name: Package name for the Kedro project the context is
-                created for.
-            project_path: Project path to define the context for.
-            env: Optional argument for configuration default environment to be used
-                for running the pipeline. If not specified, it defaults to "local".
-            extra_params: Optional dictionary containing extra project parameters.
-                If specified, will update (and therefore take precedence over)
-                the parameters retrieved from the project configuration.
-        """
-        self._project_path = Path(project_path).expanduser().resolve()
-        self._package_name = package_name
-
-        self._env = env
-        self._extra_params = deepcopy(extra_params)
-
-    @property  # type: ignore
-    @_deprecate(version="0.18.0")
-    def CONF_SOURCE(self) -> str:  # pylint: disable=invalid-name
-        """Deprecated in favour of settings.CONF_SOURCE
-
-        Returns:
-            The root directory of the configuration directory of the project.
-        Raises:
-            DeprecationWarning
-        """
-        return self._CONF_SOURCE
-
-    @CONF_SOURCE.setter  # type: ignore
-    @_deprecate(version="0.18.0")
-    def CONF_SOURCE(self, value: str) -> None:  # pylint: disable=invalid-name
-        """Deprecated in favour of settings.CONF_SOURCE
-        Raises:
-            DeprecationWarning
-        """
-        self._CONF_SOURCE = value  # pylint: disable=invalid-name
-
-    @property  # type: ignore
-    def env(self) -> Optional[str]:
-        """Property for the current Kedro environment.
-
-        Returns:
-            Name of the current Kedro environment.
-
-        """
-        return self._env
-
-    @property  # type: ignore
-    @_deprecate(version="0.18.0")
-    def package_name(self) -> str:
-        """Property for Kedro project package name.
-
-        Returns:
-            Name of Kedro project package.
-
-        """
-        return self._package_name
-
-    @property  # type: ignore
-    @_deprecate(version="0.18.0")
-    def pipeline(self) -> Pipeline:
-        """Read-only property for an instance of Pipeline.
-
-        Returns:
-            Default pipeline.
-        Raises:
-            KedroContextError: If the `__default__` pipeline is not
-                defined by `register_pipelines`.
-
-        """
-        try:
-            return pipelines["__default__"]
-        except KeyError as exc:  # pragma: no cover
-            raise KedroContextError(
-                "Failed to find the pipeline named '__default__'. "
-                "It needs to be generated and returned "
-                "by the 'register_pipelines' function."
-            ) from exc
-
-    @property  # type: ignore
-    @_deprecate(version="0.18.0")
-    def pipelines(self) -> Dict[str, Pipeline]:
-        """Read-only property for an instance of Pipeline.
-
-        Returns:
-            A dictionary of defined pipelines.
-        """
-        return dict(pipelines)
-
-    @property
-    def project_path(self) -> Path:
-        """Read-only property containing Kedro's root project directory.
-
-        Returns:
-            Project directory.
-
-        """
-        return self._project_path
+    Args:
+        package_name: Package name for the Kedro project the context is
+            created for.
+        project_path: Project path to define the context for.
+        config_loader: Kedro's ``ConfigLoader`` for loading the configuration files.
+        hook_manager: The ``PluginManager`` to activate hooks, supplied by the session.
+        env: Optional argument for configuration default environment to be used
+            for running the pipeline. If not specified, it defaults to "local".
+        extra_params: Optional dictionary containing extra project parameters.
+            If specified, will update (and therefore take precedence over)
+            the parameters retrieved from the project configuration.
+    """
 
     @property
     def catalog(self) -> DataCatalog:
@@ -328,7 +204,7 @@ class KedroContext:
         return self._get_catalog()
 
     @property
-    def params(self) -> Dict[str, Any]:
+    def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
 
         Returns:
@@ -336,21 +212,17 @@ class KedroContext:
                 extra parameters passed at initialization.
         """
         try:
-            # '**/parameters*' reads modular pipeline configs
-            params = self.config_loader.get(
-                "parameters*", "parameters*/**", "**/parameters*"
-            )
+            params = self.config_loader["parameters"]
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
             params = {}
-        params.update(self._extra_params or {})
+        _update_nested_dict(params, self._extra_params or {})
         return params
 
     def _get_catalog(
         self,
         save_version: str = None,
-        journal: Journal = None,
-        load_versions: Dict[str, str] = None,
+        load_versions: dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 
@@ -361,7 +233,7 @@ class KedroContext:
 
         """
         # '**/catalog*' reads modular pipeline configs
-        conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
+        conf_catalog = self.config_loader["catalog"]
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
         conf_catalog = _convert_paths_to_absolute_posix(
@@ -369,90 +241,27 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        hook_manager = get_hook_manager()
-        catalog = hook_manager.hook.register_catalog(  # pylint: disable=no-member
+        catalog = settings.DATA_CATALOG_CLASS.from_config(
             catalog=conf_catalog,
             credentials=conf_creds,
             load_versions=load_versions,
             save_version=save_version,
-            journal=journal,
         )
-        if not isinstance(catalog, DataCatalog):
-            raise KedroContextError(
-                f"Expected an instance of `DataCatalog`, "
-                f"got `{type(catalog).__name__}` instead."
-            )
 
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)
-        if catalog.layers:
-            _validate_layers_for_transcoding(catalog)
-        hook_manager = get_hook_manager()
-        hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
+        _validate_transcoded_datasets(catalog)
+        self._hook_manager.hook.after_catalog_created(
             catalog=catalog,
             conf_catalog=conf_catalog,
             conf_creds=conf_creds,
             feed_dict=feed_dict,
             save_version=save_version,
             load_versions=load_versions,
-            run_id=self.run_id or save_version,
         )
         return catalog
 
-    @property  # type: ignore
-    @_deprecate(version="0.18.0")
-    def io(self) -> DataCatalog:
-        """Read-only alias property referring to Kedro's ``DataCatalog`` for this
-        context.
-
-        Returns:
-            DataCatalog defined in `catalog.yml`.
-        Raises:
-            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
-
-        """
-        # pylint: disable=invalid-name
-        return self.catalog
-
-    def _get_config_loader(self) -> ConfigLoader:
-        """A hook for changing the creation of a ConfigLoader instance.
-
-        Returns:
-            Instance of `ConfigLoader` created by `settings.py`.
-        Raises:
-            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
-
-        """
-        try:
-            return settings.CONFIG_LOADER_CLASS(
-                conf_source=str(self.project_path / settings.CONF_SOURCE),
-                env=self.env,
-                runtime_params=self._extra_params,
-                **settings.CONFIG_LOADER_ARGS,
-            )
-
-        except TypeError as exc:
-            raise KedroContextError(
-                f"Expected an instance of `ConfigLoader`, "
-                f"got `{settings.CONFIG_LOADER_CLASS}` of class "
-                f"`{type(settings.CONFIG_LOADER_CLASS)}` instead.\n"
-                f"The provided `CONFIG_LOADER_ARGS were: {settings.CONFIG_LOADER_ARGS}"
-            ) from exc
-
-    @property
-    def config_loader(self) -> ConfigLoader:
-        """Read-only property referring to Kedro's ``ConfigLoader`` for this
-        context.
-
-        Returns:
-            Instance of `ConfigLoader`.
-        Raises:
-            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
-
-        """
-        return self._get_config_loader()
-
-    def _get_feed_dict(self) -> Dict[str, Any]:
+    def _get_feed_dict(self) -> dict[str, Any]:
         """Get parameters and return the feed dictionary."""
         params = self.params
         feed_dict = {"parameters": params}
@@ -472,7 +281,6 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             feed_dict[key] = param_value
-
             if isinstance(param_value, dict):
                 for key, val in param_value.items():
                     _add_param_to_feed_dict(f"{param_name}.{key}", val)
@@ -482,163 +290,16 @@ class KedroContext:
 
         return feed_dict
 
-    def _get_config_credentials(self) -> Dict[str, Any]:
+    def _get_config_credentials(self) -> dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self.config_loader.get(
-                "credentials*", "credentials*/**", "**/credentials*"
-            )
+            conf_creds = self.config_loader["credentials"]
         except MissingConfigException as exc:
-            warn(f"Credentials not found in your Kedro project config.\n{str(exc)}")
+            logging.getLogger(__name__).debug(
+                "Credentials not found in your Kedro project config.\n %s", str(exc)
+            )
             conf_creds = {}
         return conf_creds
-
-    @property
-    def run_id(self) -> Union[None, str]:
-        """Unique identifier for a run / journal record, defaults to None.
-        If `run_id` is None, `save_version` will be used instead.
-        """
-        return self._get_run_id()
-
-    def run(  # pylint: disable=too-many-arguments,too-many-locals
-        self,
-        tags: Iterable[str] = None,
-        runner: AbstractRunner = None,
-        node_names: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-        load_versions: Dict[str, str] = None,
-        pipeline_name: str = None,
-    ) -> Dict[str, Any]:
-        """Runs the pipeline with a specified runner.
-
-        Args:
-            tags: An optional list of node tags which should be used to
-                filter the nodes of the ``Pipeline``. If specified, only the nodes
-                containing *any* of these tags will be run.
-            runner: An optional parameter specifying the runner that you want to run
-                the pipeline with.
-            node_names: An optional list of node names which should be used to
-                filter the nodes of the ``Pipeline``. If specified, only the nodes
-                with these names will be run.
-            from_nodes: An optional list of node names which should be used as a
-                starting point of the new ``Pipeline``.
-            to_nodes: An optional list of node names which should be used as an
-                end point of the new ``Pipeline``.
-            from_inputs: An optional list of input datasets which should be used as a
-                starting point of the new ``Pipeline``.
-            to_outputs: An optional list of output datasets which should be used as an
-                end point of the new ``Pipeline``.
-            load_versions: An optional flag to specify a particular dataset version timestamp
-                to load.
-            pipeline_name: Name of the ``Pipeline`` to execute.
-                Defaults to "__default__".
-        Raises:
-            KedroContextError: If the resulting ``Pipeline`` is empty
-                or incorrect tags are provided.
-            Exception: Any uncaught exception will be re-raised
-                after being passed to``on_pipeline_error``.
-        Returns:
-            Any node outputs that cannot be processed by the ``DataCatalog``.
-            These are returned in a dictionary, where the keys are defined
-            by the node outputs.
-        """
-        warn(
-            "`kedro.framework.context.KedroContext.run` is now deprecated in favour of "
-            "`KedroSession.run` and will be removed in Kedro 0.18.0.",
-            DeprecationWarning,
-        )
-        # Report project name
-        logging.info("** Kedro project %s", self.project_path.name)
-
-        name = pipeline_name or "__default__"
-
-        try:
-            pipeline = pipelines[name]
-        except KeyError as exc:
-            raise KedroContextError(
-                f"Failed to find the pipeline named '{name}'. "
-                f"It needs to be generated and returned "
-                f"by the 'register_pipelines' function."
-            ) from exc
-
-        filtered_pipeline = pipeline.filter(
-            tags=tags,
-            from_nodes=from_nodes,
-            to_nodes=to_nodes,
-            node_names=node_names,
-            from_inputs=from_inputs,
-            to_outputs=to_outputs,
-        )
-
-        save_version = self._get_save_version()
-        run_id = self.run_id or save_version
-
-        record_data = {
-            "run_id": run_id,
-            "project_path": str(self.project_path),
-            "env": self.env,
-            "tags": tags,
-            "from_nodes": from_nodes,
-            "to_nodes": to_nodes,
-            "node_names": node_names,
-            "from_inputs": from_inputs,
-            "to_outputs": to_outputs,
-            "load_versions": load_versions,
-            "pipeline_name": pipeline_name,
-            "extra_params": self._extra_params,
-        }
-        journal = Journal(record_data)
-
-        catalog = self._get_catalog(
-            save_version=save_version, journal=journal, load_versions=load_versions
-        )
-
-        # Run the runner
-        runner = runner or SequentialRunner()
-        hook_manager = get_hook_manager()
-        hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
-            run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
-        )
-
-        try:
-            run_result = runner.run(filtered_pipeline, catalog, run_id)
-        except Exception as exc:
-            hook_manager.hook.on_pipeline_error(  # pylint: disable=no-member
-                error=exc,
-                run_params=record_data,
-                pipeline=filtered_pipeline,
-                catalog=catalog,
-            )
-            raise exc
-
-        hook_manager.hook.after_pipeline_run(  # pylint: disable=no-member
-            run_params=record_data,
-            run_result=run_result,
-            pipeline=filtered_pipeline,
-            catalog=catalog,
-        )
-        return run_result
-
-    def _get_run_id(  # pylint: disable=no-self-use
-        self, *args, **kwargs  # pylint: disable=unused-argument
-    ) -> Union[None, str]:
-        """A hook for generating a unique identifier for a
-        run / journal record, defaults to None.
-        If None, `save_version` will be used instead.
-        """
-        return None
-
-    def _get_save_version(  # pylint: disable=no-self-use
-        self, *args, **kwargs  # pylint: disable=unused-argument
-    ) -> str:
-        """Generate unique ID for dataset versioning, defaults to timestamp.
-        `save_version` MUST be something that can be ordered, in order to
-        easily determine the latest version.
-        """
-        return generate_timestamp()
 
 
 class KedroContextError(Exception):

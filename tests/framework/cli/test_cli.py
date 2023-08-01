@@ -1,39 +1,12 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# pylint: disable=too-many-lines
 from collections import namedtuple
 from itertools import cycle
-from os.path import join
+from os import rename
 from pathlib import Path
 
 import anyconfig
 import click
 from click.testing import CliRunner
-from mock import patch
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
@@ -41,6 +14,7 @@ from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.cli import KedroCLI, _init_plugins, cli
 from kedro.framework.cli.jupyter import jupyter_cli
+from kedro.framework.cli.micropkg import micropkg_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
 from kedro.framework.cli.registry import registry_cli
@@ -117,29 +91,19 @@ class TestCliCommands:
         assert result_abr.exit_code == 0
         assert version in result_abr.output
 
-    def test_info_contains_qb(self):
-        """Check that `kedro info` output contains
-        reference to QuantumBlack."""
-        result = CliRunner().invoke(cli, ["info"])
-
-        assert result.exit_code == 0
-        assert "QuantumBlack" in result.output
-
-    def test_info_contains_plugin_versions(self, entry_point, mocker):
-        get_distribution = mocker.patch("pkg_resources.get_distribution")
-        get_distribution().version = "1.0.2"
-        entry_point.module_name = "bob.fred"
+    def test_info_contains_plugin_versions(self, entry_point):
+        entry_point.dist.version = "1.0.2"
+        entry_point.module = "bob.fred"
 
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0
         assert (
-            "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project)"
+            "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project,starters)"
             in result.output
         )
 
         entry_point.load.assert_not_called()
 
-    @mark.usefixtures("entry_points")
     def test_info_no_plugins(self):
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0
@@ -155,20 +119,6 @@ class TestCliCommands:
         result = CliRunner().invoke(cli, ["-h"])
         assert result.exit_code == 0
         assert "-h, --help     Show this message and exit." in result.output
-
-    @patch("webbrowser.open")
-    def test_docs(self, patched_browser):
-        """Check that `kedro docs` opens a correct file in the browser."""
-        result = CliRunner().invoke(cli, ["docs"])
-
-        assert result.exit_code == 0
-        for each in ("Opening file", join("html", "index.html")):
-            assert each in result.output
-
-        assert patched_browser.call_count == 1
-        args, _ = patched_browser.call_args
-        for each in ("file://", join("kedro", "framework", "html", "index.html")):
-            assert each in args[0]
 
 
 class TestCommandCollection:
@@ -322,37 +272,46 @@ class TestEntryPoints:
         entry_point.load.return_value = "groups"
         groups = load_entry_points("project")
         assert groups == ["groups"]
-        entry_points.assert_called_once_with(group="kedro.project_commands")
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.project_commands"
+        )
 
-    def test_project_error_is_caught(self, entry_points, entry_point):
+    def test_project_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Loading project commands"):
-            load_entry_points("project")
-
-        entry_points.assert_called_once_with(group="kedro.project_commands")
+        entry_point.module = "project"
+        load_entry_points("project")
+        assert "Failed to load project commands" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.project_commands"
+        )
 
     def test_global_groups(self, entry_points, entry_point):
         entry_point.load.return_value = "groups"
         groups = load_entry_points("global")
         assert groups == ["groups"]
-        entry_points.assert_called_once_with(group="kedro.global_commands")
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.global_commands"
+        )
 
-    def test_global_error_is_caught(self, entry_points, entry_point):
+    def test_global_error_is_caught(self, entry_points, entry_point, caplog):
         entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Loading global commands from"):
-            load_entry_points("global")
-        entry_points.assert_called_once_with(group="kedro.global_commands")
+        entry_point.module = "global"
+        load_entry_points("global")
+        assert "Failed to load global commands" in caplog.text
+        entry_points.return_value.select.assert_called_once_with(
+            group="kedro.global_commands"
+        )
 
     def test_init(self, entry_points, entry_point):
         _init_plugins()
-        entry_points.assert_called_once_with(group="kedro.init")
+        entry_points.return_value.select.assert_called_once_with(group="kedro.init")
         entry_point.load().assert_called_once_with()
 
     def test_init_error_is_caught(self, entry_points, entry_point):
-        entry_point.load.side_effect = Exception()
-        with raises(KedroCliError, match="Initializing"):
+        entry_point.load.return_value.side_effect = Exception()
+        with raises(Exception):
             _init_plugins()
-        entry_points.assert_called_once_with(group="kedro.init")
+        entry_points.return_value.select.assert_called_once_with(group="kedro.init")
 
 
 class TestKedroCLI:
@@ -366,11 +325,13 @@ class TestKedroCLI:
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        assert len(kedro_cli.project_groups) == 5
+        print(kedro_cli.project_groups)
+        assert len(kedro_cli.project_groups) == 6
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
         ]
@@ -403,11 +364,12 @@ class TestKedroCLI:
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
-        assert len(kedro_cli.project_groups) == 6
+        assert len(kedro_cli.project_groups) == 7
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
             cli,
@@ -439,11 +401,12 @@ class TestKedroCLI:
 
         assert len(kedro_cli.global_groups) == 2
         assert kedro_cli.global_groups == [cli, create_cli]
-        assert len(kedro_cli.project_groups) == 6
+        assert len(kedro_cli.project_groups) == 7
         assert kedro_cli.project_groups == [
             catalog_cli,
             jupyter_cli,
             pipeline_cli,
+            micropkg_cli,
             project_group,
             registry_cli,
             cli,
@@ -455,7 +418,7 @@ class TestKedroCLI:
         assert "Project specific commands from Kedro" in result.output
 
 
-@mark.usefixtures("chdir_to_dummy_project", "patch_log")
+@mark.usefixtures("chdir_to_dummy_project")
 class TestRunCommand:
     @staticmethod
     @fixture(params=["run_config.yml", "run_config.json"])
@@ -474,7 +437,7 @@ class TestRunCommand:
         return config_path
 
     @staticmethod
-    @fixture()
+    @fixture
     def fake_run_config_with_params(fake_run_config, request):
         config = anyconfig.load(fake_run_config)
         config["run"].update(request.param)
@@ -497,6 +460,87 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
+
+    @mark.parametrize(
+        "nodes_input, nodes_expected",
+        [
+            ["splitting_data", ("splitting_data",)],
+            ["splitting_data,training_model", ("splitting_data", "training_model")],
+            ["splitting_data, training_model", ("splitting_data", "training_model")],
+        ],
+    )
+    def test_run_specific_nodes(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        nodes_input,
+        nodes_expected,
+    ):
+        nodes_command = "--nodes=" + nodes_input
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", nodes_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=nodes_expected,
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
+
+    @mark.parametrize(
+        "tags_input, tags_expected",
+        [
+            ["tag1", ("tag1",)],
+            ["tag1,tag2", ("tag1", "tag2")],
+            ["tag1, tag2", ("tag1", "tag2")],
+        ],
+    )
+    def test_run_with_tags(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        tags_input,
+        tags_expected,
+    ):
+        tags_command = "--tags=" + tags_input
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", tags_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=tags_expected,
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
@@ -508,9 +552,12 @@ class TestRunCommand:
     ):
         from_nodes = ["--from-nodes", "splitting_data"]
         to_nodes = ["--to-nodes", "training_model"]
-        tags = ["--tag", "de"]
+        namespace = ["--namespace", "fake_namespace"]
+        tags = ["--tags", "de"]
         result = CliRunner().invoke(
-            fake_project_cli, ["run", *from_nodes, *to_nodes, *tags], obj=fake_metadata
+            fake_project_cli,
+            ["run", *from_nodes, *to_nodes, *tags, *namespace],
+            obj=fake_metadata,
         )
         assert not result.exit_code
 
@@ -524,28 +571,18 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace="fake_namespace",
         )
 
         runner = fake_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, SequentialRunner)
         assert not runner._is_async
 
-    def test_with_sequential_runner_and_parallel_flag(
-        self, fake_project_cli, fake_session
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel", "--runner=SequentialRunner"]
-        )
-        assert result.exit_code
-        assert "Please use either --parallel or --runner" in result.stdout
-
-        fake_session.return_value.run.assert_not_called()
-
-    def test_run_successfully_parallel_via_flag(
+    def test_run_successfully_parallel(
         self, fake_project_cli, fake_metadata, fake_session, mocker
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel"], obj=fake_metadata
+            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
         )
         assert not result.exit_code
         fake_session.run.assert_called_once_with(
@@ -558,19 +595,9 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name=None,
+            namespace=None,
         )
 
-        runner = fake_session.run.call_args_list[0][1]["runner"]
-        assert isinstance(runner, ParallelRunner)
-        assert not runner._is_async
-
-    def test_run_successfully_parallel_via_name(
-        self, fake_project_cli, fake_metadata, fake_session
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
-        )
-        assert not result.exit_code
         runner = fake_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, ParallelRunner)
         assert not runner._is_async
@@ -608,6 +635,7 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            namespace=None,
         )
 
     @mark.parametrize(
@@ -651,33 +679,43 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+            namespace=None,
         )
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, extra_params=expected
+            env=mocker.ANY, conf_source=None, extra_params=expected
         )
 
     @mark.parametrize(
         "cli_arg,expected_extra_params",
         [
             ("foo:bar", {"foo": "bar"}),
+            ("foo=bar", {"foo": "bar"}),
             (
                 "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
                 {
                     "foo": 123.45,
                     "bar": "1a",
-                    "baz": 678,
+                    "baz": 678.0,
                     "qux": 0.01,
                     "quux": 0,
-                    "quuz": "",
+                    "quuz": None,
                 },
             ),
             ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
+            ("foo=fizz:buzz", {"foo": "fizz:buzz"}),
+            ("foo:fizz=buzz", {"foo": "fizz=buzz"}),
             (
                 "foo:bar, baz: https://example.com",
                 {"foo": "bar", "baz": "https://example.com"},
             ),
+            ("foo:bar, foo:fizz buzz", {"foo": "fizz buzz"}),
             ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
-            ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
+            ("foo.nested:bar", {"foo": {"nested": "bar"}}),
+            ("foo.nested=123.45", {"foo": {"nested": 123.45}}),
+            (
+                "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
+                {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
+            ),
         ],
     )
     def test_run_extra_params(
@@ -696,7 +734,7 @@ class TestRunCommand:
 
         assert not result.exit_code
         mock_session_create.assert_called_once_with(
-            env=mocker.ANY, extra_params=expected_extra_params
+            env=mocker.ANY, conf_source=None, extra_params=expected_extra_params
         )
 
     @mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
@@ -706,7 +744,7 @@ class TestRunCommand:
         )
         assert result.exit_code
         assert (
-            "Item `bad` must contain a key and a value separated by `:`"
+            "Item `bad` must contain a key and a value separated by `:` or `=`."
             in result.stdout
         )
 
@@ -741,6 +779,47 @@ class TestRunCommand:
             to_outputs=[],
             load_versions={ds: t},
             pipeline_name=None,
+            namespace=None,
+        )
+
+    @mark.parametrize(
+        "lv_input, lv_dict",
+        [
+            [
+                "dataset1:time1",
+                {
+                    "dataset1": "time1",
+                },
+            ],
+            [
+                "dataset1:time1,dataset2:time2",
+                {"dataset1": "time1", "dataset2": "time2"},
+            ],
+            [
+                "dataset1:time1, dataset2:time2",
+                {"dataset1": "time1", "dataset2": "time2"},
+            ],
+        ],
+    )
+    def test_split_load_versions(
+        self, fake_project_cli, fake_metadata, fake_session, lv_input, lv_dict, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--load-versions", lv_input], obj=fake_metadata
+        )
+        assert not result.exit_code, result.output
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions=lv_dict,
+            pipeline_name=None,
+            namespace=None,
         )
 
     def test_fail_reformat_load_versions(self, fake_project_cli, fake_metadata):
@@ -751,8 +830,183 @@ class TestRunCommand:
         assert result.exit_code, result.output
 
         expected_output = (
-            f"Error: Expected the form of `load_version` to be "
-            f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+            f"Error: Expected the form of 'load_version' to be "
+            f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
             f"found {load_version} instead\n"
         )
         assert expected_output in result.output
+
+    def test_fail_split_load_versions(self, fake_project_cli, fake_metadata):
+        load_version = "2020-05-12T12.00.00"
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--load-versions", load_version],
+            obj=fake_metadata,
+        )
+        assert result.exit_code, result.output
+
+        expected_output = (
+            f"Error: Expected the form of 'load_version' to be "
+            f"'dataset_name:YYYY-MM-DDThh.mm.ss.sssZ',"
+            f"found {load_version} instead\n"
+        )
+        assert expected_output in result.output
+
+    @mark.parametrize(
+        "from_nodes, expected",
+        [
+            (["--from-nodes", "A,B,C"], ["A", "B", "C"]),
+            (
+                ["--from-nodes", "two_inputs([A0,B0]) -> [C1]"],
+                ["two_inputs([A0,B0]) -> [C1]"],
+            ),
+            (
+                ["--from-nodes", "two_outputs([A0]) -> [B1,C1]"],
+                ["two_outputs([A0]) -> [B1,C1]"],
+            ),
+            (
+                ["--from-nodes", "multi_in_out([A0,B0]) -> [C1,D1]"],
+                ["multi_in_out([A0,B0]) -> [C1,D1]"],
+            ),
+            (
+                ["--from-nodes", "two_inputs([A0,B0]) -> [C1],X,Y,Z"],
+                ["two_inputs([A0,B0]) -> [C1]", "X", "Y", "Z"],
+            ),
+        ],
+    )
+    def test_safe_split_option_arguments(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+        from_nodes,
+        expected,
+    ):
+        CliRunner().invoke(fake_project_cli, ["run", *from_nodes], obj=fake_metadata)
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=expected,
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
+        )
+
+    def test_run_with_alternative_conf_source(self, fake_project_cli, fake_metadata):
+        # check that Kedro runs successfully with an alternative conf_source
+        rename("conf", "alternate_conf")
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "alternate_conf"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0
+
+    def test_run_with_non_existent_conf_source(self, fake_project_cli, fake_metadata):
+        # check that an error is thrown if target conf_source doesn't exist
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "--conf-source", "nonexistent_dir"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code, result.output
+        expected_output = (
+            "Error: Invalid value for '--conf-source': Path 'nonexistent_dir'"
+            " does not exist."
+        )
+        assert expected_output in result.output
+
+    # the following tests should be deleted in 0.19.0
+
+    def test_both_node_flags(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+    ):
+        nodes_input = ["splitting_data", "training_model"]
+        nodes_expected = ("splitting_data", "training_model")
+        node_command = "--node=" + nodes_input[0]
+        nodes_command = "--nodes=" + nodes_input[1]
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", node_command, nodes_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=nodes_expected,
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
+        )
+
+    def test_both_tag_flags(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        mocker,
+    ):
+        tags_input = ["tag1", "tag2"]
+        tags_expected = ("tag1", "tag2")
+        tag_command = "--tag=" + tags_input[0]
+        tags_command = "--tags=" + tags_input[1]
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", tag_command, tags_command], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=tags_expected,
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+            namespace=None,
+        )
+
+    def test_both_load_version_flags(
+        self, fake_project_cli, fake_metadata, fake_session, mocker
+    ):
+        lv_input = ["dataset1:time1", "dataset2:time2"]
+        lv_dict = {"dataset1": "time1", "dataset2": "time2"}
+
+        load_version_command = "--load-version=" + lv_input[0]
+        load_versions_command = "--load-versions=" + lv_input[1]
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", load_version_command, load_versions_command],
+            obj=fake_metadata,
+        )
+        assert not result.exit_code, result.output
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions=lv_dict,
+            pipeline_name=None,
+            namespace=None,
+        )

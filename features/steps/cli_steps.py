@@ -1,37 +1,8 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """Behave step definitions for the cli_scenarios feature."""
 
-import itertools
 import json
-import shlex
 import shutil
+import textwrap
 from pathlib import Path
 from time import time
 
@@ -40,6 +11,7 @@ import requests
 import toml
 import yaml
 from behave import given, then, when
+from packaging.requirements import Requirement
 
 import kedro
 from features.steps import util
@@ -157,7 +129,6 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
     """
     response = requests.get(url, timeout=1.0)
     response.raise_for_status()
-
     data = response.text
     assert string in data
     assert context.result.poll() is None
@@ -189,12 +160,15 @@ def create_config_file(context):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
-@given('I have executed the kedro command "{command}"')
-def exec_kedro_target_checked(context, command):
-    """Execute Kedro command and check the status."""
-    cmd = [context.kedro] + command.split()
-
-    res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+@given("I have installed the project dependencies")
+def pip_install_dependencies(context):
+    """Install project dependencies using pip."""
+    reqs_path = "src/requirements.txt"
+    res = run(
+        [context.pip, "install", "-r", reqs_path],
+        env=context.env,
+        cwd=str(context.root_project_dir),
+    )
 
     if res.returncode != OK_EXIT_CODE:
         print(res.stdout)
@@ -202,48 +176,6 @@ def exec_kedro_target_checked(context, command):
         assert False
 
 
-@given('I have created new environment "{}"')
-def create_new_env(context, env_name):
-    env_path = context.root_project_dir / "conf" / env_name
-    env_path.mkdir()
-
-    for config_name in ("catalog", "parameters", "credentials"):
-        path = env_path / f"{config_name}.yml"
-        with path.open("w") as config_file:
-            yaml.dump({}, config_file, default_flow_style=False)
-
-    # overwrite the log level for anyconfig from WARNING to INFO
-    logging_path = env_path / "logging.yml"
-    logging_json = {
-        "loggers": {
-            "anyconfig": {
-                "level": "INFO",
-                "handlers": ["console", "info_file_handler", "error_file_handler"],
-                "propagate": "no",
-            },
-            "kedro.io": {
-                "level": "INFO",
-                "handlers": ["console", "info_file_handler", "error_file_handler"],
-                "propagate": "no",
-            },
-            "kedro.pipeline": {
-                "level": "INFO",
-                "handlers": ["console", "info_file_handler", "error_file_handler"],
-                "propagate": "no",
-            },
-        }
-    }
-    with logging_path.open("w") as config_file:
-        yaml.dump(logging_json, config_file, default_flow_style=False)
-
-
-@given('the python package "{package}" has been uninstalled')
-def uninstall_package_via_pip(context, package):
-    """Uninstall a python package using pip."""
-    run([context.pip, "uninstall", "-y", package], env=context.env)
-
-
-@given("I have installed the project's python package")
 @when("I install the project's python package")
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
@@ -271,38 +203,57 @@ def disable_plugin_hooks(context, plugin):
         settings_file.write(to_add)
 
 
+@given("I have set the OmegaConfigLoader in settings")
+def use_omegaconfigloader(context):
+    """Set `config_loader_class` in `settings.py`."""
+    settings_path = (
+        context.root_project_dir / "src" / context.package_name / "settings.py"
+    )
+    to_add = """\nfrom kedro.config import OmegaConfigLoader
+            \nCONFIG_LOADER_CLASS = OmegaConfigLoader"""
+    with settings_path.open("a") as settings_file:
+        settings_file.write(to_add)
+
+
 @given("I have initialized a git repository")
 def init_git_repo(context):
     """Init git repo"""
     with util.chdir(context.root_project_dir):
         check_run("git init")
         check_run("git config user.name 'Tester'")
-        check_run("git config user.email 'tester.kedro@quantumblack.com'")
+        check_run("git config user.email 'tester.kedro@kedro.com'")
 
 
 @given("I have added a test jupyter notebook")
 def add_test_jupyter_nb(context):
     """Create a test jupyter notebook using TEST_JUPYTER_ORG."""
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"), "wt"
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        "w",
+        encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_ORG)
 
 
-@given("I have run a non-interactive kedro new with starter")
-@when("I run a non-interactive kedro new with starter")
-def create_project_with_starter(context):
+@given('I have run a non-interactive kedro new with starter "{starter}"')
+@when('I run a non-interactive kedro new with starter "{starter}"')
+def create_project_with_starter(context, starter):
     """Behave step to run kedro new given the config I previously created."""
-    starter_dir = Path(__file__).parent / "test_starter"
+
+    if starter == "default":
+        starter = Path(__file__).parent / "test_starter"
+
+    args = [
+        context.kedro,
+        "new",
+        "-c",
+        str(context.config_file),
+        "--starter",
+        str(starter),
+    ]
+
     res = run(
-        [
-            context.kedro,
-            "new",
-            "-c",
-            str(context.config_file),
-            "--starter",
-            str(starter_dir),
-        ],
+        args,
         env=context.env,
         cwd=context.temp_dir,
     )
@@ -324,13 +275,6 @@ def create_project_without_starter(context):
     telemetry_file.write_text("consent: false", encoding="utf-8")
 
 
-@given("I have deleted the credentials file")
-def delete_credentials_file(context):
-    """Delete configuration file from project"""
-    path_to_config_file = context.root_project_dir / "conf" / "base" / "credentials.yml"
-    path_to_config_file.unlink()
-
-
 @given("I have added the project directory to staging")
 @when("I add the project directory to staging")
 def add_proj_dir_to_staging(context):
@@ -347,6 +291,7 @@ def commit_changes_to_git(context):
         check_run(f"git commit -m 'Change {time()}'")
 
 
+@given('I have executed the kedro command "{command}"')
 @when('I execute the kedro command "{command}"')
 def exec_kedro_target(context, command):
     """Execute Kedro target."""
@@ -365,21 +310,6 @@ def exec_project(context):
     # We take care to delete with `delete_unnecessary_assets` to simulate the behaviour
     # of a installed package in a fresh environment.
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
-
-
-@when('with tags {tags:CSV}, I execute the kedro command "{cmd}"')
-def exec_kedro_run_with_tag(context, cmd, tags):
-    """Execute `kedro run` with tags"""
-    kedro_args = shlex.split(cmd)
-    context.logfile_count = util.get_logline_count(
-        util.get_logfile_path(context.root_project_dir)
-    )
-
-    tag_list = [["--tag", t] for t in tags]
-    tag_args = list(itertools.chain.from_iterable(tag_list))
-    run_cmd = [context.kedro] + kedro_args + tag_args
-
-    context.result = run(run_cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
 @when("I ask the CLI for a version")
@@ -407,14 +337,26 @@ def exec_notebook(context, command):
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
     context.result = ChildTerminatingPopen(
-        cmd, env=context.env, cwd=str(context.root_project_dir)
+        cmd, env=context.env, cwd=str(context.root_project_dir), universal_newlines=True
     )
 
 
-@when("Wait until the process is finished")
-def wait(context):
+@then('I wait for the jupyter webserver to run for up to "{timeout:d}" seconds')
+def wait_for_notebook_to_run(context, timeout):
+    timeout_start = time()
+    while time() < timeout_start + timeout:
+        stdout = context.result.stdout.readline()
+        if "http://127.0.0.1:" in stdout:
+            break
+
+    if time() >= timeout_start + timeout:
+        raise TimeoutError("Failed to run Jupyter server in time")
+
+
+@when('Wait until the process is finished for up to "{timeout:d}" seconds')
+def wait(context, timeout):
     """Wait for child process to terminate."""
-    context.result.wait()
+    context.result.wait(timeout)
 
 
 @when("I execute the test jupyter notebook and save changes")
@@ -423,7 +365,9 @@ def simulate_nb_execution(context):
     simulate that it was executed and output was saved.
     """
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"), "wt"
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        "w",
+        encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_AFTER_EXEC)
 
@@ -464,18 +408,16 @@ def update_pyproject_toml(context: behave.runner.Context, new_source_dir):
 
 @given("I have updated kedro requirements")
 def update_kedro_req(context: behave.runner.Context):
-    """Replace kedro as a standalone requirement with a line
-    that includes all of kedro's dependencies (-r kedro/requirements.txt)
-    """
+    """Remove kedro as a standalone requirement."""
     reqs_path = context.root_project_dir / "src" / "requirements.txt"
-    kedro_reqs = f"-r {context.requirements_path.as_posix()}"
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text().splitlines()
         new_reqs = []
         for req in old_reqs:
-            if req.startswith("kedro"):
-                new_reqs.append(kedro_reqs)
+            if req.startswith("kedro") and Requirement(req).name.lower() == "kedro":
+                # Do not include kedro as it's preinstalled in the environment
+                pass
             else:
                 new_reqs.append(req)
         new_reqs = "\n".join(new_reqs)
@@ -485,7 +427,7 @@ def update_kedro_req(context: behave.runner.Context):
 
 @when("I add {dependency} to the requirements")
 def add_req(context: behave.runner.Context, dependency: str):
-    reqs_path = context.root_project_dir / "src" / "requirements.in"
+    reqs_path = context.root_project_dir / "src" / "requirements.txt"
     if reqs_path.is_file():
         reqs_path.write_text(reqs_path.read_text() + "\n" + str(dependency) + "\n")
 
@@ -509,41 +451,13 @@ def check_created_project_structure(context):
         assert is_created(path)
 
 
-@then("the pipeline should contain no nodes")
-def check_empty_pipeline_exists(context):
-    """Check if the created pipeline in
-    `pipeline_registry.py` contains no nodes.
-    """
-    pipeline_file = (
-        context.root_project_dir
-        / "src"
-        / context.project_name.replace("-", "_")
-        / "pipeline_registry.py"
-    )
-    assert '"__default__": Pipeline([])' in pipeline_file.read_text("utf-8")
-
-
-@then("the pipeline should contain nodes")
-def check_pipeline_not_empty(context):
-    """Check if the created pipeline in
-    `pipeline_registry.py` contains nodes.
-    """
-    pipeline_file = (
-        context.root_project_dir
-        / "src"
-        / context.project_name.replace("-", "_")
-        / "pipeline_registry.py"
-    )
-    assert "pipeline = Pipeline([])" not in pipeline_file.read_text("utf-8")
-
-
-@then("the console log should show that {number} nodes were run")
+@then("the logs should show that {number} nodes were run")
 def check_one_node_run(context, number):
     expected_log_line = f"Completed {number} out of {number} tasks"
     assert expected_log_line in context.result.stdout
 
 
-@then('the console log should show that "{node}" was run')
+@then('the logs should show that "{node}" was run')
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
     stdout = context.result.stdout
@@ -576,16 +490,6 @@ def check_failed_status_code(context):
             f"but got {context.result.returncode}"
         )
         assert False, error_msg
-
-
-@then("the relevant packages should be created")
-def check_python_packages_created(context):
-    """Check that egg and whl files exist in dist dir."""
-    dist_dir = context.root_project_dir / "dist"
-    egg_file = dist_dir.glob("*.egg")
-    whl_file = dist_dir.glob("*.whl")
-    assert any(egg_file)
-    assert any(whl_file)
 
 
 @then('I should get a message including "{msg}"')
@@ -642,10 +546,11 @@ def check_additional_cell_added(context):
     coded by TEST_JUPYTER_ORG.
     """
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb")
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        encoding="utf-8",
     ) as test_nb_fh:
         context.nb_data = json.load(test_nb_fh)
-        assert len(context.nb_data["cells"]) == 2
+        assert len(context.nb_data["cells"]) == 2  # noqa: PLR2004
 
 
 @then("the output should be empty in all the cells in the jupyter notebook")
@@ -655,7 +560,7 @@ def check_output_cells_empty(context):
         assert cell["outputs"] == []
 
 
-@then("jupyter notebook should run on port {port}")
+@then("jupyter notebook should run on port {port:d}")
 def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     """Check that jupyter notebook service is running on specified port.
 
@@ -664,21 +569,14 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
         port: Port to check
 
     """
-    url = "http://localhost:%d" % int(port)
+    url = f"http://localhost:{port}"
     try:
-        util.wait_for(
-            func=_check_service_up,
-            context=context,
-            url=url,
-            string="Jupyter Notebook",
-            timeout_=15,
-            print_error=True,
-        )
+        _check_service_up(context, url, "Jupyter Notebook")
     finally:
         context.result.terminate()
 
 
-@then("Jupyter Lab should run on port {port}")
+@then("Jupyter Lab should run on port {port:d}")
 def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     """Check that jupyter lab service is running on specified port.
 
@@ -687,16 +585,9 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
         port: Port to check
 
     """
-    url = "http://localhost:%d" % int(port)
+    url = f"http://localhost:{port}"
     try:
-        util.wait_for(
-            func=_check_service_up,
-            timeout_=20,
-            context=context,
-            url=url,
-            string='<a href="/lab"',
-            print_error=True,
-        )
+        _check_service_up(context, url, '<a href="/lab"')
     finally:
         context.result.terminate()
 
@@ -713,13 +604,10 @@ def check_docs_generated(context: behave.runner.Context):
 
 @then("requirements should be generated")
 def check_reqs_generated(context: behave.runner.Context):
-    """Check that new project docs are generated."""
-    reqs_path = context.root_project_dir / "src" / "requirements.in"
+    """Check that new project requirements are generated."""
+    reqs_path = context.root_project_dir / "src" / "requirements.lock"
     assert reqs_path.is_file()
-    assert (
-        "This file is autogenerated by pip-compile"
-        in (context.root_project_dir / "src" / "requirements.txt").read_text()
-    )
+    assert "This file is autogenerated by pip-compile" in reqs_path.read_text()
 
 
 @then("{dependency} should be in the requirements")
@@ -740,13 +628,14 @@ def check_cell_conversion(context: behave.runner.Context):
     assert "Hello World!" in converted_file.read_text()
 
 
-@then("{path} must not exist")
-def check_path_doesnt_exist(context: behave.runner.Context, path: str):
-    path = context.root_project_dir / path
-    assert not path.exists()
-
-
-@then("{filepath} file must exist")
-def check_file_exists(context: behave.runner.Context, filepath: str):
-    filepath = context.root_project_dir / filepath
-    assert filepath.is_file()
+@given("I have micro-packaging settings in pyproject.toml")
+def add_micropkg_to_pyproject_toml(context: behave.runner.Context):
+    pyproject_toml_path = context.root_project_dir / "pyproject.toml"
+    project_toml_str = textwrap.dedent(
+        """
+        [tool.kedro.micropkg.package]
+        "pipelines.data_science" = {alias = "ds"}
+        """
+    )
+    with pyproject_toml_path.open(mode="a") as file:
+        file.write(project_toml_str)

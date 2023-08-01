@@ -1,37 +1,9 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """``TensorflowModelDataset`` is a data set implementation which can save and load
 TensorFlow models.
 """
 import copy
 import tempfile
-from pathlib import Path, PurePath, PurePosixPath
+from pathlib import PurePath, PurePosixPath
 from typing import Any, Dict
 
 import fsspec
@@ -39,7 +11,7 @@ import tensorflow as tf
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -47,20 +19,42 @@ from kedro.io.core import (
 
 TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
-class TensorFlowModelDataset(AbstractVersionedDataSet):
+
+class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.Model]):
     """``TensorflowModelDataset`` loads and saves TensorFlow models.
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
 
-    Example:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        tensorflow_model:
+          type: tensorflow.TensorFlowModelDataset
+          filepath: data/06_models/tensorflow_model.h5
+          load_args:
+            compile: False
+          save_args:
+            overwrite: True
+            include_optimizer: False
+          credentials: tf_creds
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>
-        >>> data_set = TensorFlowModelDataset("saved_model_path")
+        >>> data_set = TensorFlowModelDataset("data/06_models/tensorflow_model.h5")
         >>> model = tf.keras.Model()
         >>> predictions = model.predict([...])
         >>>
@@ -74,8 +68,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"save_format": "tf"}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -140,24 +133,30 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(  # noqa: PLW2901
+                    PurePath(path) / TEMPORARY_H5_FILE
+                )  # noqa: redefined-loop-name
                 self._fs.copy(load_path, path)
             else:
                 self._fs.get(load_path, path, recursive=True)
 
             # Pass the local temporary directory/file path to keras.load_model
-            return tf.keras.models.load_model(path, **self._load_args)
+            device_name = self._load_args.pop("tf_device", None)
+            if device_name:
+                with tf.device(device_name):
+                    model = tf.keras.models.load_model(path, **self._load_args)
+            else:
+                model = tf.keras.models.load_model(path, **self._load_args)
+            return model
 
     def _save(self, data: tf.keras.Model) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        # Make sure all intermediate directories are created.
-        save_dir = Path(save_path).parent
-        save_dir.mkdir(parents=True, exist_ok=True)
-
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(  # noqa: PLW2901
+                    PurePath(path) / TEMPORARY_H5_FILE
+                )  # noqa: redefined-loop-name
 
             tf.keras.models.save_model(data, path, **self._save_args)
 
@@ -166,23 +165,24 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
             if self._is_h5:
                 self._fs.copy(path, save_path)
             else:
+                if self._fs.exists(save_path):
+                    self._fs.rm(save_path, recursive=True)
                 self._fs.put(path, save_path, recursive=True)
 
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
         return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _release(self) -> None:
         super()._release()

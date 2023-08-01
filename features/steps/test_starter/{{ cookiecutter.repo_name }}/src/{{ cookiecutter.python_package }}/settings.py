@@ -1,51 +1,41 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
+"""Project settings. There is no need to edit this file unless you want to change values
+from the Kedro defaults. For further information, including these default values, see
+https://kedro.readthedocs.io/en/stable/kedro_project_setup/settings.html."""
 
-"""Project settings."""
-from {{cookiecutter.python_package}}.hooks import ProjectHooks
+# Instantiated project hooks.
+# For example, after creating a hooks.py and defining a ProjectHooks class there, do
+# from {{cookiecutter.python_package}}.hooks import ProjectHooks
+# HOOKS = (ProjectHooks(),)
 
-# Instantiate and list your project hooks here
-HOOKS = (ProjectHooks(),)
-
-# List the installed plugins for which to disable auto-registry
+# Installed plugins for which to disable hook auto-registration.
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
 
-# Define where to store data from a KedroSession. Defaults to BaseSessionStore.
-# from kedro.framework.session.store import ShelveStore
-# SESSION_STORE_CLASS = ShelveStore
-
-# Define keyword arguments to be passed to `SESSION_STORE_CLASS` constructor
+# Class that manages storing KedroSession data.
+# from kedro.framework.session.store import BaseSessionStore
+# SESSION_STORE_CLASS = BaseSessionStore
+# Keyword arguments to pass to the `SESSION_STORE_CLASS` constructor.
 # SESSION_STORE_ARGS = {
 #     "path": "./sessions"
 # }
 
-# Define custom context class. Defaults to `KedroContext`
+# Directory that holds configuration.
+# CONF_SOURCE = "conf"
+
+# Class that manages how configuration is loaded.
+# from kedro.config import OmegaConfigLoader
+# CONFIG_LOADER_CLASS = OmegaConfigLoader
+# Keyword arguments to pass to the `CONFIG_LOADER_CLASS` constructor.
+# CONFIG_LOADER_ARGS = {
+#       "config_patterns": {
+#           "spark" : ["spark*/"],
+#           "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
+#       }
+# }
+
+# Class that manages Kedro's library components.
+# from kedro.framework.context import KedroContext
 # CONTEXT_CLASS = KedroContext
 
-# Define the configuration folder. Defaults to `conf`
-# CONF_SOURCE = "conf"
+# Class that manages the Data Catalog.
+# from kedro.io import DataCatalog
+# DATA_CATALOG_CLASS = DataCatalog

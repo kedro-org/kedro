@@ -1,17 +1,219 @@
+# PEP-518 https://peps.python.org/pep-0518/
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["setuptools>=65.5.1"]  # PEP 518 specifications
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kedro"
+authors = [
+    {name = "Kedro"}
+]
+description = "Kedro helps you build production-ready data and analytics pipelines"
+requires-python = ">=3.7"
+dependencies = [
+    "anyconfig~=0.10.0",
+    "attrs>=21.3",
+    "build",
+    "cachetools~=5.3",
+    "click<9.0",
+    "cookiecutter>=2.1.1, <3.0",
+    "dynaconf>=3.1.2, <4.0",
+    "fsspec>=2021.4, <2024.1",  # Upper bound set arbitrarily, to be reassessed in early 2024
+    "gitpython~=3.0",
+    "importlib-metadata>=3.6; python_version >= '3.8'",
+    "importlib_metadata>=3.6, <5.0; python_version < '3.8'",  # The "selectable" entry points were introduced in `importlib_metadata` 3.6 and Python 3.10. Bandit on Python 3.7 relies on a library with `importlib_metadata` < 5.0
+    "importlib_resources>=1.3",  # The `files()` API was introduced in `importlib_resources` 1.3 and Python 3.9.
+    "jmespath>=0.9.5, <2.0",
+    "more_itertools~=9.0",
+    "omegaconf~=2.3",
+    "parse~=1.19.0",
+    "pip-tools>=6.5,<8",
+    "pluggy~=1.0",
+    "PyYAML>=4.2, <7.0",
+    "rich>=12.0, <14.0",
+    "rope>=0.21, <2.0",  # subject to LGPLv3 license
+    "setuptools>=65.5.1",
+    "toml~=0.10",
+    "toposort~=1.5",  # Needs to be at least 1.5 to be able to raise CircularDependencyError
+]
+keywords = [
+    "pipelines",
+    "machine learning",
+    "data pipelines",
+    "data science",
+    "data engineering",
+]
+license = {text = "Apache Software License (Apache 2.0)"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dynamic = ["readme", "version", "optional-dependencies"]
+
+[project.urls]
+Homepage = "https://kedro.org"
+Source = "https://github.com/kedro-org/kedro"
+Documentation = "https://docs.kedro.org"
+Tracker = "https://github.com/kedro-org/kedro/issues"
+
+[project.scripts]
+kedro = "kedro.framework.cli:main"
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.packages.find]
+include = ["kedro*"]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+version = {attr = "kedro.__version__"}
+
 [tool.black]
 exclude = "/templates/|^features/steps/test_starter"
 
 [tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-line_length = 88
-known_first_party = ["features", "kedro", "tests", "tools"]
-default_section = "THIRDPARTY"
+profile = "black"
+
+
+[tool.pylint]
+[tool.pylint.master]
+ignore = "CVS"
+ignore-patterns = "kedro/templates/*"
+load-plugins = [
+    "pylint.extensions.docparams",
+    "pylint.extensions.no_self_use"
+]
+extension-pkg-whitelist = "cv2"
+unsafe-load-any-extension = false
+[tool.pylint.messages_control]
+disable = [
+    "ungrouped-imports",
+    "duplicate-code",
+    "wrong-import-order",  # taken care of by isort
+]
+enable = ["useless-suppression"]
+[tool.pylint.refactoring]
+max-nested-blocks = 5
+[tool.pylint.format]
+indent-after-paren=4
+indent-string="    "
+[tool.pylint.miscellaneous]
+notes = [
+    "FIXME",
+    "XXX"
+]
+[tool.pylint.design]
+min-public-methods = 1
 
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["kedro/templates/*", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*"]
+omit = [
+    "kedro/templates/*",
+    "kedro/extras/logging/color_logger.py",
+    "kedro/extras/extensions/ipython.py",
+    "kedro/framework/cli/hooks/specs.py",
+    "kedro/framework/hooks/specs.py",
+    "kedro/extras/datasets/tensorflow/*",
+    "kedro/extras/datasets/holoviews/*",
+    "tests/*"
+]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.pytest.ini_options]
+addopts="""
+--cov-config pyproject.toml \
+--cov-report xml:coverage.xml \
+--cov-report term-missing \
+--cov kedro \
+--cov tests \
+--ignore tests/template/fake_repo \
+--ignore features \
+--ignore kedro/templates \
+--no-cov-on-fail \
+-ra \
+-W ignore"""
+testpaths = [
+  "tests"
+]
+
+[tool.importlinter]
+root_package = "kedro"
+
+[[tool.importlinter.contracts]]
+name = "CLI > Context > Library, Runner > Extras > IO & Pipeline"
+type = "layers"
+containers = "kedro"
+layers = [
+    "framework.cli",
+    "framework.session",
+    "framework.context",
+    "framework.project",
+    "runner",
+    "extras.datasets",
+    "io",
+    "pipeline",
+    "config"
+]
+ignore_imports = [
+    "kedro.runner.parallel_runner -> kedro.framework.project",
+    "kedro.framework.hooks.specs -> kedro.framework.context"
+]
+
+[[tool.importlinter.contracts]]
+name = "Pipeline and IO are independent"
+type = "independence"
+modules = [
+    "kedro.pipeline",
+    "kedro.io"
+]
+
+[[tool.importlinter.contracts]]
+name = "Config cannot import Runner et al"
+type = "forbidden"
+source_modules = [
+    "kedro.config"
+]
+forbidden_modules = [
+    "kedro.runner",
+    "kedro.io",
+    "kedro.pipeline",
+    "kedro.extras.datasets"
+]
+
+[[tool.importlinter.contracts]]
+name = "Runner et al cannot import Config"
+type = "forbidden"
+source_modules = [
+    "kedro.runner",
+    "kedro.io",
+    "kedro.pipeline",
+    "kedro.extras.datasets"
+]
+forbidden_modules = [
+    "kedro.config"
+]
+ignore_imports = [
+    "kedro.framework.context.context -> kedro.config",
+    "kedro.framework.session.session -> kedro.config"
+]
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+# select = ["A", "B", "C", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+select = [
+    "F",  # Pyflakes
+    "E",  # Pycodestyle
+    "W",  # Pycodestyle
+    "UP",  # pyupgrade
+    "I",  # isort
+    "PL", # Pylint
+]
+ignore = ["E501"]  # Black take care off line-too-long
+unfixable = []

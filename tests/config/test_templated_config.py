@@ -1,33 +1,6 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict
 
 import pytest
 import yaml
@@ -39,7 +12,7 @@ _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
@@ -236,6 +209,15 @@ def proj_catalog_param_with_default(tmp_path, param_config_with_default):
 
 class TestTemplatedConfigLoader:
     @pytest.mark.usefixtures("proj_catalog_param")
+    def test_get_catalog_config_with_dict_get(self, tmp_path, template_config):
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path), globals_dict=template_config
+        )
+        config_loader.default_run_env = ""
+        catalog = config_loader["catalog"]
+        assert catalog["boats"]["type"] == "SparkDataSet"
+
+    @pytest.mark.usefixtures("proj_catalog_param")
     def test_catalog_parameterized_w_dict(self, tmp_path, template_config):
         """Test parameterized config with input from dictionary with values"""
         config_loader = TemplatedConfigLoader(
@@ -281,7 +263,7 @@ class TestTemplatedConfigLoader:
     @pytest.mark.usefixtures("proj_catalog_param_with_default")
     def test_catalog_parameterized_empty_params_with_default(self, tmp_path):
         """Test parameterized config with empty globals dictionary"""
-        config_loader = TemplatedConfigLoader(str(tmp_path), globals_dict=dict())
+        config_loader = TemplatedConfigLoader(str(tmp_path), globals_dict={})
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*.yml")
 
@@ -395,6 +377,33 @@ class TestTemplatedConfigLoader:
         }
         assert catalog == expected_catalog
 
+    @pytest.mark.usefixtures("proj_catalog_globals", "catalog_with_jinja2_syntax")
+    def test_catalog_with_jinja2_syntax_and_globals_file(self, tmp_path):
+        """Test catalog with jinja2 syntax with globals yaml file"""
+        proj_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
+        _write_yaml(proj_catalog, {})
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path),
+            globals_pattern="*globals.yml",
+        )
+        config_loader.default_run_env = ""
+        catalog = config_loader.get("catalog*.yml")
+        expected_catalog = {
+            "fast-trains": {"type": "MemoryDataSet"},
+            "fast-cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "s3a://boat-and-car-bucket/fast-cars.csv",
+                "save_args": {"index": True},
+            },
+            "slow-trains": {"type": "MemoryDataSet"},
+            "slow-cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "s3a://boat-and-car-bucket/slow-cars.csv",
+                "save_args": {"index": True},
+            },
+        }
+        assert catalog == expected_catalog
+
 
 class TestFormatObject:
     @pytest.mark.parametrize(
@@ -432,7 +441,7 @@ class TestFormatObject:
             (["${a}", "X${a}"], {"a": "A"}, ["A", "XA"]),
             (["${b|D}"], {"a": "A"}, ["D"]),
             (["${b|abcDEF_.<>/@$%^&!}"], {"a": "A"}, ["abcDEF_.<>/@$%^&!"]),
-            # Dicts
+            # dicts
             ({"key": "${a}"}, {"a": "A"}, {"key": "A"}),
             ({"${a}": "value"}, {"a": "A"}, {"A": "value"}),
             ({"${a|D}": "value"}, {}, {"D": "value"}),
@@ -460,3 +469,37 @@ class TestFormatObject:
     def test_raises_error(self, val, format_dict, expected_error_message):
         with pytest.raises(ValueError, match=expected_error_message):
             _format_object(val, format_dict)
+
+    def test_customised_patterns(self, tmp_path):
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path),
+            config_patterns={"spark": ["spark*/"]},
+        )
+        assert config_loader.config_patterns["catalog"] == [
+            "catalog*",
+            "catalog*/**",
+            "**/catalog*",
+        ]
+        assert config_loader.config_patterns["spark"] == ["spark*/"]
+
+    @pytest.mark.usefixtures("proj_catalog_param")
+    def test_adding_extra_keys_to_confloader(self, tmp_path, template_config):
+        """Make sure extra keys can be added directly to the config loader instance."""
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path), globals_dict=template_config
+        )
+        config_loader.default_run_env = ""
+        catalog = config_loader["catalog"]
+        config_loader["spark"] = {"spark_config": "emr.blabla"}
+
+        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert config_loader["spark"] == {"spark_config": "emr.blabla"}
+
+    @pytest.mark.usefixtures("proj_catalog_param")
+    def test_bypass_catalog_config_loading(self, tmp_path):
+        """Make sure core config loading can be bypassed by setting the key and values
+        directly on the config loader instance."""
+        conf = TemplatedConfigLoader(str(tmp_path))
+        conf["catalog"] = {"catalog_config": "something_new"}
+
+        assert conf["catalog"] == {"catalog_config": "something_new"}

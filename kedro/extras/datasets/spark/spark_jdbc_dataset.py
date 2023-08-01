@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """SparkJDBCDataSet to load and save a PySpark DataFrame via JDBC."""
 
 from copy import deepcopy
@@ -33,20 +5,43 @@ from typing import Any, Dict
 
 from pyspark.sql import DataFrame, SparkSession
 
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet, DatasetError
 
 __all__ = ["SparkJDBCDataSet"]
 
+# NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
+# Any contribution to datasets should be made in kedro-datasets
+# in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
-class SparkJDBCDataSet(AbstractDataSet):
+
+class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     """``SparkJDBCDataSet`` loads data from a database table accessible
     via JDBC URL url and connection properties and saves the content of
     a PySpark DataFrame to an external database table via JDBC.  It uses
     ``pyspark.sql.DataFrameReader`` and ``pyspark.sql.DataFrameWriter``
     internally, so it supports all allowed PySpark options on ``jdbc``.
 
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
-    Example:
+    .. code-block:: yaml
+
+        weather:
+          type: spark.SparkJDBCDataSet
+          table: weather_table
+          url: jdbc:postgresql://localhost/test
+          credentials: db_credentials
+          load_args:
+            properties:
+              driver: org.postgresql.Driver
+          save_args:
+            properties:
+              driver: org.postgresql.Driver
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> import pandas as pd
@@ -76,8 +71,7 @@ class SparkJDBCDataSet(AbstractDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         url: str,
         table: str,
@@ -98,27 +92,27 @@ class SparkJDBCDataSet(AbstractDataSet):
             load_args: Provided to underlying PySpark ``jdbc`` function along
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
             save_args: Provided to underlying PySpark ``jdbc`` function along
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html
+                https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriter.jdbc.html
 
         Raises:
-            DataSetError: When either ``url`` or ``table`` is empty or
+            DatasetError: When either ``url`` or ``table`` is empty or
                 when a property is provided with a None value.
         """
 
         if not url:
-            raise DataSetError(
-                "`url` argument cannot be empty. Please "
+            raise DatasetError(
+                "'url' argument cannot be empty. Please "
                 "provide a JDBC URL of the form "
-                "``jdbc:subprotocol:subname``."
+                "'jdbc:subprotocol:subname'."
             )
 
         if not table:
-            raise DataSetError(
-                "`table` argument cannot be empty. Please "
+            raise DatasetError(
+                "'table' argument cannot be empty. Please "
                 "provide the name of the table to load or save "
                 "data to."
             )
@@ -140,9 +134,9 @@ class SparkJDBCDataSet(AbstractDataSet):
             # Check credentials for bad inputs.
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:
-                    raise DataSetError(
-                        "Credential property `{}` cannot be None. "
-                        "Please provide a value.".format(cred_key)
+                    raise DatasetError(
+                        f"Credential property '{cred_key}' cannot be None. "
+                        f"Please provide a value."
                     )
 
             load_properties = self._load_args.get("properties", {})
@@ -166,9 +160,12 @@ class SparkJDBCDataSet(AbstractDataSet):
             save_properties.pop("password", None)
             save_args = {**save_args, "properties": save_properties}
 
-        return dict(
-            url=self._url, table=self._table, load_args=load_args, save_args=save_args
-        )
+        return {
+            "url": self._url,
+            "table": self._table,
+            "load_args": load_args,
+            "save_args": save_args,
+        }
 
     @staticmethod
     def _get_spark():

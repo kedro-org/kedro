@@ -1,32 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 import boto3
 import dask.dataframe as dd
 import pandas as pd
@@ -38,7 +9,7 @@ from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
 from kedro.extras.datasets.dask import ParquetDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 
 FILE_NAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
@@ -105,7 +76,7 @@ class TestParquetDataSet:
     def test_incorrect_credentials_load(self):
         """Test that incorrect credential keys won't instantiate dataset."""
         pattern = r"unexpected keyword argument"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             ParquetDataSet(
                 filepath=S3_PATH,
                 credentials={
@@ -117,7 +88,7 @@ class TestParquetDataSet:
     def test_empty_credentials_load(self, bad_credentials):
         parquet_data_set = ParquetDataSet(filepath=S3_PATH, credentials=bad_credentials)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             parquet_data_set.load().compute()
 
     def test_pass_credentials(self, mocker):
@@ -126,7 +97,7 @@ class TestParquetDataSet:
         client_mock = mocker.patch("botocore.session.Session.create_client")
         s3_data_set = ParquetDataSet(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             s3_data_set.load().compute()
 
         assert client_mock.call_count == 1
@@ -184,8 +155,69 @@ class TestParquetDataSet:
     )
     def test_save_extra_params(self, s3_data_set, save_args):
         """Test overriding the default save arguments."""
+        s3_data_set._process_schema()
+        assert s3_data_set._save_args.get("schema") is None
+
         for key, value in save_args.items():
             assert s3_data_set._save_args[key] == value
 
         for key, value in s3_data_set.DEFAULT_SAVE_ARGS.items():
             assert s3_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"schema": {"col1": "[[int64]]", "col2": "string"}}],
+        indirect=True,
+    )
+    def test_save_extra_params_schema_dict(self, s3_data_set, save_args):
+        """Test setting the schema as dictionary of pyarrow column types
+        in save arguments."""
+
+        for key, value in save_args["schema"].items():
+            assert s3_data_set._save_args["schema"][key] == value
+
+        s3_data_set._process_schema()
+
+        for field in s3_data_set._save_args["schema"].values():
+            assert isinstance(field, pa.DataType)
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [
+            {
+                "schema": {
+                    "col1": "[[int64]]",
+                    "col2": "string",
+                    "col3": float,
+                    "col4": pa.int64(),
+                }
+            }
+        ],
+        indirect=True,
+    )
+    def test_save_extra_params_schema_dict_mixed_types(self, s3_data_set, save_args):
+        """Test setting the schema as dictionary of mixed value types
+        in save arguments."""
+
+        for key, value in save_args["schema"].items():
+            assert s3_data_set._save_args["schema"][key] == value
+
+        s3_data_set._process_schema()
+
+        for field in s3_data_set._save_args["schema"].values():
+            assert isinstance(field, pa.DataType)
+
+    @pytest.mark.parametrize(
+        "save_args",
+        [{"schema": "c1:[int64],c2:int64"}],
+        indirect=True,
+    )
+    def test_save_extra_params_schema_str_schema_fields(self, s3_data_set, save_args):
+        """Test setting the schema as string pyarrow schema (list of fields)
+        in save arguments."""
+
+        assert s3_data_set._save_args["schema"] == save_args["schema"]
+
+        s3_data_set._process_schema()
+
+        assert isinstance(s3_data_set._save_args["schema"], pa.Schema)

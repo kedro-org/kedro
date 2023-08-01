@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
@@ -37,7 +9,7 @@ from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pandas import ExcelDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
@@ -48,6 +20,17 @@ def filepath_excel(tmp_path):
 
 @pytest.fixture
 def excel_data_set(filepath_excel, load_args, save_args, fs_args):
+    return ExcelDataSet(
+        filepath=filepath_excel,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
+
+
+@pytest.fixture
+def excel_multisheet_data_set(filepath_excel, save_args, fs_args):
+    load_args = {"sheet_name": None}
     return ExcelDataSet(
         filepath=filepath_excel,
         load_args=load_args,
@@ -68,12 +51,30 @@ def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
+@pytest.fixture
+def another_dummy_dataframe():
+    return pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
+
+
 class TestExcelDataSet:
     def test_save_and_load(self, excel_data_set, dummy_dataframe):
         """Test saving and reloading the data set."""
         excel_data_set.save(dummy_dataframe)
         reloaded = excel_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+
+    def test_save_and_load_multiple_sheets(
+        self, excel_multisheet_data_set, dummy_dataframe, another_dummy_dataframe
+    ):
+        """Test saving and reloading the data set with multiple sheets."""
+        dummy_multisheet = {
+            "sheet 1": dummy_dataframe,
+            "sheet 2": another_dummy_dataframe,
+        }
+        excel_multisheet_data_set.save(dummy_multisheet)
+        reloaded = excel_multisheet_data_set.load()
+        assert_frame_equal(dummy_multisheet["sheet 1"], reloaded["sheet 1"])
+        assert_frame_equal(dummy_multisheet["sheet 2"], reloaded["sheet 2"])
 
     def test_exists(self, excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -113,8 +114,8 @@ class TestExcelDataSet:
 
         records = [r for r in caplog.records if r.levelname == "WARNING"]
         expected_log_message = (
-            f"Dropping `storage_options` for {filepath}, "
-            f"please specify them under `fs_args` or `credentials`."
+            f"Dropping 'storage_options' for {filepath}, "
+            f"please specify them under 'fs_args' or 'credentials'."
         )
         assert records[0].getMessage() == expected_log_message
         assert "storage_options" not in ds._save_args
@@ -123,7 +124,7 @@ class TestExcelDataSet:
     def test_load_missing_file(self, excel_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set ExcelDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             excel_data_set.load()
 
     @pytest.mark.parametrize(
@@ -199,7 +200,7 @@ class TestExcelDataSetVersioned:
     def test_no_versions(self, versioned_excel_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for ExcelDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_excel_data_set.load()
 
     def test_versioning_not_supported_in_append_mode(
@@ -208,8 +209,8 @@ class TestExcelDataSetVersioned:
         filepath = str(tmp_path / "test.xlsx")
         save_args = {"writer": {"mode": "a"}}
 
-        pattern = "`ExcelDataSet` doesn't support versioning in append mode."
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = "'ExcelDataSet' doesn't support versioning in append mode."
+        with pytest.raises(DatasetError, match=pattern):
             ExcelDataSet(
                 filepath=filepath,
                 version=Version(load_version, save_version),
@@ -227,10 +228,10 @@ class TestExcelDataSetVersioned:
         corresponding Excel file for a given save version already exists."""
         versioned_excel_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for ExcelDataSet\(.+\) must "
+            r"Save path \'.+\' for ExcelDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_excel_data_set.save(dummy_dataframe)
 
     @pytest.mark.parametrize(
@@ -245,16 +246,16 @@ class TestExcelDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save version `{0}` did not match load version `{1}` "
-            r"for ExcelDataSet\(.+\)".format(save_version, load_version)
+            rf"Save version '{save_version}' did not match load version "
+            rf"'{load_version}' for ExcelDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_excel_data_set.save(dummy_dataframe)
 
     def test_http_filesystem_no_versioning(self):
-        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+        pattern = "Versioning is not supported for HTTP protocols."
 
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             ExcelDataSet(
                 filepath="https://example.com/file.xlsx", version=Version(None, None)
             )
@@ -271,7 +272,7 @@ class TestExcelDataSetVersioned:
             f"(?=.*file with the same name already exists in the directory)"
             f"(?=.*{versioned_excel_data_set._filepath.parent.as_posix()})"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             versioned_excel_data_set.save(dummy_dataframe)
 
         # Remove non-versioned dataset and try again

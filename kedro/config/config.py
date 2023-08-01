@@ -1,37 +1,12 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files from specified paths.
 """
-from pathlib import Path
-from typing import Any, Dict, Iterable
+from __future__ import annotations
 
-from kedro.config import AbstractConfigLoader
+from pathlib import Path
+from typing import Any, Iterable
+
+from kedro.config.abstract_config import AbstractConfigLoader
 from kedro.config.common import _get_config_from_patterns, _remove_duplicates
 
 
@@ -78,22 +53,22 @@ class ConfigLoader(AbstractConfigLoader):
 
         >>> import logging.config
         >>> from kedro.config import ConfigLoader
+        >>> from kedro.framework.project import settings
         >>>
-        >>> conf_loader = ConfigLoader('conf', 'local')
+        >>> conf_path = str(project_path / settings.CONF_SOURCE)
+        >>> conf_loader = ConfigLoader(conf_source=conf_path, env="local")
         >>>
-        >>> conf_logging = conf_loader.get('logging*')
-        >>> logging.config.dictConfig(conf_logging)  # set logging conf
-        >>>
-        >>> conf_catalog = conf_loader.get('catalog*', 'catalog*/**')
-        >>> conf_params = conf_loader.get('**/parameters.yml')
+        >>> conf_catalog = conf_loader["catalog"]
+        >>> conf_params = conf_loader["parameters"]
 
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         conf_source: str,
         env: str = None,
-        runtime_params: Dict[str, Any] = None,
+        runtime_params: dict[str, Any] = None,
+        config_patterns: dict[str, list[str]] = None,
         *,
         base_env: str = "base",
         default_run_env: str = "local",
@@ -104,25 +79,51 @@ class ConfigLoader(AbstractConfigLoader):
             conf_source: Path to use as root directory for loading configuration.
             env: Environment that will take precedence over base.
             runtime_params: Extra parameters passed to a Kedro run.
+            config_patterns: Regex patterns that specify the naming convention for configuration
+                files so they can be loaded. Can be customised by supplying config_patterns as
+                in `CONFIG_LOADER_ARGS` in `settings.py`.
             base_env: Name of the base environment. Defaults to `"base"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths.
-            default_run_env: Name of the base environment. Defaults to `"local"`.
+            default_run_env: Name of the default run environment. Defaults to `"local"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths. Can be overriden by supplying the `env` argument.
         """
-        super().__init__(
-            conf_source=conf_source, env=env, runtime_params=runtime_params
-        )
         self.base_env = base_env
         self.default_run_env = default_run_env
+
+        self.config_patterns = {
+            "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
+            "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
+            "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
+        }
+        self.config_patterns.update(config_patterns or {})
+
+        super().__init__(
+            conf_source=conf_source,
+            env=env,
+            runtime_params=runtime_params,
+        )
+
+    def __getitem__(self, key):
+        # Allow bypassing of loading config from patterns if a key and value have been set
+        # explicitly on the ``ConfigLoader`` instance.
+        if key in self:
+            return super().__getitem__(key)
+        return self.get(*self.config_patterns[key])
+
+    def __repr__(self):  # pragma: no cover
+        return (
+            f"ConfigLoader(conf_source={self.conf_source}, env={self.env}, "
+            f"config_patterns={self.config_patterns})"
+        )
 
     @property
     def conf_paths(self):
         """Property method to return deduplicated configuration paths."""
         return _remove_duplicates(self._build_conf_paths())
 
-    def get(self, *patterns: str) -> Dict[str, Any]:
+    def get(self, *patterns: str) -> dict[str, Any]:  # type: ignore
         return _get_config_from_patterns(
             conf_paths=self.conf_paths, patterns=list(patterns)
         )

@@ -1,44 +1,16 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """Behave environment setup commands."""
-# pylint: disable=unused-argument
+# noqa: unused-argument
+from __future__ import annotations
 
 import os
 import shutil
-import sys
 import tempfile
 import venv
 from pathlib import Path
-from typing import Set
 
 from features.steps.sh_run import run
 
-_PATHS_TO_REMOVE = set()  # type: Set[Path]
+_PATHS_TO_REMOVE: set[Path] = set()
 
 FRESH_VENV_TAG = "fresh_venv"
 
@@ -78,23 +50,20 @@ def _setup_context_with_venv(context, venv_dir):
     # this is because exe resolution in subprocess doesn't respect a passed env
     if os.name == "posix":
         bin_dir = context.venv_dir / "bin"
-        path_sep = ":"
     else:
         bin_dir = context.venv_dir / "Scripts"
-        path_sep = ";"
     context.bin_dir = bin_dir
     context.pip = str(bin_dir / "pip")
     context.python = str(bin_dir / "python")
     context.kedro = str(bin_dir / "kedro")
-    context.requirements_path = Path("requirements.txt").resolve()
 
     # clone the environment, remove any condas and venvs and insert our venv
     context.env = os.environ.copy()
-    path = context.env["PATH"].split(path_sep)
+    path = context.env["PATH"].split(os.pathsep)
     path = [p for p in path if not (Path(p).parent / "pyvenv.cfg").is_file()]
     path = [p for p in path if not (Path(p).parent / "conda-meta").is_dir()]
     path = [str(bin_dir)] + path
-    context.env["PATH"] = path_sep.join(path)
+    context.env["PATH"] = os.pathsep.join(path)
 
     # Create an empty pip.conf file and point pip to it
     pip_conf_path = context.venv_dir / "pip.conf"
@@ -134,13 +103,15 @@ def _setup_minimal_env(context):
             "pip",
             "install",
             "-U",
-            "pip>=20.0",
-            "setuptools>=38.0",
+            # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
+            "pip>=21.2,<23.2; python_version < '3.8'",
+            "pip>=21.2; python_version >= '3.8'",
+            "setuptools>=65.5.1",
             "wheel",
-            ".",
         ],
         env=context.env,
     )
+    call([context.python, "-m", "pip", "install", "."], env=context.env)
     return context
 
 
@@ -149,18 +120,10 @@ def _install_project_requirements(context):
         Path(
             "kedro/templates/project/{{ cookiecutter.repo_name }}/src/requirements.txt"
         )
-        .read_text()
+        .read_text(encoding="utf-8")
         .splitlines()
     )
     install_reqs = [req for req in install_reqs if "{" not in req]
     install_reqs.append(".[pandas.CSVDataSet]")
-
-    # JupyterLab indirectly depends on pywin32 on Windows. Newer versions of pywin32
-    # (e.g. 3xx, to which jupyterlab~=3.0 defaults) have a bug that prevents
-    # JupyterLab from running, hence the version is forcefully set to 225.
-    # More details: https://github.com/mhammond/pywin32/issues/1431
-    if sys.platform.startswith("win"):
-        install_reqs.append("pywin32==225")
-
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

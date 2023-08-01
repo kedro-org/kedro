@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import re
 from functools import partial, update_wrapper, wraps
 from typing import Callable
@@ -58,11 +31,11 @@ def simple_tuple_node_list():
         (biconcat, ["A", "B"], "C"),
         (identity, "C", ["D", "E"]),
         (biconcat, ["H", "I"], ["J", "K"]),
-        (identity, "J", dict(result="K")),
-        (biconcat, ["J", "K"], dict(result="L")),
-        (identity, dict(input1="J"), "L"),
-        (identity, dict(input1="J"), ["L", "M"]),
-        (identity, dict(input1="J"), dict(result="K")),
+        (identity, "J", {"result": "K"}),
+        (biconcat, ["J", "K"], {"result": "L"}),
+        (identity, {"input1": "J"}, "L"),
+        (identity, {"input1": "J"}, ["L", "M"]),
+        (identity, {"input1": "J"}, {"result": "K"}),
         (constant_output, None, "M"),
         (biconcat, ["N", "O"], None),
         (lambda x: None, "F", "G"),
@@ -94,7 +67,7 @@ class TestValidNode:
             biconcat, inputs=["input1", "input2"], outputs="output", name="myname"
         )
         actual = dummy_node(input1="in1", input2="in2")
-        expected = dummy_node.run(dict(input1="in1", input2="in2"))
+        expected = dummy_node.run({"input1": "in1", "input2": "in2"})
         assert actual == expected
 
     def test_call_with_non_keyword_arguments(self):
@@ -107,14 +80,14 @@ class TestValidNode:
 
     def test_run_with_duplicate_inputs_list(self):
         dummy_node = node(func=biconcat, inputs=["input1", "input1"], outputs="output")
-        actual = dummy_node.run(dict(input1="in1"))
+        actual = dummy_node.run({"input1": "in1"})
         assert actual == {"output": "in1in1"}
 
     def test_run_with_duplicate_inputs_dict(self):
         dummy_node = node(
             func=biconcat, inputs={"input1": "in1", "input2": "in1"}, outputs="output"
         )
-        actual = dummy_node.run(dict(in1="hello"))
+        actual = dummy_node.run({"in1": "hello"})
         assert actual == {"output": "hellohello"}
 
     def test_no_input(self):
@@ -268,11 +241,11 @@ def no_input_or_output_node():
 
 
 def input_same_as_output_node():
-    return biconcat, ["A", "B"], dict(a="A")
+    return biconcat, ["A", "B"], {"a": "A"}
 
 
 def duplicate_output_dict_node():
-    return identity, "A", dict(a="A", b="A")
+    return identity, "A", {"a": "A", "b": "A"}
 
 
 def duplicate_output_list_node():
@@ -282,10 +255,10 @@ def duplicate_output_list_node():
 @pytest.mark.parametrize(
     "func, expected",
     [
-        (bad_input_type_node, r"`inputs` type must be one of "),
-        (bad_output_type_node, r"`outputs` type must be one of "),
+        (bad_input_type_node, r"'inputs' type must be one of "),
+        (bad_output_type_node, r"'outputs' type must be one of "),
         (bad_function_type_node, r"first argument must be a function"),
-        (no_input_or_output_node, r"it must have some `inputs` or `outputs`"),
+        (no_input_or_output_node, r"it must have some 'inputs' or 'outputs'"),
         (
             input_same_as_output_node,
             r"A node cannot have the same inputs and outputs: {\'A\'}",
@@ -293,13 +266,13 @@ def duplicate_output_list_node():
         (
             duplicate_output_dict_node,
             r"Failed to create node identity"
-            r"\(\[A\]\) -> \[A,A\] due to "
+            r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
         ),
         (
             duplicate_output_list_node,
             r"Failed to create node identity"
-            r"\(\[A\]\) -> \[A,A\] due to "
+            r"\(\[A\]\) -> \[A;A\] due to "
             r"duplicate output\(s\) {\'A\'}.",
         ),
     ],
@@ -327,7 +300,7 @@ def inconsistent_input_kwargs():
     return dummy_func_args, "A", "B"
 
 
-lambda_identity = lambda input1: input1  # noqa: disable=E731
+lambda_identity = lambda input1: input1  # noqa: disable=E731 # pylint: disable=C3001
 
 
 def lambda_inconsistent_input_size():
@@ -374,57 +347,17 @@ def test_bad_input(func, expected):
 def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):
-        return func(*[f"f({a})" for a in args], **kwargs)
+        return func(*(f"f({a})" for a in args), **kwargs)  # pragma: no cover
 
     return with_f
 
 
-def apply_g(func: Callable) -> Callable:
-    @wraps(func)
-    def with_g(*args, **kwargs):
-        return func(*[f"g({a})" for a in args], **kwargs)
-
-    return with_g
-
-
-def apply_h(func: Callable) -> Callable:
-    @wraps(func)
-    def with_h(*args, **kwargs):
-        return func(*[f"h({a})" for a in args], **kwargs)
-
-    return with_h
-
-
-def apply_ij(func: Callable) -> Callable:
-    @wraps(func)
-    def with_ij(*args, **kwargs):
-        return func(*[f"ij({a})" for a in args], **kwargs)
-
-    return with_ij
-
-
 @apply_f
 def decorated_identity(value):
-    return value
+    return value  # pragma: no cover
 
 
-class TestTagDecorator:
-    def test_apply_decorators(self):
-        old_node = node(apply_g(decorated_identity), "input", "output", name="node")
-        pattern = (
-            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
-            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html"
-        )
-        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
-            new_node = old_node.decorate(apply_h, apply_ij)
-        result = new_node.run(dict(input=1))
-
-        assert old_node.name == new_node.name
-        assert "output" in result
-        assert result["output"] == "f(g(ij(h(1))))"
-
+class TestTag:
     def test_tag_nodes(self):
         tagged_node = node(identity, "input", "output", tags=["hello"]).tag(["world"])
         assert "hello" in tagged_node.tags
@@ -435,15 +368,6 @@ class TestTagDecorator:
         tagged_node = node(identity, "input", "output", tags="hello").tag("world")
         assert "hello" in tagged_node.tags
         assert "world" in tagged_node.tags
-        assert len(tagged_node.tags) == 2
-
-    def test_tag_and_decorate(self):
-        tagged_node = node(identity, "input", "output", tags=["hello"])
-        tagged_node = tagged_node.decorate(apply_f)
-        tagged_node = tagged_node.tag(["world"])
-        assert "hello" in tagged_node.tags
-        assert "world" in tagged_node.tags
-        assert tagged_node.run(dict(input=1))["output"] == "f(1)"
 
 
 class TestNames:
@@ -502,7 +426,7 @@ class TestNames:
     def test_updated_partial_dict_inputs(self):
         n = node(
             update_wrapper(partial(biconcat, input1=["in1"]), biconcat),
-            dict(input2="in2"),
+            {"input2": "in2"},
             ["out"],
         )
         assert str(n) == "biconcat([in2]) -> [out]"

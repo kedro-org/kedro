@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import pickle
 from io import StringIO
 
@@ -32,44 +5,44 @@ import pytest
 import yaml
 
 from kedro.extras.datasets.pandas import CSVDataSet
-from kedro.io import CachedDataSet, DataCatalog, DataSetError, MemoryDataSet
+from kedro.io import CachedDataset, DataCatalog, DatasetError, MemoryDataset
 
 YML_CONFIG = """
 test_ds:
-  type: CachedDataSet
+  type: CachedDataset
   dataset:
-      type: kedro.extras.datasets.pandas.CSVDataSet
-      filepath: example.csv
+    type: kedro.extras.datasets.pandas.CSVDataSet
+    filepath: example.csv
 """
 
 YML_CONFIG_VERSIONED = """
 test_ds:
-  type: CachedDataSet
+  type: CachedDataset
   versioned: true
   dataset:
-      type: kedro.extras.datasets.pandas.CSVDataSet
-      filepath: example.csv
+    type: kedro.extras.datasets.pandas.CSVDataSet
+    filepath: example.csv
 """
 
 YML_CONFIG_VERSIONED_BAD = """
 test_ds:
-  type: CachedDataSet
+  type: CachedDataset
   dataset:
-      type: kedro.extras.datasets.pandas.CSVDataSet
-      filepath: example.csv
-      versioned: true
+    type: kedro.extras.datasets.pandas.CSVDataSet
+    filepath: example.csv
+    versioned: true
 """
 
 
 @pytest.fixture
 def cached_ds():
-    wrapped = MemoryDataSet()
-    return CachedDataSet(wrapped)
+    wrapped = MemoryDataset()
+    return CachedDataset(wrapped)
 
 
 class TestCachedDataset:
     def test_load_empty(self, cached_ds):
-        with pytest.raises(DataSetError, match=r"has not been saved yet"):
+        with pytest.raises(DatasetError, match=r"has not been saved yet"):
             _ = cached_ds.load()
 
     def test_save_load(self, cached_ds):
@@ -77,11 +50,11 @@ class TestCachedDataset:
         assert cached_ds.load() == 42
 
     def test_save_load_caching(self, mocker):
-        wrapped = MemoryDataSet(-42)
+        wrapped = MemoryDataset(-42)
         mocker.spy(wrapped, "load")
         mocker.spy(wrapped, "save")
 
-        cached_ds = CachedDataSet(wrapped)
+        cached_ds = CachedDataset(wrapped)
         mocker.spy(cached_ds._cache, "save")
         mocker.spy(cached_ds._cache, "load")
 
@@ -93,10 +66,10 @@ class TestCachedDataset:
         assert cached_ds._cache.save.call_count == 1  # pylint: disable=no-member
 
     def test_load_empty_cache(self, mocker):
-        wrapped = MemoryDataSet(-42)
+        wrapped = MemoryDataset(-42)
         mocker.spy(wrapped, "load")
 
-        cached_ds = CachedDataSet(wrapped)
+        cached_ds = CachedDataset(wrapped)
         mocker.spy(cached_ds._cache, "load")
 
         assert cached_ds.load() == -42
@@ -119,11 +92,11 @@ class TestCachedDataset:
     def test_bad_argument(self):
         with pytest.raises(
             ValueError,
-            match=r"The argument type of `dataset` "
+            match=r"The argument type of 'dataset' "
             r"should be either a dict/YAML representation "
             r"of the dataset, or the actual dataset object",
         ):
-            _ = CachedDataSet(dataset="BadArgument")
+            _ = CachedDataset(dataset="BadArgument")
 
     def test_config_good_version(self):
         config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED))
@@ -133,9 +106,9 @@ class TestCachedDataset:
     def test_config_bad_version(self):
         config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED_BAD))
         with pytest.raises(
-            DataSetError,
+            DatasetError,
             match=r"Cached datasets should specify that they are "
-            r"versioned in the `CachedDataSet`, not in the "
+            r"versioned in the 'CachedDataset', not in the "
             r"wrapped dataset",
         ):
             _ = DataCatalog.from_config(config, load_versions={"test_ds": "42"})
@@ -151,7 +124,7 @@ class TestCachedDataset:
 
     def test_str(self):
         assert (
-            str(CachedDataSet(MemoryDataSet(42))) == "CachedDataSet(cache={}, "
+            str(CachedDataset(MemoryDataset(42))) == "CachedDataset(cache={}, "
             "dataset={'data': <int>})"
         )
 
@@ -159,11 +132,11 @@ class TestCachedDataset:
         cached_ds.save(5)
         cached_ds.release()
         with pytest.raises(
-            DataSetError, match=r"Data for MemoryDataSet has not been saved yet"
+            DatasetError, match=r"Data for MemoryDataset has not been saved yet"
         ):
             _ = cached_ds.load()
 
     def test_copy_mode(self, mocker):
-        mocked_memory_data_set = mocker.patch("kedro.io.cached_dataset.MemoryDataSet")
-        CachedDataSet(MemoryDataSet(), copy_mode="assign")
-        mocked_memory_data_set.assert_called_once_with(copy_mode="assign")
+        mocked_memory_dataset = mocker.patch("kedro.io.cached_dataset.MemoryDataset")
+        CachedDataset(MemoryDataset(), copy_mode="assign")
+        mocked_memory_dataset.assert_called_once_with(copy_mode="assign")

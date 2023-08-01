@@ -1,36 +1,10 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import logging
 from pathlib import Path
 
 import pytest
 
-from kedro.framework.session.store import BaseSessionStore, ShelveStore
+from kedro.framework.session.shelvestore import ShelveStore
+from kedro.framework.session.store import BaseSessionStore
 
 FAKE_SESSION_ID = "fake_session_id"
 STORE_LOGGER_NAME = "kedro.framework.session.store"
@@ -38,38 +12,42 @@ STORE_LOGGER_NAME = "kedro.framework.session.store"
 
 class TestBaseStore:
     def test_init(self, caplog):
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
         path = "fake_path"
         store = BaseSessionStore(path, FAKE_SESSION_ID)
-        assert store == dict()
+        assert store == {}
         assert store._path == path
         assert store._session_id == FAKE_SESSION_ID
 
-        expected_log_messages = [
-            "`read()` not implemented for `BaseSessionStore`. Assuming empty store."
+        expected_debug_messages = [
+            "'read()' not implemented for 'BaseSessionStore'. Assuming empty store."
         ]
-        actual_log_messages = [
+        actual_debug_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.DEBUG
         ]
-        assert actual_log_messages == expected_log_messages
+        assert actual_debug_messages == expected_debug_messages
 
     def test_save(self, caplog):
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
         path = "fake_path"
         store = BaseSessionStore(path, FAKE_SESSION_ID)
         store.save()
-        assert store == dict()
+        assert store == {}
 
-        expected_log_messages = [
-            "`read()` not implemented for `BaseSessionStore`. Assuming empty store.",
-            "`save()` not implemented for `BaseSessionStore`. Skipping the step.",
+        expected_debug_messages = [
+            "'read()' not implemented for 'BaseSessionStore'. Assuming empty store.",
+            "'save()' not implemented for 'BaseSessionStore'. Skipping the step.",
         ]
-        actual_log_messages = [
+        actual_debug_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.DEBUG
         ]
-        assert actual_log_messages == expected_log_messages
+        assert actual_debug_messages == expected_debug_messages
 
 
 @pytest.fixture
@@ -80,7 +58,7 @@ def shelve_path(tmp_path):
 class TestShelveStore:
     def test_empty(self, shelve_path):
         shelve = ShelveStore(str(shelve_path), FAKE_SESSION_ID)
-        assert shelve == dict()
+        assert shelve == {}
         assert shelve._location == shelve_path / FAKE_SESSION_ID / "store"
         assert not shelve_path.exists()
 

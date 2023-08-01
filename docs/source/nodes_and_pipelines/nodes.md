@@ -274,7 +274,7 @@ class ChunkWiseCSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         buf = BytesIO()
         data.to_csv(path_or_buf=buf, **self._save_args)
 
-        with self._fs.open(save_path, mode="a+") as fs_file:
+        with self._fs.open(save_path, mode="ab") as fs_file:
             fs_file.write(buf.getvalue())
 ```
 </details>

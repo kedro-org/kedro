@@ -679,6 +679,9 @@ class TestOmegaConfigLoader:
             }
         }
         _write_yaml(base_params, param_config)
+        conf_original = OmegaConf.load(base_params)
+        # test_size should be calculated using custom resolver (x + 10)
+        assert conf_original["model_options"]["test_size"] == 20
         custom_resolvers = {
             "custom": lambda x: x + 20,
         }

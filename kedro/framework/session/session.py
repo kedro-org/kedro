@@ -16,7 +16,7 @@ from typing import Any, Iterable
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLoader
+from kedro.config import ConfigLoader, TemplatedConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools

@@ -343,7 +343,7 @@ class TestPartitionedDatasetLocal:
             f"`{path.as_posix()}` is not a well-formed versioned path ending with "
             f"`filename/timestamp/filename` (got `version/partition/file`)."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             pds.load()
 
     def test_no_partitions(self, tmpdir):

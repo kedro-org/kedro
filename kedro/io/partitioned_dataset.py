@@ -42,7 +42,7 @@ def _grandparent(path: str) -> str:
     grandparent = path_obj.parents[1]
     if grandparent.name != path_obj.name:
         last_three_parts = path_obj.relative_to(*path_obj.parts[:-3])
-        raise DataSetError(
+        raise DatasetError(
             f"`{path}` is not a well-formed versioned path ending with "
             f"`filename/timestamp/filename` (got `{last_three_parts}`)."
         )
@@ -450,7 +450,7 @@ class IncrementalDataset(PartitionedDataset):
                 This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
-            DataSetError: If versioning is enabled for the checkpoint dataset.
+            DatasetError: If versioning is enabled for the checkpoint dataset.
         """
 
         super().__init__(

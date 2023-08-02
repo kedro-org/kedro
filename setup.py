@@ -194,6 +194,7 @@ extras_require["test"] = [
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
     "scikit-learn>=1.0.2,<2",
     "scipy>=1.7.3",
+    "semver"
     "SQLAlchemy~=1.2",
     "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.9'",
     "tables~=3.6; platform_system != 'Windows'",

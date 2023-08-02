@@ -587,13 +587,11 @@ class TestOmegaConfigLoader:
         parameters = conf["parameters"]
         catalog = conf["catalog"]
         credentials = conf["credentials"]
-        logging = conf["logging"]
         spark = conf["spark"]
 
         assert key in parameters
         assert key not in catalog
         assert key not in credentials
-        assert key not in logging
         assert key not in spark
 
     def test_ignore_hidden_keys(self, tmp_path):

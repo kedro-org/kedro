@@ -1,3 +1,5 @@
+## How to contribute
+
 If you would like to help improve Kedro, here are some ways to contribute.
 
 |Activity|Description|
@@ -9,3 +11,12 @@ If you would like to help improve Kedro, here are some ways to contribute.
 |Contribute a fix or feature|If you're interested in contributing fixes to code or documentation, first read our [guidelines for contributing developers](https://docs.kedro.org/en/stable/contribution/developer_contributor_guidelines.html) for an explanation of how to get set up and the process you'll follow.  Once you are ready to contribute, a good place to start is to take a look at the `good first issues` and `help wanted issues` on [GitHub](https://github.com/kedro-org/kedro/issues).|
 |Contribute to the documentation|You can help us improve the [Kedro documentation online](https://docs.kedro.org/en/stable/). Send us feedback as a [GitHub issue](https://github.com/kedro-org/kedro/issues) or start a documentation discussion on [GitHub](https://github.com/kedro-org/kedro/discussions). You are also welcome to raise a PR with a bug fix or addition to the documentation. First read the guide [Contribute to the Kedro documentation](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide).
 
+## Which contributions are likely to be accepted?
+
+Dataset contributions to the [Kedro-Datasets](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) plugin are the most frequently accepted, since they do not require any changes to the framework itself. However, we do not discourage contributions to any of the other [Kedro-Plugins](https://github.com/kedro-org/kedro-plugins).
+
+Contributions based on existing issues from the Kedro team, or issues that the team has deemed useful, are likely to be accepted.
+
+Any contributions that affect fundamental changes to the Kedro Framework would require discussion first. In this case, we recommend opening an issue instead of a pull request.
+
+You can also make a contribution to [Awesome Kedro](https://github.com/kedro-org/awesome-kedro), our curated list of community content.

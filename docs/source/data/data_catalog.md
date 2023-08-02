@@ -1,6 +1,8 @@
 
 # Introduction to the Kedro Data Catalog
 
+TO REMOVE -- Diataxis: Explanation
+
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
 All supported data connectors are available in [`kedro-datasets`](/kedro_datasets).

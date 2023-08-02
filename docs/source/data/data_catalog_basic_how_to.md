@@ -1,7 +1,5 @@
 # Data Catalog how to guide
-
-
-TO DO: Revise any explanations where possible to make it more hands on/task based
+TO REMOVE -- Diataxis: How to but there is some explanation and it would be ideal to make this more task-based where possible.
 
 ## How to version datasets and ML models
 

@@ -1,5 +1,7 @@
 # Advanced: Access the Data Catalog in code
 
+TO REMOVE -- Diataxis: How to
+
 The code API allows you to:
 
 * configure data sources in code

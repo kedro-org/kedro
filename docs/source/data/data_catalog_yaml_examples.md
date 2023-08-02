@@ -1,5 +1,9 @@
 # Data Catalog YAML examples
 
+TO REMOVE -- Diataxis: How to guide (code example)
+
+TO DO: Add a set of anchor links
+
 You can configure your datasets in a YAML configuration file, `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
 Here are some examples of data configuration in a `catalog.yml`:

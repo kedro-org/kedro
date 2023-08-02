@@ -144,6 +144,7 @@ extras_require["test"] = [
     "coverage[toml]",
     "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
     "delta-spark>=1.2.1; python_version >= '3.11'",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
+    "delta-spark~=1.2.1; python_version < '3.11'",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2021.4, <=2023.1; python_version == '3.7'",

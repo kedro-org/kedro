@@ -5,6 +5,8 @@ authors:
   given-names: Sajid
 - family-names: Chan
   given-names: Nok Lam
+- family-names: Couto
+  given-names: Laura
 - family-names: Dada
   given-names: Yetunde
 - family-names: Danov
@@ -13,6 +15,8 @@ authors:
   given-names: Deepyaman
 - family-names: DeBold
   given-names: Tynan
+- family-names: Gundaniya
+  given-names: Jitendra
 - family-names: Holzer
   given-names: Jannic
 - family-names: Kaiser
@@ -33,6 +37,8 @@ authors:
   given-names: Antony
 - family-names: Nguyen
   given-names: Huong
+- family-names: Nikolic
+  given-names: Vladimir
 - family-names: Okwa
   given-names: Nero
 - family-names: Cano Rodríguez
@@ -40,11 +46,13 @@ authors:
   orcid: https://orcid.org/0000-0002-2187-161X
 - family-names: Schwarzmann
   given-names: Joel
+- family-names: Sorokin
+  given-names: Dmitry
 - family-names: Stichbury
   given-names: Jo
 - family-names: Theisen
   given-names: Merel
 title: Kedro
-version: 0.18.11
-date-released: 2023-07-03
+version: 0.18.12
+date-released: 2023-07-31
 url: https://github.com/kedro-org/kedro

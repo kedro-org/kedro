@@ -168,7 +168,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
         }
 
     @staticmethod
-    def _get_spark(): # noqa
+    def _get_spark():  # noqa
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:

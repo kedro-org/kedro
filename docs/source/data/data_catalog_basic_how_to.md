@@ -85,7 +85,7 @@ my_gcp_credentials:
   id_token: key
 ```
 
-In the example above, the `catalog.yml` file contains references to credentials keys `dev_s3` and `scooters_credentials`. This means that when it instantiates the `motorbikes` dataset, for example, the `DataCatalog` will attempt to read top-level key `dev_s3` from the received `credentials` dictionary, and then will pass its values into the dataset `__init__` as a `credentials` argument. 
+In the example above, the `catalog.yml` file contains references to credentials keys `dev_s3` and `scooters_credentials`. This means that when it instantiates the `motorbikes` dataset, for example, the `DataCatalog` will attempt to read top-level key `dev_s3` from the received `credentials` dictionary, and then will pass its values into the dataset `__init__` as a `credentials` argument.
 
 
 ## How to read the same file using two different dataset implementations
@@ -126,5 +126,3 @@ In this example, Kedro understands that `my_dataframe` is the same dataset in it
 
 In the pipeline, Kedro uses the `spark.SparkDataSet` implementation for saving and `pandas.ParquetDataSet`
 for loading, so the first node should output a `pyspark.sql.DataFrame`, while the second node would receive a `pandas.Dataframe`.
-
-

@@ -236,5 +236,3 @@ io.save("test_data_set", data1)  # emits a UserWarning due to version inconsiste
 # file does not exist
 reloaded = io.load("test_data_set")
 ```
-
-

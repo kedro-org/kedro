@@ -11,6 +11,7 @@
 # Upcoming Release 0.18.13
 
 ## Major features and improvements
+* Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
 
 ## Bug fixes and other changes
 

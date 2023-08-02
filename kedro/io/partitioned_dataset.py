@@ -36,6 +36,7 @@ S3_PROTOCOLS = ("s3", "s3a", "s3n")
 PartitionedDataSet: type[PartitionedDataset]
 IncrementalDataSet: type[IncrementalDataset]
 
+
 def _grandparent(path: str) -> str:
     path_obj = PurePosixPath(path)
     grandparent = path_obj.parents[1]

@@ -281,10 +281,10 @@ class TestIncrementalDatasetLocal:
         mock_ts = mocker.patch(
             "kedro.io.core.generate_timestamp", return_value=save_version
         )
-        IncrementalDataSet(str(tmp_path), dataset_config).save(partitioned_data_pandas)
+        IncrementalDataset(str(tmp_path), dataset_config).save(partitioned_data_pandas)
         mock_ts.assert_called_once()
 
-        dataset = IncrementalDataSet(
+        dataset = IncrementalDataset(
             str(tmp_path), dataset_config, filename_suffix=suffix
         )
         loaded_partitions = dataset.load()
@@ -312,7 +312,7 @@ class TestIncrementalDatasetLocal:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("content")
 
-        dataset = IncrementalDataSet(
+        dataset = IncrementalDataset(
             str(local_dir / "path/to/folder"),
             {"type": "pandas.CSVDataSet", "versioned": True},
         )
@@ -321,7 +321,7 @@ class TestIncrementalDatasetLocal:
             f"`{path.as_posix()}` is not a well-formed versioned path ending with "
             f"`filename/timestamp/filename` (got `version/partition/file`)."
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             dataset.load()
 
     @pytest.mark.parametrize(

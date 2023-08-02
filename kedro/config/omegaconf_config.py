@@ -73,7 +73,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         conf_source: str,
         env: str = None,
@@ -109,9 +109,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         }
         self.config_patterns.update(config_patterns or {})
 
-        # In the first iteration of the OmegaConfigLoader we'll keep the resolver turned-off.
-        # It's easier to introduce them step by step, but removing them would be a breaking change.
-        self._clear_omegaconf_resolvers()
+        # Deactivate oc.env built-in resolver for OmegaConf
+        OmegaConf.clear_resolver("oc.env")
 
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
@@ -207,7 +206,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             f"config_patterns={self.config_patterns})"
         )
 
-    def load_and_merge_dir_config(  # pylint: disable=too-many-arguments
+    def load_and_merge_dir_config(  # noqa: too-many-arguments
         self,
         conf_path: str,
         patterns: Iterable[str],
@@ -234,7 +233,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             Resulting configuration dictionary.
 
         """
-        # pylint: disable=too-many-locals
+        # noqa: too-many-locals
 
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
@@ -320,7 +319,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
                 if overlapping_keys:
                     sorted_keys = ", ".join(sorted(overlapping_keys))
-                    if len(sorted_keys) > 100:
+                    if len(sorted_keys) > 100:  # noqa: PLR2004
                         sorted_keys = sorted_keys[:100] + "..."
                     duplicates.append(
                         f"Duplicate keys found in {filepath1} and {filepath2}: {sorted_keys}"
@@ -345,14 +344,3 @@ class OmegaConfigLoader(AbstractConfigLoader):
             OmegaConf.clear_resolver("oc.env")
         else:
             OmegaConf.resolve(config)
-
-    @staticmethod
-    def _clear_omegaconf_resolvers():
-        """Clear the built-in OmegaConf resolvers."""
-        OmegaConf.clear_resolver("oc.env")
-        OmegaConf.clear_resolver("oc.create")
-        OmegaConf.clear_resolver("oc.deprecated")
-        OmegaConf.clear_resolver("oc.decode")
-        OmegaConf.clear_resolver("oc.select")
-        OmegaConf.clear_resolver("oc.dict.keys")
-        OmegaConf.clear_resolver("oc.dict.values")

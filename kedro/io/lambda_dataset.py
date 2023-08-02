@@ -10,7 +10,7 @@ from typing import Any, Callable
 from kedro.io.core import AbstractDataSet, DatasetError
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-LambdaDataSet: AbstractDataSet
+LambdaDataSet: type[LambdaDataset]
 
 
 class LambdaDataset(AbstractDataSet):
@@ -80,8 +80,7 @@ class LambdaDataset(AbstractDataSet):
         else:
             self.__release()
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         load: Callable[[], Any] | None,
         save: Callable[[Any], None] | None,

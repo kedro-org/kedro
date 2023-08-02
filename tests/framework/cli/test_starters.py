@@ -17,7 +17,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
 )
 
-FILES_IN_TEMPLATE = 31
+FILES_IN_TEMPLATE = 30
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def _make_cli_prompt_input(project_name="", repo_name="", python_package=""):
     return "\n".join([project_name, repo_name, python_package])
 
 
-# pylint: disable=too-many-arguments
+# noqa: too-many-arguments
 def _assert_template_ok(
     result,
     project_name="New Kedro Project",

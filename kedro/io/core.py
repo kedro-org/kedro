@@ -30,9 +30,9 @@ PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-DataSetError: type[Exception]
-DataSetNotFoundError: type[DatasetError]
-DataSetAlreadyExistsError: type[DatasetError]
+DataSetError: type[DatasetError]
+DataSetNotFoundError: type[DatasetNotFoundError]
+DataSetAlreadyExistsError: type[DatasetAlreadyExistsError]
 
 
 class DatasetError(Exception):
@@ -580,7 +580,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
     @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
-    def _fetch_latest_save_version(self) -> str:  # pylint: disable=no-self-use
+    def _fetch_latest_save_version(self) -> str:  # noqa: no-self-use
         """Generate and cache the current save version"""
         return generate_timestamp()
 
@@ -627,7 +627,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
-    def load(self) -> _DO:  # pylint: disable=useless-parent-delegation
+    def load(self) -> _DO:  # noqa: useless-parent-delegation
         return super().load()
 
     def save(self, data: _DI) -> None:

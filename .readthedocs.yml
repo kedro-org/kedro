@@ -36,4 +36,4 @@ python:
       path: .
       extra_requirements:
         - docs
-    - requirements: test_requirements.txt
+        - test

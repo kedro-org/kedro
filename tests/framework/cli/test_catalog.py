@@ -30,6 +30,45 @@ def mock_pipelines(mocker):
     return mocker.patch("kedro.framework.cli.catalog.pipelines", dummy_pipelines)
 
 
+@pytest.fixture
+def fake_catalog_config():
+    config = {
+        "parquet_{factory_pattern}": {
+            "type": "pandas.ParquetDataSet",
+            "filepath": "test.pq",
+        },
+        "csv_{factory_pattern}": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
+    }
+    return config
+
+
+@pytest.fixture
+def fake_catalog_with_overlapping_factories():
+    config = {
+        "an_example_dataset": {
+            "type": "pandas.CSVDataSet",
+            "filepath": "dummy_filepath",
+        },
+        "an_example_{placeholder}": {
+            "type": "dummy_type",
+            "filepath": "dummy_filepath",
+        },
+        "an_example_{place}_{holder}": {
+            "type": "dummy_type",
+            "filepath": "dummy_filepath",
+        },
+        "on_{example_placeholder}": {
+            "type": "dummy_type",
+            "filepath": "dummy_filepath",
+        },
+        "an_{example_placeholder}": {
+            "type": "dummy_type",
+            "filepath": "dummy_filepath",
+        },
+    }
+    return config
+
+
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
 )
@@ -143,6 +182,47 @@ class TestCatalogListCommand:
                 "Datasets mentioned in pipeline": {
                     "CSVDataSet": ["some_dataset"],
                     "DefaultDataset": ["intermediate"],
+                }
+            }
+        }
+        key = f"Datasets in '{PIPELINE_NAME}' pipeline"
+        assert yaml_dump_mock.call_count == 1
+        assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
+
+    def test_list_factory_generated_datasets(
+        self,
+        fake_project_cli,
+        fake_metadata,
+        fake_load_context,
+        mocker,
+        mock_pipelines,
+        fake_catalog_config,
+    ):
+        """Test that datasets generated from factory patterns in the catalog
+        are resolved correctly under the correct dataset classes.
+        """
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        mocked_context.catalog = DataCatalog.from_config(fake_catalog_config)
+        mocker.patch.object(
+            mock_pipelines[PIPELINE_NAME],
+            "data_sets",
+            return_value=mocked_context.catalog._data_sets.keys()
+            | {"csv_example", "parquet_example"},
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["catalog", "list"],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        expected_dict = {
+            f"Datasets in '{PIPELINE_NAME}' pipeline": {
+                "Datasets generated from factories": {
+                    "pandas.CSVDataSet": ["csv_example"],
+                    "pandas.ParquetDataSet": ["parquet_example"],
                 }
             }
         }
@@ -307,3 +387,60 @@ class TestCatalogCreateCommand:
 
         assert result.exit_code
         assert "Unable to instantiate Kedro session" in result.output
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
+)
+def test_rank_catalog_factories(
+    fake_project_cli,
+    fake_metadata,
+    mocker,
+    fake_load_context,
+    fake_catalog_with_overlapping_factories,
+):
+    yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    mocked_context = fake_load_context.return_value
+    mocked_context.catalog = DataCatalog.from_config(
+        fake_catalog_with_overlapping_factories
+    )
+
+    result = CliRunner().invoke(
+        fake_project_cli, ["catalog", "rank"], obj=fake_metadata
+    )
+    assert not result.exit_code
+
+    expected_patterns_sorted = [
+        "an_example_{place}_{holder}",
+        "an_example_{placeholder}",
+        "an_{example_placeholder}",
+        "on_{example_placeholder}",
+    ]
+
+    assert yaml_dump_mock.call_count == 1
+    assert yaml_dump_mock.call_args[0][0] == expected_patterns_sorted
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project",
+    "fake_load_context",
+)
+def test_rank_catalog_factories_with_no_factories(
+    fake_project_cli, fake_metadata, fake_load_context
+):
+    mocked_context = fake_load_context.return_value
+
+    catalog_data_sets = {
+        "iris_data": CSVDataSet("test.csv"),
+        "intermediate": MemoryDataset(),
+        "not_used": CSVDataSet("test2.csv"),
+    }
+    mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+
+    result = CliRunner().invoke(
+        fake_project_cli, ["catalog", "rank"], obj=fake_metadata
+    )
+
+    assert not result.exit_code
+    expected_output = "There are no dataset factories in the catalog."
+    assert expected_output in result.output

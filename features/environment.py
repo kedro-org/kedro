@@ -1,5 +1,5 @@
 """Behave environment setup commands."""
-# pylint: disable=unused-argument
+# noqa: unused-argument
 from __future__ import annotations
 
 import os
@@ -56,7 +56,6 @@ def _setup_context_with_venv(context, venv_dir):
     context.pip = str(bin_dir / "pip")
     context.python = str(bin_dir / "python")
     context.kedro = str(bin_dir / "kedro")
-    context.requirements_path = Path("dependency/requirements.txt").resolve()
 
     # clone the environment, remove any condas and venvs and insert our venv
     context.env = os.environ.copy()
@@ -104,7 +103,9 @@ def _setup_minimal_env(context):
             "pip",
             "install",
             "-U",
-            "pip>=21.2",
+            # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
+            "pip>=21.2,<23.2; python_version < '3.8'",
+            "pip>=21.2; python_version >= '3.8'",
             "setuptools>=65.5.1",
             "wheel",
         ],

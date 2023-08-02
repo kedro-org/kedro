@@ -143,7 +143,7 @@ extras_require["test"] = [
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
     "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
-    "delta-spark>=1.2.1; python_version >= '3.11'=1.2.1",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
+    "delta-spark>=1.2.1; python_version >= '3.11'",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2021.4, <=2023.1; python_version == '3.7'",
@@ -162,7 +162,7 @@ extras_require["test"] = [
     "jupyter~=1.0",
     "lxml~=4.6",
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
-    "matplotlib>=3.5, <3.6; python_version >= '3.10'<3.6; python_version == '3.10'",
+    "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
     "moto==1.3.7; python_version < '3.10'",
     "moto==3.0.4; python_version == '3.10'",

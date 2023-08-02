@@ -312,7 +312,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def _register_new_resolvers(resolvers: dict[str, Callable]):
         """Register custom resolvers"""
         for name, resolver in resolvers.items():
-            if not OmegaConf.has_resolver("name"):
+            if not OmegaConf.has_resolver(name):
+                msg = f"Registering new custom resolver: {name}"
+                _config_logger.debug(msg)
                 OmegaConf.register_new_resolver(name=name, resolver=resolver)
 
     @staticmethod

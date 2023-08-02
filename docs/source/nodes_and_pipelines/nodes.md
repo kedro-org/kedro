@@ -200,7 +200,7 @@ To use generators, we will do three things:
 
 
 
-### Use Generators as Inputs
+### Use Generators as Kedro Node Inputs
 Thanks to `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
 
 You need to update your `catalog.yml` as follow:
@@ -220,7 +220,7 @@ X_train_chunk:
     mode: "a+" # append
 ```
 
-### Use Generators as Outputs
+### Use Generators as Kedro Node Outputs
 To save data lazily, you will need to create a custom dataset.
 
 

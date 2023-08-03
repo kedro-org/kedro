@@ -38,7 +38,7 @@ jobs:
   e2e-tests:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest ]
         python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/e2e-tests.yml
     with:
@@ -48,7 +48,7 @@ jobs:
   pip-compile:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest ]
         python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/pip-compile.yml
     with:

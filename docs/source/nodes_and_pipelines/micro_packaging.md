@@ -4,7 +4,11 @@ Micro-packaging allows users to share Kedro micro-packages across codebases, org
 
 ## Package a micro-package
 
-You can package a micro-package by executing: `kedro micropkg package <micropkg_name>`
+You can package a micro-package by executing: `kedro micropkg package <micropkg_name>`.
+
+`<micropkg_name>` should be a Python module path like what would be used in an `import` statement, for example
+
+`kedro micropkg package pipelines.data_processing`
 
 * This will generate a new [source distribution](https://docs.python.org/3/distutils/sourcedist.html) for this micro-package.
 * By default, the tar file will be saved into `dist/` directory inside your project.

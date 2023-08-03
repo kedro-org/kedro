@@ -142,6 +142,7 @@ type_targets = {
         "PluginManager",
         "_DI",
         "_DO",
+        "deltalake.table.Metadata",
         # The statements below were added after subclassing UserDict in AbstractConfigLoader.
         "None.  Remove all items from D.",
         "a shallow copy of D",

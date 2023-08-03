@@ -1,5 +1,6 @@
 """A collection of CLI commands for working with Kedro catalog."""
 from collections import defaultdict
+from itertools import chain
 
 import click
 import yaml
@@ -27,7 +28,7 @@ def catalog():
     """Commands for working with catalog."""
 
 
-# noqa: too-many-locals
+# noqa: too-many-locals,protected-access
 @catalog.command("list")
 @env_option
 @click.option(
@@ -45,12 +46,15 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     title = "Datasets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
     mentioned = "Datasets mentioned in pipeline"
+    factories = "Datasets generated from factories"
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
+
     try:
-        datasets_meta = context.catalog._data_sets  # noqa: protected-access
-        catalog_ds = set(context.catalog.list())
+        data_catalog = context.catalog
+        datasets_meta = data_catalog._data_sets
+        catalog_ds = set(data_catalog.list())
     except Exception as exc:
         raise KedroCliError(
             f"Unable to instantiate Kedro Catalog.\nError: {exc}"
@@ -73,15 +77,30 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         default_ds = pipeline_ds - catalog_ds
         used_ds = catalog_ds - unused_ds
 
+        # resolve any factory datasets in the pipeline
+        factory_ds_by_type = defaultdict(list)
+        for ds_name in default_ds:
+            matched_pattern = data_catalog._match_pattern(
+                data_catalog._dataset_patterns, ds_name
+            )
+            if matched_pattern:
+                ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
+                factory_ds_by_type[ds_config["type"]].append(ds_name)
+
+        default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
+
         unused_by_type = _map_type_to_datasets(unused_ds, datasets_meta)
         used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
 
         if default_ds:
             used_by_type["DefaultDataset"].extend(default_ds)
 
-        data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
+        data = (
+            (mentioned, dict(used_by_type)),
+            (factories, dict(factory_ds_by_type)),
+            (not_mentioned, dict(unused_by_type)),
+        )
         result[title.format(pipe)] = {key: value for key, value in data if value}
-
     secho(yaml.dump(result))
 
 
@@ -174,3 +193,18 @@ def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
     catalog_path.parent.mkdir(exist_ok=True)
     with catalog_path.open(mode="w") as catalog_file:
         yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)
+
+
+@catalog.command("rank")
+@env_option
+@click.pass_obj
+def rank_catalog_factories(metadata: ProjectMetadata, env):
+    """List all dataset factories in the catalog, ranked by priority by which they are matched."""
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    catalog_factories = context.catalog._dataset_patterns
+    if catalog_factories:
+        click.echo(yaml.dump(list(catalog_factories.keys())))
+    else:
+        click.echo("There are no dataset factories in the catalog.")

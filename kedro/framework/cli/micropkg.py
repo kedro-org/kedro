@@ -1,5 +1,5 @@
 """A collection of CLI commands for working with Kedro micro-packages."""
-# ruff: noqa: I001 # https://github.com/kedro-org/kedro/pull/2634
+# noqa: I001 # https://github.com/kedro-org/kedro/pull/2634
 from __future__ import annotations
 
 import re
@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator, List, Tuple, Union
 
 import click
-from build.util import project_wheel_metadata
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
 from rope.base.project import Project
@@ -21,6 +20,7 @@ from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
 from setuptools.discovery import FlatLayoutPackageFinder
 
+from build.util import project_wheel_metadata
 from kedro.framework.cli.pipeline import (
     _assert_pkg_name_ok,
     _check_pipeline_name,

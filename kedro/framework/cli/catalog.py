@@ -231,30 +231,9 @@ def resolve_patterns(metadata: ProjectMetadata, pipeline, env):
     data_catalog = context.catalog
     catalog_config = data_catalog._raw_config
 
-    # datasets meta is a dict of {ds_name : AbstractDataSet()}
-    # how to unpack ADS into dict?
-    # or just read the catalog file? but then envs,,?
-
-    # A: recreate functionality of context from raw catalog file to get config
-    # B: Hijack catalog to store config  ** <- we are here **
-    # C: Reverse engineer ADS into config
-
-    # Next, strip out all the patterns from the catalog config
-    # config_copy = copy(catalog_config)
-
-    # for ds_name, ds_config in config_copy.items():
-    #     if data_catalog._is_pattern(ds_name):
-    #         del catalog_config[ds_name]
-
-    # Now can we make this more efficient?
-
     for ds_name in list(catalog_config.keys()):
         if data_catalog._is_pattern(ds_name):
             del catalog_config[ds_name]
-
-    # I think that looks better
-
-    # Next step, resolving pipeline datasets with patterns:
 
     target_pipelines = pipeline or pipelines.keys()
 

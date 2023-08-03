@@ -5,7 +5,7 @@ from setuptools import setup
 
 # at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
 PANDAS = "pandas~=1.3"
-SPARK = "pyspark>=2.2, <4.0"
+SPARK = "pyspark>=2.2, <3.4"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
 

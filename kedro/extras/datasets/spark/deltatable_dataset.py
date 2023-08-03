@@ -84,7 +84,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         self._filepath = PurePosixPath(filepath)
 
     @staticmethod
-    def _get_spark() -> Optional[pyspark.sql.SparkSession]:
+    def _get_spark():
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DeltaTable:
@@ -93,7 +93,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
 
     def _save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
-    
+
     def _exists(self) -> bool:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 

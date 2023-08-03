@@ -84,7 +84,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         self._filepath = PurePosixPath(filepath)
 
     @staticmethod
-    def _get_spark():
+    def _get_spark() -> Optional[pyspark.sql.SparkSession]:
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DeltaTable:
@@ -93,14 +93,19 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
 
     def _save(self, data: None) -> NoReturn:
         raise DatasetError(f"{self.__class__.__name__} is a read only dataset type")
-
+    
     def _exists(self) -> bool:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))
 
         try:
             self._get_spark().read.load(path=load_path, format="delta")
         except AnalysisException as exception:
-            if "is not a Delta table" in exception.desc:
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = (
+                exception.desc if hasattr(exception, "desc") else exception.message
+            )
+
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
 

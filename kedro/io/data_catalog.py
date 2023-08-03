@@ -148,6 +148,7 @@ class DataCatalog:
         dataset_patterns: Patterns = None,
         load_versions: dict[str, str] = None,
         save_version: str = None,
+        raw_config: dict[str, Any] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -191,6 +192,9 @@ class DataCatalog:
         self._dataset_patterns = dataset_patterns or {}
         self._load_versions = load_versions or {}
         self._save_version = save_version
+
+        # trial
+        self._raw_config = raw_config
 
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -318,6 +322,7 @@ class DataCatalog:
             dataset_patterns=sorted_patterns,
             load_versions=load_versions,
             save_version=save_version,
+            raw_config=catalog,
         )
 
     @staticmethod

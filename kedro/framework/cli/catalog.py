@@ -208,3 +208,72 @@ def rank_catalog_factories(metadata: ProjectMetadata, env):
         click.echo(yaml.dump(list(catalog_factories.keys())))
     else:
         click.echo("There are no dataset factories in the catalog.")
+
+
+@catalog.command("resolve")
+@env_option
+@click.option(
+    "--pipeline",
+    "-p",
+    type=str,
+    default="",
+    help="Name of the modular pipeline to resolve. If not set, "
+    "the project pipeline is run by default.",
+    callback=split_string,
+)
+@click.pass_obj
+def resolve_patterns(metadata: ProjectMetadata, pipeline, env):
+    """Resolve pipeline datasets with catalog factories."""
+
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    data_catalog = context.catalog
+    catalog_config = data_catalog._raw_config
+
+    # datasets meta is a dict of {ds_name : AbstractDataSet()}
+    # how to unpack ADS into dict?
+    # or just read the catalog file? but then envs,,?
+
+    # A: recreate functionality of context from raw catalog file to get config
+    # B: Hijack catalog to store config  ** <- we are here **
+    # C: Reverse engineer ADS into config
+
+    # Next, strip out all the patterns from the catalog config
+    # config_copy = copy(catalog_config)
+
+    # for ds_name, ds_config in config_copy.items():
+    #     if data_catalog._is_pattern(ds_name):
+    #         del catalog_config[ds_name]
+
+    # Now can we make this more efficient?
+
+    for ds_name in list(catalog_config.keys()):
+        if data_catalog._is_pattern(ds_name):
+            del catalog_config[ds_name]
+
+    # I think that looks better
+
+    # Next step, resolving pipeline datasets with patterns:
+
+    target_pipelines = pipeline or pipelines.keys()
+
+    for pipe in target_pipelines:
+        pl_obj = pipelines.get(pipe)
+        if pl_obj:
+            pipeline_ds = pl_obj.data_sets()
+        else:
+            existing_pls = ", ".join(sorted(pipelines.keys()))
+            raise KedroCliError(
+                f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
+            )
+
+        for ds_name in pipeline_ds:
+            matched_pattern = data_catalog._match_pattern(
+                data_catalog._dataset_patterns, ds_name
+            )
+            if matched_pattern:
+                ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
+                catalog_config[ds_name] = ds_config
+
+    secho(yaml.dump(catalog_config))

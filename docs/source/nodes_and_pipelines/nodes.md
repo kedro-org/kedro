@@ -189,89 +189,75 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 The following code uses a `pandas chunksize` generator to process large datasets within the [`pandas-iris` starter](../kedro_project_setup/starters.md).
 
 
-### Set up the pandas-iris project
-  First set up a project by following the [get started guide](../get_started/new_project.md#create-a-new-project-containing-example-code) to create a Kedro project with the `pandas-iris` starter example code.
-
-
-To use generators, we will do three things:
-- change `return` to `yield`
-- Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataSet`
-- Update `catalog.yml` to use the `ChunkWiseCSVDataSet`
-
+### Set up the project
+First set up a project by following the [get started guide](../get_started/new_project.md#create-a-new-project-containing-example-code) to create a Kedro project with the `pandas-iris` starter example code.
 
 
 ### Use Generators as Kedro Node Inputs
 Thanks to `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
 
 You need to update your `catalog.yml` as follow:
-```yaml
-example_iris_data:
-  type: pandas.CSVDataSet
-  filepath: data/01_raw/iris.csv
-  load_args:
-    chunksize: 1000
-
-X_train_chunk:
-  type: chunk_process.extras.datasets.chunkwise.ChunkWiseCSVDataSet
-  filepath: data/02_intermediate/iris.csv
-  load_args:
-    chunksize: 1000
-  save_args:
-    mode: "a+" # append
+```diff
++ X_test:
++  type: pandas.CSVDataSet
++  filepath: data/05_model_input/X_test.csv
++  load_args:
++    chunksize: 10
 ```
 
 ### Use Generators as Kedro Node Outputs
-To save data lazily, you will need to create a custom dataset.
+To use generator to save data lazily, you need do three things:
+- Update the `make_prediction` definition to use `return` instead of  `yield`
+- Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataset`
+- Update `catalog.yml` to use the `ChunkWiseCSVDataset`
 
+You can copy the following code to `pipeline.py`, the main change is using a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
+This `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that append data instead of overwriting.
 
- This `ChunkWise` is a variant of the `pandas.CSVDataSet` where the main change is to the `_save` method which should save the data in append-or-create mode, `ab+` (append, binary or create mode).
-
-<details>
-<summary><b>Click to expand</b></summary>
 
 ```python
-from copy import deepcopy
-from io import BytesIO
-from pathlib import PurePosixPath
-from typing import Any, Dict
-
-import fsspec
 import pandas as pd
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
-    Version,
     get_filepath_str,
-    get_protocol_and_path,
 )
-from kedro.extras.datasets.pandas import CSVDataSet
+from kedro.extras.datasets.pandas import CSVDataset
 
-class ChunkWiseCSVDataSet(CSVDataSet):
-    """``ChunkWiseCSVDataSet`` loads/saves data from/to a CSV file using an underlying
+
+class ChunkWiseCSVDataset(CSVDataset):
+    """``ChunkWiseCSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem. It uses pandas to handle the CSV file.
     """
+    _overwrite = True
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        buf = BytesIO()
-        data.to_csv(path_or_buf=buf, **self._save_args)
-
-        with self._fs.open(save_path, mode="ab+") as fs_file:
-            fs_file.write(buf.getvalue())
+        # Save the header for the first batch
+        if self._overwrite:
+            data.to_csv(save_path, index=False, mode="w")
+            self._overwrite = False
+        else:
+            data.to_csv(save_path, index=False, header=False, mode="a")
 ```
-</details>
 
-After that, you need to make two changes:
-- Update the definition of `split_data` so it use `yield` instead of `return`
+In addition, you need to update the `catalog.yml` to use this new dataset.
 
-Run `kedro run` in your terminal, you should be able to see logs similar to this
+```diff
++ y_pred:
++  type: kedro_generator_example.chunkwise.ChunkWiseCSVDataSet
++  filepath: data/07_model_output/y_pred.csv
+```
 
-
-You will see the repeat logs indicating the data is saved as multiple chunks.
+Run `kedro run` in your terminal, you should be able to see `y_pred` is saved multiple times in the logs.
 
 ```
 ...
-                    INFO     Saving data to 'X_train_chunk' (ChunkWiseCSVDataSet)...      data_catalog.py:514
-                    INFO     Saving data to 'X_train_chunk' (ChunkWiseCSVDataSet)...      data_catalog.py:514
-...
+                    INFO     Loading data from 'y_train' (MemoryDataset)...                                                                                         data_catalog.py:475
+                    INFO     Running node: make_predictions: make_predictions([X_train,X_test,y_train]) -> [y_pred]                                                         node.py:331
+                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataSet)...                                                                                       data_catalog.py:514
+                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataSet)...                                                                                       data_catalog.py:514
+                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataSet)...                                                                                       data_catalog.py:514
+                    INFO     Completed 2 out of 3 tasks                                                                                                         sequential_runner.py:85
+                    INFO     Loading data from 'y_pred' (ChunkWiseCSVDataSet)...                                                                                    data_catalog.py:475
+...                                                                              runner.py:105
 ```

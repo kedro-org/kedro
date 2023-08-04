@@ -14,6 +14,7 @@
 * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
 
 ## Bug fixes and other changes
+* Updated `kedro pipeline create` to use new `/conf` file structure.
 
 ## Documentation changes
 
@@ -32,7 +33,6 @@
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
 * Made validation of unique node outputs much faster.
 * Updated `kedro catalog list` to show datasets generated with factories.
-* Updated `kedro pipeline create` to use new `/conf` file structure.
 
 ## Documentation changes
 * Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.

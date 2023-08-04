@@ -20,13 +20,16 @@ def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
     tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
     conf_path = fake_repo_path / settings.CONF_SOURCE / request.param
+    # old conf structure for 'pipeline delete' command backward compatibility
+    old_conf_path = conf_path / "parameters"
 
-    for path in (source_path, tests_path, conf_path):
+    for path in (source_path, tests_path, conf_path, old_conf_path):
         path.mkdir(parents=True, exist_ok=True)
 
-    (conf_path / f"parameters_{PIPELINE_NAME}.yml").touch()
     (tests_path / "test_pipe.py").touch()
     (source_path / "pipe.py").touch()
+    (conf_path / f"parameters_{PIPELINE_NAME}.yml").touch()
+    (old_conf_path / f"{PIPELINE_NAME}.yml").touch()
 
     yield
     mocker.stopall()
@@ -266,16 +269,15 @@ class TestPipelineDeleteCommand:
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        params_path = (
-            fake_repo_path
-            / settings.CONF_SOURCE
-            / expected_conf
-            / f"parameters_{PIPELINE_NAME}.yml"
-        )
+        conf_path = fake_repo_path / settings.CONF_SOURCE / expected_conf
+        params_path = conf_path / f"parameters_{PIPELINE_NAME}.yml"
+        # old params structure for 'pipeline delete' command backward compatibility
+        old_params_path = conf_path / "parameters" / f"{PIPELINE_NAME}.yml"
 
         assert f"Deleting '{source_path}': OK" in result.output
         assert f"Deleting '{tests_path}': OK" in result.output
         assert f"Deleting '{params_path}': OK" in result.output
+        assert f"Deleting '{old_params_path}': OK" in result.output
 
         assert f"Pipeline '{PIPELINE_NAME}' was successfully deleted." in result.output
         assert (
@@ -285,6 +287,7 @@ class TestPipelineDeleteCommand:
 
         assert not source_path.exists()
         assert not tests_path.exists()
+        assert not params_path.exists()
         assert not params_path.exists()
 
     def test_delete_pipeline_skip(

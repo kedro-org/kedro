@@ -24,6 +24,7 @@ kedro_datasets
    kedro_datasets.networkx.GraphMLDataSet
    kedro_datasets.networkx.JSONDataSet
    kedro_datasets.pandas.CSVDataSet
+   kedro_datasets.pandas.DeltaTableDataSet
    kedro_datasets.pandas.ExcelDataSet
    kedro_datasets.pandas.FeatherDataSet
    kedro_datasets.pandas.GBQQueryDataSet

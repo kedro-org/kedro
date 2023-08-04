@@ -37,6 +37,33 @@ jobs:
       - name: Install pytables (only for windows)
         if: inputs.os == 'windows-latest'
         run: pip install tables
+      - name: Initialize conda
+        if: inputs.os == 'windows-latest'
+        run: conda init powershell
+      - name: Create 'kedro_builder' conda environment
+        if: inputs.os == 'windows-latest'
+        run: conda create -n kedro_builder python=<<parameters.python_version>> -y
+      - name: Install Microsoft Visual C++ Redistributable
+        if: inputs.os == 'windows-latest'
+        run: |
+          $ProgressPreference = "SilentlyContinue"
+          Invoke-WebRequest https://aka.ms/vs/16/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe
+          .\vc_redist.x64.exe /S /v/qn
+      - name: Install 'make' command
+        if: inputs.os == 'windows-latest'
+        run: choco install make
+      - name: Install GDAL, Fiona and pytables
+        if: inputs.os == 'windows-latest'
+        run: conda activate kedro_builder; conda install gdal fiona pytables -c conda-forge -y
+      - name: Show pip information
+        if: inputs.os == 'windows-latest'
+        run: conda activate kedro_builder; pip debug --verbose
+      - name: Install all requirements
+        if: inputs.os == 'windows-latest'
+        run: conda activate kedro_builder; pip install -v -U .[test]
+      - name: Print Python environment
+        if: inputs.os == 'windows-latest'
+        run: conda activate kedro_builder; make print-python-env
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests

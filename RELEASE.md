@@ -8,7 +8,20 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.12
+# Upcoming Release 0.18.13
+
+## Major features and improvements
+* Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
+
+## Bug fixes and other changes
+
+## Documentation changes
+- Update example of using generator functions in nodes.
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.12
 
 ## Major features and improvements
 * Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
@@ -19,11 +32,12 @@
 * Consolidated dependencies and optional dependencies in `pyproject.toml`.
 * Made validation of unique node outputs much faster.
 * Updated `kedro catalog list` to show datasets generated with factories.
-* Pinned `pip<23.2` for CI due to a breaking change. See https://github.com/kedro-org/kedro/pull/2813
 
 ## Documentation changes
 - Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
-- Update example of using generator functions in nodes.
+
+## Community contributions
+Thanks to [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) and [Chris Schopp](https://github.com/cschopp-simwell).
 
 ## Breaking changes to the API
 

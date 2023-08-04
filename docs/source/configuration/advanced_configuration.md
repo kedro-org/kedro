@@ -297,7 +297,7 @@ model_options:
   test_size: "${add:1,2,3}"
   random_state: 3
 
-date: "{today:}"
+date: "${today:}"
 ```
 The values of these parameters will be computed at access time and will be passed on to your nodes.
 Resolvers can also be used in your `catalog.yml`. In the example below, we use the `polars` resolver defined above to pass non-primitive

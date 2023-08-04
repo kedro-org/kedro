@@ -22,21 +22,19 @@ This command installs the most recent version of Kedro which also includes `omeg
 ### 2. Use the `OmegaConfigLoader`
 To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
 
-```python
-from kedro.config import OmegaConfigLoader  # new import
+```diff
++ from kedro.config import OmegaConfigLoader  # new import
 
-CONFIG_LOADER_CLASS = OmegaConfigLoader
++ CONFIG_LOADER_CLASS = OmegaConfigLoader
 ```
 
 ### 3. Import Statements
 Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoader`:
 
-```python
-# Before:
-from kedro.config import ConfigLoader
+```diff
+- from kedro.config import ConfigLoader
 
-# After:
-from kedro.config import OmegaConfigLoader
++ from kedro.config import OmegaConfigLoader
 ```
 
 ### 4. File Format Support

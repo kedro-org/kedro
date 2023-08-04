@@ -231,9 +231,11 @@ def resolve_patterns(metadata: ProjectMetadata, pipeline, env):
     data_catalog = context.catalog
     catalog_config = context.config_loader["catalog"]
 
-    for ds_name in list(catalog_config.keys()):
-        if data_catalog._is_pattern(ds_name):
-            del catalog_config[ds_name]
+    catalog_config = {
+        ds_name: ds_config
+        for ds_name, ds_config in catalog_config.items()
+        if not data_catalog._is_pattern(ds_name)
+    }
 
     target_pipelines = pipeline or pipelines.keys()
 

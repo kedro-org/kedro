@@ -184,19 +184,22 @@ You can also call a node as a regular Python function: `adder_node(dict(a=2, b=3
 
 ## How to use generator functions in a node
 
-[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255). They are a special kind of function that returns lazy iterators, which are often used for lazy-loading or lazy-saving. It does not store their entire contents in memory all at once so it can be useful to process large dataset that does not fit in memory.
-
-The following code uses a `pandas chunksize` generator to process large datasets within the [`pandas-iris` starter](../kedro_project_setup/starters.md).
+[Generator functions](https://learnpython.org/en/Generators) were introduced with [PEP 255](https://www.python.org/dev/peps/pep-0255) and are a special kind of function in Python that returns lazy iterators. They are often used for lazy-loading or lazy-saving of data, which can be particularly useful when dealing with large datasets that do not fit entirely into memory. In the context of Kedro, generator functions can be used in nodes to efficiently process and handle such large datasets.
 
 
 ### Set up the project
-First set up a project by following the [get started guide](../get_started/new_project.md#create-a-new-project-containing-example-code) to create a Kedro project with the `pandas-iris` starter example code.
 
+To demonstrate the usage of generator functions in Kedro nodes, first, set up a Kedro project using the `pandas-iris` starter. If you haven't already created a Kedro project, you can follow the [get started guide](../get_started/new_project.md#create-a-new-project-containing-example-code) to create one.
 
-### Use Generators as Kedro Node Inputs
-Thanks to `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
+You can create the project with this command
+```bash
+kedro new -s pandas-iris
+```
 
-You need to update your `catalog.yml` as follow:
+### Reading data with Generators
+To utilize generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
+
+You need to add a new dataset in your `catalog.yml` as follow:
 ```diff
 + X_test:
 +  type: pandas.CSVDataSet
@@ -205,15 +208,83 @@ You need to update your `catalog.yml` as follow:
 +    chunksize: 10
 ```
 
-### Use Generators as Kedro Node Outputs
+Thanks to `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
+
+### Saving data with Generators
 To use generator to save data lazily, you need do three things:
-- Update the `make_prediction` definition to use `return` instead of  `yield`
+- Update the `make_prediction` function definition to use `return` instead of `yield`.
 - Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataset`
-- Update `catalog.yml` to use the `ChunkWiseCSVDataset`
+- Update the `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
 
 You can copy the following code to `pipeline.py`, the main change is using a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
-This `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that append data instead of overwriting.
 
+```python
+import logging
+from typing import Any, Dict, Tuple, Iterator
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+import numpy as np
+import pandas as pd
+
+
+def split_data(
+    data: pd.DataFrame, parameters: Dict[str, Any]
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    """Splits data into features and target training and test sets.
+
+    Args:
+        data: Data containing features and target.
+        parameters: Parameters defined in parameters.yml.
+    Returns:
+        Split data.
+    """
+
+    data_train = data.sample(
+        frac=parameters["train_fraction"], random_state=parameters["random_state"]
+    )
+    data_test = data.drop(data_train.index)
+
+    X_train = data_train.drop(columns=parameters["target_column"])
+    X_test = data_test.drop(columns=parameters["target_column"])
+    y_train = data_train[parameters["target_column"]]
+    y_test = data_test[parameters["target_column"]]
+
+    label_encoder = LabelEncoder()
+    label_encoder.fit(pd.concat([y_train, y_test]))
+    y_train = label_encoder.transform(y_train)
+
+    return X_train, X_test, y_train, y_test
+
+
+def make_predictions(
+    X_train: pd.DataFrame, X_test: pd.DataFrame, y_train: pd.Series
+) -> pd.Series:
+    """Use a DecisionTreeClassifier model to make prediction."""
+    model = DecisionTreeClassifier()
+    model.fit(X_train, y_train)
+
+    for chunk in X_test:
+        y_pred = model.predict(chunk)
+        y_pred = pd.DataFrame(y_pred)
+        yield y_pred
+
+
+def report_accuracy(y_pred: pd.Series, y_test: pd.Series):
+    """Calculates and logs the accuracy.
+
+    Args:
+        y_pred: Predicted target.
+        y_test: True target.
+    """
+    accuracy = accuracy_score(y_test, y_pred)
+    logger = logging.getLogger(__name__)
+    logger.info("Model has accuracy of %.3f on test data.", accuracy)
+```
+
+
+
+This `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that append data instead of overwriting. Below is an example of the `ChunkWiseCSVDataset` implementation:
 
 ```python
 import pandas as pd
@@ -228,6 +299,7 @@ class ChunkWiseCSVDataset(CSVDataset):
     """``ChunkWiseCSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem. It uses pandas to handle the CSV file.
     """
+
     _overwrite = True
 
     def _save(self, data: pd.DataFrame) -> None:
@@ -240,7 +312,7 @@ class ChunkWiseCSVDataset(CSVDataset):
             data.to_csv(save_path, index=False, header=False, mode="a")
 ```
 
-In addition, you need to update the `catalog.yml` to use this new dataset.
+After that, you need to update the `catalog.yml` to use this new dataset.
 
 ```diff
 + y_pred:
@@ -248,7 +320,7 @@ In addition, you need to update the `catalog.yml` to use this new dataset.
 +  filepath: data/07_model_output/y_pred.csv
 ```
 
-Run `kedro run` in your terminal, you should be able to see `y_pred` is saved multiple times in the logs.
+With these changes, when you run `kedro run` in your terminal, you should see `y_pred`` being saved multiple times in the logs as the generator lazily processes and saves the data in smaller chunks.
 
 ```
 ...

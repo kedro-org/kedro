@@ -44,16 +44,14 @@ Replace the import statement for `ConfigLoader` with the one for `OmegaConfigLoa
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `ConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
 When you migrate to use `OmegaConfigLoader`it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
 
-```python
-# Before:
-conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path, env="local")
-catalog = conf_loader.get("catalog*")
+```diff
+- conf_path = str(project_path / settings.CONF_SOURCE)
+- conf_loader = ConfigLoader(conf_source=conf_path, env="local")
+- catalog = conf_loader.get("catalog*")
 
-# After:
-conf_path = str(project_path / settings.CONF_SOURCE)
-config_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
-catalog = config_loader["catalog"]
++ conf_path = str(project_path / settings.CONF_SOURCE)
++ config_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
++ catalog = config_loader["catalog"]
 ```
 
 In this example, `"catalog"` is the key to the default catalog patterns specified in the `OmegaConfigLoader` class.

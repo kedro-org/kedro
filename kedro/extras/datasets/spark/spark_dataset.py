@@ -233,7 +233,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # pylint: disable=too-many-arguments, ruff: noqa: PLR0913
+    def __init__(  # ruff: noqa: PLR0913
         self,
         filepath: str,
         file_format: str = "parquet",

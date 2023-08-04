@@ -40,20 +40,6 @@ jobs:
       - name: Install pytables (only for windows)
         if: inputs.os == 'windows-latest'
         run: pip install tables
-      - name: Set HDF5_DISABLE_VERSION_CHECK environment variable
-        if: inputs.os == 'windows-latest'
-        # geopandas and tensorflow conflicts when imported simultaneously.
-        # The HDF5 header files used to compile this application do not match
-        # the version used by the HDF5 library to which this application is linked.
-        # Data corruption or segmentation faults may occur if the application continues.
-        # This can happen when an application was compiled by one version of HDF5 but
-        # linked with a different version of static or shared HDF5 library.
-        # You should recompile the application or check your shared library related
-        # settings such as 'LD_LIBRARY_PATH'.
-        # You can, at your own risk, disable this warning by setting the environment
-        # variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.
-        # Setting it to 2 or higher will suppress the warning messages totally.
-        run: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests

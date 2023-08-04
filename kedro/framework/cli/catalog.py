@@ -229,7 +229,7 @@ def resolve_patterns(metadata: ProjectMetadata, pipeline, env):
     context = session.load_context()
 
     data_catalog = context.catalog
-    catalog_config = data_catalog._raw_config
+    catalog_config = context.config_loader["catalog"]
 
     for ds_name in list(catalog_config.keys()):
         if data_catalog._is_pattern(ds_name):

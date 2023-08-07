@@ -208,15 +208,15 @@ You need to add a new dataset in your `catalog.yml` as follow:
 +    chunksize: 10
 ```
 
-Thanks to `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
+With `pandas` built-in support, you can use the `chunksize` argument to read data using generator.
 
 ### Saving data with Generators
-To use generator to save data lazily, you need do three things:
+To use generators to save data lazily, you need do three things:
 - Update the `make_prediction` function definition to use `return` instead of `yield`.
 - Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataset`
-- Update the `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
+- Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
 
-You can copy the following code to `pipeline.py`, the main change is using a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
+Copy the following code to `pipeline.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
 
 ```python
 import logging

@@ -61,7 +61,7 @@ In this example, `"catalog"` is the key to the default catalog patterns specifie
 * In `OmegaConfigLoader`, if there is bad syntax in your configuration files, it will trigger a `ParserError` instead of a `BadConfigException` used in `ConfigLoader`.
 
 
-## [`TemplatedConfigLoader`](/kedro.config.ConfigLoader) to [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)
+## [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader) to [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)
 
 ### 1. Install the Required Library
 The [`OmegaConfigLoader`](advanced_configuration.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). Features that replace `TemplatedConfigLoader` functionality have been released in later versions, so we recommend users
@@ -126,38 +126,30 @@ Suppose you are migrating a templated **catalog** file from using `TemplatedConf
 
 ```diff
 - bucket_name: "my_s3_bucket"
-- key_prefix: "my/key/prefix/"
-
 + _bucket_name: "my_s3_bucket"
+- key_prefix: "my/key/prefix/"
 + _key_prefix: "my/key/prefix/"
 
 - datasets:
--    csv: "pandas.CSVDataSet"
--    spark: "spark.SparkDataSet"
-
 + _datasets:
-+    csv: "pandas.CSVDataSet"
-+    spark: "spark.SparkDataSet"
+    csv: "pandas.CSVDataSet"
+    spark: "spark.SparkDataSet"
+
 ```
 
 3. Update `catalog.yml` with the underscores `_` at the beginning of the templated value names.
 ```diff
-- raw_boat_data:
--    type: "${_datasets.spark}"
--    filepath: "s3a://${_bucket_name}/${_key_prefix}/raw/boats.csv"
--    file_format: parquet
+raw_boat_data:
+-   type: "${datasets.spark}"
++   type: "${_datasets.spark}"
+-   filepath: "s3a://${bucket_name}/${key_prefix}/raw/boats.csv"
++   filepath: "s3a://${_bucket_name}/${_key_prefix}/raw/boats.csv"
+    file_format: parquet
 
-+ raw_boat_data:
-+    type: "${_datasets.spark}"
-+    filepath: "s3a://${_bucket_name}/${_key_prefix}/raw/boats.csv"
-+    file_format: parquet
-
-- raw_car_data:
--    type: "${_datasets.csv}"
--    filepath: "s3://${_bucket_name}/data/${_key_prefix}/raw/cars.csv"
-
-+ raw_car_data:
+raw_car_data:
+-    type: "${datasets.csv}"
 +    type: "${_datasets.csv}"
+-    filepath: "s3://${bucket_name}/data/${key_prefix}/raw/cars.csv"
 +    filepath: "s3://${_bucket_name}/data/${_key_prefix}/raw/cars.csv"
 ```
 
@@ -180,7 +172,26 @@ boats:
    * Mix of config level and between config ?
 
 ### 8. Jinja2
-`OmegaConfigLoader` does not support Jinja2 syntax.
+`OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../data/data_catalog.md#load-multiple-datasets-with-similar-configuration-using-dataset-factories).
+If you take the example from [the `TemplatedConfigLoader` with Jinja2 documentation](advanced_configuration.md#how-to-use-jinja2-syntax-in-configuration) you can rewrite your configuration as follows to work with `OmegaConfigLoader`:
+
+```diff
+# catalog.yml
+- {% for speed in ['fast', 'slow'] %}
+- {{ speed }}-trains:
++ "{speed}-trains":
+    type: MemoryDataSet
+
+- {{ speed }}-cars:
++ "{speed}-cars":
+    type: pandas.CSVDataSet
+-    filepath: s3://${bucket_name}/{{ speed }}-cars.csv
++    filepath: s3://${bucket_name}/{speed}-cars.csv
+    save_args:
+        index: true
+
+- {% endfor %}
+```
 
 ### 9. Exception Handling
-* For missing template value throws `OmegaConfigLoader` throws `omegaconf.errors.InterpolationKeyError`.
+* For missing template values `OmegaConfigLoader` throws `omegaconf.errors.InterpolationKeyError`.

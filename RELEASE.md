@@ -16,7 +16,7 @@
 ## Bug fixes and other changes
 
 ## Documentation changes
-- Update example of using generator functions in nodes.
+* Update example of using generator functions in nodes.
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
@@ -34,7 +34,7 @@
 * Updated `kedro catalog list` to show datasets generated with factories.
 
 ## Documentation changes
-- Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
+* Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
 
 ## Community contributions
 Thanks to [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) and [Chris Schopp](https://github.com/cschopp-simwell).

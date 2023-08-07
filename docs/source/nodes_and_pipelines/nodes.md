@@ -216,7 +216,7 @@ To use generators to save data lazily, you need do three things:
 - Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataset`
 - Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
 
-Copy the following code to `pipeline.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
+Copy the following code to `nodes.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
 
 ```python
 import logging
@@ -284,7 +284,7 @@ def report_accuracy(y_pred: pd.Series, y_test: pd.Series):
 
 
 
-The `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. Below is an example of the `ChunkWiseCSVDataset` implementation:
+The `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
 
 ```python
 import pandas as pd
@@ -316,7 +316,7 @@ After that, you need to update the `catalog.yml` to use this new dataset.
 
 ```diff
 + y_pred:
-+  type: kedro_generator_example.chunkwise.ChunkWiseCSVDataSet
++  type: <package_name>.chunkwise.ChunkWiseCSVDataSet
 +  filepath: data/07_model_output/y_pred.csv
 ```
 

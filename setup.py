@@ -176,7 +176,7 @@ extras_require["test"] = [
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
-    "pyarrow>=1.0, <7.0; python_version <= '3.10'",
+    "pyarrow>=1.0; python_version <= '3.10'",
     "pyarrow>=7.0; python_version > '3.10'",
     "pylint>=2.17.0, <3.0",
     "pyproj~=3.0",

@@ -34,7 +34,7 @@
 * [How do I bypass the configuration loading rules](../configuration/advanced_configuration.md#how-to-bypass-the-configuration-loading-rules)?
 * [How do I use Jinja2 syntax in configuration](../configuration/advanced_configuration.md#how-to-use-jinja2-syntax-in-configuration)?
 * [How do I do templating with the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader)?
-* [How do I use custom resolvers in the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-custom-resolvers-in-the-omegaconfigloader)?
+* [How do I use resolvers in the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-resolvers-in-the-omegaconfigloader)?
 * [How do I load credentials through environment variables](../configuration/advanced_configuration.md#how-to-load-credentials-through-environment-variables)?
 
 ## Datasets and the Data Catalog

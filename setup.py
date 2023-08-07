@@ -176,8 +176,8 @@ extras_require["test"] = [
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
-    "pyarrow>=1.0; python_version <= '3.10'",
-    "pyarrow>=7.0; python_version > '3.10'",
+    "pyarrow>=1.0; python_version < '3.11'",
+    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pylint>=2.17.0, <3.0",
     "pyproj~=3.0",
     "pyspark>=2.2, <3.4; python_version < '3.11'",
@@ -197,7 +197,7 @@ extras_require["test"] = [
     "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.8'",
     "tables~=3.8.0; platform_system == 'Windows' and python_version>='3.8'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
     "tables~=3.6; platform_system != 'Windows'",
-    "tensorflow>=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
+    "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     # https://developer.apple.com/metal/tensorflow-plugin/
     "tensorflow-macos~=2.0; platform_system == 'Darwin' and platform_machine == 'arm64'",
     "triad>=0.6.7, <1.0",

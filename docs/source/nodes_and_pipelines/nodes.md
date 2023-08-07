@@ -284,7 +284,7 @@ def report_accuracy(y_pred: pd.Series, y_test: pd.Series):
 
 
 
-The `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. Below is an example of the `ChunkWiseCSVDataset` implementation:
+The `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
 
 ```python
 import pandas as pd
@@ -316,7 +316,7 @@ After that, you need to update the `catalog.yml` to use this new dataset.
 
 ```diff
 + y_pred:
-+  type: kedro_generator_example.chunkwise.ChunkWiseCSVDataSet
++  type: <package_name>.chunkwise.ChunkWiseCSVDataSet
 +  filepath: data/07_model_output/y_pred.csv
 ```
 

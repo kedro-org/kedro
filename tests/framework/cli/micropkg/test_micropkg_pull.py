@@ -115,8 +115,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / config_env
-            / "parameters"
-            / f"{pipeline_name}.yml"
+            / f"parameters_{pipeline_name}.yml"
         )
 
         self.assert_package_files_exist(source_dest)
@@ -160,8 +159,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
 
         sdist_file = (
@@ -189,8 +187,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / config_env
-            / "parameters"
-            / f"{pipeline_name}.yml"
+            / f"parameters_{pipeline_name}.yml"
         )
 
         assert not filecmp.dircmp(source_path, source_dest).diff_files
@@ -237,8 +234,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / config_env
-            / "parameters"
-            / f"{pipeline_name}.yml"
+            / f"parameters_{pipeline_name}.yml"
         )
 
         self.assert_package_files_exist(source_dest)
@@ -287,8 +283,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / config_env
-            / "parameters"
-            / f"{pipeline_name}.yml"
+            / f"parameters_{pipeline_name}.yml"
         )
 
         self.assert_package_files_exist(source_dest)
@@ -451,8 +446,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
         # Make sure the files actually deleted before pulling from the sdist file.
         assert not source_path.exists()
@@ -480,8 +474,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / config_env
-            / "parameters"
-            / f"{pipeline_name}.yml"
+            / f"parameters_{pipeline_name}.yml"
         )
 
         self.assert_package_files_exist(source_dest)
@@ -509,8 +502,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
         source_params_config.unlink()
         call_micropkg_package(fake_project_cli, fake_metadata)
@@ -544,8 +536,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / config_env
-            / "parameters"
-            / f"{pipeline_name}.yml"
+            / f"parameters_{pipeline_name}.yml"
         )
 
         self.assert_package_files_exist(source_dest)
@@ -586,8 +577,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
         # Make sure the files actually deleted before pulling from pypi.
         assert not source_path.exists()
@@ -645,8 +635,7 @@ class TestMicropkgPullCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / config_env
-            / "parameters"
-            / f"{pipeline_name}.yml"
+            / f"parameters_{pipeline_name}.yml"
         )
 
         self.assert_package_files_exist(source_dest)

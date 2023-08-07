@@ -305,6 +305,9 @@ texinfo_documents = [
     )
 ]
 
+# Mocking modules to prevent issues during documentation build on Read the Docs.
+autodoc_mock_imports = ["pyarrow", "deltalake"]
+
 # -- Options for todo extension ----------------------------------------------
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.

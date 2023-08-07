@@ -199,7 +199,7 @@ kedro new -s pandas-iris
 ### Loading data with Generators
 To use generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
 
-You need to add a new dataset in your `catalog.yml` as follow:
+You need to add a new dataset in your `catalog.yml` as follows:
 ```diff
 + X_test:
 +  type: pandas.CSVDataSet

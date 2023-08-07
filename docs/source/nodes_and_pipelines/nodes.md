@@ -196,8 +196,8 @@ Create the project with this command:
 kedro new -s pandas-iris
 ```
 
-### Reading data with Generators
-To utilize generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
+### Loading data with Generators
+To use generator functions in Kedro nodes, you need to update the `catalog.yml` file to include the `chunksize` argument for the relevant dataset that will be processed using the generator.
 
 You need to add a new dataset in your `catalog.yml` as follow:
 ```diff
@@ -284,7 +284,7 @@ def report_accuracy(y_pred: pd.Series, y_test: pd.Series):
 
 
 
-This `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that append data instead of overwriting. Below is an example of the `ChunkWiseCSVDataset` implementation:
+The `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. Below is an example of the `ChunkWiseCSVDataset` implementation:
 
 ```python
 import pandas as pd

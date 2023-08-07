@@ -263,9 +263,9 @@ Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom spark or mlflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.
 
 ### How to use resolvers in the `OmegaConfigLoader`
-Instead of hard-coding values in your configuration files, you can also dynamically compute them using `OmegaConf`'s
-[resolvers](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#resolvers) functionality. You use resolvers to define custom
-logic to calculate values of parameters or catalog entries, or inject these values from elsewhere. To use this feature with Kedro, you can pass a
+Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s
+resolvers functionality](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#resolvers). You use resolvers to define custom
+logic to calculate values of parameters or catalog entries, or inject these values from elsewhere. To use this feature with Kedro, pass a
 `dict` of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS` in your project's `src/<package_name>/settings.py`.
 The example below illustrates this:
 

@@ -315,8 +315,10 @@ my_polars_dataset:
 ```
 `OmegaConf` also comes with some [built-in resolvers](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#built-in-resolvers)
 that you can use with the `OmegaConfigLoader` in Kedro. All built-in resolvers except for [`oc.env`](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-env)
-are enabled by default. `oc.env` is only turned on for loading credentials. You can, however, turn this on for all configurations
-through your project's `src/<package_name>/settings.py` in a similar way:
+are enabled by default. `oc.env` is only turned on for loading credentials. You can, however, turn this on for all configurations through your project's `src/<package_name>/settings.py` in a similar way:
+```{note}
+This is an advanced feature and should be used with caution. We do not recommend using environment variables for configurations other than credentials.
+```
 ```python
 from omegaconf.resolvers import oc
 from kedro.config import OmegaConfigLoader

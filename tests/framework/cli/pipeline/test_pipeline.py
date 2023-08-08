@@ -1,4 +1,3 @@
-import os
 import shutil
 from pathlib import Path
 
@@ -20,14 +19,17 @@ PIPELINE_NAME = "my_pipeline"
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
     tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = fake_repo_path / settings.CONF_SOURCE / request.param / "parameters"
+    conf_path = fake_repo_path / settings.CONF_SOURCE / request.param
+    # old conf structure for 'pipeline delete' command backward compatibility
+    old_conf_path = conf_path / "parameters"
 
-    for path in (source_path, tests_path, conf_path):
+    for path in (source_path, tests_path, conf_path, old_conf_path):
         path.mkdir(parents=True, exist_ok=True)
 
-    (conf_path / f"{PIPELINE_NAME}.yml").touch()
     (tests_path / "test_pipe.py").touch()
     (source_path / "pipe.py").touch()
+    (conf_path / f"parameters_{PIPELINE_NAME}.yml").touch()
+    (old_conf_path / f"{PIPELINE_NAME}.yml").touch()
 
     yield
     mocker.stopall()
@@ -67,8 +69,8 @@ class TestPipelineCreateCommand:
         # config
         conf_env = env or "base"
         conf_dir = (fake_repo_path / settings.CONF_SOURCE / conf_env).resolve()
-        actual_configs = list(conf_dir.glob(f"**/{PIPELINE_NAME}.yml"))
-        expected_configs = [conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"]
+        actual_configs = list(conf_dir.glob(f"**/*{PIPELINE_NAME}.yml"))
+        expected_configs = [conf_dir / f"parameters_{PIPELINE_NAME}.yml"]
         assert actual_configs == expected_configs
 
         # tests
@@ -92,7 +94,7 @@ class TestPipelineCreateCommand:
         assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
 
         conf_dirs = list((fake_repo_path / settings.CONF_SOURCE).rglob(PIPELINE_NAME))
-        assert conf_dirs == []  # no configs created for the pipeline
+        assert not conf_dirs  # no configs created for the pipeline
 
         test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         assert test_dir.is_dir()
@@ -117,13 +119,12 @@ class TestPipelineCreateCommand:
                 "filepath": "data/01_raw/iris.csv",
             }
         }
-        catalog_file = conf_dir / "catalog" / f"{PIPELINE_NAME}.yml"
-        catalog_file.parent.mkdir()
+        catalog_file = conf_dir / f"catalog_{PIPELINE_NAME}.yml"
         with catalog_file.open("w") as f:
             yaml.dump(catalog_dict, f)
 
         # write pipeline parameters
-        params_file = conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"
+        params_file = conf_dir / f"parameters_{PIPELINE_NAME}.yml"
         assert params_file.is_file()
         params_dict = {"params_from_pipeline": {"p1": [1, 2, 3], "p2": None}}
         with params_file.open("w") as f:
@@ -143,8 +144,7 @@ class TestPipelineCreateCommand:
                 fake_repo_path
                 / settings.CONF_SOURCE
                 / "base"
-                / dirname
-                / f"{PIPELINE_NAME}.yml"
+                / f"{dirname}_{PIPELINE_NAME}.yml"
             )
             path.parent.mkdir(exist_ok=True)
             path.touch()
@@ -166,7 +166,7 @@ class TestPipelineCreateCommand:
 
         assert result.exit_code == 0
         assert "__init__.py': SKIPPED" in result.output
-        assert f"parameters{os.sep}{PIPELINE_NAME}.yml': SKIPPED" in result.output
+        assert f"parameters_{PIPELINE_NAME}.yml': SKIPPED" in result.output
         assert result.output.count("SKIPPED") == 2  # only 2 files skipped
 
     def test_failed_copy(
@@ -269,17 +269,15 @@ class TestPipelineDeleteCommand:
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        params_path = (
-            fake_repo_path
-            / settings.CONF_SOURCE
-            / expected_conf
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
-        )
+        conf_path = fake_repo_path / settings.CONF_SOURCE / expected_conf
+        params_path = conf_path / f"parameters_{PIPELINE_NAME}.yml"
+        # old params structure for 'pipeline delete' command backward compatibility
+        old_params_path = conf_path / "parameters" / f"{PIPELINE_NAME}.yml"
 
         assert f"Deleting '{source_path}': OK" in result.output
         assert f"Deleting '{tests_path}': OK" in result.output
         assert f"Deleting '{params_path}': OK" in result.output
+        assert f"Deleting '{old_params_path}': OK" in result.output
 
         assert f"Pipeline '{PIPELINE_NAME}' was successfully deleted." in result.output
         assert (
@@ -289,6 +287,7 @@ class TestPipelineDeleteCommand:
 
         assert not source_path.exists()
         assert not tests_path.exists()
+        assert not params_path.exists()
         assert not params_path.exists()
 
     def test_delete_pipeline_skip(
@@ -309,8 +308,7 @@ class TestPipelineDeleteCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
 
         assert f"Deleting '{source_path}'" not in result.output
@@ -401,8 +399,7 @@ class TestPipelineDeleteCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
 
         assert "The following paths will be removed:" in result.output
@@ -442,8 +439,7 @@ class TestPipelineDeleteCommand:
             fake_repo_path
             / settings.CONF_SOURCE
             / "base"
-            / "parameters"
-            / f"{PIPELINE_NAME}.yml"
+            / f"parameters_{PIPELINE_NAME}.yml"
         )
 
         assert "The following paths will be removed:" in result.output

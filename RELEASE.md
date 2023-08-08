@@ -14,9 +14,12 @@
 * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
 
 ## Bug fixes and other changes
+* Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 
 ## Documentation changes
 * Update example of using generator functions in nodes.
+* Added migration guide from the `ConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` is deprecated and will be removed in the `0.19.0` release.
+
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0

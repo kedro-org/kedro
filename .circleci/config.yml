@@ -31,4 +31,4 @@ workflows:
           mapping: |
             docs/.* docs_change true
             RELEASE.md docs_change true
-            ^((?!docs/).)*$|^(RELEASE.md)*$ code_change true
+            ^(RELEASE.md|(?!docs/).)*$ code_change true

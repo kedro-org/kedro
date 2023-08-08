@@ -7,7 +7,6 @@ on:
       - develop
       - try-ga-triggering
       - docs-only-check-for-releasemd
-      - try-ga-triggering
     paths:
       - "docs/**"
       - '**.md'

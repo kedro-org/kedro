@@ -15,7 +15,7 @@
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
-* Only trigger docs build when release notes have been updated.
+* Only trigger docs build when release notes have been updated
 
 ## Documentation changes
 

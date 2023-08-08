@@ -7,14 +7,14 @@ on:
       - develop
     paths-ignore:
       - "docs/**"
-      - "RELEASE.md"
+      - '**.md'
   pull_request:
     branches:
       - main
       - develop
     paths-ignore:
       - "docs/**"
-      - "RELEASE.md"
+      - '**.md'
 
 jobs:
   unit-tests:

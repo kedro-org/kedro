@@ -14,7 +14,7 @@
 * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
 
 ## Bug fixes and other changes
-* Updated `kedro pipeline create` to use new `/conf` file structure.
+* Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 
 ## Documentation changes
 

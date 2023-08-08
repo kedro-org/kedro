@@ -17,6 +17,7 @@
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 
 ## Documentation changes
+* Added migration guide from the `ConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` is deprecated and will be removed in the `0.19.0` release.
 
 ## Breaking changes to the API
 

@@ -14,7 +14,7 @@ import fsspec
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -60,8 +60,7 @@ class EmailMessageDataSet(
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -146,15 +145,15 @@ class EmailMessageDataSet(
         self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            parser_args=self._parser_args,
-            save_args=self._save_args,
-            generator_args=self._generator_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "load_args": self._load_args,
+            "parser_args": self._parser_args,
+            "save_args": self._save_args,
+            "generator_args": self._generator_args,
+            "version": self._version,
+        }
 
     def _load(self) -> Message:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -173,7 +172,7 @@ class EmailMessageDataSet(
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

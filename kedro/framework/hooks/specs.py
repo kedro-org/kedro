@@ -2,7 +2,9 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
-from typing import Any, Dict, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from kedro.framework.context import KedroContext
 from kedro.io import DataCatalog
@@ -16,14 +18,14 @@ class DataCatalogSpecs:
     """Namespace that defines all specifications for a data catalog's lifecycle hooks."""
 
     @hook_spec
-    def after_catalog_created(  # pylint: disable=too-many-arguments
+    def after_catalog_created(  # noqa: too-many-arguments
         self,
         catalog: DataCatalog,
-        conf_catalog: Dict[str, Any],
-        conf_creds: Dict[str, Any],
-        feed_dict: Dict[str, Any],
+        conf_catalog: dict[str, Any],
+        conf_creds: dict[str, Any],
+        feed_dict: dict[str, Any],
         save_version: str,
-        load_versions: Dict[str, str],
+        load_versions: dict[str, str],
     ) -> None:
         """Hooks to be invoked after a data catalog is created.
         It receives the ``catalog`` as well as
@@ -46,14 +48,14 @@ class NodeSpecs:
     """Namespace that defines all specifications for a node's lifecycle hooks."""
 
     @hook_spec
-    def before_node_run(  # pylint: disable=too-many-arguments
+    def before_node_run(  # noqa: too-many-arguments
         self,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
+        inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Hook to be invoked before a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
 
@@ -74,12 +76,12 @@ class NodeSpecs:
         pass
 
     @hook_spec
-    def after_node_run(  # pylint: disable=too-many-arguments
+    def after_node_run(  # noqa: too-many-arguments
         self,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
-        outputs: Dict[str, Any],
+        inputs: dict[str, Any],
+        outputs: dict[str, Any],
         is_async: bool,
         session_id: str,
     ) -> None:
@@ -102,12 +104,12 @@ class NodeSpecs:
         pass
 
     @hook_spec
-    def on_node_error(  # pylint: disable=too-many-arguments
+    def on_node_error(  # noqa: too-many-arguments
         self,
         error: Exception,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
+        inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
     ):
@@ -133,7 +135,7 @@ class PipelineSpecs:
 
     @hook_spec
     def before_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self, run_params: dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         """Hook to be invoked before a pipeline runs.
 
@@ -153,8 +155,10 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
+                     "pipeline_name": str,
+                     "namespace": Optional[str],
+                     "runner": str,
                    }
 
             pipeline: The ``Pipeline`` that will be run.
@@ -165,8 +169,8 @@ class PipelineSpecs:
     @hook_spec
     def after_pipeline_run(
         self,
-        run_params: Dict[str, Any],
-        run_result: Dict[str, Any],
+        run_params: dict[str, Any],
+        run_result: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
     ) -> None:
@@ -188,8 +192,10 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
+                     "pipeline_name": str,
+                     "namespace": Optional[str],
+                     "runner": str,
                    }
 
             run_result: The output of ``Pipeline`` run.
@@ -202,7 +208,7 @@ class PipelineSpecs:
     def on_pipeline_error(
         self,
         error: Exception,
-        run_params: Dict[str, Any],
+        run_params: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
     ):
@@ -227,9 +233,12 @@ class PipelineSpecs:
                      "from_inputs": Optional[List[str]],
                      "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
-                     "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
+                     "pipeline_name": str,
+                     "namespace": Optional[str],
+                     "runner": str,
                    }
+
             pipeline: The ``Pipeline`` that will was run.
             catalog: The ``DataCatalog`` used during the run.
         """
@@ -240,41 +249,45 @@ class DatasetSpecs:
     """Namespace that defines all specifications for a dataset's lifecycle hooks."""
 
     @hook_spec
-    def before_dataset_loaded(self, dataset_name: str) -> None:
+    def before_dataset_loaded(self, dataset_name: str, node: Node) -> None:
         """Hook to be invoked before a dataset is loaded from the catalog.
 
         Args:
             dataset_name: name of the dataset to be loaded from the catalog.
+            node: The ``Node`` to run.
         """
         pass
 
     @hook_spec
-    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+    def after_dataset_loaded(self, dataset_name: str, data: Any, node: Node) -> None:
         """Hook to be invoked after a dataset is loaded from the catalog.
 
         Args:
             dataset_name: name of the dataset that was loaded from the catalog.
             data: the actual data that was loaded from the catalog.
+            node: The ``Node`` to run.
         """
         pass
 
     @hook_spec
-    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         """Hook to be invoked before a dataset is saved to the catalog.
 
         Args:
             dataset_name: name of the dataset to be saved to the catalog.
             data: the actual data to be saved to the catalog.
+            node: The ``Node`` that ran.
         """
         pass
 
     @hook_spec
-    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def after_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         """Hook to be invoked after a dataset is saved in the catalog.
 
         Args:
             dataset_name: name of the dataset that was saved to the catalog.
             data: the actual data that was saved to the catalog.
+            node: The ``Node`` that ran.
         """
         pass
 

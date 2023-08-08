@@ -13,7 +13,7 @@ import pandas as pd
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -30,30 +30,31 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 
-    Example adding a catalog entry with
-    `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: pandas.CSVDataSet
-        >>>   filepath: data/01_raw/company/cars.csv
-        >>>   load_args:
-        >>>     sep: ","
-        >>>     na_values: ["#NA", NA]
-        >>>   save_args:
-        >>>     index: False
-        >>>     date_format: "%Y-%m-%d %H:%M"
-        >>>     decimal: .
-        >>>
-        >>> motorbikes:
-        >>>   type: pandas.CSVDataSet
-        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
-        >>>   credentials: dev_s3
+        cars:
+          type: pandas.CSVDataSet
+          filepath: data/01_raw/company/cars.csv
+          load_args:
+            sep: ","
+            na_values: ["#NA", NA]
+          save_args:
+            index: False
+            date_format: "%Y-%m-%d %H:%M"
+            decimal: .
 
-    Example using Python API:
+        motorbikes:
+          type: pandas.CSVDataSet
+          filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
+          credentials: dev_s3
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import CSVDataSet
@@ -72,8 +73,7 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -143,13 +143,12 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
             self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())
@@ -179,7 +178,7 @@ class CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

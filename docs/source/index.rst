@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 
-.. image:: https://raw.githubusercontent.com/kedro-org/kedro/develop/static/img/kedro_banner.png
+.. image:: https://raw.githubusercontent.com/kedro-org/kedro/main/static/img/kedro_banner.png
     :alt: Kedro logo
     :class: kedro-logo
 
@@ -20,12 +20,12 @@ Welcome to Kedro's documentation!
     :alt: CircleCI - Develop Branch
 
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
-    :target: https://opensource.org/licenses/Apache-2.0
+    :target: https://opensource.org/license/apache2-0-php/
     :alt: License is Apache 2.0
 
-.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg
+.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
     :target: https://pypi.org/project/kedro/
-    :alt: Python version 3.7, 3.8, 3.9, 3.10
+    :alt: Python version 3.7, 3.8, 3.9, 3.10, 3.11
 
 .. image:: https://badge.fury.io/py/kedro.svg
     :target: https://pypi.org/project/kedro/
@@ -36,166 +36,116 @@ Welcome to Kedro's documentation!
     :alt: Conda package version
 
 .. image:: https://readthedocs.org/projects/kedro/badge/?version=stable
-    :target: https://kedro.readthedocs.io/
+    :target: https://docs.kedro.org/
     :alt: Docs build status
 
-.. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack&style=flat-square
-    :target: https://join.slack.com/t/kedro-org/shared_invite/zt-1eicp0iw6-nkBvDlfAYb1AUJV7DgBIvw
+.. image:: https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack
+    :target: https://slack.kedro.org
     :alt: Kedro's Slack organisation
+
+.. image:: https://img.shields.io/badge/slack-archive-blueviolet.svg?label=Kedro%20Slack%20
+    :target: https://linen-slack.kedro.org/
+    :alt: Kedro's Slack archive
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black
     :alt: Code style is Black
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Introduction
-
-   introduction/introduction
-
+.. image:: https://bestpractices.coreinfrastructure.org/projects/6711/badge
+    :target: https://bestpractices.coreinfrastructure.org/projects/6711
+    :alt: OpenSSF Best Practices Badge Program
 
 .. toctree::
    :maxdepth: 2
-   :caption: Get started
+   :caption: Learn about Kedro
 
-   get_started/prerequisites
-   get_started/install
-   get_started/hello_kedro
+   introduction/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Make a project
 
-   get_started/new_project
-   get_started/example_project
-   get_started/starters
-   get_started/standalone_use_of_datacatalog
+   get_started/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorial
+   :caption: Tutorial and basic Kedro usage
 
-   tutorial/spaceflights_tutorial
-   tutorial/tutorial_template
-   tutorial/set_up_data
-   tutorial/create_pipelines
-   tutorial/visualise_pipeline
-   tutorial/namespace_pipelines
-   tutorial/set_up_experiment_tracking
-   tutorial/package_a_project
+   tutorial/spaceflights_tutorial.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Kedro project setup
 
-   kedro_project_setup/dependencies
-   kedro_project_setup/configuration
-   kedro_project_setup/session
-   kedro_project_setup/settings
+   visualisation/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Data Catalog
 
-   data/data_catalog
-   data/kedro_io
+   experiment_tracking/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Nodes and pipelines
 
-   nodes_and_pipelines/nodes
-   nodes_and_pipelines/pipeline_introduction
-   nodes_and_pipelines/modular_pipelines
-   nodes_and_pipelines/pipeline_registry
-   nodes_and_pipelines/micro_packaging
-   nodes_and_pipelines/run_a_pipeline
-   nodes_and_pipelines/slice_a_pipeline
+   notebooks_and_ipython/index.md
+   resources/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Extend Kedro
+   :caption: Kedro projects
 
-   extend_kedro/common_use_cases
-   extend_kedro/custom_datasets
-   extend_kedro/plugins
-   extend_kedro/create_kedro_starters
+   kedro_project_setup/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Hooks
 
-   hooks/introduction
-   hooks/common_use_cases
-   hooks/examples
+   configuration/index.md
+
+.. toctree::
+   :maxdepth: 2
+
+   data/index.md
+
+.. toctree::
+   :maxdepth: 2
+
+   nodes_and_pipelines/index.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Advanced usage
+
+   extend_kedro/index.md
+
+.. toctree::
+   :maxdepth: 2
+
+   hooks/index.md
 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Logging
 
-   logging/logging
-   logging/experiment_tracking
+   logging/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Development
 
-   development/set_up_vscode
-   development/set_up_pycharm
-   development/commands_reference
-   development/debugging
-   development/automated_testing
-   development/linting
+   integrations/pyspark_integration.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Deployment
 
-   deployment/deployment_guide
-   deployment/single_machine
-   deployment/distributed
-   deployment/argo
-   deployment/prefect
-   deployment/kubeflow
-   deployment/aws_batch
-   deployment/databricks
-   deployment/aws_sagemaker
-   deployment/aws_step_functions
-   deployment/airflow_astronomer
-   deployment/dask
+   development/index.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tools integration
 
-   tools_integration/pyspark
-   tools_integration/ipython
-
-.. toctree::
-   :maxdepth: 2
-   :caption: FAQs
-
-   faq/faq
-   faq/architecture_overview
-   faq/kedro_principles
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Resources
-
-   resources/logos
-   resources/glossary
+   deployment/index.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Contribute to Kedro
 
-   contribution/contribute_to_kedro
-   contribution/developer_contributor_guidelines
-   contribution/backwards_compatibility
-   contribution/documentation_contributor_guidelines
-   contribution/technical_steering_committee
+   contribution/index.md
 
 API documentation
 =================
@@ -207,6 +157,7 @@ API documentation
    :recursive:
 
    kedro
+   kedro_datasets
 
 Indices and tables
 ==================

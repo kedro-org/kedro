@@ -1,14 +1,17 @@
-# How to deploy your Kedro pipeline with AWS Step Functions
+# AWS Step Functions
 
 This tutorial explains how to deploy a Kedro project with [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) in order to run a Kedro pipeline in production on AWS [Serverless Computing](https://aws.amazon.com/serverless/) platform.
 
-## Why would you run a Kedro pipeline with AWS Step Functions
+## Why would you run a Kedro pipeline with AWS Step Functions?
 
-A major problem when data pipelines move to production is to build and maintain the underlying compute infrastructure, or [servers](https://en.wikipedia.org/wiki/Server_(computing)). However, [serverless computing](https://en.wikipedia.org/wiki/Serverless_computing) can address some aspects of this problem, whereby cloud providers allocate machine resources on demand, allowing data engineers and data scientists to focus on their business problems. [Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) and [AWS Lambda](https://aws.amazon.com/lambda/) are good examples of this solution, but others are available.
+A major problem when data pipelines move to production is to build and maintain the underlying compute infrastructure, or [servers](https://en.wikipedia.org/wiki/Server_(computing)). [Serverless computing](https://en.wikipedia.org/wiki/Serverless_computing) hands the provisioning and management of distributed computing resources to cloud providers, enabling data engineers and data scientists to focus on their business problems.
 
-In addition to on-demand compute, services like [AWS Step Functions](https://aws.amazon.com/step-functions/) offer a managed orchestration capability that makes it easy to sequence serverless functions and multiple cloud-native services into business-critical applications. From a Kedro perspective, this means the ability to run each node and retain the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure.
+[Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/) and [AWS Lambda](https://aws.amazon.com/lambda/) are good examples of this solution, but others are available. Services like [AWS Step Functions](https://aws.amazon.com/step-functions/) offer a managed orchestration capability that makes it easy to sequence serverless functions and multiple cloud-native services into business-critical applications.
+
+From a Kedro perspective, this means the ability to run each node and retain the pipeline's correctness and reliability through a managed orchestrator without the concerns of managing underlying infrastructure. Another benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider, such as the use of the [feature store for Amazon SageMaker](https://aws.amazon.com/sagemaker/feature-store/) to store features data.
 
 The following discusses how to run the Kedro pipeline from the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) on [AWS Step Functions](https://aws.amazon.com/step-functions/).
+
 
 ## Strategy
 
@@ -131,7 +134,7 @@ from unittest.mock import patch
 def handler(event, context):
     from kedro.framework.project import configure_project
 
-    configure_project("spaceflights_steps_function")
+    configure_project("spaceflights_step_functions")
     node_to_run = event["node_name"]
 
     # Since _multiprocessing.SemLock is not implemented on lambda yet,
@@ -173,14 +176,14 @@ ARG FUNCTION_DIR
 ARG RUNTIME_VERSION
 # Create the function directory
 RUN mkdir -p ${FUNCTION_DIR}
-RUN mkdir -p ${FUNCTION_DIR}/{conf,logs}
+RUN mkdir -p ${FUNCTION_DIR}/{conf}
 # Add handler function
 COPY lambda_handler.py ${FUNCTION_DIR}
 # Add conf/ directory
 COPY conf ${FUNCTION_DIR}/conf
 # Install Kedro pipeline
-COPY dist/spaceflights_steps_function-0.1-py3-none-any.whl .
-RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir spaceflights_steps_function-0.1-py3-none-any.whl --target ${FUNCTION_DIR}
+COPY dist/spaceflights_step_functions-0.1-py3-none-any.whl .
+RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir spaceflights_step_functions-0.1-py3-none-any.whl --target ${FUNCTION_DIR}
 # Install Lambda Runtime Interface Client for Python
 RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir awslambdaric --target ${FUNCTION_DIR}
 
@@ -197,7 +200,7 @@ ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
 CMD [ "lambda_handler.handler" ]
 ```
 
-This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-create-from-alt) for Lambda to include Kedro-specific steps.
+This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-types) for Lambda to include Kedro-specific steps.
 
 * **Step 2.4**: Build the Docker image and push it to AWS Elastic Container Registry (ECR):
 
@@ -384,7 +387,3 @@ If you go into the state machine and click on `Start Execution`, you will be abl
 ## Limitations
 
 Generally speaking, the [limitations on AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) have improved dramatically in recent years. However, it's still worth noting that each Lambda function has a 15-minute timeout, 10GB maximum memory limit and 10GB container image code package size limit. This means, for example, if you have a node that takes longer than 15 minutes to run, you should switch to some other AWS services, such as [AWS Batch](aws_batch) or [AWS ECS](https://aws.amazon.com/ecs/), to execute that node.
-
-## Final thought
-
-One major benefit of running a Kedro pipeline in a serverless computing platform is the ability to take advantage of other services from the same provider. For example, AWS has recently announced a [Feature Store for SageMaker](https://aws.amazon.com/sagemaker/feature-store/). We could easily use it as the Features layer in [Kedro's Data Engineering convention](../faq/faq.md#what-is-data-engineering-convention).

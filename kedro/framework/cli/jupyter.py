@@ -1,6 +1,8 @@
 """A collection of helper functions to integrate with Jupyter/IPython
 and CLI commands for working with Kedro catalog.
 """
+from __future__ import annotations
+
 import json
 import os
 import shutil
@@ -8,7 +10,7 @@ import sys
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 from warnings import warn
 
 import click
@@ -32,17 +34,37 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
-# pylint: disable=missing-function-docstring
+class JupyterCommandGroup(click.Group):
+    """A custom class for ordering the `kedro jupyter` command groups"""
+
+    def list_commands(self, ctx):
+        """List commands according to a custom order"""
+        return ["setup", "notebook", "lab", "convert"]
+
+
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def jupyter_cli():  # pragma: no cover
     pass
 
 
-@jupyter_cli.group()
+@jupyter_cli.group(cls=JupyterCommandGroup)
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.
     """
+
+
+@forward_command(jupyter, "setup", forward_help=True)
+@click.pass_obj  # this will pass the metadata as first argument
+def setup(metadata: ProjectMetadata, args, **kwargs):  # noqa: unused-argument
+    """Initialise the Jupyter Kernel for a kedro project."""
+    _check_module_importable("ipykernel")
+    validate_settings()
+
+    kernel_name = f"kedro_{metadata.package_name}"
+    kernel_path = _create_kernel(kernel_name, f"Kedro ({metadata.package_name})")
+    click.secho(f"\nThe kernel has been created successfully at {kernel_path}")
 
 
 @forward_command(jupyter, "notebook", forward_help=True)
@@ -53,7 +75,7 @@ def jupyter_notebook(
     env,
     args,
     **kwargs,
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Open Jupyter Notebook with project specific variables loaded."""
     _check_module_importable("notebook")
     validate_settings()
@@ -79,7 +101,7 @@ def jupyter_lab(
     env,
     args,
     **kwargs,
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Open Jupyter Lab with project specific variables loaded."""
     _check_module_importable("jupyterlab")
     validate_settings()
@@ -96,7 +118,7 @@ def jupyter_lab(
     )
 
 
-def _create_kernel(kernel_name: str, display_name: str) -> None:
+def _create_kernel(kernel_name: str, display_name: str) -> str:
     """Creates an IPython kernel for the kedro project. If one with the same kernel_name
     exists already it will be replaced.
 
@@ -130,12 +152,15 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
         kernel_name: Name of the kernel to create.
         display_name: Kernel name as it is displayed in the UI.
 
+    Returns:
+        String of the path of the created kernel.
+
     Raises:
         KedroCliError: When kernel cannot be setup.
     """
     # These packages are required by jupyter lab and notebook, which we have already
     # checked are importable, so we don't run _check_module_importable on them.
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     from ipykernel.kernelspec import install
 
     try:
@@ -164,6 +189,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
         raise KedroCliError(
             f"Cannot setup kedro kernel for Jupyter.\nError: {exc}"
         ) from exc
+    return kernel_path
 
 
 @command_with_verbosity(jupyter, "convert")
@@ -179,7 +205,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> None:
 @click.pass_obj  # this will pass the metadata as first argument
 def convert_notebook(
     metadata: ProjectMetadata, all_flag, overwrite_flag, filepath, env, **kwargs
-):  # pylint: disable=unused-argument, too-many-locals
+):  # noqa: unused-argument, too-many-locals
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
     Cells tagged as `node` will be copied over to a Python file matching
@@ -276,7 +302,7 @@ def _export_nodes(filepath: Path, output_path: Path) -> None:
         warn(f"Skipping notebook '{filepath}' - no nodes to export.")
 
 
-def _append_source_code(cell: Dict[str, Any], path: Path) -> None:
+def _append_source_code(cell: dict[str, Any], path: Path) -> None:
     source_code = "".join(cell["source"]).strip() + "\n"
     with path.open(mode="a") as file_:
         file_.write(source_code)

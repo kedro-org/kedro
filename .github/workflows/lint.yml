@@ -1,0 +1,33 @@
+name: Run linters on Kedro
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        type: string
+      python-version:
+        type: string
+
+jobs:
+  lint:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Cache python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{inputs.os}}-python-${{inputs.python-version}}
+      - name: Install dependencies
+        run: |
+            make install-test-requirements
+            make install-pre-commit
+      - name: pip freeze
+        run: pip freeze
+      - name: Run linter
+        run: make lint

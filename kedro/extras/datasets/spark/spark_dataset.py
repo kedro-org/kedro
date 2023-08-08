@@ -18,7 +18,7 @@ from s3fs import S3FileSystem
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -41,7 +41,8 @@ def _parse_glob_pattern(pattern: str) -> str:
 
 def _split_filepath(filepath: str) -> Tuple[str, str]:
     split_ = filepath.split("://", 1)
-    if len(split_) == 2:
+    MIN_SPLIT_SIZE = 2
+    if len(split_) == MIN_SPLIT_SIZE:
         return split_[0] + "://", split_[1]
     return "", split_[0]
 
@@ -164,41 +165,43 @@ class KedroHdfsInsecureClient(InsecureClient):
 class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     """``SparkDataSet`` loads and saves Spark dataframes.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> weather:
-        >>>   type: spark.SparkDataSet
-        >>>   filepath: s3a://your_bucket/data/01_raw/weather/*
-        >>>   file_format: csv
-        >>>   load_args:
-        >>>     header: True
-        >>>     inferSchema: True
-        >>>   save_args:
-        >>>     sep: '|'
-        >>>     header: True
-        >>>
-        >>> weather_schema:
-        >>>   type: spark.SparkDataSet
-        >>>   filepath: s3a://your_bucket/data/01_raw/weather/*
-        >>>   file_format: csv
-        >>>   load_args:
-        >>>     header: True
-        >>>     schema:
-        >>>       filepath: path/to/schema.json
-        >>>   save_args:
-        >>>     sep: '|'
-        >>>     header: True
-        >>>
-        >>> weather_cleaned:
-        >>>   type: spark.SparkDataSet
-        >>>   filepath: data/02_intermediate/data.parquet
-        >>>   file_format: parquet
+        weather:
+          type: spark.SparkDataSet
+          filepath: s3a://your_bucket/data/01_raw/weather/*
+          file_format: csv
+          load_args:
+            header: True
+            inferSchema: True
+          save_args:
+            sep: '|'
+            header: True
 
-    Example using Python API:
+        weather_with_schema:
+          type: spark.SparkDataSet
+          filepath: s3a://your_bucket/data/01_raw/weather/*
+          file_format: csv
+          load_args:
+            header: True
+            schema:
+              filepath: path/to/schema.json
+          save_args:
+            sep: '|'
+            header: True
+
+        weather_cleaned:
+          type: spark.SparkDataSet
+          filepath: data/02_intermediate/data.parquet
+          file_format: parquet
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from pyspark.sql import SparkSession
@@ -230,7 +233,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # ruff: noqa: PLR0913
         self,
         filepath: str,
         file_format: str = "parquet",
@@ -344,7 +347,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
         filepath = schema.get("filepath")
         if not filepath:
-            raise DataSetError(
+            raise DatasetError(
                 "Schema load argument does not specify a 'filepath' attribute. Please"
                 "include a path to a JSON-serialised 'pyspark.sql.types.StructType'."
             )
@@ -361,19 +364,19 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             try:
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:
-                raise DataSetError(
+                raise DatasetError(
                     f"Contents of 'schema.filepath' ({schema_path}) are invalid. Please"
                     f"provide a valid JSON-serialised 'pyspark.sql.types.StructType'."
                 ) from exc
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._fs_prefix + str(self._filepath),
-            file_format=self._file_format,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._fs_prefix + str(self._filepath),
+            "file_format": self._file_format,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     @staticmethod
     def _get_spark():
@@ -399,10 +402,11 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         try:
             self._get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
-            if (
-                exception.desc.startswith("Path does not exist:")
-                or "is not a Delta table" in exception.desc
-            ):
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = (
+                exception.desc if hasattr(exception, "desc") else exception.message
+            )
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
         return True
@@ -415,7 +419,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
             and self._file_format == "delta"
             and write_mode not in supported_modes
         ):
-            raise DataSetError(
+            raise DatasetError(
                 f"It is not possible to perform 'save()' for file format 'delta' "
                 f"with mode '{write_mode}' on 'SparkDataSet'. "
                 f"Please use 'spark.DeltaTableDataSet' instead."

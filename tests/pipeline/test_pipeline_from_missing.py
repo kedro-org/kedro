@@ -3,8 +3,9 @@ from unittest import mock
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import DataCatalog, LambdaDataSet
-from kedro.pipeline import Pipeline, node
+from kedro.io import DataCatalog, LambdaDataset
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
 
 
@@ -55,7 +56,7 @@ def branched_pipeline():
     #       r-out
     #
     # ##################################
-    return Pipeline(
+    return modular_pipeline(
         [
             node(identity, "A", "B", name="left_in"),
             node(constant_output, None, "C", name="right_in"),
@@ -69,19 +70,19 @@ def branched_pipeline():
 def _make_catalog(
     existent=None, non_existent=None, no_exists_method=None, feed_dict=None
 ):
-    """Creates a catalog of existent and non-existent DataSets."""
+    """Creates a catalog of existent and non-existent Datasets."""
     existent = [] if existent is None else existent
     non_existent = [] if non_existent is None else non_existent
     no_exists_method = [] if no_exists_method is None else no_exists_method
 
     catalog = DataCatalog(feed_dict=feed_dict)
     for source in existent:
-        catalog.add(source, LambdaDataSet(None, None, lambda: True))
+        catalog.add(source, LambdaDataset(None, None, lambda: True))
     for source in non_existent:
-        catalog.add(source, LambdaDataSet(None, None, lambda: False))
-    # Some LambdaDataSet do not have exists() method
+        catalog.add(source, LambdaDataset(None, None, lambda: False))
+    # Some LambdaDataset do not have exists() method
     for source in no_exists_method:
-        catalog.add(source, LambdaDataSet(None, None))
+        catalog.add(source, LambdaDataset(None, None))
     return catalog
 
 
@@ -150,7 +151,7 @@ class TestPipelineMissing:
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "'exists()' not implemented for 'LambdaDataSet'" in log_record.getMessage()
+            "'exists()' not implemented for 'LambdaDataset'" in log_record.getMessage()
         )
 
     def test_all_no_exists_method(self, branched_pipeline, caplog, hook_manager):
@@ -160,7 +161,7 @@ class TestPipelineMissing:
 
         log_msgs = [record.getMessage() for record in caplog.records]
         expected_msg = (
-            "'exists()' not implemented for 'LambdaDataSet'. "
+            "'exists()' not implemented for 'LambdaDataset'. "
             "Assuming output does not exist."
         )
         assert expected_msg in log_msgs

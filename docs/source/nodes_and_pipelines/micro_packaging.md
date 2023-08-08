@@ -4,9 +4,13 @@ Micro-packaging allows users to share Kedro micro-packages across codebases, org
 
 ## Package a micro-package
 
-You can package a micro-package by executing: `kedro micropkg package <micropkg_name>`
+You can package a micro-package by executing: `kedro micropkg package <micropkg_name>`.
 
-* This will generate a new [tar](https://docs.python.org/3/distutils/sourcedist.html) file for this micro-package.
+`<micropkg_name>` should be a Python module path like what would be used in an `import` statement, for example
+
+`kedro micropkg package pipelines.data_processing`
+
+* This will generate a new [source distribution](https://docs.python.org/3/distutils/sourcedist.html) for this micro-package.
 * By default, the tar file will be saved into `dist/` directory inside your project.
 * You can customise the target with the `--destination` (`-d`) option.
 
@@ -64,14 +68,14 @@ The examples above apply to any generic Python package, modular pipelines fall u
 
 You can pull a micro-package from a tar file by executing `kedro micropkg pull <package_name>`.
 
-* The `<package_name>` must either be a package name on PyPI or a path to the tar file.
+* The `<package_name>` must either be a package name on PyPI or a path to the source distribution file.
 * Kedro will unpack the tar file, and install the files in following locations in your Kedro project:
   * All the micro-package code in `src/<package_name>/<micropkg_name>/`
   * Configuration files in `conf/<env>/parameters/<micropkg_name>.yml`, where `<env>` defaults to `base`.
   * To place parameters from a different config environment, run `kedro micropkg pull <micropkg_name> --env <env_name>`
   * Unit tests in `src/tests/<micropkg_name>`
 * Kedro will also parse any requirements packaged with the micro-package and add them to project level `requirements.in`.
-* It is advised to do `kedro build-reqs` to compile the updated list of requirements after pulling a micro-package.
+* It is advised to compile an updated list of requirements after pulling a micro-package using [`pip-compile`](https://pypi.org/project/pip-tools/).
 
 ```{note}
 If a micro-package has embedded requirements and a project `requirements.in` file does not already exist, it will be generated based on the project `requirements.txt` before appending the micro-package requirements.

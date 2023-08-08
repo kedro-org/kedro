@@ -43,8 +43,7 @@ class GraphMLDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -125,13 +124,12 @@ class GraphMLDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
         return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _release(self) -> None:
         super()._release()

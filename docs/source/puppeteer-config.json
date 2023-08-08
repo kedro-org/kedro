@@ -1,0 +1,4 @@
+{
+  "args": ["--no-sandbox"],
+  "headless": "old"
+}

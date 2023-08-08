@@ -1,9 +1,9 @@
 """This module contains unit test for the cli command 'kedro new'
 """
+from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Dict
 
 import pytest
 import yaml
@@ -17,7 +17,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
 )
 
-FILES_IN_TEMPLATE = 32
+FILES_IN_TEMPLATE = 30
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ def mock_cookiecutter(mocker):
     return mocker.patch("cookiecutter.main.cookiecutter")
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
@@ -48,7 +48,7 @@ def _make_cli_prompt_input(project_name="", repo_name="", python_package=""):
     return "\n".join([project_name, repo_name, python_package])
 
 
-# pylint: disable=too-many-arguments
+# noqa: too-many-arguments
 def _assert_template_ok(
     result,
     project_name="New Kedro Project",

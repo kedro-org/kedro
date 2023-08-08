@@ -10,7 +10,7 @@ from PIL import Image
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -25,7 +25,9 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
     """``ImageDataSet`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
-    Example:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pillow import ImageDataSet
@@ -38,8 +40,7 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         save_args: Dict[str, Any] = None,
@@ -103,12 +104,12 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
         self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> Image.Image:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -127,7 +128,7 @@ class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

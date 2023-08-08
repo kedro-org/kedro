@@ -1,5 +1,4 @@
 # pylint: disable=unused-argument
-import subprocess
 import sys
 from pathlib import Path
 
@@ -59,9 +58,7 @@ class TestActivateNbstripoutCommand:
         call_mock.assert_called_once_with(["nbstripout", "--install"])
 
         fake_git_repo.assert_called_once_with(
-            ["git", "rev-parse", "--git-dir"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            ["git", "rev-parse", "--git-dir"], capture_output=True
         )
 
     def test_nbstripout_not_installed(
@@ -296,26 +293,23 @@ class TestPackageCommand:
                 mocker.call(
                     [
                         sys.executable,
-                        "setup.py",
-                        "clean",
-                        "--all",
-                        "bdist_egg",
-                        "--dist-dir",
+                        "-m",
+                        "build",
+                        "--wheel",
+                        "--outdir",
                         "../dist",
                     ],
                     cwd=str(fake_repo_path / "src"),
                 ),
                 mocker.call(
                     [
-                        sys.executable,
-                        "setup.py",
-                        "clean",
-                        "--all",
-                        "bdist_wheel",
-                        "--dist-dir",
-                        "../dist",
+                        "tar",
+                        "--exclude=local/*.yml",
+                        "-czf",
+                        f"dist/conf-{fake_metadata.package_name}.tar.gz",
+                        f"--directory={fake_metadata.project_path}",
+                        "conf",
                     ],
-                    cwd=str(fake_repo_path / "src"),
                 ),
             ]
         )

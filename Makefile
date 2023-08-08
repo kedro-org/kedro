@@ -2,22 +2,30 @@ install:
 	pip install .
 
 clean:
-	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
+	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info kedro/datasets
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true
 
 install-pip-setuptools:
-	pip install -U "pip>=21.2" "setuptools>=38.0" wheel
+	python -m pip install -U "pip>=21.2, <23.2" "setuptools>=65.5.1" wheel
 
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
-
 test:
-	pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
+	pytest --numprocesses 4 --dist loadfile
 
 test-no-spark:
-	pytest tests --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
+	pytest --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
+
+test-sequential:
+	pytest tests --cov-config pyproject.toml
+
+test-no-spark-sequential:
+	pytest tests --no-cov --ignore tests/extras/datasets/spark
+
+test-no-datasets:
+	pytest --no-cov --ignore tests/extras/datasets/ --numprocesses 4 --dist loadfile
 
 e2e-tests:
 	behave
@@ -41,14 +49,11 @@ linkcheck:
 	pip install -e ".[docs]"
 	./docs/build-docs.sh "linkcheck"
 
-devserver: build-docs
-	cd docs && npm install && npm start
-
 package: clean install
-	python setup.py sdist bdist_wheel
+	python -m pip install build && python -m build
 
 install-test-requirements:
-	pip install -r test_requirements.txt
+	pip install .[test]
 
 install-pre-commit: install-test-requirements
 	pre-commit install --install-hooks
@@ -58,6 +63,10 @@ uninstall-pre-commit:
 
 print-python-env:
 	@./tools/print_env.sh
+
+databricks-build:
+	python -m pip install build && python -m build
+	python ./tools/databricks_build.py
 
 sign-off:
 	echo "git interpret-trailers --if-exists doNothing \c" >> .git/hooks/commit-msg

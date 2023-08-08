@@ -2,10 +2,12 @@
 This script creates an IPython extension to load Kedro-related variables in
 local scope.
 """
+from __future__ import annotations
+
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
@@ -14,8 +16,11 @@ from IPython.core.magic_arguments import argument, magic_arguments, parse_argstr
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import PARAMS_ARG_HELP
 from kedro.framework.cli.utils import ENV_HELP, _split_params
-from kedro.framework.project import LOGGING  # noqa
-from kedro.framework.project import configure_project, pipelines
+from kedro.framework.project import (
+    LOGGING,  # noqa
+    configure_project,
+    pipelines,
+)
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
 
@@ -29,6 +34,8 @@ def load_ipython_extension(ipython):
     IPython will look for this function specifically.
     See https://ipython.readthedocs.io/en/stable/config/extensions/index.html
     """
+    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
+
     if _find_kedro_project(Path.cwd()) is None:
         logger.warning(
             "Kedro extension was registered but couldn't find a Kedro project. "
@@ -36,7 +43,6 @@ def load_ipython_extension(ipython):
         )
         return
 
-    ipython.register_magic_function(magic_reload_kedro, magic_name="reload_kedro")
     reload_kedro()
 
 
@@ -59,10 +65,11 @@ def load_ipython_extension(ipython):
     default=None,
     help=PARAMS_ARG_HELP,
 )
-def magic_reload_kedro(line: str, local_ns: Dict[str, Any] = None):
+def magic_reload_kedro(line: str, local_ns: dict[str, Any] = None):
     """
-    The `%reload_kedro` IPython line magic. See
-     https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html for more.
+    The `%reload_kedro` IPython line magic.
+    See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic # noqa: line-too-long
+    for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
     reload_kedro(args.path, args.env, args.params, local_ns)
@@ -71,8 +78,8 @@ def magic_reload_kedro(line: str, local_ns: Dict[str, Any] = None):
 def reload_kedro(
     path: str = None,
     env: str = None,
-    extra_params: Dict[str, Any] = None,
-    local_namespace: Optional[Dict[str, Any]] = None,
+    extra_params: dict[str, Any] = None,
+    local_namespace: dict[str, Any] | None = None,
 ) -> None:  # pragma: no cover
     """Function that underlies the %reload_kedro Line magic. This should not be imported
     or run directly but instead invoked through %reload_kedro."""
@@ -109,7 +116,7 @@ def reload_kedro(
 
 
 def _resolve_project_path(
-    path: Optional[str] = None, local_namespace: Optional[Dict[str, Any]] = None
+    path: str | None = None, local_namespace: dict[str, Any] | None = None
 ) -> Path:
     """
     Resolve the project path to use with reload_kedro, updating or adding it
@@ -124,7 +131,7 @@ def _resolve_project_path(
         project_path = Path(path).expanduser().resolve()
     else:
         if local_namespace and "context" in local_namespace:
-            # pylint: disable=protected-access
+            # noqa: protected-access
             project_path = local_namespace["context"]._project_path
         else:
             project_path = _find_kedro_project(Path.cwd())
@@ -135,7 +142,7 @@ def _resolve_project_path(
                 project_path,
             )
 
-    # pylint: disable=protected-access
+    # noqa: protected-access
     if (
         project_path
         and local_namespace

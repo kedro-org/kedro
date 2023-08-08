@@ -12,7 +12,7 @@ from sqlalchemy.exc import NoSuchModuleError
 
 from kedro.io.core import (
     AbstractDataSet,
-    DataSetError,
+    DatasetError,
     get_filepath_str,
     get_protocol_and_path,
 )
@@ -72,19 +72,19 @@ def _find_known_drivers(module_import_error: ImportError) -> Optional[str]:
     return None
 
 
-def _get_missing_module_error(import_error: ImportError) -> DataSetError:
+def _get_missing_module_error(import_error: ImportError) -> DatasetError:
     missing_module_instruction = _find_known_drivers(import_error)
 
     if missing_module_instruction is None:
-        return DataSetError(
+        return DatasetError(
             f"{DRIVER_ERROR_MESSAGE}Loading failed with error:\n\n{str(import_error)}"
         )
 
-    return DataSetError(f"{DRIVER_ERROR_MESSAGE}{missing_module_instruction}")
+    return DatasetError(f"{DRIVER_ERROR_MESSAGE}{missing_module_instruction}")
 
 
-def _get_sql_alchemy_missing_error() -> DataSetError:
-    return DataSetError(
+def _get_sql_alchemy_missing_error() -> DatasetError:
+    return DatasetError(
         "The SQL dialect in your connection is not supported by "
         "SQLAlchemy. Please refer to "
         "https://docs.sqlalchemy.org/en/13/core/engines.html#supported-databases "
@@ -107,30 +107,32 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
     the data with no index. This is designed to make load and save methods
     symmetric.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> shuttles_table_dataset:
-        >>>   type: pandas.SQLTableDataSet
-        >>>   credentials: db_credentials
-        >>>   table_name: shuttles
-        >>>   load_args:
-        >>>     schema: dwschema
-        >>>   save_args:
-        >>>     schema: dwschema
-        >>>     if_exists: replace
+        shuttles_table_dataset:
+          type: pandas.SQLTableDataSet
+          credentials: db_credentials
+          table_name: shuttles
+          load_args:
+            schema: dwschema
+          save_args:
+            schema: dwschema
+            if_exists: replace
 
     Sample database credentials entry in ``credentials.yml``:
 
     .. code-block:: yaml
 
-            >>> db_creds:
-            >>>     con: postgresql://scott:tiger@localhost/test
+        db_credentials:
+          con: postgresql://scott:tiger@localhost/test
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import SQLTableDataSet
@@ -192,14 +194,14 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
                 It has ``index=False`` in the default parameters.
 
         Raises:
-            DataSetError: When either ``table_name`` or ``con`` is empty.
+            DatasetError: When either ``table_name`` or ``con`` is empty.
         """
 
         if not table_name:
-            raise DataSetError("'table_name' argument cannot be empty.")
+            raise DatasetError("'table_name' argument cannot be empty.")
 
         if not (credentials and "con" in credentials and credentials["con"]):
-            raise DataSetError(
+            raise DatasetError(
                 "'con' argument cannot be empty. Please "
                 "provide a SQLAlchemy connection string."
             )
@@ -241,11 +243,11 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         save_args = copy.deepcopy(self._save_args)
         del load_args["table_name"]
         del save_args["name"]
-        return dict(
-            table_name=self._load_args["table_name"],
-            load_args=load_args,
-            save_args=save_args,
-        )
+        return {
+            "table_name": self._load_args["table_name"],
+            "load_args": load_args,
+            "save_args": save_args,
+        }
 
     def _load(self) -> pd.DataFrame:
         engine = self.engines[self._connection_str]  # type:ignore
@@ -276,26 +278,40 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     To save data to a SQL server use ``SQLTableDataSet``.
 
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> shuttle_id_dataset:
-        >>>   type: pandas.SQLQueryDataSet
-        >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
-        >>>   credentials: db_credentials
-        >>>   layer: raw
+        shuttle_id_dataset:
+          type: pandas.SQLQueryDataSet
+          sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+          credentials: db_credentials
+
+    Advanced example using the ``stream_results`` and ``chunksize`` options to reduce memory usage:
+
+    .. code-block:: yaml
+
+        shuttle_id_dataset:
+          type: pandas.SQLQueryDataSet
+          sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+          credentials: db_credentials
+          execution_options:
+            stream_results: true
+          load_args:
+            chunksize: 1000
 
     Sample database credentials entry in ``credentials.yml``:
 
     .. code-block:: yaml
 
-            >>> db_creds:
-            >>>     con: postgresql://scott:tiger@localhost/test
+        db_credentials:
+          con: postgresql://scott:tiger@localhost/test
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import SQLQueryDataSet
@@ -311,7 +327,6 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         >>>                            credentials=credentials)
         >>>
         >>> sql_data = data_set.load()
-        >>>
 
     """
 
@@ -319,13 +334,14 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
     # sqlalchemy.engine.Engine or sqlalchemy.engine.base.Engine
     engines: Dict[str, Any] = {}
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: too-many-arguments
         self,
         sql: str = None,
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
         filepath: str = None,
+        execution_options: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -351,24 +367,30 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading.
             filepath: A path to a file with a sql query statement.
+            execution_options: A dictionary with non-SQL advanced options for the connection to
+                be applied to the underlying engine. To find all supported execution
+                options, see here:
+                https://docs.sqlalchemy.org/en/12/core/connections.html#sqlalchemy.engine.Connection.execution_options
+                Note that this is not a standard argument supported by pandas API, but could be
+                useful for handling large datasets.
 
         Raises:
-            DataSetError: When either ``sql`` or ``con`` parameters is empty.
+            DatasetError: When either ``sql`` or ``con`` parameters is empty.
         """
         if sql and filepath:
-            raise DataSetError(
+            raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be provided."
                 "Please only provide one."
             )
 
         if not (sql or filepath):
-            raise DataSetError(
+            raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be empty."
                 "Please provide a sql query or path to a sql query file."
             )
 
         if not (credentials and "con" in credentials and credentials["con"]):
-            raise DataSetError(
+            raise DatasetError(
                 "'con' argument cannot be empty. Please "
                 "provide a SQLAlchemy connection string."
             )
@@ -395,6 +417,7 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
             self._filepath = path
         self._connection_str = credentials["con"]
+        self._execution_options = execution_options or {}
         self.create_connection(self._connection_str)
 
     @classmethod
@@ -417,15 +440,18 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     def _describe(self) -> Dict[str, Any]:
         load_args = copy.deepcopy(self._load_args)
-        return dict(
-            sql=str(load_args.pop("sql", None)),
-            filepath=str(self._filepath),
-            load_args=str(load_args),
-        )
+        return {
+            "sql": str(load_args.pop("sql", None)),
+            "filepath": str(self._filepath),
+            "load_args": str(load_args),
+            "execution_options": str(self._execution_options),
+        }
 
     def _load(self) -> pd.DataFrame:
         load_args = copy.deepcopy(self._load_args)
-        engine = self.engines[self._connection_str]  # type: ignore
+        engine = self.engines[self._connection_str].execution_options(
+            **self._execution_options
+        )  # type: ignore
 
         if self._filepath:
             load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
@@ -435,4 +461,4 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         return pd.read_sql_query(con=engine, **load_args)
 
     def _save(self, data: None) -> NoReturn:
-        raise DataSetError("'save' is not supported on SQLQueryDataSet")
+        raise DatasetError("'save' is not supported on SQLQueryDataSet")

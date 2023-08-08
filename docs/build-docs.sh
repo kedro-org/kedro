@@ -7,21 +7,8 @@ set -o nounset
 
 action=$1
 
-# Move some files around. We need a separate build directory, which would
-# have all the files, build scripts would shuffle the files,
-# we don't want that happening on the actual code locally.
-# When running on ReadTheDocs, sphinx-build would run directly on the original files,
-# but we don't care about the code state there.
-rm -rf docs/build
-mkdir docs/build/
-cp -r docs/_templates docs/conf.py docs/*.svg docs/*.json  docs/build/
-
 if [ "$action" == "linkcheck" ]; then
-  sphinx-build -c docs/ -WETan -j auto -D language=en -b linkcheck docs/build/ docs/build/html
+  sphinx-build -WETan -j auto -D language=en -b linkcheck -d docs/build/doctrees docs/source docs/build/linkcheck
 elif [ "$action" == "docs" ]; then
-  sphinx-build -c docs/ -WETa -j auto -D language=en docs/build/ docs/build/html
+  sphinx-build -WETa -j auto -D language=en -b html -d docs/build/doctrees docs/source docs/build/html
 fi
-
-# Clean up build artefacts
-rm -rf docs/build/html/_sources
-rm -rf docs/build/[0-9][0-9]_*

@@ -1,26 +1,32 @@
 """
-This module contains ``CachedDataSet``, a dataset wrapper which caches in memory the data saved,
+This module contains ``CachedDataset``, a dataset wrapper which caches in memory the data saved,
 so that the user avoids io operations with slow storage media
 """
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Union
+import warnings
+from typing import Any
 
 from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataSet, Version
-from kedro.io.memory_dataset import MemoryDataSet
+from kedro.io.memory_dataset import MemoryDataset
+
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+CachedDataSet: type[CachedDataset]
 
 
-class CachedDataSet(AbstractDataSet):
-    """``CachedDataSet`` is a dataset wrapper which caches in memory the data saved,
+class CachedDataset(AbstractDataSet):
+    """``CachedDataset`` is a dataset wrapper which caches in memory the data saved,
     so that the user avoids io operations with slow storage media.
 
-    You can also specify a ``CachedDataSet`` in catalog.yml:
+    You can also specify a ``CachedDataset`` in catalog.yml:
     ::
 
         >>> test_ds:
-        >>>    type: CachedDataSet
+        >>>    type: CachedDataset
         >>>    versioned: true
         >>>    dataset:
-        >>>       type: pandas.CSVDataSet
+        >>>       type: pandas.CSVDataset
         >>>       filepath: example.csv
 
     Please note that if your dataset is versioned, this should be indicated in the wrapper
@@ -34,15 +40,16 @@ class CachedDataSet(AbstractDataSet):
 
     def __init__(
         self,
-        dataset: Union[AbstractDataSet, Dict],
+        dataset: AbstractDataSet | dict,
         version: Version = None,
         copy_mode: str = None,
+        metadata: dict[str, Any] = None,
     ):
-        """Creates a new instance of ``CachedDataSet`` pointing to the
+        """Creates a new instance of ``CachedDataset`` pointing to the
         provided Python object.
 
         Args:
-            dataset: A Kedro DataSet object or a dictionary to cache.
+            dataset: A Kedro Dataset object or a dictionary to cache.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -50,6 +57,8 @@ class CachedDataSet(AbstractDataSet):
             copy_mode: The copy mode used to copy the data. Possible
                 values are: "deepcopy", "copy" and "assign". If not
                 provided, it is inferred based on the data type.
+            metadata: Any arbitrary metadata.
+                This is ignored by Kedro, but may be consumed by users or external plugins.
 
         Raises:
             ValueError: If the provided dataset is not a valid dict/YAML
@@ -64,7 +73,8 @@ class CachedDataSet(AbstractDataSet):
                 "The argument type of 'dataset' should be either a dict/YAML "
                 "representation of the dataset, or the actual dataset object."
             )
-        self._cache = MemoryDataSet(copy_mode=copy_mode)
+        self._cache = MemoryDataset(copy_mode=copy_mode)
+        self.metadata = metadata
 
     def _release(self) -> None:
         self._cache.release()
@@ -75,7 +85,7 @@ class CachedDataSet(AbstractDataSet):
         if VERSIONED_FLAG_KEY in config:
             raise ValueError(
                 "Cached datasets should specify that they are versioned in the "
-                "'CachedDataSet', not in the wrapped dataset."
+                "'CachedDataset', not in the wrapped dataset."
             )
         if version:
             config[VERSIONED_FLAG_KEY] = True
@@ -84,10 +94,10 @@ class CachedDataSet(AbstractDataSet):
             )
         return AbstractDataSet.from_config("_cached", config)
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {
-            "dataset": self._dataset._describe(),  # pylint: disable=protected-access
-            "cache": self._cache._describe(),  # pylint: disable=protected-access
+            "dataset": self._dataset._describe(),  # noqa: protected-access
+            "cache": self._cache._describe(),  # noqa: protected-access
         }
 
     def _load(self):
@@ -111,3 +121,16 @@ class CachedDataSet(AbstractDataSet):
         logging.getLogger(__name__).warning("%s: clearing cache to pickle.", str(self))
         self._cache.release()
         return self.__dict__
+
+
+def __getattr__(name):
+    if name == "CachedDataSet":
+        alias = CachedDataset
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro 0.19.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

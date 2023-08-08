@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import logging
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -21,6 +23,7 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.pipeline.node import Node, node
 
 logger = logging.getLogger(__name__)
@@ -33,20 +36,20 @@ def mock_package_name() -> str:
     return MOCK_PACKAGE_NAME
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
 
 
-def _write_toml(filepath: Path, config: Dict):
+def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     toml_str = toml.dumps(config)
     filepath.write_text(toml_str)
 
 
 def _assert_hook_call_record_has_expected_parameters(
-    call_record: logging.LogRecord, expected_parameters: List[str]
+    call_record: logging.LogRecord, expected_parameters: list[str]
 ):
     """Assert the given call record has all expected parameters."""
     for param in expected_parameters:
@@ -86,7 +89,7 @@ def config_dir(tmp_path, local_config):
     payload = {
         "tool": {
             "kedro": {
-                "project_version": kedro_version,
+                "kedro_init_version": kedro_version,
                 "project_name": "test hooks",
                 "package_name": "test_hooks",
             }
@@ -110,7 +113,7 @@ def dummy_dataframe() -> pd.DataFrame:
 
 @pytest.fixture
 def mock_pipeline() -> Pipeline:
-    return Pipeline(
+    return modular_pipeline(
         [
             node(identity_node, "cars", "planes", name="node1"),
             node(identity_node, "boats", "ships", name="node2"),
@@ -167,11 +170,11 @@ class LoggingHooks:
     def after_catalog_created(
         self,
         catalog: DataCatalog,
-        conf_catalog: Dict[str, Any],
-        conf_creds: Dict[str, Any],
-        feed_dict: Dict[str, Any],
+        conf_catalog: dict[str, Any],
+        conf_creds: dict[str, Any],
+        feed_dict: dict[str, Any],
         save_version: str,
-        load_versions: Dict[str, str],
+        load_versions: dict[str, str],
     ):
         logger.info(
             "Catalog created",
@@ -190,7 +193,7 @@ class LoggingHooks:
         self,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
+        inputs: dict[str, Any],
         is_async: str,
         session_id: str,
     ) -> None:
@@ -210,8 +213,8 @@ class LoggingHooks:
         self,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
-        outputs: Dict[str, Any],
+        inputs: dict[str, Any],
+        outputs: dict[str, Any],
         is_async: str,
         session_id: str,
     ) -> None:
@@ -233,7 +236,7 @@ class LoggingHooks:
         error: Exception,
         node: Node,
         catalog: DataCatalog,
-        inputs: Dict[str, Any],
+        inputs: dict[str, Any],
         is_async: bool,
         session_id: str,
     ):
@@ -251,7 +254,7 @@ class LoggingHooks:
 
     @hook_impl
     def before_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self, run_params: dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         logger.info(
             "About to run pipeline",
@@ -261,8 +264,8 @@ class LoggingHooks:
     @hook_impl
     def after_pipeline_run(
         self,
-        run_params: Dict[str, Any],
-        run_result: Dict[str, Any],
+        run_params: dict[str, Any],
+        run_result: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
     ) -> None:
@@ -280,7 +283,7 @@ class LoggingHooks:
     def on_pipeline_error(
         self,
         error: Exception,
-        run_params: Dict[str, Any],
+        run_params: dict[str, Any],
         pipeline: Pipeline,
         catalog: DataCatalog,
     ) -> None:
@@ -295,25 +298,30 @@ class LoggingHooks:
         )
 
     @hook_impl
-    def before_dataset_loaded(self, dataset_name: str) -> None:
-        logger.info("Before dataset loaded", extra={"dataset_name": dataset_name})
-
-    @hook_impl
-    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_loaded(self, dataset_name: str, node: Node) -> None:
         logger.info(
-            "After dataset loaded", extra={"dataset_name": dataset_name, "data": data}
+            "Before dataset loaded", extra={"dataset_name": dataset_name, "node": node}
         )
 
     @hook_impl
-    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def after_dataset_loaded(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "Before dataset saved", extra={"dataset_name": dataset_name, "data": data}
+            "After dataset loaded",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
     @hook_impl
-    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+    def before_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
         logger.info(
-            "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
+            "Before dataset saved",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
+        )
+
+    @hook_impl
+    def after_dataset_saved(self, dataset_name: str, data: Any, node: Node) -> None:
+        logger.info(
+            "After dataset saved",
+            extra={"dataset_name": dataset_name, "data": data, "node": node},
         )
 
     @hook_impl

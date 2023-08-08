@@ -14,7 +14,7 @@ from google.oauth2.credentials import Credentials
 
 from kedro.io.core import (
     AbstractDataSet,
-    DataSetError,
+    DatasetError,
     get_filepath_str,
     get_protocol_and_path,
     validate_on_forbidden_chars,
@@ -29,25 +29,26 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
     """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> vehicles:
-        >>>   type: pandas.GBQTableDataSet
-        >>>   dataset: big_query_dataset
-        >>>   table_name: big_query_table
-        >>>   project: my-project
-        >>>   credentials: gbq-creds
-        >>>   load_args:
-        >>>     reauth: True
-        >>>   save_args:
-        >>>     chunk_size: 100
+        vehicles:
+          type: pandas.GBQTableDataSet
+          dataset: big_query_dataset
+          table_name: big_query_table
+          project: my-project
+          credentials: gbq-creds
+          load_args:
+            reauth: True
+          save_args:
+            chunk_size: 100
 
-
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import GBQTableDataSet
@@ -69,8 +70,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"progress_bar": False}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         dataset: str,
         table_name: str,
@@ -102,7 +102,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
                 All defaults are preserved, but "progress_bar", which is set to False.
 
         Raises:
-            DataSetError: When ``load_args['location']`` and ``save_args['location']``
+            DatasetError: When ``load_args['location']`` and ``save_args['location']``
                 are different.
         """
         # Handle default load and save arguments
@@ -130,12 +130,12 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
         )
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            dataset=self._dataset,
-            table_name=self._table_name,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
+        return {
+            "dataset": self._dataset,
+            "table_name": self._table_name,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+        }
 
     def _load(self) -> pd.DataFrame:
         sql = f"select * from {self._dataset}.{self._table_name}"  # nosec
@@ -167,7 +167,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
         load_location = self._load_args.get("location")
 
         if save_location != load_location:
-            raise DataSetError(
+            raise DatasetError(
                 """"load_args['location']" is different from "save_args['location']". """
                 "The 'location' defines where BigQuery data is stored, therefore has "
                 "to be the same for save and load args. "
@@ -209,8 +209,7 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         sql: str = None,
         project: str = None,
@@ -241,17 +240,17 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
             filepath: A path to a file with a sql query statement.
 
         Raises:
-            DataSetError: When ``sql`` and ``filepath`` parameters are either both empty
+            DatasetError: When ``sql`` and ``filepath`` parameters are either both empty
                 or both provided, as well as when the `save()` method is invoked.
         """
         if sql and filepath:
-            raise DataSetError(
+            raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be provided."
                 "Please only provide one."
             )
 
         if not (sql or filepath):
-            raise DataSetError(
+            raise DatasetError(
                 "'sql' and 'filepath' arguments cannot both be empty."
                 "Please provide a sql query or path to a sql query file."
             )
@@ -311,4 +310,4 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
         )
 
     def _save(self, data: None) -> NoReturn:
-        raise DataSetError("'save' is not supported on GBQQueryDataSet")
+        raise DatasetError("'save' is not supported on GBQQueryDataSet")

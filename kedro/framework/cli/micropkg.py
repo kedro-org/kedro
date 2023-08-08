@@ -1,5 +1,8 @@
 """A collection of CLI commands for working with Kedro micro-packages."""
+# ruff: noqa: I001 # https://github.com/kedro-org/kedro/pull/2634
+from __future__ import annotations
 
+import logging
 import re
 import shutil
 import sys
@@ -7,14 +10,17 @@ import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
-from typing import Iterable, List, Optional, Set, Tuple, Union
+from typing import Any, Iterable, Iterator, List, Tuple, Union
 
 import click
-import pkg_resources
+from build.util import project_wheel_metadata
+from packaging.requirements import InvalidRequirement, Requirement
+from packaging.utils import canonicalize_name
 from rope.base.project import Project
 from rope.contrib import generate
 from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
+from setuptools.discovery import FlatLayoutPackageFinder
 
 from kedro.framework.cli.pipeline import (
     _assert_pkg_name_ok,
@@ -32,21 +38,74 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.startup import ProjectMetadata
 
-_SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
+_PYPROJECT_TOML_TEMPLATE = """
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
-setup(
-    name="{name}",
-    version="{version}",
-    description="Micro-package `{name}`",
-    packages=find_packages(),
-    include_package_data=True,
-    install_requires={install_requires},
-)
+[project]
+name = "{name}"
+version = "{version}"
+description = "Micro-package `{name}`"
+dependencies = {install_requires}
+
+[tool.setuptools.packages]
+find = {{}}
 """
 
+logger = logging.getLogger(__name__)
 
-def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
+
+class _EquivalentRequirement(Requirement):
+    """Parse a requirement according to PEP 508.
+
+    This class overrides __eq__ to be backwards compatible with pkg_resources.Requirement
+    while making __str__ and __hash__ use the non-canonicalized name
+    as agreed in https://github.com/pypa/packaging/issues/644,
+
+    Implementation taken from https://github.com/pypa/packaging/pull/696/
+    """
+
+    def _iter_parts(self, name: str) -> Iterator[str]:
+        yield name
+
+        if self.extras:
+            formatted_extras = ",".join(sorted(self.extras))
+            yield f"[{formatted_extras}]"
+
+        if self.specifier:
+            yield str(self.specifier)
+
+        if self.url:
+            yield f"@ {self.url}"
+            if self.marker:
+                yield " "
+
+        if self.marker:
+            yield f"; {self.marker}"
+
+    def __str__(self) -> str:
+        return "".join(self._iter_parts(self.name))
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                self.__class__.__name__,
+                *self._iter_parts(canonicalize_name(self.name)),
+            )
+        )
+
+    def __eq__(self, other: Any) -> bool:
+        return (
+            canonicalize_name(self.name) == canonicalize_name(other.name)
+            and self.extras == other.extras
+            and self.specifier == other.specifier
+            and self.url == other.url
+            and self.marker == other.marker
+        )
+
+
+def _check_module_path(ctx, param, value):  # noqa: unused-argument
     if value and not re.match(r"^[\w.]+$", value):
         message = (
             "The micro-package location you provided is not a valid Python module path"
@@ -55,7 +114,7 @@ def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def micropkg_cli():  # pragma: no cover
     pass
@@ -95,7 +154,7 @@ def micropkg():
     help="Location of a configuration file for the fsspec filesystem used to pull the package.",
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def pull_package(  # pylint:disable=unused-argument, too-many-arguments
+def pull_package(  # noqa: unused-argument, too-many-arguments
     metadata: ProjectMetadata,
     package_path,
     env,
@@ -130,8 +189,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-# pylint: disable=too-many-arguments, too-many-locals
-def _pull_package(
+def _pull_package(  # noqa: too-many-arguments
     package_path: str,
     metadata: ProjectMetadata,
     env: str = None,
@@ -143,25 +201,46 @@ def _pull_package(
         temp_dir_path = Path(temp_dir).resolve()
         _unpack_sdist(package_path, temp_dir_path, fs_args)
 
-        egg_info_files = list((temp_dir_path).rglob("*.egg-info"))
-        if len(egg_info_files) != 1:
+        # temp_dir_path is the parent directory of the project root dir
+        contents = [member for member in temp_dir_path.iterdir() if member.is_dir()]
+        if len(contents) != 1:
             raise KedroCliError(
-                f"More than 1 or no egg-info files found from {package_path}. "
-                f"There has to be exactly one egg-info directory."
+                "Invalid sdist was extracted: exactly one directory was expected, "
+                f"got {contents}"
             )
-        egg_info_file = egg_info_files[0]
-        package_name = egg_info_file.stem
-        package_requirements = egg_info_file.parent / "setup.py"
+        project_root_dir = contents[0]
 
-        # Finds a string representation of 'install_requires' list from setup.py
-        reqs_list_pattern = r"install_requires\=(.*?)\,\n"
-        list_reqs = re.findall(
-            reqs_list_pattern, package_requirements.read_text(encoding="utf-8")
-        )
+        # This is much slower than parsing the requirements
+        # directly from the metadata files
+        # because it installs the package in an isolated environment,
+        # but it's the only reliable way of doing it
+        # without making assumptions on the project metadata.
+        library_meta = project_wheel_metadata(project_root_dir)
 
-        # Finds all elements from the above string representation of a list
-        reqs_element_pattern = r"\'(.*?)\'"
-        package_reqs = re.findall(reqs_element_pattern, list_reqs[0])
+        # Project name will be `my-pipeline` even if `pyproject.toml` says `my_pipeline`
+        # because standards mandate normalization of names for comparison,
+        # see https://packaging.python.org/en/latest/specifications/core-metadata/#name
+        # The proper way to get it would be
+        # project_name = library_meta.get("Name")
+        # However, the rest of the code expects the non-normalized package name,
+        # so we have to find it.
+        packages = [
+            package
+            for package in FlatLayoutPackageFinder().find(project_root_dir)
+            if "." not in package
+        ]
+        if len(packages) != 1:
+            # Should not happen if user is calling `micropkg pull`
+            # with the result of a `micropkg package`,
+            # and in general if the distribution only contains one package (most likely),
+            # but helps give a sensible error message otherwise
+            raise KedroCliError(
+                "Invalid package contents: exactly one package was expected, "
+                f"got {packages}"
+            )
+        package_name = packages[0]
+
+        package_reqs = _get_all_library_reqs(library_meta)
 
         if package_reqs:
             requirements_txt = metadata.source_dir / "requirements.txt"
@@ -171,7 +250,7 @@ def _pull_package(
         _install_files(
             metadata,
             package_name,
-            egg_info_file.parent,
+            project_root_dir,
             env,
             alias,
             destination,
@@ -179,7 +258,7 @@ def _pull_package(
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import anyconfig  # for performance reasons
 
     config_dict = anyconfig.load(metadata.config_file)
@@ -203,7 +282,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
 
 def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import anyconfig  # for performance reasons
 
     config_dict = anyconfig.load(metadata.config_file)
@@ -226,7 +305,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
     click.secho("Micro-packages packaged!", fg="green")
 
 
-@micropkg.command("package")
+@command_with_verbosity(micropkg, "package")
 @env_option(
     help="Environment where the micro-package configuration lives. Defaults to `base`."
 )
@@ -252,8 +331,14 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 )
 @click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
-def package_micropkg(
-    metadata: ProjectMetadata, module_path, env, alias, destination, all_flag
+def package_micropkg(  # noqa: too-many-arguments
+    metadata: ProjectMetadata,
+    module_path,
+    env,
+    alias,
+    destination,
+    all_flag,
+    **kwargs,
 ):
     """Package up a modular pipeline or micro-package as a Python source distribution."""
     if not module_path and not all_flag:
@@ -279,8 +364,8 @@ def package_micropkg(
     click.secho(message, fg="green")
 
 
-def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
-    # pylint: disable=import-outside-toplevel
+def _get_fsspec_filesystem(location: str, fs_args: str | None):
+    # noqa: import-outside-toplevel
     import anyconfig
     import fsspec
 
@@ -291,7 +376,7 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
 
     try:
         return fsspec.filesystem(protocol, **fs_args_config)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:  # noqa: broad-except
         # Specified protocol is not supported by `fsspec`
         # or requires extra dependencies
         click.secho(str(exc), fg="red")
@@ -299,20 +384,44 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
         return None
 
 
-def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> None:
+def _is_within_directory(directory, target):
+    abs_directory = directory.resolve()
+    abs_target = target.resolve()
+    return abs_directory in abs_target.parents
+
+
+def safe_extract(tar, path):
+    for member in tar.getmembers():
+        member_path = path / member.name
+        if not _is_within_directory(path, member_path):
+            # noqa: broad-exception-raised
+            raise Exception("Failed to safely extract tar file.")
+    tar.extractall(path)  # nosec B202
+
+
+def _unpack_sdist(location: str, destination: Path, fs_args: str | None) -> None:
     filesystem = _get_fsspec_filesystem(location, fs_args)
 
     if location.endswith(".tar.gz") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
             with tarfile.open(fileobj=fs_file, mode="r:gz") as tar_file:
-                tar_file.extractall(destination)
+                safe_extract(tar_file, destination)
     else:
         python_call(
-            "pip", ["download", "--no-deps", "--dest", str(destination), location]
+            "pip",
+            [
+                "download",
+                "--no-deps",
+                "--no-binary",  # the micropackaging expects an sdist,
+                ":all:",  # wheels are not supported
+                "--dest",
+                str(destination),
+                location,
+            ],
         )
         sdist_file = list(destination.glob("*.tar.gz"))
-        # `--no-deps` should fetch only one source distribution file, and CLI should fail if that's
-        # not the case.
+        # `--no-deps --no-binary :all:` should fetch only one source distribution file,
+        # and CLI should fail if that's not the case.
         if len(sdist_file) != 1:
             file_names = [sf.name for sf in sdist_file]
             raise KedroCliError(
@@ -320,7 +429,7 @@ def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> N
                 f"There has to be exactly one source distribution file."
             )
         with tarfile.open(sdist_file[0], "r:gz") as fs_file:
-            fs_file.extractall(destination)
+            safe_extract(fs_file, destination)
 
 
 def _rename_files(conf_source: Path, old_name: str, new_name: str):
@@ -334,14 +443,14 @@ def _rename_files(conf_source: Path, old_name: str, new_name: str):
         config_file.rename(config_file.parent / new_config_name)
 
 
-def _refactor_code_for_unpacking(
+def _refactor_code_for_unpacking(  # noqa: too-many-arguments
     project: Project,
     package_path: Path,
     tests_path: Path,
-    alias: Optional[str],
-    destination: Optional[str],
+    alias: str | None,
+    destination: str | None,
     project_metadata: ProjectMetadata,
-) -> Tuple[Path, Path]:
+) -> tuple[Path, Path]:
     """This is the reverse operation of `_refactor_code_for_package`, i.e
     we go from:
     <temp_dir>  # also the root of the Rope project
@@ -415,7 +524,7 @@ def _refactor_code_for_unpacking(
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
+def _install_files(  # noqa: too-many-arguments, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
@@ -463,9 +572,9 @@ def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
 
 
 def _find_config_files(
-    source_config_dir: Path, glob_patterns: List[str]
-) -> List[Tuple[Path, str]]:
-    config_files = []  # type: List[Tuple[Path, str]]
+    source_config_dir: Path, glob_patterns: list[str]
+) -> list[tuple[Path, str]]:
+    config_files: list[tuple[Path, str]] = []
 
     if source_config_dir.is_dir():
         config_files = [
@@ -486,6 +595,12 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
         )
         return micropkg_module.__version__  # type: ignore
     except (AttributeError, ModuleNotFoundError):
+        logger.warning(
+            "Micropackage version not found in '%s.%s', will take the top-level one in '%s'",
+            metadata.package_name,
+            micropkg_module_path,
+            metadata.package_name,
+        )
         # if micropkg version doesn't exist, take the project one
         project_module = import_module(f"{metadata.package_name}")
         return project_module.__version__  # type: ignore
@@ -507,9 +622,16 @@ def _package_micropkg(
     )
     # as the source distribution will only contain parameters, we aren't listing other
     # config files not to confuse users and avoid useless file copies
+    # collect configs to package not only from parameters folder, but from core conf folder also
+    # because parameters had been moved from foldername to yml filename
     configs_to_package = _find_config_files(
         package_conf,
-        [f"parameters*/**/{micropkg_name}.yml", f"parameters*/**/{micropkg_name}/**/*"],
+        [
+            f"**/parameters_{micropkg_name}.yml",
+            f"**/{micropkg_name}/**/*",
+            f"parameters*/**/{micropkg_name}.yml",
+            f"parameters*/**/{micropkg_name}/**/*",
+        ],
     )
 
     source_paths = (package_source, package_tests, configs_to_package)
@@ -546,19 +668,29 @@ def _get_sdist_name(name, version):
     return f"{name}-{version}.tar.gz"
 
 
-def _sync_path_list(source: List[Tuple[Path, str]], target: Path) -> None:
+def _sync_path_list(source: list[tuple[Path, str]], target: Path) -> None:
     for source_path, suffix in source:
         target_with_suffix = (target / suffix).resolve()
         _sync_dirs(source_path, target_with_suffix)
 
 
-def _make_install_requires(requirements_txt: Path) -> List[str]:
+def _drop_comment(line):
+    # https://github.com/pypa/setuptools/blob/b545fc7/\
+    # pkg_resources/_vendor/jaraco/text/__init__.py#L554-L566
+    return line.partition(" #")[0]
+
+
+def _make_install_requires(requirements_txt: Path) -> list[str]:
     """Parses each line of requirements.txt into a version specifier valid to put in
-    install_requires."""
+    install_requires.
+    Matches pkg_resources.parse_requirements"""
     if not requirements_txt.exists():
         return []
-    requirements = pkg_resources.parse_requirements(requirements_txt.read_text())
-    return [str(requirement) for requirement in requirements]
+    return [
+        str(_EquivalentRequirement(_drop_comment(requirement_line)))
+        for requirement_line in requirements_txt.read_text().splitlines()
+        if requirement_line and not requirement_line.startswith("#")
+    ]
 
 
 def _create_nested_package(project: Project, package_path: Path) -> Path:
@@ -613,7 +745,7 @@ def _refactor_code_for_package(
     project: Project,
     package_path: Path,
     tests_path: Path,
-    alias: Optional[str],
+    alias: str | None,
     project_metadata: ProjectMetadata,
 ) -> None:
     """In order to refactor the imports properly, we need to recreate
@@ -695,11 +827,10 @@ def _refactor_code_for_package(
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 
 
-# pylint: disable=too-many-arguments,too-many-locals
-def _generate_sdist_file(
+def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
     micropkg_name: str,
     destination: Path,
-    source_paths: Tuple[_SourcePathType, ...],
+    source_paths: tuple[_SourcePathType, ...],
     version: str,
     metadata: ProjectMetadata,
     alias: str = None,
@@ -722,7 +853,7 @@ def _generate_sdist_file(
         if conf_target.is_dir() and alias:
             _rename_files(conf_target, micropkg_name, alias)
 
-        # Build a setup.py on the fly
+        # Build a pyproject.toml on the fly
         try:
             install_requires = _make_install_requires(
                 package_source / "requirements.txt"  # type: ignore
@@ -733,9 +864,7 @@ def _generate_sdist_file(
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
         _generate_manifest_file(temp_dir_path)
-        setup_file = _generate_setup_file(
-            package_name, version, install_requires, temp_dir_path
-        )
+        _generate_pyproject_file(package_name, version, install_requires, temp_dir_path)
 
         package_file = destination / _get_sdist_name(name=package_name, version=version)
 
@@ -744,14 +873,14 @@ def _generate_sdist_file(
                 f"Package file {package_file} will be overwritten!", fg="yellow"
             )
 
-        # python setup.py sdist --formats=gztar --dist-dir <destination>
+        # python -m build --outdir <destination>
         call(
             [
                 sys.executable,
-                str(setup_file.resolve()),
-                "sdist",
-                "--formats=gztar",
-                "--dist-dir",
+                "-m",
+                "build",
+                "--sdist",
+                "--outdir",
                 str(destination),
             ],
             cwd=temp_dir,
@@ -771,22 +900,24 @@ def _generate_manifest_file(output_dir: Path):
     )
 
 
-def _generate_setup_file(
-    package_name: str, version: str, install_requires: List[str], output_dir: Path
+def _generate_pyproject_file(
+    package_name: str, version: str, install_requires: list[str], output_dir: Path
 ) -> Path:
-    setup_file = output_dir / "setup.py"
+    pyproject_file = output_dir / "pyproject.toml"
 
-    setup_file_context = dict(
-        name=package_name, version=version, install_requires=install_requires
-    )
+    pyproject_file_context = {
+        "name": package_name,
+        "version": version,
+        "install_requires": install_requires,
+    }
 
-    setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
-    return setup_file
+    pyproject_file.write_text(_PYPROJECT_TOML_TEMPLATE.format(**pyproject_file_context))
+    return pyproject_file
 
 
 def _get_package_artifacts(
     source_path: Path, package_name: str
-) -> Tuple[Path, Path, Path]:
+) -> tuple[Path, Path, Path]:
     """From existing package, returns in order:
     source_path, tests_path, config_path
     """
@@ -800,7 +931,7 @@ def _get_package_artifacts(
 
 
 def _append_package_reqs(
-    requirements_txt: Path, package_reqs: List[str], package_name: str
+    requirements_txt: Path, package_reqs: list[str], package_name: str
 ) -> None:
     """Appends micro-package requirements to project level requirements.txt"""
     incoming_reqs = _safe_parse_requirements(package_reqs)
@@ -836,19 +967,39 @@ def _append_package_reqs(
     )
 
 
+def _get_all_library_reqs(metadata):
+    """Get all library requirements from metadata, leaving markers intact."""
+    # See https://discuss.python.org/t/\
+    # programmatically-getting-non-optional-requirements-of-current-directory/26963/2
+    return [
+        str(_EquivalentRequirement(dep_str))
+        for dep_str in metadata.get_all("Requires-Dist", [])
+    ]
+
+
 def _safe_parse_requirements(
-    requirements: Union[str, Iterable[str]]
-) -> Set[pkg_resources.Requirement]:
-    """Safely parse a requirement or set of requirements. This effectively replaces
-    pkg_resources.parse_requirements, which blows up with a ValueError as soon as it
+    requirements: str | Iterable[str],
+) -> set[_EquivalentRequirement]:
+    """Safely parse a requirement or set of requirements. This avoids blowing up when it
     encounters a requirement it cannot parse (e.g. `-r requirements.txt`). This way
     we can still extract all the parseable requirements out of a set containing some
     unparseable requirements.
     """
     parseable_requirements = set()
-    for requirement in pkg_resources.yield_lines(requirements):
-        try:
-            parseable_requirements.add(pkg_resources.Requirement.parse(requirement))
-        except ValueError:
-            continue
+    if isinstance(requirements, str):
+        requirements = requirements.splitlines()
+    # TODO: Properly handle continuation lines,
+    # see https://github.com/pypa/setuptools/blob/v67.8.0/setuptools/_reqs.py
+    for requirement_line in requirements:
+        if (
+            requirement_line
+            and not requirement_line.startswith("#")
+            and not requirement_line.startswith("-e")
+        ):
+            try:
+                parseable_requirements.add(
+                    _EquivalentRequirement(_drop_comment(requirement_line))
+                )
+            except InvalidRequirement:
+                continue
     return parseable_requirements

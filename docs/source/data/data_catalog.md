@@ -2,7 +2,7 @@
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
-All supported data connectors are available in [`kedro.extras.datasets`](/kedro.extras.datasets).
+All supported data connectors are available in [`kedro-datasets`](/kedro_datasets).
 
 ## Use the Data Catalog within Kedro configuration
 
@@ -10,7 +10,7 @@ Kedro uses configuration to make your code reproducible when it has to reference
 
 You can copy this file and reference additional locations for the same datasets. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production, while copying and updating a second version of `catalog.yml` in `conf/local/` to register the locations of sample datasets that you are using for prototyping your data pipeline(s).
 
-Built-in functionality for `conf/local/` to overwrite `conf/base/` is [described in the documentation about configuration](../kedro_project_setup/configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
+Built-in functionality for `conf/local/` to overwrite `conf/base/` is [described in the documentation about configuration](../configuration/configuration_basics.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
 
 The Data Catalog also works with the `credentials.yml` file in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
 
@@ -261,7 +261,7 @@ scooters_query:
     index_col: [name]
 ```
 
-When you use [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+When you use [`pandas.SQLTableDataSet`](/kedro_datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro_datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
 
 ### Example 14: Loads data from an API endpoint, example US corn yield data from USDA
@@ -371,12 +371,12 @@ scooters:
 
 ## Adding parameters
 
-You can [configure parameters](../kedro_project_setup/configuration.md#load-parameters) for your project and [reference them](../kedro_project_setup/configuration.md#use-parameters) in your nodes. To do this, use the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry or metadata you wish on the `DataCatalog`.
+You can [configure parameters](../configuration/parameters.md) for your project and [reference them](../configuration/parameters.md#how-to-use-parameters) in your nodes. To do this, use the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry or metadata you wish on the `DataCatalog`.
 
 
 ## Feeding in credentials
 
-Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../kedro_project_setup/configuration.md#aws-credentials). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
+Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 
@@ -404,7 +404,7 @@ CSVDataSet(
 ```
 
 
-## Load multiple datasets with similar configuration
+## Load multiple datasets with similar configuration using YAML anchors
 
 Different datasets might use the same file format, load and save arguments, and be stored in the same folder. [YAML has a built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets, so that you need not spend time copying and pasting dataset configurations in the `catalog.yml` file.
 
@@ -461,6 +461,211 @@ airplanes:
 
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
+## Load multiple datasets with similar configuration using dataset factories
+For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.12. This syntax allows you to generalise the configuration and
+reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
+
+### Example 1: Generalise datasets with similar names and types into one dataset factory
+Consider the following catalog entries:
+```yaml
+factory_data:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/factory_data.csv
+
+
+process_data:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/process_data.csv
+```
+The datasets in this catalog can be generalised to the following dataset factory:
+```yaml
+"{name}_data":
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/{name}_data.csv
+```
+When `factory_data` or `process_data` is used in your pipeline, it is matched to the factory pattern `{name}_data`. The factory pattern must always be enclosed in
+quotes to avoid YAML parsing errors.
+
+
+### Example 2: Generalise datasets of the same type into one dataset factory
+You can also combine all the datasets with the same type and configuration details. For example, consider the following
+catalog with three datasets named `boats`, `cars` and `planes` of the type `pandas.CSVDataSet`:
+```yaml
+boats:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/shuttles.csv
+
+cars:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/reviews.csv
+
+planes:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/companies.csv
+```
+These datasets can be combined into the following dataset factory:
+```yaml
+"{dataset_name}#csv":
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/{dataset_name}.csv
+```
+You will then have to update the pipelines in your project located at `src/<project_name>/<pipeline_name>/pipeline.py` to refer to these datasets as `boats#csv`,
+`cars#csv` and `planes#csv`. Adding a suffix or a prefix to the dataset names and the dataset factory patterns, like `#csv` here, ensures that the dataset
+names are matched with the intended pattern.
+```python
+from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
+        [
+            node(
+                func=preprocess_boats,
+                inputs="boats#csv",
+                outputs="preprocessed_boats",
+                name="preprocess_boats_node",
+            ),
+            node(
+                func=preprocess_cars,
+                inputs="cars#csv",
+                outputs="preprocessed_cars",
+                name="preprocess_cars_node",
+            ),
+            node(
+                func=preprocess_planes,
+                inputs="planes#csv",
+                outputs="preprocessed_planes",
+                name="preprocess_planes_node",
+            ),
+            node(
+                func=create_model_input_table,
+                inputs=[
+                    "preprocessed_boats",
+                    "preprocessed_planes",
+                    "preprocessed_cars",
+                ],
+                outputs="model_input_table",
+                name="create_model_input_table_node",
+            ),
+        ]
+    )
+```
+### Example 3: Generalise datasets using namespaces into one dataset factory
+You can also generalise the catalog entries for datasets belonging to namespaced modular pipelines. Consider the
+following pipeline which takes in a `model_input_table` and outputs two regressors belonging to the
+`active_modelling_pipeline` and the `candidate_modelling_pipeline` namespaces:
+```python
+from kedro.pipeline import Pipeline, node
+from kedro.pipeline.modular_pipeline import pipeline
+
+from .nodes import evaluate_model, split_data, train_model
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    pipeline_instance = pipeline(
+        [
+            node(
+                func=split_data,
+                inputs=["model_input_table", "params:model_options"],
+                outputs=["X_train", "y_train"],
+                name="split_data_node",
+            ),
+            node(
+                func=train_model,
+                inputs=["X_train", "y_train"],
+                outputs="regressor",
+                name="train_model_node",
+            ),
+        ]
+    )
+    ds_pipeline_1 = pipeline(
+        pipe=pipeline_instance,
+        inputs="model_input_table",
+        namespace="active_modelling_pipeline",
+    )
+    ds_pipeline_2 = pipeline(
+        pipe=pipeline_instance,
+        inputs="model_input_table",
+        namespace="candidate_modelling_pipeline",
+    )
+
+    return ds_pipeline_1 + ds_pipeline_2
+```
+You can now have one dataset factory pattern in your catalog instead of two separate entries for `active_modelling_pipeline.regressor`
+and `candidate_modelling_pipeline.regressor` as below:
+```yaml
+{namespace}.regressor:
+  type: pickle.PickleDataSet
+  filepath: data/06_models/regressor_{namespace}.pkl
+  versioned: true
+```
+### Example 4: Generalise datasets of the same type in different layers into one dataset factory with multiple placeholders
+
+You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset
+entries share `type`, `file_format` and `save_args`:
+```yaml
+processing.factory_data:
+  type: spark.SparkDataSet
+  filepath: data/processing/factory_data.pq
+  file_format: parquet
+  save_args:
+    mode: overwrite
+
+processing.process_data:
+  type: spark.SparkDataSet
+  filepath: data/processing/process_data.pq
+  file_format: parquet
+  save_args:
+    mode: overwrite
+
+modelling.metrics:
+  type: spark.SparkDataSet
+  filepath: data/modelling/factory_data.pq
+  file_format: parquet
+  save_args:
+    mode: overwrite
+```
+This could be generalised to the following pattern:
+```yaml
+"{layer}.{dataset_name}":
+  type: spark.SparkDataSet
+  filepath: data/{layer}/{dataset_name}.pq
+  file_format: parquet
+  save_args:
+    mode: overwrite
+```
+All the placeholders used in the catalog entry body must exist in the factory pattern name.
+
+### Example 5: Generalise datasets using multiple dataset factories
+You can have multiple dataset factories in your catalog. For example:
+```yaml
+"{namespace}.{dataset_name}@spark":
+  type: spark.SparkDataSet
+  filepath: data/{namespace}/{dataset_name}.pq
+  file_format: parquet
+
+"{dataset_name}@csv":
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/{dataset_name}.csv
+```
+
+Having multiple dataset factories in your catalog can lead to a situation where a dataset name from your pipeline might
+match multiple patterns. To overcome this, Kedro sorts all the potential matches for the dataset name in the pipeline and picks the best match.
+The matches are ranked according to the following criteria :
+1. Number of exact character matches between the dataset name and the factory pattern. For example, a dataset named `factory_data$csv` would match `{dataset}_data$csv` over `{dataset_name}$csv`.
+2. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
+3. Alphabetical order
+
+### Example 6: Generalise all datasets with a catch-all dataset factory to overwrite the default `MemoryDataSet`
+You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataSet` creation.
+```yaml
+"{default_dataset}":
+  type: pandas.CSVDataSet
+  filepath: data/{default_dataset}.csv
+
+```
+Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
+as `pandas.CSVDataSet`.
 
 ## Transcode datasets
 
@@ -509,18 +714,18 @@ Making a simple addition to your Data Catalog allows you to perform versioning o
 Consider the following versioned dataset defined in the `catalog.yml`:
 
 ```yaml
-cars.csv:
+cars:
   type: pandas.CSVDataSet
   filepath: data/01_raw/company/cars.csv
   versioned: True
 ```
 
-The `DataCatalog` will create a versioned `CSVDataSet` called `cars.csv`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
+The `DataCatalog` will create a versioned `CSVDataSet` called `cars`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
 
 You can run the pipeline with a particular versioned data set with `--load-version` flag as follows:
 
 ```bash
-kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
+kedro run --load-version=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
@@ -535,11 +740,11 @@ The code API allows you to:
 
 ### Configure a Data Catalog
 
-In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using a number of pre-built data loaders documented in the [API reference documentation](/kedro.extras.datasets).
+In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using several pre-built data loaders documented in the [API reference documentation](/kedro_datasets).
 
 ```python
 from kedro.io import DataCatalog
-from kedro.extras.datasets.pandas import (
+from kedro_datasets.pandas import (
     CSVDataSet,
     SQLTableDataSet,
     SQLQueryDataSet,
@@ -606,7 +811,7 @@ from kedro.io import MemoryDataSet
 memory = MemoryDataSet(data=None)
 io.add("cars_cache", memory)
 io.save("cars_cache", "Memory can store anything.")
-io.load("car_cache")
+io.load("cars_cache")
 ```
 
 #### Save data to a SQL database for querying

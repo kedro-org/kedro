@@ -1,8 +1,10 @@
 """This module provides context for Kedro project."""
+from __future__ import annotations
 
+import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Dict, Optional, Union
+from typing import Any
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -20,12 +22,12 @@ def _is_relative_path(path_string: str) -> bool:
     Example:
     ::
         >>> _is_relative_path("data/01_raw") == True
-        >>> _is_relative_path("logs/info.log") == True
+        >>> _is_relative_path("info.log") == True
         >>> _is_relative_path("/tmp/data/01_raw") == False
-        >>> _is_relative_path(r"C:\\logs\\info.log") == False
-        >>> _is_relative_path(r"\\logs\\'info.log") == False
-        >>> _is_relative_path("c:/logs/info.log") == False
-        >>> _is_relative_path("s3://logs/info.log") == False
+        >>> _is_relative_path(r"C:\\info.log") == False
+        >>> _is_relative_path(r"\\'info.log") == False
+        >>> _is_relative_path("c:/info.log") == False
+        >>> _is_relative_path("s3://info.log") == False
 
     Args:
         path_string: The path string to check.
@@ -50,8 +52,8 @@ def _is_relative_path(path_string: str) -> bool:
 
 
 def _convert_paths_to_absolute_posix(
-    project_path: Path, conf_dictionary: Dict[str, Any]
-) -> Dict[str, Any]:
+    project_path: Path, conf_dictionary: dict[str, Any]
+) -> dict[str, Any]:
     """Turn all relative paths inside ``conf_dictionary`` into absolute paths by appending them
     to ``project_path`` and convert absolute Windows paths to POSIX format. This is a hack to
     make sure that we don't have to change user's working directory for logging and datasets to
@@ -65,13 +67,13 @@ def _convert_paths_to_absolute_posix(
         >>>     conf_dictionary={
         >>>         "handlers": {
         >>>             "info_file_handler": {
-        >>>                 "filename": "logs/info.log"
+        >>>                 "filename": "info.log"
         >>>             }
         >>>         }
         >>>     }
         >>> )
         >>> print(conf['handlers']['info_file_handler']['filename'])
-        "/path/to/my/project/logs/info.log"
+        "/path/to/my/project/info.log"
 
     Args:
         project_path: The root directory to prepend to relative path to make absolute path.
@@ -90,7 +92,6 @@ def _convert_paths_to_absolute_posix(
     conf_keys_with_filepath = ("filename", "filepath", "path")
 
     for conf_key, conf_value in conf_dictionary.items():
-
         # if the conf_value is another dictionary, absolutify its paths first.
         if isinstance(conf_value, dict):
             conf_dictionary[conf_key] = _convert_paths_to_absolute_posix(
@@ -117,31 +118,25 @@ def _convert_paths_to_absolute_posix(
     return conf_dictionary
 
 
-def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
-    """Check that transcoded names that correspond to
-    the same dataset also belong to the same layer.
+def _validate_transcoded_datasets(catalog: DataCatalog):
+    """Validates transcoded datasets are correctly named
+
+    Args:
+        catalog (DataCatalog): The catalog object containing the
+        datasets to be validated.
+
+    Raises:
+        ValueError: If a dataset name does not conform to the expected
+        transcoding naming conventions,a ValueError is raised by the
+        `_transcode_split` function.
+
     """
-
-    def _find_conflicts():
-        base_names_to_layer = {}
-        for current_layer, dataset_names in catalog.layers.items():
-            for name in dataset_names:
-                base_name, _ = _transcode_split(name)
-                known_layer = base_names_to_layer.setdefault(base_name, current_layer)
-                if current_layer != known_layer:
-                    yield name
-                else:
-                    base_names_to_layer[base_name] = current_layer
-
-    conflicting_datasets = sorted(_find_conflicts())
-    if conflicting_datasets:
-        error_str = ", ".join(conflicting_datasets)
-        raise ValueError(
-            f"Transcoded datasets should have the same layer. Mismatch found for: {error_str}"
-        )
+    # noqa: protected-access
+    for dataset_name in catalog._data_sets.keys():
+        _transcode_split(dataset_name)
 
 
-def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> None:
+def _update_nested_dict(old_dict: dict[Any, Any], new_dict: dict[Any, Any]) -> None:
     """Update a nested dict with values of new_dict.
 
     Args:
@@ -152,11 +147,10 @@ def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> N
     for key, value in new_dict.items():
         if key not in old_dict:
             old_dict[key] = value
+        elif isinstance(old_dict[key], dict) and isinstance(value, dict):
+            _update_nested_dict(old_dict[key], value)
         else:
-            if isinstance(old_dict[key], dict) and isinstance(value, dict):
-                _update_nested_dict(old_dict[key], value)
-            else:
-                old_dict[key] = value
+            old_dict[key] = value
 
 
 class KedroContext:
@@ -164,15 +158,15 @@ class KedroContext:
     Kedro's main functionality.
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         package_name: str,
-        project_path: Union[Path, str],
+        project_path: Path | str,
         config_loader: ConfigLoader,
         hook_manager: PluginManager,
         env: str = None,
-        extra_params: Dict[str, Any] = None,
-    ):  # pylint: disable=too-many-arguments
+        extra_params: dict[str, Any] = None,
+    ):
         """Create a context object by providing the root of a Kedro project and
         the environment configuration subfolders
         (see ``kedro.config.ConfigLoader``)
@@ -200,7 +194,7 @@ class KedroContext:
         self._hook_manager = hook_manager
 
     @property  # type: ignore
-    def env(self) -> Optional[str]:
+    def env(self) -> str | None:
         """Property for the current Kedro environment.
 
         Returns:
@@ -232,7 +226,7 @@ class KedroContext:
         return self._get_catalog()
 
     @property
-    def params(self) -> Dict[str, Any]:
+    def params(self) -> dict[str, Any]:
         """Read-only property referring to Kedro's parameters for this context.
 
         Returns:
@@ -261,7 +255,7 @@ class KedroContext:
     def _get_catalog(
         self,
         save_version: str = None,
-        load_versions: Dict[str, str] = None,
+        load_versions: dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 
@@ -289,8 +283,7 @@ class KedroContext:
 
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)
-        if catalog.layers:
-            _validate_layers_for_transcoding(catalog)
+        _validate_transcoded_datasets(catalog)
         self._hook_manager.hook.after_catalog_created(
             catalog=catalog,
             conf_catalog=conf_catalog,
@@ -301,7 +294,7 @@ class KedroContext:
         )
         return catalog
 
-    def _get_feed_dict(self) -> Dict[str, Any]:
+    def _get_feed_dict(self) -> dict[str, Any]:
         """Get parameters and return the feed dictionary."""
         params = self.params
         feed_dict = {"parameters": params}
@@ -321,7 +314,6 @@ class KedroContext:
             """
             key = f"params:{param_name}"
             feed_dict[key] = param_value
-
             if isinstance(param_value, dict):
                 for key, val in param_value.items():
                     _add_param_to_feed_dict(f"{param_name}.{key}", val)
@@ -331,12 +323,14 @@ class KedroContext:
 
         return feed_dict
 
-    def _get_config_credentials(self) -> Dict[str, Any]:
+    def _get_config_credentials(self) -> dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
             conf_creds = self.config_loader["credentials"]
         except MissingConfigException as exc:
-            warn(f"Credentials not found in your Kedro project config.\n{str(exc)}")
+            logging.getLogger(__name__).debug(
+                "Credentials not found in your Kedro project config.\n %s", str(exc)
+            )
             conf_creds = {}
         return conf_creds
 

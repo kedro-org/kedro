@@ -2,15 +2,16 @@
 be used to run the ``Pipeline`` in parallel groups formed by toposort
 using threads.
 """
+from __future__ import annotations
+
 import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
-from typing import Set
 
 from pluggy import PluginManager
 
-from kedro.io import DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
@@ -50,18 +51,18 @@ class ThreadRunner(AbstractRunner):
 
         self._max_workers = max_workers
 
-    def create_default_data_set(self, ds_name: str) -> MemoryDataSet:  # type: ignore
+    def create_default_data_set(self, ds_name: str) -> MemoryDataset:  # type: ignore
         """Factory method for creating the default dataset for the runner.
 
         Args:
             ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of ``MemoryDataSet`` to be used for all
+            An instance of ``MemoryDataset`` to be used for all
             unregistered datasets.
 
         """
-        return MemoryDataSet()
+        return MemoryDataset()
 
     def _get_required_workers_count(self, pipeline: Pipeline):
         """
@@ -80,7 +81,7 @@ class ThreadRunner(AbstractRunner):
             else required_threads
         )
 
-    def _run(  # pylint: disable=too-many-locals,useless-suppression
+    def _run(  # noqa: too-many-locals,useless-suppression
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
@@ -103,7 +104,7 @@ class ThreadRunner(AbstractRunner):
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())
-        done_nodes = set()  # type: Set[Node]
+        done_nodes: set[Node] = set()
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)

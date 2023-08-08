@@ -12,13 +12,12 @@ pip install memory_profiler
 
 * Implement `before_dataset_loaded` and `after_dataset_loaded`
 
-<details>
-<summary><b>Click to expand</b></summary>
-
 ```python
-...
-from memory_profiler import memory_usage
+# src/<package_name>/hooks.py
 import logging
+
+from kedro.framework.hooks import hook_impl
+from memory_profiler import memory_usage
 
 
 def _normalise_mem_usage(mem_usage):
@@ -29,10 +28,6 @@ def _normalise_mem_usage(mem_usage):
 class MemoryProfilingHooks:
     def __init__(self):
         self._mem_usage = {}
-
-    @property
-    def _logger(self):
-        return logging.getLogger(self.__class__.__name__)
 
     @hook_impl
     def before_dataset_loaded(self, dataset_name: str) -> None:
@@ -45,7 +40,6 @@ class MemoryProfilingHooks:
         )
         before_mem_usage = _normalise_mem_usage(before_mem_usage)
         self._mem_usage[dataset_name] = before_mem_usage
-        )
 
     @hook_impl
     def after_dataset_loaded(self, dataset_name: str) -> None:
@@ -59,13 +53,12 @@ class MemoryProfilingHooks:
         # memory_profiler < 0.56.0 returns list instead of float
         after_mem_usage = _normalise_mem_usage(after_mem_usage)
 
-        self._logger.info(
+        logging.getLogger(__name__).info(
             "Loading %s consumed %2.2fMiB memory",
             dataset_name,
             after_mem_usage - self._mem_usage[dataset_name],
         )
 ```
-</details>
 
 * Register Hooks implementation by updating the `HOOKS` variable in `settings.py` as follows:
 
@@ -83,13 +76,19 @@ The output should look similar to the following:
 
 ```
 ...
-2021-10-05 12:02:34,946 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
-2021-10-05 12:02:43,358 - MemoryProfilingHooks - INFO - Loading shuttles consumed 82.67MiB memory
-2021-10-05 12:02:43,358 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
-2021-10-05 12:02:43,440 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (MemoryDataSet)...
-2021-10-05 12:02:43,446 - kedro.runner.sequential_runner - INFO - Completed 1 out of 2 tasks
-2021-10-05 12:02:43,559 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
-2021-10-05 12:02:43,727 - MemoryProfilingHooks - INFO - Loading companies consumed 4.16MiB memory
+[01/25/23 21:38:23] INFO     Loading data from 'example_iris_data' (CSVDataSet)...                                                                                                                                                                                    data_catalog.py:343
+                    INFO     Loading example_iris_data consumed 0.99MiB memory                                                                                                                                                                                                hooks.py:67
+                    INFO     Loading data from 'parameters' (MemoryDataSet)...                                                                                                                                                                                        data_catalog.py:343
+                    INFO     Loading parameters consumed 0.48MiB memory                                                                                                                                                                                                       hooks.py:67
+                    INFO     Running node: split: split_data([example_iris_data,parameters]) -> [X_train,X_test,y_train,y_test]                                                                                                                                               node.py:327
+                    INFO     Saving data to 'X_train' (MemoryDataSet)...                                                                                                                                                                                              data_catalog.py:382
+                    INFO     Saving data to 'X_test' (MemoryDataSet)...                                                                                                                                                                                               data_catalog.py:382
+                    INFO     Saving data to 'y_train' (MemoryDataSet)...                                                                                                                                                                                              data_catalog.py:382
+                    INFO     Saving data to 'y_test' (MemoryDataSet)...                                                                                                                                                                                               data_catalog.py:382
+                    INFO     Completed 1 out of 3 tasks                                                                                                                                                                                                           sequential_runner.py:85
+                    INFO     Loading data from 'X_train' (MemoryDataSet)...                                                                                                                                                                                           data_catalog.py:343
+                    INFO     Loading X_train consumed 0.49MiB memory                                                                                                                                                                                                          hooks.py:67
+                    INFO     Loading data from 'X_test' (MemoryDataSet)...
 ...
 ```
 
@@ -105,6 +104,7 @@ pip install great-expectations
 
 * Implement `before_node_run` and `after_node_run` Hooks to validate inputs and outputs data respectively leveraging `Great Expectations`:
 
+### V2 API
 ```python
 # src/<package_name>/hooks.py
 from typing import Any, Dict
@@ -169,6 +169,90 @@ class DataValidationHooks:
 `Great Expectations` example report:
 
 ![](../meta/images/data_validation.png)
+
+### V3 API
+* Create new checkpoint:
+
+```bash
+great_expectations checkpoint new raw_companies_dataset_checkpoint
+```
+
+* Remove `data_connector_query` from the `batch_request` in the checkpoint config file:
+
+```python
+yaml_config = f"""
+name: {my_checkpoint_name}
+config_version: 1.0
+class_name: SimpleCheckpoint
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: {my_datasource_name}
+      data_connector_name: default_runtime_data_connector_name
+      data_asset_name: my_runtime_asset_name
+      data_connector_query:
+        index: -1
+    expectation_suite_name: {my_expectation_suite_name}
+"""
+```
+
+```python
+# src/<package_name>/hooks.py
+from typing import Any, Dict
+
+from kedro.framework.hooks import hook_impl
+from kedro.io import DataCatalog
+
+import great_expectations as ge
+
+
+class DataValidationHooks:
+
+    # Map checkpoint to dataset
+    DATASET_CHECKPOINT_MAPPING = {
+        "companies": "raw_companies_dataset_checkpoint",
+    }
+
+    @hook_impl
+    def before_node_run(
+        self, catalog: DataCatalog, inputs: Dict[str, Any], session_id: str
+    ) -> None:
+        """Validate inputs data to a node based on using great expectation
+        if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
+        """
+        self._run_validation(catalog, inputs, session_id)
+
+    @hook_impl
+    def after_node_run(
+        self, catalog: DataCatalog, outputs: Dict[str, Any], session_id: str
+    ) -> None:
+        """Validate outputs data from a node based on using great expectation
+        if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
+        """
+        self._run_validation(catalog, outputs, session_id)
+
+    def _run_validation(
+        self, catalog: DataCatalog, data: Dict[str, Any], session_id: str
+    ):
+        for dataset_name, dataset_value in data.items():
+            if dataset_name not in self.DATASET_CHECKPOINT_MAPPING:
+                continue
+
+            data_context = ge.data_context.DataContext()
+
+            data_context.run_checkpoint(
+                checkpoint_name=self.DATASET_CHECKPOINT_MAPPING[dataset_name],
+                batch_request={
+                    "runtime_parameters": {
+                        "batch_data": dataset_value,
+                    },
+                    "batch_identifiers": {
+                        "runtime_batch_identifier_name": dataset_name
+                    },
+                },
+                run_name=session_id,
+            )
+```
 
 ## Add observability to your pipeline
 
@@ -294,6 +378,7 @@ If the `before_node_run` hook is implemented _and_ returns a dictionary, that di
 For example, if a pipeline contains a node named `my_node`, which takes 2 inputs: `first_input` and `second_input`, to overwrite the value of `first_input` that is passed to `my_node`, we can implement the following hook:
 
 ```python
+# src/<package_name>/hooks.py
 from typing import Any, Dict, Optional
 
 from kedro.framework.hooks import hook_impl

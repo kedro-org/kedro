@@ -12,7 +12,7 @@ import fsspec
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -29,26 +29,28 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     the specified backend library passed in (defaults to the ``pickle`` library), so it
     supports all allowed options for loading and saving pickle files.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> test_model: # simple example without compression
-        >>>   type: pickle.PickleDataSet
-        >>>   filepath: data/07_model_output/test_model.pkl
-        >>>   backend: pickle
-        >>>
-        >>> final_model: # example with load and save args
-        >>>   type: pickle.PickleDataSet
-        >>>   filepath: s3://your_bucket/final_model.pkl.lz4
-        >>>   backend: joblib
-        >>>   credentials: s3_credentials
-        >>>   save_args:
-        >>>     compress: lz4
+        test_model: # simple example without compression
+          type: pickle.PickleDataSet
+          filepath: data/07_model_output/test_model.pkl
+          backend: pickle
 
-    Example using Python API:
+        final_model: # example with load and save args
+          type: pickle.PickleDataSet
+          filepath: s3://your_bucket/final_model.pkl.lz4
+          backend: joblib
+          credentials: s3_credentials
+          save_args:
+            compress: lz4
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pickle import PickleDataSet
@@ -74,8 +76,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments,too-many-locals
-    def __init__(
+    def __init__(  # noqa: too-many-arguments,too-many-locals
         self,
         filepath: str,
         backend: str = "pickle",
@@ -110,7 +111,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 You can pass in arguments that the backend load function specified accepts, e.g:
                 pickle.load: https://docs.python.org/3/library/pickle.html#pickle.load
                 joblib.load: https://joblib.readthedocs.io/en/latest/generated/joblib.load.html
-                dill.load: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.load
+                dill.load: https://dill.readthedocs.io/en/latest/index.html#dill.load
                 compress_pickle.load:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 All defaults are preserved.
@@ -118,7 +119,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 You can pass in arguments that the backend dump function specified accepts, e.g:
                 pickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump
                 joblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html
-                dill.dump: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dump
+                dill.dump: https://dill.readthedocs.io/en/latest/index.html#dill.dump
                 compress_pickle.dump:
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
                 All defaults are preserved.
@@ -195,14 +196,14 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
         self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            backend=self._backend,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "backend": self._backend,
+            "protocol": self._protocol,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -219,7 +220,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
                 imported_backend = importlib.import_module(self._backend)
                 imported_backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
-                raise DataSetError(
+                raise DatasetError(
                     f"{data.__class__} was not serialised due to: {exc}"
                 ) from exc
 
@@ -228,7 +229,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

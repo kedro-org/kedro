@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import configparser
 import json
+import logging
 import re
 import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -18,7 +21,6 @@ from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
     _is_relative_path,
     _update_nested_dict,
-    _validate_layers_for_transcoding,
 )
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.project import (
@@ -37,19 +39,19 @@ class BadCatalog:  # pylint: disable=too-few-public-methods
     """
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
 
 
-def _write_toml(filepath: Path, config: Dict):
+def _write_toml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     toml_str = toml.dumps(config)
     filepath.write_text(toml_str)
 
 
-def _write_json(filepath: Path, config: Dict):
+def _write_json(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     json_str = json.dumps(config)
     filepath.write_text(json_str)
@@ -162,7 +164,6 @@ expected_message_middle = (
     '  --from-nodes "nodes3"'
 )
 
-
 expected_message_head = (
     "There are 4 nodes that have not run.\n"
     "You can resume the pipeline run by adding the following "
@@ -173,7 +174,7 @@ pyproject_toml_payload = {
     "tool": {
         "kedro": {
             "project_name": "mock_project_name",
-            "project_version": kedro_version,
+            "kedro_init_version": kedro_version,
             "package_name": MOCK_PACKAGE_NAME,
         }
     }
@@ -226,10 +227,18 @@ class TestKedroContext:
             == (dummy_context._project_path / "horses.csv").as_posix()
         )
 
-    def test_get_catalog_validates_layers(self, dummy_context, mocker):
-        mock_validate = mocker.patch(
-            "kedro.framework.context.context._validate_layers_for_transcoding"
+    def test_get_catalog_validates_transcoded_datasets(self, dummy_context, mocker):
+        mock_transcode_split = mocker.patch(
+            "kedro.framework.context.context._transcode_split"
         )
+        catalog = dummy_context.catalog
+        for dataset_name in catalog._data_sets.keys():
+            mock_transcode_split.assert_any_call(dataset_name)
+
+        mock_validate = mocker.patch(
+            "kedro.framework.context.context._validate_transcoded_datasets"
+        )
+
         catalog = dummy_context.catalog
 
         mock_validate.assert_called_once_with(catalog)
@@ -297,15 +306,20 @@ class TestKedroContext:
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             _ = dummy_context.catalog
 
-    def test_missing_credentials(self, dummy_context):
+    def test_missing_credentials(self, dummy_context, caplog):
+        caplog.set_level(logging.DEBUG, logger="kedro")
+
         env_credentials = (
             dummy_context.project_path / "conf" / "local" / "credentials.yml"
         )
         env_credentials.unlink()
 
-        pattern = "Credentials not found in your Kedro project config."
-        with pytest.warns(UserWarning, match=re.escape(pattern)):
-            _ = dummy_context.catalog
+        _ = dummy_context.catalog
+
+        # check the logs
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_msg = "Credentials not found in your Kedro project config."
+        assert any(expected_msg in log_message for log_message in log_messages)
 
 
 @pytest.mark.parametrize(
@@ -367,7 +381,7 @@ def test_convert_paths_raises_error_on_relative_project_path():
     ],
 )
 def test_convert_paths_to_absolute_posix_for_all_known_filepath_keys(
-    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+    project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
 
@@ -388,7 +402,7 @@ def test_convert_paths_to_absolute_posix_for_all_known_filepath_keys(
     ],
 )
 def test_convert_paths_to_absolute_posix_not_changing_non_relative_path(
-    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+    project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
 
@@ -404,53 +418,9 @@ def test_convert_paths_to_absolute_posix_not_changing_non_relative_path(
     ],
 )
 def test_convert_paths_to_absolute_posix_converts_full_windows_path_to_posix(
-    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+    project_path: Path, input_conf: dict[str, Any], expected: dict[str, Any]
 ):
     assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
-
-
-@pytest.mark.parametrize(
-    "layers",
-    [
-        {"raw": {"A"}, "interm": {"B", "C"}},
-        {"raw": {"A"}, "interm": {"B@2", "B@1"}},
-        {"raw": {"C@1"}, "interm": {"A", "B@1", "B@2", "B@3"}},
-    ],
-)
-def test_validate_layers(layers, mocker):
-    mock_catalog = mocker.MagicMock()
-    mock_catalog.layers = layers
-
-    _validate_layers_for_transcoding(mock_catalog)  # it shouldn't raise any error
-
-
-@pytest.mark.parametrize(
-    "layers,conflicting_datasets",
-    [
-        ({"raw": {"A", "B@1"}, "interm": {"B@2"}}, ["B@2"]),
-        ({"raw": {"A"}, "interm": {"B@1", "B@2"}, "prm": {"B@3"}}, ["B@3"]),
-        (
-            {
-                "raw": {"A@1"},
-                "interm": {"B@1", "B@2"},
-                "prm": {"B@3", "B@4"},
-                "other": {"A@2"},
-            },
-            ["A@2", "B@3", "B@4"],
-        ),
-    ],
-)
-def test_validate_layers_error(layers, conflicting_datasets, mocker):
-    mock_catalog = mocker.MagicMock()
-    mock_catalog.layers = layers
-    error_str = ", ".join(conflicting_datasets)
-
-    pattern = (
-        f"Transcoded datasets should have the same layer. "
-        f"Mismatch found for: {error_str}"
-    )
-    with pytest.raises(ValueError, match=re.escape(pattern)):
-        _validate_layers_for_transcoding(mock_catalog)
 
 
 @pytest.mark.parametrize(
@@ -480,6 +450,6 @@ def test_validate_layers_error(layers, conflicting_datasets, mocker):
         ),
     ],
 )
-def test_update_nested_dict(old_dict: Dict, new_dict: Dict, expected: Dict):
+def test_update_nested_dict(old_dict: dict, new_dict: dict, expected: dict):
     _update_nested_dict(old_dict, new_dict)  # _update_nested_dict change dict in place
     assert old_dict == expected

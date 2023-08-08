@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import logging
 from collections import namedtuple
-from typing import List
 
 import pytest
 from click.testing import CliRunner
@@ -43,7 +44,7 @@ class FakeEntryPoint:
             def before_command_run(
                 self,
                 project_metadata: ProjectMetadata,
-                command_args: List[str],
+                command_args: list[str],
             ):
                 print(
                     f"Before command `{' '.join(command_args)}` run for project {project_metadata}"
@@ -53,7 +54,7 @@ class FakeEntryPoint:
             def after_command_run(
                 self,
                 project_metadata: ProjectMetadata,
-                command_args: List[str],
+                command_args: list[str],
                 exit_code: int,
             ):
                 print(
@@ -98,16 +99,16 @@ class TestKedroCLIHooks:
 
         Module = namedtuple("Module", ["cli"])
         mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
-        mocker.patch(
             "kedro.framework.cli.cli._is_project",
             return_value=True,
         )
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project",
             return_value=fake_metadata,
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         result = CliRunner().invoke(kedro_cli, [command])

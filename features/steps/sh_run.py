@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import shlex
 import subprocess
-from typing import Any, List, Union
+from typing import Any
 
 import psutil
 
 
 def run(
-    cmd: Union[list, str], split: bool = True, print_output: bool = False, **kwargs: Any
+    cmd: list | str, split: bool = True, print_output: bool = False, **kwargs: Any
 ) -> subprocess.CompletedProcess:
     """Run a shell command.
 
@@ -35,9 +37,7 @@ def run(
     if isinstance(cmd, str) and split:
         cmd = shlex.split(cmd)
     # pylint: disable=subprocess-run-check
-    result = subprocess.run(
-        cmd, input="", stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
-    )
+    result = subprocess.run(cmd, input="", capture_output=True, **kwargs)
     result.stdout = result.stdout.decode("utf-8")
     result.stderr = result.stderr.decode("utf-8")
     if print_output:
@@ -45,7 +45,7 @@ def run(
     return result
 
 
-def check_run(cmd: Union[list, str], print_output: bool = False) -> None:
+def check_run(cmd: list | str, print_output: bool = False) -> None:
     """
     Run cmd using subprocess.check_call (throws error if non-zero value
     returned)
@@ -74,7 +74,7 @@ class ChildTerminatingPopen(subprocess.Popen):
         dies (so-called orphan processes)
     """
 
-    def __init__(self, cmd: List[str], **kwargs) -> None:
+    def __init__(self, cmd: list[str], **kwargs) -> None:
         """
         Initializer pipes stderr and stdout.
 
@@ -84,7 +84,7 @@ class ChildTerminatingPopen(subprocess.Popen):
 
         """
         super().__init__(  # type: ignore
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs
         )
 
     def terminate(self) -> None:

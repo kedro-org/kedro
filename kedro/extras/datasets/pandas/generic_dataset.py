@@ -11,7 +11,7 @@ import pandas as pd
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -39,37 +39,39 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
 
-    Example using `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: pandas.GenericDataSet
-        >>>   file_format: csv
-        >>>   filepath: s3://data/01_raw/company/cars.csv
-        >>>   load_args:
-        >>>     sep: ","
-        >>>     na_values: ["#NA", NA]
-        >>>   save_args:
-        >>>     index: False
-        >>>     date_format: "%Y-%m-%d"
+        cars:
+          type: pandas.GenericDataSet
+          file_format: csv
+          filepath: s3://data/01_raw/company/cars.csv
+          load_args:
+            sep: ","
+            na_values: ["#NA", NA]
+          save_args:
+            index: False
+            date_format: "%Y-%m-%d"
 
-    This second example is able to load a SAS7BDAT file via the :code:`pd.read_sas` method.
-    Trying to save this dataset will raise a `DataSetError` since pandas does not provide an
-    equivalent :code:`pd.DataFrame.to_sas` write method.
+    This second example is able to load a SAS7BDAT file via the ``pd.read_sas`` method.
+    Trying to save this dataset will raise a ``DatasetError`` since pandas does not provide an
+    equivalent ``pd.DataFrame.to_sas`` write method.
 
     .. code-block:: yaml
 
-        >>> flights:
-        >>>    type: pandas.GenericDataSet
-        >>>    file_format: sas
-        >>>    filepath: data/01_raw/airplanes.sas7bdat
-        >>>    load_args:
-        >>>       format: sas7bdat
+        flights:
+           type: pandas.GenericDataSet
+           file_format: sas
+           filepath: data/01_raw/airplanes.sas7bdat
+           load_args:
+              format: sas7bdat
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import GenericDataSet
@@ -88,8 +90,7 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         file_format: str,
@@ -140,7 +141,7 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 and to `w` when saving.
 
         Raises:
-            DataSetError: Will be raised if at least less than one appropriate
+            DatasetError: Will be raised if at least less than one appropriate
                 read or write methods are identified.
         """
 
@@ -179,7 +180,7 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _ensure_file_system_target(self) -> None:
         # Fail fast if provided a known non-filesystem target
         if self._file_format in NON_FILE_SYSTEM_TARGETS:
-            raise DataSetError(
+            raise DatasetError(
                 f"Cannot create a dataset of file_format '{self._file_format}' as it "
                 f"does not support a filepath target/source."
             )
@@ -193,7 +194,7 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         if load_method:
             with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
                 return load_method(fs_file, **self._load_args)
-        raise DataSetError(
+        raise DatasetError(
             f"Unable to retrieve 'pandas.read_{self._file_format}' method, please ensure that your "
             "'file_format' parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/io.html"
@@ -211,7 +212,7 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
                 save_method(fs_file, **self._save_args)
                 self._invalidate_cache()
         else:
-            raise DataSetError(
+            raise DatasetError(
                 f"Unable to retrieve 'pandas.DataFrame.to_{self._file_format}' method, please "
                 "ensure that your 'file_format' parameter has been defined correctly as "
                 "per the Pandas API "
@@ -221,20 +222,20 @@ class GenericDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            file_format=self._file_format,
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "file_format": self._file_format,
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _release(self) -> None:
         super()._release()

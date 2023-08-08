@@ -14,7 +14,7 @@ import pyarrow.parquet as pq
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -31,35 +31,37 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``ParquetDataSet`` loads/saves data from/to a Parquet file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> boats:
-        >>>   type: pandas.ParquetDataSet
-        >>>   filepath: data/01_raw/boats.parquet
-        >>>   load_args:
-        >>>     engine: pyarrow
-        >>>     use_nullable_dtypes: True
-        >>>   save_args:
-        >>>     file_scheme: hive
-        >>>     has_nulls: False
-        >>>     engine: pyarrow
-        >>>
-        >>> trucks:
-        >>>   type: pandas.ParquetDataSet
-        >>>   filepath: abfs://container/02_intermediate/trucks.parquet
-        >>>   credentials: dev_abs
-        >>>   load_args:
-        >>>     columns: [name, gear, disp, wt]
-        >>>     index: name
-        >>>   save_args:
-        >>>     compression: GZIP
-        >>>     partition_on: [name]
+        boats:
+          type: pandas.ParquetDataSet
+          filepath: data/01_raw/boats.parquet
+          load_args:
+            engine: pyarrow
+            use_nullable_dtypes: True
+          save_args:
+            file_scheme: hive
+            has_nulls: False
+            engine: pyarrow
 
-    Example using Python API:
+        trucks:
+          type: pandas.ParquetDataSet
+          filepath: abfs://container/02_intermediate/trucks.parquet
+          credentials: dev_abs
+          load_args:
+            columns: [name, gear, disp, wt]
+            index: name
+          save_args:
+            compression: GZIP
+            partition_on: [name]
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import ParquetDataSet
@@ -78,8 +80,7 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -152,13 +153,12 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
             self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> pd.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -194,12 +194,12 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         if Path(save_path).is_dir():
-            raise DataSetError(
+            raise DatasetError(
                 f"Saving {self.__class__.__name__} to a directory is not supported."
             )
 
         if "partition_cols" in self._save_args:
-            raise DataSetError(
+            raise DatasetError(
                 f"{self.__class__.__name__} does not support save argument "
                 f"'partition_cols'. Please use 'kedro.io.PartitionedDataSet' instead."
             )
@@ -215,7 +215,7 @@ class ParquetDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

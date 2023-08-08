@@ -1,7 +1,10 @@
 """``AbstractRunner`` is the base class for all ``Pipeline`` runner
 implementations.
 """
+from __future__ import annotations
 
+import inspect
+import itertools as it
 import logging
 from abc import ABC, abstractmethod
 from collections import deque
@@ -12,12 +15,13 @@ from concurrent.futures import (
     as_completed,
     wait,
 )
-from typing import Any, Dict, Iterable, List, Set
+from typing import Any, Iterable, Iterator
 
+from more_itertools import interleave
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -28,7 +32,7 @@ class AbstractRunner(ABC):
     """
 
     def __init__(self, is_async: bool = False):
-        """Instantiates the runner classs.
+        """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
@@ -47,7 +51,7 @@ class AbstractRunner(ABC):
         catalog: DataCatalog,
         hook_manager: PluginManager = None,
         session_id: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Run the ``Pipeline`` using the datasets provided by ``catalog``
         and save results back to the same objects.
 
@@ -70,14 +74,25 @@ class AbstractRunner(ABC):
         hook_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
 
-        unsatisfied = pipeline.inputs() - set(catalog.list())
+        # Check which datasets used in the pipeline are in the catalog or match
+        # a pattern in the catalog
+        registered_ds = [ds for ds in pipeline.data_sets() if ds in catalog]
+
+        # Check if there are any input datasets that aren't in the catalog and
+        # don't match a pattern in the catalog.
+        unsatisfied = pipeline.inputs() - set(registered_ds)
+
         if unsatisfied:
             raise ValueError(
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
 
-        free_outputs = pipeline.outputs() - set(catalog.list())
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())
+        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
+        # in the catalog.
+        free_outputs = pipeline.outputs() - set(registered_ds)
+        unregistered_ds = pipeline.data_sets() - set(registered_ds)
+
+        # Create a default dataset for unregistered datasets
         for ds_name in unregistered_ds:
             catalog.add(ds_name, self.create_default_data_set(ds_name))
 
@@ -93,7 +108,7 @@ class AbstractRunner(ABC):
 
     def run_only_missing(
         self, pipeline: Pipeline, catalog: DataCatalog, hook_manager: PluginManager
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Run only the missing outputs from the ``Pipeline`` using the
         datasets provided by ``catalog``, and save results back to the
         same objects.
@@ -211,7 +226,7 @@ class AbstractRunner(ABC):
 
 def _find_persistent_ancestors(
     pipeline: Pipeline, children: Iterable[Node], catalog: DataCatalog
-) -> Set[Node]:
+) -> set[Node]:
     """Breadth-first search approach to finding the complete set of
     persistent ancestors of an iterable of ``Node``s. Persistent
     ancestors exclusively have persisted ``Dataset``s as inputs.
@@ -241,7 +256,7 @@ def _find_persistent_ancestors(
     return ancestor_nodes_to_run
 
 
-def _enumerate_parents(pipeline: Pipeline, child: Node) -> List[Node]:
+def _enumerate_parents(pipeline: Pipeline, child: Node) -> list[Node]:
     """For a given ``Node``, returns a list containing the direct parents
     of that ``Node`` in the given ``Pipeline``.
 
@@ -259,7 +274,7 @@ def _enumerate_parents(pipeline: Pipeline, child: Node) -> List[Node]:
 
 def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
     """Check if a ``Node`` exclusively has persisted Datasets as inputs.
-    If at least one input is a ``MemoryDataSet``, return False.
+    If at least one input is a ``MemoryDataset``, return False.
 
     Args:
         node: the ``Node`` to check the inputs of.
@@ -267,12 +282,12 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     Returns:
         True if the ``Node`` being checked exclusively has inputs that
-        are not ``MemoryDataSet``, else False.
+        are not ``MemoryDataset``, else False.
 
     """
     for node_input in node.inputs:
-        # pylint: disable=protected-access
-        if isinstance(catalog._data_sets[node_input], MemoryDataSet):
+        # noqa: protected-access
+        if isinstance(catalog._data_sets[node_input], MemoryDataset):
             return False
     return True
 
@@ -294,10 +309,22 @@ def run_node(
             asynchronously with threads. Defaults to False.
         session_id: The session id of the pipeline run.
 
+    Raises:
+        ValueError: Raised if is_async is set to True for nodes wrapping
+            generator functions.
+
     Returns:
         The node argument.
 
     """
+    if is_async and inspect.isgeneratorfunction(node.func):
+        raise ValueError(
+            f"Async data loading and saving does not work with "
+            f"nodes wrapping generator functions. Please make "
+            f"sure you don't use `yield` anywhere "
+            f"in node {str(node)}."
+        )
+
     if is_async:
         node = _run_node_async(node, catalog, hook_manager, session_id)
     else:
@@ -308,15 +335,15 @@ def run_node(
     return node
 
 
-def _collect_inputs_from_hook(
+def _collect_inputs_from_hook(  # noqa: too-many-arguments
     node: Node,
     catalog: DataCatalog,
-    inputs: Dict[str, Any],
+    inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
     session_id: str = None,
-) -> Dict[str, Any]:
-    # pylint: disable=too-many-arguments
+) -> dict[str, Any]:
+
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
         node=node,
@@ -337,21 +364,20 @@ def _collect_inputs_from_hook(
                     f"'before_node_run' must return either None or a dictionary mapping "
                     f"dataset names to updated values, got '{response_type}' instead."
                 )
-            response = response or {}
-            additional_inputs.update(response)
+            additional_inputs.update(response or {})
 
     return additional_inputs
 
 
-def _call_node_run(
+def _call_node_run(  # noqa: too-many-arguments
     node: Node,
     catalog: DataCatalog,
-    inputs: Dict[str, Any],
+    inputs: dict[str, Any],
     is_async: bool,
     hook_manager: PluginManager,
     session_id: str = None,
-) -> Dict[str, Any]:
-    # pylint: disable=too-many-arguments
+) -> dict[str, Any]:
+
     try:
         outputs = node.run(inputs)
     except Exception as exc:
@@ -384,9 +410,11 @@ def _run_node_sequential(
     inputs = {}
 
     for name in node.inputs:
-        hook_manager.hook.before_dataset_loaded(dataset_name=name)
+        hook_manager.hook.before_dataset_loaded(dataset_name=name, node=node)
         inputs[name] = catalog.load(name)
-        hook_manager.hook.after_dataset_loaded(dataset_name=name, data=inputs[name])
+        hook_manager.hook.after_dataset_loaded(
+            dataset_name=name, data=inputs[name], node=node
+        )
 
     is_async = False
 
@@ -399,10 +427,24 @@ def _run_node_sequential(
         node, catalog, inputs, is_async, hook_manager, session_id=session_id
     )
 
-    for name, data in outputs.items():
-        hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
+    items: Iterable = outputs.items()
+    # if all outputs are iterators, then the node is a generator node
+    if all(isinstance(d, Iterator) for d in outputs.values()):
+        # Python dictionaries are ordered, so we are sure
+        # the keys and the chunk streams are in the same order
+        # [a, b, c]
+        keys = list(outputs.keys())
+        # [Iterator[chunk_a], Iterator[chunk_b], Iterator[chunk_c]]
+        streams = list(outputs.values())
+        # zip an endless cycle of the keys
+        # with an interleaved iterator of the streams
+        # [(a, chunk_a), (b, chunk_b), ...] until all outputs complete
+        items = zip(it.cycle(keys), interleave(*streams))
+
+    for name, data in items:
+        hook_manager.hook.before_dataset_saved(dataset_name=name, data=data, node=node)
         catalog.save(name, data)
-        hook_manager.hook.after_dataset_saved(dataset_name=name, data=data)
+        hook_manager.hook.after_dataset_saved(dataset_name=name, data=data, node=node)
     return node
 
 
@@ -415,15 +457,15 @@ def _run_node_async(
     def _synchronous_dataset_load(dataset_name: str):
         """Minimal wrapper to ensure Hooks are run synchronously
         within an asynchronous dataset load."""
-        hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name)
+        hook_manager.hook.before_dataset_loaded(dataset_name=dataset_name, node=node)
         return_ds = catalog.load(dataset_name)
         hook_manager.hook.after_dataset_loaded(
-            dataset_name=dataset_name, data=return_ds
+            dataset_name=dataset_name, data=return_ds, node=node
         )
         return return_ds
 
     with ThreadPoolExecutor() as pool:
-        inputs: Dict[str, Future] = {}
+        inputs: dict[str, Future] = {}
 
         for name in node.inputs:
             inputs[name] = pool.submit(_synchronous_dataset_load, name)
@@ -440,17 +482,20 @@ def _run_node_async(
             node, catalog, inputs, is_async, hook_manager, session_id=session_id
         )
 
-        save_futures = set()
-
+        future_dataset_mapping = {}
         for name, data in outputs.items():
-            hook_manager.hook.before_dataset_saved(dataset_name=name, data=data)
-            save_futures.add(pool.submit(catalog.save, name, data))
+            hook_manager.hook.before_dataset_saved(
+                dataset_name=name, data=data, node=node
+            )
+            future = pool.submit(catalog.save, name, data)
+            future_dataset_mapping[future] = (name, data)
 
-        for future in as_completed(save_futures):
+        for future in as_completed(future_dataset_mapping):
             exception = future.exception()
             if exception:
                 raise exception
+            name, data = future_dataset_mapping[future]
             hook_manager.hook.after_dataset_saved(
-                dataset_name=name, data=data  # pylint: disable=undefined-loop-variable
+                dataset_name=name, data=data, node=node
             )
     return node

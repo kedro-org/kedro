@@ -11,7 +11,7 @@ from plotly.graph_objs import Scatter
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.plotly import PlotlyDataSet
-from kedro.io import DataSetError
+from kedro.io import DatasetError
 from kedro.io.core import PROTOCOL_DELIMITER
 
 
@@ -64,7 +64,7 @@ class TestPlotlyDataSet:
     def test_load_missing_file(self, plotly_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set PlotlyDataSet\(.*\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             plotly_data_set.load()
 
     @pytest.mark.parametrize(
@@ -104,5 +104,5 @@ class TestPlotlyDataSet:
         plotly_args = []
         filepath = "test.json"
         data_set = PlotlyDataSet(filepath=filepath, plotly_args=plotly_args)
-        with pytest.raises(DataSetError):
+        with pytest.raises(DatasetError):
             data_set.save(dummy_dataframe)

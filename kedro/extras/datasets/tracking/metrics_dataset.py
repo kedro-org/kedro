@@ -7,7 +7,7 @@ import json
 from typing import Dict, NoReturn
 
 from kedro.extras.datasets.json import JSONDataSet
-from kedro.io.core import DataSetError, get_filepath_str
+from kedro.io.core import DatasetError, get_filepath_str
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -20,18 +20,19 @@ class MetricsDataSet(JSONDataSet):
     ``MetricsDataSet`` is part of Kedro Experiment Tracking. The dataset is write-only,
     it is versioned by default and only takes metrics of numeric values.
 
-Example adding a catalog entry with
-    `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: metrics.MetricsDataSet
-        >>>   filepath: data/09_tracking/cars.json
+        cars:
+          type: metrics.MetricsDataSet
+          filepath: data/09_tracking/cars.json
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.tracking import MetricsDataSet
@@ -46,7 +47,7 @@ Example adding a catalog entry with
     versioned = True
 
     def _load(self) -> NoReturn:
-        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
+        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")
 
     def _save(self, data: Dict[str, float]) -> None:
         """Converts all values in the data from a ``MetricsDataSet`` to float to make sure
@@ -56,7 +57,7 @@ Example adding a catalog entry with
             for key, value in data.items():
                 data[key] = float(value)
         except ValueError as exc:
-            raise DataSetError(
+            raise DatasetError(
                 f"The MetricsDataSet expects only numeric values. {exc}"
             ) from exc
 

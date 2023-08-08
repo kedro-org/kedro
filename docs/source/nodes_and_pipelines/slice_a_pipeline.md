@@ -138,7 +138,7 @@ As you can see, this will slice the pipeline and run it from the specified node 
 You can run the resulting pipeline slice by running the following command in your terminal window:
 
 ```bash
-kedro run --from-nodes="mean_node"
+kedro run --from-nodes=mean_node
 ```
 
 ## Slice a pipeline by specifying final nodes
@@ -170,19 +170,19 @@ Outputs: m
 As you can see, this will slice the pipeline, so it runs from the beginning and ends with the specified node:
 
 ```bash
-kedro run --to-nodes="mean_node"
+kedro run --to-nodes=mean_node
 ```
 
 You can also slice a pipeline by specifying the start and finish nodes, and thus the set of nodes to be included in the pipeline slice:
 
 ```bash
-kedro run --from-nodes A --to-nodes Z
+kedro run --from-nodes=A --to-nodes=Z
 ```
 
 or, when specifying multiple nodes:
 
 ```bash
-kedro run --from-nodes A,D --to-nodes X,Y,Z
+kedro run --from-nodes=A,D --to-nodes=X,Y,Z
 ```
 
 ## Slice a pipeline with tagged nodes
@@ -302,7 +302,7 @@ To demonstrate this, let us save the intermediate output `n` using a `JSONDataSe
 <summary><b>Click to expand</b></summary>
 
 ```python
-from kedro.extras.datasets.pandas import JSONDataSet
+from kedro_datasets.pandas import JSONDataSet
 from kedro.io import DataCatalog, MemoryDataSet
 
 n_json = JSONDataSet(filepath="./data/07_model_output/len.json")

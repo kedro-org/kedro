@@ -1,15 +1,23 @@
+from __future__ import annotations
+
+import importlib
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import PurePosixPath
-from typing import Any, List
+from typing import Any
 
 import pytest
 
-from kedro.io.core import AbstractDataSet, _parse_filepath, get_filepath_str
+from kedro.io.core import (
+    _DEPRECATED_ERROR_CLASSES,
+    AbstractDataSet,
+    _parse_filepath,
+    get_filepath_str,
+)
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
 # Excludes None, as None values are not shown in the str representation.
-FALSE_BUILTINS: List[Any] = [
+FALSE_BUILTINS: list[Any] = [
     False,
     0,
     0.0,
@@ -25,12 +33,19 @@ FALSE_BUILTINS: List[Any] = [
 ]
 
 
+@pytest.mark.parametrize("module_name", ["kedro.io", "kedro.io.core"])
+@pytest.mark.parametrize("class_name", _DEPRECATED_ERROR_CLASSES)
+def test_deprecation(module_name, class_name):
+    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+        getattr(importlib.import_module(module_name), class_name)
+
+
 class MyDataSet(AbstractDataSet):
     def __init__(self, var=None):
         self.var = var
 
     def _describe(self):
-        return dict(var=self.var)
+        return {"var": self.var}
 
     def _load(self):
         pass  # pragma: no cover
@@ -67,6 +82,13 @@ class TestCoreFunctions:
             (
                 "abfss://bucket/file.txt",
                 {"protocol": "abfss", "path": "bucket/file.txt"},
+            ),
+            (
+                "abfss://mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
+                {
+                    "protocol": "abfss",
+                    "path": "mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
+                },
             ),
             (
                 "hdfs://namenode:8020/file.txt",

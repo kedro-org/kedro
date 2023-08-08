@@ -48,6 +48,7 @@ def fake_metadata(fake_root_dir):
         fake_root_dir / REPO_NAME,
         kedro_version,
         fake_root_dir / REPO_NAME / "src",
+        kedro_version,
     )
     return metadata
 
@@ -56,16 +57,16 @@ class TestCLITools:
     def test_get_cli_structure_raw(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
         mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
-        mocker.patch(
             "kedro.framework.cli.cli._is_project",
             return_value=True,
         )
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project",
             return_value=fake_metadata,
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         raw_cli_structure = get_cli_structure(kedro_cli, get_help=False)
@@ -85,16 +86,16 @@ class TestCLITools:
     def test_get_cli_structure_depth(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
         mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
-        mocker.patch(
             "kedro.framework.cli.cli._is_project",
             return_value=True,
         )
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project",
             return_value=fake_metadata,
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         raw_cli_structure = get_cli_structure(kedro_cli, get_help=False)
@@ -121,16 +122,16 @@ class TestCLITools:
     def test_get_cli_structure_help(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
         mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
-        mocker.patch(
             "kedro.framework.cli.cli._is_project",
             return_value=True,
         )
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project",
             return_value=fake_metadata,
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         help_cli_structure = get_cli_structure(kedro_cli, get_help=True)

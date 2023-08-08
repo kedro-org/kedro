@@ -46,9 +46,7 @@ kedro run --runner=ThreadRunner
 `SparkDataSet` doesn't work correctly with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataSet`, you must use `ThreadRunner`.
 ```
 
-For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../tools_integration/pyspark.md).
-
-
+For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../integrations/pyspark_integration.md).
 
 ## Custom runners
 
@@ -62,11 +60,13 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
+from pluggy import PluginManager
 
 
 class DryRunner(AbstractRunner):
     """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
-    nodes would be run without actually executing anything.
+    nodes would be run without actually executing anything. It also checks if all the
+    neccessary data exists.
     """
 
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
@@ -82,7 +82,11 @@ class DryRunner(AbstractRunner):
         return MemoryDataSet()
 
     def _run(
-        self, pipeline: Pipeline, catalog: DataCatalog, session_id: str = None
+        self,
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+        hook_manager: PluginManager = None,
+        session_id: str = None,
     ) -> None:
         """The method implementing dry pipeline running.
         Example logs output using this implementation:
@@ -102,8 +106,17 @@ class DryRunner(AbstractRunner):
         self._logger.info(
             "Actual run would execute %d nodes:\n%s",
             len(nodes),
-            "\n".join(map(str, nodes)),
+            pipeline.describe(),
         )
+        self._logger.info("Checking inputs...")
+        input_names = pipeline.inputs()
+        missing_inputs = [
+            input_name
+            for input_name in input_names
+            if not catalog._get_dataset(input_name).exists()
+        ]
+        if missing_inputs:
+            raise KeyError(f"Datasets {missing_inputs} not found.")
 ```
 </details>
 
@@ -168,7 +181,7 @@ def register_pipelines():
 Then, from the command line, execute the following:
 
 ```bash
-kedro run --pipeline my_pipeline
+kedro run --pipeline=my_pipeline
 ```
 
 ```{note}
@@ -308,3 +321,41 @@ except FileNotFoundError:
     pass
 ```
 </details>
+
+
+## Configure `kedro run` arguments
+
+The [Kedro CLI documentation](../development/commands_reference.md#run-the-project) lists the available CLI options for `kedro run`. You can alternatively supply a configuration file that contains the arguments to `kedro run`.
+
+Here is an example file named `config.yml`, but you can choose any name for the file:
+
+
+```console
+$ kedro run --config=config.yml
+```
+
+where `config.yml` is formatted as below (for example):
+
+```yaml
+run:
+  tags: tag1, tag2, tag3
+  pipeline: pipeline1
+  parallel: true
+  nodes_names: node1, node2
+  env: env1
+```
+
+The syntax for the options is different when you're using the CLI compared to the configuration file. In the CLI you use dashes, for example for `kedro run --from-nodes=...`, but you have to use an underscore in the configuration file:
+
+```yaml
+run:
+  from_nodes: ...
+```
+
+This is because the configuration file gets parsed by [Click](https://click.palletsprojects.com/en/8.1.x/), a Python package to handle command line interfaces. Click passes the options defined in the configuration file to a Python function. The option names need to match the argument names in that function.
+
+Variable names and arguments in Python may only contain alpha-numeric characters and underscores, so it's not possible to have a dash in the option names when using the configuration file.
+
+```{note}
+If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
+```

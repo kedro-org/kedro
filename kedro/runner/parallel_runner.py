@@ -1,17 +1,20 @@
 """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
+from __future__ import annotations
+
 import multiprocessing
 import os
 import pickle
 import sys
+import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Any, Dict, Iterable, Set
+from typing import Any, Iterable
 
 from pluggy import PluginManager
 
@@ -21,7 +24,7 @@ from kedro.framework.hooks.manager import (
     _register_hooks_setuptools,
 )
 from kedro.framework.project import settings
-from kedro.io import DataCatalog, DataSetError, MemoryDataSet
+from kedro.io import DataCatalog, DatasetError, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
@@ -29,21 +32,24 @@ from kedro.runner.runner import AbstractRunner, run_node
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61
 
+# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
+_SharedMemoryDataSet: type[_SharedMemoryDataset]
 
-class _SharedMemoryDataSet:
-    """``_SharedMemoryDataSet`` is a wrapper class for a shared MemoryDataSet in SyncManager.
+
+class _SharedMemoryDataset:
+    """``_SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
     It is not inherited from AbstractDataSet class.
     """
 
     def __init__(self, manager: SyncManager):
-        """Creates a new instance of ``_SharedMemoryDataSet``,
+        """Creates a new instance of ``_SharedMemoryDataset``,
         and creates shared memorydataset attribute.
 
         Args:
             manager: An instance of multiprocessing manager for shared objects.
 
         """
-        self.shared_memory_dataset = manager.MemoryDataSet()  # type: ignore
+        self.shared_memory_dataset = manager.MemoryDataset()  # type: ignore
 
     def __getattr__(self, name):
         # This if condition prevents recursive call when deserialising
@@ -52,48 +58,58 @@ class _SharedMemoryDataSet:
         return getattr(self.shared_memory_dataset, name)
 
     def save(self, data: Any):
-        """Calls save method of a shared MemoryDataSet in SyncManager."""
+        """Calls save method of a shared MemoryDataset in SyncManager."""
         try:
             self.shared_memory_dataset.save(data)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             # Checks if the error is due to serialisation or not
             try:
                 pickle.dumps(data)
             except Exception as serialisation_exc:  # SKIP_IF_NO_SPARK
-                raise DataSetError(
+                raise DatasetError(
                     f"{str(data.__class__)} cannot be serialised. ParallelRunner "
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
-            else:
-                raise exc
+            raise exc
+
+
+def __getattr__(name):
+    if name == "_SharedMemoryDataSet":
+        alias = _SharedMemoryDataset
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro 0.19.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 class ParallelRunnerManager(SyncManager):
-    """``ParallelRunnerManager`` is used to create shared ``MemoryDataSet``
+    """``ParallelRunnerManager`` is used to create shared ``MemoryDataset``
     objects as default data sets in a pipeline.
     """
 
 
-ParallelRunnerManager.register(  # pylint: disable=no-member
-    "MemoryDataSet", MemoryDataSet
-)
+ParallelRunnerManager.register("MemoryDataset", MemoryDataset)  # noqa: no-member
 
 
-def _bootstrap_subprocess(package_name: str, logging_config: Dict[str, Any]):
-    # pylint: disable=import-outside-toplevel,cyclic-import
+def _bootstrap_subprocess(package_name: str, logging_config: dict[str, Any]):
+    # noqa: import-outside-toplevel,cyclic-import
     from kedro.framework.project import configure_logging, configure_project
 
     configure_project(package_name)
     configure_logging(logging_config)
 
 
-def _run_node_synchronization(  # pylint: disable=too-many-arguments
+def _run_node_synchronization(  # noqa: too-many-arguments
     node: Node,
     catalog: DataCatalog,
     is_async: bool = False,
     session_id: str = None,
     package_name: str = None,
-    logging_config: Dict[str, Any] = None,
+    logging_config: dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
@@ -148,7 +164,7 @@ class ParallelRunner(AbstractRunner):
         """
         super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
-        self._manager.start()  # pylint: disable=consider-using-with
+        self._manager.start()  # noqa: consider-using-with
 
         # This code comes from the concurrent.futures library
         # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588
@@ -166,18 +182,18 @@ class ParallelRunner(AbstractRunner):
 
     def create_default_data_set(  # type: ignore
         self, ds_name: str
-    ) -> _SharedMemoryDataSet:
+    ) -> _SharedMemoryDataset:
         """Factory method for creating the default dataset for the runner.
 
         Args:
             ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of ``_SharedMemoryDataSet`` to be used for all
+            An instance of ``_SharedMemoryDataset`` to be used for all
             unregistered datasets.
 
         """
-        return _SharedMemoryDataSet(self._manager)
+        return _SharedMemoryDataset(self._manager)
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
@@ -206,7 +222,7 @@ class ParallelRunner(AbstractRunner):
         will not be synchronized across threads.
         """
 
-        data_sets = catalog._data_sets  # pylint: disable=protected-access
+        data_sets = catalog._data_sets  # noqa: protected-access
 
         unserialisable = []
         for name, data_set in data_sets.items():
@@ -232,7 +248,7 @@ class ParallelRunner(AbstractRunner):
         for name, data_set in data_sets.items():
             if (
                 name in pipeline.all_outputs()
-                and isinstance(data_set, MemoryDataSet)
+                and isinstance(data_set, MemoryDataset)
                 and not isinstance(data_set, BaseProxy)
             ):
                 memory_datasets.append(name)
@@ -242,7 +258,7 @@ class ParallelRunner(AbstractRunner):
                 f"The following data sets are memory data sets: "
                 f"{sorted(memory_datasets)}\n"
                 f"ParallelRunner does not support output to externally created "
-                f"MemoryDataSets"
+                f"MemoryDatasets"
             )
 
     def _get_required_workers_count(self, pipeline: Pipeline):
@@ -259,7 +275,7 @@ class ParallelRunner(AbstractRunner):
 
         return min(required_processes, self._max_workers)
 
-    def _run(  # pylint: disable=too-many-locals,useless-suppression
+    def _run(  # noqa: too-many-locals,useless-suppression
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,
@@ -282,7 +298,7 @@ class ParallelRunner(AbstractRunner):
             Exception: In case of any downstream node failure.
 
         """
-        # pylint: disable=import-outside-toplevel,cyclic-import
+        # noqa: import-outside-toplevel,cyclic-import
 
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
@@ -291,7 +307,7 @@ class ParallelRunner(AbstractRunner):
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = set(node_dependencies.keys())
-        done_nodes = set()  # type: Set[Node]
+        done_nodes: set[Node] = set()
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)

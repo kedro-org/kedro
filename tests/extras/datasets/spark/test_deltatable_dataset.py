@@ -1,13 +1,18 @@
 import pytest
 from delta import DeltaTable
+from pyspark import __version__
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
+from semver import VersionInfo
 
 from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
-from kedro.io import DataCatalog, DataSetError
-from kedro.pipeline import Pipeline, node
+from kedro.io import DataCatalog, DatasetError
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
+
+SPARK_VERSION = VersionInfo.parse(__version__)
 
 
 @pytest.fixture
@@ -45,7 +50,7 @@ class TestDeltaTableDataSet:
         assert not delta_ds.exists()
 
         pattern = "DeltaTableDataSet is a read only dataset type"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DatasetError, match=pattern):
             delta_ds.save(sample_spark_df)
 
         # check that indeed nothing is written
@@ -64,11 +69,17 @@ class TestDeltaTableDataSet:
 
     def test_exists_raises_error(self, mocker):
         delta_ds = DeltaTableDataSet(filepath="")
-        mocker.patch.object(
-            delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
-        )
-
-        with pytest.raises(DataSetError, match="Other Exception"):
+        if SPARK_VERSION.match(">=3.4.0"):
+            mocker.patch.object(
+                delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception")
+            )
+        else:
+            mocker.patch.object(
+                delta_ds,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception", []),
+            )
+        with pytest.raises(DatasetError, match="Other Exception"):
             delta_ds.exists()
 
     @pytest.mark.parametrize("is_async", [False, True])
@@ -80,7 +91,7 @@ class TestDeltaTableDataSet:
 
         delta_ds = DeltaTableDataSet(filepath="")
         catalog = DataCatalog(data_sets={"delta_in": delta_ds})
-        pipeline = Pipeline([node(no_output, "delta_in", None)])
+        pipeline = modular_pipeline([node(no_output, "delta_in", None)])
         pattern = (
             r"The following data sets cannot be used with "
             r"multiprocessing: \['delta_in'\]"

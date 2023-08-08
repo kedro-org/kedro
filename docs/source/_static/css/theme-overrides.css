@@ -1,0 +1,35 @@
+/* override table width restrictions */
+@media screen and (min-width: 767px) {
+  .wy-table-responsive table td {
+    white-space: normal;
+  }
+
+  .wy-table-responsive {
+    overflow: visible;
+  }
+}
+
+/* override the table font-size and line-height */
+html.writer-html5 .rst-content .wy-table-responsive table.docutils th > p,
+html.writer-html5 .rst-content .wy-table-responsive table.docutils td > p {
+  font-size: 1em;
+  line-height: 1em;
+}
+
+img[alt^="mermaid-"] {
+  max-width: 600px;
+}
+
+.rst-content .important {
+  background: #ffedcc;
+}
+.rst-content .important .admonition-title {
+  background-color: #f0b37e;
+}
+
+/* Ensure the section title is visible when linked via a hash in the URL */
+:target:before {
+  content: "";
+  display: block;
+  height: 80px;
+}

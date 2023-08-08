@@ -1,23 +1,21 @@
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
-# pylint: disable=redefined-outer-name,unused-argument,global-statement
+# noqa: redefined-outer-name,unused-argument,global-statement
+from __future__ import annotations
+
 import importlib
 import logging.config
 import operator
 import os
-import sys
 import traceback
 import types
 import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
-import click
 import importlib_resources
-import rich.pretty
-import rich.traceback
 import yaml
 from dynaconf import LazySettings
 from dynaconf.validator import ValidationError, Validator
@@ -112,7 +110,6 @@ class _ProjectSettings(LazySettings):
     )
 
     def __init__(self, *args, **kwargs):
-
         kwargs.update(
             validators=[
                 self._CONF_SOURCE,
@@ -133,7 +130,8 @@ def _load_data_wrapper(func):
     """Wrap a method in _ProjectPipelines so that data is loaded on first access.
     Taking inspiration from dynaconf.utils.functional.new_method_proxy
     """
-    # pylint: disable=protected-access
+
+    # noqa: protected-access
     def inner(self, *args, **kwargs):
         self._load_data()
         return func(self._content, *args, **kwargs)
@@ -143,15 +141,25 @@ def _load_data_wrapper(func):
 
 class _ProjectPipelines(MutableMapping):
     """A read-only lazy dictionary-like object to hold the project pipelines.
-    On configure it will store the pipelines module.
-    On first data access, e.g. through __getitem__, it will load the registered pipelines and merge
-    them with pipelines defined from hooks.
+    When configured, it stores the pipelines module.
+    On first data access, e.g. through __getitem__, it will load the registered pipelines
+
+    This object is initialized lazily for a few reasons:
+
+    1. To support an unified way of importing via `from kedro.framework.project import pipelines`.
+       The pipelines object is initializedlazily since the framework doesn't have knowledge about
+       the project until `bootstrap_project` is run.
+    2. To speed up Kedro CLI performance. Loading the pipelines incurs overhead, as all related
+       modules need to be imported.
+    3. To ensure Kedro CLI remains functional when pipelines are broken. During development, broken
+       pipelines are common, but they shouldn't prevent other parts of Kedro CLI from functioning
+       properly (e.g. `kedro -h`).
     """
 
     def __init__(self) -> None:
-        self._pipelines_module: Optional[str] = None
+        self._pipelines_module: str | None = None
         self._is_data_loaded = False
-        self._content: Dict[str, Pipeline] = {}
+        self._content: dict[str, Pipeline] = {}
 
     @staticmethod
     def _get_pipelines_registry_callable(pipelines_module: str):
@@ -175,7 +183,7 @@ class _ProjectPipelines(MutableMapping):
         self._content = project_pipelines
         self._is_data_loaded = True
 
-    def configure(self, pipelines_module: Optional[str] = None) -> None:
+    def configure(self, pipelines_module: str | None = None) -> None:
         """Configure the pipelines_module to load the pipelines dictionary.
         Reset the data loading state so that after every ``configure`` call,
         data are reloaded.
@@ -190,6 +198,9 @@ class _ProjectPipelines(MutableMapping):
     __delitem__ = _load_data_wrapper(operator.delitem)
     __iter__ = _load_data_wrapper(iter)
     __len__ = _load_data_wrapper(len)
+    keys = _load_data_wrapper(operator.methodcaller("keys"))
+    values = _load_data_wrapper(operator.methodcaller("values"))
+    items = _load_data_wrapper(operator.methodcaller("items"))
 
     # Presentation methods
     __repr__ = _load_data_wrapper(repr)
@@ -197,28 +208,17 @@ class _ProjectPipelines(MutableMapping):
 
 
 class _ProjectLogging(UserDict):
-    # pylint: disable=super-init-not-called
+    # noqa: super-init-not-called
     def __init__(self):
-        """Initialise project logging with default configuration. Also enable
-        rich tracebacks."""
-        default_logging = (Path(__file__).parent / "default_logging.yml").read_text(
-            encoding="utf-8"
+        """Initialise project logging. The path to logging configuration is given in
+        environment variable KEDRO_LOGGING_CONFIG (defaults to default_logging.yml)."""
+        path = os.environ.get(
+            "KEDRO_LOGGING_CONFIG", Path(__file__).parent / "default_logging.yml"
         )
-        self.configure(yaml.safe_load(default_logging))
-        logging.captureWarnings(True)
+        logging_config = Path(path).read_text(encoding="utf-8")
+        self.configure(yaml.safe_load(logging_config))
 
-        # We suppress click here to hide tracebacks related to it conversely,
-        # kedro is not suppressed to show its tracebacks for easier debugging.
-        # sys.executable is used to get the kedro executable path to hide the
-        # top level traceback.
-        # Rich traceback handling does not work on databricks. Hopefully this will be
-        # fixed on their side at some point, but until then we disable it.
-        # See https://github.com/Textualize/rich/issues/2455
-        if "DATABRICKS_RUNTIME_VERSION" not in os.environ:
-            rich.traceback.install(suppress=[click, str(Path(sys.executable).parent)])
-        rich.pretty.install()
-
-    def configure(self, logging_config: Dict[str, Any]) -> None:
+    def configure(self, logging_config: dict[str, Any]) -> None:
         """Configure project logging using ``logging_config`` (e.g. from project
         logging.yml). We store this in the UserDict data so that it can be reconfigured
         in _bootstrap_subprocess.
@@ -249,11 +249,11 @@ def configure_project(package_name: str):
     # global variable to make it easily accessible. This is used by validate_settings()
     # below, and also by ParallelRunner on Windows, as package_name is required every
     # time a new subprocess is spawned.
-    global PACKAGE_NAME
+    global PACKAGE_NAME  # noqa: PLW0603
     PACKAGE_NAME = package_name
 
 
-def configure_logging(logging_config: Dict[str, Any]) -> None:
+def configure_logging(logging_config: dict[str, Any]) -> None:
     """Configure logging according to ``logging_config`` dictionary."""
     LOGGING.configure(logging_config)
 
@@ -276,7 +276,7 @@ def validate_settings():
     importlib.import_module(f"{PACKAGE_NAME}.settings")
 
 
-def _create_pipeline(pipeline_module: types.ModuleType) -> Optional[Pipeline]:
+def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:
     if not hasattr(pipeline_module, "create_pipeline"):
         warnings.warn(
             f"The '{pipeline_module.__name__}' module does not "
@@ -299,7 +299,7 @@ def _create_pipeline(pipeline_module: types.ModuleType) -> Optional[Pipeline]:
     return obj
 
 
-def find_pipelines() -> Dict[str, Pipeline]:
+def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
     """Automatically find modular pipelines having a ``create_pipeline``
     function. By default, projects created using Kedro 0.18.3 and higher
     call this function to autoregister pipelines upon creation/addition.
@@ -325,7 +325,7 @@ def find_pipelines() -> Dict[str, Pipeline]:
     pipeline_module_name = f"{PACKAGE_NAME}.pipeline"
     try:
         pipeline_module = importlib.import_module(pipeline_module_name)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:  # noqa: broad-except
         if str(exc) != f"No module named '{pipeline_module_name}'":
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
@@ -355,7 +355,7 @@ def find_pipelines() -> Dict[str, Pipeline]:
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
-        except:  # pylint: disable=bare-except  # noqa: E722
+        except:  # noqa: bare-except  # noqa: E722
             warnings.warn(
                 IMPORT_ERROR_MESSAGE.format(
                     module=pipeline_module_name, tb_exc=traceback.format_exc()

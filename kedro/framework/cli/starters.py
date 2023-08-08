@@ -3,6 +3,8 @@
 This module implements commands available from the kedro CLI for creating
 projects.
 """
+from __future__ import annotations
+
 import os
 import re
 import shutil
@@ -11,7 +13,7 @@ import tempfile
 from collections import OrderedDict
 from itertools import groupby
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable
 
 import click
 import yaml
@@ -35,7 +37,7 @@ _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
 
 
 @define(order=True)
-class KedroStarterSpec:  # pylint: disable=too-few-public-methods
+class KedroStarterSpec:  # noqa: too-few-public-methods
     """Specification of custom kedro starter template
     Args:
         alias: alias of the starter which shows up on `kedro starter list` and is used
@@ -49,8 +51,8 @@ class KedroStarterSpec:  # pylint: disable=too-few-public-methods
 
     alias: str
     template_path: str
-    directory: Optional[str] = None
-    origin: Optional[str] = field(init=False)
+    directory: str | None = None
+    origin: str | None = field(init=False)
 
 
 _OFFICIAL_STARTER_SPECS = [
@@ -67,6 +69,7 @@ _OFFICIAL_STARTER_SPECS = [
     KedroStarterSpec("pyspark", _STARTERS_REPO, "pyspark"),
     KedroStarterSpec("pyspark-iris", _STARTERS_REPO, "pyspark-iris"),
     KedroStarterSpec("spaceflights", _STARTERS_REPO, "spaceflights"),
+    KedroStarterSpec("databricks-iris", _STARTERS_REPO, "databricks-iris"),
 ]
 # Set the origin for official starters
 for starter_spec in _OFFICIAL_STARTER_SPECS:
@@ -89,8 +92,8 @@ DIRECTORY_ARG_HELP = (
 )
 
 
-# pylint: disable=unused-argument
-def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no cover
+# noqa: unused-argument
+def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
     """Remove readonly files on Windows
     See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
     """
@@ -98,7 +101,7 @@ def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no 
     func(path)
 
 
-def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
+def _get_starters_dict() -> dict[str, KedroStarterSpec]:
     """This function lists all the starter aliases declared in
     the core repo and in plugins entry points.
 
@@ -145,10 +148,10 @@ def _get_starters_dict() -> Dict[str, KedroStarterSpec]:
 
 
 def _starter_spec_to_dict(
-    starter_specs: Dict[str, KedroStarterSpec]
-) -> Dict[str, Dict[str, str]]:
+    starter_specs: dict[str, KedroStarterSpec]
+) -> dict[str, dict[str, str]]:
     """Convert a dictionary of starters spec to a nicely formatted dictionary"""
-    format_dict: Dict[str, Dict[str, str]] = {}
+    format_dict: dict[str, dict[str, str]] = {}
     for alias, spec in starter_specs.items():
         format_dict[alias] = {}  # Each dictionary represent 1 starter
         format_dict[alias]["template_path"] = spec.template_path
@@ -157,7 +160,7 @@ def _starter_spec_to_dict(
     return format_dict
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
     pass
@@ -244,7 +247,7 @@ def list_starters():
     starters_dict = _get_starters_dict()
 
     # Group all specs by origin as nested dict and sort it.
-    sorted_starters_dict: Dict[str, Dict[str, KedroStarterSpec]] = {
+    sorted_starters_dict: dict[str, dict[str, KedroStarterSpec]] = {
         origin: dict(sorted(starters_dict_by_origin))
         for origin, starters_dict_by_origin in groupby(
             starters_dict.items(), lambda item: item[1].origin
@@ -263,7 +266,7 @@ def list_starters():
         )
 
 
-def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
+def _fetch_config_from_file(config_path: str) -> dict[str, str]:
     """Obtains configuration for a new kedro project non-interactively from a file.
 
     Args:
@@ -294,10 +297,10 @@ def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
 
 
 def _make_cookiecutter_args(
-    config: Dict[str, str],
+    config: dict[str, str],
     checkout: str,
     directory: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Creates a dictionary of arguments to pass to cookiecutter.
 
     Args:
@@ -330,7 +333,7 @@ def _make_cookiecutter_args(
     return cookiecutter_args
 
 
-def _create_project(template_path: str, cookiecutter_args: Dict[str, Any]):
+def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
     Args:
@@ -344,7 +347,7 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, Any]):
         KedroCliError: If it fails to generate a project.
     """
     with _filter_deprecation_warnings():
-        # pylint: disable=import-outside-toplevel
+        # noqa: import-outside-toplevel
         from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
@@ -386,7 +389,7 @@ def _get_cookiecutter_dir(
     clones it to ``tmpdir``; if template_path is a file path then directly uses that
     path without copying anything.
     """
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
     from cookiecutter.repository import determine_repo_dir  # for performance reasons
 
@@ -416,7 +419,7 @@ def _get_cookiecutter_dir(
     return Path(cookiecutter_dir)
 
 
-def _get_prompts_required(cookiecutter_dir: Path) -> Optional[Dict[str, Any]]:
+def _get_prompts_required(cookiecutter_dir: Path) -> dict[str, Any] | None:
     """Finds the information a user must supply according to prompts.yml."""
     prompts_yml = cookiecutter_dir / "prompts.yml"
     if not prompts_yml.is_file():
@@ -432,8 +435,8 @@ def _get_prompts_required(cookiecutter_dir: Path) -> Optional[Dict[str, Any]]:
 
 
 def _fetch_config_from_user_prompts(
-    prompts: Dict[str, Any], cookiecutter_context: OrderedDict
-) -> Dict[str, str]:
+    prompts: dict[str, Any], cookiecutter_context: OrderedDict
+) -> dict[str, str]:
     """Interactively obtains information from user prompts.
 
     Args:
@@ -444,11 +447,11 @@ def _fetch_config_from_user_prompts(
         Configuration for starting a new project. This is passed as ``extra_context``
             to cookiecutter and will overwrite the cookiecutter.json defaults.
     """
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     from cookiecutter.environment import StrictEnvironment
     from cookiecutter.prompt import read_user_variable, render_variable
 
-    config: Dict[str, str] = {}
+    config: dict[str, str] = {}
 
     for variable_name, prompt_dict in prompts.items():
         prompt = _Prompt(**prompt_dict)
@@ -469,7 +472,7 @@ def _fetch_config_from_user_prompts(
 
 
 def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     from cookiecutter.generate import generate_context
 
     cookiecutter_context = generate_context(cookiecutter_dir / "cookiecutter.json")
@@ -479,7 +482,7 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
 class _Prompt:
     """Represent a single CLI prompt for `kedro new`"""
 
-    def __init__(self, *args, **kwargs) -> None:  # pylint: disable=unused-argument
+    def __init__(self, *args, **kwargs) -> None:  # noqa: unused-argument
         try:
             self.title = kwargs["title"]
         except KeyError as exc:
@@ -507,9 +510,9 @@ class _Prompt:
             raise ValueError(message, self.error_message)
 
 
-def _get_available_tags(template_path: str) -> List:
+def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import git
 
     try:
@@ -527,7 +530,7 @@ def _get_available_tags(template_path: str) -> List:
     return sorted(unique_tags)
 
 
-def _validate_config_file(config: Dict[str, str], prompts: Dict[str, Any]):
+def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
     """Checks that the configuration file contains all needed variables.
 
     Args:

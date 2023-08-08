@@ -1,10 +1,12 @@
 """This module provides ``kedro.config`` with the functionality to load one
 or more configuration files from specified paths.
 """
-from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from __future__ import annotations
 
-from kedro.config import AbstractConfigLoader
+from pathlib import Path
+from typing import Any, Iterable
+
+from kedro.config.abstract_config import AbstractConfigLoader
 from kedro.config.common import _get_config_from_patterns, _remove_duplicates
 
 
@@ -64,12 +66,12 @@ class ConfigLoader(AbstractConfigLoader):
 
     """
 
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         conf_source: str,
         env: str = None,
-        runtime_params: Dict[str, Any] = None,
-        config_patterns: Dict[str, List[str]] = None,
+        runtime_params: dict[str, Any] = None,
+        config_patterns: dict[str, list[str]] = None,
         *,
         base_env: str = "base",
         default_run_env: str = "local",
@@ -86,7 +88,7 @@ class ConfigLoader(AbstractConfigLoader):
             base_env: Name of the base environment. Defaults to `"base"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths.
-            default_run_env: Name of the base environment. Defaults to `"local"`.
+            default_run_env: Name of the default run environment. Defaults to `"local"`.
                 This is used in the `conf_paths` property method to construct
                 the configuration paths. Can be overriden by supplying the `env` argument.
         """
@@ -108,6 +110,10 @@ class ConfigLoader(AbstractConfigLoader):
         )
 
     def __getitem__(self, key):
+        # Allow bypassing of loading config from patterns if a key and value have been set
+        # explicitly on the ``ConfigLoader`` instance.
+        if key in self:
+            return super().__getitem__(key)
         return self.get(*self.config_patterns[key])
 
     def __repr__(self):  # pragma: no cover
@@ -121,7 +127,7 @@ class ConfigLoader(AbstractConfigLoader):
         """Property method to return deduplicated configuration paths."""
         return _remove_duplicates(self._build_conf_paths())
 
-    def get(self, *patterns: str) -> Dict[str, Any]:  # type: ignore
+    def get(self, *patterns: str) -> dict[str, Any]:  # type: ignore
         return _get_config_from_patterns(
             conf_paths=self.conf_paths, patterns=list(patterns)
         )

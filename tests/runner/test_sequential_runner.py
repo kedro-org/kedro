@@ -1,19 +1,22 @@
+from __future__ import annotations
+
 import re
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DataSetError, LambdaDataSet
-from kedro.pipeline import node, pipeline
+from kedro.io import AbstractDataSet, DataCatalog, DatasetError, LambdaDataset
+from kedro.pipeline import node
+from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
 from tests.runner.conftest import exception_fn, identity, sink, source
 
 
 class TestValidSequentialRunner:
     def test_run_with_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = SequentialRunner().run(
             fan_out_fan_in, catalog, hook_manager=_create_hook_manager()
         )
@@ -21,7 +24,7 @@ class TestValidSequentialRunner:
         assert result["Z"] == (42, 42, 42)
 
     def test_run_without_plugin_manager(self, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
+        catalog.add_feed_dict({"A": 42})
         result = SequentialRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
@@ -50,8 +53,8 @@ class TestSeqentialRunnerBranchlessPipeline:
         assert outputs["ds3"]["data"] == 42
 
     def test_node_returning_none(self, is_async, saving_none_pipeline, catalog):
-        pattern = "Saving 'None' to a 'DataSet' is not allowed"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = "Saving 'None' to a 'Dataset' is not allowed"
+        with pytest.raises(DatasetError, match=pattern):
             SequentialRunner(is_async=is_async).run(saving_none_pipeline, catalog)
 
     def test_result_saved_not_returned(self, is_async, saving_result_pipeline):
@@ -65,8 +68,8 @@ class TestSeqentialRunnerBranchlessPipeline:
 
         catalog = DataCatalog(
             {
-                "ds": LambdaDataSet(load=_load, save=_save),
-                "dsX": LambdaDataSet(load=_load, save=_save),
+                "ds": LambdaDataset(load=_load, save=_save),
+                "dsX": LambdaDataset(load=_load, save=_save),
             }
         )
         output = SequentialRunner(is_async=is_async).run(
@@ -122,7 +125,7 @@ class TestSequentialRunnerBranchedPipeline:
             )
 
 
-class LoggingDataSet(AbstractDataSet):
+class LoggingDataset(AbstractDataSet):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name
@@ -139,7 +142,7 @@ class LoggingDataSet(AbstractDataSet):
         self.log.append(("release", self.name))
         self.value = None
 
-    def _describe(self) -> Dict[str, Any]:
+    def _describe(self) -> dict[str, Any]:
         return {}
 
 
@@ -147,14 +150,14 @@ class LoggingDataSet(AbstractDataSet):
 class TestSequentialRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):
         log = []
-        test_pipeline = pipeline(
+        test_pipeline = modular_pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
         catalog = DataCatalog(
             {
-                "in": LoggingDataSet(log, "in", "stuff"),
-                "middle": LoggingDataSet(log, "middle"),
-                "out": LoggingDataSet(log, "out"),
+                "in": LoggingDataset(log, "in", "stuff"),
+                "middle": LoggingDataset(log, "middle"),
+                "out": LoggingDataset(log, "out"),
             }
         )
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
@@ -164,7 +167,7 @@ class TestSequentialRunnerRelease:
 
     def test_release_at_earliest_opportunity(self, is_async):
         log = []
-        test_pipeline = pipeline(
+        test_pipeline = modular_pipeline(
             [
                 node(source, None, "first"),
                 node(identity, "first", "second"),
@@ -173,8 +176,8 @@ class TestSequentialRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "first": LoggingDataSet(log, "first"),
-                "second": LoggingDataSet(log, "second"),
+                "first": LoggingDataset(log, "first"),
+                "second": LoggingDataset(log, "second"),
             }
         )
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
@@ -189,14 +192,14 @@ class TestSequentialRunnerRelease:
 
     def test_count_multiple_loads(self, is_async):
         log = []
-        test_pipeline = pipeline(
+        test_pipeline = modular_pipeline(
             [
                 node(source, None, "dataset"),
                 node(sink, "dataset", None, name="bob"),
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
+        catalog = DataCatalog({"dataset": LoggingDataset(log, "dataset")})
         SequentialRunner(is_async=is_async).run(test_pipeline, catalog)
 
         # we want to the release after both the loads
@@ -204,13 +207,13 @@ class TestSequentialRunnerRelease:
 
     def test_release_transcoded(self, is_async):
         log = []
-        test_pipeline = pipeline(
+        test_pipeline = modular_pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
         catalog = DataCatalog(
             {
-                "ds@save": LoggingDataSet(log, "save"),
-                "ds@load": LoggingDataSet(log, "load"),
+                "ds@save": LoggingDataset(log, "save"),
+                "ds@load": LoggingDataset(log, "load"),
             }
         )
 
@@ -222,8 +225,8 @@ class TestSequentialRunnerRelease:
     @pytest.mark.parametrize(
         "test_pipeline",
         [
-            pipeline([node(identity, "ds1", "ds2", confirms="ds1")]),
-            pipeline(
+            modular_pipeline([node(identity, "ds1", "ds2", confirms="ds1")]),
+            modular_pipeline(
                 [
                     node(identity, "ds1", "ds2"),
                     node(identity, "ds2", None, confirms="ds1"),
@@ -260,8 +263,8 @@ class TestSuggestResumeScenario:
     ):
         nodes = {n.name: n for n in two_branches_crossed_pipeline.nodes}
         for name in failing_node_names:
-            two_branches_crossed_pipeline -= pipeline([nodes[name]])
-            two_branches_crossed_pipeline += pipeline(
+            two_branches_crossed_pipeline -= modular_pipeline([nodes[name]])
+            two_branches_crossed_pipeline += modular_pipeline(
                 [nodes[name]._copy(func=exception_fn)]
             )
         with pytest.raises(Exception):

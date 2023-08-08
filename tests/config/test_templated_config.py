@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Dict
 
 import pytest
 import yaml
@@ -11,7 +12,7 @@ _DEFAULT_RUN_ENV = "local"
 _BASE_ENV = "base"
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
@@ -440,7 +441,7 @@ class TestFormatObject:
             (["${a}", "X${a}"], {"a": "A"}, ["A", "XA"]),
             (["${b|D}"], {"a": "A"}, ["D"]),
             (["${b|abcDEF_.<>/@$%^&!}"], {"a": "A"}, ["abcDEF_.<>/@$%^&!"]),
-            # Dicts
+            # dicts
             ({"key": "${a}"}, {"a": "A"}, {"key": "A"}),
             ({"${a}": "value"}, {"a": "A"}, {"A": "value"}),
             ({"${a|D}": "value"}, {}, {"D": "value"}),
@@ -480,3 +481,25 @@ class TestFormatObject:
             "**/catalog*",
         ]
         assert config_loader.config_patterns["spark"] == ["spark*/"]
+
+    @pytest.mark.usefixtures("proj_catalog_param")
+    def test_adding_extra_keys_to_confloader(self, tmp_path, template_config):
+        """Make sure extra keys can be added directly to the config loader instance."""
+        config_loader = TemplatedConfigLoader(
+            str(tmp_path), globals_dict=template_config
+        )
+        config_loader.default_run_env = ""
+        catalog = config_loader["catalog"]
+        config_loader["spark"] = {"spark_config": "emr.blabla"}
+
+        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert config_loader["spark"] == {"spark_config": "emr.blabla"}
+
+    @pytest.mark.usefixtures("proj_catalog_param")
+    def test_bypass_catalog_config_loading(self, tmp_path):
+        """Make sure core config loading can be bypassed by setting the key and values
+        directly on the config loader instance."""
+        conf = TemplatedConfigLoader(str(tmp_path))
+        conf["catalog"] = {"catalog_config": "something_new"}
+
+        assert conf["catalog"] == {"catalog_config": "something_new"}

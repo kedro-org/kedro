@@ -5,7 +5,7 @@ The ``JSONDataSet`` is part of Kedro Experiment Tracking. The dataset is version
 from typing import NoReturn
 
 from kedro.extras.datasets.json import JSONDataSet as JDS
-from kedro.io.core import DataSetError
+from kedro.io.core import DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -18,18 +18,19 @@ class JSONDataSet(JDS):
     The ``JSONDataSet`` is part of Kedro Experiment Tracking.
     The dataset is write-only and it is versioned by default.
 
-    Example adding a catalog entry with
-    `YAML API
-    <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: tracking.JSONDataSet
-        >>>   filepath: data/09_tracking/cars.json
+        cars:
+          type: tracking.JSONDataSet
+          filepath: data/09_tracking/cars.json
 
-    Example using Python API:
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.tracking import JSONDataSet
@@ -44,4 +45,4 @@ class JSONDataSet(JDS):
     versioned = True
 
     def _load(self) -> NoReturn:
-        raise DataSetError(f"Loading not supported for '{self.__class__.__name__}'")
+        raise DatasetError(f"Loading not supported for '{self.__class__.__name__}'")

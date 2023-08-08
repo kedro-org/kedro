@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 import dask.dataframe as dd
 import fsspec
+import triad
 
 from kedro.io.core import AbstractDataSet, get_protocol_and_path
 
@@ -19,57 +20,78 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
-        Example adding a catalog entry with
-        `YAML API
-        <https://kedro.readthedocs.io/en/stable/data/\
-            data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    Example usage for the
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
-        .. code-block:: yaml
+    .. code-block:: yaml
 
-        >>> cars:
-        >>>   type: dask.ParquetDataSet
-        >>>   filepath: s3://bucket_name/path/to/folder
-        >>>   save_args:
-        >>>     compression: GZIP
-        >>>   credentials:
-        >>>     client_kwargs:
-        >>>         aws_access_key_id: YOUR_KEY
-        >>>         aws_secret_access_key: YOUR_SECRET
+        cars:
+          type: dask.ParquetDataSet
+          filepath: s3://bucket_name/path/to/folder
+          save_args:
+            compression: GZIP
+          credentials:
+            client_kwargs:
+              aws_access_key_id: YOUR_KEY
+              aws_secret_access_key: YOUR_SECRET
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    ::
+
+        >>> from kedro.extras.datasets.dask import ParquetDataSet
+        >>> import pandas as pd
+        >>> import dask.dataframe as dd
         >>>
+        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
+        >>>                      'col3': [[5, 6], [7, 8]]})
+        >>> ddf = dd.from_pandas(data, npartitions=2)
+        >>>
+        >>> data_set = ParquetDataSet(
+        >>>     filepath="s3://bucket_name/path/to/folder",
+        >>>     credentials={
+        >>>         'client_kwargs':{
+        >>>             'aws_access_key_id': 'YOUR_KEY',
+        >>>             'aws_secret_access_key': 'YOUR SECRET',
+        >>>         }
+        >>>     },
+        >>>     save_args={"compression": "GZIP"}
+        >>> )
+        >>> data_set.save(ddf)
+        >>> reloaded = data_set.load()
+        >>>
+        >>> assert ddf.compute().equals(reloaded.compute())
 
+    The output schema can also be explicitly specified using
+    `Triad <https://triad.readthedocs.io/en/latest/api/\
+    triad.collections.html#module-triad.collections.schema>`_.
+    This is processed to map specific columns to
+    `PyArrow field types <https://arrow.apache.org/docs/python/api/\
+    datatypes.html>`_ or schema. For instance:
 
-        Example using Python API (AWS S3):
-        ::
+    .. code-block:: yaml
 
-            >>> from kedro.extras.datasets.dask import ParquetDataSet
-            >>> import pandas as pd
-            >>> import dask.dataframe as dd
-            >>>
-            >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-            >>>                      'col3': [5, 6]})
-            >>> ddf = dd.from_pandas(data, npartitions=2)
-            >>>
-            >>> data_set = ParquetDataSet(
-            >>>     filepath="s3://bucket_name/path/to/folder",
-            >>>     credentials={
-            >>>         'client_kwargs':{
-            >>>             'aws_access_key_id': 'YOUR_KEY',
-            >>>             'aws_secret_access_key': 'YOUR SECRET',
-            >>>         }
-            >>>     },
-            >>>     save_args={"compression": "GZIP"}
-            >>> )
-            >>> data_set.save(ddf)
-            >>> reloaded = data_set.load()
-            >>>
-            >>> assert ddf.compute().equals(reloaded.compute())
+        parquet_dataset:
+          type: dask.ParquetDataSet
+          filepath: "s3://bucket_name/path/to/folder"
+          credentials:
+            client_kwargs:
+              aws_access_key_id: YOUR_KEY
+              aws_secret_access_key: "YOUR SECRET"
+          save_args:
+            compression: GZIP
+            schema:
+              col1: [int32]
+              col2: [int32]
+              col3: [[int32]]
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"write_index": False}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -116,11 +138,11 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         return fs_args
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
+        return {
+            "filepath": self._filepath,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+        }
 
     def _load(self) -> dd.DataFrame:
         return dd.read_parquet(
@@ -128,7 +150,58 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
         )
 
     def _save(self, data: dd.DataFrame) -> None:
+        self._process_schema()
         data.to_parquet(self._filepath, storage_options=self.fs_args, **self._save_args)
+
+    def _process_schema(self) -> None:
+        """This method processes the schema in the catalog.yml or the API, if provided.
+        This assumes that the schema is specified using Triad's grammar for
+        schema definition.
+
+        When the value of the `schema` variable is a string, it is assumed that
+        it corresponds to the full schema specification for the data.
+
+        Alternatively, if the `schema` is specified as a dictionary, then only the
+        columns that are specified will be strictly mapped to a field type. The other
+        unspecified columns, if present, will be inferred from the data.
+
+        This method converts the Triad-parsed schema into a pyarrow schema.
+        The output directly supports Dask's specifications for providing a schema
+        when saving to a parquet file.
+
+        Note that if a `pa.Schema` object is passed directly in the `schema` argument, no
+        processing will be done. Additionally, the behavior when passing a `pa.Schema`
+        object is assumed to be consistent with how Dask sees it. That is, it should fully
+        define the  schema for all fields.
+        """
+        schema = self._save_args.get("schema")
+
+        if isinstance(schema, dict):
+            # The schema may contain values of different types, e.g., pa.DataType, Python types,
+            # strings, etc. The latter requires a transformation, then we use triad handle all
+            # other value types.
+
+            # Create a schema from values that triad can handle directly
+            triad_schema = triad.Schema(
+                {k: v for k, v in schema.items() if not isinstance(v, str)}
+            )
+
+            # Handle the schema keys that are represented as string and add them to the triad schema
+            triad_schema.update(
+                triad.Schema(
+                    ",".join(
+                        [f"{k}:{v}" for k, v in schema.items() if isinstance(v, str)]
+                    )
+                )
+            )
+
+            # Update the schema argument with the normalized schema
+            self._save_args["schema"].update(
+                {col: field.type for col, field in triad_schema.items()}
+            )
+
+        elif isinstance(schema, str):
+            self._save_args["schema"] = triad.Schema(schema).pyarrow_schema
 
     def _exists(self) -> bool:
         protocol = get_protocol_and_path(self._filepath)[0]

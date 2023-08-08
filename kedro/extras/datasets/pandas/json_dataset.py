@@ -13,7 +13,7 @@ import pandas as pd
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
-    DataSetError,
+    DatasetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -30,24 +30,26 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
-    Example adding a catalog entry with
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-        data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
-        >>> clickstream_dataset:
-        >>>   type: pandas.JSONDataSet
-        >>>   filepath: abfs://landing_area/primary/click_stream.json
-        >>>   credentials: abfs_creds
-        >>>
-        >>> json_dataset:
-        >>>   type: pandas.JSONDataSet
-        >>>   filepath: data/01_raw/Video_Games.json
-        >>>   load_args:
-        >>>     lines: True
+        clickstream_dataset:
+          type: pandas.JSONDataSet
+          filepath: abfs://landing_area/primary/click_stream.json
+          credentials: abfs_creds
 
-    Example using Python API:
+        json_dataset:
+          type: pandas.JSONDataSet
+          filepath: data/01_raw/Video_Games.json
+          load_args:
+            lines: True
+
+    Example usage for the
+    `Python API <https://kedro.readthedocs.io/en/stable/data/\
+    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import JSONDataSet
@@ -66,8 +68,7 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -136,13 +137,12 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
             self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())
@@ -172,7 +172,7 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
+        except DatasetError:
             return False
 
         return self._fs.exists(load_path)

@@ -1,5 +1,3 @@
-from unittest import mock
-
 import pytest
 
 from kedro.extras.datasets.spark import SparkJDBCDataSet
@@ -53,59 +51,52 @@ def test_missing_table():
         SparkJDBCDataSet(url="dummy_url", table=None)
 
 
-def mock_save(arg_dict):
-    mock_data = mock.Mock()
-    data_set = SparkJDBCDataSet(**arg_dict)
+def test_save(mocker, spark_jdbc_args):
+    mock_data = mocker.Mock()
+    data_set = SparkJDBCDataSet(**spark_jdbc_args)
     data_set.save(mock_data)
-    return mock_data
+    mock_data.write.jdbc.assert_called_with("dummy_url", "dummy_table")
 
 
-def test_save(spark_jdbc_args):
-    data = mock_save(spark_jdbc_args)
-    data.write.jdbc.assert_called_with("dummy_url", "dummy_table")
-
-
-def test_save_credentials(spark_jdbc_args_credentials):
-    data = mock_save(spark_jdbc_args_credentials)
-    data.write.jdbc.assert_called_with(
+def test_save_credentials(mocker, spark_jdbc_args_credentials):
+    mock_data = mocker.Mock()
+    data_set = SparkJDBCDataSet(**spark_jdbc_args_credentials)
+    data_set.save(mock_data)
+    mock_data.write.jdbc.assert_called_with(
         "dummy_url",
         "dummy_table",
         properties={"user": "dummy_user", "password": "dummy_pw"},
     )
 
 
-def test_save_args(spark_jdbc_args_save_load):
-    data = mock_save(spark_jdbc_args_save_load)
-    data.write.jdbc.assert_called_with(
+def test_save_args(mocker, spark_jdbc_args_save_load):
+    mock_data = mocker.Mock()
+    data_set = SparkJDBCDataSet(**spark_jdbc_args_save_load)
+    data_set.save(mock_data)
+    mock_data.write.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )
 
 
-def test_except_bad_credentials(spark_jdbc_args_credentials_with_none_password):
+def test_except_bad_credentials(mocker, spark_jdbc_args_credentials_with_none_password):
     pattern = r"Credential property 'password' cannot be None(.+)"
     with pytest.raises(DatasetError, match=pattern):
-        mock_save(spark_jdbc_args_credentials_with_none_password)
+        mock_data = mocker.Mock()
+        data_set = SparkJDBCDataSet(**spark_jdbc_args_credentials_with_none_password)
+        data_set.save(mock_data)
 
 
-@mock.patch(
-    "kedro.extras.datasets.spark.spark_jdbc_dataset.SparkSession.builder.getOrCreate"
-)
-def mock_load(mock_get_or_create, arg_dict):
-    spark = mock_get_or_create.return_value
-    data_set = SparkJDBCDataSet(**arg_dict)
+def test_load(mocker, spark_jdbc_args):
+    spark = mocker.patch.object(SparkJDBCDataSet, "_get_spark").return_value
+    data_set = SparkJDBCDataSet(**spark_jdbc_args)
     data_set.load()
-    return spark
-
-
-def test_load(spark_jdbc_args):
-    # pylint: disable=no-value-for-parameter
-    spark = mock_load(arg_dict=spark_jdbc_args)
     spark.read.jdbc.assert_called_with("dummy_url", "dummy_table")
 
 
-def test_load_credentials(spark_jdbc_args_credentials):
-    # pylint: disable=no-value-for-parameter
-    spark = mock_load(arg_dict=spark_jdbc_args_credentials)
+def test_load_credentials(mocker, spark_jdbc_args_credentials):
+    spark = mocker.patch.object(SparkJDBCDataSet, "_get_spark").return_value
+    data_set = SparkJDBCDataSet(**spark_jdbc_args_credentials)
+    data_set.load()
     spark.read.jdbc.assert_called_with(
         "dummy_url",
         "dummy_table",
@@ -113,9 +104,10 @@ def test_load_credentials(spark_jdbc_args_credentials):
     )
 
 
-def test_load_args(spark_jdbc_args_save_load):
-    # pylint: disable=no-value-for-parameter
-    spark = mock_load(arg_dict=spark_jdbc_args_save_load)
+def test_load_args(mocker, spark_jdbc_args_save_load):
+    spark = mocker.patch.object(SparkJDBCDataSet, "_get_spark").return_value
+    data_set = SparkJDBCDataSet(**spark_jdbc_args_save_load)
+    data_set.load()
     spark.read.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )

@@ -329,13 +329,13 @@ class TestEntryPoints:
 
 class TestKedroCLI:
     def test_project_commands_no_clipy(self, mocker, fake_metadata):
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            side_effect=cycle([ModuleNotFoundError()]),
-        )
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            side_effect=cycle([ModuleNotFoundError()]),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         print(kedro_cli.project_groups)
@@ -356,25 +356,25 @@ class TestKedroCLI:
         assert kedro_cli._metadata is None
 
     def test_project_commands_invalid_clipy(self, mocker, fake_metadata):
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module", return_value=None
-        )
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module", return_value=None
         )
         with raises(KedroCliError, match="Cannot load commands from"):
             _ = KedroCLI(fake_metadata.project_path)
 
     def test_project_commands_valid_clipy(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         assert len(kedro_cli.project_groups) == 7
@@ -402,13 +402,13 @@ class TestKedroCLI:
 
     def test_kedro_cli_with_project(self, mocker, fake_metadata):
         Module = namedtuple("Module", ["cli"])
-        mocker.patch(
-            "kedro.framework.cli.cli.importlib.import_module",
-            return_value=Module(cli=cli),
-        )
         mocker.patch("kedro.framework.cli.cli._is_project", return_value=True)
         mocker.patch(
             "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
 

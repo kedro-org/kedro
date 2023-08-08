@@ -43,8 +43,8 @@ Welcome to Kedro's documentation!
     :target: https://slack.kedro.org
     :alt: Kedro's Slack organisation
 
-.. image:: https://img.shields.io/badge/slack-archive-blue.svg?label=Kedro%20Slack%20
-    :target: https://www.linen.dev/s/kedro
+.. image:: https://img.shields.io/badge/slack-archive-blueviolet.svg?label=Kedro%20Slack%20
+    :target: https://linen-slack.kedro.org/
     :alt: Kedro's Slack archive
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg

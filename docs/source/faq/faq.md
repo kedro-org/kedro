@@ -1,4 +1,6 @@
-# Frequently asked questions
+# FAQs
+
+This is a growing set of technical FAQs. The [product FAQs on the Kedro website](https://kedro.org/#faq) explain how Kedro can answer the typical use cases and requirements of data scientists, data engineers, machine learning engineers and product owners.
 
 ## Visualisation
 

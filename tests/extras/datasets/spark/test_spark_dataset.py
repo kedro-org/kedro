@@ -7,6 +7,7 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
+from pyspark import __version__
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.types import (
@@ -17,6 +18,7 @@ from pyspark.sql.types import (
     StructType,
 )
 from pyspark.sql.utils import AnalysisException
+from semver import VersionInfo
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.extras.datasets.pickle import PickleDataSet
@@ -59,6 +61,8 @@ HDFS_FOLDER_STRUCTURE = [
     (HDFS_PREFIX + "/2019-01-02T01.00.00.000Z/" + FILENAME, [], ["part1"]),
     (HDFS_PREFIX + "/2019-02-01T00.00.00.000Z", [], ["other_file"]),
 ]
+
+SPARK_VERSION = VersionInfo.parse(__version__)
 
 
 @pytest.fixture
@@ -405,11 +409,18 @@ class TestSparkDataSet:
         # exists should raise all errors except for
         # AnalysisExceptions clearly indicating a missing file
         spark_data_set = SparkDataSet(filepath="")
-        mocker.patch.object(
-            spark_data_set,
-            "_get_spark",
-            side_effect=AnalysisException("Other Exception", []),
-        )
+        if SPARK_VERSION.match(">=3.4.0"):
+            mocker.patch.object(
+                spark_data_set,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception"),
+            )
+        else:
+            mocker.patch.object(  # pylint: disable=expression-not-assigned
+                spark_data_set,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception", []),
+            )
 
         with pytest.raises(DatasetError, match="Other Exception"):
             spark_data_set.exists()

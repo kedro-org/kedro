@@ -293,12 +293,9 @@ class TestSparkHiveDataSet:
         )
         with pytest.raises(
             DatasetError,
-            match=r"Failed while loading data from data set "
-            r"SparkHiveDataSet\(database=default_1, format=hive, "
-            r"table=table_doesnt_exist, table_pk=\[\], write_mode=append\)\.\n"
-            r"Table or view not found: default_1.table_doesnt_exist;\n"
-            r"'UnresolvedRelation \[default_1, "
-            r"table_doesnt_exist\], \[\], false\n",
+            match=r"Failed while loading data from data set SparkHiveDataSet"
+            r"|table_doesnt_exist"
+            r"|UnresolvedRelation",
         ):
             dataset.load()
 

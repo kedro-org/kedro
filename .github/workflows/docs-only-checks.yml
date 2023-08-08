@@ -6,6 +6,8 @@ on:
       - main
       - develop
       - try-ga-triggering
+      - docs-only-check-for-releasemd
+      - try-ga-triggering
     paths:
       - "docs/**"
       - '**.md'
@@ -13,6 +15,7 @@ on:
     branches:
       - main
       - develop
+      - docs-only-check-for-releasemd
     paths:
       - "docs/**"
       - '**.md'

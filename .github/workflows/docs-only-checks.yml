@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - try-ga-triggering
     paths:
       - "docs/**"
       - '**.md'

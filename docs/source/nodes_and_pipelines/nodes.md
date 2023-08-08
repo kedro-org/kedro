@@ -218,7 +218,7 @@ To use generators to save data lazily, you need do three things:
 
 Copy the following code to `nodes.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
 
-<details><summary>Click to open
+<details><summary>C<b>Click to open</b></summary>
 ```python
 import logging
 from typing import Any, Dict, Tuple, Iterator
@@ -282,7 +282,7 @@ def report_accuracy(y_pred: pd.Series, y_test: pd.Series):
     logger = logging.getLogger(__name__)
     logger.info("Model has accuracy of %.3f on test data.", accuracy)
 ```
-</summary></details>
+</details>
 
 
 The `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:

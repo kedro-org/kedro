@@ -7,7 +7,7 @@ from setuptools import setup
 PANDAS = "pandas~=1.3"
 SPARK = "pyspark>=2.2, <3.4"
 HDFS = "hdfs>=2.5.8, <3.0"
-S3FS = "s3fs>=2021.4, <2022.10.1"
+S3FS = "s3fs>=0.3, <2023.12.1"  # Revise in 6 months
 
 template_files = []
 for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:

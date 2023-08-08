@@ -218,7 +218,9 @@ To use generators to save data lazily, you need do three things:
 
 Copy the following code to `nodes.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
 
-<details><summary>C<b>Click to open</b></summary>
+<details>
+<summary><b>Click to open</b></summary>
+
 ```python
 import logging
 from typing import Any, Dict, Tuple, Iterator

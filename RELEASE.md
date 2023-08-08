@@ -18,6 +18,7 @@
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 
 ## Documentation changes
+* Update example of using generator functions in nodes.
 * Added migration guide from the `ConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` is deprecated and will be removed in the `0.19.0` release.
 
 ## Migration Tips for Python 3.11:
@@ -45,7 +46,6 @@
 * Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
 
 ## Community contributions
-
 Thanks to [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) and [Chris Schopp](https://github.com/cschopp-simwell).
 
 ## Breaking changes to the API

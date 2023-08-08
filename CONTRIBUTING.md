@@ -10,7 +10,7 @@ We also curate a [GitHub repo that lists content created by the Kedro community]
 
 ## Contribute to the project
 
-There are quite a few ways to contribute to the project. To learn how to do so, visit our [Contribute to Kedro](https://github.com/kedro-org/kedro/wiki/Contributing-to-Kedro) wiki page.
+There are quite a few ways to contribute to the project. To learn how to do so, visit our [Contribute to Kedro](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro) wiki page.
 
 ## Join our Technical Steering Committee
 

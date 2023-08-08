@@ -57,5 +57,6 @@ When you migrate to use `OmegaConfigLoader` it  requires you to fetch configurat
 In this example, `"catalog"` is the key to the default catalog patterns specified in the `OmegaConfigLoader` class.
 
 ### 6. Exception Handling
+For error and exception handling, most errors are the same. Those you need to be aware of that are different between the original `ConfigLoader` and `OmegaConfigLoader` are as follows:
 * `OmegaConfigLoader` throws a `MissingConfigException` when configuration paths don't exist, rather than the `ValueError` used in `ConfigLoader`.
 * In `OmegaConfigLoader`, if there is bad syntax in your configuration files, it will trigger a `ParserError` instead of a `BadConfigException` used in `ConfigLoader`.

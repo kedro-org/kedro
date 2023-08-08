@@ -622,9 +622,16 @@ def _package_micropkg(
     )
     # as the source distribution will only contain parameters, we aren't listing other
     # config files not to confuse users and avoid useless file copies
+    # collect configs to package not only from parameters folder, but from core conf folder also
+    # because parameters had been moved from foldername to yml filename
     configs_to_package = _find_config_files(
         package_conf,
-        [f"parameters*/**/{micropkg_name}.yml", f"parameters*/**/{micropkg_name}/**/*"],
+        [
+            f"**/parameters_{micropkg_name}.yml",
+            f"**/{micropkg_name}/**/*",
+            f"parameters*/**/{micropkg_name}.yml",
+            f"parameters*/**/{micropkg_name}/**/*",
+        ],
     )
 
     source_paths = (package_source, package_tests, configs_to_package)

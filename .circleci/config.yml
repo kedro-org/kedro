@@ -30,4 +30,5 @@ workflows:
           # <regex path-to-test> <parameter-to-set> <value-of-pipeline-parameter>
           mapping: |
             docs/.* docs_change true
+            RELEASE.md docs_change true
             ^((?!docs/).)*$ code_change true

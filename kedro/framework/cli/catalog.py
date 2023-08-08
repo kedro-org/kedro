@@ -170,8 +170,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
             context.project_path
             / settings.CONF_SOURCE
             / env
-            / "catalog"
-            / f"{pipeline_name}.yml"
+            / f"catalog_{pipeline_name}.yml"
         )
         _add_missing_datasets_to_catalog(missing_ds, catalog_path)
         click.echo(f"Data Catalog YAML configuration was created: {catalog_path}")

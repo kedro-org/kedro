@@ -19,8 +19,7 @@ When you package your micro-package, such as a modular pipeline for example, Ked
 ```text
 ├── conf
 │   └── base
-│       └── parameters
-│           └── {{pipeline_name*}}  <-- All parameter file(s)
+│       └── parameters_{{pipeline_name*}}  <-- All parameter file(s)
 └── src
     ├── my_project
     │   ├── __init__.py

@@ -52,8 +52,7 @@ Running the `kedro pipeline create` command adds boilerplate folders and files f
 ```text
 ├── conf
 │   └── base
-│       └── parameters
-│           └── {{pipeline_name}}.yml  <-- Pipeline-specific parameters
+│       └── parameters_{{pipeline_name}}.yml  <-- Pipeline-specific parameters
 └── src
     ├── my_project
     │   ├── __init__.py

@@ -75,13 +75,13 @@ The [Kedro product team](https://docs.kedro.org/en/stable/contribution/technical
 
 ## Can I contribute?
 
-Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
+Yes! We welcome all kinds of contributions. Check out our [guide to contributing to Kedro](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).
 
 ## Where can I learn more?
 
 There is a growing community around Kedro. We encourage you to ask and answer technical questions on [Slack](https://slack.kedro.org/) and bookmark the [Linen archive of past discussions](https://linen-slack.kedro.org/).
 
-We keep a list of [technical FAQs in the Kedro documentation](https://docs.kedro.org/en/stable/faq/faq.html) and you can find a  growing list of blog posts, videos and projects that use Kedro over on the [`awesome-kedro` GitHub repository](https://github.com/kedro-org/awesome-kedro).
+We keep a list of [technical FAQs in the Kedro documentation](https://docs.kedro.org/en/stable/faq/faq.html) and you can find a  growing list of blog posts, videos and projects that use Kedro over on the [`awesome-kedro` GitHub repository](https://github.com/kedro-org/awesome-kedro). If you have created anything with Kedro we'd love to include it on the list. Just make a PR to add it!
 
 ## How can I cite Kedro?
 

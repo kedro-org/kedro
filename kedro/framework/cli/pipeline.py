@@ -140,10 +140,14 @@ def delete_pipeline(
     pipeline_artifacts = _get_pipeline_artifacts(metadata, pipeline_name=name, env=env)
 
     files_to_delete = [
-        pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml"
+        pipeline_artifacts.pipeline_conf / filepath
         for confdir in ("parameters", "catalog")
-        if (pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml").is_file()
+        # Since we remove nesting in 'parameters' and 'catalog' folders,
+        # we want to also del the old project's structure for backward compatibility
+        for filepath in (Path(f"{confdir}_{name}.yml"), Path(confdir) / f"{name}.yml")
+        if (pipeline_artifacts.pipeline_conf / filepath).is_file()
     ]
+
     dirs_to_delete = [
         path
         for path in (pipeline_artifacts.pipeline_dir, pipeline_artifacts.pipeline_tests)

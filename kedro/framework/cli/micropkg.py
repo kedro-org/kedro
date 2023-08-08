@@ -2,6 +2,7 @@
 # ruff: noqa: I001 # https://github.com/kedro-org/kedro/pull/2634
 from __future__ import annotations
 
+import logging
 import re
 import shutil
 import sys
@@ -51,6 +52,8 @@ dependencies = {install_requires}
 [tool.setuptools.packages]
 find = {{}}
 """
+
+logger = logging.getLogger(__name__)
 
 
 class _EquivalentRequirement(Requirement):
@@ -592,6 +595,12 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
         )
         return micropkg_module.__version__  # type: ignore
     except (AttributeError, ModuleNotFoundError):
+        logger.warning(
+            "Micropackage version not found in '%s.%s', will take the top-level one in '%s'",
+            metadata.package_name,
+            micropkg_module_path,
+            metadata.package_name,
+        )
         # if micropkg version doesn't exist, take the project one
         project_module = import_module(f"{metadata.package_name}")
         return project_module.__version__  # type: ignore
@@ -613,9 +622,16 @@ def _package_micropkg(
     )
     # as the source distribution will only contain parameters, we aren't listing other
     # config files not to confuse users and avoid useless file copies
+    # collect configs to package not only from parameters folder, but from core conf folder also
+    # because parameters had been moved from foldername to yml filename
     configs_to_package = _find_config_files(
         package_conf,
-        [f"parameters*/**/{micropkg_name}.yml", f"parameters*/**/{micropkg_name}/**/*"],
+        [
+            f"**/parameters_{micropkg_name}.yml",
+            f"**/{micropkg_name}/**/*",
+            f"parameters*/**/{micropkg_name}.yml",
+            f"parameters*/**/{micropkg_name}/**/*",
+        ],
     )
 
     source_paths = (package_source, package_tests, configs_to_package)

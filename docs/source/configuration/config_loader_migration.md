@@ -60,9 +60,6 @@ In this example, `"catalog"` is the key to the default catalog patterns specifie
 For error and exception handling, most errors are the same. Those you need to be aware of that are different between the original `ConfigLoader` and `OmegaConfigLoader` are as follows:
 * `OmegaConfigLoader` throws a `MissingConfigException` when configuration paths don't exist, rather than the `ValueError` used in `ConfigLoader`.
 * In `OmegaConfigLoader`, if there is bad syntax in your configuration files, it will trigger a `ParserError` instead of a `BadConfigException` used in `ConfigLoader`.
-* `OmegaConfigLoader` throws a `MissingConfigException` when configuration paths don't exist, rather than the `ValueError` used in `ConfigLoader`.
-* In `OmegaConfigLoader`, if there is bad syntax in your configuration files, it will trigger a `ParserError` instead of a `BadConfigException` used in `ConfigLoader`.
-
 
 ## [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader) to [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader)
 
@@ -74,13 +71,13 @@ You can install both this Kedro version and `omegaconf` using `pip`:
 ```bash
 pip install kedro==0.18.X
 ```
-This would be the minimum required Kedro version which includes `omegaconf` as dependency and the necessary functionality to replace `TemplatedConfigLoader`.
+This would be the minimum required Kedro version which includes `omegaconf` as a dependency and the necessary functionality to replace `TemplatedConfigLoader`.
 Or you can run:
 ```bash
 pip install -U kedro
 ```
 
-This command installs the most recent version of Kedro which also includes `omegaconf` as dependency.
+This command installs the most recent version of Kedro which also includes `omegaconf` as a dependency.
 
 ### 2. Use the `OmegaConfigLoader`
 To use `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
@@ -105,7 +102,7 @@ Replace the import statement for `TemplatedConfigLoader` with the one for `Omega
 
 ### 5. Load Configuration
 The method to load the configuration using `OmegaConfigLoader` differs slightly from that used by `TemplatedConfigLoader`, which allowed users to access configuration through the `.get()` method and required patterns as argument.
-When you migrate to use `OmegaConfigLoader`it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
+When you migrate to use `OmegaConfigLoader` it  requires you to fetch configuration through a configuration key that points to [configuration patterns specified in the loader class](configuration_basics.md#configuration-patterns) or [provided in the `CONFIG_LOADER_ARGS`](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) in `settings.py`.
 
 ```diff
 - conf_path = str(project_path / settings.CONF_SOURCE)
@@ -197,4 +194,5 @@ If you take the example from [the `TemplatedConfigLoader` with Jinja2 documentat
 ```
 
 ### 9. Exception Handling
+For error and exception handling, most errors are the same. Those you need to be aware of that are different between the original `TemplatedConfigLoader` and `OmegaConfigLoader` are as follows:
 * For missing template values `OmegaConfigLoader` throws `omegaconf.errors.InterpolationKeyError`.

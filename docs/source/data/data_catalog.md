@@ -359,10 +359,10 @@ The list of all available parameters is given in the [Paramiko documentation](ht
 
 You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
 
-This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
+This creates a `<conf_root>/<env>/catalog_<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
 
 ```yaml
-# <conf_root>/<env>/catalog/<pipeline_name>.yml
+# <conf_root>/<env>/catalog_<pipeline_name>.yml
 rockets:
   type: MemoryDataSet
 scooters:

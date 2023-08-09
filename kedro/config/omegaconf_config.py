@@ -119,6 +119,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if custom_resolvers:
             self._register_new_resolvers(custom_resolvers)
 
+        self.globals: dict[str, Any] = {}
+        self._register_globals_resolver()
+
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
             self._protocol = "tar"
@@ -241,6 +244,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         """
         # noqa: too-many-locals
+        print(conf_path)
+        print(patterns)
 
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
@@ -260,6 +265,18 @@ class OmegaConfigLoader(AbstractConfigLoader):
         seen_file_to_keys = {
             file: set(config.keys()) for file, config in config_per_file.items()
         }
+
+        globals_files_filtered = self._filter_paths(
+            conf_path, self.config_patterns["globals"]
+        )
+        # print(globals_files_filtered)
+        globals_per_file = self._load_config_files(conf_path, globals_files_filtered)
+        globals = OmegaConf.to_container(OmegaConf.merge(*globals_per_file.values()))
+        if conf_path.endswith("base"):
+            self.globals = globals
+        else:
+            self.globals.update(globals)
+        print(self.globals)
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
 
@@ -359,6 +376,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if duplicates:
             dup_str = "\n".join(duplicates)
             raise ValueError(f"{dup_str}")
+
+    def _register_globals_resolver(self):
+        self._register_new_resolvers({"globals": lambda x: self._globals_resolver(x)})
+
+    def _globals_resolver(self, variable):
+        print("ACCESSING GLOBALS -> ", self.globals)
+        return self.globals[variable]
 
     @staticmethod
     def _resolve_environment_variables(config: dict[str, Any]) -> None:

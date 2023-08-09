@@ -230,7 +230,14 @@ def resolve_patterns(metadata: ProjectMetadata, env):
     target_pipelines = pipelines.keys()
 
     for pipe in target_pipelines:
-        pipeline_ds = pipelines.get(pipe).data_sets()
+        pl_obj = pipelines.get(pipe)
+        if pl_obj:
+            pipeline_ds = pl_obj.data_sets()
+        else:
+            existing_pls = ", ".join(sorted(pipelines.keys()))
+            raise KedroCliError(
+                f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
+            )
 
         for ds_name in pipeline_ds:
             is_param = ds_name.startswith("params:") or ds_name == "parameters"

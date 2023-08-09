@@ -8,16 +8,14 @@ We welcome any and all contributions to Kedro, at whatever level you can manage.
 - Make a pull request on the [`awesome-kedro` GitHub repo](https://github.com/kedro-org/awesome-kedro) to update the curated list of Kedro community content
 - Report a bug or propose a new feature on [GitHub issues](https://github.com/kedro-org/kedro/issues)
 - [Review other contributors' PRs](https://github.com/kedro-org/kedro/pulls)
-- [Contribute code](./developer_contributor_guidelines.md), for example to fix a bug or add a feature
-- [Contribute to the documentation](documentation_contributor_guidelines.md)
+- [Contribute code](https://github.com/kedro-org/kedro/wiki/Guidelines-for-contributing-developers), for example to fix a bug or add a feature
+- [Contribute to the documentation](https://github.com/kedro-org/kedro/wiki/Contribute-to-the-Kedro-documentation)
+  
+Make sure to read our [contribution guidelines](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro) on the [Kedro wiki](https://github.com/kedro-org/kedro/wiki).
 
 
 ```{toctree}
 :hidden:
 
-developer_contributor_guidelines
-backwards_compatibility
-documentation_contributor_guidelines
 technical_steering_committee
-development_for_databricks
 ```

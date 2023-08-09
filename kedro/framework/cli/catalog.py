@@ -233,6 +233,10 @@ def resolve_patterns(metadata: ProjectMetadata, env):
         pipeline_ds = pipelines.get(pipe).data_sets()
 
         for ds_name in pipeline_ds:
+            is_param = ds_name.startswith("params:") or ds_name == "parameters"
+            if ds_name in catalog_config or is_param:
+                continue
+
             matched_pattern = data_catalog._match_pattern(
                 data_catalog._dataset_patterns, ds_name
             )

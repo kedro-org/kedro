@@ -109,6 +109,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
             "logging": ["logging*", "logging*/**", "**/logging*"],
+            "globals": ["globals*", "globals*/**", "**/globals*"],
         }
         self.config_patterns.update(config_patterns or {})
 
@@ -247,35 +248,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 f"or is not a valid directory: {conf_path}"
             )
 
-        paths = [
-            Path(each)
-            for pattern in patterns
-            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix())
-        ]
-        deduplicated_paths = set(paths)
-        config_files_filtered = [
-            path for path in deduplicated_paths if self._is_valid_config_path(path)
-        ]
+        config_files_filtered = self._filter_paths(conf_path, patterns)
 
-        config_per_file = {}
-        for config_filepath in config_files_filtered:
-            try:
-                with self._fs.open(str(config_filepath.as_posix())) as open_config:
-                    # As fsspec doesn't allow the file to be read as StringIO,
-                    # this is a workaround to read it as a binary file and decode it back to utf8.
-                    tmp_fo = io.StringIO(open_config.read().decode("utf8"))
-                    config = OmegaConf.load(tmp_fo)
-                    processed_files.add(config_filepath)
-                if read_environment_variables:
-                    self._resolve_environment_variables(config)
-                config_per_file[config_filepath] = config
-            except (ParserError, ScannerError) as exc:
-                line = exc.problem_mark.line  # type: ignore
-                cursor = exc.problem_mark.column  # type: ignore
-                raise ParserError(
-                    f"Invalid YAML or JSON file {Path(conf_path, config_filepath.name).as_posix()},"
-                    f" unable to read line {line}, position {cursor}."
-                ) from exc
+        config_per_file = self._load_config_files(
+            conf_path, config_files_filtered, read_environment_variables
+        )
+
+        for filepath in config_per_file.keys():
+            processed_files.add(filepath)
 
         seen_file_to_keys = {
             file: set(config.keys()) for file, config in config_per_file.items()
@@ -298,6 +278,42 @@ class OmegaConfigLoader(AbstractConfigLoader):
             ).items()
             if not k.startswith("_")
         }
+
+    def _filter_paths(self, conf_path, patterns):
+        paths = [
+            Path(each)
+            for pattern in patterns
+            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix())
+        ]
+        deduplicated_paths = set(paths)
+        config_files_filtered = [
+            path for path in deduplicated_paths if self._is_valid_config_path(path)
+        ]
+        return config_files_filtered
+
+    def _load_config_files(
+        self, conf_path, config_files_filtered, read_environment_variables=False
+    ):
+        config_per_file = {}
+        for config_filepath in config_files_filtered:
+            try:
+                with self._fs.open(str(config_filepath.as_posix())) as open_config:
+                    # As fsspec doesn't allow the file to be read as StringIO,
+                    # this is a workaround to read it as a binary file and decode it back to utf8.
+                    tmp_fo = io.StringIO(open_config.read().decode("utf8"))
+                    config = OmegaConf.load(tmp_fo)
+                    # processed_files.add(config_filepath)
+                if read_environment_variables:
+                    self._resolve_environment_variables(config)
+                config_per_file[config_filepath] = config
+            except (ParserError, ScannerError) as exc:
+                line = exc.problem_mark.line  # type: ignore
+                cursor = exc.problem_mark.column  # type: ignore
+                raise ParserError(
+                    f"Invalid YAML or JSON file {Path(conf_path, config_filepath.name).as_posix()},"
+                    f" unable to read line {line}, position {cursor}."
+                ) from exc
+        return config_per_file
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

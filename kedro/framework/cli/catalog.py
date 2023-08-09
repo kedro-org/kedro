@@ -242,6 +242,15 @@ def resolve_patterns(metadata: ProjectMetadata, env):
             )
             if matched_pattern:
                 ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
+                ds_config["filepath"] = trim_filepath(
+                    str(context.project_path) + "/", ds_config["filepath"]
+                )
                 catalog_config[ds_name] = ds_config
 
     secho(yaml.dump(catalog_config))
+
+
+def trim_filepath(project_path: str, file_path: str):
+    if file_path.startswith(project_path):
+        file_path = file_path[len(project_path) :]
+    return file_path

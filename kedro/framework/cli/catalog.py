@@ -211,17 +211,8 @@ def rank_catalog_factories(metadata: ProjectMetadata, env):
 
 @catalog.command("resolve")
 @env_option
-@click.option(
-    "--pipeline",
-    "-p",
-    type=str,
-    default="",
-    help="Name of the modular pipeline to resolve. If not set, "
-    "the project pipeline is run by default.",
-    callback=split_string,
-)
 @click.pass_obj
-def resolve_patterns(metadata: ProjectMetadata, pipeline, env):
+def resolve_patterns(metadata: ProjectMetadata, env):
     """Resolve pipeline datasets with catalog factories."""
 
     session = _create_session(metadata.package_name, env=env)
@@ -236,17 +227,10 @@ def resolve_patterns(metadata: ProjectMetadata, pipeline, env):
         if not data_catalog._is_pattern(ds_name)
     }
 
-    target_pipelines = pipeline or pipelines.keys()
+    target_pipelines = pipelines.keys()
 
     for pipe in target_pipelines:
-        pl_obj = pipelines.get(pipe)
-        if pl_obj:
-            pipeline_ds = pl_obj.data_sets()
-        else:
-            existing_pls = ", ".join(sorted(pipelines.keys()))
-            raise KedroCliError(
-                f"'{pipe}' pipeline not found! Existing pipelines: {existing_pls}"
-            )
+        pipeline_ds = pipelines.get(pipe).data_sets()
 
         for ds_name in pipeline_ds:
             matched_pattern = data_catalog._match_pattern(

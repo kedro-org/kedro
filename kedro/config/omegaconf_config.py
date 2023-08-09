@@ -270,8 +270,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
             conf_path, self.config_patterns["globals"]
         )
         # print(globals_files_filtered)
+        globals = {}
         globals_per_file = self._load_config_files(conf_path, globals_files_filtered)
-        globals = OmegaConf.to_container(OmegaConf.merge(*globals_per_file.values()))
+        if globals_per_file:
+            globals = OmegaConf.to_container(
+                OmegaConf.merge(*globals_per_file.values())
+            )
         if conf_path.endswith("base"):
             self.globals = globals
         else:

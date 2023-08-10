@@ -14,6 +14,7 @@ There are quite a few ways to contribute to Kedro, sich as answering questions a
 
 Take a look at some of our [contribution suggestions on the Kedro GitHub Wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro)!
 
+## Join the Technical Steering Committee
 Kedro is an incubating project in [LF AI & Data](https://lfaidata.foundation/), a sub-organisation within the Linux Foundation that focuses on open innovation within the data and AI space.
 
 The project is governed by a group of maintainers, known as the Technical Steering Committee (TSC); read more about the structure of our TSC in our [Technical Charter](./kedro_technical_charter.pdf).

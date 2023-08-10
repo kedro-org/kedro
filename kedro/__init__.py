@@ -18,7 +18,7 @@ class KedroPythonVersionWarning(UserWarning):
 if not sys.warnoptions:
     warnings.simplefilter("error", KedroPythonVersionWarning)
 
-if sys.version_info >= (3, 11):
+if sys.version_info >= (3, 12):
     warnings.warn(
         """Kedro is not yet fully compatible with this Python version.
 To proceed at your own risk and ignore this warning,

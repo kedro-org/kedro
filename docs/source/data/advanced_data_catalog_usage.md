@@ -1,6 +1,50 @@
-# Advanced: Access the Data Catalog in code
+# Advanced Data Catalog usage
+
+## How to read the same file using two different dataset implementations
+
+When you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations, you'll need to use transcoding.
+
+### A typical example of transcoding
+
+For instance, parquet files can not only be loaded via the `ParquetDataSet` using `pandas`, but also directly by `SparkDataSet`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
+
+To enable transcoding, define two `DataCatalog` entries for the same dataset in a common format (Parquet, JSON, CSV, etc.) in your `conf/base/catalog.yml`:
+
+```yaml
+my_dataframe@spark:
+  type: spark.SparkDataSet
+  filepath: data/02_intermediate/data.parquet
+  file_format: parquet
+
+my_dataframe@pandas:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/data.parquet
+```
+
+These entries are used in the pipeline like this:
+
+```python
+pipeline(
+    [
+        node(func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
+        node(func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),
+    ]
+)
+```
+
+### How does transcoding work?
+
+In this example, Kedro understands that `my_dataframe` is the same dataset in its `spark.SparkDataSet` and `pandas.ParquetDataSet` formats and helps resolve the node execution order.
+
+In the pipeline, Kedro uses the `spark.SparkDataSet` implementation for saving and `pandas.ParquetDataSet`
+for loading, so the first node should output a `pyspark.sql.DataFrame`, while the second node would receive a `pandas.Dataframe`.
+
+
+## Access the Data Catalog in code
 
 TO REMOVE -- Diataxis: How to
+
+You can define a Data Catalog in two ways - through YAML configuration, or programmatically using an API.
 
 The code API allows you to:
 

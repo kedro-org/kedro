@@ -11,10 +11,20 @@
 # Upcoming Release 0.18.13
 
 ## Major features and improvements
+* Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
+* Added support for Python 3.11. This includes tackling challenges like dependency pinning and test adjustments to ensure a smooth experience. Detailed migration tips are provided below for further context.
 
 ## Bug fixes and other changes
+* Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 
 ## Documentation changes
+* Update example of using generator functions in nodes.
+* Added migration guide from the `ConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` is deprecated and will be removed in the `0.19.0` release.
+
+## Migration Tips for Python 3.11:
+* PyTables on Windows: Users on Windows with Python >=3.8 should note we've pinned `pytables` to `3.8.0` due to compatibility issues.
+* Spark Dependency: We've set an upper version limit for `pyspark` at <3.4 due to breaking changes in 3.4.
+* Testing with Python 3.10: The latest `moto` version now supports parallel test execution for Python 3.10, resolving previous issues.
 
 ## Breaking changes to the API
 
@@ -36,7 +46,6 @@
 * Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
 
 ## Community contributions
-
 Thanks to [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) and [Chris Schopp](https://github.com/cschopp-simwell).
 
 ## Breaking changes to the API

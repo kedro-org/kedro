@@ -1,5 +1,3 @@
-import shutil
-
 import pytest
 import yaml
 from click.testing import CliRunner
@@ -242,11 +240,12 @@ class TestCatalogCreateCommand:
     @staticmethod
     @pytest.fixture(params=["base"])
     def catalog_path(request, fake_repo_path):
-        catalog_path = fake_repo_path / "conf" / request.param / "catalog"
+        catalog_path = fake_repo_path / "conf" / request.param
 
         yield catalog_path
 
-        shutil.rmtree(catalog_path, ignore_errors=True)
+        for file in catalog_path.glob("catalog_*"):
+            file.unlink()
 
     def test_pipeline_argument_is_required(self, fake_project_cli):
         result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
@@ -278,7 +277,7 @@ class TestCatalogCreateCommand:
         main_catalog_config = yaml.safe_load(main_catalog_path.read_text())
         assert "example_iris_data" in main_catalog_config
 
-        data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
+        data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         result = CliRunner().invoke(
             fake_project_cli,
@@ -302,9 +301,9 @@ class TestCatalogCreateCommand:
     def test_catalog_is_created_in_correct_env(
         self, fake_project_cli, fake_metadata, catalog_path
     ):
-        data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
+        data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
-        env = catalog_path.parent.name
+        env = catalog_path.name
         result = CliRunner().invoke(
             fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME, "--env", env],
@@ -335,7 +334,7 @@ class TestCatalogCreateCommand:
         )
 
         data_catalog_file = (
-            fake_repo_path / "conf" / "base" / "catalog" / f"{self.PIPELINE_NAME}.yml"
+            fake_repo_path / "conf" / "base" / f"catalog_{self.PIPELINE_NAME}.yml"
         )
 
         result = CliRunner().invoke(
@@ -351,9 +350,7 @@ class TestCatalogCreateCommand:
     def test_missing_datasets_appended(
         self, fake_project_cli, fake_metadata, catalog_path
     ):
-        data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
-        assert not catalog_path.exists()
-        catalog_path.mkdir()
+        data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         catalog_config = {
             "example_test_x": {"type": "pandas.CSVDataSet", "filepath": "test.csv"}

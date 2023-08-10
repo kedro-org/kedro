@@ -44,9 +44,6 @@ The following prepends are available:
 
 `fsspec` also provides other file systems, such as SSH, FTP and WebHDFS. [See the fsspec documentation for more information](https://filesystem-spec.readthedocs.io/en/latest/api.html#implementations).
 
-
-
-
 ```{toctree}
 :maxdepth: 1
 

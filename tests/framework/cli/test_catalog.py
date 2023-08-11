@@ -533,8 +533,6 @@ def test_no_overwrite(
     assert not result.exit_code
     assert yaml_dump_mock.call_count == 1
 
-    print(yaml_dump_mock.call_args[0][0])
-
     assert (
         yaml_dump_mock.call_args[0][0]["explicit_ds"]
         == fake_catalog_config_with_overwrite["explicit_ds"]

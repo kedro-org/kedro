@@ -1,20 +1,20 @@
-<mxfile host="app.diagrams.net" modified="2023-08-10T07:53:04.706Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36" etag="4XtX07R8FCg0TmmfuHPW" version="21.6.7" type="device">
+<mxfile host="app.diagrams.net" modified="2023-08-11T08:15:21.406Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36" etag="pOH_k2PfNpEJ3XIaRh-A" version="21.6.8" type="device">
   <diagram id="lAR1TNdJkKldSFXk2R--" name="Page-1">
-    <mxGraphModel dx="1816" dy="597" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1816" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="sW6pIuucetsD1QFtk8Oz-4" value="&lt;b&gt;Kedro project&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-          <mxGeometry x="20" y="10" width="230" height="600" as="geometry" />
+          <mxGeometry x="20" y="10" width="230" height="530" as="geometry" />
         </mxCell>
         <mxCell id="h_zvmKvXXmHW6Jpc9vYN-2" value="src/" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 1;verticalAlign=top;align=left;labelBackgroundColor=none;opacity=50;" parent="1" vertex="1">
-          <mxGeometry x="40" y="100" width="190" height="380" as="geometry" />
+          <mxGeometry x="40" y="100" width="190" height="280" as="geometry" />
         </mxCell>
         <mxCell id="sW6pIuucetsD1QFtk8Oz-17" value="&lt;b&gt;Kedro framework&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
           <mxGeometry x="20" y="665" width="450" height="150" as="geometry" />
         </mxCell>
         <mxCell id="sW6pIuucetsD1QFtk8Oz-1" value="Pipeline Developer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
-          <mxGeometry x="-290" y="300" width="30" height="60" as="geometry" />
+          <mxGeometry x="-290" y="219" width="30" height="60" as="geometry" />
         </mxCell>
         <mxCell id="8BOP4LQhE6iUcxmmY-iy-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;" parent="1" source="sW6pIuucetsD1QFtk8Oz-4" target="sW6pIuucetsD1QFtk8Oz-23" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -28,7 +28,11 @@
           <mxGeometry x="75" y="40" width="120" height="45" as="geometry" />
         </mxCell>
         <mxCell id="sW6pIuucetsD1QFtk8Oz-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;dashed=1;" parent="1" source="sW6pIuucetsD1QFtk8Oz-9" target="sW6pIuucetsD1QFtk8Oz-4" edge="1">
-          <mxGeometry relative="1" as="geometry" />
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="275" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="sW6pIuucetsD1QFtk8Oz-16" value="generates" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="sW6pIuucetsD1QFtk8Oz-15" vertex="1" connectable="0">
           <mxGeometry x="0.22" y="-1" relative="1" as="geometry">
@@ -135,9 +139,6 @@
         <mxCell id="8BOP4LQhE6iUcxmmY-iy-4" value="pipelines/" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="75" y="110" width="120" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="8BOP4LQhE6iUcxmmY-iy-5" value="cli.py" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="75" y="261.5" width="120" height="45" as="geometry" />
-        </mxCell>
         <mxCell id="8BOP4LQhE6iUcxmmY-iy-6" value="pyspark" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="617.5" y="197.5" width="115" height="47.5" as="geometry" />
         </mxCell>
@@ -148,10 +149,10 @@
           <mxGeometry x="617.5" y="335" width="115" height="47.5" as="geometry" />
         </mxCell>
         <mxCell id="8BOP4LQhE6iUcxmmY-iy-10" value="notebooks/" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="75" y="490" width="120" height="45" as="geometry" />
+          <mxGeometry x="75" y="409" width="120" height="45" as="geometry" />
         </mxCell>
         <mxCell id="8BOP4LQhE6iUcxmmY-iy-11" value="pyproject.toml" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="75" y="555" width="120" height="45" as="geometry" />
+          <mxGeometry x="75" y="474" width="120" height="45" as="geometry" />
         </mxCell>
         <mxCell id="8BOP4LQhE6iUcxmmY-iy-12" value="standalone-datacatalog" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="617.5" y="405" width="115" height="47.5" as="geometry" />
@@ -199,26 +200,12 @@
             <mxPoint x="-45" y="-7" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="8BOP4LQhE6iUcxmmY-iy-21" value="" style="endArrow=classic;html=1;dashed=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" parent="1" target="8BOP4LQhE6iUcxmmY-iy-5" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-210" y="231.5" as="sourcePoint" />
-            <mxPoint x="85" y="221.52999999999997" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="-210" y="284.5" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="8BOP4LQhE6iUcxmmY-iy-22" value="provides project&amp;nbsp;CLI commands&lt;br&gt;e.g. kedro run" style="edgeLabel;html=1;align=left;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" parent="8BOP4LQhE6iUcxmmY-iy-21" vertex="1" connectable="0">
-          <mxGeometry x="-0.2037" y="3" relative="1" as="geometry">
-            <mxPoint x="-31" y="3" as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="8BOP4LQhE6iUcxmmY-iy-23" value="" style="endArrow=classic;html=1;dashed=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" parent="1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-210" y="400" as="sourcePoint" />
-            <mxPoint x="75" y="512.5" as="targetPoint" />
+            <mxPoint x="-210" y="319" as="sourcePoint" />
+            <mxPoint x="75" y="431.5" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="-210" y="513" />
+              <mxPoint x="-210" y="432" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -229,10 +216,10 @@
         </mxCell>
         <mxCell id="8BOP4LQhE6iUcxmmY-iy-25" value="" style="endArrow=classic;html=1;dashed=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" parent="1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-210" y="465" as="sourcePoint" />
-            <mxPoint x="75" y="577.5" as="targetPoint" />
+            <mxPoint x="-210" y="384" as="sourcePoint" />
+            <mxPoint x="75" y="496.5" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="-210" y="578" />
+              <mxPoint x="-210" y="497" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -279,14 +266,14 @@
           <mxGeometry x="617.5" y="468.75" width="115" height="47.5" as="geometry" />
         </mxCell>
         <mxCell id="h_zvmKvXXmHW6Jpc9vYN-6" value="__main__.py" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="75" y="400" width="120" height="45" as="geometry" />
+          <mxGeometry x="75" y="319" width="120" height="45" as="geometry" />
         </mxCell>
         <mxCell id="h_zvmKvXXmHW6Jpc9vYN-7" value="" style="endArrow=classic;html=1;dashed=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" parent="1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-210" y="350" as="sourcePoint" />
-            <mxPoint x="75" y="422.5" as="targetPoint" />
+            <mxPoint x="-210" y="269" as="sourcePoint" />
+            <mxPoint x="75" y="341.5" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="-210" y="423" />
+              <mxPoint x="-210" y="342" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -296,14 +283,14 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="NNUITAlQQ4K4jJbgWuWx-1" value="pipeline_registry.py" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="75" y="333" width="120" height="45" as="geometry" />
+          <mxGeometry x="75" y="252" width="120" height="45" as="geometry" />
         </mxCell>
         <mxCell id="NNUITAlQQ4K4jJbgWuWx-2" value="" style="endArrow=classic;html=1;dashed=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" parent="1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-210" y="290" as="sourcePoint" />
-            <mxPoint x="75" y="355.5" as="targetPoint" />
+            <mxPoint x="-210" y="209" as="sourcePoint" />
+            <mxPoint x="75" y="274.5" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="-210" y="356" />
+              <mxPoint x="-210" y="275" />
             </Array>
           </mxGeometry>
         </mxCell>

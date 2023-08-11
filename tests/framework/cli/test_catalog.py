@@ -441,3 +441,46 @@ def test_rank_catalog_factories_with_no_factories(
     assert not result.exit_code
     expected_output = "There are no dataset factories in the catalog."
     assert expected_output in result.output
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
+)
+def test_catalog_resolve(
+    fake_project_cli,
+    fake_metadata,
+    fake_load_context,
+    mocker,
+    mock_pipelines,
+    fake_catalog_config,
+):
+    """Test that datasets generated from factory patterns in the catalog
+    are resolved correctly under the correct dataset classes.
+    """
+    yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    mocked_context = fake_load_context.return_value
+    mocked_context.catalog = DataCatalog.from_config(fake_catalog_config)
+
+    placeholder_ds = mocked_context.catalog._data_sets.keys()
+    explicit_ds = {"csv_example", "parquet_example"}
+
+    mocker.patch.object(
+        mock_pipelines[PIPELINE_NAME],
+        "data_sets",
+        return_value=explicit_ds,
+    )
+
+    result = CliRunner().invoke(
+        fake_project_cli, ["catalog", "resolve"], obj=fake_metadata
+    )
+
+    assert not result.exit_code
+    assert yaml_dump_mock.call_count == 1
+
+    output = yaml_dump_mock.call_args[0][0]
+
+    for ds in placeholder_ds:
+        assert ds not in output
+
+    for ds in explicit_ds:
+        assert ds in output

@@ -516,7 +516,7 @@ def test_no_overwrite(
     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     mocked_context = fake_load_context.return_value
 
-    mocked_context.config_loader["catalog"] = fake_catalog_config_with_overwrite
+    mocked_context.config_loader = {"catalog": fake_catalog_config_with_overwrite}
     mocked_context.catalog = DataCatalog.from_config(fake_catalog_config_with_overwrite)
 
     mocker.patch.object(
@@ -525,8 +525,6 @@ def test_no_overwrite(
         return_value=mocked_context.catalog._data_sets.keys()
         | {"csv_example", "parquet_example"},
     )
-
-    print(mock_pipelines)
 
     result = CliRunner().invoke(
         fake_project_cli, ["catalog", "resolve"], obj=fake_metadata

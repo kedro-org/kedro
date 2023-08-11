@@ -671,3 +671,19 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["model_options"]["param1"] == 7
         assert conf["parameters"]["model_options"]["param2"] == 3
         assert conf["parameters"]["model_options"]["param3"] == "my_env_variable"
+
+    def test_globals(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        globals_params = tmp_path / _BASE_ENV / "globals.yml"
+        param_config = {
+            "param1": "${globals:hello}",
+        }
+        globals_config = {
+            "hello": 34,
+        }
+        _write_yaml(base_params, param_config)
+        _write_yaml(globals_params, globals_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        parameters = conf["parameters"]
+        assert OmegaConf.has_resolver("globals")
+        assert parameters["param1"] == 34

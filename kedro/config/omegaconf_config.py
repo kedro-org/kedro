@@ -103,6 +103,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         self.base_env = base_env
         self.default_run_env = default_run_env
+        self.globals = {}
 
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
@@ -118,10 +119,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Register user provided custom resolvers
         if custom_resolvers:
             self._register_new_resolvers(custom_resolvers)
-
-        self.globals: dict[str, Any] = {}
         self._register_globals_resolver()
-
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
             self._protocol = "tar"
@@ -140,10 +138,20 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env=env,
             runtime_params=runtime_params,
         )
+        # Read globals from patterns if the files exist
+        try:
+            self.globals = self._get_config("globals")
+        except MissingConfigException:
+            pass
+
+    def __repr__(self):  # pragma: no cover
+        return (
+            f"OmegaConfigLoader(conf_source={self.conf_source}, env={self.env}, "
+            f"config_patterns={self.config_patterns})"
+        )
 
     def __getitem__(self, key) -> dict[str, Any]:
-        """Get configuration files by key, load and merge them, and
-        return them in the form of a config dictionary.
+        """Get configuration files by key and return them in the form of a config dictionary.
 
         Args:
             key: Key of the configuration type to fetch.
@@ -162,21 +170,21 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # explicitly on the ``OmegaConfigLoader`` instance.
         if key in self:
             return super().__getitem__(key)
-
         if key not in self.config_patterns:
             raise KeyError(
                 f"No config patterns were found for '{key}' in your config loader"
             )
-        patterns = [*self.config_patterns[key]]
+        return self._get_config(key)
 
+    def _get_config(self, key) -> dict[str, Any]:
+        """Helper function to get configuration files by key, load and merge them,
+        and return them in the form of a config dictionary"""
+        patterns = [*self.config_patterns[key]]
         read_environment_variables = key == "credentials"
 
         processed_files: set[Path] = set()
         # Load base env config
-        if self._protocol == "file":
-            base_path = str(Path(self.conf_source) / self.base_env)
-        else:
-            base_path = str(Path(self._fs.ls("", detail=False)[-1]) / self.base_env)
+        base_path = self._get_conf_path(self.base_env)
         base_config = self.load_and_merge_dir_config(
             base_path, patterns, key, processed_files, read_environment_variables
         )
@@ -184,10 +192,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         # Load chosen env config
         run_env = self.env or self.default_run_env
-        if self._protocol == "file":
-            env_path = str(Path(self.conf_source) / run_env)
-        else:
-            env_path = str(Path(self._fs.ls("", detail=False)[-1]) / run_env)
+        env_path = self._get_conf_path(run_env)
         env_config = self.load_and_merge_dir_config(
             env_path, patterns, key, processed_files, read_environment_variables
         )
@@ -203,18 +208,19 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         config.update(env_config)
 
-        if not processed_files:
+        if not processed_files and key != "globals":
             raise MissingConfigException(
                 f"No files of YAML or JSON format found in {base_path} or {env_path} matching"
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
             )
         return config
 
-    def __repr__(self):  # pragma: no cover
-        return (
-            f"OmegaConfigLoader(conf_source={self.conf_source}, env={self.env}, "
-            f"config_patterns={self.config_patterns})"
-        )
+    def _get_conf_path(self, env):
+        if self._protocol == "file":
+            conf_path = str(Path(self.conf_source) / env)
+        else:
+            conf_path = str(Path(self._fs.ls("", detail=False)[-1]) / env)
+        return conf_path
 
     def load_and_merge_dir_config(  # noqa: too-many-arguments
         self,
@@ -244,43 +250,22 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         """
         # noqa: too-many-locals
-        print(conf_path)
-        print(patterns)
 
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
                 f"Given configuration path either does not exist "
                 f"or is not a valid directory: {conf_path}"
             )
-
-        config_files_filtered = self._filter_paths(conf_path, patterns)
-
+        config_files_filtered = self._get_filtered_conf_paths(conf_path, patterns)
         config_per_file = self._load_config_files(
             conf_path, config_files_filtered, read_environment_variables
         )
-
-        for filepath in config_per_file.keys():
-            processed_files.add(filepath)
+        for file in config_per_file.keys():
+            processed_files.add(file)
 
         seen_file_to_keys = {
             file: set(config.keys()) for file, config in config_per_file.items()
         }
-
-        globals_files_filtered = self._filter_paths(
-            conf_path, self.config_patterns["globals"]
-        )
-        # print(globals_files_filtered)
-        globals = {}
-        globals_per_file = self._load_config_files(conf_path, globals_files_filtered)
-        if globals_per_file:
-            globals = OmegaConf.to_container(
-                OmegaConf.merge(*globals_per_file.values())
-            )
-        if conf_path.endswith("base"):
-            self.globals = globals
-        else:
-            self.globals.update(globals)
-        print(self.globals)
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
 
@@ -300,7 +285,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             if not k.startswith("_")
         }
 
-    def _filter_paths(self, conf_path, patterns):
+    def _get_filtered_conf_paths(self, conf_path, patterns):
         paths = [
             Path(each)
             for pattern in patterns
@@ -312,18 +297,26 @@ class OmegaConfigLoader(AbstractConfigLoader):
         ]
         return config_files_filtered
 
+    def _is_valid_config_path(self, path):
+        """Check if given path is a file path and file type is yaml or json."""
+        posix_path = path.as_posix()
+        return self._fs.isfile(str(posix_path)) and path.suffix in [
+            ".yml",
+            ".yaml",
+            ".json",
+        ]
+
     def _load_config_files(
-        self, conf_path, config_files_filtered, read_environment_variables=False
+        self, conf_path, config_filepaths, read_environment_variables
     ):
         config_per_file = {}
-        for config_filepath in config_files_filtered:
+        for config_filepath in config_filepaths:
             try:
                 with self._fs.open(str(config_filepath.as_posix())) as open_config:
                     # As fsspec doesn't allow the file to be read as StringIO,
                     # this is a workaround to read it as a binary file and decode it back to utf8.
                     tmp_fo = io.StringIO(open_config.read().decode("utf8"))
                     config = OmegaConf.load(tmp_fo)
-                    # processed_files.add(config_filepath)
                 if read_environment_variables:
                     self._resolve_environment_variables(config)
                 config_per_file[config_filepath] = config
@@ -336,14 +329,15 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 ) from exc
         return config_per_file
 
-    def _is_valid_config_path(self, path):
-        """Check if given path is a file path and file type is yaml or json."""
-        posix_path = path.as_posix()
-        return self._fs.isfile(str(posix_path)) and path.suffix in [
-            ".yml",
-            ".yaml",
-            ".json",
-        ]
+    def _register_globals_resolver(self):
+        """Register the globals resolver"""
+        OmegaConf.register_new_resolver(
+            "globals", lambda x: self._get_globals_value(x), replace=True
+        )
+
+    def _get_globals_value(self, variable):
+        """Return the globals values to the resolver"""
+        return self.globals[variable]
 
     @staticmethod
     def _register_new_resolvers(resolvers: dict[str, Callable]):
@@ -380,13 +374,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if duplicates:
             dup_str = "\n".join(duplicates)
             raise ValueError(f"{dup_str}")
-
-    def _register_globals_resolver(self):
-        self._register_new_resolvers({"globals": lambda x: self._globals_resolver(x)})
-
-    def _globals_resolver(self, variable):
-        print("ACCESSING GLOBALS -> ", self.globals)
-        return self.globals[variable]
 
     @staticmethod
     def _resolve_environment_variables(config: dict[str, Any]) -> None:

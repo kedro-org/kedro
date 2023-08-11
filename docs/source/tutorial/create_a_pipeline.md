@@ -14,7 +14,7 @@ The data processing pipeline prepares the data for model building by combining t
 * Two python files within `src/spaceflights/pipelines/data_processing`
     * `nodes.py` (for the node functions that form the data processing)
     * `pipeline.py` (to build the pipeline)
-* A yaml file: `conf/base/parameters/data_processing.yml` to define the parameters used when running the pipeline
+* A yaml file: `conf/base/parameters_data_processing.yml` to define the parameters used when running the pipeline
 * `__init__.py` files in the required folders to ensure that Python can import the pipeline
 
 ```{note}

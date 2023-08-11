@@ -6,5 +6,6 @@
 configuration_basics
 credentials
 parameters
+config_loader_migration
 advanced_configuration
 ```

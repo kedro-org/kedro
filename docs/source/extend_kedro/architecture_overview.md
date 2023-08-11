@@ -30,7 +30,7 @@ Kedro library consists of independent units, each responsible for one aspect of 
 * **`Config Loader`** provides utility to parse and load configuration defined in a Kedro project.
 * **`Pipeline`** provides a collection of abstractions to model data pipelines.
 * **`Runner`** provides an abstraction for different execution strategy of a data pipeline.
-* **`I/O`** provides a collection of abstractions to handle I/O in a project, including `DataCatalog` and many `DataSet` implementations.
+* **`I/O`** provides a collection of abstractions to handle I/O in a project, including `DataCatalog` and many `Dataset` implementations.
 
 ## Kedro framework
 

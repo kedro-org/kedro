@@ -15,8 +15,8 @@ As a data pipeline developer, you will interact with a Kedro project, which cons
   * **`pipeline_registry.py`** file defines the project pipelines, i.e. pipelines that can be run using `kedro run --pipeline`.
   * **`__main__.py`** file serves as the main entry point of the project in [package mode](../tutorial/package_a_project.md#package-a-kedro-project).
 * **`pyproject.toml`** identifies the project root by providing project metadata, including:
-  * `package_name`: A valid Python package name for your project package. 
-  * `project_name`: A human readable name for your project. 
+  * `package_name`: A valid Python package name for your project package.
+  * `project_name`: A human readable name for your project.
   * `kedro_init_version`: Kedro version with which the project was generated.
 
 ## Kedro starter
@@ -44,3 +44,5 @@ Kedro framework serves as the interface between a Kedro project and Kedro librar
 ## Kedro extension
 
 You can also extend Kedro behaviour in your project using a Kedro extension, which can be a custom starter, a Python library with extra hooks implementations, extra CLI commands such as [Kedro-Viz](https://github.com/kedro-org/kedro-viz) or a custom library component implementation.
+
+If you create a Kedro extension, we welcome all kinds of contributions. Check out our [guide to contributing to Kedro](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro). Dataset contributions to [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) are the most frequently accepted, since they do not require any changes to the framework itself. However, we do not discourage contributions to any of the other [`kedro-plugins`](https://github.com/kedro-org/kedro-plugins).

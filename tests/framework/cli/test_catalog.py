@@ -504,6 +504,48 @@ def test_catalog_resolve(
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
 )
+def test_no_overwrite(
+    fake_project_cli,
+    fake_metadata,
+    fake_load_context,
+    mocker,
+    mock_pipelines,
+    fake_catalog_config_with_overwrite,
+):
+    """Test that explicit catalog entries are not overitten by factory config."""
+    yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    mocked_context = fake_load_context.return_value
+
+    mocked_context.config_loader["catalog"] = fake_catalog_config_with_overwrite
+    mocked_context.catalog = DataCatalog.from_config(fake_catalog_config_with_overwrite)
+
+    mocker.patch.object(
+        mock_pipelines[PIPELINE_NAME],
+        "data_sets",
+        return_value=mocked_context.catalog._data_sets.keys()
+        | {"csv_example", "parquet_example"},
+    )
+
+    print(mock_pipelines)
+
+    result = CliRunner().invoke(
+        fake_project_cli, ["catalog", "resolve"], obj=fake_metadata
+    )
+
+    assert not result.exit_code
+    assert yaml_dump_mock.call_count == 1
+
+    print(yaml_dump_mock.call_args[0][0])
+
+    assert (
+        yaml_dump_mock.call_args[0][0]["explicit_ds"]
+        == fake_catalog_config_with_overwrite["explicit_ds"]
+    )
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
+)
 def test_no_param_datasets_in_resolve(
     fake_project_cli, fake_metadata, fake_load_context, mocker, mock_pipelines
 ):

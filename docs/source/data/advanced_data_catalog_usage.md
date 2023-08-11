@@ -1,6 +1,6 @@
 # Advanced Data Catalog usage
 
-## How to read the same file using two different dataset implementations
+## How to read the same file using two different datasets
 
 When you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations, you'll need to use transcoding.
 

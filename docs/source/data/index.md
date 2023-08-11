@@ -6,7 +6,6 @@ In a Kedro project, the Data Catalog is a registry of all data sources available
 [Kedro provides different built-in datasets in the `kedro-datasets` package](/kedro_datasets) for numerous file types and file systems, so you don’t have to write any of the logic for reading/writing data.
 
 
-
 We first introduce the basic sections of `catalog.yml`, which is the file used to register data sources for a Kedro project.
 
 ```{toctree}
@@ -23,17 +22,25 @@ The following page offers a range of examples of YAML specification for various 
 data_catalog_yaml_examples
 ```
 
-Further pages describe more advanced usage:
+Once you are familiar with the format of `catalog.yml`, you may find your catalog gets repetitive if you need to load multiple datasets with similar configuration. From Kedro 0.18.12 you can use dataset factories to generalise the configuration and reduce the number of similar catalog entries. This works by by matching datasets used in your project’s pipelines to dataset factory patterns and is explained in a new page about Kedro dataset factories:
+
 
 ```{toctree}
 :maxdepth: 1
 
 kedro_dataset_factories
+```
+
+Further pages describe more advanced concepts:
+
+```{toctree}
+:maxdepth: 1
+
 partitioned_and_incremental_datasets
 advanced_data_catalog_usage
 ```
 
-The section concludes with an advanced use case tutorial to create your own custom dataset:
+This section on handing data with Kedro concludes with an advanced use case, illustrated with a tutorial that explains how to create your own custom dataset:
 
 ```{toctree}
 :maxdepth: 1

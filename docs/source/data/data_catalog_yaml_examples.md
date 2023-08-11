@@ -6,18 +6,9 @@ TO DO: Add a set of anchor links
 
 You can configure your datasets in a YAML configuration file, `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
-## Provide the `project` value to the underlying filesystem class (`GCSFileSystem`) to interact with Google Cloud Storage (GCS)
-
-```yaml
-test_dataset:
-  type: ...
-  fs_args:
-    project: test_project
-```
+## Load data from a local binary file using `utf-8` encoding
 
 The `open_args_load` and `open_args_save` parameters are passed to the filesystem's `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation, respectively.
-
-## Load data from a local binary file using `utf-8` encoding
 
 ```yaml
 test_dataset:
@@ -41,7 +32,7 @@ test_dataset:
     encoding: "utf-8"
 ```
 
-## Load / save a CSV file from / to a local file system
+## Load/save a CSV file from/to a local file system
 
 ```yaml
 bikes:
@@ -49,7 +40,7 @@ bikes:
   filepath: data/01_raw/bikes.csv
 ```
 
-## Load / save a CSV on a local file system, using specified load / save arguments
+## Load/save a CSV on a local file system, using specified load/save arguments
 
 ```yaml
 cars:
@@ -64,7 +55,7 @@ cars:
 
 ```
 
-## Load / save a compressed CSV on a local file system
+## Load/save a compressed CSV on a local file system
 
 ```yaml
 boats:
@@ -92,7 +83,7 @@ motorbikes:
     na_values: ['#NA', NA]
 ```
 
-## Load / save a pickle file from / to a local file system
+## Load/save a pickle file from/to a local file system
 
 ```yaml
 airplanes:
@@ -102,6 +93,8 @@ airplanes:
 ```
 
 ## Load an Excel file from Google Cloud Storage
+
+The example includes the `project` value for the underlying filesystem class (`GCSFileSystem`) within Google Cloud Storage (GCS)
 
 ```yaml
 rockets:
@@ -113,6 +106,7 @@ rockets:
   save_args:
     sheet_name: Sheet1
 ```
+
 
 ## Load a multi-sheet Excel file from a local file system
 
@@ -136,7 +130,7 @@ results_plot:
 ```
 
 
-## Load / save an HDF file on local file system storage, using specified load / save arguments
+## Load/save an HDF file on local file system storage, using specified load/save arguments
 
 ```yaml
 skateboards:
@@ -150,7 +144,7 @@ skateboards:
     dropna: True
 ```
 
-## Load / save a parquet file on local file system storage, using specified load / save arguments
+## Load/save a parquet file on local file system storage, using specified load/save arguments
 
 ```yaml
 trucks:
@@ -168,7 +162,7 @@ trucks:
 ```
 
 
-## Load / save a Spark table on S3, using specified load / save arguments
+## Load/save a Spark table on S3, using specified load/save arguments
 
 ```yaml
 weather:
@@ -185,7 +179,7 @@ weather:
 ```
 
 
-## Load / save a SQL table using credentials, a database connection, using specified load / save arguments
+## Load/save a SQL table using credentials, a database connection, and specified load/save arguments
 
 ```yaml
 scooters:
@@ -199,7 +193,7 @@ scooters:
     if_exists: replace
 ```
 
-## Load an SQL table with credentials, a database connection, and applies a SQL query to the table
+## Load a SQL table with credentials and a database connection, and apply a SQL query to the table
 
 
 ```yaml
@@ -211,10 +205,14 @@ scooters_query:
     index_col: [name]
 ```
 
-When you use [`pandas.SQLTableDataSet`](/kedro_datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro_datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials (see the details in the [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+When you use [`pandas.SQLTableDataSet`](/kedro_datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro_datasets.pandas.SQLQueryDataSet), you must provide a database connection string. In the above example, we pass it using the `scooters_credentials` key from the credentials.
+
+Note that `scooters_credentials` must have a top-level key `con` containing a [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
 
-## Load data from an API endpoint, example US corn yield data from USDA
+## Load data from an API endpoint
+
+This example uses US corn yield data from USDA.
 
 ```yaml
 us_corn_yield_data:

@@ -3,7 +3,8 @@ You can load multiple datasets with similar configuration using dataset factorie
 
 The syntax allows you to generalise the configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
-## Generalise datasets with similar names and types into one dataset factory
+## Generalise datasets with similar names and types
+
 Consider the following catalog entries:
 
 ```yaml
@@ -29,7 +30,8 @@ When `factory_data` or `process_data` is used in your pipeline, it is matched to
 quotes to avoid YAML parsing errors.
 
 
-## Generalise datasets of the same type into one dataset factory
+## Generalise datasets of the same type
+
 You can also combine all the datasets with the same type and configuration details. For example, consider the following
 catalog with three datasets named `boats`, `cars` and `planes` of the type `pandas.CSVDataSet`:
 
@@ -61,6 +63,7 @@ names are matched with the intended pattern.
 
 ```python
 from .nodes import create_model_input_table, preprocess_companies, preprocess_shuttles
+
 
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
@@ -96,7 +99,8 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
-## Generalise datasets using namespaces into one dataset factory
+## Generalise datasets using namespaces
+
 You can also generalise the catalog entries for datasets belonging to namespaced modular pipelines. Consider the
 following pipeline which takes in a `model_input_table` and outputs two regressors belonging to the
 `active_modelling_pipeline` and the `candidate_modelling_pipeline` namespaces:
@@ -147,7 +151,7 @@ and `candidate_modelling_pipeline.regressor` as below:
   filepath: data/06_models/regressor_{namespace}.pkl
   versioned: true
 ```
-## Generalise datasets of the same type in different layers into one dataset factory with multiple placeholders
+## Generalise datasets of the same type in different layers
 
 You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset
 entries share `type`, `file_format` and `save_args`:
@@ -209,7 +213,8 @@ The matches are ranked according to the following criteria:
 2. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
 3. Alphabetical order
 
-### Generalise all datasets with a catch-all dataset factory to overwrite the default `MemoryDataSet`
+### Generalise all datasets with a catch-all dataset factory
+
 You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataSet` creation.
 
 ```yaml

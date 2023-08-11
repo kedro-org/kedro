@@ -62,7 +62,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro build-docs`](#build-the-project-documentation) (deprecated from version 0.19.0)
   * [`kedro build-reqs`](#build-the-projects-dependency-tree) (deprecated from version 0.19.0)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
-  * [`kedro catalog resolve`](#resolve-datasets-in-the-catalog)
+  * [`kedro catalog resolve`](#resolve-dataset-factories-in-the-catalog)
   * [`kedro catalog rank`](#rank-dataset-factories-in-the-catalog)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro ipython`](#notebooks)

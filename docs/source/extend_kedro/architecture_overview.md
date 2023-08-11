@@ -17,7 +17,7 @@ As a data pipeline developer, you will interact with a Kedro project, which cons
 * **`pyproject.toml`** identifies the project root by providing project metadata, including:
   * `package_name`: A valid Python package name for your project package. 
   * `project_name`: A human readable name for your project. 
-  * `project_version`: Kedro version with which the project was generated
+  * `kedro_init_version`: Kedro version with which the project was generated.
 
 ## Kedro starter
 

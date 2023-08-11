@@ -13,6 +13,7 @@
 ## Major features and improvements
 * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
 * Added support for Python 3.11. This includes tackling challenges like dependency pinning and test adjustments to ensure a smooth experience. Detailed migration tips are provided below for further context.
+* Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.

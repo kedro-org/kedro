@@ -10,7 +10,7 @@ We welcome any and all contributions to Kedro, at whatever level you can manage.
 - [Review other contributors' PRs](https://github.com/kedro-org/kedro/pulls)
 - [Contribute code](https://github.com/kedro-org/kedro/wiki/Guidelines-for-contributing-developers), for example to fix a bug or add a feature
 - [Contribute to the documentation](https://github.com/kedro-org/kedro/wiki/Contribute-to-the-Kedro-documentation)
-  
+
 Make sure to read our [contribution guidelines](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro) on the [Kedro wiki](https://github.com/kedro-org/kedro/wiki).
 
 

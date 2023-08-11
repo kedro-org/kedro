@@ -23,9 +23,9 @@ Welcome to Kedro's documentation!
     :target: https://opensource.org/license/apache2-0-php/
     :alt: License is Apache 2.0
 
-.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg
+.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
     :target: https://pypi.org/project/kedro/
-    :alt: Python version 3.7, 3.8, 3.9, 3.10
+    :alt: Python version 3.7, 3.8, 3.9, 3.10, 3.11
 
 .. image:: https://badge.fury.io/py/kedro.svg
     :target: https://pypi.org/project/kedro/
@@ -43,8 +43,8 @@ Welcome to Kedro's documentation!
     :target: https://slack.kedro.org
     :alt: Kedro's Slack organisation
 
-.. image:: https://img.shields.io/badge/slack-archive-blue.svg?label=Kedro%20Slack%20
-    :target: https://www.linen.dev/s/kedro
+.. image:: https://img.shields.io/badge/slack-archive-blueviolet.svg?label=Kedro%20Slack%20
+    :target: https://linen-slack.kedro.org/
     :alt: Kedro's Slack archive
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg

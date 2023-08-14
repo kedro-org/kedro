@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to load/save data from/to a redis db."""
+"""``AbstractDataset`` implementation to load/save data from/to a redis db."""
 
 __all__ = ["PickleDataSet"]
 

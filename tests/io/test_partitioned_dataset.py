@@ -266,7 +266,7 @@ class TestPartitionedDatasetLocal:
             (
                 FakeDataset,
                 r"Dataset type 'tests\.io\.test_partitioned_dataset\.FakeDataset' "
-                r"is invalid\: all data set types must extend 'AbstractDataSet'",
+                r"is invalid\: all data set types must extend 'AbstractDataset'",
             ),
             ({}, "'type' is missing from dataset catalog configuration"),
         ],

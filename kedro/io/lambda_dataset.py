@@ -1,19 +1,19 @@
-"""``LambdaDataset`` is an implementation of ``AbstractDataSet`` which allows for
+"""``LambdaDataset`` is an implementation of ``AbstractDataset`` which allows for
 providing custom load, save, and exists methods without extending
-``AbstractDataSet``.
+``AbstractDataset``.
 """
 from __future__ import annotations
 
 import warnings
 from typing import Any, Callable
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 LambdaDataSet: type[LambdaDataset]
 
 
-class LambdaDataset(AbstractDataSet):
+class LambdaDataset(AbstractDataset):
     """``LambdaDataset`` loads and saves data to a data set.
     It relies on delegating to specific implementation such as csv, sql, etc.
 

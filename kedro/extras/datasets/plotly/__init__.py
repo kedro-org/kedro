@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementations to load/save a plotly figure from/to a JSON
+"""``AbstractDataset`` implementations to load/save a plotly figure from/to a JSON
 file."""
 
 __all__ = ["PlotlyDataSet", "JSONDataSet"]

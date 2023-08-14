@@ -22,6 +22,8 @@ shuttles:
 ```
 ### Dataset `type`
 
+TO DO
+
 ### Dataset `filepath`
 
 Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, you should provide a URL using the general form `protocol://path/to/data`.  If no protocol is provided, the local file system is assumed (which is the same as ``file://``).

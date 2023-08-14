@@ -2,11 +2,11 @@
 
 ## How to read the same file using two different datasets
 
-When you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations, you'll need to use transcoding.
+Use transcoding to load and save a file via its specified `filepath` using more than one `DataSet` implementation.
 
 ### A typical example of transcoding
 
-For instance, parquet files can not only be loaded via the `ParquetDataSet` using `pandas`, but also directly by `SparkDataSet`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
+Parquet files can not only be loaded via the `ParquetDataSet` using `pandas`, but also directly by `SparkDataSet`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
 
 To enable transcoding, define two `DataCatalog` entries for the same dataset in a common format (Parquet, JSON, CSV, etc.) in your `conf/base/catalog.yml`:
 
@@ -37,16 +37,12 @@ pipeline(
 In this example, Kedro understands that `my_dataframe` is the same dataset in its `spark.SparkDataSet` and `pandas.ParquetDataSet` formats and helps resolve the node execution order.
 
 In the pipeline, Kedro uses the `spark.SparkDataSet` implementation for saving and `pandas.ParquetDataSet`
-for loading, so the first node should output a `pyspark.sql.DataFrame`, while the second node would receive a `pandas.Dataframe`.
+for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the second node receives a `pandas.Dataframe`.
 
 
 ## Access the Data Catalog in code
 
-TO REMOVE -- Diataxis: How to
-
-You can define a Data Catalog in two ways - through YAML configuration, or programmatically using an API.
-
-The code API allows you to:
+You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md#the-basics-of-catalog-yml), but it is possible to access the Data Catalog programmatically using an API that allows you to:
 
 * configure data sources in code
 * operate the IO module within notebooks
@@ -84,14 +80,12 @@ When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key c
 
 ### Load datasets
 
-You can access each dataset by its name.
+Access each dataset by its name:
 
 ```python
 cars = io.load("cars")  # data is now loaded as a DataFrame in 'cars'
 gear = cars["gear"].values
 ```
-
-#### Behind the scenes
 
 The following steps happened behind the scenes when `load` was called:
 
@@ -110,7 +104,7 @@ io.list()
 
 ### Save data
 
-You can save data using an API similar to that used to load data.
+Save data using an API similar to that used to load data.
 
 ```{warning}
 This use is not recommended unless you are prototyping in notebooks.
@@ -129,7 +123,7 @@ io.load("cars_cache")
 
 #### Save data to a SQL database for querying
 
-We might now want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
+To put the data in a SQLite database: 
 
 ```python
 import os
@@ -141,12 +135,14 @@ except FileNotFoundError:
     pass
 
 io.save("cars_table", cars)
+
+# rank scooters by their mpg
 ranked = io.load("scooters_query")[["brand", "mpg"]]
 ```
 
 #### Save data in Parquet
 
-Finally, we can save the processed data in Parquet format.
+To save the processed data in Parquet format:
 
 ```python
 io.save("ranked", ranked)

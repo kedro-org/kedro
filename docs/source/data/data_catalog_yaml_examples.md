@@ -1,10 +1,28 @@
 # Data Catalog YAML examples
 
-TO REMOVE -- Diataxis: How to guide (code example)
+This page contains a set of examples to help you structure your YAML configuration file in `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
-TO DO: Add a set of anchor links
-
-You can configure your datasets in a YAML configuration file, `conf/base/catalog.yml` or `conf/local/catalog.yml`.
+* [Load data from a local binary file using utf-8 encoding](#todo)
+* [Save data to a CSV file without row names (index) using utf-8 encoding](#todo)
+* [Load/save a CSV file from/to a local file system](#todo)
+* [Load/save a CSV on a local file system, using specified load/save arguments](#todo)
+* [Load/save a compressed CSV on a local file system](#todo)
+* [Load a CSV file from a specific S3 bucket, using credentials and load arguments](#todo)
+* [Load/save a pickle file from/to a local file system](#todo)
+* [Load an Excel file from Google Cloud Storage](#todo)
+* [Load a multi-sheet Excel file from a local file system](#todo)
+* [Save an image created with Matplotlib on Google Cloud Storage](#todo)
+* [Load/save an HDF file on local file system storage, using specified load/save arguments](#todo)
+* [Load/save a parquet file on local file system storage, using specified load/save arguments](#todo)
+* [Load/save a Spark table on S3, using specified load/save arguments](#todo)
+* [Load/save a SQL table using credentials, a database connection, and specified load/save arguments](#todo)
+* [Load a SQL table with credentials and a database connection, and apply a SQL query to the table](#todo)
+* [Load data from an API endpoint](#todo)
+* [Load data from Minio (S3 API Compatible Storage)](#todo)
+* [Load a model saved as a pickle from Azure Blob Storage](#todo)
+* [Load a CSV file stored in a remote location through SSH](#todo)
+* [Load multiple datasets with similar configuration using YAML anchors](#todo)
+* [Create a Data Catalog YAML configuration file via the CLI](#todo)
 
 ## Load data from a local binary file using `utf-8` encoding
 

@@ -100,7 +100,12 @@ class DeltaTableDataSet(AbstractDataset[None, DeltaTable]):
         try:
             self._get_spark().read.load(path=load_path, format="delta")
         except AnalysisException as exception:
-            if "is not a Delta table" in exception.desc:
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = (
+                exception.desc if hasattr(exception, "desc") else exception.message
+            )
+
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
 

@@ -41,7 +41,8 @@ def _parse_glob_pattern(pattern: str) -> str:
 
 def _split_filepath(filepath: str) -> Tuple[str, str]:
     split_ = filepath.split("://", 1)
-    if len(split_) == 2:
+    MIN_SPLIT_SIZE = 2
+    if len(split_) == MIN_SPLIT_SIZE:
         return split_[0] + "://", split_[1]
     return "", split_[0]
 
@@ -232,7 +233,7 @@ class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # ruff: noqa: PLR0913
         self,
         filepath: str,
         file_format: str = "parquet",
@@ -401,10 +402,11 @@ class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
         try:
             self._get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
-            if (
-                exception.desc.startswith("Path does not exist:")
-                or "is not a Delta table" in exception.desc
-            ):
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = (
+                exception.desc if hasattr(exception, "desc") else exception.message
+            )
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
         return True

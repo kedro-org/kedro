@@ -5,10 +5,9 @@ tasks:
 
     init: |
       make sign-off
-      pip install -e /workspace/kedro
+      pip install -e /workspace/kedro[test]
       cd /workspace
       yes project | kedro new -s pandas-iris --checkout main
-      pip install -r /workspace/kedro/test_requirements.txt
       cd /workspace/kedro
       pre-commit install --install-hooks
 

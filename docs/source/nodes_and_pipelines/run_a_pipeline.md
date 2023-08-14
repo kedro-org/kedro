@@ -63,11 +63,6 @@ from kedro.runner.runner import AbstractRunner
 from pluggy import PluginManager
 
 
-from kedro.io import AbstractDataset, DataCatalog, MemoryDataSet
-from kedro.pipeline import Pipeline
-from kedro.runner.runner import AbstractRunner
-
-
 class DryRunner(AbstractRunner):
     """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
     nodes would be run without actually executing anything. It also checks if all the
@@ -111,7 +106,6 @@ class DryRunner(AbstractRunner):
         self._logger.info(
             "Actual run would execute %d nodes:\n%s",
             len(nodes),
-            "\n",
             pipeline.describe(),
         )
         self._logger.info("Checking inputs...")

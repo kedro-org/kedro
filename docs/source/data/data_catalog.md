@@ -359,10 +359,10 @@ The list of all available parameters is given in the [Paramiko documentation](ht
 
 You can use the [`kedro catalog create` command to create a Data Catalog YAML configuration](../development/commands_reference.md#create-a-data-catalog-yaml-configuration-file).
 
-This creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
+This creates a `<conf_root>/<env>/catalog_<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
 
 ```yaml
-# <conf_root>/<env>/catalog/<pipeline_name>.yml
+# <conf_root>/<env>/catalog_<pipeline_name>.yml
 rockets:
   type: MemoryDataSet
 scooters:
@@ -462,7 +462,7 @@ airplanes:
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
 
 ## Load multiple datasets with similar configuration using dataset factories
-For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.11. This syntax allows you to generalise the configuration and
+For catalog entries that share configuration details, you can also use the dataset factories introduced in Kedro 0.18.12. This syntax allows you to generalise the configuration and
 reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
 ### Example 1: Generalise datasets with similar names and types into one dataset factory
@@ -811,7 +811,7 @@ from kedro.io import MemoryDataSet
 memory = MemoryDataSet(data=None)
 io.add("cars_cache", memory)
 io.save("cars_cache", "Memory can store anything.")
-io.load("car_cache")
+io.load("cars_cache")
 ```
 
 #### Save data to a SQL database for querying

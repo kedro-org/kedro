@@ -71,8 +71,7 @@ class SparkHiveDataSet(AbstractDataset[DataFrame, DataFrame]):
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint:disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         database: str,
         table: str,
@@ -210,7 +209,7 @@ class SparkHiveDataSet(AbstractDataset[DataFrame, DataFrame]):
             )
 
     def _exists(self) -> bool:
-        # noqa # pylint:disable=protected-access
+        # noqa # noqa: protected-access
         return (
             self._get_spark()
             ._jsparkSession.catalog()

@@ -16,8 +16,11 @@ from IPython.core.magic_arguments import argument, magic_arguments, parse_argstr
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.project import PARAMS_ARG_HELP
 from kedro.framework.cli.utils import ENV_HELP, _split_params
-from kedro.framework.project import LOGGING  # noqa
-from kedro.framework.project import configure_project, pipelines
+from kedro.framework.project import (
+    LOGGING,  # noqa
+    configure_project,
+    pipelines,
+)
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _is_project, bootstrap_project
 
@@ -65,7 +68,7 @@ def load_ipython_extension(ipython):
 def magic_reload_kedro(line: str, local_ns: dict[str, Any] = None):
     """
     The `%reload_kedro` IPython line magic.
-    See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic # pylint: disable=line-too-long
+    See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic # noqa: line-too-long
     for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
@@ -128,7 +131,7 @@ def _resolve_project_path(
         project_path = Path(path).expanduser().resolve()
     else:
         if local_namespace and "context" in local_namespace:
-            # pylint: disable=protected-access
+            # noqa: protected-access
             project_path = local_namespace["context"]._project_path
         else:
             project_path = _find_kedro_project(Path.cwd())
@@ -139,7 +142,7 @@ def _resolve_project_path(
                 project_path,
             )
 
-    # pylint: disable=protected-access
+    # noqa: protected-access
     if (
         project_path
         and local_namespace

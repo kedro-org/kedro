@@ -71,8 +71,7 @@ class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         url: str,
         table: str,
@@ -169,7 +168,7 @@ class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
         }
 
     @staticmethod
-    def _get_spark():
+    def _get_spark():  # pragma: no cover
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:

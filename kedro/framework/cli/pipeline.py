@@ -56,7 +56,7 @@ def _assert_pkg_name_ok(pkg_name: str):
     if not re.match(r"^[a-zA-Z_]", pkg_name):
         message = base_message + " It must start with a letter or underscore."
         raise KedroCliError(message)
-    if len(pkg_name) < 2:
+    if len(pkg_name) < 2:  # noqa: PLR2004
         message = base_message + " It must be at least 2 characters long."
         raise KedroCliError(message)
     if not re.match(r"^\w+$", pkg_name[1:]):
@@ -66,13 +66,13 @@ def _assert_pkg_name_ok(pkg_name: str):
         raise KedroCliError(message)
 
 
-def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
+def _check_pipeline_name(ctx, param, value):  # noqa: unused-argument
     if value:
         _assert_pkg_name_ok(value)
     return value
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def pipeline_cli():  # pragma: no cover
     pass
@@ -94,7 +94,7 @@ def pipeline():
 @click.pass_obj  # this will pass the metadata as first argument
 def create_pipeline(
     metadata: ProjectMetadata, name, skip_config, env, **kwargs
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE
@@ -124,7 +124,7 @@ def create_pipeline(
 @click.pass_obj  # this will pass the metadata as first argument
 def delete_pipeline(
     metadata: ProjectMetadata, name, env, yes, **kwargs
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_source = settings.CONF_SOURCE
@@ -140,10 +140,14 @@ def delete_pipeline(
     pipeline_artifacts = _get_pipeline_artifacts(metadata, pipeline_name=name, env=env)
 
     files_to_delete = [
-        pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml"
+        pipeline_artifacts.pipeline_conf / filepath
         for confdir in ("parameters", "catalog")
-        if (pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml").is_file()
+        # Since we remove nesting in 'parameters' and 'catalog' folders,
+        # we want to also del the old project's structure for backward compatibility
+        for filepath in (Path(f"{confdir}_{name}.yml"), Path(confdir) / f"{name}.yml")
+        if (pipeline_artifacts.pipeline_conf / filepath).is_file()
     ]
+
     dirs_to_delete = [
         path
         for path in (pipeline_artifacts.pipeline_dir, pipeline_artifacts.pipeline_tests)
@@ -189,7 +193,7 @@ def _echo_deletion_warning(message: str, **paths: list[Path]):
 
 def _create_pipeline(name: str, output_dir: Path) -> Path:
     with _filter_deprecation_warnings():
-        # pylint: disable=import-outside-toplevel
+        # noqa: import-outside-toplevel
         from cookiecutter.main import cookiecutter
 
     template_path = Path(kedro.__file__).parent / "templates" / "pipeline"

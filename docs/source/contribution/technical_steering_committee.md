@@ -62,12 +62,14 @@ Currently, the core Kedro team consists of:
 [Ankita Katiyar](https://github.com/ankatiyar),
 [Antony Milne](https://github.com/antonymilne),
 [Deepyaman Datta](https://github.com/deepyaman),
+[Dmitry Sorokin](https://github.com/DimedS),
 [Huong Nguyen](https://github.com/Huongg),
 [Ivan Danov](https://github.com/idanov),
-[Jannic Holzer](https://github.com/jmholzer),
+[Jitendra Gundaniya](https://github.com/jitu5),
 [Jo Stichbury](https://github.com/stichbury),
 [Joel Schwarzmann](https://github.com/datajoely),
 [Juan Luis Cano](https://github.com/astrojuanlu),
+[Laura Couto](https://github.com/lrcouto),
 [Marcin Zabłocki](https://github.com/marrrcin),
 [Merel Theisen](https://github.com/merelcht),
 [Nero Okwa](https://github.com/NeroOkwa),
@@ -76,7 +78,8 @@ Currently, the core Kedro team consists of:
 [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla),
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Stephanie Kaiser](https://github.com/stephkaiser),
-[Tynan DeBold](https://github.com/tynandebold) and
+[Tynan DeBold](https://github.com/tynandebold),
+[Vladimir Nikolic](https://github.com/vladimir-mck), and
 [Yetunde Dada](https://github.com/yetudada).
 
 Former core team members with significant contributions include:
@@ -89,6 +92,7 @@ Former core team members with significant contributions include:
 [Gordon Wrigley](https://github.com/tolomea),
 [Hamza Oza](https://github.com/hamzaoza),
 [Ignacio Paricio](https://github.com/ignacioparicio),
+[Jannic Holzer](https://github.com/jmholzer),
 [Jiri Klein](https://github.com/jiriklein),
 [Kiyohito Kunii](https://github.com/921kiyo),
 [Laís Carvalho](https://github.com/laisbsc),

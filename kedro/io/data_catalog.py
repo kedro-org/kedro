@@ -11,7 +11,7 @@ import difflib
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable
 
 from parse import parse
 
@@ -25,6 +25,8 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataset
+
+Patterns = Dict[str, Dict[str, Any]]
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
@@ -138,12 +140,12 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # noqa: too-many-arguments
         self,
         data_sets: dict[str, AbstractDataset] = None,
         feed_dict: dict[str, Any] = None,
         layers: dict[str, set[str]] = None,
-        dataset_patterns: dict[str, dict[str, Any]] = None,
+        dataset_patterns: Patterns = None,
         load_versions: dict[str, str] = None,
         save_version: str = None,
     ) -> None:
@@ -283,7 +285,9 @@ class DataCatalog:
         layers: dict[str, set[str]] = defaultdict(set)
 
         for ds_name, ds_config in catalog.items():
-            ds_config = _resolve_credentials(ds_config, credentials)
+            ds_config = _resolve_credentials(  # noqa: redefined-loop-name
+                ds_config, credentials
+            )
             if cls._is_pattern(ds_name):
                 # Add each factory to the dataset_patterns dict.
                 dataset_patterns[ds_name] = ds_config
@@ -300,7 +304,7 @@ class DataCatalog:
         missing_keys = [
             key
             for key in load_versions.keys()
-            if not (cls._match_pattern(sorted_patterns, key) or key in catalog)
+            if not (key in catalog or cls._match_pattern(sorted_patterns, key))
         ]
         if missing_keys:
             raise DatasetNotFoundError(
@@ -322,21 +326,21 @@ class DataCatalog:
         return "{" in pattern
 
     @staticmethod
-    def _match_pattern(
-        data_set_patterns: dict[str, dict[str, Any]], data_set_name: str
-    ) -> str | None:
+    def _match_pattern(data_set_patterns: Patterns, data_set_name: str) -> str | None:
         """Match a dataset name against patterns in a dictionary."""
-        for pattern, _ in data_set_patterns.items():
-            result = parse(pattern, data_set_name)
-            if result:
-                return pattern
-        return None
+        matches = (
+            pattern
+            for pattern in data_set_patterns.keys()
+            if parse(pattern, data_set_name)
+        )
+        return next(matches, None)
 
     @classmethod
-    def _sort_patterns(
-        cls, data_set_patterns: dict[str, dict[str, Any]]
-    ) -> dict[str, dict[str, Any]]:
-        """Sort a dictionary of dataset patterns according to parsing rules -
+    def _sort_patterns(cls, data_set_patterns: Patterns) -> dict[str, dict[str, Any]]:
+        """Sort a dictionary of dataset patterns according to parsing rules.
+        
+        In order:
+
         1. Decreasing specificity (number of characters outside the curly brackets)
         2. Decreasing number of placeholders (number of curly bracket pairs)
         3. Alphabetically
@@ -349,18 +353,18 @@ class DataCatalog:
                 pattern,
             ),
         )
-        sorted_patterns = {}
-        for key in sorted_keys:
-            sorted_patterns[key] = data_set_patterns[key]
-        return sorted_patterns
+        return {key: data_set_patterns[key] for key in sorted_keys}
 
     @staticmethod
     def _specificity(pattern: str) -> int:
-        """Helper function to check the length of exactly matched characters not inside brackets
-        Example -
-        specificity("{namespace}.companies") = 10
-        specificity("{namespace}.{dataset}") = 1
-        specificity("france.companies") = 16
+        """Helper function to check the length of exactly matched characters not inside brackets.
+
+        Example:
+        ::
+        
+            >>> specificity("{namespace}.companies") = 10
+            >>> specificity("{namespace}.{dataset}") = 1
+            >>> specificity("france.companies") = 16
         """
         # Remove all the placeholders from the pattern and count the number of remaining chars
         result = re.sub(r"\{.*?\}", "", pattern)
@@ -410,9 +414,7 @@ class DataCatalog:
         if version and isinstance(data_set, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
-            data_set = data_set._copy(  # pylint: disable=protected-access
-                _version=version
-            )
+            data_set = data_set._copy(_version=version)  # noqa: protected-access
 
         return data_set
 

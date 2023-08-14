@@ -62,7 +62,7 @@ We focus on three areas for contribution: `core`, `extras` and `plugin`:
 
 - `core` refers to the primary Kedro library. Read the [`core` contribution process](#core-contribution-process) for details.
 - `extras` refers to features that could be added to `core` that do not introduce too many dependencies or require new Kedro CLI commands to be created. Read the [`extras` contribution process](#extras-contribution-process) for more information.
-- [`plugin`](../extend_kedro/plugins.md) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality and [adding a new dataset](../extend_kedro/custom_datasets.md) to the `kedro-datasets` package. The [`plugin` development documentation](../extend_kedro/plugins.md) contains guidance on how to design and develop a Kedro `plugin`.
+- [`plugin`](../extend_kedro/plugins.md) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality or adding a new dataset to the `kedro-datasets` package. The [`plugin` development documentation](../extend_kedro/plugins.md) contains guidance on how to design and develop a Kedro `plugin`.
 
 
 ### `core` contribution process

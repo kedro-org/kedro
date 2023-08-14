@@ -41,7 +41,7 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 
 ## Datasets and the Data Catalog
 
-* [Can I read the same data file using two different dataset implementations](../data/data_catalog.md#transcode-datasets)?
+* [Can I read the same data file using two different dataset implementations](../data/advanced_data_catalog_usage.md#how-to-read-the-same-file-using-two-different-datasets)?
 
 ## Nodes and pipelines
 

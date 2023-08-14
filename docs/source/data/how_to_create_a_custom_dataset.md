@@ -1,7 +1,5 @@
 # Advanced: Tutorial to create a custom dataset
 
-TO REMOVE -- Diataxis: Tutorial
-
 [Kedro supports many datasets](/kedro_datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## AbstractDataSet
@@ -100,7 +98,7 @@ src/kedro_pokemon/extras
 
 ## Implement the `_load` method with `fsspec`
 
-Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](../data/data_catalog.md#specify-the-location-of-the-dataset). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
+Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](../data/data_catalog.md#dataset-filepath). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
 
 Here is the implementation of the `_load` method using `fsspec` and `Pillow` to read the data of a single image into a `numpy` array:
 
@@ -273,7 +271,7 @@ class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
 
 Currently, the `ImageDataSet` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-Kedro's [`PartitionedDataSet`](../data/kedro_io.md#partitioned-dataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+Kedro's [`PartitionedDataSet`](./partitioned_and_incremental_datasets.md) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
 
 To use `PartitionedDataSet` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataSet` loads all PNG files from the data directory using `ImageDataSet`:
 
@@ -330,7 +328,7 @@ Versioned dataset `__init__` method must have an optional argument called `versi
 ```{note}
 Versioning doesn't work with `PartitionedDataSet`. You can't use both of them at the same time.
 ```
-To add [Versioning](../data/kedro_io.md#versioning) support to the new dataset we need to extend the
+To add versioning support to the new dataset we need to extend the
  [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataSet) to:
 
 * Accept a `version` keyword argument as part of the constructor
@@ -591,7 +589,7 @@ class ImageDataSet(AbstractVersionedDataSet):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](../data/data_catalog.md#use-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro_datasets.spark.SparkDataSet)'s implementation.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](./data_catalog_yaml_examples.md). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro_datasets.spark.SparkDataSet)'s implementation.
 
 
 ## How to contribute a custom dataset implementation

@@ -22,7 +22,9 @@ shuttles:
 ```
 ### Dataset `type`
 
-TO DO
+Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml and more.
+
+[The `kedro-datasets` package documentation](/kedro_datasets) contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
 
@@ -138,10 +140,12 @@ kedro run --load-version=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
-Currently, the following datasets support versioning:
+A dataset offers versioning support if it extends the [`AbstractVersionedDataSet`](/kedro.io.AbstractVersionedDataSet) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively. In Kedro version 0.18.2, the following datasets support versioning:
 
-- `kedro_datasets.matplotlib.MatplotlibWriter`
+- `kedro_datasets.api.APIDataSet`
 - `kedro_datasets.holoviews.HoloviewsWriter`
+- `kedro_datasets.json.JSONDataSet`
+- `kedro_datasets.matplotlib.MatplotlibWriter`
 - `kedro_datasets.networkx.NetworkXDataSet`
 - `kedro_datasets.pandas.CSVDataSet`
 - `kedro_datasets.pandas.ExcelDataSet`
@@ -151,17 +155,14 @@ Currently, the following datasets support versioning:
 - `kedro_datasets.pandas.ParquetDataSet`
 - `kedro_datasets.pickle.PickleDataSet`
 - `kedro_datasets.pillow.ImageDataSet`
+- `kedro_datasets.tensorflow.TensorFlowModelDataSet`
 - `kedro_datasets.text.TextDataSet`
 - `kedro_datasets.spark.SparkDataSet`
 - `kedro_datasets.yaml.YAMLDataSet`
-- `kedro_datasets.api.APIDataSet`
-- `kedro_datasets.tensorflow.TensorFlowModelDataSet`
-- `kedro_datasets.json.JSONDataSet`
 
 ```{note}
 Although HTTP(S) is a supported file system in the dataset implementations, it does not support versioning.
 ```
-
 
 ## Use the Data Catalog within Kedro configuration
 

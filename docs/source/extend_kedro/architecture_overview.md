@@ -27,19 +27,19 @@ You can use a [Kedro starter](../kedro_project_setup/starters.md) to generate a 
 
 Kedro library consists of independent units, each responsible for one aspect of computation in a data pipeline:
 
-* **`Config Loader`** provides utility to parse and load configuration defined in a Kedro project.
-* **`Pipeline`** provides a collection of abstractions to model data pipelines.
-* **`Runner`** provides an abstraction for different execution strategy of a data pipeline.
-* **`I/O`** provides a collection of abstractions to handle I/O in a project, including `DataCatalog` and many `Dataset` implementations.
+* **[`ConfigLoader`](/kedro.config.ConfigLoader)** provides utility to parse and load configuration defined in a Kedro project.
+* **[`Pipeline`](/kedro.pipeline)** provides a collection of abstractions to model data pipelines.
+* **[`Runner`](/kedro.runner)** provides an abstraction for different execution strategy of a data pipeline.
+* **[`I/O`](/kedro.io)** provides a collection of abstractions to handle I/O in a project, including `DataCatalog` and many `Dataset` implementations.
 
 ## Kedro framework
 
 Kedro framework serves as the interface between a Kedro project and Kedro library components. The major building blocks of the Kedro framework include:
 
-* **`Session`** is responsible for managing the lifecycle of a Kedro run.
-* **`Context`** holds the configuration and Kedro's main functionality, and also serves as the main entry point for interactions with core library components.
-* **`Hooks`** defines all hook specifications available to extend Kedro.
-* **`CLI`** defines built-in Kedro CLI commands and utilities to load custom CLI commands from plugins.
+* **[`Session`](/kedro.framework.session)** is responsible for managing the lifecycle of a Kedro run.
+* **[`Context`](/kedro.framework.context)** holds the configuration and Kedro's main functionality, and also serves as the main entry point for interactions with core library components.
+* **[`Hooks`](/kedro.framework.hooks)** defines all hook specifications available to extend Kedro.
+* **[`CLI`](/kedro.framework.cli)** defines built-in Kedro CLI commands and utilities to load custom CLI commands from plugins.
 
 ## Kedro extension
 

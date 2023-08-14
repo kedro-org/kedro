@@ -21,7 +21,7 @@ from more_itertools import interleave
 from pluggy import PluginManager
 
 from kedro.framework.hooks.manager import _NullPluginManager
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
@@ -32,7 +32,7 @@ class AbstractRunner(ABC):
     """
 
     def __init__(self, is_async: bool = False):
-        """Instantiates the runner classs.
+        """Instantiates the runner class.
 
         Args:
             is_async: If True, the node inputs and outputs are loaded and saved
@@ -74,14 +74,25 @@ class AbstractRunner(ABC):
         hook_manager = hook_manager or _NullPluginManager()
         catalog = catalog.shallow_copy()
 
-        unsatisfied = pipeline.inputs() - set(catalog.list())
+        # Check which datasets used in the pipeline are in the catalog or match
+        # a pattern in the catalog
+        registered_ds = [ds for ds in pipeline.data_sets() if ds in catalog]
+
+        # Check if there are any input datasets that aren't in the catalog and
+        # don't match a pattern in the catalog.
+        unsatisfied = pipeline.inputs() - set(registered_ds)
+
         if unsatisfied:
             raise ValueError(
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
 
-        free_outputs = pipeline.outputs() - set(catalog.list())
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())
+        # Check if there's any output datasets that aren't in the catalog and don't match a pattern
+        # in the catalog.
+        free_outputs = pipeline.outputs() - set(registered_ds)
+        unregistered_ds = pipeline.data_sets() - set(registered_ds)
+
+        # Create a default dataset for unregistered datasets
         for ds_name in unregistered_ds:
             catalog.add(ds_name, self.create_default_data_set(ds_name))
 
@@ -153,14 +164,14 @@ class AbstractRunner(ABC):
         pass
 
     @abstractmethod  # pragma: no cover
-    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
+    def create_default_data_set(self, ds_name: str) -> AbstractDataset:
         """Factory method for creating the default dataset for the runner.
 
         Args:
             ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of an implementation of ``AbstractDataSet`` to be
+            An instance of an implementation of ``AbstractDataset`` to be
             used for all unregistered datasets.
         """
         pass
@@ -275,7 +286,7 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     """
     for node_input in node.inputs:
-        # pylint: disable=protected-access
+        # noqa: protected-access
         if isinstance(catalog._data_sets[node_input], MemoryDataset):
             return False
     return True
@@ -324,7 +335,7 @@ def run_node(
     return node
 
 
-def _collect_inputs_from_hook(
+def _collect_inputs_from_hook(  # noqa: too-many-arguments
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
@@ -332,7 +343,7 @@ def _collect_inputs_from_hook(
     hook_manager: PluginManager,
     session_id: str = None,
 ) -> dict[str, Any]:
-    # pylint: disable=too-many-arguments
+
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_response = hook_manager.hook.before_node_run(
         node=node,
@@ -353,13 +364,12 @@ def _collect_inputs_from_hook(
                     f"'before_node_run' must return either None or a dictionary mapping "
                     f"dataset names to updated values, got '{response_type}' instead."
                 )
-            response = response or {}
-            additional_inputs.update(response)
+            additional_inputs.update(response or {})
 
     return additional_inputs
 
 
-def _call_node_run(
+def _call_node_run(  # noqa: too-many-arguments
     node: Node,
     catalog: DataCatalog,
     inputs: dict[str, Any],
@@ -367,7 +377,7 @@ def _call_node_run(
     hook_manager: PluginManager,
     session_id: str = None,
 ) -> dict[str, Any]:
-    # pylint: disable=too-many-arguments
+
     try:
         outputs = node.run(inputs)
     except Exception as exc:
@@ -420,7 +430,7 @@ def _run_node_sequential(
     items: Iterable = outputs.items()
     # if all outputs are iterators, then the node is a generator node
     if all(isinstance(d, Iterator) for d in outputs.values()):
-        # Python dictionaries are ordered so we are sure
+        # Python dictionaries are ordered, so we are sure
         # the keys and the chunk streams are in the same order
         # [a, b, c]
         keys = list(outputs.keys())

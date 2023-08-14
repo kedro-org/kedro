@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import traceback
+import warnings
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterable
@@ -15,7 +16,7 @@ from typing import Any, Iterable
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
@@ -48,7 +49,7 @@ def _describe_git(project_path: Path) -> dict[str, dict[str, Any]]:
         git_data["dirty"] = bool(git_status_res.decode().strip())
 
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa: broad-except
         logger = logging.getLogger(__name__)
         logger.debug("Unable to git describe %s", project_path)
         logger.debug(traceback.format_exc())
@@ -74,7 +75,7 @@ class KedroSessionError(Exception):
     pass
 
 
-# pylint: disable=too-many-instance-attributes
+# noqa: too-many-instance-attributes
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run. Use `KedroSession.create()` as
@@ -99,8 +100,7 @@ class KedroSession:
 
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         session_id: str,
         package_name: str = None,
@@ -125,7 +125,7 @@ class KedroSession:
         )
 
     @classmethod
-    def create(  # pylint: disable=too-many-arguments
+    def create(  # noqa: too-many-arguments
         cls,
         package_name: str = None,
         project_path: Path | str | None = None,
@@ -183,7 +183,7 @@ class KedroSession:
 
         try:
             session_data["username"] = getpass.getuser()
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: broad-except
             logging.getLogger(__name__).debug(
                 "Unable to get username. Full exception: %s", exc
             )
@@ -262,7 +262,15 @@ class KedroSession:
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
         config_loader = self._get_config_loader()
-
+        if isinstance(config_loader, (ConfigLoader, TemplatedConfigLoader)):
+            warnings.warn(
+                f"{type(config_loader).__name__} will be deprecated in Kedro 0.19."
+                f" Please use the OmegaConfigLoader instead. To consult"
+                f" the documentation for OmegaConfigLoader, see here:"
+                f" https://docs.kedro.org/en/stable/configuration/"
+                f"advanced_configuration.html#omegaconfigloader",
+                FutureWarning,
+            )
         context_class = settings.CONTEXT_CLASS
         context = context_class(
             package_name=self._package_name,
@@ -272,9 +280,7 @@ class KedroSession:
             extra_params=extra_params,
             hook_manager=self._hook_manager,
         )
-        self._hook_manager.hook.after_context_created(  # pylint: disable=no-member
-            context=context
-        )
+        self._hook_manager.hook.after_context_created(context=context)
 
         return context
 
@@ -306,7 +312,7 @@ class KedroSession:
             self._log_exception(exc_type, exc_value, tb_)
         self.close()
 
-    def run(  # pylint: disable=too-many-arguments,too-many-locals
+    def run(  # noqa: too-many-arguments,too-many-locals
         self,
         pipeline_name: str = None,
         tags: Iterable[str] = None,
@@ -354,7 +360,6 @@ class KedroSession:
             These are returned in a dictionary, where the keys are defined
             by the node outputs.
         """
-        # pylint: disable=protected-access,no-member
         # Report project name
         self._logger.info("Kedro project %s", self._project_path.name)
 
@@ -409,7 +414,7 @@ class KedroSession:
             "runner": getattr(runner, "__name__", str(runner)),
         }
 
-        catalog = context._get_catalog(
+        catalog = context._get_catalog(  # noqa: protected-access
             save_version=save_version,
             load_versions=load_versions,
         )
@@ -417,7 +422,12 @@ class KedroSession:
         # Run the runner
         hook_manager = self._hook_manager
         runner = runner or SequentialRunner()
-        hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
+        if not isinstance(runner, AbstractRunner):
+            raise KedroSessionError(
+                "KedroSession expect an instance of Runner instead of a class."
+                "Have you forgotten the `()` at the end of the statement?"
+            )
+        hook_manager.hook.before_pipeline_run(
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 

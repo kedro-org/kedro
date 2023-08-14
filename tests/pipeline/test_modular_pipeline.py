@@ -219,7 +219,7 @@ class TestPipelineHelper:
     )
     def test_missing_dataset_name(
         self, func, inputs, outputs, inputs_map, outputs_map, expected_missing
-    ):  # pylint: disable=too-many-arguments
+    ):  # noqa: too-many-arguments
         raw_pipeline = modular_pipeline([node(func, inputs, outputs)])
 
         with pytest.raises(ModularPipelineError, match=r"Failed to map datasets") as e:

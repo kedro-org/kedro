@@ -57,15 +57,10 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 
 ```python
 # in src/<package_name>/runner.py
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
 from pluggy import PluginManager
-
-
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
-from kedro.pipeline import Pipeline
-from kedro.runner.runner import AbstractRunner
 
 
 class DryRunner(AbstractRunner):
@@ -74,13 +69,13 @@ class DryRunner(AbstractRunner):
     neccessary data exists.
     """
 
-    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
+    def create_default_data_set(self, ds_name: str) -> AbstractDataset:
         """Factory method for creating the default data set for the runner.
 
         Args:
             ds_name: Name of the missing data set
         Returns:
-            An instance of an implementation of AbstractDataSet to be used
+            An instance of an implementation of AbstractDataset to be used
             for all unregistered data sets.
 
         """
@@ -111,7 +106,6 @@ class DryRunner(AbstractRunner):
         self._logger.info(
             "Actual run would execute %d nodes:\n%s",
             len(nodes),
-            "\n",
             pipeline.describe(),
         )
         self._logger.info("Checking inputs...")

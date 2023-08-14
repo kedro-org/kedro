@@ -8,7 +8,7 @@ from typing import Any, Dict
 import fsspec
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -20,7 +20,7 @@ from kedro.io.core import (
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class TextDataSet(AbstractVersionedDataSet[str, str]):
+class TextDataSet(AbstractVersionedDataset[str, str]):
     """``TextDataSet`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 

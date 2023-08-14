@@ -10,7 +10,7 @@ import fsspec
 import tensorflow as tf
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -24,7 +24,7 @@ TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.Model]):
+class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.Model]):
     """``TensorflowModelDataset`` loads and saves TensorFlow models.
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
@@ -68,8 +68,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"save_format": "tf"}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
@@ -134,7 +133,9 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(  # noqa: PLW2901
+                    PurePath(path) / TEMPORARY_H5_FILE
+                )  # noqa: redefined-loop-name
                 self._fs.copy(load_path, path)
             else:
                 self._fs.get(load_path, path, recursive=True)
@@ -153,7 +154,9 @@ class TensorFlowModelDataset(AbstractVersionedDataSet[tf.keras.Model, tf.keras.M
 
         with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
             if self._is_h5:
-                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+                path = str(  # noqa: PLW2901
+                    PurePath(path) / TEMPORARY_H5_FILE
+                )  # noqa: redefined-loop-name
 
             tf.keras.models.save_model(data, path, **self._save_args)
 

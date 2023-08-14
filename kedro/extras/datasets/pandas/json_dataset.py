@@ -12,7 +12,7 @@ import pandas as pd
 
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
+class JSONDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
@@ -68,8 +68,7 @@ class JSONDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

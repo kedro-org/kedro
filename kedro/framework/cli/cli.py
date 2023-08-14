@@ -28,7 +28,7 @@ from kedro.framework.cli.utils import (
     _get_entry_points,
     load_entry_points,
 )
-from kedro.framework.project import LOGGING  # noqa # pylint:disable=unused-import
+from kedro.framework.project import LOGGING  # noqa # noqa: unused-import
 from kedro.framework.startup import _is_project, bootstrap_project
 
 LOGO = rf"""
@@ -131,7 +131,7 @@ class KedroCLI(CommandCollection):
         # subcommand, arguments and options. click doesn't store this information anywhere
         # so we have to re-do it.
         args = sys.argv[1:] if args is None else list(args)
-        self._cli_hook_manager.hook.before_command_run(  # pylint: disable=no-member
+        self._cli_hook_manager.hook.before_command_run(
             project_metadata=self._metadata, command_args=args
         )
 
@@ -146,7 +146,7 @@ class KedroCLI(CommandCollection):
         # click.core.main() method exits by default, we capture this and then
         # exit as originally intended
         except SystemExit as exc:
-            self._cli_hook_manager.hook.after_command_run(  # pylint: disable=no-member
+            self._cli_hook_manager.hook.after_command_run(
                 project_metadata=self._metadata, command_args=args, exit_code=exc.code
             )
             sys.exit(exc.code)
@@ -161,7 +161,7 @@ class KedroCLI(CommandCollection):
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
-        # pylint: disable=line-too-long
+        # noqa: line-too-long
         """Property which loads all project command groups from the
         project and the plugins, then combines them with the built-in ones.
         Built-in commands can be overridden by plugins, which can be

@@ -10,7 +10,7 @@ import plotly.io as pio
 from plotly import graph_objects as go
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -22,7 +22,7 @@ from kedro.io.core import (
 
 
 class JSONDataSet(
-    AbstractVersionedDataSet[go.Figure, Union[go.Figure, go.FigureWidget]]
+    AbstractVersionedDataset[go.Figure, Union[go.Figure, go.FigureWidget]]
 ):
     """``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS).
@@ -57,8 +57,7 @@ class JSONDataSet(
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

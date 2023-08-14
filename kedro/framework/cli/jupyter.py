@@ -42,7 +42,7 @@ class JupyterCommandGroup(click.Group):
         return ["setup", "notebook", "lab", "convert"]
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def jupyter_cli():  # pragma: no cover
     pass
@@ -57,7 +57,7 @@ def jupyter():
 
 @forward_command(jupyter, "setup", forward_help=True)
 @click.pass_obj  # this will pass the metadata as first argument
-def setup(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-argument
+def setup(metadata: ProjectMetadata, args, **kwargs):  # noqa: unused-argument
     """Initialise the Jupyter Kernel for a kedro project."""
     _check_module_importable("ipykernel")
     validate_settings()
@@ -75,7 +75,7 @@ def jupyter_notebook(
     env,
     args,
     **kwargs,
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Open Jupyter Notebook with project specific variables loaded."""
     _check_module_importable("notebook")
     validate_settings()
@@ -101,7 +101,7 @@ def jupyter_lab(
     env,
     args,
     **kwargs,
-):  # pylint: disable=unused-argument
+):  # noqa: unused-argument
     """Open Jupyter Lab with project specific variables loaded."""
     _check_module_importable("jupyterlab")
     validate_settings()
@@ -160,7 +160,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> str:
     """
     # These packages are required by jupyter lab and notebook, which we have already
     # checked are importable, so we don't run _check_module_importable on them.
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     from ipykernel.kernelspec import install
 
     try:
@@ -205,7 +205,7 @@ def _create_kernel(kernel_name: str, display_name: str) -> str:
 @click.pass_obj  # this will pass the metadata as first argument
 def convert_notebook(
     metadata: ProjectMetadata, all_flag, overwrite_flag, filepath, env, **kwargs
-):  # pylint: disable=unused-argument, too-many-locals
+):  # noqa: unused-argument, too-many-locals
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
     Cells tagged as `node` will be copied over to a Python file matching

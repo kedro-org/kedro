@@ -3,23 +3,61 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
 
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
-# Upcoming Release 0.18.12
+# Upcoming Release 0.18.13
 
 ## Major features and improvements
+* Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
+* Added support for Python 3.11. This includes tackling challenges like dependency pinning and test adjustments to ensure a smooth experience. Detailed migration tips are provided below for further context.
 
 ## Bug fixes and other changes
+* Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 
 ## Documentation changes
+* Update example of using generator functions in nodes.
+* Added migration guide from the `ConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` is deprecated and will be removed in the `0.19.0` release.
+
+## Migration Tips for Python 3.11:
+* PyTables on Windows: Users on Windows with Python >=3.8 should note we've pinned `pytables` to `3.8.0` due to compatibility issues.
+* Spark Dependency: We've set an upper version limit for `pyspark` at <3.4 due to breaking changes in 3.4.
+* Testing with Python 3.10: The latest `moto` version now supports parallel test execution for Python 3.10, resolving previous issues.
 
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+* Renamed abstract dataset classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 0.19.0. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+
+| Type                       | Deprecated Alias           | Location        |
+| -------------------------- | -------------------------- | --------------- |
+| `AbstractDataset`          | `AbstractDataSet`          | `kedro.io.core` |
+| `AbstractVersionedDataset` | `AbstractVersionedDataSet` | `kedro.io.core` |
+
+# Release 0.18.12
+
+## Major features and improvements
+* Added dataset factories feature which uses pattern matching to reduce the number of catalog entries.
+* Activated all built-in resolvers by default for `OmegaConfigLoader` except for `oc.env`.
+* Added `kedro catalog rank` CLI command that ranks dataset factories in the catalog by matching priority.
+
+## Bug fixes and other changes
+* Consolidated dependencies and optional dependencies in `pyproject.toml`.
+* Made validation of unique node outputs much faster.
+* Updated `kedro catalog list` to show datasets generated with factories.
+
+## Documentation changes
+* Recommended `ruff` as the linter and removed mentions of `pylint`, `isort`, `flake8`.
+
+## Community contributions
+Thanks to [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto) and [Chris Schopp](https://github.com/cschopp-simwell).
+
+## Breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.19.0
+* `ConfigLoader` and `TemplatedConfigLoader` will be deprecated. Please use `OmegaConfigLoader` instead.
 
 # Release 0.18.11
 
@@ -29,6 +67,7 @@
 ## Bug fixes and other changes
 * Reworked micropackaging workflow to use standard Python packaging practices.
 * Make `kedro micropkg package` accept `--verbose`.
+* Compare for protocol and delimiter in `PartitionedDataSet` to be able to pass the protocol to partitions which paths starts with the same characters as the protocol (e.g. `s3://s3-my-bucket`).
 
 ## Documentation changes
 * Significant improvements to the documentation that covers working with Databricks and Kedro, including a new page for workspace-only development, and a guide to choosing the best workflow for your use case.

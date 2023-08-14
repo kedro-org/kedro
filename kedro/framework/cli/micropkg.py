@@ -1,6 +1,8 @@
 """A collection of CLI commands for working with Kedro micro-packages."""
+# ruff: noqa: I001 # https://github.com/kedro-org/kedro/pull/2634
 from __future__ import annotations
 
+import logging
 import re
 import shutil
 import sys
@@ -36,18 +38,22 @@ from kedro.framework.cli.utils import (
 )
 from kedro.framework.startup import ProjectMetadata
 
-_SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
+_PYPROJECT_TOML_TEMPLATE = """
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
-setup(
-    name="{name}",
-    version="{version}",
-    description="Micro-package `{name}`",
-    packages=find_packages(),
-    include_package_data=True,
-    install_requires={install_requires},
-)
+[project]
+name = "{name}"
+version = "{version}"
+description = "Micro-package `{name}`"
+dependencies = {install_requires}
+
+[tool.setuptools.packages]
+find = {{}}
 """
+
+logger = logging.getLogger(__name__)
 
 
 class _EquivalentRequirement(Requirement):
@@ -99,7 +105,7 @@ class _EquivalentRequirement(Requirement):
         )
 
 
-def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
+def _check_module_path(ctx, param, value):  # noqa: unused-argument
     if value and not re.match(r"^[\w.]+$", value):
         message = (
             "The micro-package location you provided is not a valid Python module path"
@@ -108,7 +114,7 @@ def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-# pylint: disable=missing-function-docstring
+# noqa: missing-function-docstring
 @click.group(name="Kedro")
 def micropkg_cli():  # pragma: no cover
     pass
@@ -148,7 +154,7 @@ def micropkg():
     help="Location of a configuration file for the fsspec filesystem used to pull the package.",
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def pull_package(  # pylint:disable=unused-argument, too-many-arguments
+def pull_package(  # noqa: unused-argument, too-many-arguments
     metadata: ProjectMetadata,
     package_path,
     env,
@@ -183,8 +189,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-# pylint: disable=too-many-arguments
-def _pull_package(
+def _pull_package(  # noqa: too-many-arguments
     package_path: str,
     metadata: ProjectMetadata,
     env: str = None,
@@ -212,7 +217,7 @@ def _pull_package(
         # without making assumptions on the project metadata.
         library_meta = project_wheel_metadata(project_root_dir)
 
-        # Project name will be `my-pipeline` even if `setup.py` says `my_pipeline`
+        # Project name will be `my-pipeline` even if `pyproject.toml` says `my_pipeline`
         # because standards mandate normalization of names for comparison,
         # see https://packaging.python.org/en/latest/specifications/core-metadata/#name
         # The proper way to get it would be
@@ -253,7 +258,7 @@ def _pull_package(
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import anyconfig  # for performance reasons
 
     config_dict = anyconfig.load(metadata.config_file)
@@ -277,7 +282,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
 
 def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import anyconfig  # for performance reasons
 
     config_dict = anyconfig.load(metadata.config_file)
@@ -326,7 +331,7 @@ def _package_micropkgs_from_manifest(metadata: ProjectMetadata) -> None:
 )
 @click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
-def package_micropkg(
+def package_micropkg(  # noqa: too-many-arguments
     metadata: ProjectMetadata,
     module_path,
     env,
@@ -334,7 +339,7 @@ def package_micropkg(
     destination,
     all_flag,
     **kwargs,
-):  # pylint: disable=unused-argument
+):
     """Package up a modular pipeline or micro-package as a Python source distribution."""
     if not module_path and not all_flag:
         click.secho(
@@ -360,7 +365,7 @@ def package_micropkg(
 
 
 def _get_fsspec_filesystem(location: str, fs_args: str | None):
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     import anyconfig
     import fsspec
 
@@ -371,7 +376,7 @@ def _get_fsspec_filesystem(location: str, fs_args: str | None):
 
     try:
         return fsspec.filesystem(protocol, **fs_args_config)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:  # noqa: broad-except
         # Specified protocol is not supported by `fsspec`
         # or requires extra dependencies
         click.secho(str(exc), fg="red")
@@ -389,7 +394,7 @@ def safe_extract(tar, path):
     for member in tar.getmembers():
         member_path = path / member.name
         if not _is_within_directory(path, member_path):
-            # pylint: disable=broad-exception-raised
+            # noqa: broad-exception-raised
             raise Exception("Failed to safely extract tar file.")
     tar.extractall(path)  # nosec B202
 
@@ -438,7 +443,7 @@ def _rename_files(conf_source: Path, old_name: str, new_name: str):
         config_file.rename(config_file.parent / new_config_name)
 
 
-def _refactor_code_for_unpacking(
+def _refactor_code_for_unpacking(  # noqa: too-many-arguments
     project: Project,
     package_path: Path,
     tests_path: Path,
@@ -519,7 +524,7 @@ def _refactor_code_for_unpacking(
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
+def _install_files(  # noqa: too-many-arguments, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
@@ -590,6 +595,12 @@ def _get_default_version(metadata: ProjectMetadata, micropkg_module_path: str) -
         )
         return micropkg_module.__version__  # type: ignore
     except (AttributeError, ModuleNotFoundError):
+        logger.warning(
+            "Micropackage version not found in '%s.%s', will take the top-level one in '%s'",
+            metadata.package_name,
+            micropkg_module_path,
+            metadata.package_name,
+        )
         # if micropkg version doesn't exist, take the project one
         project_module = import_module(f"{metadata.package_name}")
         return project_module.__version__  # type: ignore
@@ -611,9 +622,16 @@ def _package_micropkg(
     )
     # as the source distribution will only contain parameters, we aren't listing other
     # config files not to confuse users and avoid useless file copies
+    # collect configs to package not only from parameters folder, but from core conf folder also
+    # because parameters had been moved from foldername to yml filename
     configs_to_package = _find_config_files(
         package_conf,
-        [f"parameters*/**/{micropkg_name}.yml", f"parameters*/**/{micropkg_name}/**/*"],
+        [
+            f"**/parameters_{micropkg_name}.yml",
+            f"**/{micropkg_name}/**/*",
+            f"parameters*/**/{micropkg_name}.yml",
+            f"parameters*/**/{micropkg_name}/**/*",
+        ],
     )
 
     source_paths = (package_source, package_tests, configs_to_package)
@@ -809,8 +827,7 @@ def _refactor_code_for_package(
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 
 
-# pylint: disable=too-many-arguments,too-many-locals
-def _generate_sdist_file(
+def _generate_sdist_file(  # noqa: too-many-arguments,too-many-locals
     micropkg_name: str,
     destination: Path,
     source_paths: tuple[_SourcePathType, ...],
@@ -836,7 +853,7 @@ def _generate_sdist_file(
         if conf_target.is_dir() and alias:
             _rename_files(conf_target, micropkg_name, alias)
 
-        # Build a setup.py on the fly
+        # Build a pyproject.toml on the fly
         try:
             install_requires = _make_install_requires(
                 package_source / "requirements.txt"  # type: ignore
@@ -847,7 +864,7 @@ def _generate_sdist_file(
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
         _generate_manifest_file(temp_dir_path)
-        _generate_setup_file(package_name, version, install_requires, temp_dir_path)
+        _generate_pyproject_file(package_name, version, install_requires, temp_dir_path)
 
         package_file = destination / _get_sdist_name(name=package_name, version=version)
 
@@ -883,19 +900,19 @@ def _generate_manifest_file(output_dir: Path):
     )
 
 
-def _generate_setup_file(
+def _generate_pyproject_file(
     package_name: str, version: str, install_requires: list[str], output_dir: Path
 ) -> Path:
-    setup_file = output_dir / "setup.py"
+    pyproject_file = output_dir / "pyproject.toml"
 
-    setup_file_context = {
+    pyproject_file_context = {
         "name": package_name,
         "version": version,
         "install_requires": install_requires,
     }
 
-    setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
-    return setup_file
+    pyproject_file.write_text(_PYPROJECT_TOML_TEMPLATE.format(**pyproject_file_context))
+    return pyproject_file
 
 
 def _get_package_artifacts(

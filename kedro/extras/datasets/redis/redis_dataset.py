@@ -9,14 +9,14 @@ from typing import Any, Dict
 
 import redis
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class PickleDataSet(AbstractDataSet[Any, Any]):
+class PickleDataSet(AbstractDataset[Any, Any]):
     """``PickleDataSet`` loads/saves data from/to a Redis database. The
     underlying functionality is supported by the redis library, so it supports
     all allowed options for instantiating the redis app ``from_url`` and setting
@@ -64,8 +64,7 @@ class PickleDataSet(AbstractDataSet[Any, Any]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         key: str,
         backend: str = "pickle",

@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to access Spark dataframes using
+"""``AbstractDataset`` implementation to access Spark dataframes using
 ``pyspark`` on Apache Hive.
 """
 import pickle
@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql.functions import col, lit, row_number
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
@@ -16,7 +16,7 @@ from kedro.io.core import AbstractDataSet, DatasetError
 
 
 # pylint:disable=too-many-instance-attributes
-class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
+class SparkHiveDataSet(AbstractDataset[DataFrame, DataFrame]):
     """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
     hive which will not normally allow upserts to existing data without a complete replacement
@@ -71,8 +71,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint:disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         database: str,
         table: str,
@@ -210,7 +209,7 @@ class SparkHiveDataSet(AbstractDataSet[DataFrame, DataFrame]):
             )
 
     def _exists(self) -> bool:
-        # noqa # pylint:disable=protected-access
+        # noqa # noqa: protected-access
         return (
             self._get_spark()
             ._jsparkSession.catalog()

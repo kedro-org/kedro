@@ -1,4 +1,4 @@
-# Resources
+# FAQs and resources
 
 ```{toctree}
 :maxdepth: 1

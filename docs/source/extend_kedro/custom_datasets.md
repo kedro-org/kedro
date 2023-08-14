@@ -24,13 +24,13 @@ Consult the [Pillow documentation](https://pillow.readthedocs.io/en/stable/insta
 
 ## The anatomy of a dataset
 
-At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataSet](/kedro.io.AbstractDataSet) and provide an implementation for the following abstract methods:
+At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataset](/kedro.io.AbstractDataset) and provide an implementation for the following abstract methods:
 
 * `_load`
 * `_save`
 * `_describe`
 
-`AbstractDataSet` is generically typed with an input data type for saving data, and an output data type for loading data.
+`AbstractDataset` is generically typed with an input data type for saving data, and an output data type for loading data.
 This typing is optional however, and defaults to `Any` type.
 
 Here is an example skeleton for `ImageDataSet`:
@@ -43,10 +43,10 @@ from typing import Any, Dict
 
 import numpy as np
 
-from kedro.io import AbstractDataSet
+from kedro.io import AbstractDataset
 
 
-class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
+class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
@@ -108,11 +108,11 @@ import fsspec
 import numpy as np
 from PIL import Image
 
-from kedro.io import AbstractDataSet
+from kedro.io import AbstractDataset
 from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
-class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
+class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
     def __init__(self, filepath: str):
         """Creates a new instance of ImageDataSet to load / save image data for given filepath.
 
@@ -169,7 +169,7 @@ Similarly, we can implement the `_save` method as follows:
 
 
 ```python
-class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
+class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
@@ -193,7 +193,7 @@ You can open the file to verify that the data was written back correctly.
 The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset.
 
 ```python
-class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
+class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes the attributes of the dataset."""
         return dict(filepath=self._filepath, protocol=self._protocol)
@@ -214,11 +214,11 @@ import fsspec
 import numpy as np
 from PIL import Image
 
-from kedro.io import AbstractDataSet
+from kedro.io import AbstractDataset
 from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
-class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
+class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
@@ -301,7 +301,7 @@ $ ls -la data/01_raw/pokemon-images-and-types/images/images/*.png | wc -l
 Versioning doesn't work with `PartitionedDataset`. You can't use both of them at the same time.
 ```
 To add [Versioning](../data/kedro_io.md#versioning) support to the new dataset we need to extend the
- [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataSet) to:
+ [AbstractVersionedDataset](/kedro.io.AbstractVersionedDataset) to:
 
 * Accept a `version` keyword argument as part of the constructor
 * Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively
@@ -320,11 +320,11 @@ import fsspec
 import numpy as np
 from PIL import Image
 
-from kedro.io import AbstractVersionedDataSet
+from kedro.io import AbstractVersionedDataset
 from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
-class ImageDataSet(AbstractVersionedDataSet[np.ndarray, np.ndarray]):
+class ImageDataSet(AbstractVersionedDataset[np.ndarray, np.ndarray]):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
@@ -391,14 +391,14 @@ The difference between the original `ImageDataSet` and the versioned `ImageDataS
  import numpy as np
  from PIL import Image
 
--from kedro.io import AbstractDataSet
+-from kedro.io import AbstractDataset
 -from kedro.io.core import get_filepath_str, get_protocol_and_path
-+from kedro.io import AbstractVersionedDataSet
++from kedro.io import AbstractVersionedDataset
 +from kedro.io.core import get_filepath_str, get_protocol_and_path, Version
 
 
--class ImageDataSet(AbstractDataSet[np.ndarray, np.ndarray]):
-+class ImageDataSet(AbstractVersionedDataSet[np.ndarray, np.ndarray]):
+-class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
++class ImageDataSet(AbstractVersionedDataset[np.ndarray, np.ndarray]):
      """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
      Example:
@@ -537,7 +537,7 @@ These parameters are then passed to the dataset constructor so you can use them 
 import fsspec
 
 
-class ImageDataSet(AbstractVersionedDataSet):
+class ImageDataSet(AbstractVersionedDataset):
     def __init__(
         self,
         filepath: str,

@@ -1,5 +1,5 @@
 """This module defines a dedicated hook manager for hooks that extends Kedro CLI behaviour."""
-# pylint: disable=global-statement,invalid-name
+# noqa: global-statement,invalid-name
 import logging
 
 from pluggy import PluginManager
@@ -16,7 +16,7 @@ _CLI_PLUGIN_HOOKS = "kedro.cli_hooks"
 
 def get_cli_hook_manager():
     """Create or return the global _hook_manager singleton instance."""
-    global _cli_hook_manager
+    global _cli_hook_manager  # noqa: PLW0603
     if _cli_hook_manager is None:
         _cli_hook_manager = CLIHooksManager()
     _cli_hook_manager.trace.root.setwriter(logger.debug)

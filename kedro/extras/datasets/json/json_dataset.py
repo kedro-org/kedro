@@ -9,7 +9,7 @@ from typing import Any, Dict
 import fsspec
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -21,7 +21,7 @@ from kedro.io.core import (
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
+class JSONDataSet(AbstractVersionedDataset[Any, Any]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses native json to handle the JSON file.
 
@@ -56,8 +56,7 @@ class JSONDataSet(AbstractVersionedDataSet[Any, Any]):
 
     DEFAULT_SAVE_ARGS = {"indent": 2}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         save_args: Dict[str, Any] = None,

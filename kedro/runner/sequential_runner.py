@@ -8,7 +8,7 @@ from itertools import chain
 
 from pluggy import PluginManager
 
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataset
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner, run_node
 
@@ -29,14 +29,14 @@ class SequentialRunner(AbstractRunner):
         """
         super().__init__(is_async=is_async)
 
-    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
+    def create_default_data_set(self, ds_name: str) -> AbstractDataset:
         """Factory method for creating the default data set for the runner.
 
         Args:
             ds_name: Name of the missing data set
 
         Returns:
-            An instance of an implementation of AbstractDataSet to be used
+            An instance of an implementation of AbstractDataset to be used
             for all unregistered data sets.
 
         """

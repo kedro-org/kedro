@@ -11,7 +11,7 @@ import fsspec
 import matplotlib.pyplot as plt
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -24,7 +24,7 @@ from kedro.io.core import (
 
 
 class MatplotlibWriter(
-    AbstractVersionedDataSet[
+    AbstractVersionedDataset[
         Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
     ]
 ):
@@ -111,8 +111,7 @@ class MatplotlibWriter(
 
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,

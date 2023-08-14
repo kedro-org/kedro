@@ -338,7 +338,7 @@ class DataCatalog:
     @classmethod
     def _sort_patterns(cls, data_set_patterns: Patterns) -> dict[str, dict[str, Any]]:
         """Sort a dictionary of dataset patterns according to parsing rules.
-        
+
         In order:
 
         1. Decreasing specificity (number of characters outside the curly brackets)
@@ -361,7 +361,7 @@ class DataCatalog:
 
         Example:
         ::
-        
+
             >>> specificity("{namespace}.companies") = 10
             >>> specificity("{namespace}.{dataset}") = 1
             >>> specificity("france.companies") = 16

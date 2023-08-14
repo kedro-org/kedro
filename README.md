@@ -1,10 +1,11 @@
 ![Kedro Logo Banner - Light](.github/demo-dark.png#gh-dark-mode-only)
 ![Kedro Logo Banner - Dark](.github/demo-light.png#gh-light-mode-only)
-[![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10-blue.svg)](https://pypi.org/project/kedro/)
+[![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/kedro-org/kedro/blob/main/LICENSE.md)
 [![Slack Organisation](https://img.shields.io/badge/slack-chat-blueviolet.svg?label=Kedro%20Slack&logo=slack)](https://slack.kedro.org)
+[![Slack Archive](https://img.shields.io/badge/slack-archive-blueviolet.svg?label=Kedro%20Slack%20)](https://linen-slack.kedro.org/)
 ![CircleCI - Main Branch](https://img.shields.io/circleci/build/github/kedro-org/kedro/main?label=main)
 ![Develop Branch Build](https://img.shields.io/circleci/build/github/kedro-org/kedro/develop?label=develop)
 [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://docs.kedro.org/)
@@ -14,7 +15,7 @@
 
 ## What is Kedro?
 
-Kedro is a toolbox for production-ready data science. It uses software engineering best practices to help you create data engineering and data science pipelines that are reproducible, maintainable, and modular.
+Kedro is a toolbox for production-ready data science. It uses software engineering best practices to help you create data engineering and data science pipelines that are reproducible, maintainable, and modular. You can find out more at [kedro.org](https://kedro.org).
 
 Kedro is an open-source Python framework hosted by the [LF AI & Data Foundation](https://lfaidata.foundation/).
 
@@ -51,12 +52,10 @@ _A pipeline visualisation generated using [Kedro-Viz](https://github.com/kedro-o
 
 The [Kedro documentation](https://docs.kedro.org/en/stable/) first explains [how to install Kedro](https://docs.kedro.org/en/stable/get_started/install.html) and then introduces [key Kedro concepts](https://docs.kedro.org/en/stable/get_started/kedro_concepts.html).
 
-- The first example illustrates the [basics of a Kedro project](https://docs.kedro.org/en/stable/get_started/new_project.html) using the Iris dataset
-- You can then review the [spaceflights tutorial](https://docs.kedro.org/en/stable/tutorial/tutorial_template.html) to build a Kedro project for hands-on experience
+You can then review the [spaceflights tutorial](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) to build a Kedro project for hands-on experience
 
-For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://docs.kedro.org/en/stable/visualisation/kedro-viz_visualisation.html) and [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/notebooks_and_ipython/kedro_and_notebooks).
+For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://docs.kedro.org/en/stable/visualisation/index.html) and [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/notebooks_and_ipython/index.html). We also recommend the [API reference documentation](/kedro) for additional information.
 
-Further documentation is available for more advanced Kedro usage and deployment. We also recommend the [glossary](https://docs.kedro.org/en/stable/resources/glossary.html) and the [API reference documentation](/kedro) for additional information.
 
 ## Why does Kedro exist?
 
@@ -68,64 +67,21 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 - To increase efficiency, because applied concepts like modularity and separation of concerns inspire the creation of
   **reusable analytics code**
 
+Find out more about how Kedro can answer your use cases from the [product FAQs on the Kedro website](https://kedro.org/#faq).
+
 ## The humans behind Kedro
 
 The [Kedro product team](https://docs.kedro.org/en/stable/contribution/technical_steering_committee.html#kedro-maintainers) and a number of [open source contributors from across the world](https://github.com/kedro-org/kedro/releases) maintain Kedro.
 
 ## Can I contribute?
 
-Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md).
+Yes! We welcome all kinds of contributions. Check out our [guide to contributing to Kedro](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).
 
 ## Where can I learn more?
 
-There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://docs.kedro.org/en/stable/faq/faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
+There is a growing community around Kedro. We encourage you to ask and answer technical questions on [Slack](https://slack.kedro.org/) and bookmark the [Linen archive of past discussions](https://linen-slack.kedro.org/).
 
-## Who likes Kedro?
-
-There are Kedro users across the world, who work at start-ups, major enterprises and academic institutions like [Absa](https://www.absa.co.za/),
-[Acensi](https://acensi.eu/page/home),
-[Advanced Programming Solutions SL](https://www.linkedin.com/feed/update/urn:li:activity:6863494681372721152/),
-[AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/),
-[AMAI GmbH](https://www.am.ai/),
-[Augment Partners](https://www.linkedin.com/posts/augment-partners_kedro-cheat-sheet-by-augment-activity-6858927624631283712-Ivqk),
-[AXA UK](https://www.axa.co.uk/),
-[Belfius](https://www.linkedin.com/posts/vangansen_mlops-machinelearning-kedro-activity-6772379995953238016-JUmo),
-[Beamery](https://medium.com/hacking-talent/production-code-for-data-science-and-our-experience-with-kedro-60bb69934d1f),
-[Caterpillar](https://www.caterpillar.com/),
-[CRIM](https://www.crim.ca/en/),
-[Dendra Systems](https://www.dendra.io/),
-[Element AI](https://www.elementai.com/),
-[GetInData](https://getindata.com/blog/running-machine-learning-pipelines-kedro-kubeflow-airflow),
-[GMO](https://recruit.gmo.jp/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/blog/kedro_and_mlflow_tracking/),
-[Indicium](https://medium.com/indiciumtech/how-to-build-models-as-products-using-mlops-part-2-machine-learning-pipelines-with-kedro-10337c48de92),
-[Imperial College London](https://github.com/dssg/barefoot-winnie-public),
-[ING](https://www.ing.com),
-[Jungle Scout](https://junglescouteng.medium.com/jungle-scout-case-study-kedro-airflow-and-mlflow-use-on-production-code-150d7231d42e),
-[Helvetas](https://www.linkedin.com/posts/lionel-trebuchon_mlflow-kedro-ml-ugcPost-6747074322164154368-umKw),
-[Leapfrog](https://www.lftechnology.com/blog/ai-pipeline-kedro/),
-[McKinsey & Company](https://www.mckinsey.com/alumni/news-and-insights/global-news/firm-news/kedro-from-proprietary-to-open-source),
-[Mercado Libre Argentina](https://www.mercadolibre.com.ar),
-[Modec](https://www.modec.com/),
-[Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g),
-[NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ),
-[NASA](https://github.com/nasa/ML-airport-taxi-out),
-[NHS AI Lab](https://nhsx.github.io/skunkworks/synthetic-data-pipeline),
-[Open Data Science LatAm](https://www.odesla.org/),
-[Prediqt](https://prediqt.co/),
-[QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),
-[ReSpo.Vision](https://neptune.ai/customers/respo-vision),
-[Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414),
-[Roche](https://www.roche.com/),
-[Sber](https://www.linkedin.com/posts/seleznev-artem_welcome-to-kedros-documentation-kedro-activity-6767523561109385216-woTt),
-[Société Générale](https://www.societegenerale.com/en),
-[Telkomsel](https://medium.com/life-at-telkomsel/how-we-build-a-production-grade-data-pipeline-7004e56c8c98),
-[Universidad Rey Juan Carlos](https://github.com/vchaparro/MasterThesis-wind-power-forecasting/blob/master/thesis.pdf),
-[UrbanLogiq](https://urbanlogiq.com/),
-[Wildlife Studios](https://wildlifestudios.com),
-[WovenLight](https://www.wovenlight.com/) and
-[XP](https://youtu.be/wgnGOVNkXqU?t=2210).
-
-Kedro won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/). Kedro has received an [honorable mention in the User Experience category in Fast Company’s 2022 Innovation by Design Awards](https://www.fastcompany.com/90772252/user-experience-innovation-by-design-2022).
+We keep a list of [technical FAQs in the Kedro documentation](https://docs.kedro.org/en/stable/faq/faq.html) and you can find a  growing list of blog posts, videos and projects that use Kedro over on the [`awesome-kedro` GitHub repository](https://github.com/kedro-org/awesome-kedro). If you have created anything with Kedro we'd love to include it on the list. Just make a PR to add it!
 
 ## How can I cite Kedro?
 

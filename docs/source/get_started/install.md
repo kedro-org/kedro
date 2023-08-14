@@ -134,7 +134,7 @@ You should see an ASCII art graphic and the Kedro version number. For example:
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro), or post a new query on the [Slack organisation](https://slack.kedro.org).
+If you do not see the graphic displayed, or have any issues with your installation, check out the [searchable archive of Slack discussions](https://linen-slack.kedro.org/), or post a new query on the [Slack organisation](https://slack.kedro.org).
 
 
 ## How to upgrade Kedro
@@ -187,4 +187,4 @@ pip install kedro
 * Installation prerequisites include a virtual environment manager like `conda`, Python 3.7+, and `git`.
 * You should install Kedro using `pip install kedro`.
 
-If you encounter any problems as you set up Kedro, ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or review the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro).
+If you encounter any problems as you set up Kedro, ask for help on Kedro's [Slack organisation](https://slack.kedro.org) or review the [searchable archive of Slack discussions](https://linen-slack.kedro.org/).

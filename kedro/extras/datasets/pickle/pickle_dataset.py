@@ -11,7 +11,7 @@ from typing import Any, Dict
 import fsspec
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -23,7 +23,7 @@ from kedro.io.core import (
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
+class PickleDataSet(AbstractVersionedDataset[Any, Any]):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
     the specified backend library passed in (defaults to the ``pickle`` library), so it
@@ -76,8 +76,7 @@ class PickleDataSet(AbstractVersionedDataSet[Any, Any]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments,too-many-locals
-    def __init__(
+    def __init__(  # noqa: too-many-arguments,too-many-locals
         self,
         filepath: str,
         backend: str = "pickle",

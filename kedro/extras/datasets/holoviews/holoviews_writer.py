@@ -10,7 +10,7 @@ import fsspec
 import holoviews as hv
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -25,7 +25,7 @@ from kedro.io.core import (
 HoloViews = TypeVar("HoloViews")
 
 
-class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, NoReturn]):
+class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     """``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying
     filesystem (e.g. local, S3, GCS).
 
@@ -44,8 +44,7 @@ class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, NoReturn]):
 
     DEFAULT_SAVE_ARGS = {"fmt": "png"}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,

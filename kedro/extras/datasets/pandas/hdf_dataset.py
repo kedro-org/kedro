@@ -10,7 +10,7 @@ import fsspec
 import pandas as pd
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -24,7 +24,7 @@ HDFSTORE_DRIVER = "H5FD_CORE"
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
+class HDFDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
     filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 
@@ -64,8 +64,7 @@ class HDFDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         key: str,

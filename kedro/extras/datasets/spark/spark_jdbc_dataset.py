@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from pyspark.sql import DataFrame, SparkSession
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 __all__ = ["SparkJDBCDataSet"]
 
@@ -14,7 +14,7 @@ __all__ = ["SparkJDBCDataSet"]
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
+class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
     """``SparkJDBCDataSet`` loads data from a database table accessible
     via JDBC URL url and connection properties and saves the content of
     a PySpark DataFrame to an external database table via JDBC.  It uses
@@ -71,8 +71,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         url: str,
         table: str,
@@ -169,7 +168,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
         }
 
     @staticmethod
-    def _get_spark():
+    def _get_spark():  # pragma: no cover
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:

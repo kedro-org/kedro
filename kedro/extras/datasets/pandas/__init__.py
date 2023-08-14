@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementations that produce pandas DataFrames."""
+"""``AbstractDataset`` implementations that produce pandas DataFrames."""
 
 __all__ = [
     "CSVDataSet",

@@ -4,20 +4,24 @@ on:
   push:
     branches:
       - main
+      - develop
     paths-ignore:
       - "docs/**"
+      - '**.md'
   pull_request:
     branches:
       - main
+      - develop
     paths-ignore:
       - "docs/**"
+      - '**.md'
 
 jobs:
   unit-tests:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       os: ${{ matrix.os }}
@@ -27,7 +31,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ "3.10" ]
+        python-version: [ "3.11" ]
     uses: ./.github/workflows/lint.yml
     with:
       os: ${{ matrix.os }}
@@ -37,8 +41,18 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/e2e-tests.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+
+  pip-compile:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+    uses: ./.github/workflows/pip-compile.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}

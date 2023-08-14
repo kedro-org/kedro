@@ -13,7 +13,7 @@ from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 
 from kedro.io.core import (
-    AbstractDataSet,
+    AbstractDataset,
     DatasetError,
     get_filepath_str,
     get_protocol_and_path,
@@ -25,7 +25,7 @@ from kedro.io.core import (
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
+class GBQTableDataSet(AbstractDataset[None, pd.DataFrame]):
     """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
 
@@ -70,8 +70,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"progress_bar": False}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         dataset: str,
         table_name: str,
@@ -176,7 +175,7 @@ class GBQTableDataSet(AbstractDataSet[None, pd.DataFrame]):
             )
 
 
-class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
+class GBQQueryDataSet(AbstractDataset[None, pd.DataFrame]):
     """``GBQQueryDataSet`` loads data from a provided SQL query from Google
     BigQuery. It uses ``pandas.read_gbq`` which itself uses ``pandas-gbq``
     internally to read from BigQuery table. Therefore it supports all allowed
@@ -210,8 +209,7 @@ class GBQQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         sql: str = None,
         project: str = None,

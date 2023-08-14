@@ -6,7 +6,7 @@ import copy
 import warnings
 from typing import Any
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 _EMPTY = object()
 
@@ -14,7 +14,7 @@ _EMPTY = object()
 MemoryDataSet: type[MemoryDataset]
 
 
-class MemoryDataset(AbstractDataSet):
+class MemoryDataset(AbstractDataset):
     """``MemoryDataset`` loads and saves data from/to an in-memory
     Python object.
 
@@ -93,7 +93,7 @@ def _infer_copy_mode(data: Any) -> str:
     Returns:
         One of "copy", "assign" or "deepcopy" as the copy mode to use.
     """
-    # pylint: disable=import-outside-toplevel
+    # noqa: import-outside-toplevel
     try:
         import pandas as pd
     except ImportError:  # pragma: no cover

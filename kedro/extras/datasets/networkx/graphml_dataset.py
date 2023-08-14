@@ -10,7 +10,7 @@ import fsspec
 import networkx
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -21,7 +21,7 @@ from kedro.io.core import (
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class GraphMLDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
+class GraphMLDataSet(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     """``GraphMLDataSet`` loads and saves graphs to a GraphML file using an
     underlying filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to
     create GraphML data.
@@ -43,8 +43,7 @@ class GraphMLDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

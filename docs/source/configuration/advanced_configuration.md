@@ -124,7 +124,7 @@ This section contains a set of guidance for advanced configuration requirements 
 * [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
 * [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
 * [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
-* [How to use custom resolvers in the `OmegaConfigLoader`](#how-to-use-custom-resolvers-in-the-omegaconfigloader)
+* [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 * [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
 ### How to change which configuration files are loaded
@@ -262,58 +262,75 @@ Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the
 #### Other configuration files
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom spark or mlflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.
 
-### How to use custom resolvers in the `OmegaConfigLoader`
-`Omegaconf` provides functionality to [register custom resolvers](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#resolvers) for templated values. You can use these custom resolves within Kedro by extending the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) class.
+### How to use resolvers in the `OmegaConfigLoader`
+Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s
+resolvers functionality](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#resolvers). You use resolvers to define custom
+logic to calculate values of parameters or catalog entries, or inject these values from elsewhere. To use this feature with Kedro, pass a
+`dict` of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS` in your project's `src/<package_name>/settings.py`.
 The example below illustrates this:
 
 ```python
+import polars as pl
+from datetime import date
+
 from kedro.config import OmegaConfigLoader
-from omegaconf import OmegaConf
-from typing import Any, Dict
+
+CONFIG_LOADER_CLASS = OmegaConfigLoader
 
 
-class CustomOmegaConfigLoader(OmegaConfigLoader):
-    def __init__(
-        self,
-        conf_source: str,
-        env: str = None,
-        runtime_params: Dict[str, Any] = None,
-    ):
-        super().__init__(
-            conf_source=conf_source, env=env, runtime_params=runtime_params
-        )
+def date_today():
+    return date.today()
 
-        # Register a customer resolver that adds up numbers.
-        self.register_custom_resolver("add", lambda *numbers: sum(numbers))
 
-    @staticmethod
-    def register_custom_resolver(name, function):
-        """
-        Helper method that checks if the resolver has already been registered and registers the
-        resolver if it's new. The check is needed, because omegaconf will throw an error
-        if a resolver with the same name is registered twice.
-        Alternatively, you can call `register_new_resolver()` with  `replace=True`.
-        """
-        if not OmegaConf.has_resolver(name):
-            OmegaConf.register_new_resolver(name, function)
+CONFIG_LOADER_ARGS = {
+    "custom_resolvers": {
+        "add": lambda *my_list: sum(my_list),
+        "polars": lambda x: getattr(pl, x),
+        "today": lambda: date_today(),
+    }
+}
 ```
-
-In order to use this custom configuration loader, you will need to set it as the project configuration loader in `src/<package_name>/settings.py`:
-
-```python
-from package_name.custom_configloader import CustomOmegaConfigLoader
-
-CONFIG_LOADER_CLASS = CustomOmegaConfigLoader
-```
-
-You can then use the custom "add" resolver in your `parameters.yml` as follows:
-
+These custom resolvers are then registered using `OmegaConf.register_new_resolver()` under the hood and can be used in any of the
+configuration files in your project. For example, you can use the `add` or the `today` resolver defined above in your `parameters.yml` like this:
 ```yaml
 model_options:
-  test_size: ${add:1,2,3}
+  test_size: "${add:1,2,3}"
   random_state: 3
-```
 
+date: "${today:}"
+```
+The values of these parameters will be computed at access time and will be passed on to your nodes.
+Resolvers can also be used in your `catalog.yml`. In the example below, we use the `polars` resolver defined above to pass non-primitive
+types to the catalog entry.
+
+```yaml
+my_polars_dataset:
+  type: polars.CSVDataSet
+  filepath: data/01_raw/my_dataset.csv
+  load_args:
+    dtypes:
+      product_age: "${polars:Float64}"
+      group_identifier: "${polars:Utf8}"
+    try_parse_dates: true
+```
+`OmegaConf` also comes with some [built-in resolvers](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#built-in-resolvers)
+that you can use with the `OmegaConfigLoader` in Kedro. All built-in resolvers except for [`oc.env`](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-env)
+are enabled by default. `oc.env` is only turned on for loading credentials. You can, however, turn this on for all configurations through your project's `src/<package_name>/settings.py` in a similar way:
+```{note}
+This is an advanced feature and should be used with caution. We do not recommend using environment variables for configurations other than credentials.
+```
+```python
+from omegaconf.resolvers import oc
+from kedro.config import OmegaConfigLoader
+
+CONFIG_LOADER_CLASS = OmegaConfigLoader
+
+CONFIG_LOADER_ARGS = {
+    "custom_resolvers": {
+        "oc.env": oc.env,
+    }
+}
+```
 ### How to load credentials through environment variables
 The [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) enables you to load credentials from environment variables. To achieve this you have to use the `OmegaConfigLoader` and the `omegaconf` [`oc.env` resolver](https://omegaconf.readthedocs.io/en/2.3_branch/custom_resolvers.html#oc-env).
 To use the `OmegaConfigLoader` in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):

@@ -1,4 +1,4 @@
-name: Run e2e-tests on Kedro
+name: Run pip-compile
 
 on:
   workflow_call:
@@ -8,12 +8,8 @@ on:
       python-version:
         type: string
 
-env:
-  COLUMNS: 120
-  LINES: 25
-
 jobs:
-  e2e-tests:
+  pip-compile:
     runs-on: ${{ inputs.os }}
     steps:
       - name: Checkout code
@@ -42,7 +38,5 @@ jobs:
         run: |
           make install-test-requirements
           make install-pre-commit
-      - name: pip freeze
-        run: pip freeze
-      - name: Run e2e tests
-        run: make e2e-tests
+      - name: Run pip-compile
+        run: make pip-compile

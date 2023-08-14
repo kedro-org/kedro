@@ -13,7 +13,7 @@ import pandas as pd
 
 from kedro.io.core import (
     PROTOCOL_DELIMITER,
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
+class FeatherDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``FeatherDataSet`` loads and saves data to a feather file using an
     underlying filesystem (e.g.: local, S3, GCS). The underlying functionality
     is supported by pandas, so it supports all allowed pandas options
@@ -73,8 +73,7 @@ class FeatherDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # noqa: too-many-arguments
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,

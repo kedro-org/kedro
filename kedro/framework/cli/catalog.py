@@ -213,7 +213,7 @@ def rank_catalog_factories(metadata: ProjectMetadata, env):
 @env_option
 @click.pass_obj
 def resolve_patterns(metadata: ProjectMetadata, env):
-    """Resolve pipeline datasets with catalog factories."""
+    """Resolve catalog factories against pipeline datasets"""
 
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()

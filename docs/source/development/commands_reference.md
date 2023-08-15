@@ -499,7 +499,7 @@ kedro catalog list --pipeline=ds,de
 kedro catalog resolve
 ```
 
-This command resolves dataset factories in the catalog file with any explicit entries in the pipeline. The output is the aggregation of all explicit dataset entries in the catalog and factory datasets in the pipeline.
+This command resolves dataset factories in the catalog file with any explicit entries in the pipeline. The output includes datasets explicitly mentioned in your catalog files and any datasets mentioned in the project's pipelines that resolve some dataset factory.
 
 ##### Rank dataset factories in the catalog
 

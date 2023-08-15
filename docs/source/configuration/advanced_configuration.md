@@ -124,6 +124,7 @@ This section contains a set of guidance for advanced configuration requirements 
 * [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
 * [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
 * [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+* [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
 * [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 * [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
@@ -261,6 +262,34 @@ Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the
 
 #### Other configuration files
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom spark or mlflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.
+
+### How to use global variables with the `OmegaConfigLoader`
+From Kedro `0.18.13`, you can also use variable interpolation in your configurations using "globals" with `OmegaConfigLoader`.
+The benefit of using globals over regular variable interpolation is that the global variables are shared across different configurations.
+By default, these global variables are assumed to be in files that follow the naming convention specified by `globals` key in `OmegaConfigLoader`'s
+`config_patterns`: `["globals*", "globals*/**", "**/globals*"]`. To change these patterns, you can either [customise the config patterns](#how-to-change-which-configuration-files-are-loaded)
+or [bypass the configuration loading](#how-to-bypass-the-configuration-loading-rules).
+
+Suppose you have global variables located in the file `conf/base/globals.yml`:
+```yaml
+my_global_value: 45
+dataset_type:
+  csv: pandas.CSVDataSet
+```
+You can access these global variables in your catalog or parameters config files with a `globals` resolver like this:
+`conf/base/parameters.yml`:
+```yaml
+my_param : "${globals:my_global_value}"
+```
+`conf/base/catalog.yml`:
+```yaml
+companies:
+  filepath: data/01_raw/companies.csv
+  type: "${globals:dataset_type.csv}"
+```
+If there are duplicate keys in the globals files in your base and run time environments, the values in the run time environment
+will overwrite the values in your base environment.
+
 
 ### How to use resolvers in the `OmegaConfigLoader`
 Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s

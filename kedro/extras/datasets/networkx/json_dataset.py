@@ -11,7 +11,7 @@ import fsspec
 import networkx
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -22,7 +22,7 @@ from kedro.io.core import (
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class JSONDataSet(AbstractVersionedDataSet[networkx.Graph, networkx.Graph]):
+class JSONDataSet(AbstractVersionedDataset[networkx.Graph, networkx.Graph]):
     """NetworkX ``JSONDataSet`` loads and saves graphs to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to
     create JSON data.

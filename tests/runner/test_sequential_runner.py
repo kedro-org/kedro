@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from kedro.framework.hooks import _create_hook_manager
-from kedro.io import AbstractDataSet, DataCatalog, DatasetError, LambdaDataset
+from kedro.io import AbstractDataset, DataCatalog, DatasetError, LambdaDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import SequentialRunner
@@ -125,7 +125,7 @@ class TestSequentialRunnerBranchedPipeline:
             )
 
 
-class LoggingDataset(AbstractDataSet):
+class LoggingDataset(AbstractDataset):
     def __init__(self, log, name, value=None):
         self.log = log
         self.name = name

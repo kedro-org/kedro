@@ -11,7 +11,7 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import (
-    AbstractDataSet,
+    AbstractDataset,
     DataCatalog,
     DatasetAlreadyExistsError,
     DatasetError,
@@ -175,7 +175,7 @@ def conflicting_feed_dict():
     return {"ds1": ds1, "ds3": 1}
 
 
-class BadDataset(AbstractDataSet):  # pragma: no cover
+class BadDataset(AbstractDataset):  # pragma: no cover
     def __init__(self, filepath):
         self.filepath = filepath
         raise Exception("Naughty!")  # pylint: disable=broad-exception-raised
@@ -477,7 +477,7 @@ class TestDataCatalogFromConfig:
         pattern = (
             "An exception occurred when parsing config for dataset 'boats':\n"
             "Dataset type 'kedro.io.data_catalog.DataCatalog' is invalid: "
-            "all data set types must extend 'AbstractDataSet'"
+            "all data set types must extend 'AbstractDataset'"
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)

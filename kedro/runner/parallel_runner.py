@@ -38,7 +38,7 @@ _SharedMemoryDataSet: type[_SharedMemoryDataset]
 
 class _SharedMemoryDataset:
     """``_SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
-    It is not inherited from AbstractDataSet class.
+    It is not inherited from AbstractDataset class.
     """
 
     def __init__(self, manager: SyncManager):

@@ -674,16 +674,60 @@ class TestOmegaConfigLoader:
 
     def test_globals(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
+        globals_params_folder = tmp_path / _BASE_ENV / "globals" / "my_globals.yml"
         param_config = {
-            "param1": "${globals:hello}",
+            "my_param": "${globals:x}",
         }
-        globals_config = {
-            "hello": 34,
+        catalog_config = {
+            "companies": {
+                "type": "${globals:dataset_type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
         }
+        globals_config_1 = {
+            "x": 34,
+        }
+        globals_config_2 = {"dataset_type": "pandas.CSVDataSet"}
         _write_yaml(base_params, param_config)
-        _write_yaml(globals_params, globals_config)
+        _write_yaml(globals_params, globals_config_1)
+        _write_yaml(globals_params_folder, globals_config_2)
+        _write_yaml(base_catalog, catalog_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        parameters = conf["parameters"]
         assert OmegaConf.has_resolver("globals")
-        assert parameters["param1"] == 34
+        globals_config = {**globals_config_1, **globals_config_2}
+        # Globals is readable in a dict way
+        assert conf["globals"] == globals_config
+        # Globals are resolved correctly in parameters
+        assert conf["parameters"]["my_param"] == globals_config_1["x"]
+        # Globals are resolved correctly in catalog
+        assert conf["catalog"]["companies"]["type"] == globals_config_2["dataset_type"]
+
+    def test_globals_across_env(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        local_params = tmp_path / _DEFAULT_RUN_ENV / "parameters.yml"
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        local_globals = tmp_path / _DEFAULT_RUN_ENV / "globals.yml"
+        base_param_config = {
+            "param1": "${globals:y}",
+        }
+        local_param_config = {
+            "param2": "${globals:x}",
+        }
+        base_globals_config = {
+            "x": 34,
+            "y": 25,
+        }
+        local_globals_config = {
+            "y": 99,
+        }
+        _write_yaml(base_params, base_param_config)
+        _write_yaml(local_params, local_param_config)
+        _write_yaml(base_globals, base_globals_config)
+        _write_yaml(local_globals, local_globals_config)
+        conf = OmegaConfigLoader(tmp_path)
+        # Local global overwrites the base global value
+        assert conf["parameters"]["param1"] == local_globals_config["y"]
+        # Base global value is accessible to local params
+        assert conf["parameters"]["param2"] == base_globals_config["x"]

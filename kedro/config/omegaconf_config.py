@@ -103,8 +103,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         self.base_env = base_env
         self.default_run_env = default_run_env
-        self._globals = {}
-
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
@@ -138,11 +136,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env=env,
             runtime_params=runtime_params,
         )
-        # Read globals from patterns if the files exist
-        try:
-            self._globals = self["globals"]
-        except MissingConfigException:
-            pass
 
     def __getitem__(self, key) -> dict[str, Any]:
         """Get configuration files by key, load and merge them, and
@@ -206,7 +199,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         config.update(env_config)
 
-        if not processed_files:
+        if not processed_files and key != "globals":
             raise MissingConfigException(
                 f"No files of YAML or JSON format found in {base_path} or {env_path} matching"
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
@@ -323,7 +316,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _get_globals_value(self, variable):
         """Return the globals values to the resolver"""
-        return self._globals[variable]
+        return self["globals"][variable]
 
     @staticmethod
     def _register_new_resolvers(resolvers: dict[str, Callable]):

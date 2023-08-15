@@ -1,6 +1,6 @@
 # Kedro architecture overview
 
-There are different ways to leverage Kedro in your work, you can: 
+There are different ways to leverage Kedro in your work, you can:
 
  - Commit to using all of Kedro (framework, project, starters and library); which is preferable to take advantage of the full value proposition of Kedro
  - You can leverage parts of Kedro, like the DataCatalog (I/O), ConfigLoader, Pipelines and Runner, by using it as a Python libary; this best supports a workflow where you don't want to adopt the Kedro project template

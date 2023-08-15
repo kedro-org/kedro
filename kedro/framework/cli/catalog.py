@@ -228,26 +228,27 @@ def resolve_patterns(metadata: ProjectMetadata, env):
     }
 
     target_pipelines = pipelines.keys()
+    datasets = set()
 
     for pipe in target_pipelines:
         pl_obj = pipelines.get(pipe)
         if pl_obj:
-            pipeline_ds = pl_obj.data_sets()
+            datasets.update(pl_obj.data_sets())
 
-        for ds_name in pipeline_ds:
-            is_param = ds_name.startswith("params:") or ds_name == "parameters"
-            if ds_name in catalog_config or is_param:
-                continue
+    for ds_name in datasets:
+        is_param = ds_name.startswith("params:") or ds_name == "parameters"
+        if ds_name in catalog_config or is_param:
+            continue
 
-            matched_pattern = data_catalog._match_pattern(
-                data_catalog._dataset_patterns, ds_name
+        matched_pattern = data_catalog._match_pattern(
+            data_catalog._dataset_patterns, ds_name
+        )
+        if matched_pattern:
+            ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
+            ds_config["filepath"] = _trim_filepath(
+                str(context.project_path) + "/", ds_config["filepath"]
             )
-            if matched_pattern:
-                ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
-                ds_config["filepath"] = _trim_filepath(
-                    str(context.project_path) + "/", ds_config["filepath"]
-                )
-                catalog_config[ds_name] = ds_config
+            catalog_config[ds_name] = ds_config
 
     secho(yaml.dump(catalog_config))
 

@@ -376,7 +376,7 @@ kedro micropkg pull <link-to-micro-package-sdist-file>
 The above command will take the bundled `.tar.gz` file and do the following:
 
 * Place source code in `src/<package_name>/pipelines/<pipeline_name>`
-* Place parameters in `conf/base/parameters/<pipeline_name>.yml`
+* Place parameters in `conf/base/parameters_<pipeline_name>.yml`
 * Pull out tests and place in `src/tests/pipelines/<pipeline_name>`
 
 `kedro micropkg pull` works with PyPI, local and cloud storage:
@@ -512,7 +512,7 @@ kedro catalog create --pipeline=<pipeline_name>
 
 The command also accepts an optional `--env` argument that allows you to specify a configuration environment (defaults to `base`).
 
-The command creates the following file: `<conf_root>/<env>/catalog/<pipeline_name>.yml`
+The command creates the following file: `<conf_root>/<env>/catalog_<pipeline_name>.yml`
 
 #### Notebooks
 

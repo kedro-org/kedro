@@ -33,7 +33,7 @@ class TestMicropkgPackageCommand:
             f"{package_name}-{version}/{package_name}/README.md",
             f"{package_name}-{version}/{package_name}/nodes.py",
             f"{package_name}-{version}/{package_name}/pipeline.py",
-            f"{package_name}-{version}/{package_name}/config/parameters/{package_name}.yml",
+            f"{package_name}-{version}/{package_name}/config/parameters_{package_name}.yml",
             f"{package_name}-{version}/tests/__init__.py",
             f"{package_name}-{version}/tests/test_pipeline.py",
         }
@@ -354,9 +354,9 @@ class TestMicropkgPackageCommand:
         assert (
             "retail-0.1/retail/config/parameters/retail/params1.yml" in sdist_contents
         )
-        assert "retail-0.1/retail/config/parameters/retail.yml" in sdist_contents
+        assert "retail-0.1/retail/config/parameters_retail.yml" in sdist_contents
         assert (
-            "retail-0.1/retail/config/parameters/retail_banking.yml"
+            "retail-0.1/retail/config/parameters_retail_banking.yml"
             not in sdist_contents
         )
 
@@ -424,7 +424,7 @@ class TestMicropkgPackageCommand:
             "retail-0.1/retail/config/parameters/retail/deep/params1.yml"
             in sdist_contents
         )
-        assert "retail-0.1/retail/config/parameters/retail.yml" in sdist_contents
+        assert "retail-0.1/retail/config/parameters_retail.yml" in sdist_contents
         assert "retail-0.1/retail/config/parameters/deep/retail.yml" in sdist_contents
         assert (
             "retail-0.1/retail/config/parameters/a/b/c/d/retail/params3.yml"

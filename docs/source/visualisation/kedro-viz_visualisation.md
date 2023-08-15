@@ -42,7 +42,7 @@ You should see the following:
 If a visualisation panel opens up and a pipeline is not visible, refresh the view, and check that your tutorial project code is complete if you've not generated it from the starter template. If you still don't see the visualisation, the Kedro community can help:
 
 * use the [#questions channel](https://slack.kedro.org/) on our Slack channel to ask the community for help
-* search the [searchable archive of Slack discussions](https://www.linen.dev/s/kedro)
+* search the [searchable archive of Slack discussions](https://linen-slack.kedro.org/)
 
 To exit the visualisation, close the browser tab. To regain control of the terminal, enter `^+c` on Mac or `Ctrl+c` on Windows or Linux machines.
 

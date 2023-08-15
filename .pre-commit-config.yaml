@@ -9,6 +9,7 @@ repos:
       rev: v0.0.277
       hooks:
         - id: ruff
+          name: "ruff on kedro/, tests/ and docs/"
           args: ["--fix", "--exit-non-zero-on-fix"]
           exclude: "^kedro/templates/|^features/steps/test_starter/"
 

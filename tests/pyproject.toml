@@ -1,8 +1,0 @@
-[tool.ruff]
-# Extend the `pyproject.toml` file in the parent directory.
-extend = "../pyproject.toml"
-# But disable some Pylint rules.
-ignore = [
-    "PLR0913",  # pylint: too-many-arguments
-    "PLR2004",  # pylint: magic-value-comparison
-]

@@ -34,7 +34,7 @@ folders:
     fea: "04_feature"
 ```
 
-To point your `TemplatedConfigLoader` to the globals file, add it to the the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
+To point your `TemplatedConfigLoader` to the globals file, add it to the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
 
 ```python
 CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}

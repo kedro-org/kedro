@@ -30,6 +30,12 @@
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+* Renamed abstract dataset classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 0.19.0. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+
+| Type                       | Deprecated Alias           | Location        |
+| -------------------------- | -------------------------- | --------------- |
+| `AbstractDataset`          | `AbstractDataSet`          | `kedro.io.core` |
+| `AbstractVersionedDataset` | `AbstractVersionedDataSet` | `kedro.io.core` |
 
 # Release 0.18.12
 

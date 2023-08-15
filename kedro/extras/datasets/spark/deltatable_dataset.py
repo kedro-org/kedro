@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to access DeltaTables using
+"""``AbstractDataset`` implementation to access DeltaTables using
 ``delta-spark``
 """
 from pathlib import PurePosixPath
@@ -12,14 +12,14 @@ from kedro.extras.datasets.spark.spark_dataset import (
     _split_filepath,
     _strip_dbfs_prefix,
 )
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
+class DeltaTableDataSet(AbstractDataset[None, DeltaTable]):
     """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
     Example usage for the

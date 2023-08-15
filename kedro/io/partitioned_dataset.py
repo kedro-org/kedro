@@ -14,7 +14,7 @@ from cachetools import Cache, cachedmethod
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
-    AbstractDataSet,
+    AbstractDataset,
     DatasetError,
     parse_dataset_definition,
 )
@@ -36,7 +36,7 @@ PartitionedDataSet: type[PartitionedDataset]
 IncrementalDataSet: type[IncrementalDataset]
 
 
-class PartitionedDataset(AbstractDataSet):
+class PartitionedDataset(AbstractDataset):
     # noqa: too-many-instance-attributes,protected-access
     """``PartitionedDataset`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
@@ -138,7 +138,7 @@ class PartitionedDataset(AbstractDataSet):
     def __init__(  # noqa: too-many-arguments
         self,
         path: str,
-        dataset: str | type[AbstractDataSet] | dict[str, Any],
+        dataset: str | type[AbstractDataset] | dict[str, Any],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
         credentials: dict[str, Any] = None,
@@ -161,7 +161,7 @@ class PartitionedDataset(AbstractDataSet):
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataSet``
+                a) object of a class that inherits from ``AbstractDataset``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -384,7 +384,7 @@ class IncrementalDataset(PartitionedDataset):
     def __init__(  # noqa: too-many-arguments
         self,
         path: str,
-        dataset: str | type[AbstractDataSet] | dict[str, Any],
+        dataset: str | type[AbstractDataset] | dict[str, Any],
         checkpoint: str | dict[str, Any] | None = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
@@ -408,7 +408,7 @@ class IncrementalDataset(PartitionedDataset):
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
-                a) object of a class that inherits from ``AbstractDataSet``
+                a) object of a class that inherits from ``AbstractDataset``
                 b) a string representing a fully qualified class name to such class
                 c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
@@ -521,7 +521,7 @@ class IncrementalDataset(PartitionedDataset):
         )
 
     @property
-    def _checkpoint(self) -> AbstractDataSet:
+    def _checkpoint(self) -> AbstractDataset:
         type_, kwargs = parse_dataset_definition(self._checkpoint_config)
         return type_(**kwargs)  # type: ignore
 
@@ -555,15 +555,15 @@ class IncrementalDataset(PartitionedDataset):
             self._checkpoint.save(partition_ids[-1])  # checkpoint to last partition
 
 
-_DEPRECATED_ERROR_CLASSES = {
+_DEPRECATED_CLASSES = {
     "PartitionedDataSet": PartitionedDataset,
     "IncrementalDataSet": IncrementalDataset,
 }
 
 
 def __getattr__(name):
-    if name in _DEPRECATED_ERROR_CLASSES:
-        alias = _DEPRECATED_ERROR_CLASSES[name]
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",

@@ -11,8 +11,8 @@ kedro.io
    :toctree:
    :template: autosummary/class.rst
 
-   kedro.io.AbstractDataSet
-   kedro.io.AbstractVersionedDataSet
+   kedro.io.AbstractDataset
+   kedro.io.AbstractVersionedDataset
    kedro.io.CachedDataSet
    kedro.io.CachedDataset
    kedro.io.DataCatalog

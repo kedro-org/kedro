@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to load/save image data."""
+"""``AbstractDataset`` implementation to load/save image data."""
 
 __all__ = ["ImageDataSet"]
 

@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to load/save data from/to a svmlight/
+"""``AbstractDataset`` implementation to load/save data from/to a svmlight/
 libsvm sparse data file."""
 __all__ = ["SVMLightDataSet"]
 

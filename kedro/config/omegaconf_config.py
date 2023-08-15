@@ -103,6 +103,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         self.base_env = base_env
         self.default_run_env = default_run_env
+
         self.config_patterns = {
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
@@ -117,6 +118,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Register user provided custom resolvers
         if custom_resolvers:
             self._register_new_resolvers(custom_resolvers)
+        # Register globals resolver
         self._register_globals_resolver()
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
@@ -316,7 +318,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _get_globals_value(self, variable):
         """Return the globals values to the resolver"""
-        return self["globals"][variable]
+        keys = variable.split(".")
+        value = self["globals"].get(keys[0])
+        for k in keys[1:]:
+            if value is None:
+                return None
+            value = value.get(k)
+        return value
 
     @staticmethod
     def _register_new_resolvers(resolvers: dict[str, Callable]):

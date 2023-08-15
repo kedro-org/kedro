@@ -679,6 +679,7 @@ class TestOmegaConfigLoader:
         globals_params_folder = tmp_path / _BASE_ENV / "globals" / "my_globals.yml"
         param_config = {
             "my_param": "${globals:x}",
+            "my_nested_param": "${globals:nested.y}",
         }
         catalog_config = {
             "companies": {
@@ -688,6 +689,9 @@ class TestOmegaConfigLoader:
         }
         globals_config_1 = {
             "x": 34,
+            "nested": {
+                "y": 42,
+            },
         }
         globals_config_2 = {"dataset_type": "pandas.CSVDataSet"}
         _write_yaml(base_params, param_config)
@@ -701,6 +705,8 @@ class TestOmegaConfigLoader:
         assert conf["globals"] == globals_config
         # Globals are resolved correctly in parameters
         assert conf["parameters"]["my_param"] == globals_config_1["x"]
+        # Nested globals are accessible with dot notation
+        assert conf["parameters"]["my_nested_param"] == globals_config_1["nested"]["y"]
         # Globals are resolved correctly in catalog
         assert conf["catalog"]["companies"]["type"] == globals_config_2["dataset_type"]
 

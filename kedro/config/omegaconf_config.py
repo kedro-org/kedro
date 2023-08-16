@@ -7,7 +7,7 @@ import io
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Any, Callable, Iterable, Mapping
+from typing import Any, Callable, Iterable
 
 import fsspec
 from omegaconf import OmegaConf
@@ -291,32 +291,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
         else:
+            original_keys = OmegaConf.merge(*aggregate_config).keys()
             merged_conf = {
                 k: v
                 for k, v in OmegaConf.to_container(
-                    self._update_nested_dict(
-                        OmegaConf.merge(*aggregate_config), self.runtime_params
-                    ),
+                    OmegaConf.merge(*aggregate_config, self.runtime_params),
                     resolve=True,
                 ).items()
-                if not k.startswith("_")
+                if not k.startswith("_") and k in original_keys
             }
         return merged_conf
-
-    @classmethod
-    def _update_nested_dict(cls, dict1, dict2):
-        for key, value in dict1.items():
-            if (
-                isinstance(value, Mapping)
-                and key in dict2
-                and isinstance(dict2[key], Mapping)
-            ):
-                cls.update_nested_dict(
-                    value, dict2[key]
-                )  # Recurse into nested dictionaries
-            elif key in dict2:
-                dict1[key] = dict2[key]
-        return dict1
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

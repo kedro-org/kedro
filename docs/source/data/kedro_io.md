@@ -1,7 +1,7 @@
 # Kedro IO
 
 
-In this tutorial, we cover advanced uses of [the Kedro IO module](/kedro.io) to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
+In this tutorial, we cover advanced uses of [the Kedro IO module](/kedro.io) to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataset](/kedro.io.AbstractDataset) and [kedro.io.DataSetError](/kedro.io.DataSetError).
 
 ## Error handling
 
@@ -21,9 +21,9 @@ except DataSetError:
 ```
 
 
-## AbstractDataSet
+## AbstractDataset
 
-To understand what is going on behind the scenes, you should study the [AbstractDataSet interface](/kedro.io.AbstractDataSet). `AbstractDataSet` is the underlying interface that all datasets extend. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataSet` implementation.
+To understand what is going on behind the scenes, you should study the [AbstractDataset interface](/kedro.io.AbstractDataset). `AbstractDataset` is the underlying interface that all datasets extend. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
 
 If you have a dataset called `parts`, you can make direct calls to it like so:
 
@@ -33,13 +33,13 @@ parts_df = parts.load()
 
 We recommend using a `DataCatalog` instead (for more details, see [the `DataCatalog` documentation](../data/data_catalog.md)) as it has been designed to make all datasets available to project members.
 
-For contributors, if you would like to submit a new dataset, you must extend the `AbstractDataSet`. For a complete guide, please read [the section on custom datasets](../extend_kedro/custom_datasets.md).
+For contributors, if you would like to submit a new dataset, you must extend the `AbstractDataset`. For a complete guide, please read [the section on custom datasets](../extend_kedro/custom_datasets.md).
 
 
 ## Versioning
 
 In order to enable versioning, you need to update the `catalog.yml` config file and set the `versioned` attribute to `true` for the given dataset. If this is a custom dataset, the implementation must also:
-  1. extend `kedro.io.core.AbstractVersionedDataSet` AND
+  1. extend `kedro.io.core.AbstractVersionedDataset` AND
   2. add `version` namedtuple as an argument to its `__init__` method AND
   3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with `glob` and `exists` functions if it uses a non-local filesystem (see [kedro_datasets.pandas.CSVDataSet](/kedro_datasets.pandas.CSVDataSet) as an example) AND
   4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro_datasets.pandas.CSVDataSet`](/kedro_datasets.pandas.CSVDataSet) for an example implementation)
@@ -55,10 +55,10 @@ from pathlib import Path, PurePosixPath
 
 import pandas as pd
 
-from kedro.io import AbstractVersionedDataSet
+from kedro.io import AbstractVersionedDataset
 
 
-class MyOwnDataSet(AbstractVersionedDataSet):
+class MyOwnDataSet(AbstractVersionedDataset):
     def __init__(self, filepath, version, param1, param2=True):
         super().__init__(PurePosixPath(filepath), version)
         self._param1 = param1
@@ -314,7 +314,7 @@ Here is an exhaustive list of the arguments supported by `PartitionedDataSet`:
 | Argument          | Required                       | Supported types                                  | Description                                                                                                                                                                                                                                   |
 | ----------------- | ------------------------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `path`            | Yes                            | `str`                                            | Path to the folder containing partitioned data. If path starts with the protocol (e.g., `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
-| `dataset`         | Yes                            | `str`, `Type[AbstractDataSet]`, `Dict[str, Any]` | Underlying dataset definition, for more details see the section below                                                                                                                                                                         |
+| `dataset`         | Yes                            | `str`, `Type[AbstractDataset]`, `Dict[str, Any]` | Underlying dataset definition, for more details see the section below                                                                                                                                                                         |
 | `credentials`     | No                             | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystemcall`, for more details see the section below                                                                                                                              |
 | `load_args`       | No                             | `Dict[str, Any]`                                 | Keyword arguments to be passed into `find()` method of the corresponding filesystem implementation                                                                                                                                            |
 | `filepath_arg`    | No                             | `str` (defaults to `filepath`)                   | Argument name of the underlying dataset initializer that will contain a path to an individual partition                                                                                                                                       |
@@ -326,7 +326,7 @@ Dataset definition should be passed into the `dataset` argument of the `Partitio
 
 ##### Shorthand notation
 
-Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataSet` or a fully qualified class path like `kedro_datasets.pandas.CSVDataSet`) or as a class object that is a subclass of the [AbstractDataSet](/kedro.io.AbstractDataSet).
+Requires you only to specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataSet` or a fully qualified class path like `kedro_datasets.pandas.CSVDataSet`) or as a class object that is a subclass of the [AbstractDataset](/kedro.io.AbstractDataset).
 
 ##### Full notation
 

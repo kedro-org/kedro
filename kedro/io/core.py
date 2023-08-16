@@ -33,13 +33,15 @@ CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdr
 DataSetError: type[DatasetError]
 DataSetNotFoundError: type[DatasetNotFoundError]
 DataSetAlreadyExistsError: type[DatasetAlreadyExistsError]
+AbstractDataSet: type[AbstractDataset]
+AbstractVersionedDataSet: type[AbstractVersionedDataset]
 
 
 class DatasetError(Exception):
-    """``DatasetError`` raised by ``AbstractDataSet`` implementations
+    """``DatasetError`` raised by ``AbstractDataset`` implementations
     in case of failure of input/output methods.
 
-    ``AbstractDataSet`` implementations should provide instructive
+    ``AbstractDataset`` implementations should provide instructive
     information in case of failure.
     """
 
@@ -62,28 +64,8 @@ class DatasetAlreadyExistsError(DatasetError):
     pass
 
 
-_DEPRECATED_ERROR_CLASSES = {
-    "DataSetError": DatasetError,
-    "DataSetNotFoundError": DatasetNotFoundError,
-    "DataSetAlreadyExistsError": DatasetAlreadyExistsError,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_ERROR_CLASSES:
-        alias = _DEPRECATED_ERROR_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
-
-
 class VersionNotFoundError(DatasetError):
-    """``VersionNotFoundError`` raised by ``AbstractVersionedDataSet`` implementations
+    """``VersionNotFoundError`` raised by ``AbstractVersionedDataset`` implementations
     in case of no load versions available for the data set.
     """
 
@@ -94,8 +76,8 @@ _DI = TypeVar("_DI")
 _DO = TypeVar("_DO")
 
 
-class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
-    """``AbstractDataSet`` is the base class for all data set implementations.
+class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
+    """``AbstractDataset`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
     If a specific dataset implementation cannot be used in conjunction with
@@ -106,10 +88,10 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractDataSet
+        >>> from kedro.io import AbstractDataset
         >>>
         >>>
-        >>> class MyOwnDataset(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
+        >>> class MyOwnDataset(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         >>>     def __init__(self, filepath, param1, param2=True):
         >>>         self._filepath = PurePosixPath(filepath)
         >>>         self._param1 = param1
@@ -144,7 +126,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
         config: dict[str, Any],
         load_version: str = None,
         save_version: str = None,
-    ) -> AbstractDataSet:
+    ) -> AbstractDataset:
         """Create a data set instance using the configuration provided.
 
         Args:
@@ -158,7 +140,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
                 if versioning was not enabled.
 
         Returns:
-            An instance of an ``AbstractDataSet`` subclass.
+            An instance of an ``AbstractDataset`` subclass.
 
         Raises:
             DatasetError: When the function fails to create the data set
@@ -274,21 +256,21 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
     @abc.abstractmethod
     def _load(self) -> _DO:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_load' method"
         )
 
     @abc.abstractmethod
     def _save(self, data: _DI) -> None:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_save' method"
         )
 
     @abc.abstractmethod
     def _describe(self) -> dict[str, Any]:
         raise NotImplementedError(
-            f"'{self.__class__.__name__}' is a subclass of AbstractDataSet and "
+            f"'{self.__class__.__name__}' is a subclass of AbstractDataset and "
             f"it must implement the '_describe' method"
         )
 
@@ -336,7 +318,7 @@ class AbstractDataSet(abc.ABC, Generic[_DI, _DO]):
     def _release(self) -> None:
         pass
 
-    def _copy(self, **overwrite_params) -> AbstractDataSet:
+    def _copy(self, **overwrite_params) -> AbstractDataset:
         dataset_copy = copy.deepcopy(self)
         for name, value in overwrite_params.items():
             setattr(dataset_copy, name, value)
@@ -379,7 +361,7 @@ _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", "
 
 def parse_dataset_definition(
     config: dict[str, Any], load_version: str = None, save_version: str = None
-) -> tuple[type[AbstractDataSet], dict[str, Any]]:
+) -> tuple[type[AbstractDataset], dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
@@ -422,10 +404,10 @@ def parse_dataset_definition(
                 f"has not been installed."
             ) from exc
 
-    if not issubclass(class_obj, AbstractDataSet):
+    if not issubclass(class_obj, AbstractDataset):
         raise DatasetError(
             f"Dataset type '{class_obj.__module__}.{class_obj.__qualname__}' "
-            f"is invalid: all data set types must extend 'AbstractDataSet'."
+            f"is invalid: all data set types must extend 'AbstractDataset'."
         )
 
     if VERSION_KEY in config:
@@ -481,9 +463,9 @@ def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
-class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
+class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     """
-    ``AbstractVersionedDataSet`` is the base class for all versioned data set
+    ``AbstractVersionedDataset`` is the base class for all versioned data set
     implementations. All data sets that implement versioning should extend this
     abstract class and implement the methods marked as abstract.
 
@@ -492,10 +474,10 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
 
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
-        >>> from kedro.io import AbstractVersionedDataSet
+        >>> from kedro.io import AbstractVersionedDataset
         >>>
         >>>
-        >>> class MyOwnDataset(AbstractVersionedDataSet):
+        >>> class MyOwnDataset(AbstractVersionedDataset):
         >>>     def __init__(self, filepath, version, param1, param2=True):
         >>>         super().__init__(PurePosixPath(filepath), version)
         >>>         self._param1 = param1
@@ -534,7 +516,7 @@ class AbstractVersionedDataSet(AbstractDataSet[_DI, _DO], abc.ABC):
         exists_function: Callable[[str], bool] = None,
         glob_function: Callable[[str], list[str]] = None,
     ):
-        """Creates a new instance of ``AbstractVersionedDataSet``.
+        """Creates a new instance of ``AbstractVersionedDataset``.
 
         Args:
             filepath: Filepath in POSIX format to a file.
@@ -778,3 +760,25 @@ def validate_on_forbidden_chars(**kwargs):
             raise DatasetError(
                 f"Neither white-space nor semicolon are allowed in '{key}'."
             )
+
+
+_DEPRECATED_CLASSES = {
+    "DataSetError": DatasetError,
+    "DataSetNotFoundError": DatasetNotFoundError,
+    "DataSetAlreadyExistsError": DatasetAlreadyExistsError,
+    "AbstractDataSet": AbstractDataset,
+    "AbstractVersionedDataSet": AbstractVersionedDataset,
+}
+
+
+def __getattr__(name):
+    if name in _DEPRECATED_CLASSES:
+        alias = _DEPRECATED_CLASSES[name]
+        warnings.warn(
+            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
+            f"and the alias will be removed in Kedro 0.19.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return alias
+    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

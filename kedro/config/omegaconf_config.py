@@ -240,6 +240,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         """
         # noqa: too-many-locals
+
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
                 f"Given configuration path either does not exist "
@@ -281,8 +282,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
         }
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
+
         if not aggregate_config:
             return {}
+
         if key == "parameters":
             merged_conf = OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
@@ -291,7 +294,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             merged_conf = {
                 k: v
                 for k, v in OmegaConf.to_container(
-                    self.update_nested_dict(
+                    self._update_nested_dict(
                         OmegaConf.merge(*aggregate_config), self.runtime_params
                     ),
                     resolve=True,
@@ -301,7 +304,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         return merged_conf
 
     @classmethod
-    def update_nested_dict(cls, dict1, dict2):
+    def _update_nested_dict(cls, dict1, dict2):
         for key, value in dict1.items():
             if (
                 isinstance(value, Mapping)

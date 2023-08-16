@@ -240,8 +240,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         """
         # noqa: too-many-locals
-        print(conf_path)
-        print(key)
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
                 f"Given configuration path either does not exist "
@@ -283,7 +281,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
         }
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
-        print(self.runtime_params)
         if not aggregate_config:
             return {}
         if key == "parameters":

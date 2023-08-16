@@ -656,8 +656,8 @@ The matches are ranked according to the following criteria :
 2. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
 3. Alphabetical order
 
-### Example 6: Generalise all datasets with a catch-all dataset factory to overwrite the default `MemoryDataSet`
-You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataSet` creation.
+### Example 6: Generalise all datasets with a catch-all dataset factory to overwrite the default `MemoryDataset`
+You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataset` creation.
 ```yaml
 "{default_dataset}":
   type: pandas.CSVDataSet

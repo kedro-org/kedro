@@ -708,7 +708,94 @@ Running `kedro catalog rank` will result in the following output:
 - '{default_dataset}'
 ```
 
+#### Using `kedro catalog resolve`
 
+This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.
+
+To illustrate this, consider the following catalog file:
+
+```yaml
+companies:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/companies.csv
+
+reviews:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/reviews.csv
+
+shuttles:
+  type: pandas.ExcelDataSet
+  filepath: data/01_raw/shuttles.xlsx
+  load_args:
+    engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
+
+preprocessed_{name}:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_{name}.pq
+
+"{default}":
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/{default}.pq
+```
+
+and the following pipeline in `pipeline.py`:
+
+```python
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
+        [
+            node(
+                func=preprocess_companies,
+                inputs="companies",
+                outputs="preprocessed_companies",
+                name="preprocess_companies_node",
+            ),
+            node(
+                func=preprocess_shuttles,
+                inputs="shuttles",
+                outputs="preprocessed_shuttles",
+                name="preprocess_shuttles_node",
+            ),
+            node(
+                func=create_model_input_table,
+                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
+                outputs="model_input_table",
+                name="create_model_input_table_node",
+            ),
+        ]
+    )
+```
+
+The resolved catalog output by the command will be as follows:
+
+```yaml
+companies:
+  filepath: data/01_raw/companies.csv
+  type: pandas.CSVDataSet
+model_input_table:
+  filepath: data/03_primary/model_input_table.pq
+  type: pandas.ParquetDataSet
+preprocessed_companies:
+  filepath: data/02_intermediate/preprocessed_companies.pq
+  type: pandas.ParquetDataSet
+preprocessed_shuttles:
+  filepath: data/02_intermediate/preprocessed_shuttles.pq
+  type: pandas.ParquetDataSet
+reviews:
+  filepath: data/01_raw/reviews.csv
+  type: pandas.CSVDataSet
+shuttles:
+  filepath: data/01_raw/shuttles.xlsx
+  load_args:
+    engine: openpyxl
+  type: pandas.ExcelDataSet
+```
+
+By default this is output to the terminal. However, if you wish to output the resolved catalog to a specific file, you can use the redirection operator `>`:
+
+```bash
+kedro catalog resolve > output_file.yaml
+```
 
 ## Transcode datasets
 

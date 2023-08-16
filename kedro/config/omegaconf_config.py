@@ -7,7 +7,7 @@ import io
 import logging
 import mimetypes
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Mapping
 
 import fsspec
 from omegaconf import OmegaConf
@@ -240,7 +240,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         """
         # noqa: too-many-locals
-
+        print(conf_path)
+        print(key)
         if not self._fs.isdir(Path(conf_path).as_posix()):
             raise MissingConfigException(
                 f"Given configuration path either does not exist "
@@ -282,22 +283,40 @@ class OmegaConfigLoader(AbstractConfigLoader):
         }
         aggregate_config = config_per_file.values()
         self._check_duplicates(seen_file_to_keys)
-
+        print(self.runtime_params)
         if not aggregate_config:
             return {}
-
         if key == "parameters":
-            # Merge with runtime parameters only for "parameters"
-            return OmegaConf.to_container(
+            merged_conf = OmegaConf.to_container(
                 OmegaConf.merge(*aggregate_config, self.runtime_params), resolve=True
             )
-        return {
-            k: v
-            for k, v in OmegaConf.to_container(
-                OmegaConf.merge(*aggregate_config), resolve=True
-            ).items()
-            if not k.startswith("_")
-        }
+        else:
+            merged_conf = {
+                k: v
+                for k, v in OmegaConf.to_container(
+                    self.update_nested_dict(
+                        OmegaConf.merge(*aggregate_config), self.runtime_params
+                    ),
+                    resolve=True,
+                ).items()
+                if not k.startswith("_")
+            }
+        return merged_conf
+
+    @classmethod
+    def update_nested_dict(cls, dict1, dict2):
+        for key, value in dict1.items():
+            if (
+                isinstance(value, Mapping)
+                and key in dict2
+                and isinstance(dict2[key], Mapping)
+            ):
+                cls.update_nested_dict(
+                    value, dict2[key]
+                )  # Recurse into nested dictionaries
+            elif key in dict2:
+                dict1[key] = dict2[key]
+        return dict1
 
     def _is_valid_config_path(self, path):
         """Check if given path is a file path and file type is yaml or json."""

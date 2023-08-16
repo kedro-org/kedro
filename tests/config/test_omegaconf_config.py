@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 import yaml
 from omegaconf import OmegaConf, errors
+from omegaconf.errors import InterpolationResolutionError
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 
@@ -737,3 +738,23 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["param1"] == local_globals_config["y"]
         # Base global value is accessible to local params
         assert conf["parameters"]["param2"] == base_globals_config["x"]
+
+    def test_bad_globals(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        base_param_config = {
+            "param1": "${globals:x.y}",
+        }
+        base_globals_config = {
+            "x": {
+                "z": 23,
+            }
+        }
+        _write_yaml(base_params, base_param_config)
+        _write_yaml(base_globals, base_globals_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        # Base global value is accessible to local params
+        with pytest.raises(
+            InterpolationResolutionError, match=r"Globals key 'x.y' not found."
+        ):
+            conf["parameters"]["param1"]

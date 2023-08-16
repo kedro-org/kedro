@@ -11,6 +11,7 @@ from typing import Any, Callable, Iterable
 
 import fsspec
 from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationResolutionError
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
@@ -319,11 +320,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def _get_globals_value(self, variable):
         """Return the globals values to the resolver"""
         keys = variable.split(".")
-        value = self["globals"].get(keys[0])
-        for k in keys[1:]:
-            if value is None:
-                return None
+        value = self["globals"]
+        for k in keys:
             value = value.get(k)
+            if not value:
+                raise InterpolationResolutionError(
+                    f"Globals key '{variable}' not found."
+                )
         return value
 
     @staticmethod

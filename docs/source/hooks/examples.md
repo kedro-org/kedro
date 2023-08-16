@@ -264,7 +264,7 @@ This example adds observability to your pipeline using [statsd](https://statsd.r
 pip install statsd
 ```
 
-* Implement `before_node_run` and `after_node_run` Hooks to collect metrics (DataSet size and node execution time):
+* Implement `before_node_run` and `after_node_run` Hooks to collect metrics (Dataset size and node execution time):
 
 ```python
 # src/<package_name>/hooks.py

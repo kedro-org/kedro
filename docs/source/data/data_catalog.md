@@ -669,7 +669,7 @@ as `pandas.CSVDataSet`.
 
 ## Transcode datasets
 
-You might come across a situation where you would like to read the same file using two different dataset implementations. Use transcoding when you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations.
+You might come across a situation where you would like to read the same file using two different dataset implementations. Use transcoding when you want to load and save the same file, via its specified `filepath`, using different `Dataset` implementations.
 
 ### A typical example of transcoding
 

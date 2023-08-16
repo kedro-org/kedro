@@ -667,6 +667,49 @@ You can use dataset factories to define a catch-all pattern which will overwrite
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
 as `pandas.CSVDataSet`.
 
+### CLI commands for dataset factories
+
+To manage your dataset factories, two new commands have been added to the Kedro CLI: `kedro catalog rank` (0.18.12) and `kedro catalog resolve` (0.18.3).
+
+#### Using `kedro catalog rank`
+
+This command outputs a list of all dataset factories in the catalog, ranked by the priority that they are matched against. This priority is determined by considering the following criteria:
+
+1. The number of non-placeholder characters in the pattern
+2. The number of placeholers in the pattern
+3. Alphabetic ordering
+
+Consider a catalog file with the following patterns:
+
+```yaml
+"{layer}.{dataset_name}":
+  type: pandas.CSVDataSet
+  filepath: data/{layer}/{dataset_name}.csv
+
+preprocessed_{dataset_name}:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_{dataset_name}.pq
+
+processed_{dataset_name}:
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/processed_{dataset_name}.pq
+
+"{default_dataset}":
+  type: pickle.PickleDataSet
+  filepath: data/01_raw/{default_dataset}.pickle
+```
+
+Running `kedro catalog rank` will result in the following output:
+
+```
+- preprocessed_{dataset_name}
+- processed_{dataset_name}
+- '{layer}.{dataset_name}'
+- '{default_dataset}'
+```
+
+
+
 ## Transcode datasets
 
 You might come across a situation where you would like to read the same file using two different dataset implementations. Use transcoding when you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations.

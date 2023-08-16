@@ -669,14 +669,14 @@ as `pandas.CSVDataSet`.
 
 ### CLI commands for dataset factories
 
-To manage your dataset factories, two new commands have been added to the Kedro CLI: `kedro catalog rank` (0.18.12) and `kedro catalog resolve` (0.18.3).
+To manage your dataset factories, two new commands have been added to the Kedro CLI: `kedro catalog rank` (0.18.12) and `kedro catalog resolve` (0.18.13).
 
 #### Using `kedro catalog rank`
 
 This command outputs a list of all dataset factories in the catalog, ranked by the priority that they are matched against. This priority is determined by considering the following criteria:
 
 1. The number of non-placeholder characters in the pattern
-2. The number of placeholers in the pattern
+2. The number of placeholders in the pattern
 3. Alphabetic ordering
 
 Consider a catalog file with the following patterns:

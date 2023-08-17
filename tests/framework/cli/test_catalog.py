@@ -548,18 +548,29 @@ def test_no_param_datasets_in_resolve(
 
     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     mocked_context = fake_load_context.return_value
-    catalog_data_sets = {
+
+    catalog_config = {
+        "iris_data": {
+            "type": "pandas.CSVDataSet",
+            "filepath": "test.csv",
+        },
+        "intermediate": {"type": "MemoryDataSet"},
+    }
+
+    catalog_datasets = {
         "iris_data": CSVDataSet("test.csv"),
         "intermediate": MemoryDataset(),
         "parameters": MemoryDataset(),
         "params:data_ratio": MemoryDataset(),
     }
 
-    mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+    mocked_context.config_loader = {"catalog": catalog_config}
+    mocked_context.catalog = DataCatalog(data_sets=catalog_datasets)
+
     mocker.patch.object(
         mock_pipelines[PIPELINE_NAME],
         "data_sets",
-        return_value=catalog_data_sets.keys(),
+        return_value=catalog_datasets.keys(),
     )
 
     result = CliRunner().invoke(
@@ -576,3 +587,5 @@ def test_no_param_datasets_in_resolve(
 
     assert "parameters" not in output.keys()
     assert "params:data_ratio" not in output.keys()
+    assert "iris_data" in output.keys()
+    assert "intermediate" in output.keys()

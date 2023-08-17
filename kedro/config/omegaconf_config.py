@@ -110,7 +110,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
             "logging": ["logging*", "logging*/**", "**/logging*"],
-            "globals": ["globals*", "globals*/**", "**/globals*"],
+            "globals": ["globals.yml"],
         }
         self.config_patterns.update(config_patterns or {})
 

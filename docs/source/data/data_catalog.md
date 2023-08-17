@@ -673,7 +673,7 @@ To manage your dataset factories, two new commands have been added to the Kedro 
 
 #### Using `kedro catalog rank`
 
-This command outputs a list of all dataset factories in the catalog, ranked by the priority that they are matched against. This priority is determined by considering the following criteria:
+This command outputs a list of all dataset factories in the catalog, ranked in the order by which pipeline datasets are matched against them. This ordering is determined by considering the following criteria:
 
 1. The number of non-placeholder characters in the pattern
 2. The number of placeholders in the pattern

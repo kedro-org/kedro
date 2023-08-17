@@ -195,14 +195,21 @@ assert data1.equals(reloaded)
 io.save("test_data_set", data2)
 ```
 
-```{warning}
-We do not recommend passing exact load and/or save versions, since it might lead to inconsistencies between operations. For example, if versions for load and save operations do not match, a save operation would result in a `UserWarning` indicating that save and load versions do not match. Load after save might also return an error if the corresponding load version is not found:
+We do not recommend passing exact load and/or save versions, since it might lead to inconsistencies between operations. For example, if versions for load and save operations do not match, a save operation would result in a `UserWarning`.
+
+Imagine a simple pipeline with two nodes, where B takes the output from A. If you specify the load-version of the data for B to be `my_data_2023_08_16.csv`, the data that A produces (`my_data_20230818.csv`) is not used.
+
+```text
+Node_A -> my_data_20230818.csv
+my_data_2023_08_16.csv -> Node B
 ```
+
+In code:
 
 ```python
 version = Version(
-    load="exact_load_version",  # load exact version
-    save="exact_save_version",  # save to exact version
+    load="my_data_2023_08_16.csv",  # load exact version
+    save="my_data_20230818.csv",  # save to exact version
 )
 
 test_data_set = CSVDataSet(

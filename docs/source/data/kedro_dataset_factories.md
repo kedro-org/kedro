@@ -213,9 +213,9 @@ The matches are ranked according to the following criteria:
 2. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
 3. Alphabetical order
 
-## How to generalise all datasets with a catch-all dataset factory
+## How to override the default dataset creation with dataset factories
 
-You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataSet` creation.
+You can use dataset factories to define a catch-all pattern which will overwrite the default [`MemoryDataSet`](/kedro.io.MemoryDataset) creation.
 
 ```yaml
 "{default_dataset}":

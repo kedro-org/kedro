@@ -674,13 +674,27 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["model_options"]["param3"] == "my_env_variable"
 
     def test_globals(self, tmp_path):
+        globals_params = tmp_path / _BASE_ENV / "globals.yml"
+        globals_params_folder = tmp_path / _BASE_ENV / "globals" / "my_globals.yml"
+        globals_config_1 = {
+            "x": 34,
+        }
+        globals_config_2 = {"dataset_type": "pandas.CSVDataSet"}
+        _write_yaml(globals_params, globals_config_1)
+        _write_yaml(globals_params_folder, globals_config_2)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        # OmegaConfigLoader has globals resolver
+        assert OmegaConf.has_resolver("globals")
+        globals_config = {**globals_config_1, **globals_config_2}
+        # Globals is readable in a dict way
+        assert conf["globals"] == globals_config
+
+    def test_globals_resolution(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
-        globals_params_folder = tmp_path / _BASE_ENV / "globals" / "my_globals.yml"
         param_config = {
             "my_param": "${globals:x}",
-            "my_nested_param": "${globals:nested.y}",
         }
         catalog_config = {
             "companies": {
@@ -688,28 +702,36 @@ class TestOmegaConfigLoader:
                 "filepath": "data/01_raw/companies.csv",
             },
         }
-        globals_config_1 = {
+        globals_config = {"x": 34, "dataset_type": "pandas.CSVDataSet"}
+        _write_yaml(base_params, param_config)
+        _write_yaml(globals_params, globals_config)
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        assert OmegaConf.has_resolver("globals")
+        # Globals are resolved correctly in parameter
+        assert conf["parameters"]["my_param"] == globals_config["x"]
+        # Globals are resolved correctly in catalog
+        assert conf["catalog"]["companies"]["type"] == globals_config["dataset_type"]
+
+    def test_globals_nested(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        globals_params = tmp_path / _BASE_ENV / "globals.yml"
+        param_config = {
+            "my_param": "${globals:x}",
+            "my_nested_param": "${globals:nested.y}",
+        }
+        globals_config = {
             "x": 34,
             "nested": {
                 "y": 42,
             },
         }
-        globals_config_2 = {"dataset_type": "pandas.CSVDataSet"}
         _write_yaml(base_params, param_config)
-        _write_yaml(globals_params, globals_config_1)
-        _write_yaml(globals_params_folder, globals_config_2)
-        _write_yaml(base_catalog, catalog_config)
+        _write_yaml(globals_params, globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        assert OmegaConf.has_resolver("globals")
-        globals_config = {**globals_config_1, **globals_config_2}
-        # Globals is readable in a dict way
-        assert conf["globals"] == globals_config
-        # Globals are resolved correctly in parameters
-        assert conf["parameters"]["my_param"] == globals_config_1["x"]
+        assert conf["parameters"]["my_param"] == globals_config["x"]
         # Nested globals are accessible with dot notation
-        assert conf["parameters"]["my_nested_param"] == globals_config_1["nested"]["y"]
-        # Globals are resolved correctly in catalog
-        assert conf["catalog"]["companies"]["type"] == globals_config_2["dataset_type"]
+        assert conf["parameters"]["my_nested_param"] == globals_config["nested"]["y"]
 
     def test_globals_across_env(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"

@@ -516,8 +516,12 @@ def test_no_overwrite(
     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     mocked_context = fake_load_context.return_value
 
-    mocked_context.config_loader = {"catalog": fake_catalog_config_with_resolvable_dataset}
-    mocked_context.catalog = DataCatalog.from_config(fake_catalog_config_with_resolvable_dataset)
+    mocked_context.config_loader = {
+        "catalog": fake_catalog_config_with_resolvable_dataset
+    }
+    mocked_context.catalog = DataCatalog.from_config(
+        fake_catalog_config_with_resolvable_dataset
+    )
 
     mocker.patch.object(
         mock_pipelines[PIPELINE_NAME],

@@ -4,7 +4,7 @@
 
 ## AbstractDataSet
 
-For contributors, if you would like to submit a new dataset, you must extend the [`AbstractDataSet` interface](/kedro.io.AbstractDataSet), which is the underlying interface that all datasets extend. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataSet` implementation.
+For contributors, if you would like to submit a new dataset, you must extend the [`AbstractDataSet` interface](/kedro.io.AbstractDataSet) or [`AbstractVersionedDataSet` interface](/kedro.io.AbstractVersionedDataSet) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataSet` implementation.
 
 
 ## Scenario

@@ -3,7 +3,7 @@ You can load multiple datasets with similar configuration using dataset factorie
 
 The syntax allows you to generalise the configuration and reduce the number of similar catalog entries by matching datasets used in your project's pipelines to dataset factory patterns.
 
-## Generalise datasets with similar names and types
+## How to generalise datasets with similar names and types
 
 Consider the following catalog entries:
 
@@ -30,7 +30,7 @@ When `factory_data` or `process_data` is used in your pipeline, it is matched to
 quotes to avoid YAML parsing errors.
 
 
-## Generalise datasets of the same type
+## How to generalise datasets of the same type
 
 You can also combine all the datasets with the same type and configuration details. For example, consider the following
 catalog with three datasets named `boats`, `cars` and `planes` of the type `pandas.CSVDataSet`:
@@ -99,7 +99,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
-## Generalise datasets using namespaces
+## How to generalise datasets using namespaces
 
 You can also generalise the catalog entries for datasets belonging to namespaced modular pipelines. Consider the
 following pipeline which takes in a `model_input_table` and outputs two regressors belonging to the
@@ -151,7 +151,7 @@ and `candidate_modelling_pipeline.regressor` as below:
   filepath: data/06_models/regressor_{namespace}.pkl
   versioned: true
 ```
-## Generalise datasets of the same type in different layers
+## How to generalise datasets of the same type in different layers
 
 You can use multiple placeholders in the same pattern. For example, consider the following catalog where the dataset
 entries share `type`, `file_format` and `save_args`:
@@ -191,7 +191,7 @@ This could be generalised to the following pattern:
 ```
 All the placeholders used in the catalog entry body must exist in the factory pattern name.
 
-### Generalise datasets using multiple dataset factories
+## How to generalise datasets using multiple dataset factories
 You can have multiple dataset factories in your catalog. For example:
 
 ```yaml
@@ -213,7 +213,7 @@ The matches are ranked according to the following criteria:
 2. Number of placeholders. For example, the dataset `preprocessing.shuttles+csv` would match `{namespace}.{dataset}+csv` over `{dataset}+csv`.
 3. Alphabetical order
 
-### Generalise all datasets with a catch-all dataset factory
+## How to generalise all datasets with a catch-all dataset factory
 
 You can use dataset factories to define a catch-all pattern which will overwrite the default `MemoryDataSet` creation.
 
@@ -230,7 +230,7 @@ as `pandas.CSVDataSet`.
 
 To manage your dataset factories, two new commands have been added to the Kedro CLI: `kedro catalog rank` (0.18.12) and `kedro catalog resolve` (0.18.13).
 
-#### How to use `kedro catalog rank`
+### How to use `kedro catalog rank`
 
 This command outputs a list of all dataset factories in the catalog, ranked in the order by which pipeline datasets are matched against them. The ordering is determined by the following criteria:
 
@@ -283,7 +283,7 @@ Running `kedro catalog rank` will result in the following output:
 
 As we can see, the entries are ranked firstly by how many non-placeholders are in the pattern, in descending order. Where two entries have the same number of non-placeholder characters, `{namespace}.{dataset_name}_pq` and `{dataset_name}_csv` with four each, they are then ranked by the number of placeholders, also in decreasing order. `{default_dataset}` is the least specific pattern possible, and will always be matched against last.
 
-#### How to use `kedro catalog resolve`
+### How to use `kedro catalog resolve`
 
 This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.
 

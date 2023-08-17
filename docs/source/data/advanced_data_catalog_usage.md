@@ -1,52 +1,12 @@
-# Advanced Data Catalog usage
-
-## How to read the same file using two different datasets
-
-Use transcoding to load and save a file via its specified `filepath` using more than one `DataSet` implementation.
-
-### A typical example of transcoding
-
-Parquet files can not only be loaded via the `ParquetDataSet` using `pandas`, but also directly by `SparkDataSet`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
-
-To enable transcoding, define two `DataCatalog` entries for the same dataset in a common format (Parquet, JSON, CSV, etc.) in your `conf/base/catalog.yml`:
-
-```yaml
-my_dataframe@spark:
-  type: spark.SparkDataSet
-  filepath: data/02_intermediate/data.parquet
-  file_format: parquet
-
-my_dataframe@pandas:
-  type: pandas.ParquetDataSet
-  filepath: data/02_intermediate/data.parquet
-```
-
-These entries are used in the pipeline like this:
-
-```python
-pipeline(
-    [
-        node(func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
-        node(func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),
-    ]
-)
-```
-
-### How does transcoding work?
-
-In this example, Kedro understands that `my_dataframe` is the same dataset in its `spark.SparkDataSet` and `pandas.ParquetDataSet` formats and helps resolve the node execution order.
-
-In the pipeline, Kedro uses the `spark.SparkDataSet` implementation for saving and `pandas.ParquetDataSet`
-for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the second node receives a `pandas.Dataframe`.
-
-
-## How to access the Data Catalog in code
+# Advanced: Access the Data Catalog in code
 
 You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through [`kedro.io.DataCatalog`](/kedro.io.DataCatalog) using an API that allows you to configure data sources in code and use the IO module within notebooks.
 
-### How to configure a Data Catalog using the `DataCatalog` API
+## How to configure the Data Catalog
 
-In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using several pre-built data loaders documented in the [API reference documentation](/kedro_datasets).
+To use the `DataCatalog` API, construct a `DataCatalog` object programmatically in a file like `catalog.py`.
+
+In the following, we are using several pre-built data loaders documented in the [API reference documentation](/kedro_datasets).
 
 ```python
 from kedro.io import DataCatalog
@@ -75,7 +35,7 @@ io = DataCatalog(
 
 When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` is to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
-### How to view the available data sources programmatically
+## How to view the available data sources
 
 To review the `DataCatalog`:
 
@@ -83,7 +43,7 @@ To review the `DataCatalog`:
 io.list()
 ```
 
-### How to load datasets programmatically
+## How to load datasets programmatically
 
 To access each dataset by its name:
 
@@ -99,15 +59,15 @@ The following steps happened behind the scenes when `load` was called:
 - The `load` method of this dataset was called
 - This `load` method delegated the loading to the underlying pandas `read_csv` function
 
-### How to save data programmatically
-
-To save data using an API similar to that used to load data:
+## How to save data programmatically
 
 ```{warning}
-This use is not recommended unless you are prototyping in notebooks.
+This pattern is not recommended unless you are using platform notebook environments (Sagemaker, Databricks etc) or writing unit/integration tests for your Kedro pipeline. Use the YAML approach in preference.
 ```
 
-#### How to save data to memory
+### How to save data to memory
+
+To save data using an API similar to that used to load data:
 
 ```python
 from kedro.io import MemoryDataSet
@@ -118,7 +78,7 @@ io.save("cars_cache", "Memory can store anything.")
 io.load("cars_cache")
 ```
 
-#### How to save data to a SQL database for querying
+### How to save data to a SQL database for querying
 
 To put the data in a SQLite database:
 
@@ -137,7 +97,7 @@ io.save("cars_table", cars)
 ranked = io.load("scooters_query")[["brand", "mpg"]]
 ```
 
-#### How to save data in Parquet
+### How to save data in Parquet
 
 To save the processed data in Parquet format:
 
@@ -149,7 +109,7 @@ io.save("ranked", ranked)
 Saving `None` to a dataset is not allowed!
 ```
 
-### How to access a dataset programmatically with credentials
+## How to access a dataset with credentials
 Before instantiating the `DataCatalog`, Kedro will first attempt to read [the credentials from the project configuration](../configuration/credentials.md). The resulting dictionary is then passed into `DataCatalog.from_config()` as the `credentials` argument.
 
 Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
@@ -177,7 +137,7 @@ CSVDataSet(
 )
 ```
 
-### How to version a dataset using the Code API
+## How to version a dataset using the Code API
 
 In an earlier section of the documentation we described how [Kedro enables dataset and ML model versioning](./data_catalog.md/#dataset-versioning).
 

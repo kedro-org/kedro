@@ -1,5 +1,9 @@
 # Introduction to the Data Catalog
 
+In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
+
+This page introduces the basic sections of `catalog.yml`, which is the file used to register data sources for a Kedro project.
+
 ## The basics of `catalog.yml`
 A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorial/set_up_data.md).
 
@@ -140,7 +144,7 @@ kedro run --load-version=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
-A dataset offers versioning support if it extends the [`AbstractVersionedDataSet`](/kedro.io.AbstractVersionedDataSet) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively. In Kedro version 0.18.2, the following datasets support versioning:
+A dataset offers versioning support if it extends the [`AbstractVersionedDataSet`](/kedro.io.AbstractVersionedDataSet) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively. In versions of Kedro from 0.18.2 onwards, the following datasets support versioning:
 
 - `kedro_datasets.api.APIDataSet`
 - `kedro_datasets.holoviews.HoloviewsWriter`
@@ -161,7 +165,7 @@ A dataset offers versioning support if it extends the [`AbstractVersionedDataSet
 - `kedro_datasets.yaml.YAMLDataSet`
 
 ```{note}
-Although HTTP(S) is a supported file system in the dataset implementations, it does not support versioning.
+Note that HTTP(S) is a supported file system in the dataset implementations, but if you it, you can't also use versioning.
 ```
 
 ## Use the Data Catalog within Kedro configuration

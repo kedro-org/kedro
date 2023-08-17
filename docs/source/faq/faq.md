@@ -39,9 +39,6 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 * [How do I use resolvers in the `OmegaConfigLoader`](../configuration/advanced_configuration.md#how-to-use-resolvers-in-the-omegaconfigloader)?
 * [How do I load credentials through environment variables](../configuration/advanced_configuration.md#how-to-load-credentials-through-environment-variables)?
 
-## Datasets and the Data Catalog
-
-* [Can I read the same data file using two different dataset implementations](../data/advanced_data_catalog_usage.md#how-to-read-the-same-file-using-two-different-datasets)?
 
 ## Nodes and pipelines
 

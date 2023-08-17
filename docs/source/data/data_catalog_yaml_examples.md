@@ -2,29 +2,9 @@
 
 This page contains a set of examples to help you structure your YAML configuration file in `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
-<!-- To do: fix anchors -->
-
-* [Load data from a local binary file using utf-8 encoding](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Save data to a CSV file without row names (index) using utf-8 encoding](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load/save a CSV file from/to a local file system](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load/save a CSV on a local file system, using specified load/save arguments](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load/save a compressed CSV on a local file system](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load a CSV file from a specific S3 bucket, using credentials and load arguments](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load/save a pickle file from/to a local file system](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load an Excel file from Google Cloud Storage](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load a multi-sheet Excel file from a local file system](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Save an image created with Matplotlib on Google Cloud Storage](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load/save an HDF file on local file system storage, using specified load/save arguments](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load/save a parquet file on local file system storage, using specified load/save arguments](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load/save a Spark table on S3, using specified load/save arguments](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load/save a SQL table using credentials, a database connection, and specified load/save arguments](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load a SQL table with credentials and a database connection, and apply a SQL query to the table](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load data from an API endpoint](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load data from Minio (S3 API Compatible Storage)](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load a model saved as a pickle from Azure Blob Storage](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load a CSV file stored in a remote location through SSH](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Load multiple datasets with similar configuration using YAML anchors](#load-data-from-a-local-binary-file-using-utf-8-encoding)
-* [Create a Data Catalog YAML configuration file via the CLI](#load-data-from-a-local-binary-file-using-utf-8-encoding)
+```{contents} Table of Contents
+:depth: 3
+```
 
 ## Load data from a local binary file using `utf-8` encoding
 
@@ -379,6 +359,39 @@ airplanes:
 ```
 
 In this example, the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally, that would replace the whole dictionary. In order to extend `load_args`, the defaults for that block are then re-inserted.
+
+## Read the same file using two different datasets
+
+You might come across a situation where you would like to read the same file using two different dataset implementations (known as transcoding). For example, Parquet files can not only be loaded via the `ParquetDataSet` using `pandas`, but also directly by `SparkDataSet`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
+
+Define two `DataCatalog` entries for the same dataset in a common format (Parquet, JSON, CSV, etc.) in your `conf/base/catalog.yml`:
+
+```yaml
+my_dataframe@spark:
+  type: spark.SparkDataSet
+  filepath: data/02_intermediate/data.parquet
+  file_format: parquet
+
+my_dataframe@pandas:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/data.parquet
+```
+
+These entries are used in the pipeline like this:
+
+```python
+pipeline(
+    [
+        node(func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
+        node(func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),
+    ]
+)
+```
+
+In this example, Kedro understands that `my_dataframe` is the same dataset in its `spark.SparkDataSet` and `pandas.ParquetDataSet` formats and resolves the node execution order.
+
+In the pipeline, Kedro uses the `spark.SparkDataSet` implementation for saving and `pandas.ParquetDataSet`
+for loading, so the first node outputs a `pyspark.sql.DataFrame`, while the second node receives a `pandas.Dataframe`.
 
 ## Create a Data Catalog YAML configuration file via the CLI
 

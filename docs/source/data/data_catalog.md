@@ -144,25 +144,9 @@ kedro run --load-version=cars:YYYY-MM-DDThh.mm.ss.sssZ
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
-A dataset offers versioning support if it extends the [`AbstractVersionedDataSet`](/kedro.io.AbstractVersionedDataSet) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively. In versions of Kedro from 0.18.2 onwards, the following datasets support versioning:
+A dataset offers versioning support if it extends the [`AbstractVersionedDataSet`](/kedro.io.AbstractVersionedDataSet) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
 
-- `kedro_datasets.api.APIDataSet`
-- `kedro_datasets.holoviews.HoloviewsWriter`
-- `kedro_datasets.json.JSONDataSet`
-- `kedro_datasets.matplotlib.MatplotlibWriter`
-- `kedro_datasets.networkx.NetworkXDataSet`
-- `kedro_datasets.pandas.CSVDataSet`
-- `kedro_datasets.pandas.ExcelDataSet`
-- `kedro_datasets.pandas.FeatherDataSet`
-- `kedro_datasets.pandas.HDFDataSet`
-- `kedro_datasets.pandas.JSONDataSet`
-- `kedro_datasets.pandas.ParquetDataSet`
-- `kedro_datasets.pickle.PickleDataSet`
-- `kedro_datasets.pillow.ImageDataSet`
-- `kedro_datasets.tensorflow.TensorFlowModelDataSet`
-- `kedro_datasets.text.TextDataSet`
-- `kedro_datasets.spark.SparkDataSet`
-- `kedro_datasets.yaml.YAMLDataSet`
+To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataSet`. For instance, if you encounter a class like `CSVDataSet(AbstractVersionedDataSet[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 
 ```{note}
 Note that HTTP(S) is a supported file system in the dataset implementations, but if you it, you can't also use versioning.

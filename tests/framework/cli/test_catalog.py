@@ -68,7 +68,7 @@ def fake_catalog_with_overlapping_factories():
 
 
 @pytest.fixture
-def fake_catalog_config_with_overwrite():
+def fake_catalog_config_with_resolvable_dataset():
     config = {
         "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataSet",
@@ -510,14 +510,14 @@ def test_no_overwrite(
     fake_load_context,
     mocker,
     mock_pipelines,
-    fake_catalog_config_with_overwrite,
+    fake_catalog_config_with_resolvable_dataset,
 ):
     """Test that explicit catalog entries are not overwritten by factory config."""
     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     mocked_context = fake_load_context.return_value
 
-    mocked_context.config_loader = {"catalog": fake_catalog_config_with_overwrite}
-    mocked_context.catalog = DataCatalog.from_config(fake_catalog_config_with_overwrite)
+    mocked_context.config_loader = {"catalog": fake_catalog_config_with_resolvable_dataset}
+    mocked_context.catalog = DataCatalog.from_config(fake_catalog_config_with_resolvable_dataset)
 
     mocker.patch.object(
         mock_pipelines[PIPELINE_NAME],
@@ -535,7 +535,7 @@ def test_no_overwrite(
 
     assert (
         yaml_dump_mock.call_args[0][0]["explicit_ds"]
-        == fake_catalog_config_with_overwrite["explicit_ds"]
+        == fake_catalog_config_with_resolvable_dataset["explicit_ds"]
     )
 
 

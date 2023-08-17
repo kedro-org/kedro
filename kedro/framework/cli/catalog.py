@@ -221,7 +221,7 @@ def resolve_patterns(metadata: ProjectMetadata, env):
     data_catalog = context.catalog
     catalog_config = context.config_loader["catalog"]
 
-    catalog_config = {
+    explicit_datasets = {
         ds_name: ds_config
         for ds_name, ds_config in catalog_config.items()
         if not data_catalog._is_pattern(ds_name)
@@ -237,7 +237,7 @@ def resolve_patterns(metadata: ProjectMetadata, env):
 
     for ds_name in datasets:
         is_param = ds_name.startswith("params:") or ds_name == "parameters"
-        if ds_name in catalog_config or is_param:
+        if ds_name in explicit_datasets or is_param:
             continue
 
         matched_pattern = data_catalog._match_pattern(
@@ -248,9 +248,9 @@ def resolve_patterns(metadata: ProjectMetadata, env):
             ds_config["filepath"] = _trim_filepath(
                 str(context.project_path) + "/", ds_config["filepath"]
             )
-            catalog_config[ds_name] = ds_config
+            explicit_datasets[ds_name] = ds_config
 
-    secho(yaml.dump(catalog_config))
+    secho(yaml.dump(explicit_datasets))
 
 
 def _trim_filepath(project_path: str, file_path: str):

@@ -230,9 +230,9 @@ as `pandas.CSVDataSet`.
 
 To manage your dataset factories, two new commands have been added to the Kedro CLI: `kedro catalog rank` (0.18.12) and `kedro catalog resolve` (0.18.13).
 
-#### Using `kedro catalog rank`
+#### How to use `kedro catalog rank`
 
-This command outputs a list of all dataset factories in the catalog, ranked in the order by which pipeline datasets are matched against them. This ordering is determined by considering the following criteria:
+This command outputs a list of all dataset factories in the catalog, ranked in the order by which pipeline datasets are matched against them. The ordering is determined by the following criteria:
 
 1. The number of non-placeholder characters in the pattern
 2. The number of placeholders in the pattern
@@ -279,7 +279,7 @@ Running `kedro catalog rank` will result in the following output:
 
 As we can see, the entries are ranked firstly by how many non-placeholders are in the pattern, in descending order. Where two entries have the same number of non-placeholder characters, `{namespace}.{dataset_name}_pq` and `{dataset_name}_csv` with four each, they are then ranked by the number of placeholders, also in decreasing order. `{default_dataset}` is the least specific pattern possible, and will always be matched against last.
 
-#### Using `kedro catalog resolve`
+#### How to use `kedro catalog resolve`
 
 This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.
 

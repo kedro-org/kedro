@@ -264,8 +264,8 @@ Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom spark or mlflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.
 
 ### How to use global variables with the `OmegaConfigLoader`
-From Kedro `0.18.13`, you can also use variable interpolation in your configurations using "globals" with `OmegaConfigLoader`.
-The benefit of using globals over regular variable interpolation is that the global variables are shared across different configurations.
+From Kedro `0.18.13`, you can use variable interpolation in your configurations using "globals" with `OmegaConfigLoader`.
+The benefit of using globals over regular variable interpolation is that the global variables are shared across different configuration types, such as catalog and parameters.
 By default, these global variables are assumed to be in files that follow the naming convention specified by `globals` key in `OmegaConfigLoader`'s
 `config_patterns`: `["globals*", "globals*/**", "**/globals*"]`. To change these patterns, you can either [customise the config patterns](#how-to-change-which-configuration-files-are-loaded)
 or [bypass the configuration loading](#how-to-bypass-the-configuration-loading-rules).

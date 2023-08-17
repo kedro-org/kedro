@@ -718,6 +718,8 @@ Running `kedro catalog rank` will result in the following output:
 - '{default_dataset}'
 ```
 
+As we can see, the entries are ranked firstly by how many non-placeholders are in the pattern, in descending order. Where two entries have the same number of non-placeholder characters, `{namespace}.{dataset_name}_pq` and `{dataset_name}_csv` with four each, they are then ranked by the number of placeholders, also in decreasing order. `{default_dataset}` is the least specific pattern possible, and will always be matched against last.
+
 #### Using `kedro catalog resolve`
 
 This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.

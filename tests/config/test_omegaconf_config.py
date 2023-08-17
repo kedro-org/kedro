@@ -766,13 +766,30 @@ class TestOmegaConfigLoader:
         base_globals_config = {
             "x": {
                 "z": 23,
-            }
+            },
         }
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        # Base global value is accessible to local params
         with pytest.raises(
             InterpolationResolutionError, match=r"Globals key 'x.y' not found."
         ):
             conf["parameters"]["param1"]
+
+    def test_bad_globals_underscore(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        base_param_config = {
+            "param2": "${globals:_ignore}",
+        }
+        base_globals_config = {
+            "_ignore": 45,
+        }
+        _write_yaml(base_params, base_param_config)
+        _write_yaml(base_globals, base_globals_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        with pytest.raises(
+            InterpolationResolutionError,
+            match=r"Globals key '_ignore' not found. Keys starting with '_' are not supported for globals.",
+        ):
+            conf["parameters"]["param2"]

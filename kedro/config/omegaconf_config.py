@@ -324,9 +324,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
         for k in keys:
             value = value.get(k)
             if not value:
-                raise InterpolationResolutionError(
-                    f"Globals key '{variable}' not found."
-                )
+                msg = f"Globals key '{variable}' not found. "
+                if variable.startswith("_"):
+                    msg += "Keys starting with '_' are not supported for globals."
+                raise InterpolationResolutionError(msg)
         return value
 
     @staticmethod

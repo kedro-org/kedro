@@ -512,7 +512,7 @@ def test_no_overwrite(
     mock_pipelines,
     fake_catalog_config_with_overwrite,
 ):
-    """Test that explicit catalog entries are not overitten by factory config."""
+    """Test that explicit catalog entries are not overwritten by factory config."""
     yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
     mocked_context = fake_load_context.return_value
 

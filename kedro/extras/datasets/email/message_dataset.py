@@ -13,7 +13,7 @@ from typing import Any, Dict
 import fsspec
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -26,7 +26,7 @@ from kedro.io.core import (
 
 
 class EmailMessageDataSet(
-    AbstractVersionedDataSet[Message, Message]
+    AbstractVersionedDataset[Message, Message]
 ):  # pylint: disable=too-many-instance-attributes
     """``EmailMessageDataSet`` loads/saves an email message from/to a file
     using an underlying filesystem (e.g.: local, S3, GCS). It uses the

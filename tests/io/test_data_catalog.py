@@ -11,7 +11,7 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import (
-    AbstractDataSet,
+    AbstractDataset,
     DataCatalog,
     DatasetAlreadyExistsError,
     DatasetError,
@@ -175,7 +175,7 @@ def conflicting_feed_dict():
     return {"ds1": ds1, "ds3": 1}
 
 
-class BadDataset(AbstractDataSet):  # pragma: no cover
+class BadDataset(AbstractDataset):  # pragma: no cover
     def __init__(self, filepath):
         self.filepath = filepath
         raise Exception("Naughty!")  # pylint: disable=broad-exception-raised
@@ -336,7 +336,6 @@ class TestDataCatalog:
             multi_catalog.list("((")
 
     def test_eq(self, multi_catalog, data_catalog):
-        assert multi_catalog == multi_catalog  # noqa: PLR0124
         assert multi_catalog == multi_catalog.shallow_copy()
         assert multi_catalog != data_catalog
 
@@ -377,13 +376,14 @@ class TestDataCatalog:
 
     def test_confirm(self, mocker, caplog):
         """Confirm the dataset"""
-        mock_ds = mocker.Mock()
-        data_catalog = DataCatalog(data_sets={"mocked": mock_ds})
-        data_catalog.confirm("mocked")
-        mock_ds.confirm.assert_called_once_with()
-        assert caplog.record_tuples == [
-            ("kedro.io.data_catalog", logging.INFO, "Confirming dataset 'mocked'")
-        ]
+        with caplog.at_level(logging.INFO):
+            mock_ds = mocker.Mock()
+            data_catalog = DataCatalog(data_sets={"mocked": mock_ds})
+            data_catalog.confirm("mocked")
+            mock_ds.confirm.assert_called_once_with()
+            assert caplog.record_tuples == [
+                ("kedro.io.data_catalog", logging.INFO, "Confirming dataset 'mocked'")
+            ]
 
     @pytest.mark.parametrize(
         "dataset_name,error_pattern",
@@ -477,7 +477,7 @@ class TestDataCatalogFromConfig:
         pattern = (
             "An exception occurred when parsing config for dataset 'boats':\n"
             "Dataset type 'kedro.io.data_catalog.DataCatalog' is invalid: "
-            "all data set types must extend 'AbstractDataSet'"
+            "all data set types must extend 'AbstractDataset'"
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
@@ -567,24 +567,25 @@ class TestDataCatalogFromConfig:
 
     def test_confirm(self, tmp_path, caplog, mocker):
         """Confirm the dataset"""
-        mock_confirm = mocker.patch("kedro.io.IncrementalDataset.confirm")
-        catalog = {
-            "ds_to_confirm": {
-                "type": "IncrementalDataset",
-                "dataset": "pandas.CSVDataSet",
-                "path": str(tmp_path),
+        with caplog.at_level(logging.INFO):
+            mock_confirm = mocker.patch("kedro.io.IncrementalDataset.confirm")
+            catalog = {
+                "ds_to_confirm": {
+                    "type": "IncrementalDataset",
+                    "dataset": "pandas.CSVDataSet",
+                    "path": str(tmp_path),
+                }
             }
-        }
-        data_catalog = DataCatalog.from_config(catalog=catalog)
-        data_catalog.confirm("ds_to_confirm")
-        assert caplog.record_tuples == [
-            (
-                "kedro.io.data_catalog",
-                logging.INFO,
-                "Confirming dataset 'ds_to_confirm'",
-            )
-        ]
-        mock_confirm.assert_called_once_with()
+            data_catalog = DataCatalog.from_config(catalog=catalog)
+            data_catalog.confirm("ds_to_confirm")
+            assert caplog.record_tuples == [
+                (
+                    "kedro.io.data_catalog",
+                    logging.INFO,
+                    "Confirming dataset 'ds_to_confirm'",
+                )
+            ]
+            mock_confirm.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "dataset_name,pattern",
@@ -735,8 +736,10 @@ class TestDataCatalogVersioned:
         assert "ds3__csv" in catalog.datasets.__dict__
         assert "jalapeño" in catalog.datasets.__dict__
 
-    def test_no_versions_with_cloud_protocol(self):
+    def test_no_versions_with_cloud_protocol(self, monkeypatch):
         """Check the error if no versions are available for load from cloud storage"""
+        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummmy")
+        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummmy")
         version = Version(load=None, save=None)
         versioned_dataset = CSVDataSet("s3://bucket/file.csv", version=version)
         pattern = re.escape(

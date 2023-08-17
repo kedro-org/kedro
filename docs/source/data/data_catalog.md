@@ -694,6 +694,14 @@ processed_{dataset_name}:
   type: pandas.ParquetDataSet
   filepath: data/03_primary/processed_{dataset_name}.pq
 
+"{dataset_name}_csv":
+  type: pandas.CSVDataSet
+  filepath: data/03_primary/{dataset_name}.csv
+
+"{namespace}.{dataset_name}_pq":
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/{dataset_name}_{namespace}.pq
+
 "{default_dataset}":
   type: pickle.PickleDataSet
   filepath: data/01_raw/{default_dataset}.pickle
@@ -704,6 +712,8 @@ Running `kedro catalog rank` will result in the following output:
 ```
 - preprocessed_{dataset_name}
 - processed_{dataset_name}
+- '{namespace}.{dataset_name}_pq'
+- '{dataset_name}_csv'
 - '{layer}.{dataset_name}'
 - '{default_dataset}'
 ```

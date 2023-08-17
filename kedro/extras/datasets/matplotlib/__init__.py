@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to save matplotlib objects as image files."""
+"""``AbstractDataset`` implementation to save matplotlib objects as image files."""
 
 __all__ = ["MatplotlibWriter"]
 

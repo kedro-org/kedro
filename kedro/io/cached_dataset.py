@@ -8,14 +8,14 @@ import logging
 import warnings
 from typing import Any
 
-from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataSet, Version
+from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataset, Version
 from kedro.io.memory_dataset import MemoryDataset
 
 # https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
 CachedDataSet: type[CachedDataset]
 
 
-class CachedDataset(AbstractDataSet):
+class CachedDataset(AbstractDataset):
     """``CachedDataset`` is a dataset wrapper which caches in memory the data saved,
     so that the user avoids io operations with slow storage media.
 
@@ -40,7 +40,7 @@ class CachedDataset(AbstractDataSet):
 
     def __init__(
         self,
-        dataset: AbstractDataSet | dict,
+        dataset: AbstractDataset | dict,
         version: Version = None,
         copy_mode: str = None,
         metadata: dict[str, Any] = None,
@@ -66,7 +66,7 @@ class CachedDataset(AbstractDataSet):
         """
         if isinstance(dataset, dict):
             self._dataset = self._from_config(dataset, version)
-        elif isinstance(dataset, AbstractDataSet):
+        elif isinstance(dataset, AbstractDataset):
             self._dataset = dataset
         else:
             raise ValueError(
@@ -89,10 +89,10 @@ class CachedDataset(AbstractDataSet):
             )
         if version:
             config[VERSIONED_FLAG_KEY] = True
-            return AbstractDataSet.from_config(
+            return AbstractDataset.from_config(
                 "_cached", config, version.load, version.save
             )
-        return AbstractDataSet.from_config("_cached", config)
+        return AbstractDataset.from_config("_cached", config)
 
     def _describe(self) -> dict[str, Any]:
         return {

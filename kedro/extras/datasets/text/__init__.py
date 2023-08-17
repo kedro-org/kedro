@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to load/save data from/to a text file."""
+"""``AbstractDataset`` implementation to load/save data from/to a text file."""
 
 __all__ = ["TextDataSet"]
 

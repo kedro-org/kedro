@@ -137,7 +137,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     the ``DataCatalog``.
 
     The catalog configuration will be saved to
-    `<conf_source>/<env>/catalog/<pipeline_name>.yml` file.
+    `<conf_source>/<env>/catalog_<pipeline_name>.yml` file.
     """
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)

@@ -225,3 +225,145 @@ You can use dataset factories to define a catch-all pattern which will overwrite
 ```
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
 as `pandas.CSVDataSet`.
+
+## CLI commands for dataset factories
+
+To manage your dataset factories, two new commands have been added to the Kedro CLI: `kedro catalog rank` (0.18.12) and `kedro catalog resolve` (0.18.13).
+
+#### Using `kedro catalog rank`
+
+This command outputs a list of all dataset factories in the catalog, ranked in the order by which pipeline datasets are matched against them. This ordering is determined by considering the following criteria:
+
+1. The number of non-placeholder characters in the pattern
+2. The number of placeholders in the pattern
+3. Alphabetic ordering
+
+Consider a catalog file with the following patterns:
+
+```yaml
+"{layer}.{dataset_name}":
+  type: pandas.CSVDataSet
+  filepath: data/{layer}/{dataset_name}.csv
+
+preprocessed_{dataset_name}:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_{dataset_name}.pq
+
+processed_{dataset_name}:
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/processed_{dataset_name}.pq
+
+"{dataset_name}_csv":
+  type: pandas.CSVDataSet
+  filepath: data/03_primary/{dataset_name}.csv
+
+"{namespace}.{dataset_name}_pq":
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/{dataset_name}_{namespace}.pq
+
+"{default_dataset}":
+  type: pickle.PickleDataSet
+  filepath: data/01_raw/{default_dataset}.pickle
+```
+
+Running `kedro catalog rank` will result in the following output:
+
+```
+- preprocessed_{dataset_name}
+- processed_{dataset_name}
+- '{namespace}.{dataset_name}_pq'
+- '{dataset_name}_csv'
+- '{layer}.{dataset_name}'
+- '{default_dataset}'
+```
+
+As we can see, the entries are ranked firstly by how many non-placeholders are in the pattern, in descending order. Where two entries have the same number of non-placeholder characters, `{namespace}.{dataset_name}_pq` and `{dataset_name}_csv` with four each, they are then ranked by the number of placeholders, also in decreasing order. `{default_dataset}` is the least specific pattern possible, and will always be matched against last.
+
+#### Using `kedro catalog resolve`
+
+This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.
+
+To illustrate this, consider the following catalog file:
+
+```yaml
+companies:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/companies.csv
+
+reviews:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/reviews.csv
+
+shuttles:
+  type: pandas.ExcelDataSet
+  filepath: data/01_raw/shuttles.xlsx
+  load_args:
+    engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
+
+preprocessed_{name}:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/preprocessed_{name}.pq
+
+"{default}":
+  type: pandas.ParquetDataSet
+  filepath: data/03_primary/{default}.pq
+```
+
+and the following pipeline in `pipeline.py`:
+
+```python
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
+        [
+            node(
+                func=preprocess_companies,
+                inputs="companies",
+                outputs="preprocessed_companies",
+                name="preprocess_companies_node",
+            ),
+            node(
+                func=preprocess_shuttles,
+                inputs="shuttles",
+                outputs="preprocessed_shuttles",
+                name="preprocess_shuttles_node",
+            ),
+            node(
+                func=create_model_input_table,
+                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
+                outputs="model_input_table",
+                name="create_model_input_table_node",
+            ),
+        ]
+    )
+```
+
+The resolved catalog output by the command will be as follows:
+
+```yaml
+companies:
+  filepath: data/01_raw/companies.csv
+  type: pandas.CSVDataSet
+model_input_table:
+  filepath: data/03_primary/model_input_table.pq
+  type: pandas.ParquetDataSet
+preprocessed_companies:
+  filepath: data/02_intermediate/preprocessed_companies.pq
+  type: pandas.ParquetDataSet
+preprocessed_shuttles:
+  filepath: data/02_intermediate/preprocessed_shuttles.pq
+  type: pandas.ParquetDataSet
+reviews:
+  filepath: data/01_raw/reviews.csv
+  type: pandas.CSVDataSet
+shuttles:
+  filepath: data/01_raw/shuttles.xlsx
+  load_args:
+    engine: openpyxl
+  type: pandas.ExcelDataSet
+```
+
+By default this is output to the terminal. However, if you wish to output the resolved catalog to a specific file, you can use the redirection operator `>`:
+
+```bash
+kedro catalog resolve > output_file.yaml
+```

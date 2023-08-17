@@ -240,6 +240,9 @@ This command outputs a list of all dataset factories in the catalog, ranked in t
 
 Consider a catalog file with the following patterns:
 
+<details>
+<summary><b>Click to expand</b></summary>
+
 ```yaml
 "{layer}.{dataset_name}":
   type: pandas.CSVDataSet
@@ -265,6 +268,7 @@ processed_{dataset_name}:
   type: pickle.PickleDataSet
   filepath: data/01_raw/{default_dataset}.pickle
 ```
+</details>
 
 Running `kedro catalog rank` will result in the following output:
 
@@ -284,6 +288,9 @@ As we can see, the entries are ranked firstly by how many non-placeholders are i
 This command resolves dataset patterns in the catalog against any explicit dataset entries in the project pipeline. The resulting output contains all explicit dataset entries in the catalog and any dataset in the default pipeline that resolves some dataset pattern.
 
 To illustrate this, consider the following catalog file:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```yaml
 companies:
@@ -308,8 +315,12 @@ preprocessed_{name}:
   type: pandas.ParquetDataSet
   filepath: data/03_primary/{default}.pq
 ```
+</details>
 
 and the following pipeline in `pipeline.py`:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 def create_pipeline(**kwargs) -> Pipeline:
@@ -336,8 +347,12 @@ def create_pipeline(**kwargs) -> Pipeline:
         ]
     )
 ```
+</details>
 
 The resolved catalog output by the command will be as follows:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```yaml
 companies:
@@ -361,6 +376,7 @@ shuttles:
     engine: openpyxl
   type: pandas.ExcelDataSet
 ```
+</details>
 
 By default this is output to the terminal. However, if you wish to output the resolved catalog to a specific file, you can use the redirection operator `>`:
 

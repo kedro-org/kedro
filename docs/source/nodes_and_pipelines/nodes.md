@@ -213,7 +213,7 @@ With `pandas` built-in support, you can use the `chunksize` argument to read dat
 ### Saving data with Generators
 To use generators to save data lazily, you need do three things:
 - Update the `make_prediction` function definition to use `return` instead of `yield`.
-- Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataset`
+- Create a [custom dataset](../data/how_to_create_a_custom_dataset.md) called `ChunkWiseCSVDataset`
 - Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
 
 Copy the following code to `nodes.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.

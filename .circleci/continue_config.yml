@@ -49,9 +49,6 @@ commands:
   setup_requirements:
     steps:
       - run:
-          name: Install pip setuptools
-          command: make install-pip-setuptools
-      - run:
           name: Install venv for some pre-commit hooks
           command: conda install -y virtualenv
       - run:

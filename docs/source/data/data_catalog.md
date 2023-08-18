@@ -172,4 +172,4 @@ cars:
   filepath: data/01_raw/cars.csv
   type: pandas.CSVDataSet
 ```
-In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml` which points to the local file.` dataset and rely on Kedro to detect which definition of `cars` dataset to use in your pipeline.
+In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml` and rely on Kedro to detect which definition of `cars` dataset to use in your pipeline.

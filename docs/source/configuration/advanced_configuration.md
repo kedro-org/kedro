@@ -287,7 +287,7 @@ companies:
   filepath: data/01_raw/companies.csv
   type: "${globals:dataset_type.csv}"
 ```
-You can also provide a default value to be used incase the globals variable does not exist:
+You can also provide a default value to be used in case the global variable does not exist:
 ```yaml
 my_param: "${globals: nonexistent_global, 23}"
 ```

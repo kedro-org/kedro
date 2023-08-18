@@ -177,7 +177,7 @@ From version 0.17.0, `TemplatedConfigLoader` also supports the [Jinja2](https://
 ```
 {% for speed in ['fast', 'slow'] %}
 {{ speed }}-trains:
-    type: MemoryDataSet
+    type: MemoryDataset
 
 {{ speed }}-cars:
     type: pandas.CSVDataSet
@@ -198,13 +198,13 @@ The output Python dictionary will look as follows:
 
 ```python
 {
-    "fast-trains": {"type": "MemoryDataSet"},
+    "fast-trains": {"type": "MemoryDataset"},
     "fast-cars": {
         "type": "pandas.CSVDataSet",
         "filepath": "s3://my_s3_bucket/fast-cars.csv",
         "save_args": {"index": True},
     },
-    "slow-trains": {"type": "MemoryDataSet"},
+    "slow-trains": {"type": "MemoryDataset"},
     "slow-cars": {
         "type": "pandas.CSVDataSet",
         "filepath": "s3://my_s3_bucket/slow-cars.csv",

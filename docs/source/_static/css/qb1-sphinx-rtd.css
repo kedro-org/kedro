@@ -321,16 +321,16 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
 }
 
 .wy-body-for-nav h1 {
-    font-size: 2.6rem;
+    font-size: 2.6rem !important;
     letter-spacing: -0.3px;
 }
 
 .wy-body-for-nav h2 {
-    font-size: 2.3rem;
+    font-size: 2rem;
 }
 
 .wy-body-for-nav h3 {
-    font-size: 2.1rem;
+    font-size: 2rem;
 }
 
 .wy-body-for-nav h4 {

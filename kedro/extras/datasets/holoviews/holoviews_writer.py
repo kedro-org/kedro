@@ -10,7 +10,7 @@ import fsspec
 import holoviews as hv
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -25,7 +25,7 @@ from kedro.io.core import (
 HoloViews = TypeVar("HoloViews")
 
 
-class HoloviewsWriter(AbstractVersionedDataSet[HoloViews, NoReturn]):
+class HoloviewsWriter(AbstractVersionedDataset[HoloViews, NoReturn]):
     """``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying
     filesystem (e.g. local, S3, GCS).
 

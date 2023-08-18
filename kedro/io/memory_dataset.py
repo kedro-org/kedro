@@ -6,7 +6,7 @@ import copy
 import warnings
 from typing import Any
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 _EMPTY = object()
 
@@ -14,7 +14,7 @@ _EMPTY = object()
 MemoryDataSet: type[MemoryDataset]
 
 
-class MemoryDataset(AbstractDataSet):
+class MemoryDataset(AbstractDataset):
     """``MemoryDataset`` loads and saves data from/to an in-memory
     Python object.
 

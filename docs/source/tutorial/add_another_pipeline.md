@@ -17,7 +17,7 @@ The data science pipeline is made up of the following:
 * Two python files within `src/spaceflights/pipelines/data_science`
     * `nodes.py` (for the node functions that form the data processing)
     * `pipeline.py` (to build the pipeline)
-* A yaml file: `conf/base/parameters/data_science.yml` to define the parameters used when running the pipeline
+* A yaml file: `conf/base/parameters_data_science.yml` to define the parameters used when running the pipeline
 * `__init__.py` files in the required folders to ensure that Python can import the pipeline
 
 
@@ -42,7 +42,7 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
 
     Args:
         data: Data containing features and target.
-        parameters: Parameters defined in parameters/data_science.yml.
+        parameters: Parameters defined in parameters_data_science.yml.
     Returns:
         Split data.
     """
@@ -89,7 +89,7 @@ def evaluate_model(
 
 ## Input parameter configuration
 
-Parameters that are used by the `DataCatalog` when the pipeline executes are stored in `conf/base/parameters/data_science.yml`:
+Parameters that are used by the `DataCatalog` when the pipeline executes are stored in `conf/base/parameters_data_science.yml`:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -276,7 +276,7 @@ candidate_modelling_pipeline.regressor:
 ```
 </details><br/>
 
-2. Update the parameters file for the data science pipeline in `conf/base/parameters/data_science.yml` to replace the existing contents for `model_options` with the following for the two instances of the template pipeline:
+2. Update the parameters file for the data science pipeline in `conf/base/parameters_data_science.yml` to replace the existing contents for `model_options` with the following for the two instances of the template pipeline:
 
 <details>
 <summary><b>Click to expand</b></summary>

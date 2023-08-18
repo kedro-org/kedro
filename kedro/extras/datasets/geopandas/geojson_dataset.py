@@ -10,7 +10,7 @@ import fsspec
 import geopandas as gpd
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -23,7 +23,7 @@ from kedro.io.core import (
 
 
 class GeoJSONDataSet(
-    AbstractVersionedDataSet[
+    AbstractVersionedDataset[
         gpd.GeoDataFrame, Union[gpd.GeoDataFrame, Dict[str, gpd.GeoDataFrame]]
     ]
 ):

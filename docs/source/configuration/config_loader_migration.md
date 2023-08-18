@@ -165,11 +165,49 @@ boats:
 ```
 
 ### 7. Globals
-* Globals for OCL:
-   * 1. within the same config params and catalog (add underscore for catalog)
-   * 2. between config
-   * Only globals through file not through dict
-   * Mix of config level and between config ?
+If you want to share variables across configuration types, e.g. parameters and catalog, and environments you need to use [the custom globals resolver with the `OmegaConfigLoader`](...).
+The `OmegaConfigLoader` requires global values to be provided in a `globals.yml` file. The following section explains the differences between using globals with `TemplatedConfigLoader` and the `OmegaConfigLoader`.
+
+Let's assume your project contains a `conf/base/globals.yml` file with the following contents:
+
+```yaml
+bucket_name: "my_s3_bucket"
+key_prefix: "my/key/prefix/"
+
+datasets:
+    csv: "pandas.CSVDataSet"
+    spark: "spark.SparkDataSet"
+
+folders:
+    raw: "01_raw"
+    int: "02_intermediate"
+    pri: "03_primary"
+    fea: "04_feature"
+```
+
+You no longer need to set `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md) to find this `globals.yml` file, because the
+`OmegaConfigLoader` is configured to pick up files named `globals.yml` by default.
+
+```diff
+- CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
+```
+
+The globals templating in your catalog configuration will need to be updated to use the globals resolver as follows:
+
+```diff
+raw_boat_data:
+-   type: "${datasets.spark}"  # nested paths into global dict are allowed
++   type: "${globals:datasets.spark}"  # nested paths into global dict are allowed
+-   filepath: "s3a://${bucket_name}/${key_prefix}/${folders.raw}/boats.csv"
++   filepath: "s3a://${globals:bucket_name}/${globals:key_prefix}/${globals:folders.raw}/boats.csv"
+    file_format: parquet
+
+raw_car_data:
+-   type: "${datasets.csv}"
++   type: "${globals:datasets.csv}"
+-   filepath: "s3://${bucket_name}/data/${key_prefix}/${folders.raw}/${filename|cars.csv}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
++   filepath: "s3://${globals:bucket_name}/data/${globals:key_prefix}/${globals:folders.raw}/${globals:${oc.select:filename|cars.csv}}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
+```
 
 ### 8. Jinja2
 `OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../data/data_catalog.md#load-multiple-datasets-with-similar-configuration-using-dataset-factories).

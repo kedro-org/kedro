@@ -12,7 +12,7 @@ This can now achieved by using [Hooks](../hooks/introduction.md), to define the 
 
 ## Use Case 2: How to integrate Kedro with additional data sources
 
-You can use [DataSets](/kedro_datasets) to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](custom_datasets.md).
+You can use [DataSets](/kedro_datasets) to interface with various different data sources. If the data source you plan to use is not supported out of the box by Kedro, you can [create a custom dataset](../data/how_to_create_a_custom_dataset.md).
 
 ## Use Case 3: How to add or modify CLI commands
 

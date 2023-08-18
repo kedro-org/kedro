@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to save and load NetworkX graphs in JSON
+"""``AbstractDataset`` implementation to save and load NetworkX graphs in JSON
 , GraphML and GML formats using ``NetworkX``."""
 
 __all__ = ["GMLDataSet", "GraphMLDataSet", "JSONDataSet"]

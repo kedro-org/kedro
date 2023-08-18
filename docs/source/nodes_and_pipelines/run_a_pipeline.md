@@ -57,7 +57,7 @@ If the built-in Kedro runners do not meet your requirements, you can also define
 
 ```python
 # in src/<package_name>/runner.py
-from kedro.io import AbstractDataset, DataCatalog, MemoryDataSet
+from kedro.io import AbstractDataset, DataCatalog, MemoryDataset
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
 from pluggy import PluginManager
@@ -79,7 +79,7 @@ class DryRunner(AbstractRunner):
             for all unregistered data sets.
 
         """
-        return MemoryDataSet()
+        return MemoryDataset()
 
     def _run(
         self,
@@ -198,14 +198,14 @@ By using `DataCatalog` from the IO module we are still able to write pure functi
 
 Through `DataCatalog`, we can control where inputs are loaded from, where intermediate variables get persisted and ultimately the location to which output variables are written.
 
-In a simple example, we define a `MemoryDataSet` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, then instantiate `SequentialRunner` and call its `run` method with the pipeline and data catalog instances:
+In a simple example, we define a `MemoryDataset` called `xs` to store our inputs, save our input list `[1, 2, 3]` into `xs`, then instantiate `SequentialRunner` and call its `run` method with the pipeline and data catalog instances:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 
 ```python
-io = DataCatalog(dict(xs=MemoryDataSet()))
+io = DataCatalog(dict(xs=MemoryDataset()))
 ```
 
 ```python
@@ -237,7 +237,7 @@ Out[11]: {'v': 0.666666666666667}
 
 ## Output to a file
 
-We can also use IO to save outputs to a file. In this example, we define a custom `LambdaDataSet` that would serialise the output to a file locally:
+We can also use IO to save outputs to a file. In this example, we define a custom `LambdaDataset` that would serialise the output to a file locally:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -254,14 +254,14 @@ def load():
         return pickle.load(f)
 
 
-pickler = LambdaDataSet(load=load, save=save)
+pickler = LambdaDataset(load=load, save=save)
 io.add("v", pickler)
 ```
 </details>
 
 It is important to make sure that the data catalog variable name `v` matches the name `v` in the pipeline definition.
 
-Next we can confirm that this `LambdaDataSet` behaves correctly:
+Next we can confirm that this `LambdaDataset` behaves correctly:
 
 <details>
 <summary><b>Click to expand</b></summary>

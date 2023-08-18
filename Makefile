@@ -7,9 +7,6 @@ clean:
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true
 
-install-pip-setuptools:
-	python -m pip install -U "pip>=21.2, <23.2" "setuptools>=65.5.1" wheel
-
 lint:
 	pre-commit run -a --hook-stage manual $(hook)
 test:

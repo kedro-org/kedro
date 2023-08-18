@@ -498,7 +498,7 @@ kedro catalog list --pipeline=ds,de
 kedro catalog rank
 ```
 
-The output includes a list of any [dataset factories](../data/data_catalog.md#load-multiple-datasets-with-similar-configuration-using-dataset-factories) in the catalog, ranked by the priority on which they are matched against.
+The output includes a list of any [dataset factories](../data/kedro_dataset_factories.md) in the catalog, ranked by the priority on which they are matched against.
 
 #### Data Catalog
 

@@ -271,7 +271,7 @@ class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
 
 Currently, the `ImageDataSet` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-Kedro's [`PartitionedDataset`](../data/kedro_io.md#partitioned-dataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+Kedro's [`PartitionedDataset`](/kedro.io.PartitionedDataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
 
 To use `PartitionedDataset` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataset` loads all PNG files from the data directory using `ImageDataSet`:
 

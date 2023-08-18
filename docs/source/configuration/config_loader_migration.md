@@ -111,13 +111,13 @@ When you migrate to use `OmegaConfigLoader` it  requires you to fetch configurat
 
 + conf_path = str(project_path / settings.CONF_SOURCE)
 + config_loader = OmegaConfigLoader(conf_source=conf_path, env="local")
-+ catalog = config_loader["catalog"]
++ catalog = config_loader["catalog"] # note the key accessor syntax
 ```
 
-In this example, `"catalog"` is the key to the default catalog patterns specified in the `OmegaConfigLoader` class.
+In this example, the `"catalog"` key points to the default catalog patterns specified in the `OmegaConfigLoader` class.
 
 ### 6. Templating of Values
-Templating of values is done through [variable interpolation in `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader). Where in `TemplatedConfigLoader` it was necessary to
+Templating of values is done through native [variable interpolation in `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader). Where in `TemplatedConfigLoader` it was necessary to
 provide the template values in a `globals` file or dictionary, in `OmegaConfigLoader` you can provide these values within the same file that has the placeholders or a file that has a name that follows [the same config pattern specified](configuration_basics.md#configuration-patterns).
 
 Suppose you are migrating a templated **catalog** file from using `TemplatedConfigLoader` to `OmegaConfigLoader` you would do the following:
@@ -126,7 +126,7 @@ Suppose you are migrating a templated **catalog** file from using `TemplatedConf
 
 ```diff
 - bucket_name: "my_s3_bucket"
-+ _bucket_name: "my_s3_bucket"
++ _bucket_name: "my_s3_bucket" # kedro requires `_` to mark templatable keys
 - key_prefix: "my/key/prefix/"
 + _key_prefix: "my/key/prefix/"
 
@@ -153,7 +153,7 @@ raw_car_data:
 +    filepath: "s3://${_bucket_name}/data/${_key_prefix}/raw/cars.csv"
 ```
 
-#### Providing default values for templates with `oc.select`
+#### Providing default values for templates via `oc.select`
 To provide a default for any template values you have to use [the omegaconf `oc.select` resolver](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-select).
 
 ```diff
@@ -196,7 +196,7 @@ The globals templating in your catalog configuration will need to be updated to 
 
 ```diff
 raw_boat_data:
--   type: "${datasets.spark}"  # nested paths into global dict are allowed
+-   type: "${datasets.spark}"
 +   type: "${globals:datasets.spark}"  # nested paths into global dict are allowed
 -   filepath: "s3a://${bucket_name}/${key_prefix}/${folders.raw}/boats.csv"
 +   filepath: "s3a://${globals:bucket_name}/${globals:key_prefix}/${globals:folders.raw}/boats.csv"

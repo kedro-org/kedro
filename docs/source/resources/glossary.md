@@ -2,7 +2,7 @@
 
 
 ## Data Catalog
- The Data Catalog is Kedro's registry of all data sources available for use in the data pipeline. It manages loading and saving of data. The Data Catalog maps the names of node inputs and outputs as keys in a Kedro `DataSet`, which can be specialised for different types of data storage.
+ The Data Catalog is Kedro's registry of all data sources available for use in the data pipeline. It manages loading and saving of data. The Data Catalog maps the names of node inputs and outputs as keys in a Kedro dataset, which can be specialised for different types of data storage.
 
 [Further information about the Data Catalog](../data/data_catalog.md)
 

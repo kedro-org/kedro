@@ -62,6 +62,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro build-docs`](#build-the-project-documentation) (deprecated from version 0.19.0)
   * [`kedro build-reqs`](#build-the-projects-dependency-tree) (deprecated from version 0.19.0)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
+  * [`kedro catalog resolve`](#resolve-dataset-factories-in-the-catalog)
   * [`kedro catalog rank`](#rank-dataset-factories-in-the-catalog)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro ipython`](#notebooks)
@@ -492,6 +493,14 @@ The command also accepts an optional `--pipeline` argument that allows you to sp
 kedro catalog list --pipeline=ds,de
 ```
 
+##### Resolve dataset factories in the catalog
+
+```bash
+kedro catalog resolve
+```
+
+This command resolves dataset factories in the catalog file with any explicit entries in the pipeline. The output includes datasets explicitly mentioned in your catalog files and any datasets mentioned in the project's pipelines that match a dataset factory.
+
 ##### Rank dataset factories in the catalog
 
 ```bash
@@ -504,7 +513,7 @@ The output includes a list of any [dataset factories](../data/kedro_dataset_fact
 
 ##### Create a Data Catalog YAML configuration file
 
-The following command creates a Data Catalog YAML configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
+The following command creates a Data Catalog YAML configuration file with `MemoryDataset` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
 
 ```bash
 kedro catalog create --pipeline=<pipeline_name>

@@ -2,9 +2,9 @@
 
 [Kedro supports many datasets](/kedro_datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
-## AbstractDataSet
+## AbstractDataset
 
-For contributors, if you would like to submit a new dataset, you must extend the [`AbstractDataSet` interface](/kedro.io.AbstractDataset) or [`AbstractVersionedDataSet` interface](/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataSet` implementation.
+For contributors, if you would like to submit a new dataset, you must extend the [`AbstractDataset` interface](/kedro.io.AbstractDataset) or [`AbstractVersionedDataset` interface](/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
 
 
 ## Scenario
@@ -267,19 +267,19 @@ class ImageDataSet(AbstractDataset[np.ndarray, np.ndarray]):
 ```
 </details>
 
-## Integration with `PartitionedDataSet`
+## Integration with `PartitionedDataset`
 
 Currently, the `ImageDataSet` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-Kedro's [`PartitionedDataSet`](./partitioned_and_incremental_datasets.md) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+Kedro's [`PartitionedDataset`](/kedro.io.PartitionedDataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
 
-To use `PartitionedDataSet` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataSet` loads all PNG files from the data directory using `ImageDataSet`:
+To use `PartitionedDataset` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataset` loads all PNG files from the data directory using `ImageDataSet`:
 
 ```yaml
 # in conf/base/catalog.yml
 
 pokemon:
-  type: PartitionedDataSet
+  type: PartitionedDataset
   dataset: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
   path: data/01_raw/pokemon-images-and-types/images/images
   filename_suffix: ".png"
@@ -305,11 +305,11 @@ $ ls -la data/01_raw/pokemon-images-and-types/images/images/*.png | wc -l
 ### How to implement versioning in your dataset
 
 ```{note}
-Versioning doesn't work with `PartitionedDataSet`. You can't use both of them at the same time.
+Versioning doesn't work with `PartitionedDataset`. You can't use both of them at the same time.
 ```
 
 To add versioning support to the new dataset we need to extend the
- [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataset) to:
+ [AbstractVersionedDataset](/kedro.io.AbstractVersionedDataset) to:
 
 * Accept a `version` keyword argument as part of the constructor
 * Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively

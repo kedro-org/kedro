@@ -19,7 +19,7 @@ Kedro's [experiment tracking demo](https://demo.kedro.org/experiment-tracking) e
 ![](../meta/images/experiment-tracking_demo.gif)
 
 ## Kedro versions supporting experiment tracking
-Kedro has always supported parameter versioning (as part of your codebase with a version control system like `git`) and Kedro’s dataset versioning capabilities enabled you to [snapshot models, datasets and plots](../data/data_catalog.md#version-datasets-and-ml-models).
+Kedro has always supported parameter versioning (as part of your codebase with a version control system like `git`) and Kedro’s dataset versioning capabilities enabled you to [snapshot models, datasets and plots](../data/data_catalog.md#dataset-versioning).
 
 Kedro-Viz version 4.1.1 introduced metadata capture, visualisation, discovery and comparison, enabling you to access, edit and [compare your experiments](#access-run-data-and-compare-runs) and additionally [track how your metrics change over time](#view-and-compare-metrics-data).
 

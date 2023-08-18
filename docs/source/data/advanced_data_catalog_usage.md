@@ -55,7 +55,7 @@ gear = cars["gear"].values
 The following steps happened behind the scenes when `load` was called:
 
 - The value `cars` was located in the Data Catalog
-- The corresponding `AbstractDataSet` object was retrieved
+- The corresponding `AbstractDataset` object was retrieved
 - The `load` method of this dataset was called
 - This `load` method delegated the loading to the underlying pandas `read_csv` function
 
@@ -70,9 +70,9 @@ This pattern is not recommended unless you are using platform notebook environme
 To save data using an API similar to that used to load data:
 
 ```python
-from kedro.io import MemoryDataSet
+from kedro.io import MemoryDataset
 
-memory = MemoryDataSet(data=None)
+memory = MemoryDataset(data=None)
 io.add("cars_cache", memory)
 io.save("cars_cache", "Memory can store anything.")
 io.load("cars_cache")
@@ -190,7 +190,7 @@ io.save("test_data_set", data1)
 reloaded = io.load("test_data_set")
 assert data1.equals(reloaded)
 
-# raises DataSetError since the path
+# raises DatasetError since the path
 # data/01_raw/test.csv/my_exact_version/test.csv already exists
 io.save("test_data_set", data2)
 ```
@@ -219,7 +219,7 @@ io = DataCatalog({"test_data_set": test_data_set})
 
 io.save("test_data_set", data1)  # emits a UserWarning due to version inconsistency
 
-# raises DataSetError since the data/01_raw/test.csv/exact_load_version/test.csv
+# raises DatasetError since the data/01_raw/test.csv/exact_load_version/test.csv
 # file does not exist
 reloaded = io.load("test_data_set")
 ```

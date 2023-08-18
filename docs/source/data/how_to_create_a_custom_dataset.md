@@ -2,9 +2,9 @@
 
 [Kedro supports many datasets](/kedro_datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
-## AbstractDataSet
+## AbstractDataset
 
-For contributors, if you would like to submit a new dataset, you must extend the [`AbstractDataSet` interface](/kedro.io.AbstractDataset) or [`AbstractVersionedDataSet` interface](/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataSet` implementation.
+For contributors, if you would like to submit a new dataset, you must extend the [`AbstractDataset` interface](/kedro.io.AbstractDataset) or [`AbstractVersionedDataset` interface](/kedro.io.AbstractVersionedDataset) if you plan to support versioning. It requires subclasses to override the `_load` and `_save` and provides `load` and `save` methods that enrich the corresponding private methods with uniform error handling. It also requires subclasses to override `_describe`, which is used in logging the internal information about the instances of your custom `AbstractDataset` implementation.
 
 
 ## Scenario
@@ -309,7 +309,7 @@ Versioning doesn't work with `PartitionedDataset`. You can't use both of them at
 ```
 
 To add versioning support to the new dataset we need to extend the
- [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataset) to:
+ [AbstractVersionedDataset](/kedro.io.AbstractVersionedDataset) to:
 
 * Accept a `version` keyword argument as part of the constructor
 * Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively

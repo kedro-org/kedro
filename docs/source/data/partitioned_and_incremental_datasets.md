@@ -15,7 +15,7 @@ This is why Kedro provides a built-in [PartitionedDataset](/kedro.io.Partitioned
 In this section, each individual file inside a given location is called a partition.
 ```
 
-### How to use `PartitionedDataSet`
+### How to use `PartitionedDataset`
 
 You can use a `PartitionedDataset` in `catalog.yml` file like any other regular dataset definition:
 

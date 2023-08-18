@@ -287,6 +287,10 @@ companies:
   filepath: data/01_raw/companies.csv
   type: "${globals:dataset_type.csv}"
 ```
+You can also provide a default value to be used incase the globals variable does not exist:
+```yaml
+my_param: "${globals: nonexistent_global, 23}"
+```
 If there are duplicate keys in the globals files in your base and run time environments, the values in the run time environment
 will overwrite the values in your base environment.
 

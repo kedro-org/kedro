@@ -691,6 +691,7 @@ class TestOmegaConfigLoader:
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
         param_config = {
             "my_param": "${globals:x}",
+            "my_param_default": "${globals:y,34}",  # y does not exist in globals
         }
         catalog_config = {
             "companies": {
@@ -706,6 +707,8 @@ class TestOmegaConfigLoader:
         assert OmegaConf.has_resolver("globals")
         # Globals are resolved correctly in parameter
         assert conf["parameters"]["my_param"] == globals_config["x"]
+        # The default value is used if the key does not exist
+        assert conf["parameters"]["my_param_default"] == 34
         # Globals are resolved correctly in catalog
         assert conf["catalog"]["companies"]["type"] == globals_config["dataset_type"]
 
@@ -772,7 +775,8 @@ class TestOmegaConfigLoader:
         _write_yaml(base_globals, base_globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
         with pytest.raises(
-            InterpolationResolutionError, match=r"Globals key 'x.y' not found."
+            InterpolationResolutionError,
+            match=r"Globals key 'x.y' not found and no default value provided.",
         ):
             conf["parameters"]["param1"]
 
@@ -790,6 +794,6 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
         with pytest.raises(
             InterpolationResolutionError,
-            match=r"Globals key '_ignore' not found. Keys starting with '_' are not supported for globals.",
+            match=r"Globals key '_ignore' not found and no default value provided. Keys starting with '_' are not supported for globals.",
         ):
             conf["parameters"]["param2"]

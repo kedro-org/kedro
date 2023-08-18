@@ -314,17 +314,26 @@ class OmegaConfigLoader(AbstractConfigLoader):
     def _register_globals_resolver(self):
         """Register the globals resolver"""
         OmegaConf.register_new_resolver(
-            "globals", lambda x: self._get_globals_value(x), replace=True
+            "globals",
+            lambda variable, default_value=None: self._get_globals_value(
+                variable, default_value
+            ),
+            replace=True,
         )
 
-    def _get_globals_value(self, variable):
+    def _get_globals_value(self, variable, default_value):
         """Return the globals values to the resolver"""
         keys = variable.split(".")
         value = self["globals"]
         for k in keys:
             value = value.get(k)
             if not value:
-                msg = f"Globals key '{variable}' not found. "
+                if default_value:
+                    _config_logger.debug(
+                        f"Using the default value for the global variable {variable}."
+                    )
+                    return default_value
+                msg = f"Globals key '{variable}' not found and no default value provided. "
                 if variable.startswith("_"):
                     msg += "Keys starting with '_' are not supported for globals."
                 raise InterpolationResolutionError(msg)

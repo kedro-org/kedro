@@ -40,7 +40,7 @@ $ cdk -h
 The deployment process for a Kedro pipeline on AWS Step Functions consists of the following steps:
 
 * Develop the Kedro pipeline locally as normal
-* Create a new configuration environment in which we ensure all nodes' inputs and outputs have a persistent location on S3, since `MemoryDataSet` can't be shared between AWS Lambda functions
+* Create a new configuration environment in which we ensure all nodes' inputs and outputs have a persistent location on S3, since `MemoryDataset` can't be shared between AWS Lambda functions
 * Package the Kedro pipeline as an [AWS Lambda-compliant Docker image](https://docs.aws.amazon.com/lambda/latest/dg/lambda-images.html)
 * Write a script to convert and deploy each Kedro node as an AWS Lambda function. Each function will use the same pipeline Docker image created in the previous step and run a single Kedro node associated with it. This follows the principles laid out in our [distributed deployment guide](distributed).
 * The script above will also convert and deploy the entire Kedro pipeline as an AWS Step Functions State Machine.

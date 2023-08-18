@@ -18,6 +18,8 @@
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 
 ## Documentation changes
+* Revised the `data` section to restructure beginner and advanced pages about the Data Catalog and datasets.
+* Moved contributor documentation to the [GitHub wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).
 * Update example of using generator functions in nodes.
 * Added migration guide from the `ConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` is deprecated and will be removed in the `0.19.0` release.
 

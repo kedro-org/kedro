@@ -209,7 +209,7 @@ raw_car_data:
 +   filepath: "s3://${globals:bucket_name}/data/${globals:key_prefix}/${globals:folders.raw}/${globals:filename,'cars.csv'}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
 ```
 
-### 8. Jinja2
+### 8. Deprecation of Jinja2
 `OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../data/data_catalog.md#load-multiple-datasets-with-similar-configuration-using-dataset-factories).
 If you take the example from [the `TemplatedConfigLoader` with Jinja2 documentation](advanced_configuration.md#how-to-use-jinja2-syntax-in-configuration) you can rewrite your configuration as follows to work with `OmegaConfigLoader`:
 

@@ -69,7 +69,7 @@ from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
-from kedro.io import DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline.node import Node
 from kedro.runner import run_node
 
@@ -165,7 +165,7 @@ def kedro_init(
     logger.info("Registering datasets...")
     unregistered_ds = pipeline.data_sets() - set(catalog.list())  # NOQA
     for ds_name in unregistered_ds:
-        catalog.add(ds_name, MemoryDataSet())
+        catalog.add(ds_name, MemoryDataset())
     return {"catalog": catalog, "sess_id": session.session_id}
 
 

@@ -93,7 +93,7 @@ catalog.load("parameters")
 You should see the following:
 
 ```ipython
-INFO     Loading data from 'parameters' (MemoryDataSet)...
+INFO     Loading data from 'parameters' (MemoryDataset)...
 
 {'example_test_data_ratio': 0.2,
  'example_num_train_iter': 10000,

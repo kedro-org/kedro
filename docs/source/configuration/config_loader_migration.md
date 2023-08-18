@@ -206,7 +206,7 @@ raw_car_data:
 -   type: "${datasets.csv}"
 +   type: "${globals:datasets.csv}"
 -   filepath: "s3://${bucket_name}/data/${key_prefix}/${folders.raw}/${filename|cars.csv}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
-+   filepath: "s3://${globals:bucket_name}/data/${globals:key_prefix}/${globals:folders.raw}/${globals:${oc.select:filename|cars.csv}}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
++   filepath: "s3://${globals:bucket_name}/data/${globals:key_prefix}/${globals:folders.raw}/${globals:filename,'cars.csv'}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
 ```
 
 ### 8. Jinja2

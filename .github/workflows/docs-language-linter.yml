@@ -1,9 +1,6 @@
 name: Language Linter for Kedro Docs
 on:
   pull_request:
-    branches:
-      - main
-      - develop
     paths:
       - "docs/**"
       - '**.md'

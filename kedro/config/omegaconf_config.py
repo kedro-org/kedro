@@ -11,6 +11,7 @@ from typing import Any, Callable, Iterable
 
 import fsspec
 from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationResolutionError
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
@@ -109,6 +110,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
             "logging": ["logging*", "logging*/**", "**/logging*"],
+            "globals": ["globals.yml"],
         }
         self.config_patterns.update(config_patterns or {})
 
@@ -117,7 +119,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Register user provided custom resolvers
         if custom_resolvers:
             self._register_new_resolvers(custom_resolvers)
-
+        # Register globals resolver
+        self._register_globals_resolver()
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
             self._protocol = "tar"
@@ -199,7 +202,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         config.update(env_config)
 
-        if not processed_files:
+        if not processed_files and key != "globals":
             raise MissingConfigException(
                 f"No files of YAML or JSON format found in {base_path} or {env_path} matching"
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
@@ -307,6 +310,36 @@ class OmegaConfigLoader(AbstractConfigLoader):
             ".yaml",
             ".json",
         ]
+
+    def _register_globals_resolver(self):
+        """Register the globals resolver"""
+        OmegaConf.register_new_resolver(
+            "globals",
+            lambda variable, default_value=None: self._get_globals_value(
+                variable, default_value
+            ),
+            replace=True,
+        )
+
+    def _get_globals_value(self, variable, default_value):
+        """Return the globals values to the resolver"""
+        if variable.startswith("_"):
+            raise InterpolationResolutionError(
+                "Keys starting with '_' are not supported for globals."
+            )
+        keys = variable.split(".")
+        value = self["globals"]
+        for k in keys:
+            value = value.get(k)
+            if not value:
+                if default_value:
+                    _config_logger.debug(
+                        f"Using the default value for the global variable {variable}."
+                    )
+                    return default_value
+                msg = f"Globals key '{variable}' not found and no default value provided. "
+                raise InterpolationResolutionError(msg)
+        return value
 
     @staticmethod
     def _register_new_resolvers(resolvers: dict[str, Callable]):

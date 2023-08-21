@@ -794,6 +794,6 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
         with pytest.raises(
             InterpolationResolutionError,
-            match=r"Globals key '_ignore' not found and no default value provided. Keys starting with '_' are not supported for globals.",
+            match=r"Keys starting with '_' are not supported for globals.",
         ):
             conf["parameters"]["param2"]

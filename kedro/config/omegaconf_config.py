@@ -323,6 +323,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _get_globals_value(self, variable, default_value):
         """Return the globals values to the resolver"""
+        if variable.startswith("_"):
+            raise InterpolationResolutionError(
+                "Keys starting with '_' are not supported for globals."
+            )
         keys = variable.split(".")
         value = self["globals"]
         for k in keys:
@@ -334,8 +338,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
                     )
                     return default_value
                 msg = f"Globals key '{variable}' not found and no default value provided. "
-                if variable.startswith("_"):
-                    msg += "Keys starting with '_' are not supported for globals."
                 raise InterpolationResolutionError(msg)
         return value
 

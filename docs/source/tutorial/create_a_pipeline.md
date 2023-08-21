@@ -270,7 +270,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 ## Model input table registration
 
 The following entry in `conf/base/catalog.yml` saves the model input table dataset to file (in `data/03_primary`):
-
+dksflksfhlheflh
 ```yaml
 model_input_table:
   type: pandas.ParquetDataSet
@@ -317,7 +317,7 @@ You should see output similar to the following:
 </details>
 
 ## Visualise the project
-
+Thus is just a demo demo
 This section introduces project visualisation using Kedro-Viz, which is a separate package from the standard Kedro installation. To install it your virtual environment:
 
 ```bash

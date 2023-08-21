@@ -51,7 +51,6 @@ class TestMicropkgPullCommand:
             "__init__.py",
             "nodes.py",
             "pipeline.py",
-            "README.md",
         }
 
     @pytest.mark.parametrize("env", [None, "local"])

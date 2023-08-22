@@ -446,7 +446,7 @@ kedro micropkg package <package_module_path>
 Further information is available in the [micro-packaging documentation](../nodes_and_pipelines/micro_packaging.md).
 
 ##### Pull a micro-package in your project
-The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [Pypi](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
+The following command pulls all the files related to a micro-package, e.g. a modular pipeline, from either [PyPI](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
 
 ```bash
 kedro micropkg pull <package_name> (or path to a sdist file)

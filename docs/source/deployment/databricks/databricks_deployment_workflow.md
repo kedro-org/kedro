@@ -33,7 +33,7 @@ For those reasons, the packaging approach is unsuitable for development projects
 The sequence of steps described in this section is as follows:
 
 1. [Note your Databricks username and host](#note-your-databricks-username-and-host)
-2. [Install Kedro and the databricks CLI in a new virtual environment](#install-kedro-and-the-databricks-cli-in-a-new-virtual-environment)
+2. [Install Kedro and the Databricks CLI in a new virtual environment](#install-kedro-and-the-databricks-cli-in-a-new-virtual-environment)
 3. [Authenticate the Databricks CLI](#authenticate-the-databricks-cli)
 4. [Create a new Kedro project](#create-a-new-kedro-project)
 5. [Create an entry point for Databricks](#create-an-entry-point-for-databricks)
@@ -49,10 +49,10 @@ Find your Databricks username in the top right of the workspace UI and the host 
 ![Find Databricks host and username](../../meta/images/find_databricks_host_and_username.png)
 
 ```{note}
-Your databricks host must include the protocol (`https://`).
+Your Databricks host must include the protocol (`https://`).
 ```
 
-### Install Kedro and the databricks CLI in a new virtual environment
+### Install Kedro and the Databricks CLI in a new virtual environment
 
 The following commands will create a new `conda` environment, activate it, and then install Kedro and the Databricks CLI.
 

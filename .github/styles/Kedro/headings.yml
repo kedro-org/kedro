@@ -29,7 +29,8 @@ exceptions:
   - Google Cloud
   - Google Cloud Functions
   - GraphQL
-  - Heroku
+  - Hook
+  - Hooks
   - IDs
   - Jenkins
   - JFrog

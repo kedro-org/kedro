@@ -1,0 +1,40 @@
+# Started with 18F's guide https://github.com/testthedocs/vale-styles/blob/master/18F/Contractions.yml but changed to not use negative contractions as per GOV.UK style
+extends: substitution
+message: Use '%s' instead of '%s.'
+level: error
+ignorecase: true
+swap:
+  it is: it's
+  it will: it'll
+  we are: we're
+  we will: we'll
+  we have: we've
+  they are: they're
+  they will: they'll
+  that is: that's
+  that will: that'll
+  who is: who's
+  who will: who'll
+  what is: what's
+  what will: what'll
+  where is: where's
+  where will: where'll
+  when is: when's
+  when will: when'll
+  why is: why's
+  why will: why'll
+  how is: how's
+  how will: how'll
+  isn't: is not
+  aren't: are not
+  wasn't: was not
+  weren't: were not
+  haven't: have not
+  hasn't: has not
+  won't: will not
+  don't: do not
+  doesn't: does not
+  didn't: did not
+  can't: cannot
+  couldn't: could not
+  shouldn't: should not

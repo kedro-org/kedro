@@ -1,0 +1,16 @@
+name: Language Linter for Kedro Docs
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - '**.md'
+
+jobs:
+  vale:
+    name: runner / vale
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: errata-ai/vale-action@reviewdog
+        with:
+          reporter: github-pr-review

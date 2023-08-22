@@ -32,7 +32,7 @@ Kedro-Viz version 6.2 includes support for collaborative experiment tracking usi
 The choice of experiment tracking tool depends on your use case and choice of complementary tools, such as MLflow and Neptune:
 
 - **Kedro** - If you need experiment tracking, are looking for improved metrics visualisation and want a lightweight tool to work alongside existing functionality in Kedro. Kedro does not support a model registry.
-- **MLflow** - You can combine MLFlow with Kedro by using [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/en/stable/) if you require experiment tracking, model registry and/or model serving capabilities or have access to Managed MLflow within the Databricks ecosystem.
+- **MLflow** - You can combine MLflow with Kedro by using [`kedro-mlflow`](https://kedro-mlflow.readthedocs.io/en/stable/) if you require experiment tracking, model registry and/or model serving capabilities or have access to Managed MLflow within the Databricks ecosystem.
 - **Neptune** - If you require experiment tracking and model registry functionality, improved visualisation of metrics and support for collaborative data science, you may consider [`kedro-neptune`](https://docs.neptune.ai/integrations/kedro/) for your workflow.
 
 [We support a growing list of integrations](../extend_kedro/plugins.md).

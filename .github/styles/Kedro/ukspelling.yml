@@ -11,8 +11,10 @@ tokens:
   - '(?:\w+)lyze'
 exceptions:
     - backlog
+    - blog
     - capsize
     - catalog
+    - Catalog
     - dialog
     - log
     - maize

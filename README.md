@@ -1,5 +1,5 @@
-![Kedro Logo Banner - Light](.github/demo-dark.png#gh-dark-mode-only)
-![Kedro Logo Banner - Dark](.github/demo-light.png#gh-light-mode-only)
+![Kedro Logo Banner - Light](https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-dark.png#gh-dark-mode-only)
+![Kedro Logo Banner - Dark](https://raw.githubusercontent.com/kedro-org/kedro/main/.github/demo-light.png#gh-light-mode-only)
 [![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
@@ -37,7 +37,6 @@ Our [Get Started guide](https://docs.kedro.org/en/stable/get_started/install.htm
 
 ## What are the main features of Kedro?
 
-![Kedro-Viz Pipeline Visualisation](https://github.com/kedro-org/kedro-viz/blob/main/.github/img/banner.png)
 _A pipeline visualisation generated using [Kedro-Viz](https://github.com/kedro-org/kedro-viz)_
 
 | Feature              | What is this?                                                                                                                                                                                                                                                                                                                                                                                  |

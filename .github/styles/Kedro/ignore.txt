@@ -1,7 +1,5 @@
 Kedro
-kedro
 Kedro's
-kedro's
 Kubeflow
 Databricks
 Conda

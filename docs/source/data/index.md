@@ -22,7 +22,7 @@ The following page offers a range of examples of YAML specification for various 
 data_catalog_yaml_examples
 ```
 
-Once you are familiar with the format of `catalog.yml`, you may find your catalog gets repetitive if you need to load multiple datasets with similar configuration. From Kedro 0.18.12 you can use dataset factories to generalise the configuration and reduce the number of similar catalog entries. This works by by matching datasets used in your project’s pipelines to dataset factory patterns and is explained in a new page about Kedro dataset factories:
+Once you are familiar with the format of `catalog.yml`, you may find your catalog gets repetitive if you need to load multiple datasets with similar configuration. From Kedro 0.18.12 you can use dataset factories to generalise the configuration and reduce the number of similar catalog entries. This works by matching datasets used in your project’s pipelines to dataset factory patterns and is explained in a new page about Kedro dataset factories:
 
 
 ```{toctree}

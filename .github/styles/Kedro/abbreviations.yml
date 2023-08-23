@@ -1,7 +1,7 @@
 extends: substitution
 message: "Use '%s' instead of abbreviations like '%s'."
 ignorecase: true
-level: error
+level: warning
 nonword: true
 action:
   name: replace

@@ -18,6 +18,7 @@ exceptions:
   - Azure Event Hub
   - CI/CD
   - DataCatalog
+  - Data Catalog
   - Docker
   - Docker Compose
   - Docker Swarm
@@ -45,10 +46,11 @@ exceptions:
   - Linux
   - MySQL
   - Python
+  - QuantumBlack
+  - QuantumBlack Labs
   - Red Hat
   - Redis
   - Slack
   - Ubuntu
   - Unix
   - URLs
-  

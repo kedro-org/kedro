@@ -59,7 +59,7 @@ For new and intermediate Kedro users, there's a comprehensive section on [how to
     <em>A pipeline visualisation generated using Kedro-Viz</em>
 </p>
 
-Additional documentation explains [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/notebooks_and_ipython/index.html), and there are a set of advanced user guides for advanced for key Kedro features. We also recommend the [API reference documentation](/kedro) for additional information.
+Additional documentation explains [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/notebooks_and_ipython/index.html), and there are a set of advanced user guides for advanced for key Kedro features. We also recommend the [API reference documentation](/kedro) for further information.
 
 
 ## Why does Kedro exist?

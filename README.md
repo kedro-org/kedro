@@ -37,8 +37,6 @@ Our [Get Started guide](https://docs.kedro.org/en/stable/get_started/install.htm
 
 ## What are the main features of Kedro?
 
-_A pipeline visualisation generated using [Kedro-Viz](https://github.com/kedro-org/kedro-viz)_
-
 | Feature              | What is this?                                                                                                                                                                                                                                                                                                                                                                                  |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Project Template     | A standard, modifiable and easy-to-use project template based on [Cookiecutter Data Science](https://github.com/drivendata/cookiecutter-data-science/).                                                                                                                                                                                                                                        |
@@ -53,7 +51,17 @@ The [Kedro documentation](https://docs.kedro.org/en/stable/) first explains [how
 
 You can then review the [spaceflights tutorial](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html) to build a Kedro project for hands-on experience
 
-For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://docs.kedro.org/en/stable/visualisation/index.html) and [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/notebooks_and_ipython/index.html). We also recommend the [API reference documentation](/kedro) for additional information.
+For new and intermediate Kedro users, there's a comprehensive section on [how to visualise Kedro projects using Kedro-Viz](https://docs.kedro.org/en/stable/visualisation/index.html).
+
+<p align="center">
+
+![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/kedro-org/kedro-viz/main/.github/img/banner.png)
+
+_A pipeline visualisation generated using [Kedro-Viz](https://github.com/kedro-org/kedro-viz)_
+
+</p>
+
+Additional documentation explains [how to work with Kedro and Jupyter notebooks](https://docs.kedro.org/en/stable/notebooks_and_ipython/index.html), and there are a set of advanced user guides for advanced for key Kedro features. We also recommend the [API reference documentation](/kedro) for additional information.
 
 
 ## Why does Kedro exist?

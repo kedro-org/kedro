@@ -56,10 +56,8 @@ For new and intermediate Kedro users, there's a comprehensive section on [how to
 <p align="center">
 
 ![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/kedro-org/kedro-viz/main/.github/img/banner.png)
-</p>
-
-<p align="center">
 _A pipeline visualisation generated using [Kedro-Viz](https://github.com/kedro-org/kedro-viz)_
+
 </p>
 
 

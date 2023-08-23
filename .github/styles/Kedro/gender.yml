@@ -1,0 +1,13 @@
+extends: existence
+message: "Use a gender-neutral pronoun instead of '%s'."
+level: error
+ignorecase: true
+tokens:
+  - he/she
+  - s/he
+  - \(s\)he
+  - \bhe\b
+  - \bhim\b
+  - \bhis\b
+  - \bshe\b
+  - \bher\b

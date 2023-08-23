@@ -44,14 +44,14 @@ from kedro.framework.hooks.manager import (
     _register_hooks_setuptools,
 )
 from kedro.framework.project import settings
-from kedro.io import AbstractDataSet, DataCatalog
+from kedro.io import AbstractDataset, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner import AbstractRunner, run_node
 from pluggy import PluginManager
 
 
-class _DaskDataSet(AbstractDataSet):
+class _DaskDataSet(AbstractDataset):
     """``_DaskDataSet`` publishes/gets named datasets to/from the Dask
     scheduler."""
 

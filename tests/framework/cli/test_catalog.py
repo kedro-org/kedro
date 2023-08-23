@@ -1,5 +1,3 @@
-import shutil
-
 import pytest
 import yaml
 from click.testing import CliRunner
@@ -64,6 +62,23 @@ def fake_catalog_with_overlapping_factories():
         "an_{example_placeholder}": {
             "type": "dummy_type",
             "filepath": "dummy_filepath",
+        },
+    }
+    return config
+
+
+@pytest.fixture
+def fake_catalog_config_with_resolvable_dataset():
+    config = {
+        "parquet_{factory_pattern}": {
+            "type": "pandas.ParquetDataSet",
+            "filepath": "test.pq",
+        },
+        "csv_{factory_pattern}": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
+        "explicit_ds": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
+        "{factory_pattern}_ds": {
+            "type": "pandas.ParquetDataSet",
+            "filepath": "test.pq",
         },
     }
     return config
@@ -242,11 +257,12 @@ class TestCatalogCreateCommand:
     @staticmethod
     @pytest.fixture(params=["base"])
     def catalog_path(request, fake_repo_path):
-        catalog_path = fake_repo_path / "conf" / request.param / "catalog"
+        catalog_path = fake_repo_path / "conf" / request.param
 
         yield catalog_path
 
-        shutil.rmtree(catalog_path, ignore_errors=True)
+        for file in catalog_path.glob("catalog_*"):
+            file.unlink()
 
     def test_pipeline_argument_is_required(self, fake_project_cli):
         result = CliRunner().invoke(fake_project_cli, ["catalog", "create"])
@@ -278,7 +294,7 @@ class TestCatalogCreateCommand:
         main_catalog_config = yaml.safe_load(main_catalog_path.read_text())
         assert "example_iris_data" in main_catalog_config
 
-        data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
+        data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         result = CliRunner().invoke(
             fake_project_cli,
@@ -302,9 +318,9 @@ class TestCatalogCreateCommand:
     def test_catalog_is_created_in_correct_env(
         self, fake_project_cli, fake_metadata, catalog_path
     ):
-        data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
+        data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
-        env = catalog_path.parent.name
+        env = catalog_path.name
         result = CliRunner().invoke(
             fake_project_cli,
             ["catalog", "create", "--pipeline", self.PIPELINE_NAME, "--env", env],
@@ -335,7 +351,7 @@ class TestCatalogCreateCommand:
         )
 
         data_catalog_file = (
-            fake_repo_path / "conf" / "base" / "catalog" / f"{self.PIPELINE_NAME}.yml"
+            fake_repo_path / "conf" / "base" / f"catalog_{self.PIPELINE_NAME}.yml"
         )
 
         result = CliRunner().invoke(
@@ -351,9 +367,7 @@ class TestCatalogCreateCommand:
     def test_missing_datasets_appended(
         self, fake_project_cli, fake_metadata, catalog_path
     ):
-        data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
-        assert not catalog_path.exists()
-        catalog_path.mkdir()
+        data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         catalog_config = {
             "example_test_x": {"type": "pandas.CSVDataSet", "filepath": "test.csv"}
@@ -444,3 +458,138 @@ def test_rank_catalog_factories_with_no_factories(
     assert not result.exit_code
     expected_output = "There are no dataset factories in the catalog."
     assert expected_output in result.output
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
+)
+def test_catalog_resolve(
+    fake_project_cli,
+    fake_metadata,
+    fake_load_context,
+    mocker,
+    mock_pipelines,
+    fake_catalog_config,
+):
+    """Test that datasets factories are correctly resolved to the explicit datasets in the pipeline."""
+    yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    mocked_context = fake_load_context.return_value
+    mocked_context.catalog = DataCatalog.from_config(fake_catalog_config)
+
+    placeholder_ds = mocked_context.catalog._data_sets.keys()
+    explicit_ds = {"csv_example", "parquet_example"}
+
+    mocker.patch.object(
+        mock_pipelines[PIPELINE_NAME],
+        "data_sets",
+        return_value=explicit_ds,
+    )
+
+    result = CliRunner().invoke(
+        fake_project_cli, ["catalog", "resolve"], obj=fake_metadata
+    )
+
+    assert not result.exit_code
+    assert yaml_dump_mock.call_count == 1
+
+    output = yaml_dump_mock.call_args[0][0]
+
+    for ds in placeholder_ds:
+        assert ds not in output
+
+    for ds in explicit_ds:
+        assert ds in output
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
+)
+def test_no_overwrite(
+    fake_project_cli,
+    fake_metadata,
+    fake_load_context,
+    mocker,
+    mock_pipelines,
+    fake_catalog_config_with_resolvable_dataset,
+):
+    """Test that explicit catalog entries are not overwritten by factory config."""
+    yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    mocked_context = fake_load_context.return_value
+
+    mocked_context.config_loader = {
+        "catalog": fake_catalog_config_with_resolvable_dataset
+    }
+    mocked_context.catalog = DataCatalog.from_config(
+        fake_catalog_config_with_resolvable_dataset
+    )
+
+    mocker.patch.object(
+        mock_pipelines[PIPELINE_NAME],
+        "data_sets",
+        return_value=mocked_context.catalog._data_sets.keys()
+        | {"csv_example", "parquet_example"},
+    )
+
+    result = CliRunner().invoke(
+        fake_project_cli, ["catalog", "resolve"], obj=fake_metadata
+    )
+
+    assert not result.exit_code
+    assert yaml_dump_mock.call_count == 1
+
+    assert (
+        yaml_dump_mock.call_args[0][0]["explicit_ds"]
+        == fake_catalog_config_with_resolvable_dataset["explicit_ds"]
+    )
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
+)
+def test_no_param_datasets_in_resolve(
+    fake_project_cli, fake_metadata, fake_load_context, mocker, mock_pipelines
+):
+
+    yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+    mocked_context = fake_load_context.return_value
+
+    catalog_config = {
+        "iris_data": {
+            "type": "pandas.CSVDataSet",
+            "filepath": "test.csv",
+        },
+        "intermediate": {"type": "MemoryDataSet"},
+    }
+
+    catalog_datasets = {
+        "iris_data": CSVDataSet("test.csv"),
+        "intermediate": MemoryDataset(),
+        "parameters": MemoryDataset(),
+        "params:data_ratio": MemoryDataset(),
+    }
+
+    mocked_context.config_loader = {"catalog": catalog_config}
+    mocked_context.catalog = DataCatalog(data_sets=catalog_datasets)
+
+    mocker.patch.object(
+        mock_pipelines[PIPELINE_NAME],
+        "data_sets",
+        return_value=catalog_datasets.keys(),
+    )
+
+    result = CliRunner().invoke(
+        fake_project_cli,
+        ["catalog", "resolve"],
+        obj=fake_metadata,
+    )
+
+    assert not result.exit_code
+    assert yaml_dump_mock.call_count == 1
+
+    # 'parameters' and 'params:data_ratio' should not appear in the output
+    output = yaml_dump_mock.call_args[0][0]
+
+    assert "parameters" not in output.keys()
+    assert "params:data_ratio" not in output.keys()
+    assert "iris_data" in output.keys()
+    assert "intermediate" in output.keys()

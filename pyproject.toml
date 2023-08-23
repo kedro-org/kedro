@@ -206,14 +206,18 @@ ignore_imports = [
 [tool.ruff]
 line-length = 88
 show-fixes = true
-# select = ["A", "B", "C", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
 select = [
-    "F",  # Pyflakes
-    "E",  # Pycodestyle
-    "W",  # Pycodestyle
+    "F",   # Pyflakes
+    "W",   # pycodestyle
+    "E",   # pycodestyle
+    "I",   # isort
     "UP",  # pyupgrade
-    "I",  # isort
-    "PL", # Pylint
+    "PL",  # Pylint
 ]
-ignore = ["E501"]  # Black take care off line-too-long
-unfixable = []
+ignore = ["E501"]  # Black takes care of line-too-long
+
+[tool.ruff.isort]
+known-first-party = ["kedro"]
+
+[tool.ruff.per-file-ignores]
+"{tests,docs}/*" = ["PLR2004","PLR0913"]

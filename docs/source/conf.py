@@ -226,7 +226,8 @@ linkcheck_ignore = [
     "https://github.com/kedro-org/kedro/blob/main/README.md#the-humans-behind-kedro",  # "anchor not found" but is valid
     "https://opensource.org/license/apache2-0-php/",
     "https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password",
-    "https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/api/snowflake.snowpark.DataFrameWriter.saveAsTable.html"
+    "https://docs.snowflake.com/en/developer-guide/snowpark/reference/python/api/snowflake.snowpark.DataFrameWriter.saveAsTable.html",
+    "https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors"
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -463,7 +464,7 @@ def autolink_classes_and_methods(lines):
             lines[i] = re.sub(existing, rf"{replacement}", lines[i])
 
 
-def autodoc_process_docstring(app, what, name, obj, options, lines):
+def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
     try:
         # guarded method to make sure build never fails
         log_suggestions(lines, name)

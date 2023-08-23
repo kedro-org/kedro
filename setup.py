@@ -5,7 +5,7 @@ from setuptools import setup
 
 # at least 1.3 to be able to use XMLDataSet and pandas integration with fsspec
 PANDAS = "pandas~=1.3"
-SPARK = "pyspark>=2.2, <4.0"
+SPARK = "pyspark>=2.2, <3.4"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
 
@@ -30,7 +30,7 @@ geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
-holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
+holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews>=1.13.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
@@ -97,7 +97,7 @@ extras_require = {
         "sphinxcontrib-mermaid~=0.7.1",
         "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
-        "kedro-datasets[all,pandas-deltatabledataset]~=1.5.1",
+        "kedro-datasets[all]~=1.5.3",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),
@@ -143,14 +143,15 @@ extras_require["test"] = [
     "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
     "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
-    "delta-spark~=1.2.1",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
+    "delta-spark>=1.2.1; python_version >= '3.11'",  # 1.2.0 has a bug that breaks some of our tests: https://github.com/delta-io/delta/issues/1070
+    "delta-spark~=1.2.1; python_version < '3.11'",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
     "gcsfs>=2021.4, <=2023.1; python_version == '3.7'",
     "gcsfs>=2023.1, <2023.3; python_version >= '3.8'",
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
-    "holoviews~=1.13.0",
+    "holoviews>=1.13.0",
     "import-linter[toml]==1.8.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
@@ -162,23 +163,25 @@ extras_require["test"] = [
     "jupyter~=1.0",
     "lxml~=4.6",
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
-    "matplotlib>=3.5, <3.6; python_version == '3.10'",
+    "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
     "moto==1.3.7; python_version < '3.10'",
-    "moto==3.0.4; python_version == '3.10'",
+    "moto==4.1.12; python_version >= '3.10'",
     "networkx~=2.4",
     "opencv-python~=4.5.5.64",
     "openpyxl>=3.0.3, <4.0",
-    "pandas-gbq>=0.12.0, <0.18.0",
+    "pandas-gbq>=0.12.0, <0.18.0; python_version < '3.11'",
+    "pandas-gbq>=0.18.0; python_version >= '3.11'",
     "pandas~=1.3  # 1.3 for read_xml/to_xml",
     "Pillow~=9.0",
     "plotly>=4.8.0, <6.0",
     "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
-    "psutil~=5.8",
-    "pyarrow>=6.0",
+    "pyarrow>=1.0; python_version < '3.11'",
+    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
     "pylint>=2.17.0, <3.0",
     "pyproj~=3.0",
-    "pyspark>=2.2, <4.0",
+    "pyspark>=2.2, <3.4; python_version < '3.11'",
+    "pyspark>=3.4; python_version >= '3.11'",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
     "pytest-xdist[psutil]~=2.2.1",
@@ -187,10 +190,12 @@ extras_require["test"] = [
     "requests-mock~=1.6",
     "requests~=2.20",
     "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
-    "scikit-learn~=1.0.2",
-    "scipy~=1.7.3",
+    "scikit-learn>=1.0.2,<2",
+    "scipy>=1.7.3",
+    "semver",
     "SQLAlchemy~=1.2",
-    "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.9'",
+    "tables~=3.6.0; platform_system == 'Windows' and python_version<'3.8'",
+    "tables~=3.8.0; platform_system == 'Windows' and python_version>='3.8'",  # Import issues with python 3.8 with pytables pinning to 3.8.0 fixes this https://github.com/PyTables/PyTables/issues/933#issuecomment-1555917593
     "tables~=3.6; platform_system != 'Windows'",
     "tensorflow~=2.0; platform_system != 'Darwin' or platform_machine != 'arm64'",
     # https://developer.apple.com/metal/tensorflow-plugin/

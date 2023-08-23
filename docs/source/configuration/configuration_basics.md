@@ -45,7 +45,7 @@ Kedro merges configuration information and returns a configuration dictionary ac
 * If any two configuration files located inside the **same** environment path (such as `conf/base/`) contain the same top-level key, the configuration loader raises a `ValueError` indicating that duplicates are not allowed.
 * If two configuration files contain the same top-level key but are in **different** environment paths (for example, one in `conf/base/`, another in `conf/local/`) then the last loaded path (`conf/local/`) takes precedence as the key value. `ConfigLoader.get` does not raise any errors but a `DEBUG` level log message is emitted with information on the overridden keys.
 
-When using any of the configuration loaders, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet#anchors)
+When using any of the configuration loaders, any top-level keys that start with `_` are considered hidden (or reserved) and are ignored. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you can still use such keys, for example, as [YAML anchors and aliases](https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet)
 or [to enable templating in the catalog when using the `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader).
 
 ### Configuration file names
@@ -61,7 +61,7 @@ Configuration files will be matched according to file name and type rules. Suppo
 ### Configuration patterns
 Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.
 
-By default those patterns are set as follows for the configuration of catalog, parameters, logging and credentials:
+By default those patterns are set as follows for the configuration of catalog, parameters, logging, credentials, and globals:
 
 ```python
 config_patterns = {
@@ -69,10 +69,11 @@ config_patterns = {
     "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
     "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
     "logging": ["logging*", "logging*/**", "**/logging*"],
+    "globals": ["globals*", "globals*/**", "**/globals*"],
 }
 ```
 
-If you want to change change the way configuration is loaded, you can either [customise the config patterns](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) or [bypass the configuration loading](advanced_configuration.md#how-to-bypass-the-configuration-loading-rules) as described in the advanced configuration chapter.
+If you want to change the way configuration is loaded, you can either [customise the config patterns](advanced_configuration.md#how-to-change-which-configuration-files-are-loaded) or [bypass the configuration loading](advanced_configuration.md#how-to-bypass-the-configuration-loading-rules) as described in the advanced configuration chapter.
 
 ## How to use Kedro configuration
 

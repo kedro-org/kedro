@@ -17,7 +17,8 @@ from pathlib import Path
 from kedro.config import ConfigLoader
 from kedro.framework.project import settings
 
-conf_path = str(Path(project_path) / settings.CONF_SOURCE)
+# Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html#terminology)
+conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path)
 credentials = conf_loader["credentials"]
 ```

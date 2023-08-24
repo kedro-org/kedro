@@ -300,7 +300,8 @@ class DataCatalog:
                     warnings.warn(
                         "Defining the 'layer' attribute at the top level is deprecated "
                         "and will be removed in Kedro 0.19.0. Please move 'layer' inside the 'metadata' -> "
-                        "'kedro-viz' attributes.",
+                        "'kedro-viz' attributes. See https://docs.kedro.org/en/latest/visualisation/kedro"
+                        "-viz_visualisation.html#visualise-layers for more information.",
                         FutureWarning,
                     )
                 ds_layer = ds_config.pop("layer", None)

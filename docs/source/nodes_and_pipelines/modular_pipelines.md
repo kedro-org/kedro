@@ -59,7 +59,6 @@ Running the `kedro pipeline create` command adds boilerplate folders and files f
     │   └── pipelines
     │       ├── __init__.py
     │       └── {{pipeline_name}}      <-- This folder defines the modular pipeline
-    │           ├── README.md          <-- Pipeline-specific documentation
     │           ├── __init__.py        <-- So that Python treats this pipeline as a module
     │           ├── nodes.py           <-- To declare your nodes
     │           └── pipeline.py        <-- To structure the pipeline itself
@@ -74,6 +73,13 @@ Running the `kedro pipeline create` command adds boilerplate folders and files f
 ```
 
 </details>
+
+If you want to generate a pipeline with a custom Cookiecutter template, you can save it in `<project_root>/templates/pipeline`.
+The `kedro pipeline create` command will then pick up the custom template as the default. You can also specify the path to your custom
+Cookiecutter pipeline template with the `--template` flag like this:
+```bash
+kedro pipeline create <pipeline_name> --template <path_to_template>
+```
 
 If you want to do the reverse and remove a modular pipeline, you can use ``kedro pipeline delete <pipeline_name>`` to do so.
 

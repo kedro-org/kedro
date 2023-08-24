@@ -15,6 +15,7 @@
 * Added support for Python 3.11. This includes tackling challenges like dependency pinning and test adjustments to ensure a smooth experience. Detailed migration tips are provided below for further context.
 * Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
 * Added support for global variables to `OmegaConfigLoader`.
+* Allowed using of custom cookiecutter templates for creating pipelines with `--template` flag for `kedro pipeline create`
 
 
 ## Bug fixes and other changes

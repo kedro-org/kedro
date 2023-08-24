@@ -79,64 +79,6 @@ def dummy_config(fake_root_dir, fake_metadata):
     return config_path
 
 
-def write_file_contents(fname: Path, contents: str):
-    """Little helper to make setting up a test template dir easier.
-
-    Automatically creates the parent dir of a file first if it doesn't exist to cut
-    down on extraneous LOC. SO BE WARNED you need to clean up after yourself.
-    """
-    fname.parent.mkdir(parents=True, exist_ok=True)
-
-    with fname.open("w") as f:
-        f.write(contents)
-
-
-@fixture()
-def fake_local_template_dir(fake_repo_path):
-    """Set up a local template directory. This won't be functional we're just testing the actual layout works.
-
-    Note that this is not scoped to module because we don't want to have this folder present in most of the tests,
-    so we will tear it down every time.
-    """
-    template_path = fake_repo_path / Path("templates")
-    pipeline_template_path = template_path / Path("pipeline")
-    cookiecutter_template_path = (
-        pipeline_template_path / "{{ cookiecutter.pipeline_name }}"
-    )
-
-    cookiecutter_template_path.mkdir(parents=True)
-
-    # Create the absolute bare minimum files
-    write_file_contents(
-        pipeline_template_path / "cookiecutter.json",
-        """
-        {"pipeline_name": "default", "kedro_version": "{{ cookiecutter.kedro_version }}"}
-        """.strip(),
-    )
-
-    write_file_contents(
-        cookiecutter_template_path / "pipeline_{{ cookiecutter.pipeline_name }}.py",
-        r"print('hello world')",
-    )
-
-    write_file_contents(cookiecutter_template_path / "__init__.py", "")
-
-    write_file_contents(
-        cookiecutter_template_path
-        / r"config/parameters/{{ cookiecutter.pipeline_name }}.yml",
-        "foo: bar",
-    )
-
-    write_file_contents(
-        cookiecutter_template_path / r"tests/test_{{ cookiecutter.pipeline_name }}.py",
-        "",
-    )
-
-    yield template_path.resolve()
-
-    shutil.rmtree(template_path)
-
-
 @fixture(scope="module")
 def fake_metadata(fake_root_dir):
     metadata = ProjectMetadata(

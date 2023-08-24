@@ -1,0 +1,11 @@
+extends: substitution
+message: "Use '%s' instead of abbreviations like '%s'."
+ignorecase: true
+level: warning
+nonword: true
+action:
+  name: replace
+swap:
+  '\b(?:eg|e\.g\.|eg\.)[\s,]': for example
+  '\b(?:ie|i\.e\.|ie\.)[\s,]': that is
+  '\b(?:etc)[\s\n,.]': and more

@@ -466,7 +466,7 @@ def autolink_classes_and_methods(lines):
             lines[i] = re.sub(existing, rf"{replacement}", lines[i])
 
 
-def autodoc_process_docstring(app, what, name, obj, options, lines):
+def autodoc_process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
     try:
         # guarded method to make sure build never fails
         log_suggestions(lines, name)

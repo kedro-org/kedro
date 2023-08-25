@@ -331,14 +331,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
         value = self["globals"]
         for k in keys:
             value = value.get(k)
-            if not value:
-                if default_value:
-                    _config_logger.debug(
-                        f"Using the default value for the global variable {variable}."
-                    )
-                    return default_value
-                msg = f"Globals key '{variable}' not found and no default value provided. "
-                raise InterpolationResolutionError(msg)
+            if value is None:
+                _config_logger.debug(
+                    f"Using the default value for the global variable {variable}."
+                )
+                return default_value
         return value
 
     @staticmethod

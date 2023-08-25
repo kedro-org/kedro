@@ -760,7 +760,7 @@ class TestOmegaConfigLoader:
         # Base global value is accessible to local params
         assert conf["parameters"]["param2"] == base_globals_config["x"]
 
-    def test_bad_globals(self, tmp_path):
+    def test_globals_default_none(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
         base_param_config = {
@@ -774,11 +774,8 @@ class TestOmegaConfigLoader:
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        with pytest.raises(
-            InterpolationResolutionError,
-            match=r"Globals key 'x.y' not found and no default value provided.",
-        ):
-            conf["parameters"]["param1"]
+        # Default value None is being used
+        assert conf["parameters"]["param1"] is None
 
     def test_bad_globals_underscore(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"

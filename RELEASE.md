@@ -21,7 +21,8 @@
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 * Converted `setup.py` in default template to `pyproject.toml` and moved flake8 configuration
   to dedicated file `.flake8`.
-
+* Fixed a bug that `OmegaConfigLoader` read config from hidden directory like `.ipynb_checkpoints`.
+* 
 ## Documentation changes
 * Revised the `data` section to restructure beginner and advanced pages about the Data Catalog and datasets.
 * Moved contributor documentation to the [GitHub wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).

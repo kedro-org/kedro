@@ -797,3 +797,48 @@ class TestOmegaConfigLoader:
             match=r"Keys starting with '_' are not supported for globals.",
         ):
             conf["parameters"]["param2"]
+
+    @pytest.mark.parametrize(
+        "hidden_path", ["/User/.hidden/dummy.yml", "/User/dummy/.hidden.yml"]
+    )
+    def test_is_hidden_config(self, tmp_path, hidden_path):
+        conf = OmegaConfigLoader(str(tmp_path))
+        assert conf._is_hidden(hidden_path)
+
+    @pytest.mark.parametrize(
+        "hidden_path",
+        [
+            "/User/conf/base/catalog.yml",
+            "/User/conf/local/catalog/data_science.yml",
+            "/User/notebooks/../conf/base/catalog",
+        ],
+    )
+    def test_not_hidden_config(self, tmp_path, hidden_path):
+        conf = OmegaConfigLoader(str(tmp_path))
+        assert not conf._is_hidden(hidden_path)
+
+    def test_ignore_ipynb_checkpoints(self, tmp_path, mocker):
+        conf = OmegaConfigLoader(str(tmp_path))
+        base_path = tmp_path / _BASE_ENV / "parameters.yml"
+        checkpoints_path = (
+            tmp_path / _DEFAULT_RUN_ENV / ".ipynb_checkpoints" / "parameters.yml"
+        )
+
+        base_config = {
+            "param1": "dummy",
+        }
+        checkpoints_config = {
+            "param1": "dummy",
+        }
+
+        _write_yaml(base_path, base_config)
+        _write_yaml(checkpoints_path, checkpoints_config)
+
+        # read successfully
+        conf["parameters"]
+        print(conf["parameters"])
+
+        mocker.patch.object(conf, "_is_hidden", return_value=False)  #
+        with pytest.raises(ValueError, match="Duplicate keys found in"):
+            # fail because of reading the hidden files and get duplicate keys
+            conf["parameters"]

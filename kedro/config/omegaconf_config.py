@@ -332,9 +332,14 @@ class OmegaConfigLoader(AbstractConfigLoader):
         for k in keys:
             value = value.get(k)
             if value is None:
-                _config_logger.debug(
-                    f"Using the default value for the global variable {variable}."
-                )
+                if default_value:
+                    _config_logger.debug(
+                        f"Using the default value for the global variable {variable}."
+                    )
+                else:
+                    _config_logger.warning(
+                        f"Globals key '{variable}' might be undefined. Using the default 'None' value."
+                    )
                 return default_value
         return value
 

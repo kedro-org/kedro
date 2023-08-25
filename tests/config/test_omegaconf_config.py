@@ -676,7 +676,7 @@ class TestOmegaConfigLoader:
     def test_globals(self, tmp_path):
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
         globals_config = {
-            "x": 34,
+            "x": 0,
         }
         _write_yaml(globals_params, globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")

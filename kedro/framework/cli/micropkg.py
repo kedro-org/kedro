@@ -1,5 +1,5 @@
 """A collection of CLI commands for working with Kedro micro-packages."""
-# ruff: noqa: I001 # https://github.com/kedro-org/kedro/pull/2634
+# ruff: noqa: I001
 from __future__ import annotations
 
 import logging

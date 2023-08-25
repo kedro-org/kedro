@@ -30,7 +30,6 @@ class TestMicropkgPackageCommand:
 
         expected_files = {
             f"{package_name}-{version}/{package_name}/__init__.py",
-            f"{package_name}-{version}/{package_name}/README.md",
             f"{package_name}-{version}/{package_name}/nodes.py",
             f"{package_name}-{version}/{package_name}/pipeline.py",
             f"{package_name}-{version}/{package_name}/config/parameters_{package_name}.yml",
@@ -264,7 +263,6 @@ class TestMicropkgPackageCommand:
 
         expected_files = {
             f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/__init__.py",
-            f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/README.md",
             f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/nodes.py",
             f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/pipeline.py",
             f"{PIPELINE_NAME}-{version}/tests/__init__.py",

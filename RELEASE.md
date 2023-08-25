@@ -44,6 +44,8 @@
 | `AbstractDataset`          | `AbstractDataSet`          | `kedro.io.core` |
 | `AbstractVersionedDataset` | `AbstractVersionedDataSet` | `kedro.io.core` |
 
+* Using the `layer` attribute at the top level is deprecated; it will be removed in Kedro version 0.19.0. Please move `layer` inside the `metadata` -> `kedro-viz` attributes.
+
 # Release 0.18.12
 
 ## Major features and improvements

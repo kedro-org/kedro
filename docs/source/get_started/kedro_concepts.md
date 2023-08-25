@@ -72,7 +72,7 @@ project-dir         # Parent directory of the template
 ├── notebooks       # Project-related Jupyter notebooks (can be used for experimental code before moving the code to src)
 ├── pyproject.toml  # Identifies the project root and contains configuration information
 ├── README.md       # Project README
-├── setup.cfg       # Configuration options for `pytest` when doing `kedro test` and for the `isort` utility when doing `kedro lint`
+├── .flake8         # Configuration options for `flake8` (linting)
 └── src             # Project source code
 ```
 

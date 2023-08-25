@@ -293,6 +293,17 @@ class DataCatalog:
                 dataset_patterns[ds_name] = ds_config
 
             else:
+                # Check if 'layer' attribute is defined at the top level
+                if "layer" in ds_config:
+                    import warnings
+
+                    warnings.warn(
+                        "Defining the 'layer' attribute at the top level is deprecated "
+                        "and will be removed in Kedro 0.19.0. Please move 'layer' inside the 'metadata' -> "
+                        "'kedro-viz' attributes. See https://docs.kedro.org/en/latest/visualisation/kedro"
+                        "-viz_visualisation.html#visualise-layers for more information.",
+                        FutureWarning,
+                    )
                 ds_layer = ds_config.pop("layer", None)
                 if ds_layer is not None:
                     layers[ds_layer].add(ds_name)

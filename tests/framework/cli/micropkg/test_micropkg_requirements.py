@@ -249,8 +249,8 @@ class TestMicropkgRequirements:
     def test_complex_requirements(
         self, requirement, fake_project_cli, fake_metadata, fake_package_path
     ):
-        """Options that are valid in requirements.txt but cannot be packaged using
-        setup.py."""
+        """Options that are valid in requirements.txt but cannot be packaged in
+        pyproject.toml."""
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         pipeline_requirements_txt = (
             fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"

@@ -20,6 +20,8 @@
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
+* Converted `setup.py` in default template to `pyproject.toml` and moved flake8 configuration
+  to dedicated file `.flake8`.
 
 ## Documentation changes
 * Revised the `data` section to restructure beginner and advanced pages about the Data Catalog and datasets.

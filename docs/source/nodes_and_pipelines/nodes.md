@@ -213,7 +213,7 @@ With `pandas` built-in support, you can use the `chunksize` argument to read dat
 ### Saving data with Generators
 To use generators to save data lazily, you need do three things:
 - Update the `make_prediction` function definition to use `return` instead of `yield`.
-- Create a [custom dataset](../extend_kedro/custom_datasets.md) called `ChunkWiseCSVDataset`
+- Create a [custom dataset](../data/how_to_create_a_custom_dataset.md) called `ChunkWiseCSVDataset`
 - Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
 
 Copy the following code to `nodes.py`. The main change is to use a new model `DecisionTreeClassifier` to make prediction by chunks in `make_predictions`.
@@ -287,7 +287,7 @@ def report_accuracy(y_pred: pd.Series, y_test: pd.Series):
 </details>
 
 
-The `ChunkWiseDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
+The `ChunkWiseCSVDataset` is a variant of the `pandas.CSVDataSet` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
 
 ```python
 import pandas as pd
@@ -295,10 +295,10 @@ import pandas as pd
 from kedro.io.core import (
     get_filepath_str,
 )
-from kedro.extras.datasets.pandas import CSVDataset
+from kedro.extras.datasets.pandas import CSVDataSet
 
 
-class ChunkWiseCSVDataset(CSVDataset):
+class ChunkWiseCSVDataset(CSVDataSet):
     """``ChunkWiseCSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem. It uses pandas to handle the CSV file.
     """
@@ -319,20 +319,20 @@ After that, you need to update the `catalog.yml` to use this new dataset.
 
 ```diff
 + y_pred:
-+  type: <package_name>.chunkwise.ChunkWiseCSVDataSet
++  type: <package_name>.chunkwise.ChunkWiseCSVDataset
 +  filepath: data/07_model_output/y_pred.csv
 ```
 
-With these changes, when you run `kedro run` in your terminal, you should see `y_pred`` being saved multiple times in the logs as the generator lazily processes and saves the data in smaller chunks.
+With these changes, when you run `kedro run` in your terminal, you should see `y_pred` being saved multiple times in the logs as the generator lazily processes and saves the data in smaller chunks.
 
 ```
 ...
                     INFO     Loading data from 'y_train' (MemoryDataset)...                                                                                         data_catalog.py:475
                     INFO     Running node: make_predictions: make_predictions([X_train,X_test,y_train]) -> [y_pred]                                                         node.py:331
-                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataSet)...                                                                                       data_catalog.py:514
-                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataSet)...                                                                                       data_catalog.py:514
-                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataSet)...                                                                                       data_catalog.py:514
+                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataset)...                                                                                       data_catalog.py:514
+                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataset)...                                                                                       data_catalog.py:514
+                    INFO     Saving data to 'y_pred' (ChunkWiseCSVDataset)...                                                                                       data_catalog.py:514
                     INFO     Completed 2 out of 3 tasks                                                                                                         sequential_runner.py:85
-                    INFO     Loading data from 'y_pred' (ChunkWiseCSVDataSet)...                                                                                    data_catalog.py:475
+                    INFO     Loading data from 'y_pred' (ChunkWiseCSVDataset)...                                                                                    data_catalog.py:475
 ...                                                                              runner.py:105
 ```

@@ -34,7 +34,7 @@ folders:
     fea: "04_feature"
 ```
 
-To point your `TemplatedConfigLoader` to the globals file, add it to the the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
+To point your `TemplatedConfigLoader` to the globals file, add it to the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
 
 ```python
 CONFIG_LOADER_ARGS = {"globals_pattern": "*globals.yml"}
@@ -124,6 +124,7 @@ This section contains a set of guidance for advanced configuration requirements 
 * [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
 * [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
 * [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+* [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
 * [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 * [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
@@ -176,7 +177,7 @@ From version 0.17.0, `TemplatedConfigLoader` also supports the [Jinja2](https://
 ```
 {% for speed in ['fast', 'slow'] %}
 {{ speed }}-trains:
-    type: MemoryDataSet
+    type: MemoryDataset
 
 {{ speed }}-cars:
     type: pandas.CSVDataSet
@@ -197,13 +198,13 @@ The output Python dictionary will look as follows:
 
 ```python
 {
-    "fast-trains": {"type": "MemoryDataSet"},
+    "fast-trains": {"type": "MemoryDataset"},
     "fast-cars": {
         "type": "pandas.CSVDataSet",
         "filepath": "s3://my_s3_bucket/fast-cars.csv",
         "save_args": {"index": True},
     },
-    "slow-trains": {"type": "MemoryDataSet"},
+    "slow-trains": {"type": "MemoryDataset"},
     "slow-cars": {
         "type": "pandas.CSVDataSet",
         "filepath": "s3://my_s3_bucket/slow-cars.csv",
@@ -261,6 +262,38 @@ Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the
 
 #### Other configuration files
 It's also possible to use variable interpolation in configuration files other than parameters and catalog, such as custom spark or mlflow configuration. This works in the same way as variable interpolation in parameter files. You can still use the underscore for the templated values if you want, but it's not mandatory like it is for catalog files.
+
+### How to use global variables with the `OmegaConfigLoader`
+From Kedro `0.18.13`, you can use variable interpolation in your configurations using "globals" with `OmegaConfigLoader`.
+The benefit of using globals over regular variable interpolation is that the global variables are shared across different configuration types, such as catalog and parameters.
+By default, these global variables are assumed to be in files called `globals.yml` in any of your environments. If you want to configure the naming patterns for the files that contain your global variables,
+you can do so [by overwriting the `globals` key in `config_patterns`](#how-to-change-which-configuration-files-are-loaded). You can also [bypass the configuration loading](#how-to-bypass-the-configuration-loading-rules)
+to directly set the global variables in `OmegaConfigLoader`.
+
+Suppose you have global variables located in the file `conf/base/globals.yml`:
+```yaml
+my_global_value: 45
+dataset_type:
+  csv: pandas.CSVDataSet
+```
+You can access these global variables in your catalog or parameters config files with a `globals` resolver like this:
+`conf/base/parameters.yml`:
+```yaml
+my_param : "${globals:my_global_value}"
+```
+`conf/base/catalog.yml`:
+```yaml
+companies:
+  filepath: data/01_raw/companies.csv
+  type: "${globals:dataset_type.csv}"
+```
+You can also provide a default value to be used in case the global variable does not exist:
+```yaml
+my_param: "${globals: nonexistent_global, 23}"
+```
+If there are duplicate keys in the globals files in your base and run time environments, the values in the run time environment
+will overwrite the values in your base environment.
+
 
 ### How to use resolvers in the `OmegaConfigLoader`
 Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s

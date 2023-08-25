@@ -33,7 +33,7 @@ For those reasons, the packaging approach is unsuitable for development projects
 The sequence of steps described in this section is as follows:
 
 1. [Note your Databricks username and host](#note-your-databricks-username-and-host)
-2. [Install Kedro and the databricks CLI in a new virtual environment](#install-kedro-and-the-databricks-cli-in-a-new-virtual-environment)
+2. [Install Kedro and the Databricks CLI in a new virtual environment](#install-kedro-and-the-databricks-cli-in-a-new-virtual-environment)
 3. [Authenticate the Databricks CLI](#authenticate-the-databricks-cli)
 4. [Create a new Kedro project](#create-a-new-kedro-project)
 5. [Create an entry point for Databricks](#create-an-entry-point-for-databricks)
@@ -49,10 +49,10 @@ Find your Databricks username in the top right of the workspace UI and the host 
 ![Find Databricks host and username](../../meta/images/find_databricks_host_and_username.png)
 
 ```{note}
-Your databricks host must include the protocol (`https://`).
+Your Databricks host must include the protocol (`https://`).
 ```
 
-### Install Kedro and the databricks CLI in a new virtual environment
+### Install Kedro and the Databricks CLI in a new virtual environment
 
 The following commands will create a new `conda` environment, activate it, and then install Kedro and the Databricks CLI.
 
@@ -170,7 +170,7 @@ A Kedro project's configuration and data do not get included when it is packaged
 
 Your packaged Kedro project needs access to data and configuration in order to run. Therefore, you will need to upload your project's data and configuration to a location accessible to Databricks. In this guide, we will store the data on the Databricks File System (DBFS).
 
-The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md#the-data-catalog) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
+The `databricks-iris` starter contains a [catalog](../../data/data_catalog.md) that is set up to access data stored in DBFS (`<project_root>/conf/`). You will point your project to use configuration stored on DBFS using the `--conf-source` option when you create your job on Databricks.
 
 There are several ways to upload data to DBFS: you can use the [DBFS API](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/dbfs), the [`dbutils` module](https://docs.databricks.com/dev-tools/databricks-utils.html) in a Databricks notebook or the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/dbfs-cli.html). In this guide, it is recommended to use the Databricks CLI because of the convenience it offers.
 

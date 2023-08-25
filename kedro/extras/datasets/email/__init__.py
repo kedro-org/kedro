@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementations for managing email messages."""
+"""``AbstractDataset`` implementations for managing email messages."""
 
 __all__ = ["EmailMessageDataSet"]
 

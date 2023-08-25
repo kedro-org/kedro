@@ -13,11 +13,18 @@
 ## Major features and improvements
 * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
 * Added support for Python 3.11. This includes tackling challenges like dependency pinning and test adjustments to ensure a smooth experience. Detailed migration tips are provided below for further context.
+* Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
+* Added support for global variables to `OmegaConfigLoader`.
+
 
 ## Bug fixes and other changes
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
+* Converted `setup.py` in default template to `pyproject.toml` and moved flake8 configuration
+  to dedicated file `.flake8`.
 
 ## Documentation changes
+* Revised the `data` section to restructure beginner and advanced pages about the Data Catalog and datasets.
+* Moved contributor documentation to the [GitHub wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).
 * Update example of using generator functions in nodes.
 * Added migration guide from the `ConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` is deprecated and will be removed in the `0.19.0` release.
 
@@ -29,6 +36,12 @@
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
+* Renamed abstract dataset classes, in accordance with the [Kedro lexicon](https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide#kedro-lexicon). Dataset classes ending with "DataSet" are deprecated and will be removed in 0.19.0. Note that all of the below classes are also importable from `kedro.io`; only the module where they are defined is listed as the location.
+
+| Type                       | Deprecated Alias           | Location        |
+| -------------------------- | -------------------------- | --------------- |
+| `AbstractDataset`          | `AbstractDataSet`          | `kedro.io.core` |
+| `AbstractVersionedDataset` | `AbstractVersionedDataSet` | `kedro.io.core` |
 
 # Release 0.18.12
 

@@ -1,0 +1,12 @@
+extends: substitution
+message: "Use '%s' instead of '%s'."
+ignorecase: true
+level: error
+action:
+  name: replace
+swap:
+  # bad: good
+  'black ?list': 'disallow list|exclude list'
+  'master': primary
+  'slave': secondary
+  'white ?list': 'allow list|include list'

@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to load/save data from/to a YAML file."""
+"""``AbstractDataset`` implementation to load/save data from/to a YAML file."""
 
 __all__ = ["YAMLDataSet"]
 

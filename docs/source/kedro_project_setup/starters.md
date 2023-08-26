@@ -155,7 +155,7 @@ Here is the layout of the project as a Cookiecutter template:
 ├── docs                         # Project documentation
 ├── notebooks                    # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
 ├── README.md                    # Project README
-├── setup.cfg                    # Configuration options for tools e.g. `pytest` or `black`
+├── .flake8                      # Configuration options for `flake8` (linting)
 └── src                          # Project source code
     └── {{ cookiecutter.python_package }}
        ├── __init.py__
@@ -164,7 +164,7 @@ Here is the layout of the project as a Cookiecutter template:
        ├── __main__.py
        └── settings.py
     ├── requirements.txt
-    ├── setup.py
+    ├── pyproject.toml
     └── tests
 ```
 

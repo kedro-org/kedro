@@ -33,7 +33,7 @@ from pathlib import Path
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
-conf_path = str(Path(project_path) / settings.CONF_SOURCE)
+conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path)
 
 try:

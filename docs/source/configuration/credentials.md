@@ -12,10 +12,13 @@ Credentials configuration can be loaded the same way as any other project config
 The following examples all use the default `ConfigLoader` class.
 
 ```python
+from pathlib import Path
+
 from kedro.config import ConfigLoader
 from kedro.framework.project import settings
 
-conf_path = str(project_path / settings.CONF_SOURCE)
+# Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html#terminology)
+conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path)
 credentials = conf_loader["credentials"]
 ```
@@ -25,10 +28,12 @@ This loads configuration files from `conf/base` and `conf/local` whose filenames
 Calling `conf_loader[key]` in the example above throws a `MissingConfigException` error if no configuration files match the given key. But if this is a valid workflow for your application, you can handle it as follows:
 
 ```python
+from pathlib import Path
+
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
-conf_path = str(project_path / settings.CONF_SOURCE)
+conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path)
 
 try:

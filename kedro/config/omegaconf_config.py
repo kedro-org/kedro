@@ -338,8 +338,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
                         f"Using the default value for the global variable {variable}."
                     )
                 else:
-                    _config_logger.warning(
-                        f"Globals key '{variable}' might be undefined. Using the default 'None' value."
+
+                    raise InterpolationResolutionError(
+                        "Default value is not defined for {$globals: {keys}}.".replace(
+                            "{keys}", variable
+                        )
                     )
                 return default_value
         return value

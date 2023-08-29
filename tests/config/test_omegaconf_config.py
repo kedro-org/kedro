@@ -783,8 +783,7 @@ class TestOmegaConfigLoader:
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
         base_param_config = {
-            "param1": "${globals:x.y}",
-            "param2": "${globals: x.none, 33}",
+            "param": "${globals: x.none, 33}",
         }
         base_globals_config = {
             "x": {
@@ -796,7 +795,7 @@ class TestOmegaConfigLoader:
         _write_yaml(base_globals, base_globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
         # Default value is not used
-        assert conf["parameters"]["param2"] is None
+        assert conf["parameters"]["param"] is None
 
     def test_globals_missing_default(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"

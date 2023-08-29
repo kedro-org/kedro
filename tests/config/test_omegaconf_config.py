@@ -765,10 +765,12 @@ class TestOmegaConfigLoader:
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
         base_param_config = {
             "param1": "${globals:x.y}",
+            "param2": "${globals: x.none, 33}",
         }
         base_globals_config = {
             "x": {
                 "z": 23,
+                "none": None,
             },
         }
         _write_yaml(base_params, base_param_config)
@@ -776,6 +778,8 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
         # Default value None is being used
         assert conf["parameters"]["param1"] is None
+        # Default value is not used
+        assert conf["parameters"]["param2"] is None
 
     def test_bad_globals_underscore(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"

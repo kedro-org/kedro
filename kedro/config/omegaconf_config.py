@@ -330,8 +330,9 @@ class OmegaConfigLoader(AbstractConfigLoader):
         keys = variable.split(".")
         value = self["globals"]
         for k in keys:
-            value = value.get(k)
-            if value is None:
+            if k in value:
+                value = value.get(k)
+            else:
                 if default_value:
                     _config_logger.debug(
                         f"Using the default value for the global variable {variable}."

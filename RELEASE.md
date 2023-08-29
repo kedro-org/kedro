@@ -21,7 +21,6 @@
 * Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
 * Converted `setup.py` in default template to `pyproject.toml` and moved flake8 configuration
   to dedicated file `.flake8`.
-* Fixed a bug that `OmegaConfigLoader` read config from hidden directory like `.ipynb_checkpoints`.
 * Updated `OmegaConfigLoader` to ignore config from hidden directories like `.ipynb_checkpoints`.
 
 ## Documentation changes

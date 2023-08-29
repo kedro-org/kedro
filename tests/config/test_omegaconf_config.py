@@ -732,27 +732,6 @@ class TestOmegaConfigLoader:
         # Nested globals are accessible with dot notation
         assert conf["parameters"]["my_nested_param"] == globals_config["nested"]["y"]
 
-    def test_globals_default_non_exist_keys(self, tmp_path):
-        base_params = tmp_path / _BASE_ENV / "parameters.yml"
-        globals_params = tmp_path / _BASE_ENV / "globals.yml"
-        param_config = {
-            "OK": "${globals: nested.NOT_EXIST, null}",
-            "NOT_OK": "${globals:nested.NOT_EXIST}",
-        }
-        globals_config = {
-            "nested": {
-                "y": 42,
-            },
-        }
-        _write_yaml(base_params, param_config)
-        _write_yaml(globals_params, globals_config)
-        conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        assert conf["parameters"]["OK"] is None
-
-        with pytest.raises(InterpolationResolutionError):
-            # Nested globals are accessible with dot notation
-            conf["parameters"]["NOT_OK"]
-
     def test_globals_across_env(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         local_params = tmp_path / _DEFAULT_RUN_ENV / "parameters.yml"
@@ -818,6 +797,27 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
         # Default value is not used
         assert conf["parameters"]["param2"] is None
+
+    def test_globals_missing_default(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        globals_params = tmp_path / _BASE_ENV / "globals.yml"
+        param_config = {
+            "NOT_OK": "${globals:nested.NOT_EXIST}",
+        }
+        globals_config = {
+            "nested": {
+                "y": 42,
+            },
+        }
+        _write_yaml(base_params, param_config)
+        _write_yaml(globals_params, globals_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+
+        with pytest.raises(
+            InterpolationResolutionError, match="Default value is not defined for"
+        ):
+            # Nested globals are accessible with dot notation
+            conf["parameters"]["NOT_OK"]
 
     def test_bad_globals_underscore(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"

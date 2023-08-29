@@ -333,7 +333,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             if k in value:
                 value = value.get(k)
             else:
-                if default_value is not None:
+                if default_value is not _NO_VALUE:
                     _config_logger.debug(
                         f"Using the default value for the global variable {variable}."
                     )

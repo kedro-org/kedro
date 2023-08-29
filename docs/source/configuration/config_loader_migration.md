@@ -119,9 +119,10 @@ In this example, the `"catalog"` key points to the default catalog patterns spec
 ### 6. Templating of values
 Templating of values is done through native [variable interpolation in `OmegaConfigLoader`](advanced_configuration.md#how-to-do-templating-with-the-omegaconfigloader). Where in `TemplatedConfigLoader` it was necessary to
 provide the template values in a `globals` file or dictionary, in `OmegaConfigLoader` you can provide these values within the same file that has the placeholders or a file that has a name that follows [the same config pattern specified](configuration_basics.md#configuration-patterns).
+The variable interpolation is scoped to a specific configuration type and environment. If you want to share templated values across configuration types and environments, [you will need to use globals](#7-globals).
 
 Suppose you are migrating a templated **catalog** file from using `TemplatedConfigLoader` to `OmegaConfigLoader` you would do the following:
-1. Rename `conf/base/globals.yml` to match the patterns specified for catalog (`["catalog*", "catalog*/**", "**/catalog*"]`), e.g. `conf/base/catalog_globals.yml`
+1. Rename `conf/base/globals.yml` to match the patterns specified for catalog (`["catalog*", "catalog*/**", "**/catalog*"]`), for example `conf/base/catalog_globals.yml`
 2. Add an underscore `_` to any catalog template values. This is needed because of how catalog entries are validated.
 
 ```diff
@@ -165,8 +166,8 @@ boats:
 ```
 
 ### 7. Globals
-If you want to share variables across configuration types, e.g. parameters and catalog, and environments you need to use [the custom globals resolver with the `OmegaConfigLoader`](advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader).
-The `OmegaConfigLoader` requires global values to be provided in a `globals.yml` file. The following section explains the differences between using globals with `TemplatedConfigLoader` and the `OmegaConfigLoader`.
+If you want to share variables across configuration types, for example parameters and catalog, and environments you need to use [the custom globals resolver with the `OmegaConfigLoader`](advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader).
+The `OmegaConfigLoader` requires global values to be provided in a `globals.yml` file. Note that using a `globals_dict` to provide globals is not supported with `OmegaConfigLoader`. The following section explains the differences between using globals with `TemplatedConfigLoader` and the `OmegaConfigLoader`.
 
 Let's assume your project contains a `conf/base/globals.yml` file with the following contents:
 
@@ -210,7 +211,7 @@ raw_car_data:
 ```
 
 ### 8. Deprecation of Jinja2
-`OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../data/data_catalog.md#load-multiple-datasets-with-similar-configuration-using-dataset-factories).
+`OmegaConfigLoader` does not support Jinja2 syntax in configuration. However, users can achieve similar functionality with the `OmegaConfigLoader` in combination with [dataset factories](../data/kedro_dataset_factories.md).
 If you take the example from [the `TemplatedConfigLoader` with Jinja2 documentation](advanced_configuration.md#how-to-use-jinja2-syntax-in-configuration) you can rewrite your configuration as follows to work with `OmegaConfigLoader`:
 
 ```diff

@@ -781,6 +781,25 @@ class TestOmegaConfigLoader:
         # Base global value is accessible to local params
         assert conf["parameters"]["param2"] == base_globals_config["x"]
 
+    def test_globals_default(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        base_param_config = {
+            "int": "${globals:x.NOT_EXIST, 1}",
+            "str": "${globals: x.NOT_EXIST, '2'}",
+            "dummy": "${globals: x.DUMMY.DUMMY, '2'}",
+        }
+        base_globals_config = {"x": {"DUMMY": 3}}
+        _write_yaml(base_params, base_param_config)
+        _write_yaml(base_globals, base_globals_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        # Default value None is being used
+        assert conf["parameters"]["int"] == 1
+        # Default value is not used
+        assert conf["parameters"]["str"] == "2"
+        # Test when x.DUMMY is not a dictionary it should still work
+        assert conf["parameters"]["dummy"] == "2"
+
     def test_globals_default_none(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         base_globals = tmp_path / _BASE_ENV / "globals.yml"

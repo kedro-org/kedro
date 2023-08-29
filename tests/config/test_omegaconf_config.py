@@ -736,7 +736,7 @@ class TestOmegaConfigLoader:
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
         param_config = {
-            "OK": "${globals: nested.NOT_EXIST, None}",
+            "OK": "${globals: nested.NOT_EXIST, null}",
             "NOT_OK": "${globals:nested.NOT_EXIST}",
         }
         globals_config = {

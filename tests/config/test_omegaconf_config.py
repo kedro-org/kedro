@@ -708,9 +708,9 @@ class TestOmegaConfigLoader:
         # Globals are resolved correctly in parameter
         assert conf["parameters"]["my_param"] == globals_config["x"]
         # The default value is used if the key does not exist
-        # assert conf["parameters"]["my_param_default"] == 34
+        assert conf["parameters"]["my_param_default"] == 34
         # # Globals are resolved correctly in catalog
-        # assert conf["catalog"]["companies"]["type"] == globals_config["dataset_type"]
+        assert conf["catalog"]["companies"]["type"] == globals_config["dataset_type"]
 
     def test_globals_nested(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"

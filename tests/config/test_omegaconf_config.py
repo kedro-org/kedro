@@ -816,8 +816,6 @@ class TestOmegaConfigLoader:
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        # Default value None is being used
-        assert conf["parameters"]["param1"] is None
         # Default value is not used
         assert conf["parameters"]["param2"] is None
 

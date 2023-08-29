@@ -20,6 +20,8 @@ from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigExce
 
 _config_logger = logging.getLogger(__name__)
 
+_NO_VALUE = object()
+
 
 class OmegaConfigLoader(AbstractConfigLoader):
     """Recursively scan directories (config paths) contained in ``conf_source`` for
@@ -319,7 +321,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             replace=True,
         )
 
-    def _get_globals_value(self, variable, default_value=None):
+    def _get_globals_value(self, variable, default_value=_NO_VALUE):
         """Return the globals values to the resolver"""
         if variable.startswith("_"):
             raise InterpolationResolutionError(

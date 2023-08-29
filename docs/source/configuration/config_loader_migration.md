@@ -65,11 +65,11 @@ For error and exception handling, most errors are the same. Those you need to be
 
 ### 1. Install the required library
 The [`OmegaConfigLoader`](advanced_configuration.md#omegaconfigloader) was introduced in Kedro `0.18.5` and is based on [OmegaConf](https://omegaconf.readthedocs.io/). Features that replace `TemplatedConfigLoader` functionality have been released in later versions, so we recommend users
-to install at least Kedro version `0.18.X` to properly replace the `TemplatedConfigLoader` with `OmegaConfigLoader`.
+to install at least Kedro version `0.18.13` to properly replace the `TemplatedConfigLoader` with `OmegaConfigLoader`.
 You can install both this Kedro version and `omegaconf` using `pip`:
 
 ```bash
-pip install kedro==0.18.X
+pip install kedro>=0.18.13, <0.19.0
 ```
 This would be the minimum required Kedro version which includes `omegaconf` as a dependency and the necessary functionality to replace `TemplatedConfigLoader`.
 Or you can run:

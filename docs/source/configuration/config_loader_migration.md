@@ -165,7 +165,7 @@ boats:
 ```
 
 ### 7. Globals
-If you want to share variables across configuration types, e.g. parameters and catalog, and environments you need to use [the custom globals resolver with the `OmegaConfigLoader`](...).
+If you want to share variables across configuration types, e.g. parameters and catalog, and environments you need to use [the custom globals resolver with the `OmegaConfigLoader`](advanced_configuration.md#how-to-use-global-variables-with-the-omegaconfigloader).
 The `OmegaConfigLoader` requires global values to be provided in a `globals.yml` file. The following section explains the differences between using globals with `TemplatedConfigLoader` and the `OmegaConfigLoader`.
 
 Let's assume your project contains a `conf/base/globals.yml` file with the following contents:

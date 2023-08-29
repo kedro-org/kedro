@@ -48,8 +48,6 @@ def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:
         if not hook_manager.is_registered(hooks_collection):
             hook_manager.register(hooks_collection)
 
-    hook_manager.check_pending() # Validate hook_impl respect hook_spec
-
 
 def _register_hooks_setuptools(
     hook_manager: PluginManager, disabled_plugins: Iterable[str]

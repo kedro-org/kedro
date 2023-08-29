@@ -732,7 +732,7 @@ class TestOmegaConfigLoader:
         # Nested globals are accessible with dot notation
         assert conf["parameters"]["my_nested_param"] == globals_config["nested"]["y"]
 
-    def test_globals_nested_not_exist(self, tmp_path):
+    def test_globals_default_non_exist_keys(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
         param_config = {

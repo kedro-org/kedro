@@ -327,25 +327,27 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise InterpolationResolutionError(
                 "Keys starting with '_' are not supported for globals."
             )
-        keys = variable.split(".")
         value = self["globals"]
-        for k in keys:
-            if k in value:
-                value = value.get(k)
-            else:
-                if default_value is not _NO_VALUE:
-                    _config_logger.debug(
-                        f"Using the default value for the global variable {variable}."
-                    )
-                else:
 
-                    raise InterpolationResolutionError(
-                        "Default value is not defined for {$globals: {keys}}.".replace(
-                            "{keys}", variable
-                        )
-                    )
-                return default_value
-        return value
+        global_omegaconf = OmegaConf.create(value)
+        interpolated_value = OmegaConf.select(
+            global_omegaconf, variable, default=default_value
+        )
+        if interpolated_value != _NO_VALUE:
+            return interpolated_value
+
+        elif default_value != _NO_VALUE:
+            _config_logger.debug(
+                f"Using the default value for the global variable {variable}."
+            )
+            return default_value
+
+        else:
+            raise InterpolationResolutionError(
+                "Default value is not defined for {$globals: {keys}}.".replace(
+                    "{keys}", variable
+                )
+            )
 
     @staticmethod
     def _register_new_resolvers(resolvers: dict[str, Callable]):

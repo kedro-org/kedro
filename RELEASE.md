@@ -23,6 +23,7 @@
 * Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
 * Added support for global variables to `OmegaConfigLoader`.
 * Change Kedro starters and new Kedro projects to use `OmegaConfigLoader`.
+* Adopted a flat project structure for modular pipeline and `kedro pipeline create` is updated accordingly.
 
 
 ## Bug fixes and other changes

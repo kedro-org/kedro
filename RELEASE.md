@@ -23,7 +23,7 @@
 * Added support for global variables to `OmegaConfigLoader`.
 * Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
 * Change Kedro starters and new Kedro projects to use `OmegaConfigLoader`.
-* Adopted a flat project structure for modular pipeline and `kedro pipeline create` is updated accordingly.
+* Implemented a flat project structure for modular pipeline, and accordingly, updated the kedro pipeline create command.
 * Updated Kedro starters to use `pyproject.toml` instead of `setup.py`.
 
 

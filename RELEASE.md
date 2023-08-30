@@ -19,18 +19,18 @@
 
 ## Major features and improvements
 * Added support for Python 3.11. This includes tackling challenges like dependency pinning and test adjustments to ensure a smooth experience. Detailed migration tips are provided below for further context.
-* Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
-* Added support for global variables to `OmegaConfigLoader`.
+* Added new `OmegaConfigLoader` features:
+  * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
+  * Added support for global variables to `OmegaConfigLoader`.
 * Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
-* Change Kedro starters and new Kedro projects to use `OmegaConfigLoader`.
-* Implemented a flat project structure for modular pipeline, and accordingly, updated the kedro pipeline create command.
-* Updated Kedro starters to use `pyproject.toml` instead of `setup.py`.
-
+* Implemented a flat `conf/` structure for modular pipeline, and accordingly, updated the `kedro pipeline create` and `kedro catalog create` command.
+* Updated new Kedro project template and Kedro starters:
+  * Change Kedro starters and new Kedro projects to use `OmegaConfigLoader`.
+  * Converted `setup.py` in new Kedro project template and Kedro starters to `pyproject.toml` and moved flake8 configuration
+  to dedicated file `.flake8`.
+  * Updated the spaceflights starter to use the new flat `conf/` structure.
 
 ## Bug fixes and other changes
-* Updated `kedro pipeline create` and `kedro catalog create` to use new `/conf` file structure.
-* Converted `setup.py` in default template to `pyproject.toml` and moved flake8 configuration
-  to dedicated file `.flake8`.
 * Updated `OmegaConfigLoader` to ignore config from hidden directories like `.ipynb_checkpoints`.
 
 ## Documentation changes

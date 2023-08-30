@@ -7,15 +7,22 @@
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+# Upcoming Release 0.18.14
 
-# Upcoming Release 0.18.13
+## Major features and improvements
+## Bug fixes and other changes
+## Documentation changes
+## Breaking changes to the API
+## Upcoming deprecations for Kedro 0.19.0
+
+# Release 0.18.13
 
 ## Major features and improvements
 * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
 * Added support for Python 3.11. This includes tackling challenges like dependency pinning and test adjustments to ensure a smooth experience. Detailed migration tips are provided below for further context.
 * Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
 * Added support for global variables to `OmegaConfigLoader`.
-* Change Kedro starters to use `OmegaConfigLoader`.
+* Change Kedro starters and new Kedro projects to use `OmegaConfigLoader`.
 
 
 ## Bug fixes and other changes
@@ -27,8 +34,8 @@
 ## Documentation changes
 * Revised the `data` section to restructure beginner and advanced pages about the Data Catalog and datasets.
 * Moved contributor documentation to the [GitHub wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).
-* Update example of using generator functions in nodes.
-* Added migration guide from the `ConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` is deprecated and will be removed in the `0.19.0` release.
+* Updated example of using generator functions in nodes.
+* Added migration guide from the `ConfigLoader` and `TemplatedConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` and `TemplatedConfigLoader` are deprecated and will be removed in the `0.19.0` release.
 
 ## Migration Tips for Python 3.11:
 * PyTables on Windows: Users on Windows with Python >=3.8 should note we've pinned `pytables` to `3.8.0` due to compatibility issues.

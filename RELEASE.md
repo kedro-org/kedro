@@ -35,7 +35,7 @@
 * Revised the `data` section to restructure beginner and advanced pages about the Data Catalog and datasets.
 * Moved contributor documentation to the [GitHub wiki](https://github.com/kedro-org/kedro/wiki/Contribute-to-Kedro).
 * Updated example of using generator functions in nodes.
-* Added migration guide from the `ConfigLoader` and `TemplatedConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` and `TemplatedConfigLoader` are deprecated and will be removed in the `0.19.0` release.
+* Added migration guide from the `ConfigLoader` and the `TemplatedConfigLoader` to the `OmegaConfigLoader`. The `ConfigLoader` and the `TemplatedConfigLoader` are deprecated and will be removed in the `0.19.0` release.
 
 ## Migration Tips for Python 3.11:
 * PyTables on Windows: Users on Windows with Python >=3.8 should note we've pinned `pytables` to `3.8.0` due to compatibility issues.

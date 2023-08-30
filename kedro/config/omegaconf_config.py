@@ -20,6 +20,8 @@ from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigExce
 
 _config_logger = logging.getLogger(__name__)
 
+_NO_VALUE = object()
+
 
 class OmegaConfigLoader(AbstractConfigLoader):
     """Recursively scan directories (config paths) contained in ``conf_source`` for
@@ -316,31 +318,26 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """Register the globals resolver"""
         OmegaConf.register_new_resolver(
             "globals",
-            lambda variable, default_value=None: self._get_globals_value(
-                variable, default_value
-            ),
+            self._get_globals_value,
             replace=True,
         )
 
-    def _get_globals_value(self, variable, default_value):
+    def _get_globals_value(self, variable, default_value=_NO_VALUE):
         """Return the globals values to the resolver"""
         if variable.startswith("_"):
             raise InterpolationResolutionError(
                 "Keys starting with '_' are not supported for globals."
             )
-        keys = variable.split(".")
-        value = self["globals"]
-        for k in keys:
-            value = value.get(k)
-            if not value:
-                if default_value:
-                    _config_logger.debug(
-                        f"Using the default value for the global variable {variable}."
-                    )
-                    return default_value
-                msg = f"Globals key '{variable}' not found and no default value provided. "
-                raise InterpolationResolutionError(msg)
-        return value
+        global_omegaconf = OmegaConf.create(self["globals"])
+        interpolated_value = OmegaConf.select(
+            global_omegaconf, variable, default=default_value
+        )
+        if interpolated_value != _NO_VALUE:
+            return interpolated_value
+        else:
+            raise InterpolationResolutionError(
+                f"Globals key '{variable}' not found and no default value provided."
+            )
 
     @staticmethod
     def _register_new_resolvers(resolvers: dict[str, Callable]):

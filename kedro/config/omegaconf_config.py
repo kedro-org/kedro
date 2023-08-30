@@ -252,11 +252,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 f"or is not a valid directory: {conf_path}"
             )
 
-        paths = [
-            Path(each)
-            for pattern in patterns
-            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix())
-        ]
+        paths = []
+        for pattern in patterns:
+            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix()):
+                if not self._is_hidden(each):
+                    paths.append(Path(each))
+
         deduplicated_paths = set(paths)
         config_files_filtered = [
             path for path in deduplicated_paths if self._is_valid_config_path(path)
@@ -391,3 +392,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
             OmegaConf.clear_resolver("oc.env")
         else:
             OmegaConf.resolve(config)
+
+    def _is_hidden(self, path: str):
+        """Check if path contains any hidden directory or is a hidden file"""
+        path = Path(path).resolve().as_posix()
+        parts = path.split(self._fs.sep)  # filesystem specific separator
+        HIDDEN = "."
+        # Check if any component (folder or file) starts with a dot (.)
+        return any(part.startswith(HIDDEN) for part in parts)

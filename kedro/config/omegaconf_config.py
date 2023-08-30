@@ -327,21 +327,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
             raise InterpolationResolutionError(
                 "Keys starting with '_' are not supported for globals."
             )
-        value = self["globals"]
-
-        global_omegaconf = OmegaConf.create(value)
+        global_omegaconf = OmegaConf.create(self["globals"])
         interpolated_value = OmegaConf.select(
             global_omegaconf, variable, default=default_value
         )
         if interpolated_value != _NO_VALUE:
             return interpolated_value
-
-        elif default_value != _NO_VALUE:
-            _config_logger.debug(
-                f"Using the default value for the global variable {variable}."
-            )
-            return default_value
-
         else:
             raise InterpolationResolutionError(
                 "Default value is not defined for {$globals: {keys}}.".replace(

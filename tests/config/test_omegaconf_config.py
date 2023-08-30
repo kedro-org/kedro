@@ -704,12 +704,11 @@ class TestOmegaConfigLoader:
         _write_yaml(globals_params, globals_config)
         _write_yaml(base_catalog, catalog_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        assert OmegaConf.has_resolver("globals")
         # Globals are resolved correctly in parameter
         assert conf["parameters"]["my_param"] == globals_config["x"]
         # The default value is used if the key does not exist
         assert conf["parameters"]["my_param_default"] == 34
-        # # Globals are resolved correctly in catalog
+        # Globals are resolved correctly in catalog
         assert conf["catalog"]["companies"]["type"] == globals_config["dataset_type"]
 
     def test_globals_nested(self, tmp_path):
@@ -772,9 +771,9 @@ class TestOmegaConfigLoader:
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        # Default value None is being used
+        # Default value is being used as int
         assert conf["parameters"]["int"] == 1
-        # Default value is not used
+        # Default value is being used as str
         assert conf["parameters"]["str"] == "2"
         # Test when x.DUMMY is not a dictionary it should still work
         assert conf["parameters"]["dummy"] == "2"
@@ -783,20 +782,24 @@ class TestOmegaConfigLoader:
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
         base_param_config = {
-            "zero": "${globals: x.none, 0}",
-            "null": "${globals:: x.none, null}",
+            "zero": "${globals: x.NOT_EXIST, 0}",
+            "null": "${globals: x.NOT_EXIST, null}",
+            "null2": "${globals: x.y}",
         }
         base_globals_config = {
             "x": {
                 "z": 23,
+                "y": None,
             },
         }
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        # Default value is not used
+        # Default value can be 0 or null
         assert conf["parameters"]["zero"] == 0
         assert conf["parameters"]["null"] is None
+        # Global value is null
+        assert conf["parameters"]["null2"] is None
 
     def test_globals_missing_default(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
@@ -816,7 +819,6 @@ class TestOmegaConfigLoader:
         with pytest.raises(
             InterpolationResolutionError, match="Default value is not defined for"
         ):
-            # Nested globals are accessible with dot notation
             conf["parameters"]["NOT_OK"]
 
     def test_bad_globals_underscore(self, tmp_path):

@@ -69,7 +69,7 @@ to install at least Kedro version `0.18.13` to properly replace the `TemplatedCo
 You can install both this Kedro version and `omegaconf` using `pip`:
 
 ```bash
-pip install kedro>=0.18.13, <0.19.0
+pip install "kedro>=0.18.13, <0.19.0"
 ```
 This would be the minimum required Kedro version which includes `omegaconf` as a dependency and the necessary functionality to replace `TemplatedConfigLoader`.
 Or you can run:
@@ -93,7 +93,6 @@ Replace the import statement for `TemplatedConfigLoader` with the one for `Omega
 
 ```diff
 - from kedro.config import TemplatedConfigLoader
-
 + from kedro.config import OmegaConfigLoader
 ```
 

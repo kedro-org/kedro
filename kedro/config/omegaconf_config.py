@@ -335,9 +335,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             return interpolated_value
         else:
             raise InterpolationResolutionError(
-                "Default value is not defined for {$globals: {keys}}.".replace(
-                    "{keys}", variable
-                )
+                f"Globals key '{variable}' not found and no default value provided."
             )
 
     @staticmethod

@@ -817,7 +817,8 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
 
         with pytest.raises(
-            InterpolationResolutionError, match="Default value is not defined for"
+            InterpolationResolutionError,
+            match="Globals key 'nested.NOT_EXIST' not found and no default value provided.",
         ):
             conf["parameters"]["NOT_OK"]
 

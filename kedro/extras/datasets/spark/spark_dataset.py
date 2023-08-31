@@ -201,7 +201,9 @@ class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    advanced_data_catalog_usage.html>`_: ::
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: python
 
         >>> from pyspark.sql import SparkSession
         >>> from pyspark.sql.types import (StructField, StringType,

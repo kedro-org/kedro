@@ -40,7 +40,9 @@ class JSONDataSet(AbstractVersionedDataset[Any, Any]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    advanced_data_catalog_usage.html>`_: ::
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: python
 
         >>> from kedro.extras.datasets.json import JSONDataSet
         >>>

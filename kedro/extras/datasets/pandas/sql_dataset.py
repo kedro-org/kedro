@@ -132,7 +132,9 @@ class SQLTableDataSet(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    advanced_data_catalog_usage.html>`_: ::
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: python
 
         >>> from kedro.extras.datasets.pandas import SQLTableDataSet
         >>> import pandas as pd
@@ -310,7 +312,9 @@ class SQLQueryDataSet(AbstractDataset[None, pd.DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    advanced_data_catalog_usage.html>`_: ::
+    advanced_data_catalog_usage.html>`_:
+
+    .. code-block:: python
 
         >>> from kedro.extras.datasets.pandas import SQLQueryDataSet
         >>> import pandas as pd

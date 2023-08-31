@@ -676,7 +676,7 @@ class TestOmegaConfigLoader:
     def test_globals(self, tmp_path):
         globals_params = tmp_path / _BASE_ENV / "globals.yml"
         globals_config = {
-            "x": 34,
+            "x": 0,
         }
         _write_yaml(globals_params, globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
@@ -704,7 +704,6 @@ class TestOmegaConfigLoader:
         _write_yaml(globals_params, globals_config)
         _write_yaml(base_catalog, catalog_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
-        assert OmegaConf.has_resolver("globals")
         # Globals are resolved correctly in parameter
         assert conf["parameters"]["my_param"] == globals_config["x"]
         # The default value is used if the key does not exist
@@ -760,25 +759,68 @@ class TestOmegaConfigLoader:
         # Base global value is accessible to local params
         assert conf["parameters"]["param2"] == base_globals_config["x"]
 
-    def test_bad_globals(self, tmp_path):
+    def test_globals_default(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
         base_param_config = {
-            "param1": "${globals:x.y}",
+            "int": "${globals:x.NOT_EXIST, 1}",
+            "str": "${globals: x.NOT_EXIST, '2'}",
+            "dummy": "${globals: x.DUMMY.DUMMY, '2'}",
+        }
+        base_globals_config = {"x": {"DUMMY": 3}}
+        _write_yaml(base_params, base_param_config)
+        _write_yaml(base_globals, base_globals_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        # Default value is being used as int
+        assert conf["parameters"]["int"] == 1
+        # Default value is being used as str
+        assert conf["parameters"]["str"] == "2"
+        # Test when x.DUMMY is not a dictionary it should still work
+        assert conf["parameters"]["dummy"] == "2"
+
+    def test_globals_default_none(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        base_param_config = {
+            "zero": "${globals: x.NOT_EXIST, 0}",
+            "null": "${globals: x.NOT_EXIST, null}",
+            "null2": "${globals: x.y}",
         }
         base_globals_config = {
             "x": {
                 "z": 23,
+                "y": None,
             },
         }
         _write_yaml(base_params, base_param_config)
         _write_yaml(base_globals, base_globals_config)
         conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        # Default value can be 0 or null
+        assert conf["parameters"]["zero"] == 0
+        assert conf["parameters"]["null"] is None
+        # Global value is null
+        assert conf["parameters"]["null2"] is None
+
+    def test_globals_missing_default(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        globals_params = tmp_path / _BASE_ENV / "globals.yml"
+        param_config = {
+            "NOT_OK": "${globals:nested.NOT_EXIST}",
+        }
+        globals_config = {
+            "nested": {
+                "y": 42,
+            },
+        }
+        _write_yaml(base_params, param_config)
+        _write_yaml(globals_params, globals_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+
         with pytest.raises(
             InterpolationResolutionError,
-            match=r"Globals key 'x.y' not found and no default value provided.",
+            match="Globals key 'nested.NOT_EXIST' not found and no default value provided.",
         ):
-            conf["parameters"]["param1"]
+            conf["parameters"]["NOT_OK"]
 
     def test_bad_globals_underscore(self, tmp_path):
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
@@ -797,3 +839,43 @@ class TestOmegaConfigLoader:
             match=r"Keys starting with '_' are not supported for globals.",
         ):
             conf["parameters"]["param2"]
+
+    @pytest.mark.parametrize(
+        "hidden_path", ["/User/.hidden/dummy.yml", "/User/dummy/.hidden.yml"]
+    )
+    def test_is_hidden_config(self, tmp_path, hidden_path):
+        conf = OmegaConfigLoader(str(tmp_path))
+        assert conf._is_hidden(hidden_path)
+
+    @pytest.mark.parametrize(
+        "hidden_path",
+        [
+            "/User/conf/base/catalog.yml",
+            "/User/conf/local/catalog/data_science.yml",
+            "/User/notebooks/../conf/base/catalog",
+        ],
+    )
+    def test_not_hidden_config(self, tmp_path, hidden_path):
+        conf = OmegaConfigLoader(str(tmp_path))
+        assert not conf._is_hidden(hidden_path)
+
+    def test_ignore_ipynb_checkpoints(self, tmp_path, mocker):
+        conf = OmegaConfigLoader(str(tmp_path), default_run_env=_BASE_ENV)
+        base_path = tmp_path / _BASE_ENV / "parameters.yml"
+        checkpoints_path = (
+            tmp_path / _BASE_ENV / ".ipynb_checkpoints" / "parameters.yml"
+        )
+
+        base_config = {"param1": "dummy"}
+        checkpoints_config = {"param1": "dummy"}
+
+        _write_yaml(base_path, base_config)
+        _write_yaml(checkpoints_path, checkpoints_config)
+
+        # read successfully
+        conf["parameters"]
+
+        mocker.patch.object(conf, "_is_hidden", return_value=False)  #
+        with pytest.raises(ValueError, match="Duplicate keys found in"):
+            # fail because of reading the hidden files and get duplicate keys
+            conf["parameters"]

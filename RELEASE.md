@@ -23,7 +23,7 @@
   * Allowed registering of custom resolvers to `OmegaConfigLoader` through `CONFIG_LOADER_ARGS`.
   * Added support for global variables to `OmegaConfigLoader`.
 * Added `kedro catalog resolve` CLI command that resolves dataset factories in the catalog with any explicit entries in the project pipeline.
-* Implemented a flat `conf/` structure for modular pipeline, and accordingly, updated the `kedro pipeline create` and `kedro catalog create` command.
+* Implemented a flat `conf/` structure for modular pipelines, and accordingly, updated the `kedro pipeline create` and `kedro catalog create` command.
 * Updated new Kedro project template and Kedro starters:
   * Change Kedro starters and new Kedro projects to use `OmegaConfigLoader`.
   * Converted `setup.py` in new Kedro project template and Kedro starters to `pyproject.toml` and moved flake8 configuration

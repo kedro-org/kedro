@@ -24,9 +24,10 @@ class TextDataSet(AbstractVersionedDataset[str, str]):
     """``TextDataSet`` loads/saves data from/to a text file using an underlying
     filesystem (e.g.: local, S3, GCS)
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

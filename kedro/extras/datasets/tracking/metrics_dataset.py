@@ -20,9 +20,10 @@ class MetricsDataSet(JSONDataSet):
     ``MetricsDataSet`` is part of Kedro Experiment Tracking. The dataset is write-only,
     it is versioned by default and only takes metrics of numeric values.
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

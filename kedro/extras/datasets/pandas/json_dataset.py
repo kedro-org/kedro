@@ -30,9 +30,10 @@ class JSONDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

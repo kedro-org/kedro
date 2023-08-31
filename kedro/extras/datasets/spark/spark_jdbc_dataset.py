@@ -21,9 +21,10 @@ class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
     ``pyspark.sql.DataFrameReader`` and ``pyspark.sql.DataFrameWriter``
     internally, so it supports all allowed PySpark options on ``jdbc``.
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

@@ -196,9 +196,10 @@ class VideoDataSet(AbstractDataset[AbstractVideo, AbstractVideo]):
     """``VideoDataSet`` loads / save video data from a given filepath as sequence
     of PIL.Image.Image using OpenCV.
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

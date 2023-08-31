@@ -46,9 +46,10 @@ class PartitionedDataset(AbstractDataset):
     `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
     kedro_io.html#partitioned-dataset-lazy-saving>`_.
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

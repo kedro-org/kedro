@@ -17,9 +17,10 @@ class APIDataSet(AbstractDataset[None, requests.Response]):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/latest/
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

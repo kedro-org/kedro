@@ -43,9 +43,10 @@ class SVMLightDataSet(AbstractVersionedDataset[_DI, _DO]):
     This format is used as the default format for both svmlight and the
     libsvm command line programs.
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

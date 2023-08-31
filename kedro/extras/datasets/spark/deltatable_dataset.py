@@ -22,9 +22,10 @@ from kedro.io.core import AbstractDataset, DatasetError
 class DeltaTableDataSet(AbstractDataset[None, DeltaTable]):
     """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
-        Example usage for the
+    Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
     data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 

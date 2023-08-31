@@ -179,7 +179,7 @@ class PartitionedDataset(AbstractDataset):
                 and the dataset initializer. If the dataset config contains
                 explicit credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/data/kedro.io.PartitionedDataset.html
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor

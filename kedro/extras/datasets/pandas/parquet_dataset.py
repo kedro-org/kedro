@@ -31,9 +31,9 @@ class ParquetDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
     """``ParquetDataSet`` loads/saves data from/to a Parquet file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 
-    Example usage for the
+        Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -61,7 +61,7 @@ class ParquetDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import ParquetDataSet

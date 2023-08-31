@@ -22,9 +22,9 @@ class PickleDataSet(AbstractDataset[Any, Any]):
     all allowed options for instantiating the redis app ``from_url`` and setting
     a value.
 
-    Example usage for the
+        Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -45,7 +45,7 @@ class PickleDataSet(AbstractDataset[Any, Any]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro.extras.datasets.redis import PickleDataSet

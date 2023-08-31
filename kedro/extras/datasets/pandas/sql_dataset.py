@@ -107,9 +107,9 @@ class SQLTableDataSet(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     the data with no index. This is designed to make load and save methods
     symmetric.
 
-    Example usage for the
+        Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -132,7 +132,7 @@ class SQLTableDataSet(AbstractDataset[pd.DataFrame, pd.DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import SQLTableDataSet
@@ -278,9 +278,9 @@ class SQLQueryDataSet(AbstractDataset[None, pd.DataFrame]):
     To save data to a SQL server use ``SQLTableDataSet``.
 
 
-    Example usage for the
+        Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -311,7 +311,7 @@ class SQLQueryDataSet(AbstractDataset[None, pd.DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import SQLQueryDataSet

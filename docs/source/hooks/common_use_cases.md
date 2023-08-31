@@ -200,3 +200,22 @@ HOOKS = (AzureSecretsHook(),)
 ```{note}
 Note: `DefaultAzureCredential()` is Azure's recommended approach to authorise access to data in your storage accounts. For more information, consult the [documentation about how to authenticate to Azure and authorize access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python).
 ```
+
+## Use Hook to read `metadata` from `DataCatalog`
+We recommend to use the `after_catalog_created` hook if you need to access `metadata` to extend Kedro.
+
+```python
+class MetadataHook:
+    @hook_impl
+    def after_catalog_created(
+        self,
+        catalog: DataCatalog,
+        conf_catalog: Dict[str, Any],
+        conf_creds: Dict[str, Any],
+        feed_dict: Dict[str, Any],
+        save_version: str,
+        load_versions: Dict[str, str],
+    ):
+        for dataset_name, dataset in catalog.datasets.__dict__.items():
+            print(f"{dataset_name} metadata: \n  {str(dataset.metadata)}")
+```

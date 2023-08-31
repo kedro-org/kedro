@@ -232,8 +232,6 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
     else:
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
         selected_add_ons = config.get("add_ons", "none").split(',')
-        print("-----------------------------------------------")
-        print(selected_add_ons)
 
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
     _create_project(template_path, cookiecutter_args)

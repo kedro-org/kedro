@@ -74,6 +74,10 @@ You can use `add_feed_dict()` to inject any other entries into your `DataCatalog
 
 ## How to load parameters in code
 
+```{note}
+_`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [Migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`_
+```
+
 Parameters project configuration can be loaded by any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 
 The following examples all make use of the default `ConfigLoader` class.

@@ -7,6 +7,11 @@ Credentials configuration can be used on its own directly in code or [fed into t
 If you would rather store your credentials in environment variables instead of a file, you can use the `OmegaConfigLoader` [to load credentials from environment variables](advanced_configuration.md#how-to-load-credentials-through-environment-variables) as described in the advanced configuration chapter.
 
 ## How to load credentials in code
+
+```{note}
+_`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [Migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`_
+```
+
 Credentials configuration can be loaded the same way as any other project configuration using any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 
 The following examples all use the default `ConfigLoader` class.

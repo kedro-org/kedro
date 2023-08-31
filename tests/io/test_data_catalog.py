@@ -108,6 +108,19 @@ def config_with_dataset_factories():
 
 
 @pytest.fixture
+def config_with_dataset_factories_nested():
+    return {
+        "catalog": {
+            "{brand}_cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "data/01_raw/{brand}_cars.csv",
+                "metadata": {"my-plugin": {"brand": "{brand}"}},
+            },
+        },
+    }
+
+
+@pytest.fixture
 def config_with_dataset_factories_with_default(config_with_dataset_factories):
     config_with_dataset_factories["catalog"]["{default_dataset}"] = {
         "type": "pandas.CSVDataSet",
@@ -896,3 +909,8 @@ class TestDataCatalogDatasetFactories:
             microsecond=current_ts.microsecond // 1000 * 1000, tzinfo=None
         )
         assert actual_timestamp == expected_timestamp
+
+    def test_factory_nested_config(self, config_with_dataset_factories_nested):
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_nested)
+        dataset = catalog._get_dataset("tesla_cars")
+        assert dataset.metadata["my-plugin"]["brand"] == "tesla"

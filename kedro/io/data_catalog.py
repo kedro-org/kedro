@@ -388,7 +388,10 @@ class DataCatalog:
         if data_set_name not in self._data_sets and matched_pattern:
             # If the dataset is a patterned dataset, materialise it and add it to
             # the catalog
-            data_set_config = self._resolve_config(data_set_name, matched_pattern)
+            config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
+            data_set_config = self._resolve_config(
+                data_set_name, matched_pattern, config_copy
+            )
             ds_layer = data_set_config.pop("layer", None)
             if ds_layer:
                 self.layers = self.layers or {}
@@ -436,16 +439,21 @@ class DataCatalog:
             return True
         return False
 
+    @classmethod
     def _resolve_config(
-        self,
+        cls,
         data_set_name: str,
         matched_pattern: str,
+        config_copy: dict,
     ) -> dict[str, Any]:
         """Get resolved AbstractDataset from a factory config"""
         result = parse(matched_pattern, data_set_name)
-        config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
         # Resolve the factory config for the dataset
         for key, value in config_copy.items():
+            if isinstance(value, Dict):
+                config_copy[key] = cls._resolve_config(
+                    data_set_name, matched_pattern, value
+                )
             if isinstance(value, Iterable) and "}" in value:
                 # result.named: gives access to all dict items in the match result.
                 # format_map fills in dict values into a string with {...} placeholders

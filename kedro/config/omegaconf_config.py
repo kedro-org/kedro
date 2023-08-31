@@ -11,6 +11,7 @@ from typing import Any, Callable, Iterable
 
 import fsspec
 from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationResolutionError
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
@@ -18,6 +19,8 @@ from yaml.scanner import ScannerError
 from kedro.config.abstract_config import AbstractConfigLoader, MissingConfigException
 
 _config_logger = logging.getLogger(__name__)
+
+_NO_VALUE = object()
 
 
 class OmegaConfigLoader(AbstractConfigLoader):
@@ -109,6 +112,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
             "logging": ["logging*", "logging*/**", "**/logging*"],
+            "globals": ["globals.yml"],
         }
         self.config_patterns.update(config_patterns or {})
 
@@ -117,7 +121,8 @@ class OmegaConfigLoader(AbstractConfigLoader):
         # Register user provided custom resolvers
         if custom_resolvers:
             self._register_new_resolvers(custom_resolvers)
-
+        # Register globals resolver
+        self._register_globals_resolver()
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
             self._protocol = "tar"
@@ -199,7 +204,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
         config.update(env_config)
 
-        if not processed_files:
+        if not processed_files and key != "globals":
             raise MissingConfigException(
                 f"No files of YAML or JSON format found in {base_path} or {env_path} matching"
                 f" the glob pattern(s): {[*self.config_patterns[key]]}"
@@ -247,11 +252,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 f"or is not a valid directory: {conf_path}"
             )
 
-        paths = [
-            Path(each)
-            for pattern in patterns
-            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix())
-        ]
+        paths = []
+        for pattern in patterns:
+            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix()):
+                if not self._is_hidden(each):
+                    paths.append(Path(each))
+
         deduplicated_paths = set(paths)
         config_files_filtered = [
             path for path in deduplicated_paths if self._is_valid_config_path(path)
@@ -308,6 +314,31 @@ class OmegaConfigLoader(AbstractConfigLoader):
             ".json",
         ]
 
+    def _register_globals_resolver(self):
+        """Register the globals resolver"""
+        OmegaConf.register_new_resolver(
+            "globals",
+            self._get_globals_value,
+            replace=True,
+        )
+
+    def _get_globals_value(self, variable, default_value=_NO_VALUE):
+        """Return the globals values to the resolver"""
+        if variable.startswith("_"):
+            raise InterpolationResolutionError(
+                "Keys starting with '_' are not supported for globals."
+            )
+        global_omegaconf = OmegaConf.create(self["globals"])
+        interpolated_value = OmegaConf.select(
+            global_omegaconf, variable, default=default_value
+        )
+        if interpolated_value != _NO_VALUE:
+            return interpolated_value
+        else:
+            raise InterpolationResolutionError(
+                f"Globals key '{variable}' not found and no default value provided."
+            )
+
     @staticmethod
     def _register_new_resolvers(resolvers: dict[str, Callable]):
         """Register custom resolvers"""
@@ -359,3 +390,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
             OmegaConf.clear_resolver("oc.env")
         else:
             OmegaConf.resolve(config)
+
+    def _is_hidden(self, path: str):
+        """Check if path contains any hidden directory or is a hidden file"""
+        path = Path(path).resolve().as_posix()
+        parts = path.split(self._fs.sep)  # filesystem specific separator
+        HIDDEN = "."
+        # Check if any component (folder or file) starts with a dot (.)
+        return any(part.startswith(HIDDEN) for part in parts)

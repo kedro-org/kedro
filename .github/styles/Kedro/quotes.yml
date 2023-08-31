@@ -1,0 +1,10 @@
+extends: existence
+message: Use straight quotes instead of smart quotes.
+level: warning
+nonword: true
+action:
+tokens:
+  - “
+  - ”
+  - ‘
+  - ’

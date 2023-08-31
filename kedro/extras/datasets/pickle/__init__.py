@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to load/save data from/to a Pickle file."""
+"""``AbstractDataset`` implementation to load/save data from/to a Pickle file."""
 
 __all__ = ["PickleDataSet"]
 

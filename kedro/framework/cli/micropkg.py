@@ -17,13 +17,13 @@ import click
 from omegaconf import OmegaConf
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
+from pyproject_metadata import StandardMetadata
 from rope.base.project import Project
 from rope.contrib import generate
 from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
 from setuptools.discovery import FlatLayoutPackageFinder
 
-from build.util import project_wheel_metadata
 from kedro.framework.cli.pipeline import (
     _assert_pkg_name_ok,
     _check_pipeline_name,
@@ -212,12 +212,8 @@ def _pull_package(  # noqa: PLR0913
             )
         project_root_dir = contents[0]
 
-        # This is much slower than parsing the requirements
-        # directly from the metadata files
-        # because it installs the package in an isolated environment,
-        # but it's the only reliable way of doing it
-        # without making assumptions on the project metadata.
-        library_meta = project_wheel_metadata(project_root_dir)
+        with open(project_root_dir / "pyproject.toml") as fh:
+            library_meta = StandardMetadata.from_pyproject(toml.load(fh))
 
         # Project name will be `my-pipeline` even if `pyproject.toml` says `my_pipeline`
         # because standards mandate normalization of names for comparison,
@@ -967,10 +963,7 @@ def _get_all_library_reqs(metadata):
     """Get all library requirements from metadata, leaving markers intact."""
     # See https://discuss.python.org/t/\
     # programmatically-getting-non-optional-requirements-of-current-directory/26963/2
-    return [
-        str(_EquivalentRequirement(dep_str))
-        for dep_str in metadata.get_all("Requires-Dist", [])
-    ]
+    return [str(_EquivalentRequirement(str(dep))) for dep in metadata.dependencies]
 
 
 def _safe_parse_requirements(

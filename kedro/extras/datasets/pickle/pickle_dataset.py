@@ -51,8 +51,7 @@ class PickleDataSet(AbstractVersionedDataset[Any, Any]):
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: python
+    ::
 
         >>> from kedro.extras.datasets.pickle import PickleDataSet
         >>> import pandas as pd

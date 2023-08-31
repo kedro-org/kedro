@@ -46,8 +46,7 @@ class MatplotlibWriter(
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
     advanced_data_catalog_usage.html>`_:
-
-    .. code-block:: python
+    ::
 
         >>> import matplotlib.pyplot as plt
         >>> from kedro.extras.datasets.matplotlib import MatplotlibWriter

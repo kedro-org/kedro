@@ -74,20 +74,16 @@ You can use `add_feed_dict()` to inject any other entries into your `DataCatalog
 
 ## How to load parameters in code
 
-```{note}
-_`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [Migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`_
-```
-
 Parameters project configuration can be loaded by any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 
-The following examples all make use of the default `ConfigLoader` class.
+The following examples all make use of the `OmegaConfigLoader` class.
 
 ```python
-from kedro.config import ConfigLoader
+from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
 parameters = conf_loader["parameters"]
 ```
 
@@ -96,11 +92,11 @@ This loads configuration files from any subdirectories in `conf` that have a fil
 Calling `conf_loader[key]` in the example above will throw a `MissingConfigException` error if no configuration files match the given key. But if this is a valid workflow for your application, you can handle it as follows:
 
 ```python
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import OmegaConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
 conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
 
 try:
     parameters = conf_loader["parameters"]

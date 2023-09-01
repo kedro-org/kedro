@@ -14,12 +14,12 @@ _`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.
 
 Credentials configuration can be loaded the same way as any other project configuration using any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 
-The following examples all use the default `ConfigLoader` class.
+The following examples are valid for both, the `ConfigLoader` and the `OmegaConfigLoader`.
 
 ```python
 from pathlib import Path
 
-from kedro.config import ConfigLoader
+from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
 # Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html#terminology)
@@ -35,11 +35,11 @@ Calling `conf_loader[key]` in the example above throws a `MissingConfigException
 ```python
 from pathlib import Path
 
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import OmegaConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
 conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
 
 try:
     credentials = conf_loader["credentials"]

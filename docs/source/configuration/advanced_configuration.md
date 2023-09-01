@@ -37,7 +37,7 @@ Some advanced use cases of `OmegaConfigLoader` are listed below:
 ## TemplatedConfigLoader
 
 ```{note}
-_`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [Migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`_
+`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [Migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
 ```
 
 Kedro provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):

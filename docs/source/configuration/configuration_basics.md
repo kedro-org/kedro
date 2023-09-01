@@ -5,7 +5,7 @@ This section contains detailed information about Kedro project configuration, wh
 Kedro makes use of a configuration loader to load any project configuration files, and the available configuration loader classes are:
 
 ```{note}
-`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [Migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`
+`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [Migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
 ```
 
 * [`ConfigLoader`](/kedro.config.ConfigLoader)

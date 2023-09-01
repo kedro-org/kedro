@@ -434,7 +434,7 @@ class IncrementalDataset(PartitionedDataset):
                 the dataset or the checkpoint configuration contains explicit
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://docs.kedro.org/en/stable/data/partitioned_and_incremental_datasets.html#partitioned-datasets
+                https://docs.kedro.org/en/stable/data/partitioned_and_incremental_datasets.html#checkpoint-configuration
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor

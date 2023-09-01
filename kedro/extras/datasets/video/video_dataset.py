@@ -14,7 +14,7 @@ import fsspec
 import numpy as np
 import PIL.Image
 
-from kedro.io.core import AbstractDataSet, get_protocol_and_path
+from kedro.io.core import AbstractDataset, get_protocol_and_path
 
 
 class SlicedVideo:
@@ -192,13 +192,14 @@ class GeneratorVideo(AbstractVideo):
         return self
 
 
-class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
+class VideoDataSet(AbstractDataset[AbstractVideo, AbstractVideo]):
     """``VideoDataSet`` loads / save video data from a given filepath as sequence
     of PIL.Image.Image using OpenCV.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 
@@ -213,7 +214,7 @@ class VideoDataSet(AbstractDataSet[AbstractVideo, AbstractVideo]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro.extras.datasets.video import VideoDataSet

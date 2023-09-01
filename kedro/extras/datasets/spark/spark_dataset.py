@@ -1,4 +1,4 @@
-"""``AbstractVersionedDataSet`` implementation to access Spark dataframes using
+"""``AbstractVersionedDataset`` implementation to access Spark dataframes using
 ``pyspark``
 """
 import json
@@ -17,7 +17,7 @@ from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -41,7 +41,8 @@ def _parse_glob_pattern(pattern: str) -> str:
 
 def _split_filepath(filepath: str) -> Tuple[str, str]:
     split_ = filepath.split("://", 1)
-    if len(split_) == 2:  # noqa: PLR2004
+    MIN_SPLIT_SIZE = 2
+    if len(split_) == MIN_SPLIT_SIZE:
         return split_[0] + "://", split_[1]
     return "", split_[0]
 
@@ -161,12 +162,13 @@ class KedroHdfsInsecureClient(InsecureClient):
         return sorted(matched)
 
 
-class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
+class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
     """``SparkDataSet`` loads and saves Spark dataframes.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 
@@ -200,7 +202,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from pyspark.sql import SparkSession
@@ -232,7 +234,7 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    def __init__(  # noqa: too-many-arguments
+    def __init__(  # ruff: noqa: PLR0913
         self,
         filepath: str,
         file_format: str = "parquet",
@@ -401,10 +403,11 @@ class SparkDataSet(AbstractVersionedDataSet[DataFrame, DataFrame]):
         try:
             self._get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
-            if (
-                exception.desc.startswith("Path does not exist:")
-                or "is not a Delta table" in exception.desc
-            ):
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = (
+                exception.desc if hasattr(exception, "desc") else exception.message
+            )
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
         return True

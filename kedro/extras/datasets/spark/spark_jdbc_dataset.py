@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from pyspark.sql import DataFrame, SparkSession
 
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 __all__ = ["SparkJDBCDataSet"]
 
@@ -14,7 +14,7 @@ __all__ = ["SparkJDBCDataSet"]
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
+class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
     """``SparkJDBCDataSet`` loads data from a database table accessible
     via JDBC URL url and connection properties and saves the content of
     a PySpark DataFrame to an external database table via JDBC.  It uses
@@ -23,7 +23,8 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 
@@ -41,7 +42,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> import pandas as pd
@@ -168,7 +169,7 @@ class SparkJDBCDataSet(AbstractDataSet[DataFrame, DataFrame]):
         }
 
     @staticmethod
-    def _get_spark():
+    def _get_spark():  # pragma: no cover
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:

@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to access DeltaTables using
+"""``AbstractDataset`` implementation to access DeltaTables using
 ``delta-spark``
 """
 from pathlib import PurePosixPath
@@ -12,19 +12,20 @@ from kedro.extras.datasets.spark.spark_dataset import (
     _split_filepath,
     _strip_dbfs_prefix,
 )
-from kedro.io.core import AbstractDataSet, DatasetError
+from kedro.io.core import AbstractDataset, DatasetError
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
+class DeltaTableDataSet(AbstractDataset[None, DeltaTable]):
     """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 
@@ -39,7 +40,7 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from pyspark.sql import SparkSession
@@ -100,7 +101,12 @@ class DeltaTableDataSet(AbstractDataSet[None, DeltaTable]):
         try:
             self._get_spark().read.load(path=load_path, format="delta")
         except AnalysisException as exception:
-            if "is not a Delta table" in exception.desc:
+            # `AnalysisException.desc` is deprecated with pyspark >= 3.4
+            message = (
+                exception.desc if hasattr(exception, "desc") else exception.message
+            )
+
+            if "Path does not exist:" in message or "is not a Delta table" in message:
                 return False
             raise
 

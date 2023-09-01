@@ -3,7 +3,7 @@
 For security reasons, we strongly recommend that you *do not* commit any credentials or other secrets to version control.
 Kedro is set up so that, by default, if a file inside the `conf` folder (and its subfolders) contains `credentials` in its name, it will be ignored by git.
 
-Credentials configuration can be used on its own directly in code or [fed into the `DataCatalog`](../data/data_catalog.md#feeding-in-credentials).
+Credentials configuration can be used on its own directly in code or [fed into the `DataCatalog`](../data/data_catalog.md#dataset-access-credentials).
 If you would rather store your credentials in environment variables instead of a file, you can use the `OmegaConfigLoader` [to load credentials from environment variables](advanced_configuration.md#how-to-load-credentials-through-environment-variables) as described in the advanced configuration chapter.
 
 ## How to load credentials in code
@@ -12,10 +12,13 @@ Credentials configuration can be loaded the same way as any other project config
 The following examples all use the default `ConfigLoader` class.
 
 ```python
+from pathlib import Path
+
 from kedro.config import ConfigLoader
 from kedro.framework.project import settings
 
-conf_path = str(project_path / settings.CONF_SOURCE)
+# Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html#terminology)
+conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path)
 credentials = conf_loader["credentials"]
 ```
@@ -25,10 +28,12 @@ This loads configuration files from `conf/base` and `conf/local` whose filenames
 Calling `conf_loader[key]` in the example above throws a `MissingConfigException` error if no configuration files match the given key. But if this is a valid workflow for your application, you can handle it as follows:
 
 ```python
+from pathlib import Path
+
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
-conf_path = str(project_path / settings.CONF_SOURCE)
+conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
 conf_loader = ConfigLoader(conf_source=conf_path)
 
 try:

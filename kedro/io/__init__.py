@@ -1,12 +1,12 @@
 """``kedro.io`` provides functionality to read and write to a
-number of data sets. At the core of the library is the ``AbstractDataSet`` class.
+number of data sets. At the core of the library is the ``AbstractDataset`` class.
 """
 from __future__ import annotations
 
 from .cached_dataset import CachedDataSet, CachedDataset
 from .core import (
-    AbstractDataSet,
-    AbstractVersionedDataSet,
+    AbstractDataset,
+    AbstractVersionedDataset,
     DatasetAlreadyExistsError,
     DatasetError,
     DatasetNotFoundError,
@@ -26,19 +26,23 @@ from .partitioned_dataset import (
 DataSetError: type[DatasetError]
 DataSetNotFoundError: type[DatasetNotFoundError]
 DataSetAlreadyExistsError: type[DatasetAlreadyExistsError]
+AbstractDataSet: type[AbstractDataset]
+AbstractVersionedDataSet: type[AbstractVersionedDataset]
 
 
 def __getattr__(name):
     import kedro.io.core  # noqa: import-outside-toplevel
 
-    if name in (kedro.io.core._DEPRECATED_ERROR_CLASSES):  # noqa: protected-access
+    if name in (kedro.io.core._DEPRECATED_CLASSES):  # noqa: protected-access
         return getattr(kedro.io.core, name)
     raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 __all__ = [
     "AbstractDataSet",
+    "AbstractDataset",
     "AbstractVersionedDataSet",
+    "AbstractVersionedDataset",
     "CachedDataSet",
     "CachedDataset",
     "DataCatalog",

@@ -137,7 +137,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     the ``DataCatalog``.
 
     The catalog configuration will be saved to
-    `<conf_source>/<env>/catalog/<pipeline_name>.yml` file.
+    `<conf_source>/<env>/catalog_<pipeline_name>.yml` file.
     """
     env = env or "base"
     session = _create_session(metadata.package_name, env=env)
@@ -170,8 +170,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
             context.project_path
             / settings.CONF_SOURCE
             / env
-            / "catalog"
-            / f"{pipeline_name}.yml"
+            / f"catalog_{pipeline_name}.yml"
         )
         _add_missing_datasets_to_catalog(missing_ds, catalog_path)
         click.echo(f"Data Catalog YAML configuration was created: {catalog_path}")
@@ -208,3 +207,51 @@ def rank_catalog_factories(metadata: ProjectMetadata, env):
         click.echo(yaml.dump(list(catalog_factories.keys())))
     else:
         click.echo("There are no dataset factories in the catalog.")
+
+
+@catalog.command("resolve")
+@env_option
+@click.pass_obj
+def resolve_patterns(metadata: ProjectMetadata, env):
+    """Resolve catalog factories against pipeline datasets"""
+
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    data_catalog = context.catalog
+    catalog_config = context.config_loader["catalog"]
+
+    explicit_datasets = {
+        ds_name: ds_config
+        for ds_name, ds_config in catalog_config.items()
+        if not data_catalog._is_pattern(ds_name)
+    }
+
+    target_pipelines = pipelines.keys()
+    datasets = set()
+
+    for pipe in target_pipelines:
+        pl_obj = pipelines.get(pipe)
+        if pl_obj:
+            datasets.update(pl_obj.data_sets())
+
+    for ds_name in datasets:
+        is_param = ds_name.startswith("params:") or ds_name == "parameters"
+        if ds_name in explicit_datasets or is_param:
+            continue
+
+        matched_pattern = data_catalog._match_pattern(
+            data_catalog._dataset_patterns, ds_name
+        )
+        if matched_pattern:
+            ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
+            ds_config["filepath"] = _trim_filepath(
+                str(context.project_path) + "/", ds_config["filepath"]
+            )
+            explicit_datasets[ds_name] = ds_config
+
+    secho(yaml.dump(explicit_datasets))
+
+
+def _trim_filepath(project_path: str, file_path: str):
+    return file_path.replace(project_path, "", 1)

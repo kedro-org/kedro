@@ -9,7 +9,7 @@ import fsspec
 from PIL import Image
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -21,13 +21,13 @@ from kedro.io.core import (
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class ImageDataSet(AbstractVersionedDataSet[Image.Image, Image.Image]):
+class ImageDataSet(AbstractVersionedDataset[Image.Image, Image.Image]):
     """``ImageDataSet`` loads/saves image data as `numpy` from an underlying
     filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro.extras.datasets.pillow import ImageDataSet

@@ -36,7 +36,6 @@ jobs:
         run: |
             make install-test-requirements
             make install-pre-commit
-            pip install "kedro-datasets[all]"
       - name: Install pytables (only for windows)
         if: inputs.os == 'windows-latest'
         run: pip install tables

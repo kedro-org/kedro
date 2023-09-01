@@ -43,8 +43,8 @@ class PartitionedDataset(AbstractDataset):
     https://github.com/intake/filesystem_spec.
 
     It also supports advanced features like
-    `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
-    kedro_io.html#partitioned-dataset-lazy-saving>`_.
+    `lazy saving <https://docs.kedro.org/en/stable/data/\
+    partitioned_and_incremental_datasets.html#partitioned-dataset-lazy-saving>`_.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\

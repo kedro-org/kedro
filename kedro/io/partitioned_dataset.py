@@ -43,12 +43,13 @@ class PartitionedDataset(AbstractDataset):
     https://github.com/intake/filesystem_spec.
 
     It also supports advanced features like
-    `lazy saving <https://kedro.readthedocs.io/en/stable/data/\
-    kedro_io.html#partitioned-dataset-lazy-saving>`_.
+    `lazy saving <https://docs.kedro.org/en/stable/data/\
+    partitioned_and_incremental_datasets.html#partitioned-dataset-lazy-saving>`_.
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 
@@ -66,7 +67,7 @@ class PartitionedDataset(AbstractDataset):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> import pandas as pd
@@ -178,7 +179,7 @@ class PartitionedDataset(AbstractDataset):
                 and the dataset initializer. If the dataset config contains
                 explicit credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials
+                https://docs.kedro.org/en/stable/data/partitioned_and_incremental_datasets.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
@@ -418,7 +419,7 @@ class IncrementalDataset(PartitionedDataset):
                 with the corresponding dataset definition including ``filepath``
                 (unlike ``dataset`` argument). Checkpoint configuration is
                 described here:
-                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#checkpoint-configuration
+                https://docs.kedro.org/en/stable/data/partitioned_and_incremental_datasets.html#checkpoint-configuration
                 Credentials for the checkpoint can be explicitly specified
                 in this configuration.
             filepath_arg: Underlying dataset initializer argument that will
@@ -433,7 +434,7 @@ class IncrementalDataset(PartitionedDataset):
                 the dataset or the checkpoint configuration contains explicit
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials
+                https://docs.kedro.org/en/stable/data/partitioned_and_incremental_datasets.html#checkpoint-configuration
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor

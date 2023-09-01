@@ -112,8 +112,9 @@ def config_with_dataset_factories_nested():
     return {
         "catalog": {
             "{brand}_cars": {
-                "type": "pandas.CSVDataSet",
-                "filepath": "data/01_raw/{brand}_cars.csv",
+                "type": "PartitionedDataset",
+                "path": "data/01_raw",
+                "dataset": "pandas.CSVDataSet",
                 "metadata": {"my-plugin": {"brand": "{brand}"}},
             },
         },

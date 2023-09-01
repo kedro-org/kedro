@@ -6,7 +6,7 @@ You can define a Data Catalog in two ways. Most use cases can be through a YAML 
 
 To use the `DataCatalog` API, construct a `DataCatalog` object programmatically in a file like `catalog.py`.
 
-In the following, we are using several pre-built data loaders documented in the [API reference documentation](/kedro_datasets).
+In the following code, we use several pre-built data loaders documented in the [API reference documentation](/kedro_datasets).
 
 ```python
 from kedro.io import DataCatalog

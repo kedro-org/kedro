@@ -8,7 +8,7 @@ This page contains a set of examples to help you structure your YAML configurati
 
 ## Load data from a local binary file using `utf-8` encoding
 
-The `open_args_load` and `open_args_save` parameters are passed to the filesystem's `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation, respectively.
+The `open_args_load` and `open_args_save` parameters are passed to the filesystem `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation respectively.
 
 ```yaml
 test_dataset:

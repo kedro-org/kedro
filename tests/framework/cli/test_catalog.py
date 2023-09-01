@@ -400,7 +400,7 @@ class TestCatalogCreateCommand:
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
         assert result.exit_code
-        assert "Unable to instantiate Kedro session" in result.output
+        assert "Unable to instantiate Kedro Catalog" in result.output
 
 
 @pytest.mark.usefixtures(

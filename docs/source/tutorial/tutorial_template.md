@@ -68,7 +68,7 @@ pip install -r src/requirements.txt
 
 ## Optional: logging and configuration
 
-You might want to [set up logging](../logging/logging.md) at this stage of the workflow, but we do not use it in this tutorial.
+You might want to [set up logging](../logging/index.md) at this stage of the workflow, but we do not use it in this tutorial.
 
 You may also want to store credentials such as usernames and passwords if they are needed for specific data sources used by the project.
 

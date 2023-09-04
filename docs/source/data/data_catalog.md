@@ -3,7 +3,7 @@
 
 In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
 
-This page introduces the basic sections of `catalog.yml`, which is the file used to register data sources for a Kedro project.
+This page introduces the basic sections of `catalog.yml`, which is the file Kedro uses to register data sources for a project.
 
 ## The basics of `catalog.yml`
 A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorial/set_up_data.md).

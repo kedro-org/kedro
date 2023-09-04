@@ -16,7 +16,7 @@ Feature: Package target in new project
   @fresh_venv
   Scenario: Install package after running kedro build-reqs
    Given I have updated kedro requirements
-   When I execute the kedro command "build-reqs"
+   When I execute the kedro command "build-reqs --resolver=backtracking"
    Then I should get a successful exit code
    When I execute the kedro command "package"
    Then I should get a successful exit code

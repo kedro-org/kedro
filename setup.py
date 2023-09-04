@@ -98,6 +98,7 @@ extras_require = {
         "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
         "kedro-datasets[all]~=1.7.0",
+        "sphinx_docsearch",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),

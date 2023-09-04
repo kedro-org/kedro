@@ -450,7 +450,7 @@ class DataCatalog:
         result = parse(matched_pattern, data_set_name)
         # Resolve the factory config for the dataset
         for key, value in config_copy.items():
-            if isinstance(value, Dict):
+            if isinstance(value, dict):
                 config_copy[key] = cls._resolve_config(
                     data_set_name, matched_pattern, value
                 )

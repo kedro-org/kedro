@@ -6,12 +6,12 @@ Each of these classes are alternatives for the default `ConfigLoader` and have d
 
 ## OmegaConfigLoader
 
-[OmegaConf](https://omegaconf.readthedocs.io/) is a Python library tailored for managing settings. It operates as a YAML-based hierarchical system for organizing configurations and supports merging configurations from various sources.
+[OmegaConf](https://omegaconf.readthedocs.io/) is a Python library designed to handle and manage settings. It serves as a YAML-based hierarchical system to organise configurations, which can be structured to accommodate various sources, allowing you to merge settings from multiple locations.
 
 From Kedro 0.18.5 you can use the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) which uses `OmegaConf` to load data.
 
 ```{note}
-`OmegaConfigLoader` is under active development. It was first available from Kedro 0.18.5 with additional features due in later releases. Let us know if you have any feedback about the `OmegaConfigLoader`.
+`OmegaConfigLoader` is under active development. It is available from Kedro version 0.18.5 with additional features due in later releases. Let us know if you have any feedback about the `OmegaConfigLoader` by joining the [Kedro community on Slack](https://slack.kedro.org/).
 ```
 
 `OmegaConfigLoader` can load `YAML` and `JSON` files. Acceptable file extensions are `.yml`, `.yaml`, and `.json`. By default, any configuration files used by the config loaders in Kedro are `.yml` files.
@@ -25,29 +25,15 @@ CONFIG_LOADER_CLASS = OmegaConfigLoader
 ```
 ### Advanced `OmegaConfigLoader` features
 Some advanced use cases of `OmegaConfigLoader` are listed below:
-- [Advanced configuration](#advanced-configuration)
-  - [OmegaConfigLoader](#omegaconfigloader)
-    - [Advanced `OmegaConfigLoader` features](#advanced-omegaconfigloader-features)
-  - [TemplatedConfigLoader](#templatedconfigloader)
-    - [Provide template values through globals](#provide-template-values-through-globals)
-  - [Advanced Kedro configuration](#advanced-kedro-configuration)
-    - [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
-    - [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
-    - [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
-    - [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
-    - [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
-      - [Parameters](#parameters)
-      - [Catalog](#catalog)
-      - [Other configuration files](#other-configuration-files)
-    - [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
-    - [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
-    - [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
-
+- [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+- [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
+- [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
+- [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
 ## TemplatedConfigLoader
 
 ```{note}
-`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [Migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
+`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code to use `OmegaConfigLoader`.
 ```
 
 Kedro provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, set the `CONFIG_LOADER_CLASS` constant in your [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md):
@@ -143,23 +129,14 @@ If you specify both `globals_pattern` and `globals_dict` in `CONFIG_LOADER_ARGS`
 
 This section contains a set of guidance for advanced configuration requirements of standard Kedro projects:
 
-- [Advanced configuration](#advanced-configuration)
-  - [OmegaConfigLoader](#omegaconfigloader)
-    - [Advanced `OmegaConfigLoader` features](#advanced-omegaconfigloader-features)
-  - [TemplatedConfigLoader](#templatedconfigloader)
-    - [Provide template values through globals](#provide-template-values-through-globals)
-  - [Advanced Kedro configuration](#advanced-kedro-configuration)
-    - [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
-    - [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
-    - [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
-    - [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
-    - [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
-      - [Parameters](#parameters)
-      - [Catalog](#catalog)
-      - [Other configuration files](#other-configuration-files)
-    - [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
-    - [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
-    - [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
+- [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
+- [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
+- [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
+- [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
+- [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+ - [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
+- [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
+- [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
 ### How to change which configuration files are loaded
 If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).

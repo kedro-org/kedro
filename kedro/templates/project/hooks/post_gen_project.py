@@ -1,5 +1,5 @@
 import json
-import os
+from pathlib import Path
 import shutil
 
 
@@ -37,30 +37,32 @@ selected_add_ons = "{{ cookiecutter.add_ons }}"
 # Parse the add-ons to get a list
 selected_add_ons_list = parse_add_ons_input(selected_add_ons)
 
+current_dir = Path.cwd()
+
 if "1" not in selected_add_ons_list:  # If Linting not selected
-    setup_cfg_path = os.path.join(os.getcwd(), "setup.cfg")
-    if os.path.exists(setup_cfg_path):
-        os.remove(os.path.join(os.getcwd(), "setup.cfg"))
+    setup_cfg_path = current_dir / "setup.cfg"
+    if setup_cfg_path.exists():
+        setup_cfg_path.unlink()
     # TODO ADD CODE TO UPDATE SETUP.PY TO REMOVE LINTING DEPENDENCIES
 
 if "2" not in selected_add_ons_list:  # If Testing not selected
-    tests_path = os.path.join(os.getcwd(), "tests")
-    if os.path.exists(tests_path):
-        shutil.rmtree(os.path.join(os.getcwd(), "tests"))
+    tests_path = current_dir / "tests"
+    if tests_path.exists():
+        shutil.rmtree(tests_path)
     # TODO ADD CODE TO UPDATE SETUP.PY TO REMOVE TEST DEPENDENCIES
 
 if "3" not in selected_add_ons_list:  # If Logging not selected
-    logging_yml_path = os.path.join(os.getcwd(), "logging.yml")
-    if os.path.exists(logging_yml_path):
-        os.remove(os.path.join(os.getcwd(), "logging.yml"))
+    logging_yml_path = current_dir / "logging.yml"
+    if logging_yml_path.exists():
+        logging_yml_path.unlink()
 
 if "4" not in selected_add_ons_list:  # If Documentation not selected
-    docs_path = os.path.join(os.getcwd(), "docs")
-    if os.path.exists(docs_path):
-        shutil.rmtree(os.path.join(os.getcwd(), "docs"))
+    docs_path = current_dir / "docs"
+    if docs_path.exists():
+        shutil.rmtree(docs_path)
     # TODO ADD CODE TO UPDATE SETUP.PY TO REMOVE DOCS DEPENDENCIES
 
 if "5" not in selected_add_ons_list:  # If Data Structure not selected
-    data_path = os.path.join(os.getcwd(), "data")
-    if os.path.exists(data_path):
-        shutil.rmtree(os.path.join(os.getcwd(), "data"))
+    data_path = current_dir / "data"
+    if data_path.exists():
+        shutil.rmtree(data_path)

@@ -13,7 +13,7 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.text import TextDataSet
-from kedro.io import AbstractDataSet, DatasetError, IncrementalDataset
+from kedro.io import AbstractDataset, DatasetError, IncrementalDataset
 from kedro.io.data_catalog import CREDENTIALS_KEY
 
 DATASET = "kedro.extras.datasets.pandas.CSVDataSet"
@@ -41,7 +41,7 @@ def local_csvs(tmp_path, partitioned_data_pandas):
     return local_dir
 
 
-class DummyDataset(AbstractDataSet):  # pragma: no cover
+class DummyDataset(AbstractDataset):  # pragma: no cover
     def __init__(self, filepath):
         pass
 

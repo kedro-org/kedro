@@ -8,21 +8,21 @@ import dask.dataframe as dd
 import fsspec
 import triad
 
-from kedro.io.core import AbstractDataSet, get_protocol_and_path
+from kedro.io.core import AbstractDataset, get_protocol_and_path
 
 # NOTE: kedro.extras.datasets will be removed in Kedro 0.19.0.
 # Any contribution to datasets should be made in kedro-datasets
 # in kedro-plugins (https://github.com/kedro-org/kedro-plugins)
 
 
-class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
+class ParquetDataSet(AbstractDataset[dd.DataFrame, dd.DataFrame]):
     """``ParquetDataSet`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
     https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -38,8 +38,9 @@ class ParquetDataSet(AbstractDataSet[dd.DataFrame, dd.DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
+
 
         >>> from kedro.extras.datasets.dask import ParquetDataSet
         >>> import pandas as pd

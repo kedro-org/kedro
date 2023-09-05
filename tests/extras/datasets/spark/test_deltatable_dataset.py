@@ -1,14 +1,18 @@
 import pytest
 from delta import DeltaTable
+from pyspark import __version__
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
+from semver import VersionInfo
 
 from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
 from kedro.io import DataCatalog, DatasetError
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 from kedro.runner import ParallelRunner
+
+SPARK_VERSION = VersionInfo.parse(__version__)
 
 
 @pytest.fixture
@@ -65,10 +69,16 @@ class TestDeltaTableDataSet:
 
     def test_exists_raises_error(self, mocker):
         delta_ds = DeltaTableDataSet(filepath="")
-        mocker.patch.object(
-            delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
-        )
-
+        if SPARK_VERSION.match(">=3.4.0"):
+            mocker.patch.object(
+                delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception")
+            )
+        else:
+            mocker.patch.object(
+                delta_ds,
+                "_get_spark",
+                side_effect=AnalysisException("Other Exception", []),
+            )
         with pytest.raises(DatasetError, match="Other Exception"):
             delta_ds.exists()
 

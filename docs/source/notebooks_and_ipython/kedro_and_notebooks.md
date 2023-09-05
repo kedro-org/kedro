@@ -93,7 +93,7 @@ catalog.load("parameters")
 You should see the following:
 
 ```ipython
-INFO     Loading data from 'parameters' (MemoryDataSet)...
+INFO     Loading data from 'parameters' (MemoryDataset)...
 
 {'example_test_data_ratio': 0.2,
  'example_num_train_iter': 10000,
@@ -101,7 +101,7 @@ INFO     Loading data from 'parameters' (MemoryDataSet)...
 ```
 
 ```{note}
-If you enable [versioning](../data/data_catalog.md#version-datasets-and-ml-models) you can load a particular version of a dataset, e.g. `catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
+If you enable [versioning](../data/data_catalog.md#dataset-versioning) you can load a particular version of a dataset, e.g. `catalog.load("example_train_x", version="2021-12-13T15.08.09.255Z")`.
 ```
 
 ### `context`

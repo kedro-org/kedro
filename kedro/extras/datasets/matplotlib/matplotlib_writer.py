@@ -11,7 +11,7 @@ import fsspec
 import matplotlib.pyplot as plt
 
 from kedro.io.core import (
-    AbstractVersionedDataSet,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -24,7 +24,7 @@ from kedro.io.core import (
 
 
 class MatplotlibWriter(
-    AbstractVersionedDataSet[
+    AbstractVersionedDataset[
         Union[plt.figure, List[plt.figure], Dict[str, plt.figure]], NoReturn
     ]
 ):
@@ -33,7 +33,7 @@ class MatplotlibWriter(
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
 
     .. code-block:: yaml
 
@@ -45,7 +45,7 @@ class MatplotlibWriter(
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> import matplotlib.pyplot as plt

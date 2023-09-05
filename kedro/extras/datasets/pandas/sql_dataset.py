@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import NoSuchModuleError
 
 from kedro.io.core import (
-    AbstractDataSet,
+    AbstractDataset,
     DatasetError,
     get_filepath_str,
     get_protocol_and_path,
@@ -92,7 +92,7 @@ def _get_sql_alchemy_missing_error() -> DatasetError:
     )
 
 
-class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
+class SQLTableDataSet(AbstractDataset[pd.DataFrame, pd.DataFrame]):
     """``SQLTableDataSet`` loads data from a SQL table and saves a pandas
     dataframe to a table. It uses ``pandas.DataFrame`` internally,
     so it supports all allowed pandas options on ``read_sql_table`` and
@@ -109,7 +109,8 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 
@@ -132,7 +133,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
 
         >>> from kedro.extras.datasets.pandas import SQLTableDataSet
@@ -264,7 +265,7 @@ class SQLTableDataSet(AbstractDataSet[pd.DataFrame, pd.DataFrame]):
         return exists
 
 
-class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
+class SQLQueryDataSet(AbstractDataset[None, pd.DataFrame]):
     """``SQLQueryDataSet`` loads data from a provided SQL query. It
     uses ``pandas.DataFrame`` internally, so it supports all allowed
     pandas options on ``read_sql_query``. Since Pandas uses SQLAlchemy behind
@@ -280,7 +281,8 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     Example usage for the
     `YAML API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-yaml-api>`_:
+    data_catalog_yaml_examples.html>`_:
+
 
     .. code-block:: yaml
 
@@ -311,8 +313,9 @@ class SQLQueryDataSet(AbstractDataSet[None, pd.DataFrame]):
 
     Example usage for the
     `Python API <https://kedro.readthedocs.io/en/stable/data/\
-    data_catalog.html#use-the-data-catalog-with-the-code-api>`_:
+    advanced_data_catalog_usage.html>`_:
     ::
+
 
         >>> from kedro.extras.datasets.pandas import SQLQueryDataSet
         >>> import pandas as pd

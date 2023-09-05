@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to save Holoviews objects as image files."""
+"""``AbstractDataset`` implementation to save Holoviews objects as image files."""
 
 __all__ = ["HoloviewsWriter"]
 

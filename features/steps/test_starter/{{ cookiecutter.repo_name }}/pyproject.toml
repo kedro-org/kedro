@@ -1,7 +1,7 @@
 [tool.kedro]
 project_name = "{{ cookiecutter.project_name }}"
 project_version = "{{ cookiecutter.kedro_version }}"
-package_name = "{{ cookiecutter.python_package }}"
+kedro_init_version = "{{ cookiecutter.python_package }}"
 
 [tool.isort]
 profile = "black"

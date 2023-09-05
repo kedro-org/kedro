@@ -86,7 +86,7 @@ extras_require = {
         # docutils>=0.17 changed the HTML
         # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
         # "docutils==0.16",
-        "sphinx~=6.2.1",
+        "sphinx>=6.2.1", # requied by sphinx_docsearch
         "sphinx_rtd_theme==1.2.0",
         # Regression on sphinx-autodoc-typehints 1.21
         # that creates some problematic docstrings
@@ -98,7 +98,7 @@ extras_require = {
         "myst-parser~=1.0.0",
         "Jinja2<3.1.0",
         "kedro-datasets[all]~=1.7.0",
-        "sphinx-docsearch",
+        "sphinx_docsearch==0.0.3",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),

@@ -29,6 +29,11 @@ from kedro import __version__ as release
 project = "kedro"
 author = "kedro"
 
+# Algolia DocSearch Configuration
+docsearch_app_id = os.environ.get("DOCSEARCH_APP_ID")
+docsearch_api_key = os.environ.get("DOCSEARCH_API_KEY")
+docsearch_index_name = os.environ.get("DOCSEARCH_INDEX_NAME")
+
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
 
@@ -50,6 +55,7 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
+    "sphinx_docsearch",
     "sphinxcontrib.mermaid",
     "myst_parser",
     "notfound.extension",

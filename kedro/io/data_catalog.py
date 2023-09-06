@@ -444,27 +444,28 @@ class DataCatalog:
         cls,
         data_set_name: str,
         matched_pattern: str,
-        config_copy: dict,
+        config: dict,
     ) -> dict[str, Any]:
         """Get resolved AbstractDataset from a factory config"""
         result = parse(matched_pattern, data_set_name)
         # Resolve the factory config for the dataset
-        for key, value in config_copy.items():
-            if isinstance(value, dict):
-                config_copy[key] = cls._resolve_config(
-                    data_set_name, matched_pattern, value
-                )
-            if isinstance(value, Iterable) and "}" in value:
-                # result.named: gives access to all dict items in the match result.
-                # format_map fills in dict values into a string with {...} placeholders
-                # of the same key name.
-                try:
-                    config_copy[key] = str(value).format_map(result.named)
-                except KeyError as exc:
-                    raise DatasetError(
-                        f"Unable to resolve '{key}' for the pattern '{matched_pattern}'"
-                    ) from exc
-        return config_copy
+        if isinstance(config, dict):
+            for key, value in config.items():
+                config[key] = cls._resolve_config(data_set_name, matched_pattern, value)
+        elif isinstance(config, list):
+            config = [
+                cls._resolve_config(data_set_name, matched_pattern, value)
+                for value in config
+            ]
+        elif isinstance(config, Iterable) and "}" in config:
+            try:
+                config = str(config).format_map(result.named)
+            except KeyError as exc:
+                raise DatasetError(
+                    f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the config "
+                    f"should be present in the dataset factory pattern."
+                ) from exc
+        return config
 
     def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set.

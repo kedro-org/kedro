@@ -197,16 +197,15 @@ class AbstractRunner(ABC):
 
         postfix = ""
         if done_nodes:
-            node_names = (n.name for n in remaining_nodes)
-            resume_p = pipeline.only_nodes(*node_names)
-            start_p = resume_p.only_nodes_with_inputs(*resume_p.inputs())
+            # Find which of the remaining nodes would need to run first (in topo sort)
+            remaining_initial_nodes = _find_initial_nodes(pipeline, remaining_nodes)
 
-            # find the nearest persistent ancestors of the nodes in start_p
-            start_p_persistent_ancestors = _find_persistent_ancestors(
-                pipeline, start_p.nodes, catalog
+            # Find the nearest persistent ancestors of these nodes
+            persistent_ancestors = _find_persistent_ancestors(
+                pipeline, remaining_initial_nodes, catalog
             )
 
-            start_node_names = (n.name for n in start_p_persistent_ancestors)
+            start_node_names = sorted(n.name for n in persistent_ancestors)
             postfix += f"  --from-nodes \"{','.join(start_node_names)}\""
 
         if not postfix:
@@ -229,7 +228,7 @@ def _find_persistent_ancestors(
 ) -> set[Node]:
     """Breadth-first search approach to finding the complete set of
     persistent ancestors of an iterable of ``Node``s. Persistent
-    ancestors exclusively have persisted ``Dataset``s as inputs.
+    ancestors exclusively have persisted ``Dataset``s or parameters as inputs.
 
     Args:
         pipeline: the ``Pipeline`` to find ancestors in.
@@ -273,8 +272,9 @@ def _enumerate_parents(pipeline: Pipeline, child: Node) -> list[Node]:
 
 
 def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
-    """Check if a ``Node`` exclusively has persisted Datasets as inputs.
-    If at least one input is a ``MemoryDataset``, return False.
+    """Check if a ``Node`` exclusively has either persisted Datasets
+    or parameters as inputs. If at least one non-parametric input
+    is a ``MemoryDataset``, return False.
 
     Args:
         node: the ``Node`` to check the inputs of.
@@ -282,14 +282,35 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
 
     Returns:
         True if the ``Node`` being checked exclusively has inputs that
-        are not ``MemoryDataset``, else False.
+        are persisted Datasets or parameters, else False.
 
     """
     for node_input in node.inputs:
+        # Parameters are represented as MemoryDatasets but are considered persistent
+        if node_input.startswith("params:"):
+            continue
         # noqa: protected-access
         if isinstance(catalog._data_sets[node_input], MemoryDataset):
             return False
     return True
+
+
+def _find_initial_nodes(pipeline: Pipeline, nodes: Iterable[Node]) -> list[Node]:
+    """Given a collection of ``Node``s in a ``Pipeline``,
+    find the initial group of ``Node``s to be run (in topological order).
+
+    Args:
+        pipeline: the ``Pipeline`` to search for initial ``Node``s in.
+        nodes: the ``Node``s to find initial group for.
+
+    Returns:
+        A list of initial ``Node``s to run given inputs (in topological order).
+
+    """
+    node_names = set(n.name for n in nodes)
+    sub_pipeline = pipeline.only_nodes(*node_names)
+    initial_nodes = sub_pipeline.grouped_nodes[0]
+    return initial_nodes
 
 
 def run_node(

@@ -15,6 +15,10 @@ def identity(arg):
     return arg
 
 
+def first_arg(*args):
+    return args[0]
+
+
 def sink(arg):  # pylint: disable=unused-argument
     pass
 
@@ -36,7 +40,7 @@ def return_not_serialisable(arg):  # pylint: disable=unused-argument
     return lambda x: x
 
 
-def multi_input_list_output(arg1, arg2):
+def multi_input_list_output(arg1, arg2, arg3=None):  # pylint: disable=unused-argument
     return [arg1, arg2]
 
 
@@ -81,6 +85,8 @@ def persistent_dataset_catalog():
             "ds0_B": persistent_dataset,
             "ds2_A": persistent_dataset,
             "ds2_B": persistent_dataset,
+            "dsX": persistent_dataset,
+            "params:p": MemoryDataSet(1),
         }
     )
 
@@ -147,22 +153,33 @@ def unfinished_outputs_pipeline():
     )  # Outputs: ['ds8', 'ds5', 'ds6'] == ['ds1', 'ds2', 'ds3']
 
 
-@pytest.fixture
-def two_branches_crossed_pipeline():
-    """A ``Pipeline`` with an X-shape (two branches with one common node)"""
+@pytest.fixture(
+    params=[(), ("dsX",), ("params:p",)],
+    ids=[
+        "no_extras",
+        "extra_persistent_ds",
+        "extra_param",
+    ],
+)
+def two_branches_crossed_pipeline(request):
+    """A ``Pipeline`` with an X-shape (two branches with one common node).
+    Non-persistent datasets (other than parameters) are prefixed with an underscore.
+    """
+    extra_inputs = list(request.param)
+
     return pipeline(
         [
-            node(identity, "ds0_A", "ds1_A", name="node1_A"),
-            node(identity, "ds0_B", "ds1_B", name="node1_B"),
+            node(first_arg, ["ds0_A"] + extra_inputs, "_ds1_A", name="node1_A"),
+            node(first_arg, ["ds0_B"] + extra_inputs, "_ds1_B", name="node1_B"),
             node(
                 multi_input_list_output,
-                ["ds1_A", "ds1_B"],
+                ["_ds1_A", "_ds1_B"] + extra_inputs,
                 ["ds2_A", "ds2_B"],
                 name="node2",
             ),
-            node(identity, "ds2_A", "ds3_A", name="node3_A"),
-            node(identity, "ds2_B", "ds3_B", name="node3_B"),
-            node(identity, "ds3_A", "ds4_A", name="node4_A"),
-            node(identity, "ds3_B", "ds4_B", name="node4_B"),
+            node(first_arg, ["ds2_A"] + extra_inputs, "_ds3_A", name="node3_A"),
+            node(first_arg, ["ds2_B"] + extra_inputs, "_ds3_B", name="node3_B"),
+            node(first_arg, ["_ds3_A"] + extra_inputs, "_ds4_A", name="node4_A"),
+            node(first_arg, ["_ds3_B"] + extra_inputs, "_ds4_B", name="node4_B"),
         ]
     )

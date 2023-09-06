@@ -245,11 +245,11 @@ class TestSequentialRunnerRelease:
     "failing_node_names,expected_pattern",
     [
         (["node1_A"], r"No nodes ran."),
-        (["node2"], r"(node1_A,node1_B|node1_B,node1_A)"),
-        (["node3_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node3_A", "node4_A"], r"(node3_A,node3_B|node3_B,node3_A)"),
-        (["node2", "node4_A"], r"(node1_A,node1_B|node1_B,node1_A)"),
+        (["node2"], r'"node1_A,node1_B"'),
+        (["node3_A"], r'"node3_A,node3_B"'),
+        (["node4_A"], r'"node3_A,node3_B"'),
+        (["node3_A", "node4_A"], r'"node3_A,node3_B"'),
+        (["node2", "node4_A"], r'"node1_A,node1_B"'),
     ],
 )
 class TestSuggestResumeScenario:
@@ -267,7 +267,8 @@ class TestSuggestResumeScenario:
             two_branches_crossed_pipeline += modular_pipeline(
                 [nodes[name]._copy(func=exception_fn)]
             )
-        with pytest.raises(Exception):
+
+        with pytest.raises(Exception, match="test exception"):
             SequentialRunner().run(
                 two_branches_crossed_pipeline,
                 persistent_dataset_catalog,

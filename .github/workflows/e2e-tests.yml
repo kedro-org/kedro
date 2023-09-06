@@ -38,10 +38,17 @@ jobs:
         if: inputs.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1
       - name: Temporary - constraint build version
+        if: inputs.os != 'windows-latest'
         run: |
           echo "build>=0.7.0,<1.0.0 ; python_version < '3.8'" > constraints.txt
           echo "build>=0.7.0 ; python_version >= '3.8'" >> constraints.txt
           export PIP_CONSTRAINT=constraints.txt
+      - name: Temporary - constraint build version
+        if: inputs.os == 'windows-latest'
+        run: |
+          echo "build>=0.7.0,<1.0.0 ; python_version < '3.8'" > constraints.txt
+          echo "build>=0.7.0 ; python_version >= '3.8'" >> constraints.txt
+          set PIP_CONSTRAINT=constraints.txt
       - name: Install dependencies
         run: |
           pip install --upgrade pip

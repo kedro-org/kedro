@@ -113,8 +113,10 @@ Kedro also has auto-discovery enabled by default. This means that any installed 
 Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
 ```
 
-#### Missing some links and description that hooks can be registered from Plugin - and link to a build a plugin
-TBD
+#### Auto-registered Hook with Plugin
+You can make your hook auto-registered (pip-installable) by creating a [Kedro plugin](https://docs.kedro.org/en/stable/extend_kedro/plugins.html#hooks). Kedro provides `kedro.hooks` entrypoints to extend this easily.
+
+
 #### Disable auto-registered plugins' Hooks
 
 Auto-registered plugins' Hooks can be disabled via `settings.py` as follows:

@@ -15,6 +15,9 @@
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 0.19.0
 
+# Upcoming release 0.18.14
+* Allowed using of custom cookiecutter templates for creating pipelines with `--template` flag for `kedro pipeline create` or via `template/pipeline` folder.
+
 # Release 0.18.13
 
 ## Major features and improvements

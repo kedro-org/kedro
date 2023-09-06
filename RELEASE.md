@@ -12,6 +12,7 @@
 ## Major features and improvements
 ## Bug fixes and other changes
 ## Documentation changes
+* Added documentation to clarify execution orders of hooks.
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 0.19.0
 

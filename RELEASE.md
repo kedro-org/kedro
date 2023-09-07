@@ -30,6 +30,8 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Updated dataset factories to resolve nested catalog config properly.
+
 ## Documentation changes
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 0.19.0

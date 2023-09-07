@@ -11,7 +11,7 @@ import difflib
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Dict, Iterable
+from typing import Any, Dict
 
 from parse import parse
 
@@ -388,7 +388,10 @@ class DataCatalog:
         if data_set_name not in self._data_sets and matched_pattern:
             # If the dataset is a patterned dataset, materialise it and add it to
             # the catalog
-            data_set_config = self._resolve_config(data_set_name, matched_pattern)
+            config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
+            data_set_config = self._resolve_config(
+                data_set_name, matched_pattern, config_copy
+            )
             ds_layer = data_set_config.pop("layer", None)
             if ds_layer:
                 self.layers = self.layers or {}
@@ -436,27 +439,33 @@ class DataCatalog:
             return True
         return False
 
+    @classmethod
     def _resolve_config(
-        self,
+        cls,
         data_set_name: str,
         matched_pattern: str,
+        config: dict,
     ) -> dict[str, Any]:
         """Get resolved AbstractDataset from a factory config"""
         result = parse(matched_pattern, data_set_name)
-        config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
         # Resolve the factory config for the dataset
-        for key, value in config_copy.items():
-            if isinstance(value, Iterable) and "}" in value:
-                # result.named: gives access to all dict items in the match result.
-                # format_map fills in dict values into a string with {...} placeholders
-                # of the same key name.
-                try:
-                    config_copy[key] = str(value).format_map(result.named)
-                except KeyError as exc:
-                    raise DatasetError(
-                        f"Unable to resolve '{key}' for the pattern '{matched_pattern}'"
-                    ) from exc
-        return config_copy
+        if isinstance(config, dict):
+            for key, value in config.items():
+                config[key] = cls._resolve_config(data_set_name, matched_pattern, value)
+        elif isinstance(config, (list, tuple)):
+            config = [
+                cls._resolve_config(data_set_name, matched_pattern, value)
+                for value in config
+            ]
+        elif isinstance(config, str) and "}" in config:
+            try:
+                config = str(config).format_map(result.named)
+            except KeyError as exc:
+                raise DatasetError(
+                    f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the configuration "
+                    f"should be present in the dataset factory pattern."
+                ) from exc
+        return config
 
     def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set.

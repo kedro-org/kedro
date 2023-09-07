@@ -1,4 +1,5 @@
 """A collection of CLI commands for working with Kedro catalog."""
+import copy
 from collections import defaultdict
 from itertools import chain
 
@@ -84,7 +85,13 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
                 data_catalog._dataset_patterns, ds_name
             )
             if matched_pattern:
-                ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
+                ds_config_copy = copy.deepcopy(
+                    data_catalog._dataset_patterns[matched_pattern]
+                )
+
+                ds_config = data_catalog._resolve_config(
+                    ds_name, matched_pattern, ds_config_copy
+                )
                 factory_ds_by_type[ds_config["type"]].append(ds_name)
 
         default_ds = default_ds - set(chain.from_iterable(factory_ds_by_type.values()))
@@ -244,7 +251,14 @@ def resolve_patterns(metadata: ProjectMetadata, env):
             data_catalog._dataset_patterns, ds_name
         )
         if matched_pattern:
-            ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
+            ds_config_copy = copy.deepcopy(
+                data_catalog._dataset_patterns[matched_pattern]
+            )
+
+            ds_config = data_catalog._resolve_config(
+                ds_name, matched_pattern, ds_config_copy
+            )
+
             ds_config["filepath"] = _trim_filepath(
                 str(context.project_path) + "/", ds_config["filepath"]
             )

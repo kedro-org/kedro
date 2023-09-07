@@ -462,7 +462,7 @@ class DataCatalog:
                 config = str(config).format_map(result.named)
             except KeyError as exc:
                 raise DatasetError(
-                    f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the config "
+                    f"Unable to resolve '{config}' from the pattern '{matched_pattern}'. Keys used in the configuration "
                     f"should be present in the dataset factory pattern."
                 ) from exc
         return config

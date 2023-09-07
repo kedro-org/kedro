@@ -11,6 +11,8 @@
 
 ## Major features and improvements
 ## Bug fixes and other changes
+* Updated dataset factories to resolve nested catalog config properly.
+
 ## Documentation changes
 * Added documentation to clarify execution orders of hooks.
 ## Breaking changes to the API

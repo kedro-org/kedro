@@ -129,6 +129,18 @@ DISABLE_HOOKS_FOR_PLUGINS = ("<plugin_name>",)
 
 where `<plugin_name>` is the name of an installed plugin for which the auto-registered Hooks must be disabled.
 
+### Hook Execution Order
+Hooks follow a Last-In-First-Out (LIFO) order, which means the first registered hook will be exeucted last.
+
+Hooks are registered in the following order:
+1. Project hooks in `settings.py` - If you have `HOOKS = (hook_a, hookb,)`, `hook_b` will be executed before `hook_a`.
+2. Plugins hooks registered in `kedro.hooks`, and it follows alphabetical order.
+
+In general, hook execution order are not guaranteed and you shouldn't rely on it. If you need to make sure some hook get executed first/last, you can use the the [`tryfirst` or `trylast` argument](https://pluggy.readthedocs.io/en/stable/index.html#call-time-order) for `hook_impl`.
+
 ## Under the hood
 
 Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest/) to implement Kedro's Hook mechanism. We recommend reading their documentation if you have more questions about the underlying implementation.
+
+### Plugin Hooks
+Plugin hooks are registered using []`importlib_metadata`'s `EntryPoints` API](https://docs.python.org/3/library/importlib.metadata.html)

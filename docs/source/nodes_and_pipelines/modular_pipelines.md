@@ -79,21 +79,20 @@ If you want to do the reverse and remove a modular pipeline, you can use ``kedro
 ### Custom templates
 
 If you want to generate a pipeline with a custom Cookiecutter template, you can save it in `<project_root>/templates/pipeline`.
-The `kedro pipeline create` command will then pick up the custom template as the default. You can also specify the path to your custom
+The `kedro pipeline create` command will pick up the custom template in your project as the default. You can also specify the path to your custom
 Cookiecutter pipeline template with the `--template` flag like this:
 ```bash
 kedro pipeline create <pipeline_name> --template <path_to_template>
 ```
-A template folder passed via the command line using the `--template` argument will take precedence over any local templates
-in `<project_root>/templates/pipeline`, and you can use multiple different templates within a project using the `--template` argument.
-Currently, only one template in the project `templates` directory is supported; use the command line flag if you need multiple
-templates.
+A template folder passed through the command line using the `--template` argument will take precedence over any local templates.
+Kedro supports having a single pipeline template in your project. If you need to have many pipeline templates, consider saving them in a
+separate folder and pointing to them with the `--template` flag.
 
-#### Creating Custom Templates
+#### Creating custom templates
 
 It is up to you to create functional Cookiecutter templates for custom modular pipelines. Please ensure you understand the
-basic structure of a modular pipeline. The most important requirement is that your template should render to a valid, importable
-Python module containing a `create_pipeline` function at the top level that returns a `Pipeline` object. You will also need appropriate
+basic structure of a modular pipeline. Your template should render to a valid, importable Python module containing a
+`create_pipeline` function at the top level that returns a `Pipeline` object. You will also need appropriate
 `config` and `tests` subdirectories that will be copied to the project `config` and `tests` directories when creating a pipeline.
 Currently, the `config` and `tests` directories need to follow the exact same layout as in the default template and cannot
 be customized, though the contents of the parameters and actual test file can be changed. File and folder names or structure
@@ -101,7 +100,7 @@ do not matter beyond that and can be customized according to your needs. You can
 default template that Kedro](https://github.com/kedro-org/kedro/tree/main/kedro/templates/pipeline) uses as a starting point.
 
 Pipeline templates are rendered using [Cookiecutter](https://cookiecutter.readthedocs.io/), and must also contain a `cookiecutter.json`
-See the [`cookiecutter.json` file in the Kedro default template]((https://github.com/kedro-org/kedro/tree/main/kedro/templates/pipeline/cookiecutter.json)) for an example.
+See the [`cookiecutter.json` file in the Kedro default template](https://github.com/kedro-org/kedro/tree/main/kedro/templates/pipeline/cookiecutter.json) for an example.
 It is important to note that if you are embedding your custom pipeline template within a
 Kedro starter template, you must tell cookiecutter not to render this template when creating a new project from the starter. To do this,
 you must add [`_copy_without_render: ["templates"]`](https://cookiecutter.readthedocs.io/en/latest/advanced/copy_without_render.html) to the `cookiecutter.json` file for the starter

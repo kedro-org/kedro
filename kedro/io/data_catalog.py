@@ -11,7 +11,7 @@ import difflib
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Dict, Iterable
+from typing import Any, Dict
 
 from parse import parse
 
@@ -452,12 +452,12 @@ class DataCatalog:
         if isinstance(config, dict):
             for key, value in config.items():
                 config[key] = cls._resolve_config(data_set_name, matched_pattern, value)
-        elif isinstance(config, list):
+        elif isinstance(config, (list, tuple)):
             config = [
                 cls._resolve_config(data_set_name, matched_pattern, value)
                 for value in config
             ]
-        elif isinstance(config, Iterable) and "}" in config:
+        elif isinstance(config, str) and "}" in config:
             try:
                 config = str(config).format_map(result.named)
             except KeyError as exc:

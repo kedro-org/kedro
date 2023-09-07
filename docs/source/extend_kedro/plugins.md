@@ -234,28 +234,17 @@ connectors are implementations of the `AbstractDataset`
 
 ## Community-developed plugins
 
-See the full list of plugins using the GitHub tag [kedro-plugin](https://github.com/topics/kedro-plugin).
+See the full list of plugins using the GitHub repository [awesome-kedro](https://github.com/kedro-org/awesome-kedro?tab=readme-ov-file#kedro-plugins).
 
 
 ```{note}
 Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 ```
 
-- [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling), by [Justin Malloy](https://github.com/BrickFrog), uses [Pandas Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
-- [find-kedro](https://github.com/WaylonWalker/find-kedro), by [Waylon Walker](https://github.com/WaylonWalker), automatically constructs pipelines using `pytest`-style pattern matching
-- [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz), by [Waylon Walker](https://github.com/WaylonWalker), generates a static [Kedro-Viz](https://github.com/kedro-org/kedro-viz) site (HTML, CSS, JS)
-- [steel-toes](https://github.com/WaylonWalker/steel-toes), by [Waylon Walker](https://github.com/WaylonWalker), prevents stepping on toes by automatically branching data paths
-- [kedro-wings](https://github.com/tamsanh/kedro-wings), by [Tam-Sanh Nguyen](https://github.com/tamsanh), simplifies and speeds up pipeline creation by auto-generating catalog datasets
-- [kedro-great](https://github.com/tamsanh/kedro-great), by [Tam-Sanh Nguyen](https://github.com/tamsanh), integrates Kedro with [Great Expectations](https://greatexpectations.io), enabling catalog-based expectation generation and data validation on pipeline run
-- [Kedro-Accelerator](https://github.com/deepyaman/kedro-accelerator), by [Deepyaman Datta](https://github.com/deepyaman), speeds up pipelines by parallelizing I/O in the background
-- [kedro-dataframe-dropin](https://github.com/mzjp2/kedro-dataframe-dropin), by [Zain Patel](https://github.com/mzjp2), lets you swap out pandas datasets for modin or RAPIDs equivalents for specialised use to speed up your workflows (e.g on GPUs)
 - [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei) and [Takieddine Kadiri](https://github.com/takikadiri), facilitates [MLflow](https://www.mlflow.org/) integration within a Kedro project. Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronization between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial). You can find more information in the [kedro-mlflow documentation](https://kedro-mlflow.readthedocs.io/en/stable/).
-- [Kedro-Neptune](https://github.com/neptune-ai/kedro-neptune), by [Jakub Czakon](https://github.com/jakubczakon) and [Rafał Jankowski](https://github.com/Raalsky), lets you have all the benefits of a nicely organized Kedro pipeline with Neptune: a powerful user interface built for ML metadata management. It lets you browse and filter pipeline executions, compare nodes and pipelines on metrics and parameters, and visualize pipeline metadata like learning curves, node outputs, and charts. For more information, tutorials and videos, go to the [Kedro-Neptune documentation](https://docs.neptune.ai/integrations-and-supported-tools/automation-pipelines/kedro).
-- [kedro-dolt](https://www.dolthub.com/blog/2021-06-16-kedro-dolt-plugin/), by [Max Hoffman](https://github.com/max-hoffman) and [Oscar Batori](https://github.com/oscarbatori), allows you to expand the data versioning abilities of data scientists and engineers
 - [kedro-kubeflow](https://github.com/getindata/kedro-kubeflow), by [GetInData](https://github.com/getindata), lets you run and schedule pipelines on Kubernetes clusters using [Kubeflow Pipelines](https://www.kubeflow.org/docs/components/pipelines/overview/)
 - [kedro-airflow-k8s](https://github.com/getindata/kedro-airflow-k8s), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Airflow on a Kubernetes cluster
 - [kedro-vertexai](https://github.com/getindata/kedro-vertexai), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Vertex AI Pipelines service
 - [kedro-azureml](https://github.com/getindata/kedro-azureml), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Azure ML Pipelines service
 - [kedro-sagemaker](https://github.com/getindata/kedro-sagemaker), by [GetInData](https://github.com/getindata), enables running a Kedro pipeline with Amazon SageMaker service
 - [kedro-partitioned](https://github.com/ProjetaAi/kedro-partitioned), by [Gabriel Daiha Alves](https://github.com/gabrieldaiha) and [Nickolas da Rocha Machado](https://github.com/nickolasrm), extends the functionality on processing partitioned data.
-- [kedro-auto-catalog](https://github.com/WaylonWalker/kedro-auto-catalog), by [Waylon Walker](https://github.com/WaylonWalker) A configurable replacement for `kedro catalog create` that allows you to create default dataset types other than MemoryDataset.

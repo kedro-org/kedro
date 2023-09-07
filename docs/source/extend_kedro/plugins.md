@@ -29,8 +29,15 @@ def to_json(metadata):
     pipeline = pipelines["__default__"]
     print(pipeline.to_json())
 ```
+Starting from 0.18.14, Kedro switch to replace `setup.py` with `pyproject.toml`. The plugin need to provide the entry points in either file.
 
-The plugin provides the following `entry_points` config in `setup.py`:
+To use `pyproject.toml`, specifiy
+```toml
+[project.entry-points."kedro.project_commands"]
+kedrojson = kedrojson.plugin.commands
+```
+
+To use `setup.py`, the plugin need to provide the following `entry_points` config in `setup.py`:
 
 ```python
 setup(
@@ -81,6 +88,13 @@ setup(
 )
 ```
 
+Alternatively, to use `pyproject.toml`, you need to register the specifications as follow:
+
+```toml
+[project.entry-points."kedro.starters"]
+starter = plugin.starters
+```
+
 After that you can use this starter with `kedro new --starter=test_plugin_starter`.
 
 ```{note}
@@ -127,7 +141,17 @@ We use the following command convention: `kedro <plugin-name> <command>`, with `
 
 ## Hooks
 
-You can develop hook implementations and have them automatically registered to the project context when the plugin is installed. To enable this for your custom plugin, simply add the following entry in your `setup.py`:
+You can develop hook implementations and have them automatically registered to the project context when the plugin is installed.
+
+To enable this for your custom plugin, simply add the following entry in your `pyproject.toml`
+
+To use `pyproject.toml`, specifiy
+```toml
+[project.entry-points."kedro.hooks"]
+plugin_name = plugin_name.plugin.hooks
+```
+
+If you prefer to use `setup.py`:
 
 ```python
 setup(entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]})
@@ -160,6 +184,12 @@ You can also develop hook implementations to extend Kedro's CLI behaviour in you
 
 ```python
 setup(entry_points={"kedro.cli_hooks": ["plugin_name = plugin_name.plugin:cli_hooks"]})
+```
+
+Alternatively, to use `pyproject.toml`
+```toml
+[project.entry-points."kedro.cli_hooks"]
+plugin_name = plugin_name.plugin.cli_hooks
 ```
 
 where `plugin.py` is the module where you declare hook implementations:

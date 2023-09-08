@@ -189,7 +189,7 @@ class AzureSecretsHook:
         }
 ```
 
-Finally, [register the hook](./introduction.md#registering-your-hook-implementations-with-kedro) in your `settings.py` file:
+Finally, [register the hook](./introduction.md#registering-the-hook-implementations-with-kedro) in your `settings.py` file:
 
 ```python
 from my_project.hooks import AzureSecretsHook

@@ -29,15 +29,15 @@ def to_json(metadata):
     pipeline = pipelines["__default__"]
     print(pipeline.to_json())
 ```
-Starting from 0.18.14, Kedro switch to replace `setup.py` with `pyproject.toml`. The plugin need to provide the entry points in either file.
+From version 0.18.14, Kedro replaced `setup.py` with `pyproject.toml`. The plugin needs to provide entry points in either file.
 
-To use `pyproject.toml`, specifiy
+To add the entry point to `pyproject.toml`, specify it as follows:
 ```toml
 [project.entry-points."kedro.project_commands"]
 kedrojson = kedrojson.plugin.commands
 ```
 
-To use `setup.py`, the plugin need to provide the following `entry_points` config in `setup.py`:
+To use `setup.py`, the plugin needs to provide the following `entry_points` configuration in `setup.py`:
 
 ```python
 setup(
@@ -186,13 +186,13 @@ You can also develop hook implementations to extend Kedro's CLI behaviour in you
 setup(entry_points={"kedro.cli_hooks": ["plugin_name = plugin_name.plugin:cli_hooks"]})
 ```
 
-Alternatively, to use `pyproject.toml`
+Alternatively, to use `pyproject.toml`:
 ```toml
 [project.entry-points."kedro.cli_hooks"]
 plugin_name = plugin_name.plugin.cli_hooks
 ```
 
-where `plugin.py` is the module where you declare hook implementations:
+(where `plugin.py` is the module where you declare hook implementations):
 
 ```python
 import logging
@@ -234,7 +234,7 @@ connectors are implementations of the `AbstractDataset`
 
 ## Community-developed plugins
 
-See the full list of plugins using the GitHub repository [awesome-kedro](https://github.com/kedro-org/awesome-kedro?tab=readme-ov-file#kedro-plugins).
+There are many community-developed plugins available and a comprehensive list of plugins is published on the [`awesome-kedro`](https://github.com/kedro-org/awesome-kedro?tab=readme-ov-file#kedro-plugins) GitHub repository. The list below is a small snapshot of some of those under active maintenance.
 
 
 ```{note}

@@ -97,7 +97,7 @@ test_dataset:
       mode: "rb"
       encoding: "utf-8"
 ```
-
+typo hdohfof ojdasdj
 ### Dataset access credentials
 The Data Catalog also works with the `credentials.yml` file in `conf/local/`, allowing you to specify usernames and passwords required to load certain datasets.
 
@@ -124,7 +124,7 @@ motorbikes:
 ```
 In the example above, the `catalog.yml` file contains references to credentials keys `dev_s3`. The Data Catalog first reads `dev_s3` from the received `credentials` dictionary, and then passes its values into the dataset as a `credentials` argument to `__init__`.
 
-
+typo jsdsud jdoiahsod
 ### Dataset versioning
 
 

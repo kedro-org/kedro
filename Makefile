@@ -76,4 +76,3 @@ language-lint: dir ?= docs
 # Pattern rule to allow "make language-lint dir=doc/source/hooks>" syntax
 language-lint:
 	vale $(dir)
-

@@ -1,5 +1,5 @@
 # Introduction to the Data Catalog
-Adding some typos and weasel words to test - absolutely beautifully currently hdoauhfow
+
 
 In a Kedro project, the Data Catalog is a registry of all data sources available for use by the project. It is specified with a YAML catalog file that maps the names of node inputs and outputs as keys in the `DataCatalog` class.
 
@@ -32,7 +32,7 @@ Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, 
 [The `kedro-datasets` package documentation](/kedro_datasets) contains a comprehensive list of all available file types.
 
 ### Dataset `filepath`
-More typos = heofhowfH EWFOUHEUWFH
+
 Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, you should provide a URL using the general form `protocol://path/to/data`.  If no protocol is provided, the local file system is assumed (which is the same as ``file://``).
 
 The following prepends are available:
@@ -88,7 +88,6 @@ test_dataset:
 The `open_args_load` and `open_args_save` parameters are passed to the filesystem's `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation, respectively.
 
 For example, to load data from a local binary file using `utf-8` encoding:
-Even more typos for the second commit = fjhcvf ashfio
 
 ```yaml
 test_dataset:

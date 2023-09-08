@@ -1,5 +1,6 @@
 name: Language Linter for Kedro Docs
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "docs/**"

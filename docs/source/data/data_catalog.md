@@ -124,7 +124,7 @@ motorbikes:
 ```
 In the example above, the `catalog.yml` file contains references to credentials keys `dev_s3`. The Data Catalog first reads `dev_s3` from the received `credentials` dictionary, and then passes its values into the dataset as a `credentials` argument to `__init__`.
 
-typo jsdsud jdoiahsod
+
 ### Dataset versioning
 
 

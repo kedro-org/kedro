@@ -29,20 +29,12 @@ def to_json(metadata):
     pipeline = pipelines["__default__"]
     print(pipeline.to_json())
 ```
-From version 0.18.14, Kedro replaced `setup.py` with `pyproject.toml`. The plugin needs to provide entry points in either file.
+From version 0.18.14, Kedro replaced `setup.py` with `pyproject.toml`. The plugin needs to provide entry points in either file. If you are using `setup.py`, please refer to the [`0.18.13` version of documentations](https://docs.kedro.org/en/0.18.13/extend_kedro/plugins.html).
 
-To add the entry point to `pyproject.toml`, specify it as follows:
+To add the entry point to `pyproject.toml`, the plugin needs to provide the following `entry_points` configuration:
 ```toml
 [project.entry-points."kedro.project_commands"]
 kedrojson = kedrojson.plugin.commands
-```
-
-To use `setup.py`, the plugin needs to provide the following `entry_points` configuration in `setup.py`:
-
-```python
-setup(
-    entry_points={"kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"]}
-)
 ```
 
 Once the plugin is installed, you can run it as follows:
@@ -80,15 +72,7 @@ starters = [
 
 The `directory` argument is optional and should be used when you have multiple templates in one repository as for the [official kedro-starters](https://github.com/kedro-org/kedro-starters). If you only have one template, your top-level directory will be treated as the template. For an example, see the [pandas-iris starter](https://github.com/kedro-org/kedro-starters/tree/main/pandas-iris).
 
-In your `setup.py`, you need to register the specifications to `kedro.starters`.
-
-```python
-setup(
-    entry_points={"kedro.starters": ["starter =  plugin:starters"]},
-)
-```
-
-Alternatively, to use `pyproject.toml`, you need to register the specifications as follow:
+In your `pyproject.toml`, you need to register the specifications to `kedro.starters`:
 
 ```toml
 [project.entry-points."kedro.starters"]
@@ -151,12 +135,6 @@ To use `pyproject.toml`, specifiy
 plugin_name = plugin_name.plugin.hooks
 ```
 
-If you prefer to use `setup.py`:
-
-```python
-setup(entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]})
-```
-
 where `plugin.py` is the module where you declare hook implementations:
 
 ```python
@@ -180,13 +158,9 @@ hooks = MyHooks()
 
 ## CLI Hooks
 
-You can also develop hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI hooks developed in your plugin with Kedro, add the following entry in your project's `setup.py`:
+You can also develop hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
 
-```python
-setup(entry_points={"kedro.cli_hooks": ["plugin_name = plugin_name.plugin:cli_hooks"]})
-```
 
-Alternatively, to use `pyproject.toml`:
 ```toml
 [project.entry-points."kedro.cli_hooks"]
 plugin_name = plugin_name.plugin.cli_hooks

@@ -84,19 +84,19 @@ Cookiecutter pipeline template with the `--template` flag like this:
 ```bash
 kedro pipeline create <pipeline_name> --template <path_to_template>
 ```
-A template folder passed through the command line using the `--template` argument will take precedence over any local templates.
-Kedro supports having a single pipeline template in your project. If you need to have many pipeline templates, consider saving them in a
+A template folder passed to `kedro pipeline create` using the `--template` argument will take precedence over any local templates.
+Kedro supports having a single pipeline template in your project. If you need to have multiple pipeline templates, consider saving them in a
 separate folder and pointing to them with the `--template` flag.
 
 #### Creating custom templates
 
-It is up to you to create functional Cookiecutter templates for custom modular pipelines. Please ensure you understand the
+It is your responsibility to create functional Cookiecutter templates for custom modular pipelines. Please ensure you understand the
 basic structure of a modular pipeline. Your template should render to a valid, importable Python module containing a
 `create_pipeline` function at the top level that returns a `Pipeline` object. You will also need appropriate
-`config` and `tests` subdirectories that will be copied to the project `config` and `tests` directories when creating a pipeline.
-Currently, the `config` and `tests` directories need to follow the exact same layout as in the default template and cannot
-be customized, though the contents of the parameters and actual test file can be changed. File and folder names or structure
-do not matter beyond that and can be customized according to your needs. You can use [the
+`config` and `tests` subdirectories that will be copied to the project `config` and `tests` directories when the pipeline is created.
+The `config` and `tests` directories need to follow the same layout as in the default template and cannot
+be customised, although the contents of the parameters and actual test file can be changed. File and folder names or structure
+do not matter beyond that and can be customised according to your needs. You can use [the
 default template that Kedro](https://github.com/kedro-org/kedro/tree/main/kedro/templates/pipeline) uses as a starting point.
 
 Pipeline templates are rendered using [Cookiecutter](https://cookiecutter.readthedocs.io/), and must also contain a `cookiecutter.json`

@@ -137,7 +137,7 @@ Hooks follow a Last-In-First-Out (LIFO) order, which means the first registered 
 
 Hooks are registered in the following order:
 
-1. Project Hooks in `settings.py` - If you have `HOOKS = (hook_a, hookb,)`, `hook_b` will be executed before `hook_a`
+1. Project Hooks in `settings.py` - If you have `HOOKS = (hook_a, hook_b,)`, `hook_b` will be executed before `hook_a`
 2. Plugin Hooks registered in `kedro.hooks`, which follows alphabetical order
 
 In general, Hook execution order is not guaranteed and you should not rely on it. If you need to make sure a particular Hook is executed first or last, you can use the the [`tryfirst` or `trylast` argument](https://pluggy.readthedocs.io/en/stable/index.html#call-time-order) for `hook_impl`.
@@ -147,4 +147,4 @@ In general, Hook execution order is not guaranteed and you should not rely on it
 Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest/) to implement Kedro's Hook mechanism. We recommend reading their documentation to find out more about the underlying implementation.
 
 ### Plugin Hooks
-Plugin Hooks are registered using []`importlib_metadata`'s `EntryPoints` API](https://docs.python.org/3/library/importlib.metadata.html).
+Plugin Hooks are registered using [`importlib_metadata`'s `EntryPoints` API](https://docs.python.org/3/library/importlib.metadata.html).

@@ -73,6 +73,7 @@ def _register_hooks_setuptools(
     plugin_names = set()
     disabled_plugin_names = set()
     for plugin, dist in plugininfo:
+        print("DEBUG!!!", plugin, dist)
         if dist.project_name in disabled_plugins:
             # `unregister()` is used instead of `set_blocked()` because
             # we want to disable hooks for specific plugin based on project

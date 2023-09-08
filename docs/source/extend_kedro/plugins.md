@@ -234,7 +234,7 @@ connectors are implementations of the `AbstractDataset`
 
 ## Community-developed plugins
 
-There are many community-developed plugins available and a comprehensive list of plugins is published on the [`awesome-kedro`](https://github.com/kedro-org/awesome-kedro?tab=readme-ov-file#kedro-plugins) GitHub repository. The list below is a small snapshot of some of those under active maintenance.
+There are many community-developed plugins available and a comprehensive list of plugins is published on the [`awesome-kedro`](https://github.com/kedro-org/awesome-kedro) GitHub repository. The list below is a small snapshot of some of those under active maintenance.
 
 
 ```{note}

@@ -102,7 +102,7 @@ default template that Kedro](https://github.com/kedro-org/kedro/tree/main/kedro/
 Pipeline templates are rendered using [Cookiecutter](https://cookiecutter.readthedocs.io/), and must also contain a `cookiecutter.json`
 See the [`cookiecutter.json` file in the Kedro default template](https://github.com/kedro-org/kedro/tree/main/kedro/templates/pipeline/cookiecutter.json) for an example.
 It is important to note that if you are embedding your custom pipeline template within a
-Kedro starter template, you must tell cookiecutter not to render this template when creating a new project from the starter. To do this,
+Kedro starter template, you must tell Cookiecutter not to render this template when creating a new project from the starter. To do this,
 you must add [`_copy_without_render: ["templates"]`](https://cookiecutter.readthedocs.io/en/latest/advanced/copy_without_render.html) to the `cookiecutter.json` file for the starter
 and not the `cookiecutter.json` for the pipeline template.
 

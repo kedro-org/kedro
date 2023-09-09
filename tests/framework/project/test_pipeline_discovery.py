@@ -92,7 +92,7 @@ def test_find_pipelines_skips_hidden_modules(
     mock_package_name_with_pipelines, pipeline_names
 ):
     pipelines_dir = Path(sys.path[0]) / mock_package_name_with_pipelines / "pipelines"
-    pipeline_dir = pipelines_dir / ".hidden"
+    pipeline_dir = pipelines_dir / ".ipynb_checkpoints"
     pipeline_dir.mkdir()
     (pipeline_dir / "__init__.py").write_text(
         textwrap.dedent(

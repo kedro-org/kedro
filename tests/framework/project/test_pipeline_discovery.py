@@ -112,8 +112,8 @@ def test_find_pipelines_skips_hidden_modules(
     pipelines = find_pipelines()
     assert set(pipelines) == pipeline_names | {"__default__"}
     assert sum(pipelines.values()).outputs() == pipeline_names
-    
-    
+
+
 @pytest.mark.parametrize(
     "mock_package_name_with_pipelines,pipeline_names",
     [(x, x) for x in [set(), {"my_pipeline"}]],

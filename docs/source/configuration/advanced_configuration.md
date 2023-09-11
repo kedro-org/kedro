@@ -32,7 +32,7 @@ Some advanced use cases of `OmegaConfigLoader` are listed below:
 
 ## TemplatedConfigLoader
 
-```{note}
+```{warning}
 `ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code to use `OmegaConfigLoader`.
 ```
 
@@ -134,7 +134,7 @@ This section contains a set of guidance for advanced configuration requirements 
 - [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
 - [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
 - [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
- - [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
+- [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
 - [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 - [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 

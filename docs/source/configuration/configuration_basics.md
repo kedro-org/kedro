@@ -4,7 +4,7 @@ This section contains detailed information about Kedro project configuration, wh
 
 Kedro makes use of a configuration loader to load any project configuration files, and the available configuration loader classes are:
 
-```{note}
+```{warning}
 `ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
 ```
 
@@ -92,22 +92,22 @@ If you want to change the way configuration is loaded, you can either [customise
 
 This section contains a set of guidance for the most common configuration requirements of standard Kedro projects:
 
-- [Configuration](#configuration)
-  - [Configuration source](#configuration-source)
-  - [Configuration environments](#configuration-environments)
-    - [Base](#base)
-    - [Local](#local)
-  - [Configuration loading](#configuration-loading)
-    - [Configuration file names](#configuration-file-names)
-    - [Configuration patterns](#configuration-patterns)
-  - [How to use Kedro configuration](#how-to-use-kedro-configuration)
-    - [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
-    - [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
-    - [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
-    - [How to access configuration in code](#how-to-access-configuration-in-code)
-    - [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
-    - [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
-    - [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
+* [Configuration](#configuration)
+  * [Configuration source](#configuration-source)
+  * [Configuration environments](#configuration-environments)
+    * [Base](#base)
+    * [Local](#local)
+  * [Configuration loading](#configuration-loading)
+    * [Configuration file names](#configuration-file-names)
+    * [Configuration patterns](#configuration-patterns)
+  * [How to use Kedro configuration](#how-to-use-kedro-configuration)
+    * [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
+    * [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
+    * [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
+    * [How to access configuration in code](#how-to-access-configuration-in-code)
+    * [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
+    * [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
+    * [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
 
 ### How to change the setting for a configuration source folder
 To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md) as follows:

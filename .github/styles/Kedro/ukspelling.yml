@@ -4,10 +4,8 @@ link: 'https://github.com/kedro-org/kedro/wiki/Kedro-documentation-style-guide'
 ignorecase: true
 level: warning
 tokens:
-  - '(?:\w+)zation'
-  - '(?:\w+)izing'
-  - '(?:\w+)izer'
-  - '(?:\w+)ized'
+
+  - '(?:\w+)nized'
   - '(?:\w+)ize'
   - '(?:\w+)log'
   - '(?:\w+)lor'

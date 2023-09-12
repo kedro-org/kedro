@@ -23,6 +23,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [Jason Hite](https://github.com/jasonmhite)
 
+
 # Release 0.18.13
 
 ## Major features and improvements

@@ -44,7 +44,9 @@ def _write_yaml(filepath: Path, config: dict):
     filepath.write_text(yaml_str)
 
 
-def _make_cli_prompt_input(add_ons="", project_name="", repo_name="", python_package=""):
+def _make_cli_prompt_input(
+    add_ons="", project_name="", repo_name="", python_package=""
+):
     return "\n".join([add_ons, project_name, repo_name, python_package])
 
 

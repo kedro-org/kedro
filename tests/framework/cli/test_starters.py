@@ -17,7 +17,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
 )
 
-FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 19
+FILES_IN_TEMPLATE_WITH_ALL_ADD_ONS = 29
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def _write_yaml(filepath: Path, config: dict):
 
 
 def _make_cli_prompt_input(
-    add_ons="", project_name="", repo_name="", python_package=""
+    add_ons="all", project_name="", repo_name="", python_package=""
 ):
     return "\n".join([add_ons, project_name, repo_name, python_package])
 
@@ -53,7 +53,7 @@ def _make_cli_prompt_input(
 # noqa: too-many-arguments
 def _assert_template_ok(
     result,
-    add_ons="none",
+    add_ons="all",
     project_name="New Kedro Project",
     repo_name="new-kedro-project",
     python_package="new_kedro_project",
@@ -68,7 +68,7 @@ def _assert_template_ok(
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
     ]
 
-    assert len(generated_files) == FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
+    assert len(generated_files) == FILES_IN_TEMPLATE_WITH_ALL_ADD_ONS
     assert full_path.exists()
     assert (full_path / ".gitignore").is_file()
     assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
@@ -307,7 +307,7 @@ class TestNewFromConfigFileValid:
     def test_required_keys_only(self, fake_kedro_cli):
         """Test project created from config."""
         config = {
-            "add_ons": "none",
+            "add_ons": "all",
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",
@@ -321,7 +321,7 @@ class TestNewFromConfigFileValid:
     def test_custom_required_keys(self, fake_kedro_cli):
         """Test project created from config."""
         config = {
-            "add_ons": "none",
+            "add_ons": "all",
             "project_name": "Project X",
             "repo_name": "projectx",
             "python_package": "proj_x",
@@ -335,7 +335,7 @@ class TestNewFromConfigFileValid:
     def test_custom_kedro_version(self, fake_kedro_cli):
         """Test project created from config."""
         config = {
-            "add_ons": "none",
+            "add_ons": "all",
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",
@@ -350,7 +350,7 @@ class TestNewFromConfigFileValid:
     def test_custom_output_dir(self, fake_kedro_cli):
         """Test project created from config."""
         config = {
-            "add_ons": "none",
+            "add_ons": "all",
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",
@@ -366,7 +366,7 @@ class TestNewFromConfigFileValid:
     def test_extra_keys_allowed(self, fake_kedro_cli):
         """Test project created from config."""
         config = {
-            "add_ons": "none",
+            "add_ons": "all",
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",
@@ -411,7 +411,7 @@ class TestNewFromConfigFileInvalid:
     def test_output_dir_does_not_exist(self, fake_kedro_cli):
         """Check the error if the output directory is invalid."""
         config = {
-            "add_ons": "none",
+            "add_ons": "all",
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",
@@ -425,7 +425,7 @@ class TestNewFromConfigFileInvalid:
     def test_config_missing_key(self, fake_kedro_cli):
         """Check the error if keys are missing from config file."""
         config = {
-            "add_ons": "none",
+            "add_ons": "all",
             "python_package": "my_project",
             "repo_name": "my-project",
         }

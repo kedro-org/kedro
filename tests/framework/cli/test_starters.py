@@ -17,7 +17,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
 )
 
-FILES_IN_TEMPLATE = 29
+FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 19
 
 
 @pytest.fixture
@@ -44,8 +44,8 @@ def _write_yaml(filepath: Path, config: dict):
     filepath.write_text(yaml_str)
 
 
-def _make_cli_prompt_input(project_name="", repo_name="", python_package=""):
-    return "\n".join([project_name, repo_name, python_package])
+def _make_cli_prompt_input(add_ons="", project_name="", repo_name="", python_package=""):
+    return "\n".join([add_ons, project_name, repo_name, python_package])
 
 
 # noqa: too-many-arguments
@@ -65,7 +65,7 @@ def _assert_template_ok(
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
     ]
 
-    assert len(generated_files) == FILES_IN_TEMPLATE
+    assert len(generated_files) == FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
     assert full_path.exists()
     assert (full_path / ".gitignore").is_file()
     assert project_name in (full_path / "README.md").read_text(encoding="utf-8")

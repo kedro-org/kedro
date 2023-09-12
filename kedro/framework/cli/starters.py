@@ -293,6 +293,7 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
             f"Failed to generate project: could not load config at {config_path}."
         ) from exc
 
+    click.echo("WE REACHING HERE Y'ALL")
     return config
 
 

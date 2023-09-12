@@ -80,6 +80,78 @@ class TestPipelineCreateCommand:
         assert actual_files == expected_files
 
     @pytest.mark.parametrize("env", [None, "local"])
+    def test_create_pipeline_template(  # pylint: disable=too-many-locals
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
+        env,
+        fake_package_path,
+        fake_local_template_dir,
+    ):
+        pipelines_dir = fake_package_path / "pipelines"
+        assert pipelines_dir.is_dir()
+
+        assert not (pipelines_dir / PIPELINE_NAME).exists()
+
+        cmd = ["pipeline", "create", PIPELINE_NAME]
+        cmd += ["-e", env] if env else []
+        result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
+
+        assert (
+            f"Using pipeline template at: '{fake_repo_path / 'templates'}"
+            in result.output
+        )
+        assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
+        assert f"Location: '{pipelines_dir / PIPELINE_NAME}'" in result.output
+        assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
+
+        # Dummy pipeline rendered correctly
+        assert (pipelines_dir / PIPELINE_NAME / f"pipeline_{PIPELINE_NAME}.py").exists()
+
+        assert result.exit_code == 0
+
+    @pytest.mark.parametrize("env", [None, "local"])
+    def test_create_pipeline_template_command_line_override(  # pylint: disable=too-many-locals
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
+        env,
+        fake_package_path,
+        fake_local_template_dir,
+    ):
+        pipelines_dir = fake_package_path / "pipelines"
+        assert pipelines_dir.is_dir()
+
+        assert not (pipelines_dir / PIPELINE_NAME).exists()
+
+        # Rename the local template dir to something else so we know the command line flag is taking precedence
+        try:
+            # Can skip if already there but copytree has a dirs_exist_ok flag in >python 3.8 only
+            shutil.copytree(fake_local_template_dir, fake_repo_path / "local_templates")
+        except FileExistsError:
+            pass
+
+        cmd = ["pipeline", "create", PIPELINE_NAME]
+        cmd += ["-t", str(fake_repo_path / "local_templates/pipeline")]
+        cmd += ["-e", env] if env else []
+        result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
+
+        assert (
+            f"Using pipeline template at: '{fake_repo_path / 'local_templates'}"
+            in result.output
+        )
+        assert f"Creating the pipeline '{PIPELINE_NAME}': OK" in result.output
+        assert f"Location: '{pipelines_dir / PIPELINE_NAME}'" in result.output
+        assert f"Pipeline '{PIPELINE_NAME}' was successfully created." in result.output
+
+        # Dummy pipeline rendered correctly
+        assert (pipelines_dir / PIPELINE_NAME / f"pipeline_{PIPELINE_NAME}.py").exists()
+
+        assert result.exit_code == 0
+
+    @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline_skip_config(
         self, fake_repo_path, fake_project_cli, fake_metadata, env
     ):

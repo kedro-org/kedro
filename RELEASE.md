@@ -29,12 +29,19 @@
 # Upcoming Release 0.18.14
 
 ## Major features and improvements
+* Allowed using of custom cookiecutter templates for creating pipelines with `--template` flag for `kedro pipeline create` or via `template/pipeline` folder.
+
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
 
 ## Documentation changes
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 0.19.0
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+
+* [Jason Hite](https://github.com/jasonmhite)
+
 
 # Release 0.18.13
 

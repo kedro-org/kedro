@@ -58,7 +58,7 @@ else:
     with open(requirements_file_path, 'a') as file:
         file.write(
             "pytest-cov~=3.0\npytest-mock>=1.7.1, <2.0\npytest~=7.2")
-    with open(pyproject_file_path, 'a') as file:
+    with open(current_dir / "pyproject.toml", 'a') as file:
         pyproject_test_requirements = """
 [tool.pytest.ini_options]
 addopts = \"\"\"

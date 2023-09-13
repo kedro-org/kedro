@@ -143,6 +143,21 @@ def test_starter_list_with_invalid_starter_plugin(
     assert expected in result.output
 
 
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        ("1", ["1"]),
+        ("1,2,3", ["1", "2", "3"]),
+        ("2-4", ["2", "3", "4"]),
+        ("all", ["1", "2", "3", "4", "5"]),
+        ("none", []),
+    ],
+)
+def test_parse_add_ons(input, expected):
+    result = parse_add_ons_input(input)
+    assert result == expected
+
+
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestNewFromUserPromptsValid:
     """Tests for running `kedro new` interactively."""

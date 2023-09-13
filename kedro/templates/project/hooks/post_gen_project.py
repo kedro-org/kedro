@@ -16,9 +16,7 @@ pyproject_file_path = current_dir / "pyproject.toml"
 pyproject_src_file_path = current_dir / "src/pyproject.toml"
 
 if "1" not in selected_add_ons_list:  # If Linting not selected
-    setup_cfg_path = current_dir / "setup.cfg"
-    if setup_cfg_path.exists():
-        setup_cfg_path.unlink()
+    pass
 else:
     with open(requirements_file_path, 'a') as file:
         file.write(

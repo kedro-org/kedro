@@ -1,0 +1,29 @@
+name: Run nightly tests on all plugins
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every day at midnight (UTC time)
+    - cron: '0 0 * * *'
+
+jobs:
+  kedro-test:
+    uses: ./.github/workflows/all-checks.yml
+
+  notify-airflow:
+    permissions:
+      issues: write
+    name: Notify failed build for airflow
+    needs: kedro-test
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          label-name: "nightly build"
+          title-template: "ci: Nightly build failure"
+          body-template: |
+            GitHub Actions workflow [{{workflow}} #{{runNumber}}](https://github.com/{{repo.owner}}/{{repo.repo}}/actions/runs/{{runId}}) failed.
+          create-label: true
+          always-create-new-issue: false

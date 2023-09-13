@@ -1,4 +1,4 @@
-name: Run nightly tests on all plugins
+name: Run nightly tests on Kedro
 
 on:
   workflow_dispatch:

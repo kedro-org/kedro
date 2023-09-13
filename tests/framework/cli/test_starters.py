@@ -16,6 +16,7 @@ from kedro.framework.cli.starters import (
     TEMPLATE_PATH,
     KedroStarterSpec,
 )
+from kedro.templates.project.hooks.utils import parse_add_ons_input
 
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 19
 
@@ -50,6 +51,24 @@ def _make_cli_prompt_input(
     return "\n".join([add_ons, project_name, repo_name, python_package])
 
 
+def _get_expected_files(add_ons: str):
+    add_ons_template_files = {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 2,
+        "5": 8,
+    }  # files added to template by each add-on
+    add_ons_list = parse_add_ons_input(add_ons)
+
+    expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
+
+    for add_on in add_ons_list:
+        expected_files = expected_files + add_ons_template_files[add_on]
+
+    return expected_files
+
+
 # noqa: too-many-arguments
 def _assert_template_ok(
     result,
@@ -68,7 +87,7 @@ def _assert_template_ok(
         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
     ]
 
-    assert len(generated_files) == FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
+    assert len(generated_files) == _get_expected_files(add_ons)
     assert full_path.exists()
     assert (full_path / ".gitignore").is_file()
     assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
@@ -307,7 +326,7 @@ class TestNewFromConfigFileValid:
     def test_required_keys_only(self, fake_kedro_cli):
         """Test project created from config."""
         config = {
-            "add_ons": "none",
+            "add_ons": "all",
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",

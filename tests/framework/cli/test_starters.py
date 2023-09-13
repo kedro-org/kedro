@@ -681,3 +681,125 @@ class TestFlagsNotAllowed:
         )
         assert result.exit_code != 0
         assert "Cannot use the --directory flag with a --starter alias" in result.output
+
+
+@pytest.mark.usefixtures("chdir_to_tmp")
+class TestAddOnsFromUserInput:
+    def test_testing_add_on(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="1"),
+        )
+        _assert_template_ok(result, add_ons="1")
+        # TODO assert requirements are where they should be
+
+    def test_linting_add_on(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="2"),
+        )
+        _assert_template_ok(result, add_ons="2")
+        # TODO assert requirements are where they should be
+
+    def test_logging_add_on(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="3"),
+        )
+        _assert_template_ok(result, add_ons="3")
+
+    def test_documentation_add_on(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="4"),
+        )
+        _assert_template_ok(result, add_ons="4")
+        # TODO assert requirements are where they should be
+
+    def test_data_add_on(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="5"),
+        )
+        _assert_template_ok(result, add_ons="5")
+
+    def test_no_add_ons(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="none"),
+        )
+        _assert_template_ok(result, add_ons="none")
+
+    def test_some_add_ons(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="3-5"),
+        )
+        _assert_template_ok(result, add_ons="3-5")
+        # TODO assert requirements are where they should be
+
+    def test_add_ons_range(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="3-5"),
+        )
+        _assert_template_ok(result, add_ons="3-5")
+        # TODO assert requirements are where they should be
+
+    def test_comma_separated_add_ons(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="2,4,5"),
+        )
+        _assert_template_ok(result, add_ons="2,4,5")
+        # TODO assert requirements are where they should be
+
+    def test_all_add_ons(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="all"),
+        )
+        _assert_template_ok(result, add_ons="all")
+        # TODO assert requirements are where they should be
+
+    def test_invalid_add_on(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(add_ons="bad input"),
+        )
+
+        assert result.exit_code != 0
+        assert "is an invalid value for Project Add-Ons." in result.output
+        assert (
+            "Invalid input. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
+            in result.output
+        )
+
+
+@pytest.mark.usefixtures("chdir_to_tmp")
+class TestAddOnsFromConfigFile:
+    # TODO add tests for add-ons specified in config
+    def placeholder(self, fake_kedro_cli):
+        """Test project created from config."""
+        config = {
+            "add_ons": "all",
+            "project_name": "My Project",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+        _assert_template_ok(result, **config)

@@ -18,7 +18,7 @@ from kedro.framework.cli.starters import (
 )
 from kedro.templates.project.hooks.utils import parse_add_ons_input
 
-FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 19
+FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 16
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def _make_cli_prompt_input(
 def _get_expected_files(add_ons: str):
     add_ons_template_files = {
         "1": 0,
-        "2": 0,
+        "2": 3,
         "3": 0,
         "4": 2,
         "5": 8,

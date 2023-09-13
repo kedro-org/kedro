@@ -39,7 +39,7 @@ ignore = ["E501"]  # Black take care off line-too-long
         file.write(pyproject_test_requirements)
 
 if "2" not in selected_add_ons_list:  # If Testing not selected
-    tests_path = current_dir / "tests"
+    tests_path = current_dir / "src" / "tests"
     if tests_path.exists():
         shutil.rmtree(str(tests_path))
 else:

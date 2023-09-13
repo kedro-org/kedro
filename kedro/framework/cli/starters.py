@@ -364,10 +364,13 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )
     add_ons = extra_context.get("add_ons")
-    if add_ons == "none":
-        click.secho("\nYou have selected no add-ons")
-    else:
-        click.secho(f"\nYou have selected the following add-ons: '{add_ons}'")
+
+    # Only non-starter projects have configurable add-ons
+    if template_path == str(TEMPLATE_PATH):
+        if add_ons == "none":
+            click.secho("\nYou have selected no add-ons")
+        else:
+            click.secho(f"\nYou have selected the following add-ons: '{add_ons}'")
 
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "

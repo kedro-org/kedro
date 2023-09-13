@@ -685,7 +685,7 @@ class TestFlagsNotAllowed:
 
 @pytest.mark.usefixtures("chdir_to_tmp")
 class TestAddOnsFromUserPrompts:
-    def test_testing_add_on(self, fake_kedro_cli):
+    def test_linting_add_on(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
@@ -694,7 +694,7 @@ class TestAddOnsFromUserPrompts:
         _assert_template_ok(result, add_ons="1")
         # TODO assert requirements are where they should be
 
-    def test_linting_add_on(self, fake_kedro_cli):
+    def test_testing_add_on(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],

@@ -62,7 +62,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
         file.write(pyproject_test_requirements)
 
 if "3" not in selected_add_ons_list:  # If Logging not selected
-    logging_yml_path = current_dir / "logging.yml"
+    logging_yml_path = current_dir / "conf/logging.yml"
     if logging_yml_path.exists():
         logging_yml_path.unlink()
 

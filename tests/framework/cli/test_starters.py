@@ -55,7 +55,7 @@ def _get_expected_files(add_ons: str):
     add_ons_template_files = {
         "1": 0,
         "2": 3,
-        "3": 0,
+        "3": 1,
         "4": 2,
         "5": 8,
     }  # files added to template by each add-on

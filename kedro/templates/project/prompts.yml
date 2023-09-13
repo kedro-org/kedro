@@ -8,7 +8,7 @@ add_ons:
     Add-Ons
     1) Linting : Provides a basic linting set up with Flake8, Black and isort
     2) Testing : Provides basic testing set up with pytest
-    3) Logging : Provides more logging options, environment specific,
+    3) Custom Logging : Provides more logging options
     4) Documentation: Provides basic documentations setup with Sphinx
     5) Data Structure: Provides a directory structure for storing data
 

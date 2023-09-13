@@ -684,7 +684,7 @@ class TestFlagsNotAllowed:
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
-class TestAddOnsFromUserInput:
+class TestAddOnsFromUserPrompts:
     def test_testing_add_on(self, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli,

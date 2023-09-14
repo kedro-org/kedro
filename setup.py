@@ -135,7 +135,6 @@ extras_require["all"] = _collect_requirements(extras_require)
 extras_require["test"] = [
     "adlfs>=2021.7.1, <=2022.2; python_version == '3.7'",
     "adlfs~=2023.1; python_version >= '3.8'",
-    "azure-storage-blob < 12.18.0",  # Temporary fix https://github.com/Azure/azure-sdk-for-python/issues/32056
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
     "biopython~=1.73",

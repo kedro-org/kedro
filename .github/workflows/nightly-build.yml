@@ -15,7 +15,7 @@ jobs:
       issues: write
     name: Notify failed build for kedro
     needs: kedro-test
-    if: failure()
+    if: ${{ !success() }}
     runs-on: ubuntu-latest
     steps:
       - uses: jayqi/failed-build-issue-action@v1

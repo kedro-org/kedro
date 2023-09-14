@@ -158,7 +158,7 @@ hooks = MyHooks()
 
 ## CLI Hooks
 
-You can also develop hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
+You can also develop Hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI Hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI Hooks developed in your plugin with Kedro, add the following entry in your project's `pyproject.toml`:
 
 
 ```toml
@@ -166,7 +166,7 @@ You can also develop hook implementations to extend Kedro's CLI behaviour in you
 plugin_name = plugin_name.plugin.cli_hooks
 ```
 
-(where `plugin.py` is the module where you declare hook implementations):
+(where `plugin.py` is the module where you declare Hook implementations):
 
 ```python
 import logging

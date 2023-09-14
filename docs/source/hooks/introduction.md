@@ -33,7 +33,7 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 [kedro.framework.hooks](/kedro.framework.hooks) lists the full specifications for which you can inject additional behaviours by providing an implementation.
 
 
-### CLI hooks
+### CLI Hooks
 
 Kedro defines a small set of CLI hooks that inject additional behaviour around execution of a Kedro CLI command:
 

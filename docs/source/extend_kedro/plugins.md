@@ -127,9 +127,9 @@ We use the following command convention: `kedro <plugin-name> <command>`, with `
 
 You can develop hook implementations and have them automatically registered to the project context when the plugin is installed.
 
-To enable this for your custom plugin, simply add the following entry in your `pyproject.toml`
+To enable this for your custom plugin, simply add the following entry in `pyproject.toml`
 
-To use `pyproject.toml`, specifiy
+To use `pyproject.toml`, specify
 ```toml
 [project.entry-points."kedro.hooks"]
 plugin_name = plugin_name.plugin.hooks

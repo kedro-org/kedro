@@ -7,14 +7,15 @@ Credentials configuration can be used on its own directly in code or [fed into t
 If you would rather store your credentials in environment variables instead of a file, you can use the `OmegaConfigLoader` [to load credentials from environment variables](advanced_configuration.md#how-to-load-credentials-through-environment-variables) as described in the advanced configuration chapter.
 
 ## How to load credentials in code
+
 Credentials configuration can be loaded the same way as any other project configuration using any of the configuration loader classes: `ConfigLoader`, `TemplatedConfigLoader`, and `OmegaConfigLoader`.
 
-The following examples all use the default `ConfigLoader` class.
+The following examples are valid for both, the `ConfigLoader` and the `OmegaConfigLoader`.
 
 ```python
 from pathlib import Path
 
-from kedro.config import ConfigLoader
+from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
 # Substitute <project_root> with the [root folder for your project](https://docs.kedro.org/en/stable/tutorial/spaceflights_tutorial.html#terminology)
@@ -30,11 +31,11 @@ Calling `conf_loader[key]` in the example above throws a `MissingConfigException
 ```python
 from pathlib import Path
 
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import OmegaConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 
 conf_path = str(Path(<project_root>) / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
 
 try:
     credentials = conf_loader["credentials"]

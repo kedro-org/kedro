@@ -10,10 +10,10 @@ jobs:
   kedro-test:
     uses: ./.github/workflows/all-checks.yml
 
-  notify-airflow:
+  notify-kedro:
     permissions:
       issues: write
-    name: Notify failed build for airflow
+    name: Notify failed build for kedro
     needs: kedro-test
     if: failure()
     runs-on: ubuntu-latest

@@ -108,6 +108,29 @@ def config_with_dataset_factories():
 
 
 @pytest.fixture
+def config_with_dataset_factories_nested():
+    return {
+        "catalog": {
+            "{brand}_cars": {
+                "type": "PartitionedDataset",
+                "path": "data/01_raw",
+                "dataset": "pandas.CSVDataSet",
+                "metadata": {
+                    "my-plugin": {
+                        "brand": "{brand}",
+                        "list_config": [
+                            "NA",
+                            "{brand}",
+                        ],
+                        "nested_list_dict": [{}, {"brand": "{brand}"}],
+                    }
+                },
+            },
+        },
+    }
+
+
+@pytest.fixture
 def config_with_dataset_factories_with_default(config_with_dataset_factories):
     config_with_dataset_factories["catalog"]["{default_dataset}"] = {
         "type": "pandas.CSVDataSet",
@@ -840,7 +863,10 @@ class TestDataCatalogDatasetFactories:
     ):
         """Check error raised when key mentioned in the config is not in pattern name"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories_bad_pattern)
-        pattern = "Unable to resolve 'filepath' for the pattern '{type}@planes'"
+        pattern = (
+            "Unable to resolve 'data/01_raw/{brand}_plane.pq' from the pattern '{type}@planes'. "
+            "Keys used in the configuration should be present in the dataset factory pattern."
+        )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             catalog._get_dataset("jet@planes")
 
@@ -896,3 +922,13 @@ class TestDataCatalogDatasetFactories:
             microsecond=current_ts.microsecond // 1000 * 1000, tzinfo=None
         )
         assert actual_timestamp == expected_timestamp
+
+    def test_factory_nested_config(self, config_with_dataset_factories_nested):
+        catalog = DataCatalog.from_config(**config_with_dataset_factories_nested)
+        dataset = catalog._get_dataset("tesla_cars")
+        assert dataset.metadata["my-plugin"]["brand"] == "tesla"
+        assert dataset.metadata["my-plugin"]["list_config"] == ["NA", "tesla"]
+        assert dataset.metadata["my-plugin"]["nested_list_dict"] == [
+            {},
+            {"brand": "tesla"},
+        ]

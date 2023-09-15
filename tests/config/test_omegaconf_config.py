@@ -879,3 +879,34 @@ class TestOmegaConfigLoader:
         with pytest.raises(ValueError, match="Duplicate keys found in"):
             # fail because of reading the hidden files and get duplicate keys
             conf["parameters"]
+
+    def test_runtime_params_resolution(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        runtime_params = {
+            "x": 45,
+            "dataset": {
+                "type": "pandas.CSVDataSet",
+            },
+        }
+        param_config = {
+            "my_runtime_param": "${runtime_params:x}",
+            "my_param_default": "${runtime_params:y,34}",  # y does not exist in globals
+        }
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:dataset.type}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_params, param_config)
+        _write_yaml(base_catalog, catalog_config)
+        conf = OmegaConfigLoader(
+            tmp_path, default_run_env="", runtime_params=runtime_params
+        )
+        # Globals are resolved correctly in parameter
+        assert conf["parameters"]["my_runtime_param"] == runtime_params["x"]
+        # The default value is used if the key does not exist
+        assert conf["parameters"]["my_param_default"] == 34
+        # Globals are resolved correctly in catalog
+        assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]

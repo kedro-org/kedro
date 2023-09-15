@@ -122,7 +122,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if custom_resolvers:
             self._register_new_resolvers(custom_resolvers)
         # Register globals resolver
-        self._register_globals_resolver()
+        self._register_inbuilt_resolvers()
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
             self._protocol = "tar"
@@ -314,11 +314,16 @@ class OmegaConfigLoader(AbstractConfigLoader):
             ".json",
         ]
 
-    def _register_globals_resolver(self):
+    def _register_inbuilt_resolvers(self):
         """Register the globals resolver"""
         OmegaConf.register_new_resolver(
             "globals",
             self._get_globals_value,
+            replace=True,
+        )
+        OmegaConf.register_new_resolver(
+            "runtime_params",
+            self._get_runtime_value,
             replace=True,
         )
 
@@ -337,6 +342,20 @@ class OmegaConfigLoader(AbstractConfigLoader):
         else:
             raise InterpolationResolutionError(
                 f"Globals key '{variable}' not found and no default value provided."
+            )
+
+    def _get_runtime_value(self, variable, default_value=_NO_VALUE):
+        """Return the runtime params values to the resolver"""
+
+        runtime_oc = OmegaConf.create(self.runtime_params)
+        interpolated_value = OmegaConf.select(
+            runtime_oc, variable, default=default_value
+        )
+        if interpolated_value != _NO_VALUE:
+            return interpolated_value
+        else:
+            raise InterpolationResolutionError(
+                f"Runtime parameter '{variable}' not found and no default value provided."
             )
 
     @staticmethod

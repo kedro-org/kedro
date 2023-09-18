@@ -27,5 +27,7 @@ docs = [
     "myst-parser~=0.17.2",
 ]
 
+[project.entry-points."kedro.hooks"]
+
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements.txt"}

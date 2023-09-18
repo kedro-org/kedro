@@ -121,7 +121,7 @@ def _install_project_requirements(context):
         .read_text(encoding="utf-8")
         .splitlines()
     )
-    install_reqs = [req for req in install_reqs if "{" not in req]
+    install_reqs = [req for req in install_reqs if "{" and "#" not in req]
     install_reqs.append(".[pandas.CSVDataSet]")
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

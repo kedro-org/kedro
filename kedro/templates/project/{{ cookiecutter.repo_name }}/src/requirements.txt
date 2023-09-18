@@ -12,5 +12,5 @@ nbstripout~=0.4
 pytest-cov~=3.0
 pytest-mock>=1.7.1, <2.0
 pytest~=7.2
-# Pin problematic traitlets release -  https://github.com/kedro-org/kedro/pull/3040
+# Pin problematic traitlets release -  https://github.com/jupyter/notebook/issues/7048
 traitlets<5.10.0

@@ -12,4 +12,4 @@ nbstripout~=0.4
 pytest-cov~=3.0
 pytest-mock>=1.7.1, <2.0
 pytest~=7.2
-traitlets<=5.9.0  # Temporary fix until https://github.com/microsoft/azuredatastudio/issues/24436 fixed
+traitlets<5.10.0

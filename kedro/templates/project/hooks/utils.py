@@ -143,4 +143,3 @@ def sort_requirements(requirements_file_path):
 
     with open(requirements_file_path, 'w') as requirements:
         requirements.write(sorted_content)
-

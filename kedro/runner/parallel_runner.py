@@ -21,7 +21,7 @@ from pluggy import PluginManager
 from kedro.framework.hooks.manager import (
     _create_hook_manager,
     _register_hooks,
-    _register_hooks_setuptools,
+    _register_hooks_entry_points,
 )
 from kedro.framework.project import settings
 from kedro.io import DataCatalog, DatasetError, MemoryDataset
@@ -134,7 +134,7 @@ def _run_node_synchronization(  # noqa: too-many-arguments
 
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
-    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+    _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
 
     return run_node(node, catalog, hook_manager, is_async, session_id)
 

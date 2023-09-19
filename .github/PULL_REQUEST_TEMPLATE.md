@@ -10,6 +10,7 @@
 ## Checklist
 
 - [ ] Read the [contributing](https://github.com/kedro-org/kedro/blob/main/CONTRIBUTING.md) guidelines
+- [ ] Signed off each commit with a [Developer Certificate of Origin (DCO)](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-the-commit-signoff-policy-for-your-repository)
 - [ ] Opened this PR as a 'Draft Pull Request' if it is work-in-progress
 - [ ] Updated the documentation to reflect the code changes
 - [ ] Added a description of this change in the [`RELEASE.md`](https://github.com/kedro-org/kedro/blob/main/RELEASE.md) file

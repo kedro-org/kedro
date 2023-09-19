@@ -70,3 +70,9 @@ sign-off:
 	echo '--trailer "Signed-off-by: $$(git config user.name) <$$(git config user.email)>" \c' >> .git/hooks/commit-msg
 	echo '--in-place "$$1"' >> .git/hooks/commit-msg
 	chmod +x .git/hooks/commit-msg
+
+language-lint: dir ?= docs
+
+# Pattern rule to allow "make language-lint dir=doc/source/hooks>" syntax
+language-lint:
+	vale $(dir)

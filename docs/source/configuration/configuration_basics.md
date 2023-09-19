@@ -4,11 +4,24 @@ This section contains detailed information about Kedro project configuration, wh
 
 Kedro makes use of a configuration loader to load any project configuration files, and the available configuration loader classes are:
 
+```{warning}
+`ConfigLoader` and `TemplatedConfigLoader` have been deprecated since Kedro `0.18.12` and will be removed in Kedro `0.19.0`. Refer to the [migration guide for config loaders](./config_loader_migration.md) for instructions on how to update your code base to use `OmegaConfigLoader`.
+```
+
 * [`ConfigLoader`](/kedro.config.ConfigLoader)
 * [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader)
 * [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader).
 
-By default, Kedro uses the `ConfigLoader` and, in the following sections and examples, you can assume the default `ConfigLoader` is used, unless otherwise specified. The [advanced configuration documentation](./advanced_configuration.md) covers use of the [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader) and [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) in more detail.
+By default, Kedro uses the `ConfigLoader`. However, in projects created with Kedro `0.18.13` onwards, `OmegaConfigLoader` has been set as the config loader as the default in the project's `src/<package_name>/settings.py` file.
+You can select which config loader you want to use in your project by modifying the `src/<package_name>/settings.py` like this:
+```python
+from kedro.config import OmegaConfigLoader
+
+CONFIG_LOADER_CLASS = OmegaConfigLoader
+```
+The following sections and examples are valid for both, the `ConfigLoader` and the `OmegaConfigLoader`. The [advanced configuration documentation](./advanced_configuration.md) covers use of the [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader)
+and the advanced use cases of the [`OmegaConfigLoader`](/kedro.config.OmegaConfigLoader) in more detail.
+
 
 ## Configuration source
 The configuration source folder is [`conf`](../get_started/kedro_concepts.md#conf) by default. We recommend that you keep all configuration files in the default `conf` folder of a Kedro project.
@@ -35,7 +48,8 @@ Do not add any local configuration to version control.
 ```
 
 ## Configuration loading
-Kedro-specific configuration (e.g., `DataCatalog` configuration for I/O) is loaded using a configuration loader class, by default, this is [`ConfigLoader`](/kedro.config.ConfigLoader).
+Kedro-specific configuration (e.g., `DataCatalog` configuration for I/O) is loaded using a configuration loader class, by default, this is [`ConfigLoader`](/kedro.config.ConfigLoader) for
+projects created with Kedro `0.18.13` or older and has been set to `OmegaConfigLoader` for projects created with Kedro `0.18.13` onwards.
 When you interact with Kedro through the command line, e.g. by running `kedro run`, Kedro loads all project configuration in the configuration source through this configuration loader.
 
 The loader recursively scans for configuration files inside the `conf` folder, firstly in `conf/base` (`base` being the default environment) and then in `conf/local` (`local` being the designated overriding environment).
@@ -61,14 +75,14 @@ Configuration files will be matched according to file name and type rules. Suppo
 ### Configuration patterns
 Under the hood, the Kedro configuration loader loads files based on regex patterns that specify the naming convention for configuration files. These patterns are specified by `config_patterns` in the configuration loader classes.
 
-By default those patterns are set as follows for the configuration of catalog, parameters, credentials, and globals:
+By default, those patterns are set as follows for the configuration of catalog, parameters, logging, credentials:
 
 ```python
 config_patterns = {
     "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
     "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
     "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
-    "globals": ["globals*", "globals*/**", "**/globals*"],
+    "logging": ["logging*", "logging*/**", "**/logging*"],
 }
 ```
 
@@ -78,22 +92,13 @@ If you want to change the way configuration is loaded, you can either [customise
 
 This section contains a set of guidance for the most common configuration requirements of standard Kedro projects:
 
-- [Configuration](#configuration)
-  - [Configuration source](#configuration-source)
-  - [Configuration environments](#configuration-environments)
-    - [Base](#base)
-    - [Local](#local)
-  - [Configuration loading](#configuration-loading)
-    - [Configuration file names](#configuration-file-names)
-    - [Configuration patterns](#configuration-patterns)
-  - [How to use Kedro configuration](#how-to-use-kedro-configuration)
-    - [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
-    - [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
-    - [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
-    - [How to access configuration in code](#how-to-access-configuration-in-code)
-    - [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
-    - [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
-    - [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
+* [How to change the setting for a configuration source folder](#how-to-change-the-setting-for-a-configuration-source-folder)
+* [How to change the configuration source folder at runtime](#how-to-change-the-configuration-source-folder-at-runtime)
+* [How to read configuration from a compressed file](#how-to-read-configuration-from-a-compressed-file)
+* [How to access configuration in code](#how-to-access-configuration-in-code)
+* [How to specify additional configuration environments](#how-to-specify-additional-configuration-environments)
+* [How to change the default overriding environment](#how-to-change-the-default-overriding-environment)
+* [How to use only one configuration environment](#how-to-use-only-one-configuration-environment)
 
 ### How to change the setting for a configuration source folder
 To store the Kedro project configuration in a different folder to `conf`, change the configuration source by setting the `CONF_SOURCE` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md) as follows:
@@ -153,12 +158,12 @@ Note that for both the `tar.gz` and `zip` file the following structure is expect
 To directly access configuration in code, for example to debug, you can do so as follows:
 
 ```python
-from kedro.config import ConfigLoader
+from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
 # Instantiate a ConfigLoader with the location of your project configuration.
 conf_path = str(project_path / settings.CONF_SOURCE)
-conf_loader = ConfigLoader(conf_source=conf_path)
+conf_loader = OmegaConfigLoader(conf_source=conf_path)
 
 # This line shows how to access the catalog configuration. You can access other configuration in the same way.
 conf_catalog = conf_loader["catalog"]

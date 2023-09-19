@@ -141,9 +141,7 @@ def sort_requirements(requirements_file_path):
         lines = requirements.readlines()
 
     lines = [line.strip() for line in lines]
-
     lines.sort()
-
     sorted_content = '\n'.join(lines)
 
     with open(requirements_file_path, 'w') as requirements:

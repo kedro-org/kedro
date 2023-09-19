@@ -30,10 +30,10 @@ class CLIHooksManager(PluginManager):
     def __init__(self) -> None:
         super().__init__(CLI_HOOK_NAMESPACE)
         self.add_hookspecs(CLICommandSpecs)
-        self._register_cli_hooks_setuptools()
+        self._register_cli_hooks()
 
-    def _register_cli_hooks_setuptools(self) -> None:
-        """Register CLI hook implementations from setuptools entrypoints"""
+    def _register_cli_hooks(self) -> None:
+        """Register CLI hook implementations from plugin CLI entrypoints"""
         already_registered = self.get_plugins()
         self.load_setuptools_entrypoints(_CLI_PLUGIN_HOOKS)
 

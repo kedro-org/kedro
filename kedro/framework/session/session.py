@@ -20,7 +20,7 @@ from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLo
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
     configure_logging,
     pipelines,
@@ -117,7 +117,7 @@ class KedroSession:
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
-        _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+        _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
 
         self._conf_source = conf_source or str(

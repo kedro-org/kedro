@@ -1,5 +1,6 @@
 from pathlib import Path
 import shutil
+import click
 
 current_dir = Path.cwd()
 
@@ -68,6 +69,10 @@ def parse_add_ons_input(add_ons_str):
     for choice in add_ons_choices:
         if "-" in choice:
             start, end = choice.split("-")
+            if int(start) > int(end):
+                message = f"'{add_ons_str}' is an invalid range for Project Add-Ons."
+                click.secho(message, fg="red", err=True)
+                raise ValueError(message)
             selected.extend(str(i) for i in range(int(start), int(end) + 1))
         else:
             selected.append(choice.strip())

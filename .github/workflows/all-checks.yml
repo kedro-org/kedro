@@ -1,6 +1,7 @@
 name: Run all checks on Kedro
 
 on:
+  workflow_call:
   push:
     branches:
       - main

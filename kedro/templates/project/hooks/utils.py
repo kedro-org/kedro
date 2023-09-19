@@ -1,6 +1,5 @@
 from pathlib import Path
 import shutil
-import click
 
 current_dir = Path.cwd()
 
@@ -47,6 +46,17 @@ docs = [
 ]
 """
 
+def _validate_range(start, end):
+    if int(start) > int(end):
+        message = f"'{start}-{end}' is an invalid range for project add-ons."
+        raise ValueError(message).with_traceback(None)
+
+def _validate_selection(add_ons):
+    for add_on in add_ons:
+        if int(add_on) < 1 or int(add_on) > 5:
+            message = f"'{add_on}' is not a valid selection."
+            raise ValueError(message).with_traceback(None)
+
 
 def parse_add_ons_input(add_ons_str):
     """Parse the add-ons input string.
@@ -69,14 +79,12 @@ def parse_add_ons_input(add_ons_str):
     for choice in add_ons_choices:
         if "-" in choice:
             start, end = choice.split("-")
-            if int(start) > int(end):
-                message = f"'{add_ons_str}' is an invalid range for Project Add-Ons."
-                click.secho(message, fg="red", err=True)
-                raise ValueError(message)
+            _validate_range(start, end)
             selected.extend(str(i) for i in range(int(start), int(end) + 1))
         else:
             selected.append(choice.strip())
 
+    _validate_selection(selected)
     return selected
 
 

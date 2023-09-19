@@ -10,7 +10,7 @@ from dynaconf.validator import Validator
 
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager, hook_impl
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
     _ProjectPipelines,
     _ProjectSettings,
@@ -565,7 +565,7 @@ def memory_catalog():
 def hook_manager():
     hook_manager = _create_hook_manager()
     _register_hooks(hook_manager, settings.HOOKS)
-    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+    _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
     return hook_manager
 
 

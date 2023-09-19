@@ -832,7 +832,7 @@ class TestAddOnsFromConfigFile:
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
-        _assert_requirements_ok(result, add_ons=add_ons)
+        _assert_requirements_ok(result, add_ons=add_ons, repo_name="my-project")
 
     def test_invalid_add_ons(self, fake_kedro_cli):
         """Test project created from config."""

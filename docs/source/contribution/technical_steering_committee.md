@@ -55,7 +55,7 @@ We look for commitment markers who can do the following:
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at [QuantumBlack](https://www.mckinsey.com/capabilities/quantumblack) to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 
 
-The TSC comprises the following team members from [QuantumBlack Labs](https://www.mckinsey.com/capabilities/quantumblack/labs), responsible for Kedro and Kedro-Viz:
+The TSC comprises the following team members from [QuantumBlack Labs](https://www.mckinsey.com/capabilities/quantumblack/labs):
 
 [Ahdra Merali](https://github.com/AhdraMeraliQB),
 [Andrew Mackay](https://github.com/Mackay031),

@@ -4,7 +4,7 @@ import click
 
 current_dir = Path.cwd()
 
-lint_requirements = "black\nruff\n"
+lint_requirements = "black~=22.12.0\nruff~=0.0.290\n"
 lint_pyproject_requirements = """
 [tool.ruff]
 select = [
@@ -15,7 +15,7 @@ select = [
     "I",  # isort
     "PL", # Pylint
 ]
-ignore = ["E501"]  # Black takes care off line-too-long
+ignore = ["E501"]  # Black takes care of line-too-long
 """
 
 test_requirements = "pytest-cov~=3.0\npytest-mock>=1.7.1, <2.0\npytest~=7.2"

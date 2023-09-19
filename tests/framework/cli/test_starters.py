@@ -108,7 +108,7 @@ select = [
     "I",  # isort
     "PL", # Pylint
 ]
-ignore = ["E501"]  # Black take care off line-too-long
+ignore = ["E501"]  # Black takes care of line-too-long
 """
             )
             in requirements
@@ -860,8 +860,8 @@ class TestAddOnsFromConfigFile:
         )
 
         assert result.exit_code != 0
-        assert "is an invalid value for Project Add-Ons." in result.output
+        assert "is an invalid value for project add-ons." in result.output
         assert (
-            "Invalid input. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
+            "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
             in result.output
         )

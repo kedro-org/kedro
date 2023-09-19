@@ -1,12 +1,11 @@
 add_ons:
   title: "Project Add-Ons"
   text: |
-    Here you can select which add-ons you'd like to include.
-    Don't worry if you change your mind you can always add/remove these later.
+    Here you can select which add-ons you'd like to include. By default, none are included.
     To read more about these add-ons and what they do visit: kedro.org/{insert-documentation}
 
     Add-Ons
-    1) Linting : Provides a basic linting set up with Flake8, Black and isort
+    1) Linting : Provides a basic linting set up with Black and ruff
     2) Testing : Provides basic testing set up with pytest
     3) Custom Logging : Provides more logging options
     4) Documentation: Provides basic documentations setup with Sphinx

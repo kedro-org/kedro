@@ -499,7 +499,10 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from '%s' (%s)...", name, type(dataset).__name__
+            "Loading data from [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
         )
 
         result = dataset.load()
@@ -537,7 +540,12 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to '%s' (%s)...", name, type(dataset).__name__)
+        self._logger.info(
+            "Saving data to [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
 
         dataset.save(data)
 

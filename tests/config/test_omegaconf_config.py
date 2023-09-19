@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 import yaml
 from omegaconf import OmegaConf, errors
-from omegaconf.errors import InterpolationResolutionError
+from omegaconf.errors import InterpolationResolutionError, UnsupportedInterpolationType
 from omegaconf.resolvers import oc
 from yaml.parser import ParserError
 
@@ -860,7 +860,7 @@ class TestOmegaConfigLoader:
         assert not conf._is_hidden(hidden_path)
 
     def test_ignore_ipynb_checkpoints(self, tmp_path, mocker):
-        conf = OmegaConfigLoader(str(tmp_path), default_run_env=_BASE_ENV)
+        conf = OmegaConfigLoader(str(tmp_path), default_run_env="base")
         base_path = tmp_path / _BASE_ENV / "parameters.yml"
         checkpoints_path = (
             tmp_path / _BASE_ENV / ".ipynb_checkpoints" / "parameters.yml"
@@ -904,9 +904,98 @@ class TestOmegaConfigLoader:
         conf = OmegaConfigLoader(
             tmp_path, default_run_env="", runtime_params=runtime_params
         )
-        # Globals are resolved correctly in parameter
+        # runtime are resolved correctly in parameter
         assert conf["parameters"]["my_runtime_param"] == runtime_params["x"]
         # The default value is used if the key does not exist
         assert conf["parameters"]["my_param_default"] == 34
-        # Globals are resolved correctly in catalog
+        # runtime params are resolved correctly in catalog
         assert conf["catalog"]["companies"]["type"] == runtime_params["dataset"]["type"]
+
+    def test_runtime_params_missing_default(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        runtime_params = {
+            "x": 45,
+        }
+        param_config = {
+            "my_runtime_param": "${runtime_params:NOT_EXIST}",
+        }
+        _write_yaml(base_params, param_config)
+        conf = OmegaConfigLoader(
+            tmp_path, default_run_env="", runtime_params=runtime_params
+        )
+        with pytest.raises(
+            InterpolationResolutionError,
+            match="Runtime parameter 'NOT_EXIST' not found and no default value provided.",
+        ):
+            conf["parameters"]["my_runtime_param"]
+
+    def test_runtime_params_in_globals_not_allowed(self, tmp_path):
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        local_globals = tmp_path / _DEFAULT_RUN_ENV / "globals.yml"
+        runtime_params = {
+            "x": 45,
+        }
+        base_globals_config = {
+            "my_global_var": 45,
+        }
+        local_globals_config = {
+            "my_local_var": "${runtime_params:x}",  # x does exist but shouldn't be allowed in globals
+        }
+        _write_yaml(base_globals, base_globals_config)
+        _write_yaml(local_globals, local_globals_config)
+
+        with pytest.raises(
+            UnsupportedInterpolationType,
+            match=r"The `runtime_params:` resolver is not supported for globals.",
+        ):
+            OmegaConfigLoader(
+                tmp_path, default_run_env="local", runtime_params=runtime_params
+            )
+
+    def test_runtime_params_default_global(self, tmp_path):
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        base_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+        runtime_params = {
+            "x": 45,
+        }
+        globals_config = {
+            "dataset": {
+                "type": "pandas.CSVDataSet",
+            }
+        }
+        catalog_config = {
+            "companies": {
+                "type": "${runtime_params:type, ${globals:dataset.type, 'MemoryDataSet'}}",
+                "filepath": "data/01_raw/companies.csv",
+            },
+        }
+        _write_yaml(base_catalog, catalog_config)
+        _write_yaml(base_globals, globals_config)
+        conf = OmegaConfigLoader(
+            tmp_path, default_run_env="", runtime_params=runtime_params
+        )
+        # runtime params are resolved correctly in catalog using global default
+        assert conf["catalog"]["companies"]["type"] == globals_config["dataset"]["type"]
+
+    def test_runtime_params_default_none(self, tmp_path):
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_param_config = {
+            "zero": "${runtime_params: x.NOT_EXIST, 0}",
+            "null": "${runtime_params: x.NOT_EXIST, null}",
+            "null2": "${runtime_params: x.y}",
+        }
+        runtime_params = {
+            "x": {
+                "z": 23,
+                "y": None,
+            },
+        }
+        _write_yaml(base_params, base_param_config)
+        conf = OmegaConfigLoader(
+            tmp_path, default_run_env="", runtime_params=runtime_params
+        )
+        # Default value can be 0 or null
+        assert conf["parameters"]["zero"] == 0
+        assert conf["parameters"]["null"] is None
+        # runtime param value is null
+        assert conf["parameters"]["null2"] is None

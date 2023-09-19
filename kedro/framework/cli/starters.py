@@ -30,6 +30,7 @@ from kedro.framework.cli.utils import (
     _safe_load_entry_point,
     command_with_verbosity,
 )
+from kedro.templates.project.hooks.utils import parse_add_ons_input
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
@@ -333,6 +334,22 @@ def _make_cookiecutter_args(
     return cookiecutter_args
 
 
+def _get_add_ons_text(add_ons):
+    add_ons_dict = {
+        "1": "Linting",
+        "2": "Testing",
+        "3": "Custom Logging",
+        "4": "Documentation",
+        "5": "Data structure",
+    }
+    add_ons_list = parse_add_ons_input(add_ons)
+    add_ons_text = [add_ons_dict[add_on] for add_on in add_ons_list]
+    return (
+        " ".join(str(add_on) + "," for add_on in add_ons_text[:-1])
+        + f" and {add_ons_text[-1]}"
+    )
+
+
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
@@ -370,7 +387,9 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         if add_ons == "none":
             click.secho("\nYou have selected no add-ons")
         else:
-            click.secho(f"\nYou have selected the following add-ons: '{add_ons}'")
+            click.secho(
+                f"\nYou have selected the following add-ons: {_get_add_ons_text(add_ons)}"
+            )
 
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "
@@ -513,10 +532,10 @@ class _Prompt:
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
         if self.regexp and not re.match(self.regexp, user_input):
-            message = f"'{user_input}' is an invalid value for {self.title}."
-            click.secho(message, fg="red", err=True)
-            click.secho(self.error_message, fg="red", err=True)
-            raise ValueError(message, self.error_message)
+            message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
+            # click.secho(message, fg="red", err=True)
+            # click.secho(self.error_message, fg="red", err=True)
+            raise ValueError(message, self.error_message).with_traceback(None)
 
 
 def _get_available_tags(template_path: str) -> list:

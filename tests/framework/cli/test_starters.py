@@ -249,13 +249,25 @@ def test_starter_list_with_invalid_starter_plugin(
         ("1", ["1"]),
         ("1,2,3", ["1", "2", "3"]),
         ("2-4", ["2", "3", "4"]),
+        ("3-3", ["3"]),
         ("all", ["1", "2", "3", "4", "5"]),
         ("none", []),
     ],
 )
-def test_parse_add_ons(input, expected):
+def test_parse_add_ons_valid(input, expected):
     result = parse_add_ons_input(input)
     assert result == expected
+
+
+@pytest.mark.parametrize(
+    "input",
+    ["5-2", "3-1"],
+)
+def test_parse_add_ons_invalid_range(input):
+
+    with pytest.raises(ValueError) as excinfo:
+        parse_add_ons_input(input)
+    assert str(excinfo.value) == f"'{input}' is an invalid range for Project Add-Ons."
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

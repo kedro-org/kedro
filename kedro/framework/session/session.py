@@ -21,7 +21,6 @@ from kedro.framework.context import KedroContext
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
-    configure_logging,
     pipelines,
     settings,
     validate_settings,

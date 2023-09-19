@@ -19,8 +19,12 @@ from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, TemplatedConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.hooks import _create_hook_manager
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
-from kedro.framework.project import pipelines, settings, validate_settings
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
+from kedro.framework.project import (
+    pipelines,
+    settings,
+    validate_settings,
+)
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
@@ -111,7 +115,7 @@ class KedroSession:
 
         hook_manager = _create_hook_manager()
         _register_hooks(hook_manager, settings.HOOKS)
-        _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+        _register_hooks_entry_points(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
         self._hook_manager = hook_manager
 
         self._conf_source = conf_source or str(

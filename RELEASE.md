@@ -35,6 +35,7 @@
 * Updated dataset factories to resolve nested catalog config properly.
 
 ## Documentation changes
+* Added documentation to clarify execution order of hooks.
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 0.19.0
 ## Community contributions

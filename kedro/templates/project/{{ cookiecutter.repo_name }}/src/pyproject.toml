@@ -13,5 +13,7 @@ exclude = ["tests"]
 [project.scripts]
 {{ cookiecutter.repo_name }} = "{{ cookiecutter.python_package }}.__main__:main"
 
+[project.entry-points."kedro.hooks"]
+
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements.txt"}

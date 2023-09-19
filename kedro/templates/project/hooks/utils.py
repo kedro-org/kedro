@@ -15,7 +15,7 @@ select = [
     "I",  # isort
     "PL", # Pylint
 ]
-ignore = ["E501"]  # Black take care off line-too-long
+ignore = ["E501"]  # Black takes care off line-too-long
 """
 
 test_requirements = "pytest-cov~=3.0\npytest-mock>=1.7.1, <2.0\npytest~=7.2"

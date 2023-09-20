@@ -55,12 +55,13 @@ We look for commitment markers who can do the following:
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at [QuantumBlack](https://www.mckinsey.com/capabilities/quantumblack) to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 
 
-The TSC comprises the following team members from [QuantumBlack Labs](https://www.mckinsey.com/capabilities/quantumblack/labs):
+Currently, the core Kedro team consists of:
 
 [Ahdra Merali](https://github.com/AhdraMeraliQB),
 [Andrew Mackay](https://github.com/Mackay031),
 [Ankita Katiyar](https://github.com/ankatiyar),
 [Antony Milne](https://github.com/antonymilne),
+[Deepyaman Datta](https://github.com/deepyaman),
 [Dmitry Sorokin](https://github.com/DimedS),
 [Huong Nguyen](https://github.com/Huongg),
 [Ivan Danov](https://github.com/idanov),
@@ -69,6 +70,7 @@ The TSC comprises the following team members from [QuantumBlack Labs](https://ww
 [Joel Schwarzmann](https://github.com/datajoely),
 [Juan Luis Cano](https://github.com/astrojuanlu),
 [Laura Couto](https://github.com/lrcouto),
+[Marcin Zabłocki](https://github.com/marrrcin),
 [Mehdi Naderi Varandi](https://github.com/MehdiNV),
 [Merel Theisen](https://github.com/merelcht),
 [Nero Okwa](https://github.com/NeroOkwa),
@@ -80,9 +82,6 @@ The TSC comprises the following team members from [QuantumBlack Labs](https://ww
 [Tynan DeBold](https://github.com/tynandebold),
 [Vladimir Nikolic](https://github.com/vladimir-mck), and
 [Yetunde Dada](https://github.com/yetudada).
-
-Additional TSC members are as follows:
-[Deepyaman Datta](https://github.com/deepyaman) ([Claypot AI](https://www.claypot.ai/)), [Marcin Zabłocki](https://github.com/marrrcin) ([GetInData | Part of Xebia](https://getindata.com/)).
 
 Former core team members with significant contributions include:
 

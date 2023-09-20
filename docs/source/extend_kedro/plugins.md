@@ -34,7 +34,7 @@ From version 0.18.14, Kedro replaced `setup.py` with `pyproject.toml`. The plugi
 To add the entry point to `pyproject.toml`, the plugin needs to provide the following `entry_points` configuration:
 ```toml
 [project.entry-points."kedro.project_commands"]
-kedrojson = kedrojson.plugin.commands
+kedrojson = "kedrojson.plugin:commands"
 ```
 
 Once the plugin is installed, you can run it as follows:
@@ -76,7 +76,7 @@ In your `pyproject.toml`, you need to register the specifications to `kedro.star
 
 ```toml
 [project.entry-points."kedro.starters"]
-starter = plugin.starters
+starter = "plugin:starters"
 ```
 
 After that you can use this starter with `kedro new --starter=test_plugin_starter`.
@@ -132,7 +132,7 @@ To enable this for your custom plugin, simply add the following entry in `pyproj
 To use `pyproject.toml`, specify
 ```toml
 [project.entry-points."kedro.hooks"]
-plugin_name = plugin_name.plugin.hooks
+plugin_name = "plugin_name.plugin:hooks"
 ```
 
 where `plugin.py` is the module where you declare hook implementations:
@@ -163,7 +163,7 @@ You can also develop Hook implementations to extend Kedro's CLI behaviour in you
 
 ```toml
 [project.entry-points."kedro.cli_hooks"]
-plugin_name = plugin_name.plugin.cli_hooks
+plugin_name = "plugin_name.plugin:cli_hooks"
 ```
 
 (where `plugin.py` is the module where you declare Hook implementations):

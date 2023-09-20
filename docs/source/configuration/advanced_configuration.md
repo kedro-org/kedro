@@ -297,7 +297,7 @@ You can also provide a default value to be used in case the global variable does
 my_param: "${globals: nonexistent_global, 23}"
 ```
 If there are duplicate keys in the globals files in your base and runtime environments, the values in the runtime environment
-will overwrite the values in your base environment.
+overwrite the values in your base environment.
 
 ### How to override configuration with runtime parameters with the `OmegaConfigLoader`
 
@@ -305,12 +305,13 @@ Kedro allows you to [specify runtime parameters for the `kedro run` command with
 are added to the `KedroContext` and merged with parameters from the configuration files to be used in your project's pipelines and nodes. From Kedro `0.18.14`, you can use the
 `runtime_params` resolver to indicate that you want to override values of certain keys in your configuration with runtime parameters provided through the CLI option.
 This resolver can be used across different configuration types, such as parameters, catalog, and more, except for "globals".
-Consider this `catalog.yml` file :
+
+Consider this `catalog.yml` file:
 ```yaml
 model_options:
   random_state: "${runtime_params:random}"
 ```
-This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters, like so :
+This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters:
 ```bash
 kedro run --params="random=3"
 ```

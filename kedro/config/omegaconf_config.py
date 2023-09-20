@@ -190,10 +190,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
             base_config = self.load_and_merge_dir_config(
                 base_path, patterns, key, processed_files, read_environment_variables
             )
-        except UnsupportedInterpolationType:
-            raise UnsupportedInterpolationType(
-                "The `runtime_params:` resolver is not supported for globals."
-            )
+        except UnsupportedInterpolationType as exc:
+            if "runtime_params" in str(exc):
+                raise UnsupportedInterpolationType(
+                    "The `runtime_params:` resolver is not supported for globals."
+                )
+            else:
+                raise exc
 
         config = base_config
 
@@ -207,10 +210,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
             env_config = self.load_and_merge_dir_config(
                 env_path, patterns, key, processed_files, read_environment_variables
             )
-        except UnsupportedInterpolationType:
-            raise UnsupportedInterpolationType(
-                "The `runtime_params:` resolver is not supported for globals."
-            )
+        except UnsupportedInterpolationType as exc:
+            if "runtime_params" in str(exc):
+                raise UnsupportedInterpolationType(
+                    "The `runtime_params:` resolver is not supported for globals."
+                )
+            else:
+                raise exc
         # Re-register runtime params resolver incase it was deactivated
         self._register_runtime_params_resolver()
         # Destructively merge the two env dirs. The chosen env will override base.

@@ -936,7 +936,7 @@ class TestOmegaConfigLoader:
             "x": 45,
         }
         base_globals_config = {
-            "my_global_var": 45,
+            "my_global_var": "${runtime_params:x}",
         }
         local_globals_config = {
             "my_local_var": "${runtime_params:x}",  # x does exist but shouldn't be allowed in globals
@@ -949,8 +949,16 @@ class TestOmegaConfigLoader:
             match=r"The `runtime_params:` resolver is not supported for globals.",
         ):
             OmegaConfigLoader(
-                tmp_path, default_run_env="local", runtime_params=runtime_params
+                tmp_path,
+                base_env="",
+                default_run_env="local",
+                runtime_params=runtime_params,
             )
+        with pytest.raises(
+            UnsupportedInterpolationType,
+            match=r"The `runtime_params:` resolver is not supported for globals.",
+        ):
+            OmegaConfigLoader(tmp_path, runtime_params=runtime_params)
 
     def test_runtime_params_default_global(self, tmp_path):
         base_globals = tmp_path / _BASE_ENV / "globals.yml"
@@ -999,3 +1007,35 @@ class TestOmegaConfigLoader:
         assert conf["parameters"]["null"] is None
         # runtime param value is null
         assert conf["parameters"]["null2"] is None
+
+    def test_unsupported_interpolation_globals(self, tmp_path):
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        local_globals = tmp_path / _DEFAULT_RUN_ENV / "globals.yml"
+        runtime_params = {
+            "x": 45,
+        }
+        base_globals_config = {
+            "my_global_var": "${non_existent_resolver:33}",
+        }
+        local_globals_config = {
+            "my_local_var": "${non_existent_resolver:x}",
+        }
+        _write_yaml(local_globals, local_globals_config)
+        _write_yaml(base_globals, base_globals_config)
+        # Test that the `runtime_params` error message is not shown for cases other than
+        # when `runtime_params` resolver is used in `globals`
+        with pytest.raises(
+            UnsupportedInterpolationType,
+            match=r"Unsupported interpolation type non_existent_resolver",
+        ):
+            OmegaConfigLoader(tmp_path, runtime_params=runtime_params)
+        with pytest.raises(
+            UnsupportedInterpolationType,
+            match=r"Unsupported interpolation type non_existent_resolver",
+        ):
+            OmegaConfigLoader(
+                tmp_path,
+                base_env="",
+                default_run_env="local",
+                runtime_params=runtime_params,
+            )

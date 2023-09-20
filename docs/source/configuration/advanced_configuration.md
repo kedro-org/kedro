@@ -27,6 +27,7 @@ CONFIG_LOADER_CLASS = OmegaConfigLoader
 Some advanced use cases of `OmegaConfigLoader` are listed below:
 - [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
 - [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
+- [How to override configuration with runtime parameters with the `OmegaConfigLoader`](#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
 - [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 - [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
@@ -134,6 +135,7 @@ This section contains a set of guidance for advanced configuration requirements 
 * [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
 * [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
 * [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
+* [How to override configuration with runtime parameters with the `OmegaConfigLoader`](#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
 * [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
 * [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
@@ -300,9 +302,31 @@ You can also provide a default value to be used in case the global variable does
 ```yaml
 my_param: "${globals: nonexistent_global, 23}"
 ```
-If there are duplicate keys in the globals files in your base and run time environments, the values in the run time environment
+If there are duplicate keys in the globals files in your base and runtime environments, the values in the runtime environment
 will overwrite the values in your base environment.
 
+### How to override configuration with runtime parameters with the `OmegaConfigLoader`
+
+Kedro allows you to [specify runtime parameters for the `kedro run` command with the `--params` CLI option](parameters.md#how-to-specify-parameters-at-runtime). These runtime parameters
+are added to the `KedroContext` and merged with parameters from the configuration files to be used in your project's pipelines and nodes. From Kedro `0.18.14`, you can use the
+`runtime_params` resolver to indicate that you want to override values of certain keys in your configuration with runtime parameters provided through the CLI option.
+This resolver can be used across different configuration types, such as parameters, catalog, and more, except for "globals".
+Consider this `catalog.yml` file :
+```yaml
+model_options:
+  random_state: "${runtime_params:random}"
+```
+This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters, like so :
+```bash
+kedro run --params="random=3"
+```
+You can also specify a default value to be used in case the runtime parameter is not specified with the `kedro run` command. Consider this catalog entry:
+```yaml
+companies:
+  type: pandas.CSVDataSet
+  filepath: "${runtime_params:folder,'data/01_raw/'}companies.csv"
+```
+If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 
 ### How to use resolvers in the `OmegaConfigLoader`
 Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s

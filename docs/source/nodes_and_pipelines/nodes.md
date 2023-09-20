@@ -212,7 +212,7 @@ With `pandas` built-in support, you can use the `chunksize` argument to read dat
 
 ### Saving data with Generators
 To use generators to save data lazily, you need do three things:
-- Update the `make_prediction` function definition to use `return` instead of `yield`.
+- Update the `make_prediction` function definition to use `yield` instead of `return`.
 - Create a [custom dataset](../data/how_to_create_a_custom_dataset.md) called `ChunkWiseCSVDataset`
 - Update `catalog.yml` to use a newly created `ChunkWiseCSVDataset`.
 

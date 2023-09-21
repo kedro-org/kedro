@@ -8,25 +8,20 @@ The TSC is responsible for the project's future development; you can read about 
 
 On this page we describe:
 
-- [Kedro's Technical Steering Committee](#kedros-technical-steering-committee)
-  - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
-    - [Product development](#product-development)
-    - [Community management](#community-management)
-  - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
-  - [Kedro maintainers](#kedro-maintainers)
-  - [Application process](#application-process)
-  - [Voting process](#voting-process)
-    - [Other issues or proposals](#other-issues-or-proposals)
-    - [Adding or removing maintainers](#adding-or-removing-maintainers)
+- [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
+- [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
+- [Kedro maintainers](#kedro-maintainers)
+- [Application process](#application-process)
+- [Voting process](#voting-process)
 
 ## Responsibilities of a maintainer
 
 ### Product development
 
- - Be available for at least one full day per week to help with product development
- - Attend community meetings to discuss the project plans and roadmap
- - Be proactive about project maintenance including security, updates, CI/CD, builds and infrastructure
- - Prioritise the work following the product roadmap to move the project forward
+- Be available for at least one full day per week to help with product development
+- Attend community meetings to discuss the project plans and roadmap
+- Be proactive about project maintenance including security, updates, CI/CD, builds and infrastructure
+- Prioritise the work following the product roadmap to move the project forward
 
 ### Community management
 

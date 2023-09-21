@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 import yaml
 from click.testing import CliRunner
+from kedro_datasets.pandas import CSVDataSet
 from pandas import DataFrame
 
-from kedro_datasets.pandas import CSVDataSet
 from kedro.framework.cli.pipeline import _sync_dirs
 from kedro.framework.project import settings
 from kedro.framework.session import KedroSession

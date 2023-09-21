@@ -8,11 +8,11 @@ from typing import Any
 import boto3
 import pandas as pd
 import pytest
+from kedro_datasets.pickle import PickleDataSet
+from kedro_datasets.text import TextDataSet
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
-from kedro_datasets.pickle import PickleDataSet
-from kedro_datasets.text import TextDataSet
 from kedro.io import AbstractDataset, DatasetError, IncrementalDataset
 from kedro.io.data_catalog import CREDENTIALS_KEY
 

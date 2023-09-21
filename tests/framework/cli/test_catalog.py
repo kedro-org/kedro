@@ -1,8 +1,8 @@
 import pytest
 import yaml
 from click.testing import CliRunner
-
 from kedro_datasets.pandas import CSVDataSet
+
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline

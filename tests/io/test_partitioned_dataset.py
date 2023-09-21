@@ -7,10 +7,10 @@ import boto3
 import pandas as pd
 import pytest
 import s3fs
+from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
-from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import DatasetError, PartitionedDataset
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.io.partitioned_dataset import KEY_PROPAGATION_WARNING

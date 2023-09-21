@@ -3,8 +3,8 @@ from io import StringIO
 
 import pytest
 import yaml
-
 from kedro_datasets.pandas import CSVDataSet
+
 from kedro.io import CachedDataset, DataCatalog, DatasetError, MemoryDataset
 
 YML_CONFIG = """

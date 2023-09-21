@@ -417,7 +417,7 @@ class TestNewFromUserPromptsInvalid:
         )
         assert result.exit_code != 0
         assert (
-            "is an invalid value for Project Name.\nIt must contain only alphanumeric symbols"
+            "is an invalid value for project name.\nIt must contain only alphanumeric symbols"
             in result.output
         )
 
@@ -429,7 +429,7 @@ class TestNewFromUserPromptsInvalid:
         )
         assert result.exit_code != 0
         assert (
-            "is an invalid value for Project Name.\nIt must contain only alphanumeric symbols"
+            "is an invalid value for project name.\nIt must contain only alphanumeric symbols"
             in result.output
         )
 
@@ -827,7 +827,7 @@ class TestAddOnsFromUserPrompts:
         )
 
         assert result.exit_code != 0
-        assert "is an invalid value for Project Add-Ons." in result.output
+        assert "is an invalid value for project add-ons." in result.output
         assert (
             "Invalid input. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
             in result.output
@@ -869,8 +869,8 @@ class TestAddOnsFromConfigFile:
         )
 
         assert result.exit_code != 0
-        assert "is an invalid value for project add-ons." in str(result.exc_info)
+        assert "is an invalid value for project add-ons." in result.output
         assert (
-            "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
-            in str(result.exc_info)
+            "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
+            in result.output
         )

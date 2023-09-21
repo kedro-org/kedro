@@ -533,9 +533,9 @@ class _Prompt:
         """Validate a given prompt value against the regex validator"""
         if self.regexp and not re.match(self.regexp, user_input):
             message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
-            # click.secho(message, fg="red", err=True)
-            # click.secho(self.error_message, fg="red", err=True)
-            raise ValueError(message, self.error_message).with_traceback(None)
+            click.secho(message, fg="red", err=True)
+            click.secho(self.error_message, fg="red", err=True)
+            raise ValueError(message, self.error_message)
 
 
 def _get_available_tags(template_path: str) -> list:
@@ -587,4 +587,5 @@ def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
     selected_add_ons = config["add_ons"]
     if not re.match(add_on_reg_ex, selected_add_ons):
         message = f"'{selected_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
-        raise ValueError(message).with_traceback(None)
+        click.secho(message, fg="red", err=True)
+        raise ValueError(message)

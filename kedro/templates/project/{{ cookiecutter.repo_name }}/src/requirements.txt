@@ -8,4 +8,3 @@ kedro-telemetry~=0.2.0
 nbstripout~=0.4
 # Pin problematic traitlets release -  https://github.com/jupyter/notebook/issues/7048
 traitlets<5.10.0
-

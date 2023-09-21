@@ -327,7 +327,7 @@ jobs:
       - win_setup:
           python_version: <<parameters.python_version>>
       - when:
-          # Save Python package cache only for Python 3.7. The conda environment itself
+          # Save Python package cache only for Python 3.8. The conda environment itself
           # is specific to a Python version and is cached separately for each.
           condition:
             equal: [<<parameters.python_version>>]

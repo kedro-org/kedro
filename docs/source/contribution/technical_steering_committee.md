@@ -8,11 +8,16 @@ The TSC is responsible for the project's future development; you can read about 
 
 On this page we describe:
 
-- [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
-- [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
-- [Kedro maintainers](#kedro-maintainers)
-- [Application process](#application-process)
-- [Voting process](#voting-process)
+- [Kedro's Technical Steering Committee](#kedros-technical-steering-committee)
+  - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
+    - [Product development](#product-development)
+    - [Community management](#community-management)
+  - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
+  - [Kedro maintainers](#kedro-maintainers)
+  - [Application process](#application-process)
+  - [Voting process](#voting-process)
+    - [Other issues or proposals](#other-issues-or-proposals)
+    - [Adding or removing maintainers](#adding-or-removing-maintainers)
 
 ## Responsibilities of a maintainer
 
@@ -80,8 +85,10 @@ Currently, the core Kedro team consists of:
 [Sajid Alam](https://github.com/SajidAlamQB),
 [Stephanie Kaiser](https://github.com/stephkaiser),
 [Tynan DeBold](https://github.com/tynandebold),
-[Vladimir Nikolic](https://github.com/vladimir-mck), and
-[Yetunde Dada](https://github.com/yetudada).
+[Vladimir Nikolic](https://github.com/vladimir-mck),
+[Yetunde Dada](https://github.com/yetudada), and
+[Yolan Honoré-Rougé](https://github.com/Galileo-Galilei).
+
 
 Former core team members with significant contributions include:
 

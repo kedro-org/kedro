@@ -120,8 +120,6 @@ omit = [
     "kedro/extras/extensions/ipython.py",
     "kedro/framework/cli/hooks/specs.py",
     "kedro/framework/hooks/specs.py",
-    "kedro/extras/datasets/tensorflow/*",
-    "kedro/extras/datasets/holoviews/*",
     "tests/*"
 ]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
@@ -145,6 +143,7 @@ testpaths = [
 
 [tool.importlinter]
 root_package = "kedro"
+include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "CLI > Context > Library, Runner > Extras > IO & Pipeline"
@@ -156,7 +155,6 @@ layers = [
     "framework.context",
     "framework.project",
     "runner",
-    "extras.datasets",
     "io",
     "pipeline",
     "config"
@@ -184,7 +182,6 @@ forbidden_modules = [
     "kedro.runner",
     "kedro.io",
     "kedro.pipeline",
-    "kedro_datasets"
 ]
 
 [[tool.importlinter.contracts]]
@@ -194,7 +191,6 @@ source_modules = [
     "kedro.runner",
     "kedro.io",
     "kedro.pipeline",
-    "kedro_datasets"
 ]
 forbidden_modules = [
     "kedro.config"

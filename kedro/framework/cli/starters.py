@@ -581,3 +581,11 @@ def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
             f"'{config['output_dir']}' is not a valid output directory. "
             "It must be a relative or absolute path to an existing directory."
         )
+
+    # Validate add-ons provided by config
+    add_on_reg_ex = "^(all|none|(\\d(,\\d)*|(\\d-\\d)))$"
+    selected_add_ons = config["add_ons"] if "add_ons" in config.keys() else "none"
+    if not re.match(add_on_reg_ex, selected_add_ons):
+        message = f"'{selected_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
+        click.secho(message, fg="red", err=True)
+        raise ValueError(message)

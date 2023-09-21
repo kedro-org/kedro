@@ -330,7 +330,7 @@ jobs:
           # Save Python package cache only for Python 3.7. The conda environment itself
           # is specific to a Python version and is cached separately for each.
           condition:
-            equal: ["3.7", <<parameters.python_version>>]
+            equal: [<<parameters.python_version>>]
           steps:
           - save_cache:
               name: Save Python package cache
@@ -458,7 +458,7 @@ jobs:
   publish_kedro:
     executor:
       name: docker
-      python_version: "3.7"
+      python_version: "3.8"
     steps:
       - setup
       - add_ssh_keys
@@ -528,7 +528,7 @@ workflows:
       - lint:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - all_circleci_checks_succeeded:
           requires:
             - lint
@@ -544,31 +544,31 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - win_e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - win_unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - lint:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - pip_compile:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - win_pip_compile:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - all_circleci_checks_succeeded:
           requires:
             - e2e_tests
@@ -620,14 +620,14 @@ workflows:
             - kedro-ecr-publish
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
           filters:
             branches:
               only: main
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
           requires:
             - build_docker_image-<<matrix.python_version>>
           filters:
@@ -672,7 +672,7 @@ workflows:
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - publish_kedro:
           requires:
             - build_kedro

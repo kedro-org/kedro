@@ -133,7 +133,6 @@ extras_require = {
 
 extras_require["all"] = _collect_requirements(extras_require)
 extras_require["test"] = [
-    "adlfs>=2021.7.1, <=2022.2; python_version == '3.7'",
     "adlfs~=2023.1; python_version >= '3.8'",
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
@@ -147,7 +146,6 @@ extras_require["test"] = [
     "delta-spark~=1.2.1; python_version < '3.11'",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
-    "gcsfs>=2021.4, <=2023.1; python_version == '3.7'",
     "gcsfs>=2023.1, <2023.3; python_version >= '3.8'",
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",

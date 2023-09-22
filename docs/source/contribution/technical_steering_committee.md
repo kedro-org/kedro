@@ -48,40 +48,41 @@ We look for commitment markers who can do the following:
 - Show excitement about the future of Kedro
 - Build a collaborative relationship with the existing team
 
-## Kedro maintainers
+## Current maintainers
 
 <!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT A VOTE TO SIGN OFF ANY CHANGES -->
 
+| Name                                                     | Organisation |
+|----------------------------------------------------------|------------- |
+| [Ahdra Merali](https://github.com/AhdraMeraliQB)         | QuantumBlack |
+| [Andrew Mackay](https://github.com/Mackay031)            | QuantumBlack |
+| [Ankita Katiyar](https://github.com/ankatiyar)           | QuantumBlack |
+| [Antony Milne](https://github.com/antonymilne)           | QuantumBlack |
+| [Deepyaman Datta](https://github.com/deepyaman)          | Claypot AI   |
+| [Dmitry Sorokin](https://github.com/DimedS)              | QuantumBlack |
+| [Huong Nguyen](https://github.com/Huongg)                | QuantumBlack |
+| [Ivan Danov](https://github.com/idanov)                  | QuantumBlack |
+| [Jitendra Gundaniya](https://github.com/jitu5)           | QuantumBlack |
+| [Jo Stichbury](https://github.com/stichbury)             | QuantumBlack |
+| [Joel Schwarzmann](https://github.com/datajoely)         | QuantumBlack |
+| [Juan Luis Cano](https://github.com/astrojuanlu)         | QuantumBlack |
+| [Laura Couto](https://github.com/lrcouto)                | QuantumBlack |
+| [Marcin Zabłocki](https://github.com/marrrcin)           | GetInData    |
+| [Mehdi Naderi Varandi](https://github.com/MehdiNV)       | QuantumBlack |
+| [Merel Theisen](https://github.com/merelcht)             | QuantumBlack |
+| [Nero Okwa](https://github.com/NeroOkwa)                 | QuantumBlack |
+| [Nok Lam Chan](https://github.com/noklam)                | QuantumBlack |
+| [Rashida Kanchwala](https://github.com/rashidakanchwala) | QuantumBlack |
+| [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla)  | QuantumBlack |
+| [Sajid Alam](https://github.com/SajidAlamQB)             | QuantumBlack |
+| [Stephanie Kaiser](https://github.com/stephkaiser)       | QuantumBlack |
+| [Tynan DeBold](https://github.com/tynandebold)           | QuantumBlack |
+| [Vladimir Nikolic](https://github.com/vladimir-mck)      | QuantumBlack |
+| [Yetunde Dada](https://github.com/yetudada)              | QuantumBlack |
+
+## Past maintainers
+
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at [QuantumBlack](https://www.mckinsey.com/capabilities/quantumblack) to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
-
-
-Currently, the core Kedro team consists of:
-
-[Ahdra Merali](https://github.com/AhdraMeraliQB),
-[Andrew Mackay](https://github.com/Mackay031),
-[Ankita Katiyar](https://github.com/ankatiyar),
-[Antony Milne](https://github.com/antonymilne),
-[Deepyaman Datta](https://github.com/deepyaman),
-[Dmitry Sorokin](https://github.com/DimedS),
-[Huong Nguyen](https://github.com/Huongg),
-[Ivan Danov](https://github.com/idanov),
-[Jitendra Gundaniya](https://github.com/jitu5),
-[Jo Stichbury](https://github.com/stichbury),
-[Joel Schwarzmann](https://github.com/datajoely),
-[Juan Luis Cano](https://github.com/astrojuanlu),
-[Laura Couto](https://github.com/lrcouto),
-[Marcin Zabłocki](https://github.com/marrrcin),
-[Mehdi Naderi Varandi](https://github.com/MehdiNV),
-[Merel Theisen](https://github.com/merelcht),
-[Nero Okwa](https://github.com/NeroOkwa),
-[Nok Lam Chan](https://github.com/noklam),
-[Rashida Kanchwala](https://github.com/rashidakanchwala),
-[Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla),
-[Sajid Alam](https://github.com/SajidAlamQB),
-[Stephanie Kaiser](https://github.com/stephkaiser),
-[Tynan DeBold](https://github.com/tynandebold),
-[Vladimir Nikolic](https://github.com/vladimir-mck), and
-[Yetunde Dada](https://github.com/yetudada).
 
 Former core team members with significant contributions include:
 

@@ -462,7 +462,7 @@ class TestNewFromConfigFileValid:
     def test_required_keys_only(self, fake_kedro_cli):
         """Test project created from config."""
         config = {
-            "add_ons": "all",
+            "add_ons": "none",
             "project_name": "My Project",
             "repo_name": "my-project",
             "python_package": "my_project",
@@ -608,6 +608,41 @@ class TestNewFromConfigFileInvalid:
         result = CliRunner().invoke(fake_kedro_cli, ["new", "-v", "-c", "config.yml"])
         assert result.exit_code != 0
         assert "Failed to generate project: could not load config" in result.output
+
+    def test_invalid_project_name_special_characters(self, fake_kedro_cli):
+        config = {
+            "add_ons": "none",
+            "project_name": "My $Project!",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
+            in result.output
+        )
+
+    def test_invalid_project_name_too_short(self, fake_kedro_cli):
+        config = {
+            "add_ons": "none",
+            "project_name": "P",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+        assert result.exit_code != 0
+        assert (
+            "is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
+            in result.output
+        )
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

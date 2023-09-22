@@ -227,9 +227,12 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
         config = {}
         if config_path:
             config = _fetch_config_from_file(config_path)
+            _validate_config_file_inputs(config)
+
     elif config_path:
         config = _fetch_config_from_file(config_path)
-        _validate_config_file(config, prompts_required)
+        _validate_config_file_against_prompts(config, prompts_required)
+        _validate_config_file_inputs(config)
     else:
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
@@ -558,7 +561,9 @@ def _get_available_tags(template_path: str) -> list:
     return sorted(unique_tags)
 
 
-def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
+def _validate_config_file_against_prompts(
+    config: dict[str, str], prompts: dict[str, Any]
+):
     """Checks that the configuration file contains all needed variables.
 
     Args:
@@ -582,10 +587,18 @@ def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
             "It must be a relative or absolute path to an existing directory."
         )
 
-    # Validate add-ons provided by config
+
+def _validate_config_file_inputs(config: dict[str, str]):
+    project_name_reg_ex = "^[\\w -]{2,}$"
+    input_project_name = config["project_name"]
+    if not re.match(project_name_reg_ex, input_project_name):
+        message = f"'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
+        click.secho(message, fg="red", err=True)
+        raise ValueError(message)
+
     add_on_reg_ex = "^(all|none|(\\d(,\\d)*|(\\d-\\d)))$"
-    selected_add_ons = config["add_ons"] if "add_ons" in config.keys() else "none"
-    if not re.match(add_on_reg_ex, selected_add_ons):
-        message = f"'{selected_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
+    input_add_ons = config["add_ons"] if "add_ons" in config.keys() else "none"
+    if not re.match(add_on_reg_ex, input_add_ons):
+        message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
         click.secho(message, fg="red", err=True)
         raise ValueError(message)

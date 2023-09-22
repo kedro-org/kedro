@@ -1,6 +1,5 @@
 # pylint: disable=unused-argument
 import sys
-from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -100,55 +99,3 @@ class TestPackageCommand:
                 ),
             ]
         )
-
-    def test_happy_path(
-        self,
-        call_mock,
-        python_call_mock,
-        fake_project_cli,
-        mocker,
-        fake_repo_path,
-        fake_metadata,
-    ):
-        fake_rmtree = mocker.patch("shutil.rmtree")
-
-        result = CliRunner().invoke(fake_project_cli, ["build-docs"], obj=fake_metadata)
-        assert not result.exit_code, result.stdout
-        call_mock.assert_has_calls(
-            [
-                mocker.call(
-                    [
-                        "sphinx-apidoc",
-                        "--module-first",
-                        "-o",
-                        "docs/source",
-                        str(fake_repo_path / "src/dummy_package"),
-                    ]
-                ),
-                mocker.call(
-                    ["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"]
-                ),
-            ]
-        )
-        python_call_mock.assert_has_calls(
-            [
-                mocker.call("pip", ["install", str(fake_repo_path / "src/[docs]")]),
-                mocker.call(
-                    "pip",
-                    ["install", "-r", str(fake_repo_path / "src/requirements.txt")],
-                ),
-                mocker.call("ipykernel", ["install", "--user", "--name=dummy_package"]),
-            ]
-        )
-        fake_rmtree.assert_called_once_with("docs/build", ignore_errors=True)
-
-    @pytest.mark.parametrize("open_flag", ["-o", "--open"])
-    def test_open_docs(self, open_flag, fake_project_cli, mocker, fake_metadata):
-        mocker.patch("shutil.rmtree")
-        patched_browser = mocker.patch("webbrowser.open")
-        result = CliRunner().invoke(
-            fake_project_cli, ["build-docs", open_flag], obj=fake_metadata
-        )
-        assert not result.exit_code, result.stdout
-        expected_path = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
-        patched_browser.assert_called_once_with(expected_path)

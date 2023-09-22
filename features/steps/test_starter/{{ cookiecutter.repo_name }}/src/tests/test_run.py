@@ -5,7 +5,7 @@ Tests should be placed in ``src/tests``, in modules that mirror your
 project's structure, and in files named test_*.py. They are simply functions
 named ``test_*`` which test a unit of logic.
 
-To run the tests, run ``kedro test`` from the project root directory.
+To run the tests, run ``pytest`` from the project root directory.
 """
 
 from pathlib import Path

@@ -184,7 +184,7 @@ extras_require["test"] = [
     "pyspark>=3.4; python_version >= '3.11'",
     "pytest-cov~=3.0",
     "pytest-mock>=1.7.1, <2.0",
-    "pytest-xdist[psutil]~=3.3.1",
+    "pytest-xdist[psutil]~=2.2.1",
     "pytest~=7.2",
     "redis~=4.1",
     "requests-mock~=1.6",

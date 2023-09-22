@@ -178,6 +178,7 @@ def _assert_template_ok(
     kedro_version=version,
     output_dir=".",
 ):
+
     assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
 

@@ -21,22 +21,22 @@ from kedro.framework.cli.starters import (
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 16
 
 
-@pytest.fixture
-def chdir_to_tmp(monkeypatch, tmp_path):
-    monkeypatch.chdir(tmp_path)
+# @pytest.fixture
+# def chdir_to_tmp(monkeypatch, tmp_path):
+#     monkeypatch.chdir(tmp_path)
 
 
-@pytest.fixture
-def mock_determine_repo_dir(mocker):
-    return mocker.patch(
-        "cookiecutter.repository.determine_repo_dir",
-        return_value=(str(TEMPLATE_PATH), None),
-    )
+# @pytest.fixture
+# def mock_determine_repo_dir(mocker):
+#     return mocker.patch(
+#         "cookiecutter.repository.determine_repo_dir",
+#         return_value=(str(TEMPLATE_PATH), None),
+#     )
 
 
-@pytest.fixture
-def mock_cookiecutter(mocker):
-    return mocker.patch("cookiecutter.main.cookiecutter")
+# @pytest.fixture
+# def mock_cookiecutter(mocker):
+#     return mocker.patch("cookiecutter.main.cookiecutter")
 
 
 def _write_yaml(filepath: Path, config: dict):

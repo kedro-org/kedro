@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 import tempfile
 from collections import OrderedDict
 from itertools import groupby
@@ -538,8 +539,7 @@ class _Prompt:
             message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
             click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
-            raise ValueError(message, self.error_message)
-
+            sys.exit(1)
 
 def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
@@ -594,11 +594,11 @@ def _validate_config_file_inputs(config: dict[str, str]):
     if not re.match(project_name_reg_ex, input_project_name):
         message = f"'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
         click.secho(message, fg="red", err=True)
-        raise ValueError(message)
+        sys.exit(1)
 
     add_on_reg_ex = "^(all|none|(\\d(,\\d)*|(\\d-\\d)))$"
     input_add_ons = config["add_ons"] if "add_ons" in config.keys() else "none"
     if not re.match(add_on_reg_ex, input_add_ons):
         message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
         click.secho(message, fg="red", err=True)
-        raise ValueError(message)
+        sys.exit(1)

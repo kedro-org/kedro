@@ -263,20 +263,22 @@ def test_parse_add_ons_valid(input, expected):
     "input",
     ["5-2", "3-1"],
 )
-def test_parse_add_ons_invalid_range(input):
-    with pytest.raises(ValueError) as excinfo:
+def test_parse_add_ons_invalid_range(input, capsys):
+    with pytest.raises(SystemExit):
         parse_add_ons_input(input)
-    assert str(excinfo.value) == f"'{input}' is an invalid range for project add-ons."
+    message = f"'{input}' is an invalid range for project add-ons."
+    assert message in capsys.readouterr().err
 
 
 @pytest.mark.parametrize(
     "input,first_invalid",
     [("0,3,5", "0"), ("1,3,6", "6"), ("0-4", "0"), ("3-6", "6")],
 )
-def test_parse_add_ons_invalid_selection(input, first_invalid):
-    with pytest.raises(ValueError) as excinfo:
+def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
+    with pytest.raises(SystemExit):
         parse_add_ons_input(input)
-    assert str(excinfo.value) == f"'{first_invalid}' is not a valid selection."
+    message = f"'{first_invalid}' is not a valid selection."
+    assert message in capsys.readouterr().err
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

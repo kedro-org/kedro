@@ -2,7 +2,6 @@
 
 import os
 import shutil
-import subprocess
 import sys
 import webbrowser
 from pathlib import Path
@@ -275,45 +274,6 @@ def build_reqs(
         f"and re-run build-reqs to generate the new {output_file.name}.",
         fg="green",
     )
-
-
-@command_with_verbosity(project_group, "activate-nbstripout")
-@click.pass_obj  # this will pass the metadata as first argument
-def activate_nbstripout(metadata: ProjectMetadata, **kwargs):  # noqa: unused-argument
-    """Install the nbstripout git hook to automatically clean notebooks. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro activate-nbstripout' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    source_path = metadata.source_dir
-    click.secho(
-        (
-            "Notebook output cells will be automatically cleared before committing"
-            " to git."
-        ),
-        fg="yellow",
-    )
-
-    try:
-        _check_module_importable("nbstripout")
-    except KedroCliError as exc:
-        raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module="nbstripout", src=str(source_path))
-        ) from exc
-
-    try:
-        res = subprocess.run(  # noqa: subprocess-run-check
-            ["git", "rev-parse", "--git-dir"],
-            capture_output=True,
-        )
-        if res.returncode:
-            raise KedroCliError("Not a git repository. Run 'git init' first.")
-    except FileNotFoundError as exc:
-        raise KedroCliError("Git executable not found. Install Git first.") from exc
-
-    call(["nbstripout", "--install"])
 
 
 @project_group.command()

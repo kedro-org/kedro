@@ -24,5 +24,5 @@ def main():
     # Sort requirements.txt file in alphabetical order
     sort_requirements(requirements_file_path)
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

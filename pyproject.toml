@@ -122,7 +122,7 @@ omit = [
     "kedro/framework/hooks/specs.py",
     "kedro/extras/datasets/tensorflow/*",
     "kedro/extras/datasets/holoviews/*",
-    "tests/*"
+    "tests/*",
     "*/site-packages/*"
 ]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]

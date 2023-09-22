@@ -7,10 +7,10 @@ import boto3
 import pandas as pd
 import pytest
 import s3fs
+from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
-from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import DatasetError, PartitionedDataset
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.io.partitioned_dataset import KEY_PROPAGATION_WARNING
@@ -39,7 +39,7 @@ def local_csvs(tmp_path, partitioned_data_pandas):
 
 LOCAL_DATASET_DEFINITION = [
     "pandas.CSVDataSet",
-    "kedro.extras.datasets.pandas.CSVDataSet",
+    "kedro_datasets.pandas.CSVDataSet",
     CSVDataSet,
     {"type": "pandas.CSVDataSet", "save_args": {"index": False}},
     {"type": CSVDataSet},
@@ -404,7 +404,7 @@ class TestPartitionedDatasetLocal:
 BUCKET_NAME = "fake_bucket_name"
 S3_DATASET_DEFINITION = [
     "pandas.CSVDataSet",
-    "kedro.extras.datasets.pandas.CSVDataSet",
+    "kedro_datasets.pandas.CSVDataSet",
     CSVDataSet,
     {"type": "pandas.CSVDataSet", "save_args": {"index": False}},
     {"type": CSVDataSet},

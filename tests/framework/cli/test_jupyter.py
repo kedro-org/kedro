@@ -1,4 +1,3 @@
-import json
 import shutil
 from pathlib import Path
 
@@ -10,7 +9,7 @@ from jupyter_client.kernelspec import (
     get_kernel_spec,
 )
 
-from kedro.framework.cli.jupyter import _create_kernel, _export_nodes
+from kedro.framework.cli.jupyter import _create_kernel
 from kedro.framework.cli.utils import KedroCliError
 
 
@@ -193,5 +192,3 @@ def cleanup_nodes_dir(fake_package_path):
     nodes_dir = fake_package_path / "nodes"
     if nodes_dir.exists():
         shutil.rmtree(str(nodes_dir))
-
-

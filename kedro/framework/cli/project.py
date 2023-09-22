@@ -7,7 +7,6 @@ from pathlib import Path
 import click
 
 from kedro.framework.cli.utils import (
-    KedroCliError,
     _check_module_importable,
     _config_file_callback,
     _deprecate_options,
@@ -18,7 +17,6 @@ from kedro.framework.cli.utils import (
     call,
     env_option,
     forward_command,
-    python_call,
     split_node_names,
     split_string,
 )
@@ -68,27 +66,6 @@ CONF_SOURCE_HELP = """Path of a directory where project configuration is stored.
 @click.group(name="Kedro")
 def project_group():  # pragma: no cover
     pass
-
-
-@forward_command(project_group, forward_help=True)
-@click.pass_obj  # this will pass the metadata as first argument
-def test(metadata: ProjectMetadata, args, **kwargs):  # noqa: ument
-    """Run the test suite. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro test' is deprecated and "
-        "will not be available from Kedro 0.19.0. "
-        "Use the command 'pytest' instead. "
-    )
-    click.secho(deprecation_message, fg="red")
-
-    try:
-        _check_module_importable("pytest")
-    except KedroCliError as exc:
-        source_path = metadata.source_dir
-        raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(source_path))
-        ) from exc
-    python_call("pytest", args)
 
 
 @forward_command(project_group, forward_help=True)

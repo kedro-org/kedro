@@ -551,5 +551,5 @@ def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
     if "output_dir" in config and not Path(config["output_dir"]).exists():
         raise KedroCliError(
             f"'{config['output_dir']}' is not a valid output directory. "
-            "It must be a relative or absolute path to an existing directory."
+            "It must be a relative or absolute path to an existing directory"
         )

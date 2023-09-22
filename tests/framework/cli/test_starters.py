@@ -1,24 +1,24 @@
-"""This module contains unit test for the cli command 'kedro new'
-"""
-from __future__ import annotations
+# """This module contains unit test for the cli command 'kedro new'
+# """
+# from __future__ import annotations
 
-import shutil
-from pathlib import Path
+# import shutil
+# from pathlib import Path
 
-import pytest
-import yaml
-from click.testing import CliRunner
-from cookiecutter.exceptions import RepositoryCloneFailed
+# import pytest
+# import yaml
+# from click.testing import CliRunner
+# from cookiecutter.exceptions import RepositoryCloneFailed
 
-from kedro import __version__ as version
-from kedro.framework.cli.starters import (
-    _OFFICIAL_STARTER_SPECS,
-    TEMPLATE_PATH,
-    KedroStarterSpec,
-)
+# from kedro import __version__ as version
+# from kedro.framework.cli.starters import (
+#     _OFFICIAL_STARTER_SPECS,
+#     TEMPLATE_PATH,
+#     KedroStarterSpec,
+# )
 # from kedro.templates.project.hooks.utils import parse_add_ons_input
 
-FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 16
+# FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 16
 
 
 # @pytest.fixture
@@ -39,16 +39,16 @@ FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 16
 #     return mocker.patch("cookiecutter.main.cookiecutter")
 
 
-def _write_yaml(filepath: Path, config: dict):
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    yaml_str = yaml.dump(config)
-    filepath.write_text(yaml_str)
+# def _write_yaml(filepath: Path, config: dict):
+#     filepath.parent.mkdir(parents=True, exist_ok=True)
+#     yaml_str = yaml.dump(config)
+#     filepath.write_text(yaml_str)
 
 
-def _make_cli_prompt_input(
-    add_ons="none", project_name="", repo_name="", python_package=""
-):
-    return "\n".join([add_ons, project_name, repo_name, python_package])
+# def _make_cli_prompt_input(
+#     add_ons="none", project_name="", repo_name="", python_package=""
+# ):
+#     return "\n".join([add_ons, project_name, repo_name, python_package])
 
 
 # def _get_expected_files(add_ons: str):

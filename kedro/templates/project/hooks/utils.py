@@ -30,9 +30,6 @@ addopts = \"\"\"
 fail_under = 0
 show_missing = true
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
-omit = [
-    "tests/*"
-]
 """
 
 docs_pyproject_requirements = """

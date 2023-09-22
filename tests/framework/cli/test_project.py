@@ -18,29 +18,6 @@ def fake_copyfile(mocker):
 
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project")
-class TestTestCommand:
-    def test_happy_path(self, fake_project_cli, python_call_mock):
-        result = CliRunner().invoke(fake_project_cli, ["test", "--random-arg", "value"])
-        assert not result.exit_code
-        python_call_mock.assert_called_once_with("pytest", ("--random-arg", "value"))
-
-    def test_pytest_not_installed(
-        self, fake_project_cli, python_call_mock, mocker, fake_repo_path, fake_metadata
-    ):
-        mocker.patch.dict("sys.modules", {"pytest": None})
-
-        result = CliRunner().invoke(
-            fake_project_cli, ["test", "--random-arg", "value"], obj=fake_metadata
-        )
-        expected_message = NO_DEPENDENCY_MESSAGE.format(
-            module="pytest", src=str(fake_repo_path / "src")
-        )
-
-        assert result.exit_code
-        assert expected_message in result.stdout
-        python_call_mock.assert_not_called()
-
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestLintCommand:

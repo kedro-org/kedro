@@ -218,64 +218,6 @@ def build_docs(metadata: ProjectMetadata, open_docs):
         webbrowser.open(docs_page)
 
 
-@forward_command(project_group, name="build-reqs")
-@click.option(
-    "--input-file",
-    "input_file",
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-    multiple=False,
-    help=INPUT_FILE_HELP,
-)
-@click.option(
-    "--output-file",
-    "output_file",
-    multiple=False,
-    help=OUTPUT_FILE_HELP,
-)
-@click.pass_obj  # this will pass the metadata as first argument
-def build_reqs(
-    metadata: ProjectMetadata, input_file, output_file, args, **kwargs
-):  # noqa: unused-argument
-    """Run `pip-compile` on src/requirements.txt or the user defined input file and save
-    the compiled requirements to src/requirements.lock or the user defined output file.
-    (DEPRECATED)
-    """
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro build-reqs' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    source_path = metadata.source_dir
-    input_file = Path(input_file or source_path / "requirements.txt")
-    output_file = Path(output_file or source_path / "requirements.lock")
-
-    if input_file.is_file():
-        python_call(
-            "piptools",
-            [
-                "compile",
-                *args,
-                str(input_file),
-                "--output-file",
-                str(output_file),
-            ],
-        )
-
-    else:
-        raise FileNotFoundError(
-            f"File '{input_file}' not found in the project. "
-            "Please specify another input or create the file and try again."
-        )
-
-    click.secho(
-        f"Requirements built! Please update {input_file.name} "
-        "if you'd like to make a change in your project's dependencies, "
-        f"and re-run build-reqs to generate the new {output_file.name}.",
-        fg="green",
-    )
-
-
 @project_group.command()
 @click.option(
     "--from-inputs",

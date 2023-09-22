@@ -12,94 +12,10 @@ from kedro.framework.cli.project import NO_DEPENDENCY_MESSAGE
 def call_mock(mocker):
     return mocker.patch("kedro.framework.cli.project.call")
 
-
-@pytest.fixture(autouse=True)
-def python_call_mock(mocker):
-    return mocker.patch("kedro.framework.cli.project.python_call")
-
-
 @pytest.fixture
 def fake_copyfile(mocker):
     return mocker.patch("shutil.copyfile")
 
-
-@pytest.mark.usefixtures("chdir_to_dummy_project")
-class TestActivateNbstripoutCommand:
-    @staticmethod
-    @pytest.fixture()
-    def fake_nbstripout():
-        """
-        ``nbstripout`` tries to access ``sys.stdin.buffer.readable``
-        on import, but it's patches by pytest.
-        Let's replace it by the fake!
-        """
-        sys.modules["nbstripout"] = "fake"
-        yield
-        del sys.modules["nbstripout"]
-
-    @staticmethod
-    @pytest.fixture
-    def fake_git_repo(mocker):
-        return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=0))
-
-    @staticmethod
-    @pytest.fixture
-    def without_git_repo(mocker):
-        return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=1))
-
-    def test_install_successfully(
-        self, fake_project_cli, call_mock, fake_nbstripout, fake_git_repo, fake_metadata
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["activate-nbstripout"], obj=fake_metadata
-        )
-        assert not result.exit_code
-
-        call_mock.assert_called_once_with(["nbstripout", "--install"])
-
-        fake_git_repo.assert_called_once_with(
-            ["git", "rev-parse", "--git-dir"], capture_output=True
-        )
-
-    def test_nbstripout_not_installed(
-        self, fake_project_cli, fake_git_repo, mocker, fake_metadata
-    ):
-        """
-        Run activate-nbstripout target without nbstripout installed
-        There should be a clear message about it.
-        """
-        mocker.patch.dict("sys.modules", {"nbstripout": None})
-
-        result = CliRunner().invoke(
-            fake_project_cli, ["activate-nbstripout"], obj=fake_metadata
-        )
-        assert result.exit_code
-        assert "nbstripout is not installed" in result.stdout
-
-    def test_no_git_repo(
-        self, fake_project_cli, fake_nbstripout, without_git_repo, fake_metadata
-    ):
-        """
-        Run activate-nbstripout target with no git repo available.
-        There should be a clear message about it.
-        """
-        result = CliRunner().invoke(
-            fake_project_cli, ["activate-nbstripout"], obj=fake_metadata
-        )
-
-        assert result.exit_code
-        assert "Not a git repository" in result.stdout
-
-    def test_no_git_executable(
-        self, fake_project_cli, fake_nbstripout, mocker, fake_metadata
-    ):
-        mocker.patch("subprocess.run", side_effect=FileNotFoundError)
-        result = CliRunner().invoke(
-            fake_project_cli, ["activate-nbstripout"], obj=fake_metadata
-        )
-
-        assert result.exit_code
-        assert "Git executable not found. Install Git first." in result.stdout
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")

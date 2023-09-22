@@ -16,7 +16,6 @@ from kedro.framework.cli.utils import (
     _split_load_versions,
     _split_params,
     call,
-    command_with_verbosity,
     env_option,
     forward_command,
     python_call,
@@ -90,42 +89,6 @@ def test(metadata: ProjectMetadata, args, **kwargs):  # noqa: ument
             NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(source_path))
         ) from exc
     python_call("pytest", args)
-
-
-@command_with_verbosity(project_group)
-@click.option("-c", "--check-only", is_flag=True, help=LINT_CHECK_ONLY_HELP)
-@click.argument("files", type=click.Path(exists=True), nargs=-1)
-@click.pass_obj  # this will pass the metadata as first argument
-def lint(
-    metadata: ProjectMetadata, files, check_only, **kwargs
-):  # noqa: unused-argument
-    """Run flake8, isort and black. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro lint' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    source_path = metadata.source_dir
-    package_name = metadata.package_name
-    files = files or (str(source_path / "tests"), str(source_path / package_name))
-
-    if "PYTHONPATH" not in os.environ:
-        # isort needs the source path to be in the 'PYTHONPATH' environment
-        # variable to treat it as a first-party import location
-        os.environ["PYTHONPATH"] = str(source_path)  # pragma: no cover
-
-    for module_name in ("flake8", "isort", "black"):
-        try:
-            _check_module_importable(module_name)
-        except KedroCliError as exc:
-            raise KedroCliError(
-                NO_DEPENDENCY_MESSAGE.format(module=module_name, src=str(source_path))
-            ) from exc
-
-    python_call("black", ("--check",) + files if check_only else files)
-    python_call("flake8", files)
-    python_call("isort", ("--check",) + files if check_only else files)
 
 
 @forward_command(project_group, forward_help=True)

@@ -19,6 +19,18 @@ ignore = ["E501"]  # Black takes care of line-too-long
 """
 
 test_requirements = "pytest-cov~=3.0\npytest-mock>=1.7.1, <2.0\npytest~=7.2"
+test_pyproject_requirements = """
+[tool.pytest.ini_options]
+addopts = \"\"\"
+--cov-report term-missing \\
+--cov src/{{ cookiecutter.python_package }} -ra
+\"\"\"
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+"""
 
 docs_pyproject_requirements = """
 docs = [
@@ -108,8 +120,8 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
     else:
         with open(requirements_file_path, 'a') as file:
             file.write(test_requirements)
-        # with open(pyproject_file_path, 'a') as file:
-        #     file.write(test_pyproject_requirements)
+        with open(pyproject_file_path, 'a') as file:
+            file.write(test_pyproject_requirements)
 
     if "3" not in selected_add_ons_list:  # If Logging not selected
         logging_yml_path = current_dir / "conf/logging.yml"

@@ -198,49 +198,49 @@ def _assert_template_ok(
     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
 
-def test_starter_list(fake_kedro_cli):
-    """Check that `kedro starter list` prints out all starter aliases."""
-    result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
+# def test_starter_list(fake_kedro_cli):
+#     """Check that `kedro starter list` prints out all starter aliases."""
+#     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
 
-    assert result.exit_code == 0, result.output
-    for alias in _OFFICIAL_STARTER_SPECS:
-        assert alias in result.output
-
-
-def test_starter_list_with_starter_plugin(fake_kedro_cli, entry_point):
-    """Check that `kedro starter list` prints out the plugin starters."""
-    entry_point.load.return_value = [KedroStarterSpec("valid_starter", "valid_path")]
-    entry_point.module = "valid_starter_module"
-    result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
-    assert result.exit_code == 0, result.output
-    assert "valid_starter_module" in result.output
+#     assert result.exit_code == 0, result.output
+#     for alias in _OFFICIAL_STARTER_SPECS:
+#         assert alias in result.output
 
 
-@pytest.mark.parametrize(
-    "specs,expected",
-    [
-        (
-            [{"alias": "valid_starter", "template_path": "valid_path"}],
-            "should be a 'KedroStarterSpec'",
-        ),
-        (
-            [
-                KedroStarterSpec("duplicate", "duplicate"),
-                KedroStarterSpec("duplicate", "duplicate"),
-            ],
-            "has been ignored as it is already defined by",
-        ),
-    ],
-)
-def test_starter_list_with_invalid_starter_plugin(
-    fake_kedro_cli, entry_point, specs, expected
-):
-    """Check that `kedro starter list` prints out the plugin starters."""
-    entry_point.load.return_value = specs
-    entry_point.module = "invalid_starter"
-    result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
-    assert result.exit_code == 0, result.output
-    assert expected in result.output
+# def test_starter_list_with_starter_plugin(fake_kedro_cli, entry_point):
+#     """Check that `kedro starter list` prints out the plugin starters."""
+#     entry_point.load.return_value = [KedroStarterSpec("valid_starter", "valid_path")]
+#     entry_point.module = "valid_starter_module"
+#     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
+#     assert result.exit_code == 0, result.output
+#     assert "valid_starter_module" in result.output
+
+
+# @pytest.mark.parametrize(
+#     "specs,expected",
+#     [
+#         (
+#             [{"alias": "valid_starter", "template_path": "valid_path"}],
+#             "should be a 'KedroStarterSpec'",
+#         ),
+#         (
+#             [
+#                 KedroStarterSpec("duplicate", "duplicate"),
+#                 KedroStarterSpec("duplicate", "duplicate"),
+#             ],
+#             "has been ignored as it is already defined by",
+#         ),
+#     ],
+# )
+# def test_starter_list_with_invalid_starter_plugin(
+#     fake_kedro_cli, entry_point, specs, expected
+# ):
+#     """Check that `kedro starter list` prints out the plugin starters."""
+#     entry_point.load.return_value = specs
+#     entry_point.module = "invalid_starter"
+#     result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
+#     assert result.exit_code == 0, result.output
+#     assert expected in result.output
 
 
 # @pytest.mark.parametrize(

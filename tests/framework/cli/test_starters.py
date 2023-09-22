@@ -16,7 +16,7 @@ from kedro.framework.cli.starters import (
     TEMPLATE_PATH,
     KedroStarterSpec,
 )
-from kedro.templates.project.hooks.utils import parse_add_ons_input
+# from kedro.templates.project.hooks.utils import parse_add_ons_input
 
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 16
 
@@ -51,151 +51,151 @@ def _make_cli_prompt_input(
     return "\n".join([add_ons, project_name, repo_name, python_package])
 
 
-def _get_expected_files(add_ons: str):
-    add_ons_template_files = {
-        "1": 0,
-        "2": 3,
-        "3": 1,
-        "4": 2,
-        "5": 8,
-    }  # files added to template by each add-on
-    add_ons_list = parse_add_ons_input(add_ons)
+# def _get_expected_files(add_ons: str):
+#     add_ons_template_files = {
+#         "1": 0,
+#         "2": 3,
+#         "3": 1,
+#         "4": 2,
+#         "5": 8,
+#     }  # files added to template by each add-on
+#     add_ons_list = parse_add_ons_input(add_ons)
 
-    expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
+#     expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
 
-    for add_on in add_ons_list:
-        expected_files = expected_files + add_ons_template_files[add_on]
+#     for add_on in add_ons_list:
+#         expected_files = expected_files + add_ons_template_files[add_on]
 
-    return expected_files
-
-
-def _assert_requirements_ok(
-    result,
-    add_ons="none",
-    repo_name="new-kedro-project",
-    output_dir=".",
-):
-
-    assert result.exit_code == 0, result.output
-    assert "Change directory to the project generated in" in result.output
-
-    root_path = (Path(output_dir) / repo_name).resolve()
-    requirements_file_path = root_path / "src/requirements.txt"
-    pyproject_file_path = root_path / "pyproject.toml"
-    pyproject_src_file_path = root_path / "src/pyproject.toml"
-
-    add_ons_list = parse_add_ons_input(add_ons)
-
-    if "1" in add_ons_list:
-        with open(requirements_file_path) as requirements_file:
-            requirements = requirements_file.read()
-
-        assert "black" in requirements
-        assert "ruff" in requirements
-
-        with open(pyproject_file_path) as pyproject_file:
-            requirements = pyproject_file.read()
-
-        assert (
-            (
-                """
-[tool.ruff]
-select = [
-    "F",  # Pyflakes
-    "E",  # Pycodestyle
-    "W",  # Pycodestyle
-    "UP",  # pyupgrade
-    "I",  # isort
-    "PL", # Pylint
-]
-ignore = ["E501"]  # Black takes care of line-too-long
-"""
-            )
-            in requirements
-        )
-
-    if "2" in add_ons_list:
-        with open(requirements_file_path) as requirements_file:
-            requirements = requirements_file.read()
-
-        assert "pytest-cov~=3.0" in requirements
-        assert "pytest-mock>=1.7.1, <2.0" in requirements
-        assert "pytest~=7.2" in requirements
-
-        with open(pyproject_file_path) as pyproject_file:
-            requirements = pyproject_file.read()
-
-        assert (
-            (
-                """
-[tool.pytest.ini_options]
-addopts = \"\"\"
---cov-report term-missing \\
---cov src/{{ cookiecutter.python_package }} -ra
-\"\"\"
-
-[tool.coverage.report]
-fail_under = 0
-show_missing = true
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
-"""
-            )
-            in requirements
-        )
-
-    if "4" in add_ons_list:
-        with open(pyproject_src_file_path) as pyproject_file:
-            requirements = pyproject_file.read()
-
-        assert (
-            (
-                """
-docs = [
-    "docutils<0.18.0",
-    "sphinx~=3.4.3",
-    "sphinx_rtd_theme==0.5.1",
-    "nbsphinx==0.8.1",
-    "nbstripout~=0.4",
-    "sphinx-autodoc-typehints==1.11.1",
-    "sphinx_copybutton==0.3.1",
-    "ipykernel>=5.3, <7.0",
-    "Jinja2<3.1.0",
-    "myst-parser~=0.17.2",
-]
-"""
-            )
-            in requirements
-        )
+#     return expected_files
 
 
-# noqa: too-many-arguments
-def _assert_template_ok(
-    result,
-    add_ons="none",
-    project_name="New Kedro Project",
-    repo_name="new-kedro-project",
-    python_package="new_kedro_project",
-    kedro_version=version,
-    output_dir=".",
-):
+# def _assert_requirements_ok(
+#     result,
+#     add_ons="none",
+#     repo_name="new-kedro-project",
+#     output_dir=".",
+# ):
 
-    assert result.exit_code == 0, result.output
-    assert "Change directory to the project generated in" in result.output
+#     assert result.exit_code == 0, result.output
+#     assert "Change directory to the project generated in" in result.output
 
-    full_path = (Path(output_dir) / repo_name).resolve()
-    generated_files = [
-        p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
-    ]
+#     root_path = (Path(output_dir) / repo_name).resolve()
+#     requirements_file_path = root_path / "src/requirements.txt"
+#     pyproject_file_path = root_path / "pyproject.toml"
+#     pyproject_src_file_path = root_path / "src/pyproject.toml"
 
-    assert len(generated_files) == _get_expected_files(add_ons)
-    assert full_path.exists()
-    assert (full_path / ".gitignore").is_file()
-    assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
-    assert "KEDRO" in (full_path / ".gitignore").read_text(encoding="utf-8")
-    assert kedro_version in (full_path / "src" / "requirements.txt").read_text(
-        encoding="utf-8"
-    )
-    assert (full_path / "src" / python_package / "__init__.py").is_file()
+#     add_ons_list = parse_add_ons_input(add_ons)
+
+#     if "1" in add_ons_list:
+#         with open(requirements_file_path) as requirements_file:
+#             requirements = requirements_file.read()
+
+#         assert "black" in requirements
+#         assert "ruff" in requirements
+
+#         with open(pyproject_file_path) as pyproject_file:
+#             requirements = pyproject_file.read()
+
+#         assert (
+#             (
+#                 """
+# [tool.ruff]
+# select = [
+#     "F",  # Pyflakes
+#     "E",  # Pycodestyle
+#     "W",  # Pycodestyle
+#     "UP",  # pyupgrade
+#     "I",  # isort
+#     "PL", # Pylint
+# ]
+# ignore = ["E501"]  # Black takes care of line-too-long
+# """
+#             )
+#             in requirements
+#         )
+
+#     if "2" in add_ons_list:
+#         with open(requirements_file_path) as requirements_file:
+#             requirements = requirements_file.read()
+
+#         assert "pytest-cov~=3.0" in requirements
+#         assert "pytest-mock>=1.7.1, <2.0" in requirements
+#         assert "pytest~=7.2" in requirements
+
+#         with open(pyproject_file_path) as pyproject_file:
+#             requirements = pyproject_file.read()
+
+#         assert (
+#             (
+#                 """
+# [tool.pytest.ini_options]
+# addopts = \"\"\"
+# --cov-report term-missing \\
+# --cov src/{{ cookiecutter.python_package }} -ra
+# \"\"\"
+
+# [tool.coverage.report]
+# fail_under = 0
+# show_missing = true
+# exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+# """
+#             )
+#             in requirements
+#         )
+
+#     if "4" in add_ons_list:
+#         with open(pyproject_src_file_path) as pyproject_file:
+#             requirements = pyproject_file.read()
+
+#         assert (
+#             (
+#                 """
+# docs = [
+#     "docutils<0.18.0",
+#     "sphinx~=3.4.3",
+#     "sphinx_rtd_theme==0.5.1",
+#     "nbsphinx==0.8.1",
+#     "nbstripout~=0.4",
+#     "sphinx-autodoc-typehints==1.11.1",
+#     "sphinx_copybutton==0.3.1",
+#     "ipykernel>=5.3, <7.0",
+#     "Jinja2<3.1.0",
+#     "myst-parser~=0.17.2",
+# ]
+# """
+#             )
+#             in requirements
+#         )
+
+
+# # noqa: too-many-arguments
+# def _assert_template_ok(
+#     result,
+#     add_ons="none",
+#     project_name="New Kedro Project",
+#     repo_name="new-kedro-project",
+#     python_package="new_kedro_project",
+#     kedro_version=version,
+#     output_dir=".",
+# ):
+
+#     assert result.exit_code == 0, result.output
+#     assert "Change directory to the project generated in" in result.output
+
+#     full_path = (Path(output_dir) / repo_name).resolve()
+#     generated_files = [
+#         p for p in full_path.rglob("*") if p.is_file() and p.name != ".DS_Store"
+#     ]
+
+#     assert len(generated_files) == _get_expected_files(add_ons)
+#     assert full_path.exists()
+#     assert (full_path / ".gitignore").is_file()
+#     assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
+#     assert "KEDRO" in (full_path / ".gitignore").read_text(encoding="utf-8")
+#     assert kedro_version in (full_path / "src" / "requirements.txt").read_text(
+#         encoding="utf-8"
+#     )
+#     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
 
 # def test_starter_list(fake_kedro_cli):

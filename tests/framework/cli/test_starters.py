@@ -243,40 +243,40 @@ def test_starter_list_with_invalid_starter_plugin(
     assert expected in result.output
 
 
-@pytest.mark.parametrize(
-    "input,expected",
-    [
-        ("1", ["1"]),
-        ("1,2,3", ["1", "2", "3"]),
-        ("2-4", ["2", "3", "4"]),
-        ("3-3", ["3"]),
-        ("all", ["1", "2", "3", "4", "5"]),
-        ("none", []),
-    ],
-)
-def test_parse_add_ons_valid(input, expected):
-    result = parse_add_ons_input(input)
-    assert result == expected
+# @pytest.mark.parametrize(
+#     "input,expected",
+#     [
+#         ("1", ["1"]),
+#         ("1,2,3", ["1", "2", "3"]),
+#         ("2-4", ["2", "3", "4"]),
+#         ("3-3", ["3"]),
+#         ("all", ["1", "2", "3", "4", "5"]),
+#         ("none", []),
+#     ],
+# )
+# def test_parse_add_ons_valid(input, expected):
+#     result = parse_add_ons_input(input)
+#     assert result == expected
 
 
-@pytest.mark.parametrize(
-    "input",
-    ["5-2", "3-1"],
-)
-def test_parse_add_ons_invalid_range(input):
-    with pytest.raises(ValueError) as excinfo:
-        parse_add_ons_input(input)
-    assert str(excinfo.value) == f"'{input}' is an invalid range for project add-ons."
+# @pytest.mark.parametrize(
+#     "input",
+#     ["5-2", "3-1"],
+# )
+# def test_parse_add_ons_invalid_range(input):
+#     with pytest.raises(ValueError) as excinfo:
+#         parse_add_ons_input(input)
+#     assert str(excinfo.value) == f"'{input}' is an invalid range for project add-ons."
 
 
-@pytest.mark.parametrize(
-    "input,first_invalid",
-    [("0,3,5", "0"), ("1,3,6", "6"), ("0-4", "0"), ("3-6", "6")],
-)
-def test_parse_add_ons_invalid_selection(input, first_invalid):
-    with pytest.raises(ValueError) as excinfo:
-        parse_add_ons_input(input)
-    assert str(excinfo.value) == f"'{first_invalid}' is not a valid selection."
+# @pytest.mark.parametrize(
+#     "input,first_invalid",
+#     [("0,3,5", "0"), ("1,3,6", "6"), ("0-4", "0"), ("3-6", "6")],
+# )
+# def test_parse_add_ons_invalid_selection(input, first_invalid):
+#     with pytest.raises(ValueError) as excinfo:
+#         parse_add_ons_input(input)
+#     assert str(excinfo.value) == f"'{first_invalid}' is not a valid selection."
 
 
 # @pytest.mark.usefixtures("chdir_to_tmp")

@@ -541,6 +541,7 @@ class _Prompt:
             click.secho(self.error_message, fg="red", err=True)
             sys.exit(1)
 
+
 def _get_available_tags(template_path: str) -> list:
     # Not at top level so that kedro CLI works without a working git executable.
     # noqa: import-outside-toplevel

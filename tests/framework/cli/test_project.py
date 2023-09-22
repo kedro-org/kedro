@@ -5,19 +5,15 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.project import NO_DEPENDENCY_MESSAGE
-
 
 @pytest.fixture(autouse=True)
 def call_mock(mocker):
     return mocker.patch("kedro.framework.cli.project.call")
 
+
 @pytest.fixture
 def fake_copyfile(mocker):
     return mocker.patch("shutil.copyfile")
-
-
-
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")
@@ -105,7 +101,6 @@ class TestPackageCommand:
             ]
         )
 
-
     def test_happy_path(
         self,
         call_mock,
@@ -157,4 +152,3 @@ class TestPackageCommand:
         assert not result.exit_code, result.stdout
         expected_path = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
         patched_browser.assert_called_once_with(expected_path)
-

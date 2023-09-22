@@ -104,4 +104,4 @@ The `data` folder contains multiple subfolders to store project data. We recomme
 
 ### `src`
 
-This subfolder contains the project's source code in one subfolder and another folder that you can use to add unit tests for your project. Projects are preconfigured to run tests using `pytest` when you call `kedro test` from the project's root directory.
+This subfolder contains the project's source code.

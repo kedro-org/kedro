@@ -93,6 +93,24 @@ DIRECTORY_ARG_HELP = (
     "An optional directory inside the repository where the starter resides."
 )
 
+# TODO; Insert actual link to the documentation.
+ADDON_ARG_HELP = """
+Select which add-ons you'd like to include. By default, none are included.
+To read more about these add-ons and what they do visit: kedro.org/{insert-documentation}
+
+Add-Ons
+1) Linting : Provides a basic linting set up with Black and ruff
+2) Testing : Provides basic testing set up with pytest
+3) Custom Logging : Provides more logging options
+4) Documentation: Provides basic documentations setup with Sphinx
+5) Data Structure: Provides a directory structure for storing data
+
+Example usage:
+kedro new --addons=lint,test,log,docs,data (or any subset of these options)
+kedro new --addons=all
+kedro new --addons=none
+"""
+
 
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
@@ -179,7 +197,8 @@ def create_cli():  # pragma: no cover
 @click.option("--starter", "-s", "starter_alias", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
-def new(config_path, starter_alias, checkout, directory, **kwargs):
+@click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
+def new(config_path, starter_alias, selected_addons, checkout, directory, **kwargs):
     """Create a new kedro project."""
     if checkout and not starter_alias:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
@@ -207,6 +226,9 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
         checkout = checkout or version
     else:
         template_path = str(TEMPLATE_PATH)
+
+    if selected_addons:
+        print(selected_addons)
 
     # Get prompts.yml to find what information the user needs to supply as config.
     tmpdir = tempfile.mkdtemp()

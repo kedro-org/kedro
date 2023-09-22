@@ -145,7 +145,6 @@ testpaths = [
 
 [tool.importlinter]
 root_package = "kedro"
-include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "CLI > Context > Library, Runner > Extras > IO & Pipeline"

@@ -106,8 +106,6 @@ class TestPackageCommand:
         )
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project")
-class TestBuildDocsCommand:
     def test_happy_path(
         self,
         call_mock,

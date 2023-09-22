@@ -1,9 +1,7 @@
 """A collection of CLI commands for working with Kedro project."""
 
 import os
-import shutil
 import sys
-import webbrowser
 from pathlib import Path
 
 import click
@@ -174,48 +172,6 @@ def package(metadata: ProjectMetadata):
             str(Path(settings.CONF_SOURCE).stem),
         ]
     )
-
-
-@project_group.command("build-docs")
-@click.option(
-    "--open",
-    "-o",
-    "open_docs",
-    is_flag=True,
-    multiple=False,
-    default=False,
-    help=OPEN_ARG_HELP,
-)
-@click.pass_obj  # this will pass the metadata as first argument
-def build_docs(metadata: ProjectMetadata, open_docs):
-    """Build the project documentation. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro build-docs' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    source_path = metadata.source_dir
-    package_name = metadata.package_name
-
-    python_call("pip", ["install", str(source_path / "[docs]")])
-    python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])
-    python_call("ipykernel", ["install", "--user", f"--name={package_name}"])
-    shutil.rmtree("docs/build", ignore_errors=True)
-    call(
-        [
-            "sphinx-apidoc",
-            "--module-first",
-            "-o",
-            "docs/source",
-            str(source_path / package_name),
-        ]
-    )
-    call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
-    if open_docs:
-        docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
-        click.secho(f"Opening {docs_page}")
-        webbrowser.open(docs_page)
 
 
 @project_group.command()

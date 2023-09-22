@@ -17,7 +17,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
 )
 
-FILES_IN_TEMPLATE = 16
+FILES_IN_TEMPLATE = 30
 
 
 @pytest.fixture
@@ -146,8 +146,6 @@ class TestNewFromUserPromptsValid:
             project_name="My Project",
             repo_name="my-project",
             python_package="my_project",
-            add_ons="none",
-
         )
 
     def test_custom_project_name_with_hyphen_and_underscore_and_number(
@@ -225,7 +223,6 @@ class TestNewFromUserPromptsValid:
             project_name="My Project",
             repo_name="my_custom_repo",
             python_package="my_project",
-            add_ons="none",
         )
 
 

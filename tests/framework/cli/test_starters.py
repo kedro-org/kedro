@@ -178,6 +178,7 @@ def _assert_template_ok(
     kedro_version=version,
     output_dir=".",
 ):
+
     assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
 
@@ -854,22 +855,22 @@ class TestAddOnsFromConfigFile:
         _assert_template_ok(result, **config)
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="my-project")
 
-    # def test_invalid_add_ons(self, fake_kedro_cli):
-    #     """Test project created from config."""
-    #     config = {
-    #         "add_ons": "bad input",
-    #         "project_name": "My Project",
-    #         "repo_name": "my-project",
-    #         "python_package": "my_project",
-    #     }
-    #     _write_yaml(Path("config.yml"), config)
-    #     result = CliRunner().invoke(
-    #         fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
-    #     )
-    #
-    #     assert result.exit_code != 0
-    #     assert "is an invalid value for project add-ons." in result.output
-    #     assert (
-    #         "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
-    #         in result.output
-    #     )
+    def test_invalid_add_ons(self, fake_kedro_cli):
+        """Test project created from config."""
+        config = {
+            "add_ons": "bad input",
+            "project_name": "My Project",
+            "repo_name": "my-project",
+            "python_package": "my_project",
+        }
+        _write_yaml(Path("config.yml"), config)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
+        )
+
+        assert result.exit_code != 0
+        assert "is an invalid value for project add-ons." in result.output
+        assert (
+            "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
+            in result.output
+        )

@@ -10,7 +10,8 @@ On this page we describe:
 
 - [Responsibilities of a maintainer](#responsibilities-of-a-maintainer)
 - [Requirements to become a maintainer](#requirements-to-become-a-maintainer)
-- [Kedro maintainers](#kedro-maintainers)
+- [Current maintainers](#current-maintainers)
+- [Past maintainers](#past-maintainers)
 - [Application process](#application-process)
 - [Voting process](#voting-process)
 
@@ -110,7 +111,7 @@ Former core team members with significant contributions include
 Every quarter year, existing maintainers will collect a list of contributors that have shown regular activity on the project over the prior months and want to become maintainers. From this list, maintainer candidates are selected and proposed for a vote.
 
 Following a successful vote, candidates are added to the `kedro-developers` team on the Kedro GitHub organisation
-and the `kedro-team` channel on the Kedro Slack organisation, and listed as [Kedro maintainers](#kedro-maintainers).
+and the `kedro-team` channel on the Kedro Slack organisation, and listed as [Kedro maintainers](#current-maintainers).
 
 ## Voting process
 
@@ -124,4 +125,4 @@ Voting can change project maintainers and decide on the future of Kedro. The TSC
 
 The decision to add or remove a maintainer is made based on TSC members votes in that pull request. Additions and removals of maintainers require **a 2/3 majority**.
 
-The act of adding or removing maintainers onto the list requires a pull request against the [Kedro maintainers section of this page](#kedro-maintainers).
+The act of adding or removing maintainers onto the list requires a pull request against the ["Current maintainers" section of this page](#current-maintainers).

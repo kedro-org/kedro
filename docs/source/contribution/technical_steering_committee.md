@@ -105,7 +105,6 @@ Former core team members with significant contributions include
 [Susanna Wong](https://github.com/studioswong) and
 [Zain Patel](https://github.com/mzjp2).
 
-
 ## Application process
 
 Every quarter year, existing maintainers will collect a list of contributors that have shown regular activity on the project over the prior months and want to become maintainers. From this list, maintainer candidates are selected and proposed for a vote.

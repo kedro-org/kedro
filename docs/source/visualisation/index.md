@@ -12,7 +12,7 @@ pip install kedro-viz
 :maxdepth: 1
 
 kedro-viz_visualisation
-deploy_kedro_viz
+share_kedro_viz
 preview_datasets
 visualise_charts_with_plotly
 ```

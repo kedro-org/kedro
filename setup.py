@@ -155,7 +155,6 @@ extras_require["test"] = [
     "import-linter[toml]==1.8.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
-    "isort~=5.0",
     "Jinja2<3.1.0",
     "joblib>=0.14",
     "jupyterlab_server>=2.11.1, <2.16.0",  # 2.16.0 requires importlib_metedata >= 4.8.3 which conflicts with flake8 requirement

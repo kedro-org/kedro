@@ -101,7 +101,7 @@ pip install pre-commit
 ### Add `pre-commit` configuration file
 Create a file named `.pre-commit-config.yaml` in your Kedro project root directory. You can add entries for the hooks
 you want to run before each `commit`.
-Below is a sample `YAML` file with entries for `black`,`flake8`, and `isort`:
+Below is a sample `YAML` file with entries for `ruff` and black`:
 ```yaml
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit

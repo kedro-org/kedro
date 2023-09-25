@@ -306,20 +306,20 @@ are added to the `KedroContext` and merged with parameters from the configuratio
 `runtime_params` resolver to indicate that you want to override values of certain keys in your configuration with runtime parameters provided through the CLI option.
 This resolver can be used across different configuration types, such as parameters, catalog, and more, except for "globals".
 
-Consider this `catalog.yml` file:
+Consider this `parameters.yml` file:
 ```yaml
 model_options:
   random_state: "${runtime_params:random}"
 ```
 This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters:
 ```bash
-kedro run --params="random=3"
+kedro run --params random=3
 ```
 You can also specify a default value to be used in case the runtime parameter is not specified with the `kedro run` command. Consider this catalog entry:
 ```yaml
 companies:
   type: pandas.CSVDataSet
-  filepath: "${runtime_params:folder,'data/01_raw/'}companies.csv"
+  filepath: "${runtime_params:folder, 'data/01_raw'}/companies.csv"
 ```
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 

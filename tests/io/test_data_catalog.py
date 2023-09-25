@@ -769,7 +769,7 @@ class TestDataCatalogVersioned:
         # monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummmy")
         version = Version(load=None, save=None)
         versioned_dataset = CSVDataSet("s3://bucket/file.csv", version=version)
-        # mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec.filesystem")
+        mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec.filesystem")
         pattern = re.escape(
             f"Did not find any versions for {versioned_dataset}. "
             f"This could be due to insufficient permission."

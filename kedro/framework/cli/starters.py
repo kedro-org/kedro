@@ -231,6 +231,11 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     tmpdir = tempfile.mkdtemp()
     cookiecutter_dir = _get_cookiecutter_dir(template_path, checkout, directory, tmpdir)
     prompts_required = _get_prompts_required(cookiecutter_dir)
+
+    # Remove the prompt asking for add-ons if the user already passed them through CLI.
+    if selected_addons is not None:
+        del prompts_required["add_ons"]
+
     # We only need to make cookiecutter_context if interactive prompts are needed.
     if not config_path:
         cookiecutter_context = _make_cookiecutter_context_for_prompts(cookiecutter_dir)
@@ -405,8 +410,6 @@ def _create_project(
     python_package = extra_context.get(
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )
-
-    print(selected_addons)
 
     if selected_addons is not None:
         add_ons = selected_addons

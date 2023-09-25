@@ -227,9 +227,6 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     else:
         template_path = str(TEMPLATE_PATH)
 
-    if selected_addons:
-        selected_addon_list = parse_add_ons_input(selected_addons)
-
     # Get prompts.yml to find what information the user needs to supply as config.
     tmpdir = tempfile.mkdtemp()
     cookiecutter_dir = _get_cookiecutter_dir(template_path, checkout, directory, tmpdir)
@@ -260,7 +257,7 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
-    _create_project(template_path, cookiecutter_args)
+    _create_project(template_path, selected_addons, cookiecutter_args)
 
 
 @create_cli.group()
@@ -376,7 +373,9 @@ def _get_add_ons_text(add_ons):
     )
 
 
-def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
+def _create_project(
+    template_path: str, selected_addons: str, cookiecutter_args: dict[str, Any]
+):
     """Creates a new kedro project using cookiecutter.
 
     Args:
@@ -406,7 +405,13 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     python_package = extra_context.get(
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )
-    add_ons = extra_context.get("add_ons")
+
+    print(selected_addons)
+
+    if selected_addons is not None:
+        add_ons = selected_addons
+    else:
+        add_ons = extra_context.get("add_ons")
 
     # Only non-starter projects have configurable add-ons
     if template_path == str(TEMPLATE_PATH):

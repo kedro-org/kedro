@@ -8,7 +8,6 @@ jupyterlab_server>=2.11.1, <2.16.0
 jupyterlab~=3.0, <3.6.0
 kedro~={{ cookiecutter.kedro_version }}
 kedro-telemetry~=0.2.0
-nbstripout~=0.4
 pytest-cov~=3.0
 pytest-mock>=1.7.1, <2.0
 pytest~=7.2

@@ -137,7 +137,6 @@ extras_require["test"] = [
     # "biopython~=1.73",
     "blacken-docs==1.9.2",
     "black~=22.0",
-    "boto3",
     # "compress-pickle[lz4]~=2.1.0",
     "coverage[toml]",
     # "dask[complete]~=2021.10",  # pinned by Snyk to avoid a vulnerability
@@ -163,8 +162,8 @@ extras_require["test"] = [
     # "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
     # "matplotlib>=3.5, <3.6; python_version >= '3.10'",
     "memory_profiler>=0.50.0, <1.0",
-    # "moto==1.3.7; python_version < '3.10'",
-    # "moto==4.1.12; python_version >= '3.10'",
+    "moto==1.3.7; python_version < '3.10'",
+    "moto==4.1.12; python_version >= '3.10'",
     # "networkx~=2.4",
     # "opencv-python~=4.5.5.64",
     # "openpyxl>=3.0.3, <4.0",
@@ -188,7 +187,7 @@ extras_require["test"] = [
     # "redis~=4.1",
     # "requests-mock~=1.6",
     # "requests~=2.20",
-    # "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
+    "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
     # "scikit-learn>=1.0.2,<2",
     # "scipy>=1.7.3",
     "semver",

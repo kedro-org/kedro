@@ -228,7 +228,7 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
         template_path = str(TEMPLATE_PATH)
 
     if selected_addons:
-        print(selected_addons)
+        selected_addon_list = parse_add_ons_input(selected_addons)
 
     # Get prompts.yml to find what information the user needs to supply as config.
     tmpdir = tempfile.mkdtemp()

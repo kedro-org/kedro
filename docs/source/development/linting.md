@@ -58,16 +58,6 @@ ignore = ["E501"]  # Black take care off line-too-long
 It is a good practice to [split your line when it is too long](https://beta.ruff.rs/docs/rules/line-too-long/), so it can be read easily even in a small screen. `ruff` treats this slightly different from `black`, when using together we recommend to disable this rule, i.e. `E501` to avoid conflicts.
 ```
 
-#### Configure `flake8`
-
-Store your `flake8` configuration in a file named `.flake8` within your project root. The Kedro default project template use the [following configuration](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.flake8):
-
-```text
-[flake8]
-max-line-length=88
-extend-ignore=E203
-```
-
 ### Run the tools
 Use the following commands to run lint checks:
 ```bash

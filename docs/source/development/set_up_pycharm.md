@@ -56,7 +56,7 @@ Specify the **Run / Debug Configuration** name in the **Name** field, and edit t
 - Enter ``kedro`` in the **Module Name** field
 - Enter ``run`` in the **Parameters** field
 - Enter the path of your project directory into the **Working directory** field
-- Pick ``Emulate terminal in output consule`` from the **Modify options** dropdown, and then click **OK**
+- Pick ``Emulate terminal in output console`` from the **Modify options** dropdown, and then click **OK**
 
 ![](../meta/images/pycharm_edit_py_run_config.png)
 

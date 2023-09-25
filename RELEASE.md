@@ -7,6 +7,7 @@
 ## Breaking changes to the API
 
 ### DataSets
+* Remove `kedro.extras.datasets` and tests.
 * Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
 
 ### CLI

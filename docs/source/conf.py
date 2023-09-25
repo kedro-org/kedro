@@ -319,7 +319,6 @@ KEDRO_MODULES = [
     "kedro.pipeline",
     "kedro.runner",
     "kedro.config",
-    "kedro.extras.datasets",
     "kedro_datasets",
 ]
 

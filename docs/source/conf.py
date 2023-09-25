@@ -136,7 +136,7 @@ type_targets = {
         "CONF_SOURCE",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
-        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
+        "kedro_datasets.pandas.csv_dataset.CSVDataSet",
         "kedro_datasets.pandas.json_dataset.JSONDataSet",
         "pluggy._manager.PluginManager",
         "PluginManager",

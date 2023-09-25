@@ -13,7 +13,7 @@ import pytest
 import toml
 import yaml
 from attrs.exceptions import FrozenInstanceError
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException

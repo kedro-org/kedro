@@ -157,8 +157,8 @@ extras_require["test"] = [
     "ipython~=8.10; python_version >= '3.8'",
     "Jinja2<3.1.0",
     "joblib>=0.14",
-    "jupyterlab_server>=2.11.1, <2.16.0",  # 2.16.0 requires importlib_metedata >= 4.8.3 which conflicts with flake8 requirement
-    "jupyterlab~=3.0, <3.6.0",  # 3.6.0 requires jupyterlab_server~=2.19
+    "jupyterlab_server>=2.11.1",
+    "jupyterlab~=3.0",
     "jupyter~=1.0",
     "lxml~=4.6",
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews

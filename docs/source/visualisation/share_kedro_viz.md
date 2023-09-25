@@ -1,6 +1,6 @@
-# Share a deployed Kedro-Viz project
+# Deploy a Kedro-Viz project
 
-Shareable URLs were introduced in Kedro-Viz version 7.0.0. This page describes how to generate a deployed, shareable URL with Kedro-Viz using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md).
+Deploying Kedro-Viz was introduced in version 7.0.0. This page describes how to generate a deployed, shareable URL with Kedro-Viz using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md).
 
 If you haven't installed Kedro [follow the documentation to get set up](../get_started/install.md). In your terminal window, navigate to the folder you want to store the project.
 
@@ -25,7 +25,7 @@ fsspec>=2023.9.0
 kedro>=0.18.2
 ```
 
-Install the dependencies from the project root directory, by typing the following in your terminal:
+Install the dependencies from the project root directory by typing the following in your terminal:
 
 ```bash
 pip install -r src/requirements.txt
@@ -42,7 +42,7 @@ export AWS_ACCESS_KEY_ID="your_access_key_id"
 export AWS_SECRET_ACCESS_KEY="your_secret_access_key"
 ```
 
-For more information, see the [official AWS documentation about [how to work with credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html).
+For more information, see the official AWS documentation about [how to work with credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html).
 
 ## Deploy the project
 
@@ -59,3 +59,9 @@ Once those two details are complete, click **Deploy**. A hosted, shareable URL w
 Here's an example of the flow:
 
 ![](../meta/images/kedro-viz-deploy.gif)
+
+## Permissions and access control
+
+All permissions and access control to the deployed version of your Kedro-Viz project are controlled by AWS. It's up to you, the user, if you want to allow anyone to see your project or limit access only to certain IP addresses, users, or groups.
+
+You can control who can view your deployed application using [bucket and user policies](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies.html) or [access control lists](https://docs.aws.amazon.com/AmazonS3/latest/userguide/acls.html). See the official AWS documentation for more information.

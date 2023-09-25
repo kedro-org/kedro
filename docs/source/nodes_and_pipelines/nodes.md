@@ -295,7 +295,7 @@ import pandas as pd
 from kedro.io.core import (
     get_filepath_str,
 )
-from kedro_datasets.pandas import CSVDataSet
+from kedro.extras.datasets.pandas import CSVDataSet
 
 
 class ChunkWiseCSVDataset(CSVDataSet):

@@ -169,7 +169,7 @@ class AWSBatchRunner(ThreadRunner):
 
         return super()._get_required_workers_count(pipeline)
 
-    def _run(  # pylint: disable=too-many-locals,useless-suppression
+    def _run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,

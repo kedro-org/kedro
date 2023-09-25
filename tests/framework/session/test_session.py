@@ -31,13 +31,13 @@ _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
 
-class BadStore:  # pylint: disable=too-few-public-methods
+class BadStore:
     """
     Store class that doesn't subclass `BaseSessionStore`, for testing only.
     """
 
 
-class BadConfigLoader:  # pylint: disable=too-few-public-methods
+class BadConfigLoader:
     """
     ConfigLoader class that doesn't subclass `AbstractConfigLoader`, for testing only.
     """
@@ -645,7 +645,7 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
-    def test_run_multiple_times(  # pylint: disable=too-many-locals
+    def test_run_multiple_times(
         self,
         fake_project,
         fake_session_id,
@@ -730,7 +730,7 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
-    def test_run_exception(  # pylint: disable=too-many-locals
+    def test_run_exception(
         self,
         fake_project,
         fake_session_id,
@@ -796,7 +796,7 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
-    def test_run_broken_pipeline_multiple_times(  # pylint: disable=too-many-locals
+    def test_run_broken_pipeline_multiple_times(
         self,
         fake_project,
         fake_session_id,

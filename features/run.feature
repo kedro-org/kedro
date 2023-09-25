@@ -7,6 +7,7 @@ Feature: Run Project
 
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
+    And I have installed the project dependencies
     When I execute the kedro command "run"
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run
@@ -14,6 +15,7 @@ Feature: Run Project
   Scenario: Run parallel runner with default python entry point with example code
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
+    And I have installed the project dependencies
     When I execute the kedro command "run --runner=ParallelRunner"
     Then I should get a successful exit code
     And the logs should show that "split_data" was run
@@ -32,6 +34,7 @@ Feature: Run Project
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
     And I have prepared a run_config file with config options
+    And I have installed the project dependencies
     When I execute the kedro command "run --config run_config.yml"
     Then I should get a successful exit code
     And the logs should show that 1 nodes were run
@@ -39,6 +42,7 @@ Feature: Run Project
   Scenario: Run kedro run with config from archive and OmegaConfigLoader
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
+    And I have installed the project dependencies
     And I have set the OmegaConfigLoader in settings
     When I execute the kedro command "package"
     Then I should get a successful exit code
@@ -50,6 +54,7 @@ Feature: Run Project
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
     And I have prepared a run_config file with config options
+    And I have installed the project dependencies
     When I execute the kedro command "run --config run_config.yml --pipeline __default__"
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run
@@ -57,6 +62,7 @@ Feature: Run Project
   Scenario: Run kedro run with extra parameters
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter "default"
+    And I have installed the project dependencies
     When I execute the kedro command "run --params extra1:1,extra2:value2"
     Then I should get a successful exit code
     And the logs should show that 4 nodes were run

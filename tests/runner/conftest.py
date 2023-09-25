@@ -153,6 +153,27 @@ def unfinished_outputs_pipeline():
     )  # Outputs: ['ds8', 'ds5', 'ds6'] == ['ds1', 'ds2', 'ds3']
 
 
+@pytest.fixture
+def two_branches_crossed_pipeline():
+    """A ``Pipeline`` with an X-shape (two branches with one common node)"""
+    return pipeline(
+        [
+            node(identity, "ds0_A", "ds1_A", name="node1_A"),
+            node(identity, "ds0_B", "ds1_B", name="node1_B"),
+            node(
+                multi_input_list_output,
+                ["ds1_A", "ds1_B"],
+                ["ds2_A", "ds2_B"],
+                name="node2",
+            ),
+            node(identity, "ds2_A", "ds3_A", name="node3_A"),
+            node(identity, "ds2_B", "ds3_B", name="node3_B"),
+            node(identity, "ds3_A", "ds4_A", name="node4_A"),
+            node(identity, "ds3_B", "ds4_B", name="node4_B"),
+        ]
+    )
+
+
 @pytest.fixture(
     params=[(), ("dsX",), ("params:p",)],
     ids=[
@@ -161,7 +182,7 @@ def unfinished_outputs_pipeline():
         "extra_param",
     ],
 )
-def two_branches_crossed_pipeline(request):
+def two_branches_crossed_pipeline_variable_inputs(request):
     """A ``Pipeline`` with an X-shape (two branches with one common node).
     Non-persistent datasets (other than parameters) are prefixed with an underscore.
     """

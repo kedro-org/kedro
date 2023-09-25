@@ -9,8 +9,7 @@ Linting tools check your code for errors such as a missing bracket or line inden
 As a project grows and goes through various stages of development it becomes important to maintain code quality. Using a consistent format and linting your code ensures that it is consistent, readable, and easy to debug and maintain.
 
 ## Set up Python tools
-There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use
-[`black`](https://github.com/psf/black), [`ruff`](https://beta.ruff.rs).
+There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use [`black`](https://github.com/psf/black) and [`ruff`](https://beta.ruff.rs).
 - **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
 check for styling inconsistencies and reformat your files in place.
 [You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
@@ -62,15 +61,9 @@ It is a good practice to [split your line when it is too long](https://beta.ruff
 Use the following commands to run lint checks:
 ```bash
 black --check <project_root>
-isort --profile black --check <project_root>
+ruff check <project_root>
 ```
-You can also have `black` and `isort` automatically format your code by omitting the `--check` flag. Since `isort` and
-`black` both format your imports, adding `--profile black` to the `isort` run helps avoid potential conflicts.
-
-Use the following to invoke `flake8`:
-```bash
-flake8 <project_root>
-```
+You can also have `black` automatically format your code by omitting the `--check` flag.
 
 ## Automated formatting and linting with `pre-commit` hooks
 

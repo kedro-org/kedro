@@ -5,7 +5,7 @@ This guide demonstrates a workflow for developing Kedro projects on Databricks u
 By working in your local environment, you can take advantage of features within an IDE that are not available on Databricks notebooks:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
-- Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
+- Linters like [Ruff](https://docs.astral.sh/ruff) can be integrated to catch potential issues in your code.
 - Static type checkers like Mypy can check types in your code, helping to identify potential type-related issues early in the development process.
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).

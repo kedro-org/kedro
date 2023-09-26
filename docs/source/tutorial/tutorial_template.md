@@ -33,10 +33,7 @@ The spaceflights project dependencies are stored in `src/requirements.txt`(you m
 ```text
 # code quality packages
 black==22.0
-flake8>=3.7.9, <5.0
 ipython>=7.31.1, <8.0
-isort~=5.0
-nbstripout~=0.4
 
 # notebook tooling
 jupyter~=1.0

@@ -78,40 +78,6 @@ version = {attr = "kedro.__version__"}
 [tool.black]
 exclude = "/templates/|^features/steps/test_starter"
 
-[tool.isort]
-profile = "black"
-
-
-[tool.pylint]
-[tool.pylint.master]
-ignore = "CVS"
-ignore-patterns = "kedro/templates/*"
-load-plugins = [
-    "pylint.extensions.docparams",
-    "pylint.extensions.no_self_use"
-]
-extension-pkg-whitelist = "cv2"
-unsafe-load-any-extension = false
-[tool.pylint.messages_control]
-disable = [
-    "ungrouped-imports",
-    "duplicate-code",
-    "wrong-import-order",  # taken care of by isort
-]
-enable = ["useless-suppression"]
-[tool.pylint.refactoring]
-max-nested-blocks = 5
-[tool.pylint.format]
-indent-after-paren=4
-indent-string="    "
-[tool.pylint.miscellaneous]
-notes = [
-    "FIXME",
-    "XXX"
-]
-[tool.pylint.design]
-min-public-methods = 1
-
 [tool.coverage.report]
 fail_under = 100
 show_missing = true

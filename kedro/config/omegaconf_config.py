@@ -123,7 +123,6 @@ class OmegaConfigLoader(AbstractConfigLoader):
             self._register_new_resolvers(custom_resolvers)
         # Register globals resolver
         self._register_globals_resolver()
-        self._register_runtime_params_resolver()
         file_mimetype, _ = mimetypes.guess_type(conf_source)
         if file_mimetype == "application/x-tar":
             self._protocol = "tar"
@@ -166,6 +165,10 @@ class OmegaConfigLoader(AbstractConfigLoader):
         """
         # Allow bypassing of loading config from patterns if a key and value have been set
         # explicitly on the ``OmegaConfigLoader`` instance.
+
+        # Re-register runtime params resolver incase it was previously deactivated
+        self._register_runtime_params_resolver()
+
         if key in self:
             return super().__getitem__(key)
 
@@ -217,8 +220,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 )
             else:
                 raise exc
-        # Re-register runtime params resolver incase it was deactivated
-        self._register_runtime_params_resolver()
+
         # Destructively merge the two env dirs. The chosen env will override base.
         common_keys = config.keys() & env_config.keys()
         if common_keys:

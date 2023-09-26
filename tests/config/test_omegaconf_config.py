@@ -860,7 +860,7 @@ class TestOmegaConfigLoader:
         assert not conf._is_hidden(hidden_path)
 
     def test_ignore_ipynb_checkpoints(self, tmp_path, mocker):
-        conf = OmegaConfigLoader(str(tmp_path), default_run_env="base")
+        conf = OmegaConfigLoader(str(tmp_path), default_run_env=_BASE_ENV)
         base_path = tmp_path / _BASE_ENV / "parameters.yml"
         checkpoints_path = (
             tmp_path / _BASE_ENV / ".ipynb_checkpoints" / "parameters.yml"

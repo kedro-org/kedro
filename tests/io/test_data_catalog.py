@@ -4,6 +4,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -772,8 +773,9 @@ class TestDataCatalogVersioned:
             f"Did not find any versions for {versioned_dataset}. "
             f"This could be due to insufficient permission."
         )
-        with pytest.raises(DatasetError, match=pattern):
-            versioned_dataset.load()
+        with patch("kedro_datasets.pandas.CSVDataSet._glob_function", return_value=[]):
+            with pytest.raises(DatasetError, match=pattern):
+                versioned_dataset.load()
 
 
 class TestDataCatalogDatasetFactories:

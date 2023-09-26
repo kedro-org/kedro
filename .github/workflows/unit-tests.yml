@@ -42,8 +42,4 @@ jobs:
       - name: pip freeze
         run: pip freeze
       - name: Run unit tests
-        if: inputs.os == 'ubuntu-latest'
         run: make test
-      - name: Run unit tests without spark (Windows)
-        if: inputs.os == 'windows-latest'
-        run: make test-no-spark

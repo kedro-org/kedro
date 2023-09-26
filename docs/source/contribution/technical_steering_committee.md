@@ -21,7 +21,7 @@ On this page we describe:
 - Be available for at least one full day per week to help with product development
 - Attend community meetings to discuss the project plans and roadmap
 - Be proactive about project maintenance including security, updates, CI/CD, builds and infrastructure
-- Prioritise the work following the product roadmap to move the project forward
+- Give priority to the work following the product roadmap to move the project forward
 
 ### Community management
 
@@ -83,7 +83,6 @@ Currently, the core Kedro team consists of:
 [Vladimir Nikolic](https://github.com/vladimir-mck),
 [Yetunde Dada](https://github.com/yetudada), and
 [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei).
-
 
 Former core team members with significant contributions include:
 

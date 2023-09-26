@@ -243,7 +243,7 @@ def _pull_package(  # noqa: too-many-arguments
         package_reqs = _get_all_library_reqs(library_meta)
 
         if package_reqs:
-            requirements_txt = metadata.source_dir / "requirements.txt"
+            requirements_txt = metadata.project_path / "requirements.txt"
             _append_package_reqs(requirements_txt, package_reqs, package_name)
 
         _clean_pycache(temp_dir_path)
@@ -962,8 +962,8 @@ def _append_package_reqs(
             file.write(sep.join(sorted_reqs))
 
     click.secho(
-        "Use 'pip-compile src/requirements.txt --output-file src/requirements.lock' to compile "
-        "and 'pip install -r src/requirements.lock' to install the updated list of requirements."
+        "Use 'pip-compile requirements.txt --output-file requirements.lock' to compile "
+        "and 'pip install -r requirements.lock' to install the updated list of requirements."
     )
 
 

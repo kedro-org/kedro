@@ -70,9 +70,7 @@ def _assert_template_ok(
     assert (full_path / ".gitignore").is_file()
     assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
     assert "KEDRO" in (full_path / ".gitignore").read_text(encoding="utf-8")
-    assert kedro_version in (full_path / "src" / "requirements.txt").read_text(
-        encoding="utf-8"
-    )
+    assert kedro_version in (full_path / "requirements.txt").read_text(encoding="utf-8")
     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
 

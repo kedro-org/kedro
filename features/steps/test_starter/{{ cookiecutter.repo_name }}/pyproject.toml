@@ -24,7 +24,7 @@ docs = [
 ]
 
 [tool.setuptools.dynamic]
-dependencies = {file = "src/requirements.txt"}
+dependencies = {file = "requirements.txt"}
 version = {attr = "{{ cookiecutter.python_package }}.__version__"}
 
 [tool.setuptools.packages.find]

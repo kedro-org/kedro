@@ -273,10 +273,10 @@ def run(
 
 #### Install all package dependencies
 
-The following runs [`pip`](https://github.com/pypa/pip) to install all package dependencies specified in `src/requirements.txt`:
+The following runs [`pip`](https://github.com/pypa/pip) to install all package dependencies specified in `requirements.txt`:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 For further information, see the [documentation on installing project-specific dependencies](../kedro_project_setup/dependencies.md#install-project-specific-dependencies).

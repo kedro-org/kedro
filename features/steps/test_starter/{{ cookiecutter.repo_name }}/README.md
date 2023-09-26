@@ -17,12 +17,12 @@ In order to get the best out of the template:
 
 ## How to install dependencies
 
-Declare any dependencies in `src/requirements.txt` for `pip` installation.
+Declare any dependencies in `requirements.txt` for `pip` installation.
 
 To install them, run:
 
 ```
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## How to run Kedro
@@ -46,7 +46,7 @@ To configure the coverage threshold, look at the `.coveragerc` file.
 
 ## Project dependencies
 
-To see and update the dependency requirements for your project use `src/requirements.txt`. You can install the project requirements with `pip install -r src/requirements.txt`.
+To see and update the dependency requirements for your project use `requirements.txt`. You can install the project requirements with `pip install -r requirements.txt`.
 
 [Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
 

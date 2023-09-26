@@ -176,7 +176,7 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet
             >>>
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
@@ -486,7 +486,7 @@ class DataCatalog:
         ::
 
             >>> from kedro.io import DataCatalog
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet
             >>>
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
@@ -526,7 +526,7 @@ class DataCatalog:
 
             >>> import pandas as pd
             >>>
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet
             >>>
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
@@ -600,7 +600,7 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet
             >>>
             >>> io = DataCatalog(data_sets={
             >>>                   'cars': CSVDataSet(filepath="cars.csv")
@@ -636,7 +636,7 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
             >>>
             >>> io = DataCatalog(data_sets={
             >>>                   "cars": CSVDataSet(filepath="cars.csv")

@@ -226,7 +226,6 @@ def cli():
     help=PARAMS_ARG_HELP,
     callback=_split_params,
 )
-# pylint: disable=too-many-arguments,unused-argument
 def run(
     tag,
     env,

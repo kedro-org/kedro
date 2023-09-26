@@ -9,8 +9,7 @@ Linting tools check your code for errors such as a missing bracket or line inden
 As a project grows and goes through various stages of development it becomes important to maintain code quality. Using a consistent format and linting your code ensures that it is consistent, readable, and easy to debug and maintain.
 
 ## Set up Python tools
-There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use
-[`black`](https://github.com/psf/black), [`ruff`](https://beta.ruff.rs).
+There are a variety of Python tools available to use with your Kedro projects. This guide shows you how to use [`black`](https://github.com/psf/black) and [`ruff`](https://beta.ruff.rs).
 - **`black`** is a [PEP 8](https://peps.python.org/pep-0008/) compliant opinionated Python code formatter. `black` can
 check for styling inconsistencies and reformat your files in place.
 [You can read more in the `black` documentation](https://black.readthedocs.io/en/stable/).
@@ -58,29 +57,13 @@ ignore = ["E501"]  # Black take care off line-too-long
 It is a good practice to [split your line when it is too long](https://beta.ruff.rs/docs/rules/line-too-long/), so it can be read easily even in a small screen. `ruff` treats this slightly different from `black`, when using together we recommend to disable this rule, i.e. `E501` to avoid conflicts.
 ```
 
-#### Configure `flake8`
-
-Store your `flake8` configuration in a file named `.flake8` within your project root. The Kedro default project template use the [following configuration](https://github.com/kedro-org/kedro/blob/main/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.flake8):
-
-```text
-[flake8]
-max-line-length=88
-extend-ignore=E203
-```
-
 ### Run the tools
 Use the following commands to run lint checks:
 ```bash
 black --check <project_root>
-isort --profile black --check <project_root>
+ruff check <project_root>
 ```
-You can also have `black` and `isort` automatically format your code by omitting the `--check` flag. Since `isort` and
-`black` both format your imports, adding `--profile black` to the `isort` run helps avoid potential conflicts.
-
-Use the following to invoke `flake8`:
-```bash
-flake8 <project_root>
-```
+You can also have `black` automatically format your code by omitting the `--check` flag.
 
 ## Automated formatting and linting with `pre-commit` hooks
 
@@ -101,7 +84,7 @@ pip install pre-commit
 ### Add `pre-commit` configuration file
 Create a file named `.pre-commit-config.yaml` in your Kedro project root directory. You can add entries for the hooks
 you want to run before each `commit`.
-Below is a sample `YAML` file with entries for `black`,`flake8`, and `isort`:
+Below is a sample `YAML` file with entries for `ruff` and black`:
 ```yaml
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit

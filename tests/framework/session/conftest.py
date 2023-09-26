@@ -122,7 +122,7 @@ def mock_pipeline() -> Pipeline:
     )
 
 
-class LogRecorder(logging.Handler):  # pylint: disable=abstract-method
+class LogRecorder(logging.Handler):
     """Record logs received from a process-safe log listener"""
 
     def __init__(self):
@@ -370,9 +370,7 @@ def mock_settings(mocker, project_hooks):
 
 
 @pytest.fixture
-def mock_session(
-    mock_settings, mock_package_name, tmp_path
-):  # pylint: disable=unused-argument
+def mock_session(mock_settings, mock_package_name, tmp_path):
     configure_project(mock_package_name)
     session = KedroSession.create(
         mock_package_name, tmp_path, extra_params={"params:key": "value"}

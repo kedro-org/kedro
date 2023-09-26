@@ -3,9 +3,6 @@ package_name = "{{ cookiecutter.python_package }}"
 project_name = "{{ cookiecutter.project_name }}"
 kedro_init_version = "{{ cookiecutter.kedro_version }}"
 
-[tool.isort]
-profile = "black"
-
 [tool.pytest.ini_options]
 addopts = """
 --cov-report term-missing \

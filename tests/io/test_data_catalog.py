@@ -201,7 +201,7 @@ def conflicting_feed_dict():
 class BadDataset(AbstractDataset):  # pragma: no cover
     def __init__(self, filepath):
         self.filepath = filepath
-        raise Exception("Naughty!")  # pylint: disable=broad-exception-raised
+        raise Exception("Naughty!")
 
     def _load(self):
         return None
@@ -472,7 +472,7 @@ class TestDataCatalogFromConfig:
         """Test kedro_datasets default path to the dataset class"""
         # Spy _load_obj because kedro_datasets is not installed and we can't import it.
 
-        import kedro.io.core  # pylint: disable=import-outside-toplevel
+        import kedro.io.core
 
         spy = mocker.spy(kedro.io.core, "_load_obj")
         parse_dataset_definition(sane_config["catalog"]["boats"])
@@ -569,7 +569,6 @@ class TestDataCatalogFromConfig:
         """Test that dependency is missing."""
         pattern = "dependency issue"
 
-        # pylint: disable=unused-argument,inconsistent-return-statements
         def dummy_load(obj_path, *args, **kwargs):
             if obj_path == "kedro_datasets.pandas.CSVDataSet":
                 raise AttributeError(pattern)
@@ -661,7 +660,7 @@ class TestDataCatalogVersioned:
 
         # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
         actual_timestamp = datetime.strptime(
-            catalog.datasets.boats.resolve_load_version(),  # pylint: disable=no-member
+            catalog.datasets.boats.resolve_load_version(),
             VERSION_FORMAT,
         )
         expected_timestamp = current_ts.replace(
@@ -706,11 +705,11 @@ class TestDataCatalogVersioned:
 
         # Verify that saved version on tracking dataset is the same as on the CSV dataset
         csv_timestamp = datetime.strptime(
-            catalog.datasets.boats.resolve_save_version(),  # pylint: disable=no-member
+            catalog.datasets.boats.resolve_save_version(),
             VERSION_FORMAT,
         )
         tracking_timestamp = datetime.strptime(
-            catalog.datasets.planes.resolve_save_version(),  # pylint: disable=no-member
+            catalog.datasets.planes.resolve_save_version(),
             VERSION_FORMAT,
         )
 
@@ -920,7 +919,7 @@ class TestDataCatalogDatasetFactories:
 
         # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
         actual_timestamp = datetime.strptime(
-            catalog.datasets.tesla_cars.resolve_load_version(),  # pylint: disable=no-member
+            catalog.datasets.tesla_cars.resolve_load_version(),
             VERSION_FORMAT,
         )
         expected_timestamp = current_ts.replace(

@@ -46,7 +46,7 @@ LOCAL_DATASET_DEFINITION = [
 ]
 
 
-class FakeDataset:  # pylint: disable=too-few-public-methods
+class FakeDataset:
     pass
 
 

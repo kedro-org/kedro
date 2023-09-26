@@ -249,5 +249,6 @@ pipeline([node(lambda x: x, inputs: "input1", outputs: "outputs1.kedro")])
 
 The output tends to be a disconnected pipeline and / or improperly formatted Kedro structure. 
 
-This is because `.` has a special meaning and indicates a namespace pipeline; here, the outputs segment should be disconnected as Kedro will think that there is a "outputs1" namespace pipeline.
+This is because `.` has a special meaning internally and indicates a namespace pipeline; here, the outputs segment should be disconnected as Kedro will think that there is a "outputs1" namespace pipeline.
 
+Alternatively, consider using characters like `_` - similar visual effect, without the downside. 

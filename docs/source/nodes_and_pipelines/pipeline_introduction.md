@@ -236,3 +236,18 @@ The output is as follows:
 Circular dependencies exist among these items: ['first node: <lambda>([x]) -> [y]', 'second node: <lambda>([y]) -> [x]']
 ```
 </details>
+
+### Pipeline with improperly named nodes
+Nodes named with improper characters, such as the dot notation, may exhibit strange behaviour than intended.
+
+<details>
+<summary><b>Click to expand</b></summary>
+
+```python
+pipeline([node(lambda x: x, inputs: "input1", outputs: "outputs1.kedro")])
+```
+
+The output tends to be a disconnected pipeline and / or improperly formatted Kedro structure. 
+
+This is because `.` has a special meaning and indicates a namespace pipeline; here, the outputs segment should be disconnected as Kedro will think that there is a "outputs1" namespace pipeline.
+

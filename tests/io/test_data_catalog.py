@@ -762,7 +762,7 @@ class TestDataCatalogVersioned:
         assert "ds3__csv" in catalog.datasets.__dict__
         assert "jalapeño" in catalog.datasets.__dict__
 
-    def test_no_versions_with_cloud_protocol(self, monkeypatch, mocker):
+    def test_no_versions_with_cloud_protocol(self, monkeypatch):
         """Check the error if no versions are available for load from cloud storage"""
         monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummmy")
         monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummmy")
@@ -772,7 +772,6 @@ class TestDataCatalogVersioned:
             f"Did not find any versions for {versioned_dataset}. "
             f"This could be due to insufficient permission."
         )
-
         with pytest.raises(DatasetError, match=pattern):
             versioned_dataset.load()
 

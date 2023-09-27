@@ -66,6 +66,6 @@ Here's an example of the flow:
 
 ## Permissions and access control
 
-All permissions and access control are controlled by AWS. It's up to you, the user, if you want to allow anyone to see your project or limit access only to certain IP addresses, users, or groups.
+All permissions and access control are controlled by AWS. It's up to you, the user, if you want to allow anyone to see your project or limit access to certain IP addresses, users, or groups.
 
 You can control who can view your visualisation using [bucket and user policies](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies.html) or [access control lists](https://docs.aws.amazon.com/AmazonS3/latest/userguide/acls.html). See the official AWS documentation for more information.

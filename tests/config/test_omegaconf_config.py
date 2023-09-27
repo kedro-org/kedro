@@ -1039,3 +1039,24 @@ class TestOmegaConfigLoader:
                 default_run_env="local",
                 runtime_params=runtime_params,
             )
+
+    def test_bypass_globals(self, tmp_path):
+        """When globals are bypassed, make sure that the correct overwritten values are used"""
+        base_params = tmp_path / _BASE_ENV / "parameters.yml"
+        base_globals = tmp_path / _BASE_ENV / "globals.yml"
+        param_config = {
+            "my_global": "${globals:x}",
+            "my_second_global": "${globals:new_key}",
+        }
+        globals_config = {
+            "x": 45,
+        }
+        _write_yaml(base_params, param_config)
+        _write_yaml(base_globals, globals_config)
+        conf = OmegaConfigLoader(tmp_path, default_run_env="")
+        conf["globals"] = {
+            "x": 89,
+            "new_key": 24,
+        }
+        assert conf["parameters"]["my_global"] == 89
+        assert conf["parameters"]["my_second_global"] == 24

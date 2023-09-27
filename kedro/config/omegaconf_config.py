@@ -146,6 +146,11 @@ class OmegaConfigLoader(AbstractConfigLoader):
         except MissingConfigException:
             self._globals = {}
 
+    def __setitem__(self, key, value):
+        if key == "globals":
+            self._globals = value
+        super().__setitem__(key, value)
+
     def __getitem__(self, key) -> dict[str, Any]:  # noqa: PLR0912
         """Get configuration files by key, load and merge them, and
         return them in the form of a config dictionary.
@@ -181,6 +186,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         if key == "globals":
             # "runtime_params" resolver is not allowed in globals.
             OmegaConf.clear_resolver("runtime_params")
+
         read_environment_variables = key == "credentials"
 
         processed_files: set[Path] = set()

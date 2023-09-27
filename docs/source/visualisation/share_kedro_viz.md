@@ -1,6 +1,10 @@
-# Deploy a Kedro-Viz project
+# Share a project's Kedro-Viz
 
-Deploying Kedro-Viz was introduced in version 7.0.0. This page describes how to generate a deployed, shareable URL with Kedro-Viz using the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md).
+```{note}
+Kedro-Viz sharing was introduced in version 7.0.0.
+```
+
+This page describes how to deploy the Kedro-Viz for your project so you can share it with others. It uses the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) as an example.
 
 If you haven't installed Kedro [follow the documentation to get set up](../get_started/install.md). In your terminal window, navigate to the folder you want to store the project.
 
@@ -33,7 +37,7 @@ pip install -r src/requirements.txt
 
 ## Configure your AWS S3 bucket and set credentials
 
-Kedro-Viz supports hosting a deployed URL on Amazon S3. You must first create an S3 bucket and then enable static website hosting. To do so, follow the [AWS tutorial](https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html) to configure a static website on Amazon S3.
+You can host your project's Kedro-Viz as a deployed URL on Amazon S3. You must first create an S3 bucket and then enable static website hosting. To do so, follow the [AWS tutorial](https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html) to configure a static website on Amazon S3.
 
 Once that's completed, you'll need to set your AWS credentials as environment variables in your terminal window, as shown below:
 
@@ -62,6 +66,6 @@ Here's an example of the flow:
 
 ## Permissions and access control
 
-All permissions and access control to the deployed version of your Kedro-Viz project are controlled by AWS. It's up to you, the user, if you want to allow anyone to see your project or limit access only to certain IP addresses, users, or groups.
+All permissions and access control are controlled by AWS. It's up to you, the user, if you want to allow anyone to see your project or limit access only to certain IP addresses, users, or groups.
 
-You can control who can view your deployed application using [bucket and user policies](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies.html) or [access control lists](https://docs.aws.amazon.com/AmazonS3/latest/userguide/acls.html). See the official AWS documentation for more information.
+You can control who can view your visualisation using [bucket and user policies](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies.html) or [access control lists](https://docs.aws.amazon.com/AmazonS3/latest/userguide/acls.html). See the official AWS documentation for more information.

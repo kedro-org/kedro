@@ -962,8 +962,8 @@ def _append_package_reqs(
             file.write(sep.join(sorted_reqs))
 
     click.secho(
-        "Use 'pip install -r src/requirements.txt' to install "
-        "the updated list of requirements."
+        "Use 'pip-compile src/requirements.txt --output-file src/requirements.lock' to compile "
+        "and 'pip install -r src/requirements.lock' to install the updated list of requirements."
     )
 
 

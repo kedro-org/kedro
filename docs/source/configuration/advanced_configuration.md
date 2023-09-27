@@ -4,6 +4,18 @@ The documentation on [configuration](./configuration_basics.md) describes how to
 By default, Kedro is set up to use the [ConfigLoader](/kedro.config.ConfigLoader) class. Kedro also provides two additional configuration loaders with more advanced functionality: the [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) and the [OmegaConfigLoader](/kedro.config.OmegaConfigLoader).
 Each of these classes are alternatives for the default `ConfigLoader` and have different features. The following sections describe each of these classes and their specific functionality in more detail.
 
+This page also contains a set of guidance for advanced configuration requirements of standard Kedro projects:
+
+* [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
+* [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
+* [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
+* [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
+* [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
+* [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
+* [How to override configuration with runtime parameters with the `OmegaConfigLoader`](#how-to-override-configuration-with-runtime-parameters-with-the-omegaconfigloader)
+* [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
+* [How to load credentials through environment variables with `OmegaConfigLoader`](#how-to-load-credentials-through-environment-variables)
+
 ## OmegaConfigLoader
 
 [OmegaConf](https://omegaconf.readthedocs.io/) is a Python library designed to handle and manage settings. It serves as a YAML-based hierarchical system to organise configurations, which can be structured to accommodate various sources, allowing you to merge settings from multiple locations.
@@ -23,12 +35,6 @@ from kedro.config import OmegaConfigLoader  # new import
 
 CONFIG_LOADER_CLASS = OmegaConfigLoader
 ```
-### Advanced `OmegaConfigLoader` features
-Some advanced use cases of `OmegaConfigLoader` are listed below:
-- [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
-- [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
-- [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
-- [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
 ## TemplatedConfigLoader
 
@@ -126,16 +132,6 @@ If you specify both `globals_pattern` and `globals_dict` in `CONFIG_LOADER_ARGS`
 
 
 ## Advanced Kedro configuration
-
-This section contains a set of guidance for advanced configuration requirements of standard Kedro projects:
-* [How to change which configuration files are loaded](#how-to-change-which-configuration-files-are-loaded)
-* [How to ensure non default configuration files get loaded](#how-to-ensure-non-default-configuration-files-get-loaded)
-* [How to bypass the configuration loading rules](#how-to-bypass-the-configuration-loading-rules)
-* [How to use Jinja2 syntax in configuration](#how-to-use-jinja2-syntax-in-configuration)
-* [How to do templating with the `OmegaConfigLoader`](#how-to-do-templating-with-the-omegaconfigloader)
-* [How to use global variables with the `OmegaConfigLoader`](#how-to-use-global-variables-with-the-omegaconfigloader)
-* [How to use resolvers in the `OmegaConfigLoader`](#how-to-use-resolvers-in-the-omegaconfigloader)
-* [How to load credentials through environment variables](#how-to-load-credentials-through-environment-variables)
 
 ### How to change which configuration files are loaded
 If you want to change the patterns that the configuration loader uses to find the files to load you need to set the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
@@ -300,9 +296,32 @@ You can also provide a default value to be used in case the global variable does
 ```yaml
 my_param: "${globals: nonexistent_global, 23}"
 ```
-If there are duplicate keys in the globals files in your base and run time environments, the values in the run time environment
-will overwrite the values in your base environment.
+If there are duplicate keys in the globals files in your base and runtime environments, the values in the runtime environment
+overwrite the values in your base environment.
 
+### How to override configuration with runtime parameters with the `OmegaConfigLoader`
+
+Kedro allows you to [specify runtime parameters for the `kedro run` command with the `--params` CLI option](parameters.md#how-to-specify-parameters-at-runtime). These runtime parameters
+are added to the `KedroContext` and merged with parameters from the configuration files to be used in your project's pipelines and nodes. From Kedro `0.18.14`, you can use the
+`runtime_params` resolver to indicate that you want to override values of certain keys in your configuration with runtime parameters provided through the CLI option.
+This resolver can be used across different configuration types, such as parameters, catalog, and more, except for "globals".
+
+Consider this `parameters.yml` file:
+```yaml
+model_options:
+  random_state: "${runtime_params:random}"
+```
+This will allow you to pass a runtime parameter named `random` through the CLI to specify the value of `model_options.random_state` in your project's parameters:
+```bash
+kedro run --params random=3
+```
+You can also specify a default value to be used in case the runtime parameter is not specified with the `kedro run` command. Consider this catalog entry:
+```yaml
+companies:
+  type: pandas.CSVDataSet
+  filepath: "${runtime_params:folder, 'data/01_raw'}/companies.csv"
+```
+If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
 
 ### How to use resolvers in the `OmegaConfigLoader`
 Instead of hard-coding values in your configuration files, you can also dynamically compute them using [`OmegaConf`'s

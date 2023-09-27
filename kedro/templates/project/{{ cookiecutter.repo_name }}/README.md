@@ -48,7 +48,7 @@ To configure the coverage threshold, look at the `.coveragerc` file.
 
 To see and update the dependency requirements for your project use `src/requirements.txt`. You can install the project requirements with `pip install -r src/requirements.txt`.
 
-[Further information about project dependencies](https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
+[Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
 
 ## How to work with Kedro and notebooks
 

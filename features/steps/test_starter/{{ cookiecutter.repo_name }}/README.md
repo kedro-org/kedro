@@ -4,7 +4,7 @@
 
 This is your new Kedro project, which was generated using `Kedro {{ cookiecutter.kedro_version }}`.
 
-Take a look at the [Kedro documentation](https://kedro.readthedocs.io) to get started.
+Take a look at the [Kedro documentation](https://docs.kedro.org) to get started.
 
 ## Rules and guidelines
 
@@ -48,7 +48,7 @@ To configure the coverage threshold, look at the `.coveragerc` file.
 
 To see and update the dependency requirements for your project use `src/requirements.txt`. You can install the project requirements with `pip install -r src/requirements.txt`.
 
-[Further information about project dependencies](https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
+[Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
 
 ## How to work with Kedro and notebooks
 
@@ -94,4 +94,4 @@ To automatically strip out all output cell contents before committing to `git`, 
 
 ## Package your Kedro project
 
-[Further information about building project documentation and packaging your project](https://kedro.readthedocs.io/en/stable/tutorial/package_a_project.html)
+[Further information about building project documentation and packaging your project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html)

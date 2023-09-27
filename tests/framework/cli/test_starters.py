@@ -17,7 +17,7 @@ from kedro.framework.cli.starters import (
     KedroStarterSpec,
 )
 
-FILES_IN_TEMPLATE = 29
+FILES_IN_TEMPLATE = 28
 
 
 @pytest.fixture

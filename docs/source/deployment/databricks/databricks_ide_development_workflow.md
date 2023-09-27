@@ -5,7 +5,7 @@ This guide demonstrates a workflow for developing Kedro projects on Databricks u
 By working in your local environment, you can take advantage of features within an IDE that are not available on Databricks notebooks:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
-- Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
+- Linters like [Ruff](https://docs.astral.sh/ruff) can be integrated to catch potential issues in your code.
 - Static type checkers like Mypy can check types in your code, helping to identify potential type-related issues early in the development process.
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
@@ -67,7 +67,7 @@ pip install kedro dbx --upgrade
 
 **Now, you must authenticate the Databricks CLI with your Databricks instance.**
 
-[Refer to the Databricks documentation](https://docs.databricks.com/dev-tools/cli/index.html#set-up-authentication) for a complete guide on how to authenticate your CLI. The key steps are:
+[Refer to the Databricks documentation](https://docs.databricks.com/en/dev-tools/cli/authentication.html) for a complete guide on how to authenticate your CLI. The key steps are:
 
 1. Create a personal access token for your user on your Databricks instance.
 2. Run `databricks configure --token`.

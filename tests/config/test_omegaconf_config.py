@@ -1,4 +1,3 @@
-# pylint: disable=expression-not-assigned, pointless-statement
 from __future__ import annotations
 
 import configparser
@@ -518,7 +517,7 @@ class TestOmegaConfigLoader:
 
     @use_config_dir
     def test_load_config_from_tar_file(self, tmp_path):
-        subprocess.run(  # pylint: disable=subprocess-run-check
+        subprocess.run(
             [
                 "tar",
                 "--exclude=local/*.yml",

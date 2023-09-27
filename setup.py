@@ -153,11 +153,10 @@ extras_require["test"] = [
     "import-linter[toml]==1.8.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
-    "isort~=5.0",
     "Jinja2<3.1.0",
     "joblib>=0.14",
-    "jupyterlab_server>=2.11.1, <2.16.0",  # 2.16.0 requires importlib_metedata >= 4.8.3 which conflicts with flake8 requirement
-    "jupyterlab~=3.0, <3.6.0",  # 3.6.0 requires jupyterlab_server~=2.19
+    "jupyterlab_server>=2.11.1",
+    "jupyterlab~=3.0",
     "jupyter~=1.0",
     "lxml~=4.6",
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
@@ -176,7 +175,6 @@ extras_require["test"] = [
     "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pylint>=2.17.0, <3.0",
     "pyproj~=3.0",
     "pyspark>=2.2, <3.4; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",

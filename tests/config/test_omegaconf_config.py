@@ -1040,7 +1040,7 @@ class TestOmegaConfigLoader:
                 runtime_params=runtime_params,
             )
 
-    def test_bypass_globals(self, tmp_path):
+    def test_override_globals(self, tmp_path):
         """When globals are bypassed, make sure that the correct overwritten values are used"""
         base_params = tmp_path / _BASE_ENV / "parameters.yml"
         base_globals = tmp_path / _BASE_ENV / "globals.yml"

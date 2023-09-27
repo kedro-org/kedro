@@ -148,6 +148,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def __setitem__(self, key, value):
         if key == "globals":
+        # Update the cached value at self._globals since it is used by the globals resolver
             self._globals = value
         super().__setitem__(key, value)
 

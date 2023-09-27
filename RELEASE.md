@@ -5,6 +5,7 @@
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
+* Drop Python 3.7 support.
 
 ### DataSets
 * Remove `kedro.extras.datasets` and tests.

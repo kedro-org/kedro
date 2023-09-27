@@ -11,7 +11,6 @@ for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
         ]
     )
 
-
 setup(
     package_data={
         "kedro": ["py.typed"] + template_files

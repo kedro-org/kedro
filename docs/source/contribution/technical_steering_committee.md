@@ -19,10 +19,10 @@ On this page we describe:
 
 ### Product development
 
- - Be available for at least one full day per week to help with product development
- - Attend community meetings to discuss the project plans and roadmap
- - Be proactive about project maintenance including security, updates, CI/CD, builds and infrastructure
- - Prioritise the work following the product roadmap to move the project forward
+- Be available for at least one full day per week to help with product development
+- Attend community meetings to discuss the project plans and roadmap
+- Be proactive about project maintenance including security, updates, CI/CD, builds and infrastructure
+- Give priority to the work following the product roadmap to move the project forward
 
 ### Community management
 
@@ -53,33 +53,34 @@ We look for commitment markers who can do the following:
 
 <!-- DO NOT EDIT THIS AND MERGE A PR WITHOUT A VOTE TO SIGN OFF ANY CHANGES -->
 
-| Name                                                     | Organisation |
-|----------------------------------------------------------|------------- |
-| [Ahdra Merali](https://github.com/AhdraMeraliQB)         | QuantumBlack |
-| [Andrew Mackay](https://github.com/Mackay031)            | QuantumBlack |
-| [Ankita Katiyar](https://github.com/ankatiyar)           | QuantumBlack |
-| [Antony Milne](https://github.com/antonymilne)           | QuantumBlack |
-| [Deepyaman Datta](https://github.com/deepyaman)          | Claypot AI   |
-| [Dmitry Sorokin](https://github.com/DimedS)              | QuantumBlack |
-| [Huong Nguyen](https://github.com/Huongg)                | QuantumBlack |
-| [Ivan Danov](https://github.com/idanov)                  | QuantumBlack |
-| [Jitendra Gundaniya](https://github.com/jitu5)           | QuantumBlack |
-| [Jo Stichbury](https://github.com/stichbury)             | QuantumBlack |
-| [Joel Schwarzmann](https://github.com/datajoely)         | QuantumBlack |
-| [Juan Luis Cano](https://github.com/astrojuanlu)         | QuantumBlack |
-| [Laura Couto](https://github.com/lrcouto)                | QuantumBlack |
-| [Marcin Zabłocki](https://github.com/marrrcin)           | GetInData    |
-| [Mehdi Naderi Varandi](https://github.com/MehdiNV)       | QuantumBlack |
-| [Merel Theisen](https://github.com/merelcht)             | QuantumBlack |
-| [Nero Okwa](https://github.com/NeroOkwa)                 | QuantumBlack |
-| [Nok Lam Chan](https://github.com/noklam)                | QuantumBlack |
-| [Rashida Kanchwala](https://github.com/rashidakanchwala) | QuantumBlack |
-| [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla)  | QuantumBlack |
-| [Sajid Alam](https://github.com/SajidAlamQB)             | QuantumBlack |
-| [Stephanie Kaiser](https://github.com/stephkaiser)       | QuantumBlack |
-| [Tynan DeBold](https://github.com/tynandebold)           | QuantumBlack |
-| [Vladimir Nikolic](https://github.com/vladimir-mck)      | QuantumBlack |
-| [Yetunde Dada](https://github.com/yetudada)              | QuantumBlack |
+| Name                                                     | Organisation                                                                            |
+|----------------------------------------------------------|---------------------------------------------------------------------------------------- |
+| [Ahdra Merali](https://github.com/AhdraMeraliQB)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Andrew Mackay](https://github.com/Mackay031)            | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Ankita Katiyar](https://github.com/ankatiyar)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Antony Milne](https://github.com/antonymilne)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Deepyaman Datta](https://github.com/deepyaman)          | [Claypot AI](https://www.claypot.ai)                                                    |
+| [Dmitry Sorokin](https://github.com/DimedS)              | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Huong Nguyen](https://github.com/Huongg)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Ivan Danov](https://github.com/idanov)                  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Jitendra Gundaniya](https://github.com/jitu5)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Jo Stichbury](https://github.com/stichbury)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Joel Schwarzmann](https://github.com/datajoely)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Juan Luis Cano](https://github.com/astrojuanlu)         | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Laura Couto](https://github.com/lrcouto)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Marcin Zabłocki](https://github.com/marrrcin)           | [GetInData | Part of Xebia](https://getindata.com)                                      |
+| [Mehdi Naderi Varandi](https://github.com/MehdiNV)       | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Merel Theisen](https://github.com/merelcht)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Nero Okwa](https://github.com/NeroOkwa)                 | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Nok Lam Chan](https://github.com/noklam)                | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Rashida Kanchwala](https://github.com/rashidakanchwala) | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Ravi Kumar Pilla](https://github.com/ravi-kumar-pilla)  | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Sajid Alam](https://github.com/SajidAlamQB)             | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Stephanie Kaiser](https://github.com/stephkaiser)       | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Tynan DeBold](https://github.com/tynandebold)           | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Vladimir Nikolic](https://github.com/vladimir-mck)      | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Yetunde Dada](https://github.com/yetudada)              | [QuantumBlack, AI by McKinsey](https://www.mckinsey.com/capabilities/quantumblack)      |
+| [Yolan Honoré-Rougé](https://github.com/Galileo-Galilei) | [Société Générale Assurances](https://www.assurances.societegenerale.com/en/individual) |
 
 ## Past maintainers
 

@@ -244,10 +244,10 @@ Nodes named with dot notation may behave strangely.
 <summary><b>Click to expand</b></summary>
 
 ```python
-pipeline([node(lambda x: x, inputs = "input1kedro", outputs = "output1.kedro")])
+pipeline([node(lambda x: x, inputs="input1kedro", outputs="output1.kedro")])
 ```
 
-Nodes that are created with input or output names that contain this character risk a disconnected pipeline and/or improperly formatted Kedro structure. 
+Nodes that are created with input or output names that contain this character risk a disconnected pipeline and/or improperly formatted Kedro structure.
 
 This is because `.` has a special meaning internally and indicates a namespace pipeline. In the example, the outputs segment should be disconnected as the name implies there is an "output1" namespace pipeline. The input is not namespaced, but the output is via its dot notation. This leads to Kedro processing each separately. For this example, a better approach would've been writing both as `input1_kedro` and `output1_kedro`.
 

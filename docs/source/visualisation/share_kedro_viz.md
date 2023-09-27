@@ -1,10 +1,10 @@
-# Share a project's Kedro-Viz
+# Publish and share Kedro-Viz
 
 ```{note}
-Kedro-Viz sharing was introduced in version 7.0.0.
+Kedro-Viz sharing was introduced in version 6.6.0.
 ```
 
-This page describes how to deploy the Kedro-Viz for your project so you can share it with others. It uses the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) as an example.
+This page describes how to publish Kedro-Viz so you can share it with others. It uses the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) as an example.
 
 If you haven't installed Kedro [follow the documentation to get set up](../get_started/install.md). In your terminal window, navigate to the folder you want to store the project.
 
@@ -20,7 +20,7 @@ When your project is ready, navigate to the root directory of the project.
 
 ## Update and install the dependencies
 
-Kedro-Viz requires specific minimum versions of `fsspec` and `kedro` to deploy your project.
+Kedro-Viz requires specific minimum versions of `fsspec` and `kedro` to publish your project.
 
 You can ensure you have these correct versions by updating the `requirements.txt` file in the `src` folder of the Kedro project to the following:
 
@@ -37,7 +37,7 @@ pip install -r src/requirements.txt
 
 ## Configure your AWS S3 bucket and set credentials
 
-You can host your project's Kedro-Viz as a deployed URL on Amazon S3. You must first create an S3 bucket and then enable static website hosting. To do so, follow the [AWS tutorial](https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html) to configure a static website on Amazon S3.
+You can host your Kedro-Viz project on Amazon S3. You must first create an S3 bucket and then enable static website hosting. To do so, follow the [AWS tutorial](https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html) to configure a static website on Amazon S3.
 
 Once that's completed, you'll need to set your AWS credentials as environment variables in your terminal window, as shown below:
 
@@ -48,21 +48,21 @@ export AWS_SECRET_ACCESS_KEY="your_secret_access_key"
 
 For more information, see the official AWS documentation about [how to work with credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html).
 
-## Deploy the project
+## Publish and share the project
 
-You're now ready to deploy your Kedro-Viz project. Start Kedro-Viz by running the following command in your terminal:
+You're now ready to publish and share your Kedro-Viz project. Start Kedro-Viz by running the following command in your terminal:
 
 ```bash
 kedro viz
 ```
 
-Click the **Deploy and share** icon in the lower-left of the application. You will see a modal dialog to select your relevant AWS Bucket Region and enter your Bucket Name.
+Click the **Publish and share** icon in the lower-left of the application. You will see a modal dialog to select your relevant AWS Bucket Region and enter your Bucket Name.
 
-Once those two details are complete, click **Deploy**. A hosted, shareable URL will be returned to you after the deploy completes.
+Once those two details are complete, click **Publish**. A hosted, shareable URL will be returned to you after the process completes.
 
 Here's an example of the flow:
 
-![](../meta/images/kedro-viz-deploy.gif)
+![](../meta/images/kedro-publish-share.gif)
 
 ## Permissions and access control
 

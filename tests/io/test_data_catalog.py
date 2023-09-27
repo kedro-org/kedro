@@ -767,7 +767,6 @@ class TestDataCatalogVersioned:
         monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummmy")
         monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummmy")
         version = Version(load=None, save=None)
-        mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec")
         versioned_dataset = CSVDataSet("s3://bucket/file.csv", version=version)
         pattern = re.escape(
             f"Did not find any versions for {versioned_dataset}. "

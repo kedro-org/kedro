@@ -28,7 +28,7 @@ with all required dependencies into a single immutable container. This not only 
 across the entire setup but also enables control over the runtime environment.
 
 This approach helps to avoid job failures due to misconfigurations or potential conflicts with system-level packages,
-and ensures the package is portable so it can be debugged and tested locally ([see more details on validation](#optional-validate-the-custom-image)). Using the approach can achieve a repeatable, reliable environment and improve operational flexibility.
+and ensures the package is portable so it can be debugged and tested locally ([see more details on validation](#optional-validate-the-custom-image)). Using the approach can provide a repeatable, reliable environment and improve operational flexibility.
 
 With this context established, the rest of this page describes how to use EMR Serverless with a Kedro project.
 

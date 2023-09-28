@@ -210,7 +210,7 @@ The approach of providing a custom image is only applicable to EMR Serverless. O
 
 ### EMR Serverless already has Python installed. Why do we need a custom Python version?
 
-The code base in the example requires Python 3.9 while the default Python installation on the latest EMR releases (6.10.0, 6.11.0) is based on Python 3.7.
+Some applications may require a different Python version than the default version installed. For example, your code base may require Python 3.9 while the default Python installation on the latest EMR releases (6.10.0, 6.11.0) is based on Python 3.7.
 
 ### Why do we need to create a custom image to provide the custom Python version?
 

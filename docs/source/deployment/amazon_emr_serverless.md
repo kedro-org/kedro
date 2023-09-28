@@ -171,7 +171,7 @@ The following parameters need to be provided:
 ```{note}
 The use of an "entrypoint script" is needed because [EMR Serverless disregards `[CMD]` or `[ENTRYPOINT]` instructions
 in the Dockerfile](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html#considerations).
-You should instead prefer to run Kedro programmatically through an "entrypoint script" to eliminate the need to use, for example,
+We recommend to run Kedro programmatically through an "entrypoint script" to eliminate the need to use, for example,
 a [subprocess](https://docs.python.org/3/library/subprocess.html) to invoke `kedro run`. See [FAQ](#faq) for more details.
 ```
 

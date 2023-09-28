@@ -10,9 +10,7 @@ import subprocess
 import sys
 import textwrap
 import traceback
-import warnings
 from collections import defaultdict
-from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
@@ -338,14 +336,6 @@ def env_option(func_=None, **kwargs):
     kwargs = {**default_args, **kwargs}
     opt = click.option("--env", "-e", **kwargs)
     return opt(func_) if func_ else opt
-
-
-@contextmanager
-def _filter_deprecation_warnings():
-    """Temporarily suppress all ``DeprecationWarning``s."""
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
-        yield
 
 
 def _check_module_importable(module_name: str) -> None:

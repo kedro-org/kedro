@@ -84,7 +84,7 @@ RUN chmod -R a+w /home/hadoop/logs
 # EMRS will run the image as hadoop
 USER hadoop:hadoop
 ```
-
+Make sure to replace `<PACKAGE_WHEEL_NAME>` with your own `.whl` file name.
 Here is the `entrypoint.py` entrypoint script:
 
 ```python

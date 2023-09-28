@@ -9,10 +9,15 @@ import warnings
 __version__ = "0.18.13"
 
 
+class KedroDeprecationWarning(DeprecationWarning):
+    """Custom class for warnings about deprecated Kedro features."""
+
+
+warnings.filterwarnings("default", category=KedroDeprecationWarning)
+
+
 class KedroPythonVersionWarning(UserWarning):
     """Custom class for warnings about incompatibilities with Python versions."""
-
-    pass
 
 
 if not sys.warnoptions:

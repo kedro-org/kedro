@@ -36,7 +36,7 @@ With this context established, the rest of this page describes how to deploy a K
 
 This approach creates a custom Docker image for EMR Serverless to package dependencies and manage the runtime environment, and follows these steps:
 
-- Packaging the Kedro project to install it on all EMR Serverless worker nodes. `kedro package` can be used for this, and the resultant `.whl` file is used for installation.
+- Packaging the Kedro project to install it on all EMR Serverless worker nodes. `kedro package` can be used for this: the resultant `.whl` file is used for installation, while `conf.tar.gz` contains the project configuration files.
 - Using a custom Python version instead of the default Python installed on EMR Serverless. In the example, [pyenv](https://github.com/pyenv/pyenv) is used for installing the custom Python version.
 - Running a job on EMR Serverless specifying Spark properties. This is needed to use the custom Python and provide an entrypoint script that accepts command line arguments for running Kedro.
 

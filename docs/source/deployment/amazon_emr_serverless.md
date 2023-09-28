@@ -112,7 +112,7 @@ You must create an S3 bucket to store data for EMR Serverless.
 
 1. **Create a private repository in ECR**. See details on how to do so [here](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html). You can use the default settings. This repository will be used to upload the EMR Serverless custom image.
 
-**2. Create an EMR Studio**.
+2. **Create an EMR Studio**.
 
 - Go to the AWS Console > EMR > EMR Serverless.
 - Make sure you are in the correct region where you want to create your resource.

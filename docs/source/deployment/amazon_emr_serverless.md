@@ -34,7 +34,9 @@ With this context established, the rest of this page describes how to deploy a K
 
 ## Overview of Approach
 
-This approach creates a custom Dockerfile image for EMR Serverless. It describes the following:
+This approach creates a custom Docker image for EMR Serverless to package dependencies and manage the runtime environment. 
+
+It involves the following steps:
 
 - How to package a Kedro project and install it on all EMR Serverless worker nodes. In the example, you'll see how `kedro package` is used, and how the resultant `.whl` file is used for installation.
 - How use a custom Python version instead of the default Python installed on EMR Serverless. In the example, [pyenv](https://github.com/pyenv/pyenv) is used for installing the custom Python version.

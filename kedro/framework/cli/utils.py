@@ -342,7 +342,7 @@ def env_option(func_=None, **kwargs):
 
 @contextmanager
 def _filter_deprecation_warnings():
-    """Temporarily suppress all DeprecationWarnings."""
+    """Temporarily suppress all ``DeprecationWarning``s."""
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         yield

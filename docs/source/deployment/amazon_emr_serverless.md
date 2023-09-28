@@ -42,7 +42,7 @@ It involves the following steps:
 - Use a custom Python version instead of the default Python installed on EMR Serverless. In the example, [pyenv](https://github.com/pyenv/pyenv) is used for installing the custom Python version.
 - How to run a job on EMR Serverless specifying Spark properties. This is needed to use the custom Python and provide an entrypoint script that accepts command line arguments for running Kedro.
 
-You can use the Dockerfile to package dependencies and manage the runtime environment:
+Here is an example Dockerfile that can be used:
 
 ```text
 FROM public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest AS base

@@ -73,12 +73,6 @@ RUN pip install --upgrade pip && pip install /tmp/dist/$KEDRO_PACKAGE  \
 # Copy and extract conf folder
 ADD dist/conf.tar.gz /home/hadoop/
 
-# Initialize log files
-RUN mkdir -p /home/hadoop/logs
-RUN touch /home/hadoop/logs/info.log
-RUN touch /home/hadoop/logs/errors.log
-RUN chmod -R a+w /home/hadoop/logs
-
 # EMRS will run the image as hadoop
 USER hadoop:hadoop
 ```

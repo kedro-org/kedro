@@ -238,7 +238,7 @@ However, the arguments are not a direct mapping to Kedro command line arguments:
 - Different types are used. For example, to specify the "runner" you need to pass an `AbstractRunner` object, instead of a
 simple string value like "ThreadRunner".
 
-Arguments need to be passed separately, so "env" is passed directly to `KedroSession.create()` while
+Arguments need to be passed separately: "env" is passed directly to `KedroSession.create()` while
 other arguments such as "pipeline_name" and "node_names" need to be passed to `session.run()`.
 
 It is only straightforward for simple scenarios like invoking `kedro run`, or where you do not provide many command line arguments to Kedro.

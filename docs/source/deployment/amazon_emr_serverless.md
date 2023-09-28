@@ -94,7 +94,7 @@ from <PACKAGE_NAME>.__main__ import main
 main(sys.argv[1:])
 
 ```
-
+Replace `<PACKAGE_NAME>` with your package name.
 ### Resources
 For more details, refer to the following resources:
 

@@ -214,7 +214,7 @@ Some applications may require a different Python version than the default versio
 
 ### Why do we need to create a custom image to provide the custom Python version?
 
-You may encounter difficulties with the [virtual environment approach](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python.html), particularly when modifying it to use [pyenv](https://github.com/pyenv/pyenv). While using [venv-pack](https://pypi.org/project/venv-pack/) we found [a limitation that returned the error `Too many levels of symbolic links`](https://jcristharif.com/venv-pack/#caveats) which is documented as follows:
+You may encounter difficulties with the [virtual environment approach](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python.html), particularly when modifying it to use [pyenv](https://github.com/pyenv/pyenv). While using [venv-pack](https://pypi.org/project/venv-pack/) we found [a limitation that returned the error `Too many levels of symbolic links`](https://jcristharif.com/venv-pack/#caveats), which is documented as follows:
 
 >Python is _not_ packaged with the environment, but rather symlinked in the environment.
 > This is useful for deployment situations where Python is already installed on the machine, but the required library dependencies may not be.

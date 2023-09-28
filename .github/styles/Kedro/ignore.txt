@@ -27,6 +27,8 @@ APIs
 networkx
 Plotly
 Pylint
+Serverless
+serverless
 SQLAlchemy
 tracebacks
 templated

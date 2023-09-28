@@ -3,7 +3,7 @@
 [Amazon EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html)
 can be used to manage and execute distributed computing workloads using Apache Spark. With its serverless architecture,
 it eliminates the need to provision or manage clusters to execute your Spark jobs. Instead, EMR Serverless
-independently allocates the resources needed for each job and releases them once the job has been completed.
+independently allocates the resources needed for each job and releases them after the job has completed.
 
 EMR Serverless is typically used for pipelines that are either fully or partially dependent on PySpark.
 For other parts of the pipeline such as modeling, where a non-distributed computing approach may be suitable, EMR Serverless might not be needed.
@@ -15,7 +15,7 @@ have traditionally managed dependencies using [bootstrap actions](https://docs.a
 This can sometimes lead to complications due to script complexity, longer bootstrapping times, and potential inconsistencies
 across cluster instances.
 
-Some applications may have requirements that necessitate a different approach, such as:
+Some applications may need a different approach, such as:
 
 - **Custom Python version:** By default, the latest EMR releases (6.10.0, 6.11.0) run Python 3.7, but an application may require Python 3.9 or later.
 - **Python dependencies:** Some applications use a range of third-party dependencies that need to be installed on both the driver and worker nodes.
@@ -111,7 +111,7 @@ You must create an S3 bucket to store data for EMR Serverless.
 
 ### Infrastructure
 
-1. **Create a private repository in ECR**. See details on how to do so [here](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html). You can use the default settings. This repository will be used to upload the EMR Serverless custom image.
+1. **Create a private repository in ECR**. See details on how to do so [in the AWS documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html). You can use the default settings. This repository will be used to upload the EMR Serverless custom image.
 
 2. **Create an EMR Studio**.
 
@@ -140,7 +140,7 @@ See the AWS EMR Serverless documentation for [more details on creating an applic
 
 ### IAM
 
-1. **Create a job runtime role**. Follow the instructions under "Create a job runtime role" [here](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/getting-started.html). This role will be used when submitting a job to EMR Serverless. The permissions defined in the policy also grant access
+1. **Create a job runtime role**. Follow the instructions under ["Create a job runtime role"](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/getting-started.html). This role will be used when submitting a job to EMR Serverless. The permissions defined in the policy also grant access
 to an S3 bucket (specify the S3 bucket you have created).
 
 2. **Grant access to ECR repository**.

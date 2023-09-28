@@ -44,7 +44,7 @@ It involves the following steps:
 
 Here is an example Dockerfile that can be used:
 
-```text
+```shell
 FROM public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest AS base
 
 USER root

@@ -127,7 +127,7 @@ You may customise other settings as required, or even change the release version
 (along with making the changes in the custom image).
 
 ```{warning}
-This code base has only been tested with the above options.
+The documented approach has only been tested with the above options.
 ```
 
 See the AWS EMR Serverless documentation for [more details on creating an application](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/studio.html).

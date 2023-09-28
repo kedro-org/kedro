@@ -34,13 +34,11 @@ With this context established, the rest of this page describes how to deploy a K
 
 ## Overview of Approach
 
-This approach creates a custom Docker image for EMR Serverless to package dependencies and manage the runtime environment. 
+This approach creates a custom Docker image for EMR Serverless to package dependencies and manage the runtime environment, and follows these steps:
 
-It involves the following steps:
-
-- Package the Kedro project to install it on all EMR Serverless worker nodes. `kedro package` can be used for this, and the resultant `.whl` file is used for installation.
-- Use a custom Python version instead of the default Python installed on EMR Serverless. In the example, [pyenv](https://github.com/pyenv/pyenv) is used for installing the custom Python version.
-- How to run a job on EMR Serverless specifying Spark properties. This is needed to use the custom Python and provide an entrypoint script that accepts command line arguments for running Kedro.
+- Packaging the Kedro project to install it on all EMR Serverless worker nodes. `kedro package` can be used for this, and the resultant `.whl` file is used for installation.
+- Using a custom Python version instead of the default Python installed on EMR Serverless. In the example, [pyenv](https://github.com/pyenv/pyenv) is used for installing the custom Python version.
+- Running a job on EMR Serverless specifying Spark properties. This is needed to use the custom Python and provide an entrypoint script that accepts command line arguments for running Kedro.
 
 Here is an example Dockerfile that can be used:
 
@@ -84,6 +82,7 @@ RUN chmod -R a+w /home/hadoop/logs
 # EMRS will run the image as hadoop
 USER hadoop:hadoop
 ```
+
 Make sure to replace `<PACKAGE_WHEEL_NAME>` with your own `.whl` file name.
 Here is the `entrypoint.py` entrypoint script:
 
@@ -94,12 +93,14 @@ from <PACKAGE_NAME>.__main__ import main
 main(sys.argv[1:])
 
 ```
+
 Replace `<PACKAGE_NAME>` with your package name.
+
 ### Resources
 For more details, refer to the following resources:
 
-- [Package a Kedro project](https://docs.kedro.org/en/0.18.11/tutorial/package_a_project.html#package-a-kedro-project)
-- [Run a packaged project](https://docs.kedro.org/en/0.18.11/tutorial/package_a_project.html#run-a-packaged-project)
+- [Package a Kedro project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#package-a-kedro-project)
+- [Run a packaged project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#run-a-packaged-project)
 - [Customizing an EMR Serverless image](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html)
 - [Using custom images with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-custom-images.html)
 
@@ -218,7 +219,6 @@ You may encounter difficulties with the [virtual environment approach](https://d
 
 >Python is _not_ packaged with the environment, but rather symlinked in the environment.
 > This is useful for deployment situations where Python is already installed on the machine, but the required library dependencies may not be.
-
 
 The custom image approach neatly includes both installing the Kedro project and provides
 the custom Python version in one go. Otherwise, you would need to separately provide the files, and specify them as extra Spark configuration each time you submit a job.

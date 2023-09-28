@@ -227,7 +227,7 @@ the custom Python version in one go. Otherwise, you would need to separately pro
 
 As mentioned in the [AWS documentation](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html), EMR Serverless ignores `[CMD]` or `[ENTRYPOINT]` instructions in the Dockerfile.
 
-You should prefer using the `entrypoint.py` entrypoint script approach to run Kedro
+We recommend using the `entrypoint.py` entrypoint script approach to run Kedro
 programmatically, instead of using [subprocess](https://docs.python.org/3/library/subprocess.html) to invoke `kedro run`.
 
 ### How about using the method described in [Lifecycle management with KedroSession](https://docs.kedro.org/en/0.18.11/kedro_project_setup/session.html) to run Kedro programmatically?

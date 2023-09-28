@@ -196,7 +196,7 @@ Enter the respective values in the placeholders above, e.g. use the ARN from the
 
 ## FAQ
 
-### How is the approach defined here different from [this approach](https://kedro.org/blog/how-to-deploy-kedro-pipelines-on-amazon-emr) on the Kedro blog?
+### How is the approach defined here different from the approach in ["Seven steps to deploy Kedro pipelines on Amazon EMR"](https://kedro.org/blog/how-to-deploy-kedro-pipelines-on-amazon-emr) on the Kedro blog?
 
 There are similarities in steps in both approaches. However, the key difference is that this page explains how to provide a custom Python version
 through the custom image. The blog post provides Python dependencies in a virtual environment for EMR to refer to.

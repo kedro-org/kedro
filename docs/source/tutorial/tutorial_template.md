@@ -33,10 +33,7 @@ The spaceflights project dependencies are stored in `src/requirements.txt`(you m
 ```text
 # code quality packages
 black==22.0
-flake8>=3.7.9, <5.0
 ipython>=7.31.1, <8.0
-isort~=5.0
-nbstripout~=0.4
 
 # notebook tooling
 jupyter~=1.0
@@ -68,7 +65,7 @@ pip install -r src/requirements.txt
 
 ## Optional: logging and configuration
 
-You might want to [set up logging](../logging/logging.md) at this stage of the workflow, but we do not use it in this tutorial.
+You might want to [set up logging](../logging/index.md) at this stage of the workflow, but we do not use it in this tutorial.
 
 You may also want to store credentials such as usernames and passwords if they are needed for specific data sources used by the project.
 

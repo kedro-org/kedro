@@ -192,32 +192,6 @@ For more details, run `%reload_kedro?`.
 
 If you have [Kedro-Viz](https://github.com/kedro-org/kedro-viz) installed for the project you can display an interactive visualisation of your pipeline directly in your Notebook using the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%run_viz`.
 
-
-## Convert functions from Jupyter Notebooks into Kedro nodes
-
-If you are writing experimental code in your Notebook and later want to convert functions you've written to Kedro nodes, you can do this using tags.
-
-Say you have the following code in your Notebook:
-
-```ipython
-def some_action():
-    print("This function came from `notebooks/my_notebook.ipynb`")
-```
-
-1. Enable tags toolbar: `View` menu -> `Cell Toolbar` -> `Tags`
-![Enable the tags toolbar graphic](../meta/images/jupyter_notebook_workflow_activating_tags.png)
-
-2. Add the `node` tag to the cell containing your function
-![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
-
-```{note}
-The Notebook can contain multiple functions tagged as `node`, each of them will be exported into the resulting Python file
-```
-
-3. Save your Jupyter Notebook to `notebooks/my_notebook.ipynb`
-4. From your terminal, run `kedro jupyter convert notebooks/my_notebook.ipynb` from the Kedro project directory. The output is a Python file `src/<package_name>/nodes/my_notebook.py` containing the `some_action` function definition
-5. The `some_action` function can now be used in your Kedro pipelines
-
 ## Useful to know...
 Each Kedro project has its own Jupyter kernel so you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel.
 

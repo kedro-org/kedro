@@ -7,9 +7,9 @@ from typing import Any
 
 import pandas as pd
 import pytest
+from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from pandas.util.testing import assert_frame_equal
 
-from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import (
     AbstractDataset,
     DataCatalog,
@@ -201,7 +201,7 @@ def conflicting_feed_dict():
 class BadDataset(AbstractDataset):  # pragma: no cover
     def __init__(self, filepath):
         self.filepath = filepath
-        raise Exception("Naughty!")  # pylint: disable=broad-exception-raised
+        raise Exception("Naughty!")
 
     def _load(self):
         return None
@@ -405,7 +405,11 @@ class TestDataCatalog:
             data_catalog.confirm("mocked")
             mock_ds.confirm.assert_called_once_with()
             assert caplog.record_tuples == [
-                ("kedro.io.data_catalog", logging.INFO, "Confirming dataset 'mocked'")
+                (
+                    "kedro.io.data_catalog",
+                    logging.INFO,
+                    "Confirming dataset 'mocked'",
+                )
             ]
 
     @pytest.mark.parametrize(
@@ -465,10 +469,10 @@ class TestDataCatalogFromConfig:
             DataCatalog.from_config(**sane_config)
 
     def test_config_import_kedro_datasets(self, sane_config, mocker):
-        """Test kedro.extras.datasets default path to the dataset class"""
+        """Test kedro_datasets default path to the dataset class"""
         # Spy _load_obj because kedro_datasets is not installed and we can't import it.
 
-        import kedro.io.core  # pylint: disable=import-outside-toplevel
+        import kedro.io.core
 
         spy = mocker.spy(kedro.io.core, "_load_obj")
         parse_dataset_definition(sane_config["catalog"]["boats"])
@@ -479,7 +483,7 @@ class TestDataCatalogFromConfig:
             assert call_args[0][0] == f"{prefix}pandas.CSVDataSet"
 
     def test_config_import_extras(self, sane_config):
-        """Test kedro.extras.datasets default path to the dataset class"""
+        """Test kedro_datasets default path to the dataset class"""
         sane_config["catalog"]["boats"]["type"] = "pandas.CSVDataSet"
         assert DataCatalog.from_config(**sane_config)
 
@@ -527,7 +531,7 @@ class TestDataCatalogFromConfig:
 
     def test_link_credentials(self, sane_config, mocker):
         """Test credentials being linked to the relevant data set"""
-        mock_client = mocker.patch("kedro.extras.datasets.pandas.csv_dataset.fsspec")
+        mock_client = mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec")
         config = deepcopy(sane_config)
         del config["catalog"]["boats"]
 
@@ -537,7 +541,7 @@ class TestDataCatalogFromConfig:
         mock_client.filesystem.assert_called_with("s3", **expected_client_kwargs)
 
     def test_nested_credentials(self, sane_config_with_nested_creds, mocker):
-        mock_client = mocker.patch("kedro.extras.datasets.pandas.csv_dataset.fsspec")
+        mock_client = mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec")
         config = deepcopy(sane_config_with_nested_creds)
         del config["catalog"]["boats"]
         DataCatalog.from_config(**config)
@@ -565,11 +569,10 @@ class TestDataCatalogFromConfig:
         """Test that dependency is missing."""
         pattern = "dependency issue"
 
-        # pylint: disable=unused-argument,inconsistent-return-statements
         def dummy_load(obj_path, *args, **kwargs):
-            if obj_path == "kedro.extras.datasets.pandas.CSVDataSet":
+            if obj_path == "kedro_datasets.pandas.CSVDataSet":
                 raise AttributeError(pattern)
-            if obj_path == "kedro.extras.datasets.pandas.__all__":
+            if obj_path == "kedro_datasets.pandas.__all__":
                 return ["CSVDataSet"]
 
         mocker.patch("kedro.io.core.load_obj", side_effect=dummy_load)
@@ -657,7 +660,7 @@ class TestDataCatalogVersioned:
 
         # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
         actual_timestamp = datetime.strptime(
-            catalog.datasets.boats.resolve_load_version(),  # pylint: disable=no-member
+            catalog.datasets.boats.resolve_load_version(),
             VERSION_FORMAT,
         )
         expected_timestamp = current_ts.replace(
@@ -702,11 +705,11 @@ class TestDataCatalogVersioned:
 
         # Verify that saved version on tracking dataset is the same as on the CSV dataset
         csv_timestamp = datetime.strptime(
-            catalog.datasets.boats.resolve_save_version(),  # pylint: disable=no-member
+            catalog.datasets.boats.resolve_save_version(),
             VERSION_FORMAT,
         )
         tracking_timestamp = datetime.strptime(
-            catalog.datasets.planes.resolve_save_version(),  # pylint: disable=no-member
+            catalog.datasets.planes.resolve_save_version(),
             VERSION_FORMAT,
         )
 
@@ -915,7 +918,7 @@ class TestDataCatalogDatasetFactories:
 
         # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
         actual_timestamp = datetime.strptime(
-            catalog.datasets.tesla_cars.resolve_load_version(),  # pylint: disable=no-member
+            catalog.datasets.tesla_cars.resolve_load_version(),
             VERSION_FORMAT,
         )
         expected_timestamp = current_ts.replace(

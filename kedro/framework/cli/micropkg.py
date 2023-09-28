@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator, List, Tuple, Union
 
 import click
-from build.util import project_wheel_metadata
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
 from rope.base.project import Project
@@ -22,6 +21,7 @@ from rope.refactor.move import MoveModule
 from rope.refactor.rename import Rename
 from setuptools.discovery import FlatLayoutPackageFinder
 
+from build.util import project_wheel_metadata
 from kedro.framework.cli.pipeline import (
     _assert_pkg_name_ok,
     _check_pipeline_name,
@@ -962,8 +962,8 @@ def _append_package_reqs(
             file.write(sep.join(sorted_reqs))
 
     click.secho(
-        "Use 'kedro build-reqs' to compile and 'pip install -r src/requirements.lock' to install "
-        "the updated list of requirements."
+        "Use 'pip-compile src/requirements.txt --output-file src/requirements.lock' to compile "
+        "and 'pip install -r src/requirements.lock' to install the updated list of requirements."
     )
 
 

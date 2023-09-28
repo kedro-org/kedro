@@ -133,7 +133,6 @@ extras_require = {
 
 extras_require["all"] = _collect_requirements(extras_require)
 extras_require["test"] = [
-    "adlfs>=2021.7.1, <=2022.2; python_version == '3.7'",
     "adlfs~=2023.1; python_version >= '3.8'",
     "bandit>=1.6.2, <2.0",
     "behave==1.2.6",
@@ -147,7 +146,6 @@ extras_require["test"] = [
     "delta-spark~=1.2.1; python_version < '3.11'",
     "dill~=0.3.1",
     "filelock>=3.4.0, <4.0",
-    "gcsfs>=2021.4, <=2023.1; python_version == '3.7'",
     "gcsfs>=2023.1, <2023.3; python_version >= '3.8'",
     "geopandas>=0.6.0, <1.0",
     "hdfs>=2.5.8, <3.0",
@@ -155,11 +153,10 @@ extras_require["test"] = [
     "import-linter[toml]==1.8.0",
     "ipython>=7.31.1, <8.0; python_version < '3.8'",
     "ipython~=8.10; python_version >= '3.8'",
-    "isort~=5.0",
     "Jinja2<3.1.0",
     "joblib>=0.14",
-    "jupyterlab_server>=2.11.1, <2.16.0",  # 2.16.0 requires importlib_metedata >= 4.8.3 which conflicts with flake8 requirement
-    "jupyterlab~=3.0, <3.6.0",  # 3.6.0 requires jupyterlab_server~=2.19
+    "jupyterlab_server>=2.11.1",
+    "jupyterlab~=3.0",
     "jupyter~=1.0",
     "lxml~=4.6",
     "matplotlib>=3.0.3, <3.4; python_version < '3.10'",  # 3.4.0 breaks holoviews
@@ -178,7 +175,6 @@ extras_require["test"] = [
     "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
     "pyarrow>=1.0; python_version < '3.11'",
     "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
-    "pylint>=2.17.0, <3.0",
     "pyproj~=3.0",
     "pyspark>=2.2, <3.4; python_version < '3.11'",
     "pyspark>=3.4; python_version >= '3.11'",

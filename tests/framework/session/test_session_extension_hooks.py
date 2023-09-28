@@ -419,7 +419,7 @@ class TestDataSetHooks:
             assert record.data.to_dict() == dummy_dataframe.to_dict()
 
 
-class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
+class MockDatasetReplacement:
     pass
 
 

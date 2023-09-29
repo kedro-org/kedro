@@ -90,10 +90,17 @@ def pipeline():
     is_flag=True,
     help="Skip creation of config files for the new pipeline(s).",
 )
+@click.option(
+    "template_path",
+    "-t",
+    "--template",
+    type=click.Path(file_okay=False, dir_okay=True, exists=True, path_type=Path),
+    help="Path to cookiecutter template to use for pipeline(s). Will override any local templates.",
+)
 @env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
 @click.pass_obj  # this will pass the metadata as first argument
 def create_pipeline(
-    metadata: ProjectMetadata, name, skip_config, env, **kwargs
+    metadata: ProjectMetadata, name, template_path, skip_config, env, **kwargs
 ):  # noqa: unused-argument
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
@@ -107,7 +114,19 @@ def create_pipeline(
             f"Make sure it exists in the project configuration."
         )
 
-    result_path = _create_pipeline(name, package_dir / "pipelines")
+    # Precedence for template_path is: command line > project templates/pipeline dir > global default
+    # If passed on the CLI, click will verify that the path exists so no need to check again
+    if template_path is None:
+        # No path provided on the CLI, try `PROJECT_PATH/templates/pipeline`
+        template_path = Path(metadata.project_path / "templates" / "pipeline")
+
+        if not template_path.exists():
+            # and if that folder doesn't exist fall back to the global default
+            template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
+
+    click.secho(f"Using pipeline template at: '{template_path}'")
+
+    result_path = _create_pipeline(name, template_path, package_dir / "pipelines")
     _copy_pipeline_tests(name, result_path, package_dir)
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
@@ -191,12 +210,11 @@ def _echo_deletion_warning(message: str, **paths: list[Path]):
         click.echo(indent(paths_str, " " * 2))
 
 
-def _create_pipeline(name: str, output_dir: Path) -> Path:
+def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
     with _filter_deprecation_warnings():
         # noqa: import-outside-toplevel
         from cookiecutter.main import cookiecutter
 
-    template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
 
     click.echo(f"Creating the pipeline '{name}': ", nl=False)

@@ -64,7 +64,7 @@ You can display an interactive visualisation of your pipeline directly in your n
 %run_viz
 ```
 
-TO DO: Add a screengrab here
+![View your project's Kedro Viz inside a notebook](../meta/images/run_viz_in_notebook.png)
 
 ### `catalog`
 
@@ -212,9 +212,9 @@ You don't need to restart the kernel for the `catalog`, `context`, `pipelines` a
 
 For more details, run `%reload_kedro?`.
 
-## How to convert functions from Jupyter notebooks into Kedro nodes
+## How to use tags to convert functions from Jupyter notebooks into Kedro nodes
 
-If you are writing experimental code in your notebook and later want to convert functions you've written to Kedro nodes, you can do this using tags.
+You can use the notebook to write experimental code for your Kedro project. If you later want to convert functions you've written to Kedro nodes, you can do this using tags. A notebook can contain multiple functions tagged as `node`, which can be exported into a Python file.
 
 Say you have the following code in your notebook:
 
@@ -229,15 +229,12 @@ def some_action():
 2. Add the `node` tag to the cell containing your function
 ![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
 
-```{note}
-The notebook can contain multiple functions tagged as `node`, each of them will be exported into the resulting Python file
-```
 
 3. Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
 4. From your terminal, run `kedro jupyter convert notebooks/my_notebook.ipynb` from the Kedro project directory. The output is a Python file `src/<package_name>/nodes/my_notebook.py` containing the `some_action` function definition
 5. The `some_action` function can now be used in your Kedro pipelines
 
-## Useful to know...
+## Useful to know (for advanced users)
 Each Kedro project has its own Jupyter kernel so you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel.
 
 If a Jupyter kernel with the name `kedro_<package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook` to replace the kernel specification with one that points to the new environment.

@@ -199,7 +199,7 @@ Enter the respective values in the placeholders above. For example, use the ARN 
 There are similarities in steps in both approaches. The key difference is that this page explains how to provide a custom Python version
 through the custom image. The blog post provides Python dependencies in a virtual environment for EMR.
 
-The approach of providing a custom image is applies to EMR *Serverless*. On EMR it would be worth considering [using a custom AMI](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html), as an alternative to using [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html). This has not been explored nor tested as yet.
+The approach of providing a custom image applies to EMR *Serverless*. On EMR it would be worth considering [using a custom AMI](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html), as an alternative to using [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html). This has not been explored nor tested as yet.
 
 ### EMR Serverless already has Python installed. Why do we need a custom Python version?
 

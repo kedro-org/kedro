@@ -261,8 +261,10 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     else:
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
+    config = _get_addons_from_cli_input(selected_addons, config)
+
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
-    _create_project(template_path, selected_addons, cookiecutter_args)
+    _create_project(template_path, cookiecutter_args)
 
 
 @create_cli.group()
@@ -293,6 +295,26 @@ def list_starters():
         click.echo(
             yaml.safe_dump(_starter_spec_to_dict(starters_spec), sort_keys=False)
         )
+
+
+def _get_addons_from_cli_input(
+    selected_addons: str, config: dict[str, str]
+) -> dict[str, str]:
+    """Inserts add-on selection from the CLI input in the project
+    configuration, if it exists.
+
+    Args:
+        selected_addons: a string containing the value for the --addons flag,
+            or None in case the flag wasn't used.
+
+    Returns:
+        Configuration for starting a new project, with the selected add-ons
+        from the `--addons` flag.
+    """
+    if selected_addons is not None:
+        config["add_ons"] = selected_addons
+
+    return config
 
 
 def _fetch_config_from_file(config_path: str) -> dict[str, str]:
@@ -378,9 +400,7 @@ def _get_add_ons_text(add_ons):
     )
 
 
-def _create_project(
-    template_path: str, selected_addons: str, cookiecutter_args: dict[str, Any]
-):
+def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
     Args:
@@ -410,11 +430,7 @@ def _create_project(
     python_package = extra_context.get(
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )
-
-    if selected_addons is not None:
-        add_ons = selected_addons
-    else:
-        add_ons = extra_context.get("add_ons")
+    add_ons = extra_context.get("add_ons")
 
     # Only non-starter projects have configurable add-ons
     if template_path == str(TEMPLATE_PATH):

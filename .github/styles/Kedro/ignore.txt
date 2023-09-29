@@ -6,6 +6,7 @@ Conda
 conda
 Cookiecutter
 config
+Dockerfile
 fsspec
 globals
 Globals
@@ -26,6 +27,7 @@ IPython
 APIs
 networkx
 Plotly
+pyenv
 Pylint
 Serverless
 serverless

@@ -24,8 +24,8 @@ Even though the official AWS documentation provides methods for configuring a [c
 and for [using custom dependencies](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python-libraries.html), there are some limitations. The methods are prone to errors, can be difficult to debug, and do not ensure full compatibility (see the [FAQ section below](#faq) for more details).
 
 EMR Serverless offers a solution to the limitations described, starting with Amazon EMR 6.9.0, which supports [custom images](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html). With a custom Docker image you can package a specific Python version along
-with all required dependencies into a single immutable container. This not only ensures a consistent runtime environment
-across the entire setup but also enables control over the runtime environment.
+with all required dependencies into a single immutable container. This ensures a consistent runtime environment
+across the entire setup and also enables control over the runtime environment.
 
 This approach helps to avoid job failures due to misconfigurations or potential conflicts with system-level packages,
 and ensures the package is portable so it can be debugged and tested locally ([see more details on validation](#optional-validate-the-custom-image)). Using the approach can provide a repeatable, reliable environment and improve operational flexibility.

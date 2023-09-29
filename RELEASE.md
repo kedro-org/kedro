@@ -11,6 +11,7 @@
 
 ## Major features and improvements
 * Allowed using of custom cookiecutter templates for creating pipelines with `--template` flag for `kedro pipeline create` or via `template/pipeline` folder.
+* Allowed overriding of configuration keys with runtime parameters using the `runtime_params` resolver with `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.

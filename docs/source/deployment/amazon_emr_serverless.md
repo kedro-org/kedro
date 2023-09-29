@@ -231,4 +231,4 @@ This is a valid alternative to run Kedro programmatically, without needing to pa
 Arguments need to be passed separately: "env" is passed directly to `KedroSession.create()` while
 other arguments such as "pipeline_name" and "node_names" need to be passed to `session.run()`.
 
-It is most suited to scenarios such as invoking kedro run`, or where you do not provide many command line arguments to Kedro.
+It is most suited to scenarios such as invoking `kedro run`, or where you do not provide many command line arguments to Kedro.

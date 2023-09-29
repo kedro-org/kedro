@@ -1,9 +1,8 @@
 # Amazon EMR Serverless
 
 [Amazon EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html)
-can be used to manage and execute distributed computing workloads using Apache Spark. With its serverless architecture,
-it eliminates the need to provision or manage clusters to execute your Spark jobs. Instead, EMR Serverless
-independently allocates the resources needed for each job and releases them after the job has completed.
+can be used to manage and execute distributed computing workloads using Apache Spark. Its serverless architecture eliminates the need to provision or manage clusters to execute your Spark jobs. Instead, EMR Serverless
+independently allocates the resources needed for each job and releases them at completion.
 
 EMR Serverless is typically used for pipelines that are either fully or partially dependent on PySpark.
 For other parts of the pipeline such as modeling, where a non-distributed computing approach may be suitable, EMR Serverless might not be needed.
@@ -32,7 +31,7 @@ and ensures the package is portable so it can be debugged and tested locally ([s
 
 With this context established, the rest of this page describes how to deploy a Kedro project to EMR Serverless.
 
-## Overview of Approach
+## Overview of approach
 
 This approach creates a custom Docker image for EMR Serverless to package dependencies and manage the runtime environment, and follows these steps:
 
@@ -91,7 +90,7 @@ main(sys.argv[1:])
 Replace `<PACKAGE_NAME>` with your package name.
 
 ### Resources
-For more details, refer to the following resources:
+For more details, see the following resources:
 
 - [Package a Kedro project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#package-a-kedro-project)
 - [Run a packaged project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html#run-a-packaged-project)
@@ -147,7 +146,7 @@ to an S3 bucket (specify the S3 bucket you have created).
 ## (Optional) Validate the custom image
 
 EMR Serverless provides a utility to validate your custom images locally, to make sure your modifications are still
-compatible to EMR Serverless and to prevent job failures. Refer to [Amazon EMR Serverless Image CLI](https://github.com/awslabs/amazon-emr-serverless-image-cli)
+compatible to EMR Serverless and to prevent job failures. See the [Amazon EMR Serverless Image CLI documentation](https://github.com/awslabs/amazon-emr-serverless-image-cli)
 for more details.
 
 ## Run a job
@@ -191,17 +190,16 @@ aws emr-serverless start-job-run \
     }'
 ```
 
-Enter the respective values in the placeholders above, e.g. use the ARN from the job runtime role created earlier for
-`<execution-role-arn>`.
+Enter the respective values in the placeholders above. For example, use the ARN from the job runtime role created earlier for `<execution-role-arn>`.
 
 ## FAQ
 
 ### How is the approach defined here different from the approach in ["Seven steps to deploy Kedro pipelines on Amazon EMR"](https://kedro.org/blog/how-to-deploy-kedro-pipelines-on-amazon-emr) on the Kedro blog?
 
-There are similarities in steps in both approaches. However, the key difference is that this page explains how to provide a custom Python version
-through the custom image. The blog post provides Python dependencies in a virtual environment for EMR to refer to.
+There are similarities in steps in both approaches. The key difference is that this page explains how to provide a custom Python version
+through the custom image. The blog post provides Python dependencies in a virtual environment for EMR.
 
-The approach of providing a custom image is only applicable to EMR Serverless. On EMR it would be worth considering [using a custom AMI](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html), as an alternative to using [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html). However, this has not been explored nor tested as yet.
+The approach of providing a custom image is applies to EMR *Serverless*. On EMR it would be worth considering [using a custom AMI](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-custom-ami.html), as an alternative to using [bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html). This has not been explored nor tested as yet.
 
 ### EMR Serverless already has Python installed. Why do we need a custom Python version?
 
@@ -209,15 +207,15 @@ Some applications may require a different Python version than the default versio
 
 ### Why do we need to create a custom image to provide the custom Python version?
 
-You may encounter difficulties with the [virtual environment approach](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python.html), particularly when modifying it to use [pyenv](https://github.com/pyenv/pyenv). While using [venv-pack](https://pypi.org/project/venv-pack/) we found [a limitation that returned the error `Too many levels of symbolic links`](https://jcristharif.com/venv-pack/#caveats), which is documented as follows:
+You may encounter difficulties with the [virtual environment approach](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/using-python.html) when modifying it to use [pyenv](https://github.com/pyenv/pyenv). While using [venv-pack](https://pypi.org/project/venv-pack/) we found [a limitation that returned the error `Too many levels of symbolic links`](https://jcristharif.com/venv-pack/#caveats), which is documented as follows:
 
 >Python is _not_ packaged with the environment, but rather symlinked in the environment.
 > This is useful for deployment situations where Python is already installed on the machine, but the required library dependencies may not be.
 
-The custom image approach neatly includes both installing the Kedro project and provides
+The custom image approach includes both installing the Kedro project and provides
 the custom Python version in one go. Otherwise, you would need to separately provide the files, and specify them as extra Spark configuration each time you submit a job.
 
-### Why do we need to package the Kedro project and invoke using an entrypoint script? Why can't we just use [CMD] or [ENTRYPOINT] with `kedro run` in the custom image?
+### Why do we need to package the Kedro project and invoke using an entrypoint script? Why can't we use [CMD] or [ENTRYPOINT] with `kedro run` in the custom image?
 
 As mentioned in the [AWS documentation](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-custom-image.html), EMR Serverless ignores `[CMD]` or `[ENTRYPOINT]` instructions in the Dockerfile.
 
@@ -226,13 +224,11 @@ programmatically, instead of using [subprocess](https://docs.python.org/3/librar
 
 ### How about using the method described in [Lifecycle management with KedroSession](https://docs.kedro.org/en/0.18.11/kedro_project_setup/session.html) to run Kedro programmatically?
 
-This is indeed a valid alternative to run Kedro programmatically, without needing to package the Kedro project.
-However, the arguments are not a direct mapping to Kedro command line arguments:
+This is a valid alternative to run Kedro programmatically, without needing to package the Kedro project, but the arguments are not a direct mapping to Kedro command line arguments:
 - Different names are used. For example, "pipeline_name" and "node_names" are used instead of "pipeline" and "nodes".
-- Different types are used. For example, to specify the "runner" you need to pass an `AbstractRunner` object, instead of a
-simple string value like "ThreadRunner".
+- Different types are used. For example, to specify the "runner" you need to pass an `AbstractRunner` object, instead of a string value like "ThreadRunner".
 
 Arguments need to be passed separately: "env" is passed directly to `KedroSession.create()` while
 other arguments such as "pipeline_name" and "node_names" need to be passed to `session.run()`.
 
-It is only straightforward for simple scenarios like invoking `kedro run`, or where you do not provide many command line arguments to Kedro.
+It is most suited to scenarios such as invoking kedro run`, or where you do not provide many command line arguments to Kedro.

@@ -344,15 +344,22 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         if str(exc) == f"No module named '{PACKAGE_NAME}.pipelines'":
             return pipelines_dict
 
-    for pipeline_dir in pipelines_package.iterdir():
+    for pipeline_dir in pipelines_package.glob("**/"):
         if not pipeline_dir.is_dir():
+            continue
+        if not (pipeline_dir / "__init__.py").is_file():
             continue
 
         pipeline_name = pipeline_dir.name
         if pipeline_name == "__pycache__":
             continue
 
-        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+        pipeline_relative_path = pipeline_dir.relative_to(pipelines_package)
+        full_pipeline_name = os.path.normpath(pipeline_relative_path).replace(
+            os.path.sep, "."
+        )
+
+        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{full_pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
         except:  # noqa: bare-except  # noqa: E722

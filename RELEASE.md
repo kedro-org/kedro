@@ -21,6 +21,8 @@
 * Removed deprecated `kedro.extras.ColorHandler`.
 * The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 * Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
+* The default project template now has only one `pyproject.toml` at the root of the project (containing both the packaging metadata and the Kedro build config).
+* The `requirements.txt` in the default project template moved to the root of the project as well (hence dependencies are now installed with `pip install -r requirements.txt` instead of `pip install -r src/requirements.txt`).
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 ### DataSets

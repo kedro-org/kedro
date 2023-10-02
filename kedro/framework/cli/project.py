@@ -84,8 +84,17 @@ def ipython(metadata: ProjectMetadata, env, args, **kwargs):  # noqa: unused-arg
 @click.pass_obj  # this will pass the metadata as first argument
 def package(metadata: ProjectMetadata):
     """Package the project as a Python wheel."""
-    # TODO: Detect whether metadata is under project_path or source_path
-    project_path = metadata.project_path
+    # Even if the user decides for the older setup.py on purpose,
+    # pyproject.toml is needed for Kedro metadata
+    if (metadata.project_path / "pyproject.toml").is_file():
+        metadata_dir = metadata.project_path
+        destination_dir = "dist"
+    else:
+        # Assume it's an old Kedro project, packaging metadata was under src
+        # (could be pyproject.toml or setup.py, it's not important)
+        metadata_dir = metadata.source_dir
+        destination_dir = "../dist"
+
     call(
         [
             sys.executable,
@@ -93,9 +102,9 @@ def package(metadata: ProjectMetadata):
             "build",
             "--wheel",
             "--outdir",
-            "dist",
+            destination_dir,
         ],
-        cwd=str(project_path),
+        cwd=str(metadata_dir),
     )
 
     directory = (

@@ -239,11 +239,11 @@ def delete_pipeline(
 
     for dir_to_delete in dirs_to_delete:
         for subdir in dir_to_delete.glob("**/*/"):
-            for init_py_file in subdir.glob("**/__init__.py"):
+            for py_file in subdir.glob("**/*.py"):
                 raise KedroCliError(
                     f"Cannot delete the pipeline '{dir_to_delete}'"
                     " because it contains a child pipeline."
-                    f" Please delete the child pipeline in '{init_py_file}'"
+                    f" Please delete the child pipeline in '{py_file.parent}'"
                     " before deleting this one."
                 )
 
@@ -299,6 +299,8 @@ def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
             output_dir=str(output_dir),
             no_input=True,
             extra_context=cookie_context,
+            # allows creation of pipelines in parent folder of existing pipeline
+            overwrite_if_exists=True,
         )
     except Exception as exc:
         click.secho("FAILED", fg="red")

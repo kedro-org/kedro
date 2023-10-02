@@ -344,15 +344,25 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         if str(exc) == f"No module named '{PACKAGE_NAME}.pipelines'":
             return pipelines_dict
 
-    for pipeline_dir in pipelines_package.iterdir():
+    for pipeline_dir in pipelines_package.glob("**/"):
+        if pipeline_dir == Path(pipelines_package):
+            continue
         if not pipeline_dir.is_dir():
+            continue
+        # only check the dir if it contains py files
+        if not any(pipeline_dir.glob("*.py")):
             continue
 
         pipeline_name = pipeline_dir.name
         if pipeline_name == "__pycache__":
             continue
 
-        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
+        pipeline_relative_path = pipeline_dir.relative_to(pipelines_package)
+        full_pipeline_name = os.path.normpath(pipeline_relative_path).replace(
+            os.path.sep, "."
+        )
+
+        pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{full_pipeline_name}"
         try:
             pipeline_module = importlib.import_module(pipeline_module_name)
         except:  # noqa: bare-except  # noqa: E722
@@ -365,5 +375,9 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
 
         pipeline_obj = _create_pipeline(pipeline_module)
         if pipeline_obj is not None:
+            if pipeline_name in pipelines_dict:
+                raise ValueError(
+                    f"find_pipelines found two pipelines with the name {pipeline_name}"
+                )
             pipelines_dict[pipeline_name] = pipeline_obj
     return pipelines_dict

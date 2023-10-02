@@ -99,7 +99,7 @@ def _split_on_last_dot(input_string: str) -> tuple[str, str]:
         return "", input_string
 
 
-def transform_dotted_string_to_path(dotted_string: str) -> Path:
+def _transform_dotted_string_to_path(dotted_string: str) -> Path:
     """
     Transform a dotted string into a pathlib Path with OS-independent separator.
 
@@ -176,12 +176,12 @@ def create_pipeline(
         raise ValueError(f"Pipeline {name} already exists: ({file})")
 
     # add necessary subfolders
-    pipeline_dir = package_dir / "pipelines" / transform_dotted_string_to_path(parent)
+    pipeline_dir = package_dir / "pipelines" / _transform_dotted_string_to_path(parent)
     tests_target = (
         package_dir.parent
         / "tests"
         / "pipelines"
-        / transform_dotted_string_to_path(parent)
+        / _transform_dotted_string_to_path(parent)
         / name
     )
 

@@ -1,6 +1,7 @@
 """A collection of CLI commands for working with Kedro pipelines."""
 from __future__ import annotations
 
+import os
 import re
 import shutil
 from pathlib import Path
@@ -59,9 +60,11 @@ def _assert_pkg_name_ok(pkg_name: str):
     if len(pkg_name) < 2:  # noqa: PLR2004
         message = base_message + " It must be at least 2 characters long."
         raise KedroCliError(message)
-    if not re.match(r"^\w+$", pkg_name[1:]):
+    if not re.match(r"^\w(\w+\.)*\w+$", pkg_name):
         message = (
-            base_message + " It must contain only letters, digits, and/or underscores."
+            base_message
+            + " It must contain only letters, digits, and/or underscores."
+            + " Folders should be separated by '.'"
         )
         raise KedroCliError(message)
 
@@ -70,6 +73,45 @@ def _check_pipeline_name(ctx, param, value):  # noqa: unused-argument
     if value:
         _assert_pkg_name_ok(value)
     return value
+
+
+def _split_on_last_dot(input_string: str) -> tuple[str, str]:
+    """Split an input string based on the last occurrence of a dot.
+
+    Args:
+        input_string (str): The input string to be split.
+
+    Returns:
+        tuple: A tuple containing the portion before the last dot (if present) and
+            the portion after it. If there is no dot, the entire input string
+            is included in the second element of the tuple.
+
+    Example:
+        - 'path.to.pipeline' => ('path.to', 'pipeline')
+        - 'mypipeline' => ('', 'mypipeline')
+
+    """
+    parts = input_string.rsplit(".", 1)
+    expected_nb_parts = 2
+    if len(parts) == expected_nb_parts:
+        return tuple(parts)  # type: ignore
+    else:
+        return "", input_string
+
+
+def transform_dotted_string_to_path(dotted_string: str) -> Path:
+    """
+    Transform a dotted string into a pathlib Path with OS-independent separator.
+
+    Args:
+        dotted_string (str): The input dotted string.
+
+    Returns:
+        Path: A pathlib Path object representing the path with OS-independent separator.
+    """
+    # Replace dots with os-specific path separator and return as a string
+    path_str = os.path.join(*dotted_string.split("."))
+    return Path(path_str)
 
 
 # noqa: missing-function-docstring
@@ -126,8 +168,25 @@ def create_pipeline(
 
     click.secho(f"Using pipeline template at: '{template_path}'")
 
-    result_path = _create_pipeline(name, template_path, package_dir / "pipelines")
-    _copy_pipeline_tests(name, result_path, package_dir)
+    # handle dots in name
+    parent, name = _split_on_last_dot(name)
+
+    # ensure pipeline name is globally unique
+    for file in package_dir.glob(f"**/{name}/__init__.py"):
+        raise ValueError(f"Pipeline {name} already exists: ({file})")
+
+    # add necessary subfolders
+    pipeline_dir = package_dir / "pipelines" / transform_dotted_string_to_path(parent)
+    tests_target = (
+        package_dir.parent
+        / "tests"
+        / "pipelines"
+        / transform_dotted_string_to_path(parent)
+        / name
+    )
+
+    result_path = _create_pipeline(name, template_path, pipeline_dir)
+    _copy_pipeline_tests(result_path, tests_target)
     _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline '{name}' was successfully created.\n", fg="green")
 
@@ -317,9 +376,8 @@ def _get_artifacts_to_package(
     return artifacts
 
 
-def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Path):
+def _copy_pipeline_tests(result_path: Path, tests_target: Path):
     tests_source = result_path / "tests"
-    tests_target = package_dir.parent / "tests" / "pipelines" / pipeline_name
     try:
         _sync_dirs(tests_source, tests_target)
     finally:

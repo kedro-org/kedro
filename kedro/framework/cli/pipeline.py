@@ -173,7 +173,7 @@ def create_pipeline(
 
     # ensure pipeline name is globally unique
     for file in package_dir.glob(f"**/{name}/__init__.py"):
-        raise ValueError(f"Pipeline {name} already exists: ({file})")
+        raise KedroCliError(f"Pipeline {name} already exists: ({file})")
 
     # add necessary subfolders
     pipeline_dir = package_dir / "pipelines" / _transform_dotted_string_to_path(parent)
@@ -217,12 +217,17 @@ def delete_pipeline(
 
     pipeline_artifacts = _get_pipeline_artifacts(metadata, pipeline_name=name, env=env)
 
+    _, conf_name = _split_on_last_dot(name)
+
     files_to_delete = [
         pipeline_artifacts.pipeline_conf / filepath
         for confdir in ("parameters", "catalog")
         # Since we remove nesting in 'parameters' and 'catalog' folders,
         # we want to also del the old project's structure for backward compatibility
-        for filepath in (Path(f"{confdir}_{name}.yml"), Path(confdir) / f"{name}.yml")
+        for filepath in (
+            Path(f"{confdir}_{conf_name}.yml"),
+            Path(confdir) / f"{conf_name}.yml",
+        )
         if (pipeline_artifacts.pipeline_conf / filepath).is_file()
     ]
 
@@ -231,6 +236,16 @@ def delete_pipeline(
         for path in (pipeline_artifacts.pipeline_dir, pipeline_artifacts.pipeline_tests)
         if path.is_dir()
     ]
+
+    for dir_to_delete in dirs_to_delete:
+        for subdir in dir_to_delete.glob("**/*/"):
+            for init_py_file in subdir.glob("**/__init__.py"):
+                raise KedroCliError(
+                    f"Cannot delete the pipeline '{dir_to_delete}'"
+                    " because it contains a child pipeline."
+                    f" Please delete the child pipeline in '{init_py_file}'"
+                    " before deleting this one."
+                )
 
     if not files_to_delete and not dirs_to_delete:
         raise KedroCliError(f"Pipeline '{name}' not found.")

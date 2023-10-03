@@ -51,6 +51,12 @@ def _make_cli_prompt_input(
     return "\n".join([add_ons, project_name, repo_name, python_package])
 
 
+def _make_cli_prompt_input_without_addons(
+    project_name="", repo_name="", python_package=""
+):
+    return "\n".join([project_name, repo_name, python_package])
+
+
 def _get_expected_files(add_ons: str):
     add_ons_template_files = {
         "1": 0,
@@ -911,3 +917,28 @@ class TestAddOnsFromConfigFile:
             "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
             in result.output
         )
+
+
+@pytest.mark.usefixtures("chdir_to_tmp")
+class TestAddOnsFromCLI:
+    @pytest.mark.parametrize(
+        "add_ons",
+        ["1", "2", "3", "4", "5", "none", "2,3,4", "3-5", "all"],
+    )
+    def test_valid_add_ons(self, fake_kedro_cli, add_ons):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", add_ons],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+        _assert_template_ok(result, add_ons=add_ons)
+        _assert_requirements_ok(result, add_ons=add_ons)
+
+    def test_invalid_add_ons(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", "bad_input"],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+
+        assert result.exit_code != 0

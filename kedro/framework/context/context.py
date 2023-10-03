@@ -132,7 +132,7 @@ def _validate_transcoded_datasets(catalog: DataCatalog):
 
     """
     # noqa: protected-access
-    for dataset_name in catalog._data_sets.keys():
+    for dataset_name in catalog._datasets.keys():
         _transcode_split(dataset_name)
 
 

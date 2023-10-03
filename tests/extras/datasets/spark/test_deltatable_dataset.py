@@ -90,7 +90,7 @@ class TestDeltaTableDataSet:
             _ = x + 1  # pragma: no cover
 
         delta_ds = DeltaTableDataSet(filepath="")
-        catalog = DataCatalog(data_sets={"delta_in": delta_ds})
+        catalog = DataCatalog(datasets={"delta_in": delta_ds})
         pipeline = modular_pipeline([node(no_output, "delta_in", None)])
         pattern = (
             r"The following data sets cannot be used with "

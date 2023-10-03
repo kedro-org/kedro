@@ -222,7 +222,7 @@ def bad_config(filepath):
 
 @pytest.fixture
 def data_catalog(data_set):
-    return DataCatalog(data_sets={"test": data_set})
+    return DataCatalog(datasets={"test": data_set})
 
 
 @pytest.fixture
@@ -240,7 +240,7 @@ class TestDataCatalog:
 
     def test_add_save_and_load(self, data_set, dummy_dataframe):
         """Test adding and then saving and reloading the data set"""
-        catalog = DataCatalog(data_sets={})
+        catalog = DataCatalog(datasets={})
         catalog.add("test", data_set)
         catalog.save("test", dummy_dataframe)
         reloaded_df = catalog.load("test")
@@ -250,7 +250,7 @@ class TestDataCatalog:
     def test_add_all_save_and_load(self, data_set, dummy_dataframe):
         """Test adding all to the data catalog and then saving and reloading
         the data set"""
-        catalog = DataCatalog(data_sets={})
+        catalog = DataCatalog(datasets={})
         catalog.add_all({"test": data_set})
         catalog.save("test", dummy_dataframe)
         reloaded_df = catalog.load("test")
@@ -272,14 +272,14 @@ class TestDataCatalog:
 
     def test_load_from_unregistered(self):
         """Check the error when attempting to load unregistered data set"""
-        catalog = DataCatalog(data_sets={})
+        catalog = DataCatalog(datasets={})
         pattern = r"Dataset 'test' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.load("test")
 
     def test_save_to_unregistered(self, dummy_dataframe):
         """Check the error when attempting to save to unregistered data set"""
-        catalog = DataCatalog(data_sets={})
+        catalog = DataCatalog(datasets={})
         pattern = r"Dataset 'test' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.save("test", dummy_dataframe)
@@ -300,7 +300,7 @@ class TestDataCatalog:
 
     def test_exists_not_implemented(self, caplog):
         """Test calling `exists` on the data set, which didn't implement it"""
-        catalog = DataCatalog(data_sets={"test": LambdaDataset(None, None)})
+        catalog = DataCatalog(datasets={"test": LambdaDataset(None, None)})
         result = catalog.exists("test")
 
         log_record = caplog.records[0]
@@ -401,7 +401,7 @@ class TestDataCatalog:
         """Confirm the dataset"""
         with caplog.at_level(logging.INFO):
             mock_ds = mocker.Mock()
-            data_catalog = DataCatalog(data_sets={"mocked": mock_ds})
+            data_catalog = DataCatalog(datasets={"mocked": mock_ds})
             data_catalog.confirm("mocked")
             mock_ds.confirm.assert_called_once_with()
             assert caplog.record_tuples == [
@@ -748,7 +748,7 @@ class TestDataCatalogVersioned:
         csv = CSVDataSet(filepath="abc.csv")
         datasets = {"ds1@spark": csv, "ds2_spark": csv, "ds3.csv": csv, "jalapeño": csv}
 
-        catalog = DataCatalog(data_sets=datasets)
+        catalog = DataCatalog(datasets=datasets)
         assert "ds1@spark" not in catalog.datasets.__dict__
         assert "ds2__spark" not in catalog.datasets.__dict__
         assert "ds3.csv" not in catalog.datasets.__dict__
@@ -777,13 +777,13 @@ class TestDataCatalogDatasetFactories:
     def test_match_added_to_datasets_on_get(self, config_with_dataset_factories):
         """Check that the datasets that match patterns are only added when fetched"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        assert "{brand}_cars" not in catalog._data_sets
-        assert "tesla_cars" not in catalog._data_sets
+        assert "{brand}_cars" not in catalog._datasets
+        assert "tesla_cars" not in catalog._datasets
         assert "{brand}_cars" in catalog._dataset_patterns
 
         tesla_cars = catalog._get_dataset("tesla_cars")
         assert isinstance(tesla_cars, CSVDataSet)
-        assert "tesla_cars" in catalog._data_sets
+        assert "tesla_cars" in catalog._datasets
 
     @pytest.mark.parametrize(
         "dataset_name, expected",
@@ -806,8 +806,8 @@ class TestDataCatalogDatasetFactories:
     def test_patterns_not_in_catalog_datasets(self, config_with_dataset_factories):
         """Check that the pattern is not in the catalog datasets"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        assert "audi_cars" in catalog._data_sets
-        assert "{brand}_cars" not in catalog._data_sets
+        assert "audi_cars" in catalog._datasets
+        assert "{brand}_cars" not in catalog._datasets
         assert "audi_cars" not in catalog._dataset_patterns
         assert "{brand}_cars" in catalog._dataset_patterns
 
@@ -847,7 +847,7 @@ class TestDataCatalogDatasetFactories:
     def test_default_dataset(self, config_with_dataset_factories_with_default, caplog):
         """Check that default dataset is used when no other pattern matches"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories_with_default)
-        assert "jet@planes" not in catalog._data_sets
+        assert "jet@planes" not in catalog._datasets
         jet_dataset = catalog._get_dataset("jet@planes")
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"

@@ -428,7 +428,7 @@ class TestSparkDataSet:
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async, spark_in):
         """Test ParallelRunner with SparkDataSet fails."""
-        catalog = DataCatalog(data_sets={"spark_in": spark_in})
+        catalog = DataCatalog(datasets={"spark_in": spark_in})
         pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
         pattern = (
             r"The following data sets cannot be used with "
@@ -969,7 +969,7 @@ class TestDataFlowSequentialRunner:
         pipeline = modular_pipeline([node(identity, "spark_in", "spark_out")])
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
-        save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
+        save_path = Path(data_catalog._datasets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
         assert len(files) > 0
 
@@ -991,6 +991,6 @@ class TestDataFlowSequentialRunner:
         )
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
-        save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
+        save_path = Path(data_catalog._datasets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
         assert len(files) > 0

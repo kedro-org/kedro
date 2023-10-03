@@ -222,10 +222,10 @@ class ParallelRunner(AbstractRunner):
         will not be synchronized across threads.
         """
 
-        data_sets = catalog._data_sets  # noqa: protected-access
+        datasets = catalog._datasets  # noqa: protected-access
 
         unserialisable = []
-        for name, data_set in data_sets.items():
+        for name, data_set in datasets.items():
             if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
                 unserialisable.append(name)
                 continue
@@ -245,7 +245,7 @@ class ParallelRunner(AbstractRunner):
             )
 
         memory_datasets = []
-        for name, data_set in data_sets.items():
+        for name, data_set in datasets.items():
             if (
                 name in pipeline.all_outputs()
                 and isinstance(data_set, MemoryDataset)

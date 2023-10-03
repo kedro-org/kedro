@@ -81,8 +81,8 @@ class TestCachedDataset:
         catalog = DataCatalog.from_config(config)
         assert catalog.list() == ["test_ds"]
         mock = mocker.Mock()
-        assert isinstance(catalog._data_sets["test_ds"]._dataset, CSVDataSet)
-        catalog._data_sets["test_ds"]._dataset = mock
+        assert isinstance(catalog._datasets["test_ds"]._dataset, CSVDataSet)
+        catalog._datasets["test_ds"]._dataset = mock
         catalog.save("test_ds", 20)
 
         assert catalog.load("test_ds") == 20
@@ -101,7 +101,7 @@ class TestCachedDataset:
     def test_config_good_version(self):
         config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED))
         catalog = DataCatalog.from_config(config, load_versions={"test_ds": "42"})
-        assert catalog._data_sets["test_ds"]._dataset._version.load == "42"
+        assert catalog._datasets["test_ds"]._dataset._version.load == "42"
 
     def test_config_bad_version(self):
         config = yaml.safe_load(StringIO(YML_CONFIG_VERSIONED_BAD))

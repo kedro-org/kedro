@@ -8,7 +8,7 @@ from typing import Any
 import pandas as pd
 import pytest
 from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from kedro.io import (
     AbstractDataset,

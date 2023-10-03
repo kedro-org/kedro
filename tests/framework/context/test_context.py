@@ -220,7 +220,7 @@ class TestKedroContext:
         # the catalog and its dataset should be loaded using absolute path
         # based on the project path
         catalog = dummy_context._get_catalog()
-        ds_path = catalog._data_sets["horses"]._filepath
+        ds_path = catalog._datasets["horses"]._filepath
         assert PurePath(ds_path.as_posix()).is_absolute()
         assert (
             ds_path.as_posix()
@@ -232,7 +232,7 @@ class TestKedroContext:
             "kedro.framework.context.context._transcode_split"
         )
         catalog = dummy_context.catalog
-        for dataset_name in catalog._data_sets.keys():
+        for dataset_name in catalog._datasets.keys():
             mock_transcode_split.assert_any_call(dataset_name)
 
         mock_validate = mocker.patch(

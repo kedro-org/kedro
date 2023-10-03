@@ -220,7 +220,7 @@ class DaskRunner(AbstractRunner):
 
         # We also need any missing datasets that are required to run the
         # `to_rerun` pipeline, including any chains of missing datasets.
-        unregistered_ds = pipeline.data_sets() - set(catalog.list())
+        unregistered_ds = pipeline.datasets() - set(catalog.list())
         # Some of the unregistered datasets could have been published to
         # the scheduler in a previous run, so we need not recreate them.
         missing_unregistered_ds = {

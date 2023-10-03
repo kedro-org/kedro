@@ -250,7 +250,7 @@ class Pipeline:  # noqa: too-many-public-methods
         """
         return self._remove_intermediates(self.all_outputs())
 
-    def data_sets(self) -> set[str]:
+    def datasets(self) -> set[str]:
         """The names of all data sets used by the ``Pipeline``,
         including inputs and outputs.
 

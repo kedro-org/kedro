@@ -142,7 +142,7 @@ class DataCatalog:
 
     def __init__(  # noqa: too-many-arguments
         self,
-        data_sets: dict[str, AbstractDataset] = None,
+        datasets: dict[str, AbstractDataset] = None,
         feed_dict: dict[str, Any] = None,
         layers: dict[str, set[str]] = None,
         dataset_patterns: Patterns = None,
@@ -157,7 +157,7 @@ class DataCatalog:
         functions to the underlying data sets.
 
         Args:
-            data_sets: A dictionary of data set names and data set instances.
+            datasets: A dictionary of data set names and data set instances.
             feed_dict: A feed dict with data to be added in memory.
             layers: A dictionary of data set layers. It maps a layer name
                 to a set of data set names, according to the
@@ -181,10 +181,10 @@ class DataCatalog:
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(data_sets={'cars': cars})
+            >>> io = DataCatalog(datasets={'cars': cars})
         """
-        self._data_sets = dict(data_sets or {})
-        self.datasets = _FrozenDatasets(self._data_sets)
+        self._datasets = dict(datasets or {})
+        self.datasets = _FrozenDatasets(self._datasets)
         self.layers = layers
         # Keep a record of all patterns in the catalog.
         # {dataset pattern name : dataset pattern body}
@@ -276,7 +276,7 @@ class DataCatalog:
             >>> df = catalog.load("cars")
             >>> catalog.save("boats", df)
         """
-        data_sets = {}
+        datasets = {}
         dataset_patterns = {}
         catalog = copy.deepcopy(catalog) or {}
         credentials = copy.deepcopy(credentials) or {}
@@ -307,7 +307,7 @@ class DataCatalog:
                 ds_layer = ds_config.pop("layer", None)
                 if ds_layer is not None:
                     layers[ds_layer].add(ds_name)
-                data_sets[ds_name] = AbstractDataset.from_config(
+                datasets[ds_name] = AbstractDataset.from_config(
                     ds_name, ds_config, load_versions.get(ds_name), save_version
                 )
         dataset_layers = layers or None
@@ -324,7 +324,7 @@ class DataCatalog:
             )
 
         return cls(
-            data_sets=data_sets,
+            datasets=datasets,
             layers=dataset_layers,
             dataset_patterns=sorted_patterns,
             load_versions=load_versions,
@@ -385,7 +385,7 @@ class DataCatalog:
         self, data_set_name: str, version: Version = None, suggest: bool = True
     ) -> AbstractDataset:
         matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
-        if data_set_name not in self._data_sets and matched_pattern:
+        if data_set_name not in self._datasets and matched_pattern:
             # If the dataset is a patterned dataset, materialise it and add it to
             # the catalog
             config_copy = copy.deepcopy(self._dataset_patterns[matched_pattern])
@@ -411,20 +411,20 @@ class DataCatalog:
                 )
 
             self.add(data_set_name, data_set)
-        if data_set_name not in self._data_sets:
+        if data_set_name not in self._datasets:
             error_msg = f"Dataset '{data_set_name}' not found in the catalog"
 
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
                 matches = difflib.get_close_matches(
-                    data_set_name, self._data_sets.keys()
+                    data_set_name, self._datasets.keys()
                 )
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
             raise DatasetNotFoundError(error_msg)
-        data_set = self._data_sets[data_set_name]
+        data_set = self._datasets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataset):
             # we only want to return a similar-looking dataset,
             # not modify the one stored in the current catalog
@@ -435,7 +435,7 @@ class DataCatalog:
     def __contains__(self, data_set_name):
         """Check if an item is in the catalog as a materialised dataset or pattern"""
         matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
-        if data_set_name in self._data_sets or matched_pattern:
+        if data_set_name in self._datasets or matched_pattern:
             return True
         return False
 
@@ -491,7 +491,7 @@ class DataCatalog:
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(data_sets={'cars': cars})
+            >>> io = DataCatalog(datasets={'cars': cars})
             >>>
             >>> df = io.load("cars")
         """
@@ -528,7 +528,7 @@ class DataCatalog:
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
-            >>> io = DataCatalog(data_sets={'cars': cars})
+            >>> io = DataCatalog(datasets={'cars': cars})
             >>>
             >>> df = pd.DataFrame({'col1': [1, 2],
             >>>                    'col2': [4, 5],
@@ -594,29 +594,29 @@ class DataCatalog:
 
             >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
-            >>> io = DataCatalog(data_sets={
+            >>> io = DataCatalog(datasets={
             >>>                   'cars': CSVDataSet(filepath="cars.csv")
             >>>                  })
             >>>
             >>> io.add("boats", CSVDataSet(filepath="boats.csv"))
         """
-        if data_set_name in self._data_sets:
+        if data_set_name in self._datasets:
             if replace:
                 self._logger.warning("Replacing dataset '%s'", data_set_name)
             else:
                 raise DatasetAlreadyExistsError(
                     f"Dataset '{data_set_name}' has already been registered"
                 )
-        self._data_sets[data_set_name] = data_set
+        self._datasets[data_set_name] = data_set
         self.datasets = _FrozenDatasets(self.datasets, {data_set_name: data_set})
 
     def add_all(
-        self, data_sets: dict[str, AbstractDataset], replace: bool = False
+        self, datasets: dict[str, AbstractDataset], replace: bool = False
     ) -> None:
         """Adds a group of new data sets to the ``DataCatalog``.
 
         Args:
-            data_sets: A dictionary of dataset names and dataset
+            datasets: A dictionary of dataset names and dataset
                 instances.
             replace: Specifies whether to replace an existing dataset
                 with the same name is allowed.
@@ -630,7 +630,7 @@ class DataCatalog:
 
             >>> from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
             >>>
-            >>> io = DataCatalog(data_sets={
+            >>> io = DataCatalog(datasets={
             >>>                   "cars": CSVDataSet(filepath="cars.csv")
             >>>                  })
             >>> additional = {
@@ -642,7 +642,7 @@ class DataCatalog:
             >>>
             >>> assert io.list() == ["cars", "planes", "boats"]
         """
-        for name, data_set in data_sets.items():
+        for name, data_set in datasets.items():
             self.add(name, data_set, replace)
 
     def add_feed_dict(self, feed_dict: dict[str, Any], replace: bool = False) -> None:
@@ -708,7 +708,7 @@ class DataCatalog:
         """
 
         if regex_search is None:
-            return list(self._data_sets.keys())
+            return list(self._datasets.keys())
 
         if not regex_search.strip():
             self._logger.warning("The empty string will not match any data sets")
@@ -721,7 +721,7 @@ class DataCatalog:
             raise SyntaxError(
                 f"Invalid regular expression provided: '{regex_search}'"
             ) from exc
-        return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
+        return [dset_name for dset_name in self._datasets if pattern.search(dset_name)]
 
     def shallow_copy(self) -> DataCatalog:
         """Returns a shallow copy of the current object.
@@ -730,7 +730,7 @@ class DataCatalog:
             Copy of the current object.
         """
         return DataCatalog(
-            data_sets=self._data_sets,
+            datasets=self._datasets,
             layers=self.layers,
             dataset_patterns=self._dataset_patterns,
             load_versions=self._load_versions,
@@ -738,8 +738,8 @@ class DataCatalog:
         )
 
     def __eq__(self, other):
-        return (self._data_sets, self.layers, self._dataset_patterns) == (
-            other._data_sets,
+        return (self._datasets, self.layers, self._dataset_patterns) == (
+            other._datasets,
             other.layers,
             other._dataset_patterns,
         )

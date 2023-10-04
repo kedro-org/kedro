@@ -20,12 +20,12 @@ When your project is ready, navigate to the root directory of the project.
 
 ## Update and install the dependencies
 
-Kedro-Viz requires specific minimum versions of `fsspec` and `kedro` to publish your project.
+Kedro-Viz requires specific minimum versions of `fsspec[s3]`, and `kedro` to publish your project.
 
 You can ensure you have these correct versions by updating the `requirements.txt` file in the `src` folder of the Kedro project to the following:
 
 ```text
-fsspec>=2023.9.0
+fsspec[s3]>=2023.9.0
 kedro>=0.18.2
 ```
 

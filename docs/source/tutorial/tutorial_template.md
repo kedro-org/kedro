@@ -34,7 +34,8 @@ The spaceflights project dependencies are stored in `src/requirements.txt`(you m
 # code quality packages
 black==22.0
 flake8>=3.7.9, <5.0
-ipython>=7.31.1, <8.0
+ipython>=7.31.1, <8.0; python_version < '3.8'
+ipython~=8.10; python_version >= '3.8'
 isort~=5.0
 nbstripout~=0.4
 
@@ -49,7 +50,7 @@ pytest-mock>=1.7.1, <2.0
 pytest~=7.2
 
 # Kedro dependencies and datasets to work with different data formats (including CSV, Excel, and Parquet)
-kedro~=0.18.10
+kedro~=0.18.13
 kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.1
 kedro-telemetry~=0.2.0
 kedro-viz~=6.0 # Visualise pipelines

@@ -18,7 +18,7 @@ from kedro.framework.cli.starters import (
 )
 from kedro.templates.project.hooks.utils import parse_add_ons_input
 
-FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 16
+FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 15
 
 
 @pytest.fixture
@@ -155,7 +155,6 @@ docs = [
     "sphinx~=3.4.3",
     "sphinx_rtd_theme==0.5.1",
     "nbsphinx==0.8.1",
-    "nbstripout~=0.4",
     "sphinx-autodoc-typehints==1.11.1",
     "sphinx_copybutton==0.3.1",
     "ipykernel>=5.3, <7.0",

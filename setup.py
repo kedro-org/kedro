@@ -86,6 +86,7 @@ extras_require = {
         # docutils>=0.17 changed the HTML
         # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
         "docutils==0.16",
+        "nbsphinx",
         "sphinx~=5.3.0",
         "sphinx_rtd_theme==1.2.0",
         # Regression on sphinx-autodoc-typehints 1.21

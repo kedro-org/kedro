@@ -76,9 +76,9 @@ class TestGBQDataSet:
             "exists",
         ]
 
-        data_set = GBQTableDataSet(DATASET, TABLE_NAME)
-        assert not data_set.exists()
-        assert data_set.exists()
+        dataset = GBQTableDataSet(DATASET, TABLE_NAME)
+        assert not dataset.exists()
+        assert dataset.exists()
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
@@ -196,14 +196,14 @@ class TestGBQDataSet:
             "kedro.extras.datasets.pandas.gbq_dataset.bigquery"
         )
 
-        data_set = GBQTableDataSet(
+        dataset = GBQTableDataSet(
             dataset=DATASET,
             table_name=TABLE_NAME,
             credentials=credentials,
             project=PROJECT,
         )
 
-        assert data_set._credentials == credentials_obj
+        assert dataset._credentials == credentials_obj
         mocked_credentials.assert_called_once_with(**credentials)
         mocked_bigquery.Client.assert_called_once_with(
             project=PROJECT, credentials=credentials_obj, location=None
@@ -239,13 +239,13 @@ class TestGBQQueryDataSet:
             "kedro.extras.datasets.pandas.gbq_dataset.bigquery"
         )
 
-        data_set = GBQQueryDataSet(
+        dataset = GBQQueryDataSet(
             sql=SQL_QUERY,
             credentials=credentials,
             project=PROJECT,
         )
 
-        assert data_set._credentials == credentials_obj
+        assert dataset._credentials == credentials_obj
         mocked_credentials.assert_called_once_with(**credentials)
         mocked_bigquery.Client.assert_called_once_with(
             project=PROJECT, credentials=credentials_obj, location=None

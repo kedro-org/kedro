@@ -26,7 +26,7 @@ def filepath_gml(tmp_path):
 
 
 @pytest.fixture
-def gml_data_set(filepath_gml):
+def gml_dataset(filepath_gml):
     return GMLDataSet(
         filepath=filepath_gml,
         load_args={"destringizer": int},
@@ -35,7 +35,7 @@ def gml_data_set(filepath_gml):
 
 
 @pytest.fixture
-def versioned_gml_data_set(filepath_gml, load_version, save_version):
+def versioned_gml_dataset(filepath_gml, load_version, save_version):
     return GMLDataSet(
         filepath=filepath_gml,
         version=Version(load_version, save_version),
@@ -50,25 +50,25 @@ def dummy_graph_data():
 
 
 class TestGMLDataSet:
-    def test_save_and_load(self, gml_data_set, dummy_graph_data):
+    def test_save_and_load(self, gml_dataset, dummy_graph_data):
         """Test saving and reloading the data set."""
-        gml_data_set.save(dummy_graph_data)
-        reloaded = gml_data_set.load()
+        gml_dataset.save(dummy_graph_data)
+        reloaded = gml_dataset.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
-        assert gml_data_set._fs_open_args_load == {"mode": "rb"}
-        assert gml_data_set._fs_open_args_save == {"mode": "wb"}
+        assert gml_dataset._fs_open_args_load == {"mode": "rb"}
+        assert gml_dataset._fs_open_args_save == {"mode": "wb"}
 
-    def test_load_missing_file(self, gml_data_set):
+    def test_load_missing_file(self, gml_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set GMLDataSet\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
-            assert gml_data_set.load()
+            assert gml_dataset.load()
 
-    def test_exists(self, gml_data_set, dummy_graph_data):
+    def test_exists(self, gml_dataset, dummy_graph_data):
         """Test `exists` method invocation."""
-        assert not gml_data_set.exists()
-        gml_data_set.save(dummy_graph_data)
-        assert gml_data_set.exists()
+        assert not gml_dataset.exists()
+        gml_dataset.save(dummy_graph_data)
+        assert gml_dataset.exists()
 
     @pytest.mark.parametrize(
         "filepath,instance_type",
@@ -81,54 +81,54 @@ class TestGMLDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        data_set = GMLDataSet(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = GMLDataSet(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.gml"
-        data_set = GMLDataSet(filepath=filepath)
-        data_set.release()
+        dataset = GMLDataSet(filepath=filepath)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
 
 class TestGMLDataSetVersioned:
-    def test_save_and_load(self, versioned_gml_data_set, dummy_graph_data):
+    def test_save_and_load(self, versioned_gml_dataset, dummy_graph_data):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
-        versioned_gml_data_set.save(dummy_graph_data)
-        reloaded = versioned_gml_data_set.load()
+        versioned_gml_dataset.save(dummy_graph_data)
+        reloaded = versioned_gml_dataset.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
-        assert versioned_gml_data_set._fs_open_args_load == {"mode": "rb"}
-        assert versioned_gml_data_set._fs_open_args_save == {"mode": "wb"}
+        assert versioned_gml_dataset._fs_open_args_load == {"mode": "rb"}
+        assert versioned_gml_dataset._fs_open_args_save == {"mode": "wb"}
 
-    def test_no_versions(self, versioned_gml_data_set):
+    def test_no_versions(self, versioned_gml_dataset):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for GMLDataSet\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            versioned_gml_data_set.load()
+            versioned_gml_dataset.load()
 
-    def test_exists(self, versioned_gml_data_set, dummy_graph_data):
+    def test_exists(self, versioned_gml_dataset, dummy_graph_data):
         """Test `exists` method invocation for versioned data set."""
-        assert not versioned_gml_data_set.exists()
-        versioned_gml_data_set.save(dummy_graph_data)
-        assert versioned_gml_data_set.exists()
+        assert not versioned_gml_dataset.exists()
+        versioned_gml_dataset.save(dummy_graph_data)
+        assert versioned_gml_dataset.exists()
 
-    def test_prevent_override(self, versioned_gml_data_set, dummy_graph_data):
+    def test_prevent_override(self, versioned_gml_dataset, dummy_graph_data):
         """Check the error when attempt to override the same data set
         version."""
-        versioned_gml_data_set.save(dummy_graph_data)
+        versioned_gml_dataset.save(dummy_graph_data)
         pattern = (
             r"Save path \'.+\' for GMLDataSet\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_gml_data_set.save(dummy_graph_data)
+            versioned_gml_dataset.save(dummy_graph_data)
 
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
@@ -137,7 +137,7 @@ class TestGMLDataSetVersioned:
         "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
     )
     def test_save_version_warning(
-        self, versioned_gml_data_set, load_version, save_version, dummy_graph_data
+        self, versioned_gml_dataset, load_version, save_version, dummy_graph_data
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
@@ -146,7 +146,7 @@ class TestGMLDataSetVersioned:
             rf"load version '{load_version}' for GMLDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
-            versioned_gml_data_set.save(dummy_graph_data)
+            versioned_gml_dataset.save(dummy_graph_data)
 
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
@@ -168,21 +168,21 @@ class TestGMLDataSetVersioned:
         assert "protocol" in str(ds)
 
     def test_versioning_existing_dataset(
-        self, gml_data_set, versioned_gml_data_set, dummy_graph_data
+        self, gml_dataset, versioned_gml_dataset, dummy_graph_data
     ):
         """Check the error when attempting to save a versioned dataset on top of an
         already existing (non-versioned) dataset."""
-        gml_data_set.save(dummy_graph_data)
-        assert gml_data_set.exists()
-        assert gml_data_set._filepath == versioned_gml_data_set._filepath
+        gml_dataset.save(dummy_graph_data)
+        assert gml_dataset.exists()
+        assert gml_dataset._filepath == versioned_gml_dataset._filepath
         pattern = (
             f"(?=.*file with the same name already exists in the directory)"
-            f"(?=.*{versioned_gml_data_set._filepath.parent.as_posix()})"
+            f"(?=.*{versioned_gml_dataset._filepath.parent.as_posix()})"
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_gml_data_set.save(dummy_graph_data)
+            versioned_gml_dataset.save(dummy_graph_data)
 
         # Remove non-versioned dataset and try again
-        Path(gml_data_set._filepath.as_posix()).unlink()
-        versioned_gml_data_set.save(dummy_graph_data)
-        assert versioned_gml_data_set.exists()
+        Path(gml_dataset._filepath.as_posix()).unlink()
+        versioned_gml_dataset.save(dummy_graph_data)
+        assert versioned_gml_dataset.exists()

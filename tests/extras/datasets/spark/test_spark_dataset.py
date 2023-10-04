@@ -174,8 +174,8 @@ class TestSparkDataSet:
         temp_path = (tmp_path / "data").as_posix()
         local_parquet_set = ParquetDataSet(filepath=temp_path)
         local_parquet_set.save(sample_pandas_df)
-        spark_data_set = SparkDataSet(filepath=temp_path)
-        spark_df = spark_data_set.load()
+        spark_dataset = SparkDataSet(filepath=temp_path)
+        spark_df = spark_dataset.load()
         assert spark_df.count() == 4
 
     def test_save_parquet(self, tmp_path, sample_spark_df):
@@ -183,60 +183,60 @@ class TestSparkDataSet:
         # a single spark partition and retrieve it with Kedro
         # ParquetDataSet
         temp_dir = Path(str(tmp_path / "test_data"))
-        spark_data_set = SparkDataSet(
+        spark_dataset = SparkDataSet(
             filepath=temp_dir.as_posix(), save_args={"compression": "none"}
         )
         spark_df = sample_spark_df.coalesce(1)
-        spark_data_set.save(spark_df)
+        spark_dataset.save(spark_df)
 
         single_parquet = [
             f for f in temp_dir.iterdir() if f.is_file() and f.name.startswith("part")
         ][0]
 
-        local_parquet_data_set = ParquetDataSet(filepath=single_parquet.as_posix())
+        local_parquet_dataset = ParquetDataSet(filepath=single_parquet.as_posix())
 
-        pandas_df = local_parquet_data_set.load()
+        pandas_df = local_parquet_dataset.load()
 
         assert pandas_df[pandas_df["name"] == "Bob"]["age"].iloc[0] == 12
 
     def test_load_options_csv(self, tmp_path, sample_pandas_df):
         filepath = (tmp_path / "data").as_posix()
-        local_csv_data_set = CSVDataSet(filepath=filepath)
-        local_csv_data_set.save(sample_pandas_df)
-        spark_data_set = SparkDataSet(
+        local_csv_dataset = CSVDataSet(filepath=filepath)
+        local_csv_dataset.save(sample_pandas_df)
+        spark_dataset = SparkDataSet(
             filepath=filepath, file_format="csv", load_args={"header": True}
         )
-        spark_df = spark_data_set.load()
+        spark_df = spark_dataset.load()
         assert spark_df.filter(col("Name") == "Alex").count() == 1
 
     def test_load_options_schema_ddl_string(
         self, tmp_path, sample_pandas_df, sample_spark_df_schema
     ):
         filepath = (tmp_path / "data").as_posix()
-        local_csv_data_set = CSVDataSet(filepath=filepath)
-        local_csv_data_set.save(sample_pandas_df)
-        spark_data_set = SparkDataSet(
+        local_csv_dataset = CSVDataSet(filepath=filepath)
+        local_csv_dataset.save(sample_pandas_df)
+        spark_dataset = SparkDataSet(
             filepath=filepath,
             file_format="csv",
             load_args={"header": True, "schema": "name STRING, age INT, height FLOAT"},
         )
-        spark_df = spark_data_set.load()
+        spark_df = spark_dataset.load()
         assert spark_df.schema == sample_spark_df_schema
 
     def test_load_options_schema_obj(
         self, tmp_path, sample_pandas_df, sample_spark_df_schema
     ):
         filepath = (tmp_path / "data").as_posix()
-        local_csv_data_set = CSVDataSet(filepath=filepath)
-        local_csv_data_set.save(sample_pandas_df)
+        local_csv_dataset = CSVDataSet(filepath=filepath)
+        local_csv_dataset.save(sample_pandas_df)
 
-        spark_data_set = SparkDataSet(
+        spark_dataset = SparkDataSet(
             filepath=filepath,
             file_format="csv",
             load_args={"header": True, "schema": sample_spark_df_schema},
         )
 
-        spark_df = spark_data_set.load()
+        spark_df = spark_dataset.load()
         assert spark_df.schema == sample_spark_df_schema
 
     def test_load_options_schema_path(
@@ -244,17 +244,17 @@ class TestSparkDataSet:
     ):
         filepath = (tmp_path / "data").as_posix()
         schemapath = (tmp_path / SCHEMA_FILE_NAME).as_posix()
-        local_csv_data_set = CSVDataSet(filepath=filepath)
-        local_csv_data_set.save(sample_pandas_df)
+        local_csv_dataset = CSVDataSet(filepath=filepath)
+        local_csv_dataset.save(sample_pandas_df)
         Path(schemapath).write_text(sample_spark_df_schema.json(), encoding="utf-8")
 
-        spark_data_set = SparkDataSet(
+        spark_dataset = SparkDataSet(
             filepath=filepath,
             file_format="csv",
             load_args={"header": True, "schema": {"filepath": schemapath}},
         )
 
-        spark_df = spark_data_set.load()
+        spark_df = spark_dataset.load()
         assert spark_df.schema == sample_spark_df_schema
 
     @pytest.mark.usefixtures("mocked_s3_schema")
@@ -262,10 +262,10 @@ class TestSparkDataSet:
         self, tmp_path, sample_pandas_df, sample_spark_df_schema
     ):
         filepath = (tmp_path / "data").as_posix()
-        local_csv_data_set = CSVDataSet(filepath=filepath)
-        local_csv_data_set.save(sample_pandas_df)
+        local_csv_dataset = CSVDataSet(filepath=filepath)
+        local_csv_dataset.save(sample_pandas_df)
 
-        spark_data_set = SparkDataSet(
+        spark_dataset = SparkDataSet(
             filepath=filepath,
             file_format="csv",
             load_args={
@@ -277,7 +277,7 @@ class TestSparkDataSet:
             },
         )
 
-        spark_df = spark_data_set.load()
+        spark_df = spark_dataset.load()
         assert spark_df.schema == sample_spark_df_schema
 
     def test_load_options_invalid_schema_file(self, tmp_path):
@@ -317,52 +317,52 @@ class TestSparkDataSet:
         # a single spark partition with csv format and retrieve it with Kedro
         # CSVDataSet
         temp_dir = Path(str(tmp_path / "test_data"))
-        spark_data_set = SparkDataSet(
+        spark_dataset = SparkDataSet(
             filepath=temp_dir.as_posix(),
             file_format="csv",
             save_args={"sep": "|", "header": True},
         )
         spark_df = sample_spark_df.coalesce(1)
-        spark_data_set.save(spark_df)
+        spark_dataset.save(spark_df)
 
         single_csv_file = [
             f for f in temp_dir.iterdir() if f.is_file() and f.suffix == ".csv"
         ][0]
 
-        csv_local_data_set = CSVDataSet(
+        csv_local_dataset = CSVDataSet(
             filepath=single_csv_file.as_posix(), load_args={"sep": "|"}
         )
-        pandas_df = csv_local_data_set.load()
+        pandas_df = csv_local_dataset.load()
 
         assert pandas_df[pandas_df["name"] == "Alex"]["age"][0] == 31
 
     def test_str_representation(self):
         with tempfile.NamedTemporaryFile() as temp_data_file:
             filepath = Path(temp_data_file.name).as_posix()
-            spark_data_set = SparkDataSet(
+            spark_dataset = SparkDataSet(
                 filepath=filepath, file_format="csv", load_args={"header": True}
             )
-            assert "SparkDataSet" in str(spark_data_set)
-            assert f"filepath={filepath}" in str(spark_data_set)
+            assert "SparkDataSet" in str(spark_dataset)
+            assert f"filepath={filepath}" in str(spark_dataset)
 
     def test_save_overwrite_fail(self, tmp_path, sample_spark_df):
         # Writes a data frame twice and expects it to fail.
         filepath = (tmp_path / "test_data").as_posix()
-        spark_data_set = SparkDataSet(filepath=filepath)
-        spark_data_set.save(sample_spark_df)
+        spark_dataset = SparkDataSet(filepath=filepath)
+        spark_dataset.save(sample_spark_df)
 
         with pytest.raises(DatasetError):
-            spark_data_set.save(sample_spark_df)
+            spark_dataset.save(sample_spark_df)
 
     def test_save_overwrite_mode(self, tmp_path, sample_spark_df):
         # Writes a data frame in overwrite mode.
         filepath = (tmp_path / "test_data").as_posix()
-        spark_data_set = SparkDataSet(
+        spark_dataset = SparkDataSet(
             filepath=filepath, save_args={"mode": "overwrite"}
         )
 
-        spark_data_set.save(sample_spark_df)
-        spark_data_set.save(sample_spark_df)
+        spark_dataset.save(sample_spark_df)
+        spark_dataset.save(sample_spark_df)
 
     @pytest.mark.parametrize("mode", ["merge", "delete", "update"])
     def test_file_format_delta_and_unsupported_mode(self, tmp_path, mode):
@@ -384,12 +384,12 @@ class TestSparkDataSet:
         # to the save path
 
         filepath = Path(str(tmp_path / "test_data"))
-        spark_data_set = SparkDataSet(
+        spark_dataset = SparkDataSet(
             filepath=filepath.as_posix(),
             save_args={"mode": "overwrite", "partitionBy": ["name"]},
         )
 
-        spark_data_set.save(sample_spark_df)
+        spark_dataset.save(sample_spark_df)
 
         expected_path = filepath / "name=Alex"
 
@@ -398,32 +398,32 @@ class TestSparkDataSet:
     @pytest.mark.parametrize("file_format", ["csv", "parquet", "delta"])
     def test_exists(self, file_format, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
-        spark_data_set = SparkDataSet(filepath=filepath, file_format=file_format)
+        spark_dataset = SparkDataSet(filepath=filepath, file_format=file_format)
 
-        assert not spark_data_set.exists()
+        assert not spark_dataset.exists()
 
-        spark_data_set.save(sample_spark_df)
-        assert spark_data_set.exists()
+        spark_dataset.save(sample_spark_df)
+        assert spark_dataset.exists()
 
     def test_exists_raises_error(self, mocker):
         # exists should raise all errors except for
         # AnalysisExceptions clearly indicating a missing file
-        spark_data_set = SparkDataSet(filepath="")
+        spark_dataset = SparkDataSet(filepath="")
         if SPARK_VERSION.match(">=3.4.0"):
             mocker.patch.object(
-                spark_data_set,
+                spark_dataset,
                 "_get_spark",
                 side_effect=AnalysisException("Other Exception"),
             )
         else:
             mocker.patch.object(  # pylint: disable=expression-not-assigned
-                spark_data_set,
+                spark_dataset,
                 "_get_spark",
                 side_effect=AnalysisException("Other Exception", []),
             )
 
         with pytest.raises(DatasetError, match="Other Exception"):
-            spark_data_set.exists()
+            spark_dataset.exists()
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async, spark_in):
@@ -526,11 +526,11 @@ class TestSparkDataSetVersionedLocal:
         """Check behavior when attempting to save a versioned dataset on top of an
         already existing (non-versioned) dataset. Note: because SparkDataSet saves to a
         directory even if non-versioned, an error is not expected."""
-        spark_data_set = SparkDataSet(
+        spark_dataset = SparkDataSet(
             filepath=versioned_dataset_local._filepath.as_posix()
         )
-        spark_data_set.save(sample_spark_df)
-        assert spark_data_set.exists()
+        spark_dataset.save(sample_spark_df)
+        assert spark_dataset.exists()
         versioned_dataset_local.save(sample_spark_df)
         assert versioned_dataset_local.exists()
 
@@ -631,10 +631,10 @@ class TestSparkDataSetVersionedDBFS:
             "kedro.extras.datasets.spark.spark_dataset._get_dbutils", return_value=None
         )
 
-        data_set = SparkDataSet(filepath="/dbfs/tmp/data")
+        dataset = SparkDataSet(filepath="/dbfs/tmp/data")
 
         get_dbutils_mock.assert_called_once()
-        assert data_set._glob_function.__name__ == "iglob"
+        assert dataset._glob_function.__name__ == "iglob"
 
     def test_ds_init_dbutils_available(self, mocker):
         get_dbutils_mock = mocker.patch(
@@ -642,12 +642,12 @@ class TestSparkDataSetVersionedDBFS:
             return_value="mock",
         )
 
-        data_set = SparkDataSet(filepath="/dbfs/tmp/data")
+        dataset = SparkDataSet(filepath="/dbfs/tmp/data")
 
         get_dbutils_mock.assert_called_once()
-        assert data_set._glob_function.__class__.__name__ == "partial"
-        assert data_set._glob_function.func.__name__ == "_dbfs_glob"
-        assert data_set._glob_function.keywords == {
+        assert dataset._glob_function.__class__.__name__ == "partial"
+        assert dataset._glob_function.func.__name__ == "_dbfs_glob"
+        assert dataset._glob_function.keywords == {
             "dbutils": get_dbutils_mock.return_value
         }
 
@@ -685,15 +685,15 @@ class TestSparkDataSetVersionedDBFS:
     def test_regular_path_in_different_os(self, os_name, mocker):
         """Check that class of filepath depends on OS for regular path."""
         mocker.patch("os.name", os_name)
-        data_set = SparkDataSet(filepath="/some/path")
-        assert isinstance(data_set._filepath, PurePosixPath)
+        dataset = SparkDataSet(filepath="/some/path")
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     @pytest.mark.parametrize("os_name", ["nt", "posix"])
     def test_dbfs_path_in_different_os(self, os_name, mocker):
         """Check that class of filepath doesn't depend on OS if it references DBFS."""
         mocker.patch("os.name", os_name)
-        data_set = SparkDataSet(filepath="/dbfs/some/path")
-        assert isinstance(data_set._filepath, PurePosixPath)
+        dataset = SparkDataSet(filepath="/dbfs/some/path")
+        assert isinstance(dataset._filepath, PurePosixPath)
 
 
 class TestSparkDataSetVersionedS3:

@@ -39,21 +39,21 @@ def sql_file(tmp_path: PosixPath):
 
 
 @pytest.fixture(params=[{}])
-def table_data_set(request):
+def table_dataset(request):
     kwargs = {"table_name": TABLE_NAME, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
     return SQLTableDataSet(**kwargs)
 
 
 @pytest.fixture(params=[{}])
-def query_data_set(request):
+def query_dataset(request):
     kwargs = {"sql": SQL_QUERY, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
     return SQLQueryDataSet(**kwargs)
 
 
 @pytest.fixture(params=[{}])
-def query_file_data_set(request, sql_file):
+def query_file_dataset(request, sql_file):
     kwargs = {"filepath": sql_file, "credentials": {"con": CONNECTION}}
     kwargs.update(request.param)
     return SQLQueryDataSet(**kwargs)
@@ -115,75 +115,75 @@ class TestSQLTableDataSet:
         with pytest.raises(DatasetError, match=pattern):
             SQLTableDataSet(table_name=TABLE_NAME, credentials={"con": CONNECTION})
 
-    def test_str_representation_table(self, table_data_set):
+    def test_str_representation_table(self, table_dataset):
         """Test the data set instance string representation"""
-        str_repr = str(table_data_set)
+        str_repr = str(table_dataset)
         assert (
             "SQLTableDataSet(load_args={}, save_args={'index': False}, "
             f"table_name={TABLE_NAME})" in str_repr
         )
         assert CONNECTION not in str(str_repr)
 
-    def test_table_exists(self, mocker, table_data_set):
+    def test_table_exists(self, mocker, table_dataset):
         """Test `exists` method invocation"""
         mocker.patch("sqlalchemy.engine.Engine.table_names")
-        assert not table_data_set.exists()
+        assert not table_dataset.exists()
         self._assert_sqlalchemy_called_once()
 
     @pytest.mark.parametrize(
-        "table_data_set", [{"load_args": {"schema": "ingested"}}], indirect=True
+        "table_dataset", [{"load_args": {"schema": "ingested"}}], indirect=True
     )
-    def test_table_exists_schema(self, mocker, table_data_set):
+    def test_table_exists_schema(self, mocker, table_dataset):
         """Test `exists` method invocation with DB schema provided"""
         mocker.patch("sqlalchemy.engine.Engine.table_names")
-        assert not table_data_set.exists()
+        assert not table_dataset.exists()
         self._assert_sqlalchemy_called_once("ingested")
 
-    def test_table_exists_mocked(self, mocker, table_data_set):
+    def test_table_exists_mocked(self, mocker, table_dataset):
         """Test `exists` method invocation with mocked list of tables"""
         mocker.patch("sqlalchemy.engine.Engine.table_names", return_value=[TABLE_NAME])
-        assert table_data_set.exists()
+        assert table_dataset.exists()
         self._assert_sqlalchemy_called_once()
 
-    def test_load_sql_params(self, mocker, table_data_set):
+    def test_load_sql_params(self, mocker, table_dataset):
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_table")
-        table_data_set.load()
+        table_dataset.load()
         pd.read_sql_table.assert_called_once_with(
-            table_name=TABLE_NAME, con=table_data_set.engines[CONNECTION]
+            table_name=TABLE_NAME, con=table_dataset.engines[CONNECTION]
         )
 
-    def test_save_default_index(self, mocker, table_data_set, dummy_dataframe):
+    def test_save_default_index(self, mocker, table_dataset, dummy_dataframe):
         """Test `save` method invocation"""
         mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
+        table_dataset.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
+            name=TABLE_NAME, con=table_dataset.engines[CONNECTION], index=False
         )
 
     @pytest.mark.parametrize(
-        "table_data_set", [{"save_args": {"index": True}}], indirect=True
+        "table_dataset", [{"save_args": {"index": True}}], indirect=True
     )
-    def test_save_overwrite_index(self, mocker, table_data_set, dummy_dataframe):
+    def test_save_overwrite_index(self, mocker, table_dataset, dummy_dataframe):
         """Test writing DataFrame index as a column"""
         mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
+        table_dataset.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=True
+            name=TABLE_NAME, con=table_dataset.engines[CONNECTION], index=True
         )
 
     @pytest.mark.parametrize(
-        "table_data_set", [{"save_args": {"name": "TABLE_B"}}], indirect=True
+        "table_dataset", [{"save_args": {"name": "TABLE_B"}}], indirect=True
     )
     def test_save_ignore_table_name_override(
-        self, mocker, table_data_set, dummy_dataframe
+        self, mocker, table_dataset, dummy_dataframe
     ):
         """Test that putting the table name is `save_args` does not have any
         effect"""
         mocker.patch.object(dummy_dataframe, "to_sql")
-        table_data_set.save(dummy_dataframe)
+        table_dataset.save(dummy_dataframe)
         dummy_dataframe.to_sql.assert_called_once_with(
-            name=TABLE_NAME, con=table_data_set.engines[CONNECTION], index=False
+            name=TABLE_NAME, con=table_dataset.engines[CONNECTION], index=False
         )
 
 
@@ -268,18 +268,18 @@ class TestSQLQueryDataSet:
             SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": ""})
 
     @pytest.mark.parametrize(
-        "query_data_set, has_execution_options",
+        "query_dataset, has_execution_options",
         [
             ({"execution_options": EXECUTION_OPTIONS}, True),
             ({"execution_options": {}}, False),
             ({}, False),
         ],
-        indirect=["query_data_set"],
+        indirect=["query_dataset"],
     )
-    def test_load(self, mocker, query_data_set, has_execution_options):
+    def test_load(self, mocker, query_dataset, has_execution_options):
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_query")
-        query_data_set.load()
+        query_dataset.load()
 
         # Check that data was loaded with the expected query, connection string and
         # execution options:
@@ -291,18 +291,18 @@ class TestSQLQueryDataSet:
             assert con_arg.get_execution_options() == EXECUTION_OPTIONS
 
     @pytest.mark.parametrize(
-        "query_file_data_set, has_execution_options",
+        "query_file_dataset, has_execution_options",
         [
             ({"execution_options": EXECUTION_OPTIONS}, True),
             ({"execution_options": {}}, False),
             ({}, False),
         ],
-        indirect=["query_file_data_set"],
+        indirect=["query_file_dataset"],
     )
-    def test_load_query_file(self, mocker, query_file_data_set, has_execution_options):
+    def test_load_query_file(self, mocker, query_file_dataset, has_execution_options):
         """Test `load` method with a query file"""
         mocker.patch("pandas.read_sql_query")
-        query_file_data_set.load()
+        query_file_dataset.load()
 
         # Check that data was loaded with the expected query, connection string and
         # execution options:
@@ -352,15 +352,15 @@ class TestSQLQueryDataSet:
         with pytest.raises(DatasetError, match=pattern):
             SQLQueryDataSet(sql=SQL_QUERY, credentials={"con": FAKE_CONN_STR})
 
-    def test_save_error(self, query_data_set, dummy_dataframe):
+    def test_save_error(self, query_dataset, dummy_dataframe):
         """Check the error when trying to save to the data set"""
         pattern = r"'save' is not supported on SQLQueryDataSet"
         with pytest.raises(DatasetError, match=pattern):
-            query_data_set.save(dummy_dataframe)
+            query_dataset.save(dummy_dataframe)
 
-    def test_str_representation_sql(self, query_data_set, sql_file):
+    def test_str_representation_sql(self, query_dataset, sql_file):
         """Test the data set instance string representation"""
-        str_repr = str(query_data_set)
+        str_repr = str(query_dataset)
         assert (
             "SQLQueryDataSet(execution_options={}, filepath=None, "
             f"load_args={{}}, sql={SQL_QUERY})" in str_repr
@@ -368,9 +368,9 @@ class TestSQLQueryDataSet:
         assert CONNECTION not in str_repr
         assert sql_file not in str_repr
 
-    def test_str_representation_filepath(self, query_file_data_set, sql_file):
+    def test_str_representation_filepath(self, query_file_dataset, sql_file):
         """Test the data set instance string representation with filepath arg."""
-        str_repr = str(query_file_data_set)
+        str_repr = str(query_file_dataset)
         assert (
             f"SQLQueryDataSet(execution_options={{}}, filepath={str(sql_file)}, "
             "load_args={}, sql=None)" in str_repr

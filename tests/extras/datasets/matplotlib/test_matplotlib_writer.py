@@ -252,8 +252,8 @@ class TestMatplotlibWriter:
 
     def test_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
-        data_set = MatplotlibWriter(filepath=FULL_PATH)
-        data_set.release()
+        dataset = MatplotlibWriter(filepath=FULL_PATH)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(f"{BUCKET_NAME}/{KEY_PATH}")
 
 

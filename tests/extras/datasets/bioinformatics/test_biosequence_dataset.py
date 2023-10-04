@@ -22,7 +22,7 @@ def filepath_biosequence(tmp_path):
 
 
 @pytest.fixture
-def biosequence_data_set(filepath_biosequence, fs_args):
+def biosequence_dataset(filepath_biosequence, fs_args):
     return BioSequenceDataSet(
         filepath=filepath_biosequence,
         load_args=LOAD_ARGS,
@@ -38,47 +38,47 @@ def dummy_data():
 
 
 class TestBioSequenceDataSet:
-    def test_save_and_load(self, biosequence_data_set, dummy_data):
+    def test_save_and_load(self, biosequence_dataset, dummy_data):
         """Test saving and reloading the data set."""
-        biosequence_data_set.save(dummy_data)
-        reloaded = biosequence_data_set.load()
+        biosequence_dataset.save(dummy_data)
+        reloaded = biosequence_dataset.load()
         assert dummy_data[0].id, reloaded[0].id
         assert dummy_data[0].seq, reloaded[0].seq
         assert len(dummy_data) == len(reloaded)
-        assert biosequence_data_set._fs_open_args_load == {"mode": "r"}
-        assert biosequence_data_set._fs_open_args_save == {"mode": "w"}
+        assert biosequence_dataset._fs_open_args_load == {"mode": "r"}
+        assert biosequence_dataset._fs_open_args_save == {"mode": "w"}
 
-    def test_exists(self, biosequence_data_set, dummy_data):
+    def test_exists(self, biosequence_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        assert not biosequence_data_set.exists()
-        biosequence_data_set.save(dummy_data)
-        assert biosequence_data_set.exists()
+        assert not biosequence_dataset.exists()
+        biosequence_dataset.save(dummy_data)
+        assert biosequence_dataset.exists()
 
-    def test_load_save_args_propagation(self, biosequence_data_set):
+    def test_load_save_args_propagation(self, biosequence_dataset):
         """Test overriding the default load arguments."""
         for key, value in LOAD_ARGS.items():
-            assert biosequence_data_set._load_args[key] == value
+            assert biosequence_dataset._load_args[key] == value
 
         for key, value in SAVE_ARGS.items():
-            assert biosequence_data_set._save_args[key] == value
+            assert biosequence_dataset._save_args[key] == value
 
     @pytest.mark.parametrize(
         "fs_args",
         [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
         indirect=True,
     )
-    def test_open_extra_args(self, biosequence_data_set, fs_args):
-        assert biosequence_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert biosequence_data_set._fs_open_args_save == {
+    def test_open_extra_args(self, biosequence_dataset, fs_args):
+        assert biosequence_dataset._fs_open_args_load == fs_args["open_args_load"]
+        assert biosequence_dataset._fs_open_args_save == {
             "mode": "w"
         }  # default unchanged
 
-    def test_load_missing_file(self, biosequence_data_set):
+    def test_load_missing_file(self, biosequence_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set BioSequenceDataSet\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
-            biosequence_data_set.load()
+            biosequence_dataset.load()
 
     @pytest.mark.parametrize(
         "filepath,instance_type",
@@ -91,17 +91,17 @@ class TestBioSequenceDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        data_set = BioSequenceDataSet(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = BioSequenceDataSet(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.fasta"
-        data_set = BioSequenceDataSet(filepath=filepath)
-        data_set.release()
+        dataset = BioSequenceDataSet(filepath=filepath)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)

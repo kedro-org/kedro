@@ -167,11 +167,11 @@ class TestMemoryDataset:
 
     def test_exists(self, new_data):
         """Test `exists` method invocation"""
-        data_set = MemoryDataset()
-        assert not data_set.exists()
+        dataset = MemoryDataset()
+        assert not dataset.exists()
 
-        data_set.save(new_data)
-        assert data_set.exists()
+        dataset.save(new_data)
+        assert dataset.exists()
 
 
 @pytest.mark.parametrize("data", [["a", "b"], [{"a": "b"}, {"c": "d"}]])

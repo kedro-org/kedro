@@ -197,7 +197,7 @@ class TestTensorFlowModelDataset:
         That's because a subclassed model needs to be called on some data in order to
         create its weights.
         """
-        hdf5_data_set = tensorflow_model_dataset(
+        hdf5_dataset = tensorflow_model_dataset(
             filepath=filepath, save_args={"save_format": "h5"}
         )
         # demonstrating is a working model
@@ -213,7 +213,7 @@ class TestTensorFlowModelDataset:
             r"or using `save_weights`."
         )
         with pytest.raises(DatasetError, match=pattern):
-            hdf5_data_set.save(dummy_tf_subclassed_model)
+            hdf5_dataset.save(dummy_tf_subclassed_model)
 
     @pytest.mark.parametrize(
         "filepath,instance_type",
@@ -227,13 +227,13 @@ class TestTensorFlowModelDataset:
     )
     def test_protocol_usage(self, filepath, instance_type, tensorflow_model_dataset):
         """Test that can be instantiated with mocked arbitrary file systems."""
-        data_set = tensorflow_model_dataset(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = tensorflow_model_dataset(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "compile": False}], indirect=True
@@ -246,11 +246,11 @@ class TestTensorFlowModelDataset:
     def test_catalog_release(self, mocker, tensorflow_model_dataset):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.tf"
-        data_set = tensorflow_model_dataset(filepath=filepath)
-        assert data_set._version_cache.currsize == 0  # no cache if unversioned
-        data_set.release()
+        dataset = tensorflow_model_dataset(filepath=filepath)
+        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert data_set._version_cache.currsize == 0
+        assert dataset._version_cache.currsize == 0
 
     @pytest.mark.parametrize("fs_args", [{"storage_option": "value"}])
     def test_fs_args(self, fs_args, mocker, tensorflow_model_dataset):

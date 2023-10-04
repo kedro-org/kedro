@@ -37,7 +37,7 @@ def sas_binary():
 
 
 @pytest.fixture
-def sas_data_set(filepath_sas, fs_args):
+def sas_dataset(filepath_sas, fs_args):
     return GenericDataSet(
         filepath=filepath_sas.as_posix(),
         file_format="sas",
@@ -47,7 +47,7 @@ def sas_data_set(filepath_sas, fs_args):
 
 
 @pytest.fixture
-def html_data_set(filepath_html, fs_args):
+def html_dataset(filepath_html, fs_args):
     return GenericDataSet(
         filepath=filepath_html.as_posix(),
         file_format="html",
@@ -57,7 +57,7 @@ def html_data_set(filepath_html, fs_args):
 
 
 @pytest.fixture
-def sas_data_set_bad_config(filepath_sas, fs_args):
+def sas_dataset_bad_config(filepath_sas, fs_args):
     return GenericDataSet(
         filepath=filepath_sas.as_posix(),
         file_format="sas",
@@ -67,7 +67,7 @@ def sas_data_set_bad_config(filepath_sas, fs_args):
 
 
 @pytest.fixture
-def versioned_csv_data_set(filepath_csv, load_version, save_version):
+def versioned_csv_dataset(filepath_csv, load_version, save_version):
     return GenericDataSet(
         filepath=filepath_csv.as_posix(),
         file_format="csv",
@@ -77,7 +77,7 @@ def versioned_csv_data_set(filepath_csv, load_version, save_version):
 
 
 @pytest.fixture
-def csv_data_set(filepath_csv):
+def csv_dataset(filepath_csv):
     return GenericDataSet(
         filepath=filepath_csv.as_posix(),
         file_format="csv",
@@ -91,27 +91,27 @@ def dummy_dataframe():
 
 
 class TestGenericSasDataSet:
-    def test_load(self, sas_binary, sas_data_set, filepath_sas):
+    def test_load(self, sas_binary, sas_dataset, filepath_sas):
         filepath_sas.write_bytes(sas_binary)
-        df = sas_data_set.load()
+        df = sas_dataset.load()
         assert df.shape == (32, 6)
 
-    def test_save_fail(self, sas_data_set, dummy_dataframe):
+    def test_save_fail(self, sas_dataset, dummy_dataframe):
         pattern = (
             "Unable to retrieve 'pandas.DataFrame.to_sas' method, please ensure that your "
             "'file_format' parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
         )
         with pytest.raises(DatasetError, match=pattern):
-            sas_data_set.save(dummy_dataframe)
+            sas_dataset.save(dummy_dataframe)
         # Pandas does not implement a SAS writer
 
-    def test_bad_load(self, sas_data_set_bad_config, sas_binary, filepath_sas):
+    def test_bad_load(self, sas_dataset_bad_config, sas_binary, filepath_sas):
         # SAS reader requires a format param e.g. sas7bdat
         filepath_sas.write_bytes(sas_binary)
         pattern = "you must specify a format string"
         with pytest.raises(DatasetError, match=pattern):
-            sas_data_set_bad_config.load()
+            sas_dataset_bad_config.load()
 
     @pytest.mark.parametrize(
         "filepath,instance_type,credentials",
@@ -129,24 +129,24 @@ class TestGenericSasDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):
-        data_set = GenericDataSet(
+        dataset = GenericDataSet(
             filepath=filepath, file_format="sas", credentials=credentials
         )
-        assert isinstance(data_set._fs, instance_type)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
-        data_set = GenericDataSet(filepath=filepath, file_format="sas")
-        assert data_set._version_cache.currsize == 0  # no cache if unversioned
-        data_set.release()
+        dataset = GenericDataSet(filepath=filepath, file_format="sas")
+        assert dataset._version_cache.currsize == 0  # no cache if unversioned
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert data_set._version_cache.currsize == 0
+        assert dataset._version_cache.currsize == 0
 
 
 class TestGenericCSVDataSetVersioned:
@@ -169,21 +169,21 @@ class TestGenericCSVDataSetVersioned:
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
-    def test_save_and_load(self, versioned_csv_data_set, dummy_dataframe):
+    def test_save_and_load(self, versioned_csv_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
-        versioned_csv_data_set.save(dummy_dataframe)
-        reloaded_df = versioned_csv_data_set.load()
+        versioned_csv_dataset.save(dummy_dataframe)
+        reloaded_df = versioned_csv_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
     def test_multiple_loads(
-        self, versioned_csv_data_set, dummy_dataframe, filepath_csv
+        self, versioned_csv_dataset, dummy_dataframe, filepath_csv
     ):
         """Test that if a new version is created mid-run, by an
         external system, it won't be loaded in the current run."""
-        versioned_csv_data_set.save(dummy_dataframe)
-        versioned_csv_data_set.load()
-        v1 = versioned_csv_data_set.resolve_load_version()
+        versioned_csv_dataset.save(dummy_dataframe)
+        versioned_csv_dataset.load()
+        v1 = versioned_csv_dataset.resolve_load_version()
 
         sleep(0.5)
         # force-drop a newer version into the same location
@@ -194,8 +194,8 @@ class TestGenericCSVDataSetVersioned:
             version=Version(v_new, v_new),
         ).save(dummy_dataframe)
 
-        versioned_csv_data_set.load()
-        v2 = versioned_csv_data_set.resolve_load_version()
+        versioned_csv_dataset.load()
+        v2 = versioned_csv_dataset.resolve_load_version()
 
         assert v2 == v1  # v2 should not be v_new!
         ds_new = GenericDataSet(
@@ -267,28 +267,28 @@ class TestGenericCSVDataSetVersioned:
         # dataset B cache is unaffected
         assert ds_b._version_cache.currsize == 2
 
-    def test_no_versions(self, versioned_csv_data_set):
+    def test_no_versions(self, versioned_csv_dataset):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for GenericDataSet\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            versioned_csv_data_set.load()
+            versioned_csv_dataset.load()
 
-    def test_exists(self, versioned_csv_data_set, dummy_dataframe):
+    def test_exists(self, versioned_csv_dataset, dummy_dataframe):
         """Test `exists` method invocation for versioned data set."""
-        assert not versioned_csv_data_set.exists()
-        versioned_csv_data_set.save(dummy_dataframe)
-        assert versioned_csv_data_set.exists()
+        assert not versioned_csv_dataset.exists()
+        versioned_csv_dataset.save(dummy_dataframe)
+        assert versioned_csv_dataset.exists()
 
-    def test_prevent_overwrite(self, versioned_csv_data_set, dummy_dataframe):
+    def test_prevent_overwrite(self, versioned_csv_dataset, dummy_dataframe):
         """Check the error when attempting to override the data set if the
         corresponding Generic (csv) file for a given save version already exists."""
-        versioned_csv_data_set.save(dummy_dataframe)
+        versioned_csv_dataset.save(dummy_dataframe)
         pattern = (
             r"Save path \'.+\' for GenericDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_csv_data_set.save(dummy_dataframe)
+            versioned_csv_dataset.save(dummy_dataframe)
 
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
@@ -297,7 +297,7 @@ class TestGenericCSVDataSetVersioned:
         "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
     )
     def test_save_version_warning(
-        self, versioned_csv_data_set, load_version, save_version, dummy_dataframe
+        self, versioned_csv_dataset, load_version, save_version, dummy_dataframe
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
@@ -306,33 +306,33 @@ class TestGenericCSVDataSetVersioned:
             rf"'{load_version}' for GenericDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
-            versioned_csv_data_set.save(dummy_dataframe)
+            versioned_csv_dataset.save(dummy_dataframe)
 
     def test_versioning_existing_dataset(
-        self, csv_data_set, versioned_csv_data_set, dummy_dataframe
+        self, csv_dataset, versioned_csv_dataset, dummy_dataframe
     ):
         """Check the error when attempting to save a versioned dataset on top of an
         already existing (non-versioned) dataset."""
-        csv_data_set.save(dummy_dataframe)
-        assert csv_data_set.exists()
-        assert csv_data_set._filepath == versioned_csv_data_set._filepath
+        csv_dataset.save(dummy_dataframe)
+        assert csv_dataset.exists()
+        assert csv_dataset._filepath == versioned_csv_dataset._filepath
         pattern = (
             f"(?=.*file with the same name already exists in the directory)"
-            f"(?=.*{versioned_csv_data_set._filepath.parent.as_posix()})"
+            f"(?=.*{versioned_csv_dataset._filepath.parent.as_posix()})"
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_csv_data_set.save(dummy_dataframe)
+            versioned_csv_dataset.save(dummy_dataframe)
 
         # Remove non-versioned dataset and try again
-        Path(csv_data_set._filepath.as_posix()).unlink()
-        versioned_csv_data_set.save(dummy_dataframe)
-        assert versioned_csv_data_set.exists()
+        Path(csv_dataset._filepath.as_posix()).unlink()
+        versioned_csv_dataset.save(dummy_dataframe)
+        assert versioned_csv_dataset.exists()
 
 
 class TestGenericHtmlDataSet:
-    def test_save_and_load(self, dummy_dataframe, html_data_set):
-        html_data_set.save(dummy_dataframe)
-        df = html_data_set.load()
+    def test_save_and_load(self, dummy_dataframe, html_dataset):
+        html_dataset.save(dummy_dataframe)
+        df = html_dataset.load()
         assert_frame_equal(dummy_dataframe, df[0])
 
 

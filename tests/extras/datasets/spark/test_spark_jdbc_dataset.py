@@ -53,15 +53,15 @@ def test_missing_table():
 
 def test_save(mocker, spark_jdbc_args):
     mock_data = mocker.Mock()
-    data_set = SparkJDBCDataSet(**spark_jdbc_args)
-    data_set.save(mock_data)
+    dataset = SparkJDBCDataSet(**spark_jdbc_args)
+    dataset.save(mock_data)
     mock_data.write.jdbc.assert_called_with("dummy_url", "dummy_table")
 
 
 def test_save_credentials(mocker, spark_jdbc_args_credentials):
     mock_data = mocker.Mock()
-    data_set = SparkJDBCDataSet(**spark_jdbc_args_credentials)
-    data_set.save(mock_data)
+    dataset = SparkJDBCDataSet(**spark_jdbc_args_credentials)
+    dataset.save(mock_data)
     mock_data.write.jdbc.assert_called_with(
         "dummy_url",
         "dummy_table",
@@ -71,8 +71,8 @@ def test_save_credentials(mocker, spark_jdbc_args_credentials):
 
 def test_save_args(mocker, spark_jdbc_args_save_load):
     mock_data = mocker.Mock()
-    data_set = SparkJDBCDataSet(**spark_jdbc_args_save_load)
-    data_set.save(mock_data)
+    dataset = SparkJDBCDataSet(**spark_jdbc_args_save_load)
+    dataset.save(mock_data)
     mock_data.write.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )
@@ -82,21 +82,21 @@ def test_except_bad_credentials(mocker, spark_jdbc_args_credentials_with_none_pa
     pattern = r"Credential property 'password' cannot be None(.+)"
     with pytest.raises(DatasetError, match=pattern):
         mock_data = mocker.Mock()
-        data_set = SparkJDBCDataSet(**spark_jdbc_args_credentials_with_none_password)
-        data_set.save(mock_data)
+        dataset = SparkJDBCDataSet(**spark_jdbc_args_credentials_with_none_password)
+        dataset.save(mock_data)
 
 
 def test_load(mocker, spark_jdbc_args):
     spark = mocker.patch.object(SparkJDBCDataSet, "_get_spark").return_value
-    data_set = SparkJDBCDataSet(**spark_jdbc_args)
-    data_set.load()
+    dataset = SparkJDBCDataSet(**spark_jdbc_args)
+    dataset.load()
     spark.read.jdbc.assert_called_with("dummy_url", "dummy_table")
 
 
 def test_load_credentials(mocker, spark_jdbc_args_credentials):
     spark = mocker.patch.object(SparkJDBCDataSet, "_get_spark").return_value
-    data_set = SparkJDBCDataSet(**spark_jdbc_args_credentials)
-    data_set.load()
+    dataset = SparkJDBCDataSet(**spark_jdbc_args_credentials)
+    dataset.load()
     spark.read.jdbc.assert_called_with(
         "dummy_url",
         "dummy_table",
@@ -106,8 +106,8 @@ def test_load_credentials(mocker, spark_jdbc_args_credentials):
 
 def test_load_args(mocker, spark_jdbc_args_save_load):
     spark = mocker.patch.object(SparkJDBCDataSet, "_get_spark").return_value
-    data_set = SparkJDBCDataSet(**spark_jdbc_args_save_load)
-    data_set.load()
+    dataset = SparkJDBCDataSet(**spark_jdbc_args_save_load)
+    dataset.load()
     spark.read.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )

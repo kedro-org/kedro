@@ -19,47 +19,47 @@ def filepath_txt(tmp_path):
 
 
 @pytest.fixture
-def txt_data_set(filepath_txt, fs_args):
+def txt_dataset(filepath_txt, fs_args):
     return TextDataSet(filepath=filepath_txt, fs_args=fs_args)
 
 
 @pytest.fixture
-def versioned_txt_data_set(filepath_txt, load_version, save_version):
+def versioned_txt_dataset(filepath_txt, load_version, save_version):
     return TextDataSet(
         filepath=filepath_txt, version=Version(load_version, save_version)
     )
 
 
 class TestTextDataSet:
-    def test_save_and_load(self, txt_data_set):
+    def test_save_and_load(self, txt_dataset):
         """Test saving and reloading the data set."""
-        txt_data_set.save(STRING)
-        reloaded = txt_data_set.load()
+        txt_dataset.save(STRING)
+        reloaded = txt_dataset.load()
         assert STRING == reloaded
-        assert txt_data_set._fs_open_args_load == {"mode": "r"}
-        assert txt_data_set._fs_open_args_save == {"mode": "w"}
+        assert txt_dataset._fs_open_args_load == {"mode": "r"}
+        assert txt_dataset._fs_open_args_save == {"mode": "w"}
 
-    def test_exists(self, txt_data_set):
+    def test_exists(self, txt_dataset):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        assert not txt_data_set.exists()
-        txt_data_set.save(STRING)
-        assert txt_data_set.exists()
+        assert not txt_dataset.exists()
+        txt_dataset.save(STRING)
+        assert txt_dataset.exists()
 
     @pytest.mark.parametrize(
         "fs_args",
         [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
         indirect=True,
     )
-    def test_open_extra_args(self, txt_data_set, fs_args):
-        assert txt_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert txt_data_set._fs_open_args_save == {"mode": "w"}  # default unchanged
+    def test_open_extra_args(self, txt_dataset, fs_args):
+        assert txt_dataset._fs_open_args_load == fs_args["open_args_load"]
+        assert txt_dataset._fs_open_args_save == {"mode": "w"}  # default unchanged
 
-    def test_load_missing_file(self, txt_data_set):
+    def test_load_missing_file(self, txt_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set TextDataSet\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
-            txt_data_set.load()
+            txt_dataset.load()
 
     @pytest.mark.parametrize(
         "filepath,instance_type",
@@ -72,19 +72,19 @@ class TestTextDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        data_set = TextDataSet(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = TextDataSet(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.txt"
-        data_set = TextDataSet(filepath=filepath)
-        data_set.release()
+        dataset = TextDataSet(filepath=filepath)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
 
@@ -108,35 +108,35 @@ class TestTextDataSetVersioned:
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
-    def test_save_and_load(self, versioned_txt_data_set):
+    def test_save_and_load(self, versioned_txt_dataset):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
-        versioned_txt_data_set.save(STRING)
-        reloaded_df = versioned_txt_data_set.load()
+        versioned_txt_dataset.save(STRING)
+        reloaded_df = versioned_txt_dataset.load()
         assert STRING == reloaded_df
 
-    def test_no_versions(self, versioned_txt_data_set):
+    def test_no_versions(self, versioned_txt_dataset):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for TextDataSet\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            versioned_txt_data_set.load()
+            versioned_txt_dataset.load()
 
-    def test_exists(self, versioned_txt_data_set):
+    def test_exists(self, versioned_txt_dataset):
         """Test `exists` method invocation for versioned data set."""
-        assert not versioned_txt_data_set.exists()
-        versioned_txt_data_set.save(STRING)
-        assert versioned_txt_data_set.exists()
+        assert not versioned_txt_dataset.exists()
+        versioned_txt_dataset.save(STRING)
+        assert versioned_txt_dataset.exists()
 
-    def test_prevent_overwrite(self, versioned_txt_data_set):
+    def test_prevent_overwrite(self, versioned_txt_dataset):
         """Check the error when attempting to override the data set if the
         corresponding text file for a given save version already exists."""
-        versioned_txt_data_set.save(STRING)
+        versioned_txt_dataset.save(STRING)
         pattern = (
             r"Save path \'.+\' for TextDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_txt_data_set.save(STRING)
+            versioned_txt_dataset.save(STRING)
 
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
@@ -145,7 +145,7 @@ class TestTextDataSetVersioned:
         "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
     )
     def test_save_version_warning(
-        self, versioned_txt_data_set, load_version, save_version
+        self, versioned_txt_dataset, load_version, save_version
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
@@ -154,7 +154,7 @@ class TestTextDataSetVersioned:
             rf"'{load_version}' for TextDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
-            versioned_txt_data_set.save(STRING)
+            versioned_txt_dataset.save(STRING)
 
     def test_http_filesystem_no_versioning(self):
         pattern = "Versioning is not supported for HTTP protocols."
@@ -166,22 +166,22 @@ class TestTextDataSetVersioned:
 
     def test_versioning_existing_dataset(
         self,
-        txt_data_set,
-        versioned_txt_data_set,
+        txt_dataset,
+        versioned_txt_dataset,
     ):
         """Check the error when attempting to save a versioned dataset on top of an
         already existing (non-versioned) dataset."""
-        txt_data_set.save(STRING)
-        assert txt_data_set.exists()
-        assert txt_data_set._filepath == versioned_txt_data_set._filepath
+        txt_dataset.save(STRING)
+        assert txt_dataset.exists()
+        assert txt_dataset._filepath == versioned_txt_dataset._filepath
         pattern = (
             f"(?=.*file with the same name already exists in the directory)"
-            f"(?=.*{versioned_txt_data_set._filepath.parent.as_posix()})"
+            f"(?=.*{versioned_txt_dataset._filepath.parent.as_posix()})"
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_txt_data_set.save(STRING)
+            versioned_txt_dataset.save(STRING)
 
         # Remove non-versioned dataset and try again
-        Path(txt_data_set._filepath.as_posix()).unlink()
-        versioned_txt_data_set.save(STRING)
-        assert versioned_txt_data_set.exists()
+        Path(txt_dataset._filepath.as_posix()).unlink()
+        versioned_txt_dataset.save(STRING)
+        assert versioned_txt_dataset.exists()

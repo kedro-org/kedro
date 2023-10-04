@@ -45,7 +45,7 @@ def serialised_dummy_object(backend, dummy_object, save_args):
 
 
 @pytest.fixture
-def pickle_data_set(mocker, key, backend, load_args, save_args, redis_args):
+def pickle_dataset(mocker, key, backend, load_args, save_args, redis_args):
     mocker.patch(
         "redis.StrictRedis.from_url", return_value=redis.Redis.from_url("redis://")
     )
@@ -70,7 +70,7 @@ class TestPickleDataSet:
     )
     def test_save_and_load(
         self,
-        pickle_data_set,
+        pickle_dataset,
         mocker,
         dummy_object,
         serialised_dummy_object,
@@ -81,9 +81,9 @@ class TestPickleDataSet:
         get_mocker = mocker.patch(
             "redis.StrictRedis.get", return_value=serialised_dummy_object
         )
-        pickle_data_set.save(dummy_object)
+        pickle_dataset.save(dummy_object)
         mocker.patch("redis.StrictRedis.exists", return_value=True)
-        loaded_dummy_object = pickle_data_set.load()
+        loaded_dummy_object = pickle_dataset.load()
         set_mocker.assert_called_once_with(
             key,
             serialised_dummy_object,
@@ -91,54 +91,54 @@ class TestPickleDataSet:
         get_mocker.assert_called_once_with(key)
         assert_frame_equal(loaded_dummy_object, dummy_object)
 
-    def test_exists(self, mocker, pickle_data_set, dummy_object, key):
+    def test_exists(self, mocker, pickle_dataset, dummy_object, key):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
         mocker.patch("redis.StrictRedis.exists", return_value=False)
-        assert not pickle_data_set.exists()
+        assert not pickle_dataset.exists()
         mocker.patch("redis.StrictRedis.set")
-        pickle_data_set.save(dummy_object)
+        pickle_dataset.save(dummy_object)
         exists_mocker = mocker.patch("redis.StrictRedis.exists", return_value=True)
-        assert pickle_data_set.exists()
+        assert pickle_dataset.exists()
         exists_mocker.assert_called_once_with(key)
 
-    def test_exists_raises_error(self, pickle_data_set):
+    def test_exists_raises_error(self, pickle_dataset):
         """Check the error when trying to assert existence with no redis server."""
         pattern = r"The existence of key "
         with pytest.raises(DatasetError, match=pattern):
-            pickle_data_set.exists()
+            pickle_dataset.exists()
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "errors": "strict"}], indirect=True
     )
-    def test_load_extra_params(self, pickle_data_set, load_args):
+    def test_load_extra_params(self, pickle_dataset, load_args):
         """Test overriding the default load arguments."""
         for key, value in load_args.items():
-            assert pickle_data_set._load_args[key] == value
+            assert pickle_dataset._load_args[key] == value
 
     @pytest.mark.parametrize("save_args", [{"k1": "v1", "protocol": 2}], indirect=True)
-    def test_save_extra_params(self, pickle_data_set, save_args):
+    def test_save_extra_params(self, pickle_dataset, save_args):
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
-            assert pickle_data_set._save_args[key] == value
+            assert pickle_dataset._save_args[key] == value
 
-    def test_redis_extra_args(self, pickle_data_set, redis_args):
-        assert pickle_data_set._redis_from_url_args == redis_args["from_url_args"]
-        assert pickle_data_set._redis_set_args == {}  # default unchanged
+    def test_redis_extra_args(self, pickle_dataset, redis_args):
+        assert pickle_dataset._redis_from_url_args == redis_args["from_url_args"]
+        assert pickle_dataset._redis_set_args == {}  # default unchanged
 
-    def test_load_missing_key(self, mocker, pickle_data_set):
+    def test_load_missing_key(self, mocker, pickle_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"The provided key "
         mocker.patch("redis.StrictRedis.exists", return_value=False)
         with pytest.raises(DatasetError, match=pattern):
-            pickle_data_set.load()
+            pickle_dataset.load()
 
-    def test_unserialisable_data(self, pickle_data_set, dummy_object, mocker):
+    def test_unserialisable_data(self, pickle_dataset, dummy_object, mocker):
         mocker.patch("pickle.dumps", side_effect=pickle.PickleError)
         pattern = r".+ was not serialised due to:.*"
 
         with pytest.raises(DatasetError, match=pattern):
-            pickle_data_set.save(dummy_object)
+            pickle_dataset.save(dummy_object)
 
     def test_invalid_backend(self, mocker):
         pattern = (

@@ -25,7 +25,7 @@ def backend(request):
 
 
 @pytest.fixture
-def pickle_data_set(filepath_pickle, backend, load_args, save_args, fs_args):
+def pickle_dataset(filepath_pickle, backend, load_args, save_args, fs_args):
     return PickleDataSet(
         filepath=filepath_pickle,
         backend=backend,
@@ -36,7 +36,7 @@ def pickle_data_set(filepath_pickle, backend, load_args, save_args, fs_args):
 
 
 @pytest.fixture
-def versioned_pickle_data_set(filepath_pickle, load_version, save_version):
+def versioned_pickle_dataset(filepath_pickle, load_version, save_version):
     return PickleDataSet(
         filepath=filepath_pickle, version=Version(load_version, save_version)
     )
@@ -58,49 +58,49 @@ class TestPickleDataSet:
         ],
         indirect=True,
     )
-    def test_save_and_load(self, pickle_data_set, dummy_dataframe):
+    def test_save_and_load(self, pickle_dataset, dummy_dataframe):
         """Test saving and reloading the data set."""
-        pickle_data_set.save(dummy_dataframe)
-        reloaded = pickle_data_set.load()
+        pickle_dataset.save(dummy_dataframe)
+        reloaded = pickle_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert pickle_data_set._fs_open_args_load == {}
-        assert pickle_data_set._fs_open_args_save == {"mode": "wb"}
+        assert pickle_dataset._fs_open_args_load == {}
+        assert pickle_dataset._fs_open_args_save == {"mode": "wb"}
 
-    def test_exists(self, pickle_data_set, dummy_dataframe):
+    def test_exists(self, pickle_dataset, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        assert not pickle_data_set.exists()
-        pickle_data_set.save(dummy_dataframe)
-        assert pickle_data_set.exists()
+        assert not pickle_dataset.exists()
+        pickle_dataset.save(dummy_dataframe)
+        assert pickle_dataset.exists()
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "errors": "strict"}], indirect=True
     )
-    def test_load_extra_params(self, pickle_data_set, load_args):
+    def test_load_extra_params(self, pickle_dataset, load_args):
         """Test overriding the default load arguments."""
         for key, value in load_args.items():
-            assert pickle_data_set._load_args[key] == value
+            assert pickle_dataset._load_args[key] == value
 
     @pytest.mark.parametrize("save_args", [{"k1": "v1", "protocol": 2}], indirect=True)
-    def test_save_extra_params(self, pickle_data_set, save_args):
+    def test_save_extra_params(self, pickle_dataset, save_args):
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
-            assert pickle_data_set._save_args[key] == value
+            assert pickle_dataset._save_args[key] == value
 
     @pytest.mark.parametrize(
         "fs_args",
         [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
         indirect=True,
     )
-    def test_open_extra_args(self, pickle_data_set, fs_args):
-        assert pickle_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert pickle_data_set._fs_open_args_save == {"mode": "wb"}  # default unchanged
+    def test_open_extra_args(self, pickle_dataset, fs_args):
+        assert pickle_dataset._fs_open_args_load == fs_args["open_args_load"]
+        assert pickle_dataset._fs_open_args_save == {"mode": "wb"}  # default unchanged
 
-    def test_load_missing_file(self, pickle_data_set):
+    def test_load_missing_file(self, pickle_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set PickleDataSet\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
-            pickle_data_set.load()
+            pickle_dataset.load()
 
     @pytest.mark.parametrize(
         "filepath,instance_type",
@@ -113,27 +113,27 @@ class TestPickleDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        data_set = PickleDataSet(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = PickleDataSet(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.pkl"
-        data_set = PickleDataSet(filepath=filepath)
-        data_set.release()
+        dataset = PickleDataSet(filepath=filepath)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
-    def test_unserialisable_data(self, pickle_data_set, dummy_dataframe, mocker):
+    def test_unserialisable_data(self, pickle_dataset, dummy_dataframe, mocker):
         mocker.patch("pickle.dump", side_effect=pickle.PickleError)
         pattern = r".+ was not serialised due to:.*"
 
         with pytest.raises(DatasetError, match=pattern):
-            pickle_data_set.save(dummy_dataframe)
+            pickle_dataset.save(dummy_dataframe)
 
     def test_invalid_backend(self, mocker):
         pattern = (
@@ -159,10 +159,10 @@ class TestPickleDataSet:
         with pytest.raises(ImportError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="fake.backend.does.not.exist")
 
-    def test_copy(self, pickle_data_set):
-        pickle_data_set_copy = pickle_data_set._copy()
-        assert pickle_data_set_copy is not pickle_data_set
-        assert pickle_data_set_copy._describe() == pickle_data_set._describe()
+    def test_copy(self, pickle_dataset):
+        pickle_dataset_copy = pickle_dataset._copy()
+        assert pickle_dataset_copy is not pickle_dataset
+        assert pickle_dataset_copy._describe() == pickle_dataset._describe()
 
 
 class TestPickleDataSetVersioned:
@@ -187,35 +187,35 @@ class TestPickleDataSetVersioned:
         assert "backend" in str(ds_versioned)
         assert "backend" in str(ds)
 
-    def test_save_and_load(self, versioned_pickle_data_set, dummy_dataframe):
+    def test_save_and_load(self, versioned_pickle_dataset, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
-        versioned_pickle_data_set.save(dummy_dataframe)
-        reloaded_df = versioned_pickle_data_set.load()
+        versioned_pickle_dataset.save(dummy_dataframe)
+        reloaded_df = versioned_pickle_dataset.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
-    def test_no_versions(self, versioned_pickle_data_set):
+    def test_no_versions(self, versioned_pickle_dataset):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for PickleDataSet\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            versioned_pickle_data_set.load()
+            versioned_pickle_dataset.load()
 
-    def test_exists(self, versioned_pickle_data_set, dummy_dataframe):
+    def test_exists(self, versioned_pickle_dataset, dummy_dataframe):
         """Test `exists` method invocation for versioned data set."""
-        assert not versioned_pickle_data_set.exists()
-        versioned_pickle_data_set.save(dummy_dataframe)
-        assert versioned_pickle_data_set.exists()
+        assert not versioned_pickle_dataset.exists()
+        versioned_pickle_dataset.save(dummy_dataframe)
+        assert versioned_pickle_dataset.exists()
 
-    def test_prevent_overwrite(self, versioned_pickle_data_set, dummy_dataframe):
+    def test_prevent_overwrite(self, versioned_pickle_dataset, dummy_dataframe):
         """Check the error when attempting to override the data set if the
         corresponding Pickle file for a given save version already exists."""
-        versioned_pickle_data_set.save(dummy_dataframe)
+        versioned_pickle_dataset.save(dummy_dataframe)
         pattern = (
             r"Save path \'.+\' for PickleDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_pickle_data_set.save(dummy_dataframe)
+            versioned_pickle_dataset.save(dummy_dataframe)
 
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
@@ -224,7 +224,7 @@ class TestPickleDataSetVersioned:
         "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
     )
     def test_save_version_warning(
-        self, versioned_pickle_data_set, load_version, save_version, dummy_dataframe
+        self, versioned_pickle_dataset, load_version, save_version, dummy_dataframe
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
@@ -233,7 +233,7 @@ class TestPickleDataSetVersioned:
             rf"'{load_version}' for PickleDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
-            versioned_pickle_data_set.save(dummy_dataframe)
+            versioned_pickle_dataset.save(dummy_dataframe)
 
     def test_http_filesystem_no_versioning(self):
         pattern = "Versioning is not supported for HTTP protocols."
@@ -244,26 +244,26 @@ class TestPickleDataSetVersioned:
             )
 
     def test_versioning_existing_dataset(
-        self, pickle_data_set, versioned_pickle_data_set, dummy_dataframe
+        self, pickle_dataset, versioned_pickle_dataset, dummy_dataframe
     ):
         """Check the error when attempting to save a versioned dataset on top of an
         already existing (non-versioned) dataset."""
-        pickle_data_set.save(dummy_dataframe)
-        assert pickle_data_set.exists()
-        assert pickle_data_set._filepath == versioned_pickle_data_set._filepath
+        pickle_dataset.save(dummy_dataframe)
+        assert pickle_dataset.exists()
+        assert pickle_dataset._filepath == versioned_pickle_dataset._filepath
         pattern = (
             f"(?=.*file with the same name already exists in the directory)"
-            f"(?=.*{versioned_pickle_data_set._filepath.parent.as_posix()})"
+            f"(?=.*{versioned_pickle_dataset._filepath.parent.as_posix()})"
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_pickle_data_set.save(dummy_dataframe)
+            versioned_pickle_dataset.save(dummy_dataframe)
 
         # Remove non-versioned dataset and try again
-        Path(pickle_data_set._filepath.as_posix()).unlink()
-        versioned_pickle_data_set.save(dummy_dataframe)
-        assert versioned_pickle_data_set.exists()
+        Path(pickle_dataset._filepath.as_posix()).unlink()
+        versioned_pickle_dataset.save(dummy_dataframe)
+        assert versioned_pickle_dataset.exists()
 
-    def test_copy(self, versioned_pickle_data_set):
-        pickle_data_set_copy = versioned_pickle_data_set._copy()
-        assert pickle_data_set_copy is not versioned_pickle_data_set
-        assert pickle_data_set_copy._describe() == versioned_pickle_data_set._describe()
+    def test_copy(self, versioned_pickle_dataset):
+        pickle_dataset_copy = versioned_pickle_dataset._copy()
+        assert pickle_dataset_copy is not versioned_pickle_dataset
+        assert pickle_dataset_copy._describe() == versioned_pickle_dataset._describe()

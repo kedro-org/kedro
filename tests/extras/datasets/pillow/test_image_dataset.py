@@ -95,19 +95,19 @@ class TestImageDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        data_set = ImageDataSet(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = ImageDataSet(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.png"
-        data_set = ImageDataSet(filepath=filepath)
-        data_set.release()
+        dataset = ImageDataSet(filepath=filepath)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
 

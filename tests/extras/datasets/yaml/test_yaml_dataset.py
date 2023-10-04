@@ -19,12 +19,12 @@ def filepath_yaml(tmp_path):
 
 
 @pytest.fixture
-def yaml_data_set(filepath_yaml, save_args, fs_args):
+def yaml_dataset(filepath_yaml, save_args, fs_args):
     return YAMLDataSet(filepath=filepath_yaml, save_args=save_args, fs_args=fs_args)
 
 
 @pytest.fixture
-def versioned_yaml_data_set(filepath_yaml, load_version, save_version):
+def versioned_yaml_dataset(filepath_yaml, load_version, save_version):
     return YAMLDataSet(
         filepath=filepath_yaml, version=Version(load_version, save_version)
     )
@@ -36,43 +36,43 @@ def dummy_data():
 
 
 class TestYAMLDataSet:
-    def test_save_and_load(self, yaml_data_set, dummy_data):
+    def test_save_and_load(self, yaml_dataset, dummy_data):
         """Test saving and reloading the data set."""
-        yaml_data_set.save(dummy_data)
-        reloaded = yaml_data_set.load()
+        yaml_dataset.save(dummy_data)
+        reloaded = yaml_dataset.load()
         assert dummy_data == reloaded
-        assert yaml_data_set._fs_open_args_load == {}
-        assert yaml_data_set._fs_open_args_save == {"mode": "w"}
+        assert yaml_dataset._fs_open_args_load == {}
+        assert yaml_dataset._fs_open_args_save == {"mode": "w"}
 
-    def test_exists(self, yaml_data_set, dummy_data):
+    def test_exists(self, yaml_dataset, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        assert not yaml_data_set.exists()
-        yaml_data_set.save(dummy_data)
-        assert yaml_data_set.exists()
+        assert not yaml_dataset.exists()
+        yaml_dataset.save(dummy_data)
+        assert yaml_dataset.exists()
 
     @pytest.mark.parametrize(
         "save_args", [{"k1": "v1", "index": "value"}], indirect=True
     )
-    def test_save_extra_params(self, yaml_data_set, save_args):
+    def test_save_extra_params(self, yaml_dataset, save_args):
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
-            assert yaml_data_set._save_args[key] == value
+            assert yaml_dataset._save_args[key] == value
 
     @pytest.mark.parametrize(
         "fs_args",
         [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
         indirect=True,
     )
-    def test_open_extra_args(self, yaml_data_set, fs_args):
-        assert yaml_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert yaml_data_set._fs_open_args_save == {"mode": "w"}  # default unchanged
+    def test_open_extra_args(self, yaml_dataset, fs_args):
+        assert yaml_dataset._fs_open_args_load == fs_args["open_args_load"]
+        assert yaml_dataset._fs_open_args_save == {"mode": "w"}  # default unchanged
 
-    def test_load_missing_file(self, yaml_data_set):
+    def test_load_missing_file(self, yaml_dataset):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set YAMLDataSet\(.*\)"
         with pytest.raises(DatasetError, match=pattern):
-            yaml_data_set.load()
+            yaml_dataset.load()
 
     @pytest.mark.parametrize(
         "filepath,instance_type",
@@ -85,25 +85,25 @@ class TestYAMLDataSet:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
-        data_set = YAMLDataSet(filepath=filepath)
-        assert isinstance(data_set._fs, instance_type)
+        dataset = YAMLDataSet(filepath=filepath)
+        assert isinstance(dataset._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
-        assert str(data_set._filepath) == path
-        assert isinstance(data_set._filepath, PurePosixPath)
+        assert str(dataset._filepath) == path
+        assert isinstance(dataset._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.yaml"
-        data_set = YAMLDataSet(filepath=filepath)
-        data_set.release()
+        dataset = YAMLDataSet(filepath=filepath)
+        dataset.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
-    def test_dataframe_support(self, yaml_data_set):
+    def test_dataframe_support(self, yaml_dataset):
         data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5]})
-        yaml_data_set.save(data.to_dict())
-        reloaded = yaml_data_set.load()
+        yaml_dataset.save(data.to_dict())
+        reloaded = yaml_dataset.load()
         assert isinstance(reloaded, dict)
 
         data_df = pd.DataFrame.from_dict(reloaded)
@@ -133,35 +133,35 @@ class TestYAMLDataSetVersioned:
         assert "save_args={'default_flow_style': False}" in str(ds)
         assert "save_args={'default_flow_style': False}" in str(ds_versioned)
 
-    def test_save_and_load(self, versioned_yaml_data_set, dummy_data):
+    def test_save_and_load(self, versioned_yaml_dataset, dummy_data):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
-        versioned_yaml_data_set.save(dummy_data)
-        reloaded = versioned_yaml_data_set.load()
+        versioned_yaml_dataset.save(dummy_data)
+        reloaded = versioned_yaml_dataset.load()
         assert dummy_data == reloaded
 
-    def test_no_versions(self, versioned_yaml_data_set):
+    def test_no_versions(self, versioned_yaml_dataset):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for YAMLDataSet\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            versioned_yaml_data_set.load()
+            versioned_yaml_dataset.load()
 
-    def test_exists(self, versioned_yaml_data_set, dummy_data):
+    def test_exists(self, versioned_yaml_dataset, dummy_data):
         """Test `exists` method invocation for versioned data set."""
-        assert not versioned_yaml_data_set.exists()
-        versioned_yaml_data_set.save(dummy_data)
-        assert versioned_yaml_data_set.exists()
+        assert not versioned_yaml_dataset.exists()
+        versioned_yaml_dataset.save(dummy_data)
+        assert versioned_yaml_dataset.exists()
 
-    def test_prevent_overwrite(self, versioned_yaml_data_set, dummy_data):
+    def test_prevent_overwrite(self, versioned_yaml_dataset, dummy_data):
         """Check the error when attempting to override the data set if the
         corresponding yaml file for a given save version already exists."""
-        versioned_yaml_data_set.save(dummy_data)
+        versioned_yaml_dataset.save(dummy_data)
         pattern = (
             r"Save path \'.+\' for YAMLDataSet\(.+\) must "
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_yaml_data_set.save(dummy_data)
+            versioned_yaml_dataset.save(dummy_data)
 
     @pytest.mark.parametrize(
         "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
@@ -170,7 +170,7 @@ class TestYAMLDataSetVersioned:
         "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
     )
     def test_save_version_warning(
-        self, versioned_yaml_data_set, load_version, save_version, dummy_data
+        self, versioned_yaml_dataset, load_version, save_version, dummy_data
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
@@ -179,7 +179,7 @@ class TestYAMLDataSetVersioned:
             rf"'{load_version}' for YAMLDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
-            versioned_yaml_data_set.save(dummy_data)
+            versioned_yaml_dataset.save(dummy_data)
 
     def test_http_filesystem_no_versioning(self):
         pattern = "Versioning is not supported for HTTP protocols."
@@ -190,21 +190,21 @@ class TestYAMLDataSetVersioned:
             )
 
     def test_versioning_existing_dataset(
-        self, yaml_data_set, versioned_yaml_data_set, dummy_data
+        self, yaml_dataset, versioned_yaml_dataset, dummy_data
     ):
         """Check the error when attempting to save a versioned dataset on top of an
         already existing (non-versioned) dataset."""
-        yaml_data_set.save(dummy_data)
-        assert yaml_data_set.exists()
-        assert yaml_data_set._filepath == versioned_yaml_data_set._filepath
+        yaml_dataset.save(dummy_data)
+        assert yaml_dataset.exists()
+        assert yaml_dataset._filepath == versioned_yaml_dataset._filepath
         pattern = (
             f"(?=.*file with the same name already exists in the directory)"
-            f"(?=.*{versioned_yaml_data_set._filepath.parent.as_posix()})"
+            f"(?=.*{versioned_yaml_dataset._filepath.parent.as_posix()})"
         )
         with pytest.raises(DatasetError, match=pattern):
-            versioned_yaml_data_set.save(dummy_data)
+            versioned_yaml_dataset.save(dummy_data)
 
         # Remove non-versioned dataset and try again
-        Path(yaml_data_set._filepath.as_posix()).unlink()
-        versioned_yaml_data_set.save(dummy_data)
-        assert versioned_yaml_data_set.exists()
+        Path(yaml_dataset._filepath.as_posix()).unlink()
+        versioned_yaml_dataset.save(dummy_data)
+        assert versioned_yaml_dataset.exists()

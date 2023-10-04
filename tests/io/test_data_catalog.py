@@ -173,7 +173,7 @@ def config_with_dataset_factories_only_patterns():
 
 
 @pytest.fixture
-def data_set(filepath):
+def dataset(filepath):
     return CSVDataSet(filepath=filepath, save_args={"index": False})
 
 
@@ -221,8 +221,8 @@ def bad_config(filepath):
 
 
 @pytest.fixture
-def data_catalog(data_set):
-    return DataCatalog(datasets={"test": data_set})
+def data_catalog(dataset):
+    return DataCatalog(datasets={"test": dataset})
 
 
 @pytest.fixture
@@ -238,20 +238,20 @@ class TestDataCatalog:
 
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
-    def test_add_save_and_load(self, data_set, dummy_dataframe):
+    def test_add_save_and_load(self, dataset, dummy_dataframe):
         """Test adding and then saving and reloading the data set"""
         catalog = DataCatalog(datasets={})
-        catalog.add("test", data_set)
+        catalog.add("test", dataset)
         catalog.save("test", dummy_dataframe)
         reloaded_df = catalog.load("test")
 
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
-    def test_add_all_save_and_load(self, data_set, dummy_dataframe):
+    def test_add_all_save_and_load(self, dataset, dummy_dataframe):
         """Test adding all to the data catalog and then saving and reloading
         the data set"""
         catalog = DataCatalog(datasets={})
-        catalog.add_all({"test": data_set})
+        catalog.add_all({"test": dataset})
         catalog.save("test", dummy_dataframe)
         reloaded_df = catalog.load("test")
 
@@ -264,11 +264,11 @@ class TestDataCatalog:
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
-    def test_add_data_set_twice(self, data_catalog, data_set):
+    def test_add_dataset_twice(self, data_catalog, dataset):
         """Check the error when attempting to add the data set twice"""
         pattern = r"Dataset 'test' has already been registered"
         with pytest.raises(DatasetAlreadyExistsError, match=pattern):
-            data_catalog.add("test", data_set)
+            data_catalog.add("test", dataset)
 
     def test_load_from_unregistered(self):
         """Check the error when attempting to load unregistered data set"""
@@ -494,7 +494,7 @@ class TestDataCatalogFromConfig:
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
-    def test_config_invalid_data_set(self, sane_config):
+    def test_config_invalid_dataset(self, sane_config):
         """Check the error if the type points to invalid class"""
         sane_config["catalog"]["boats"]["type"] = "DataCatalog"
         pattern = (

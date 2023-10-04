@@ -29,7 +29,7 @@ class TestAPIDataSet:
             yield mock
 
     def test_successfully_load_with_response(self, requests_mocker, method):
-        api_data_set = APIDataSet(
+        api_dataset = APIDataSet(
             url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
         )
         requests_mocker.register_uri(
@@ -39,12 +39,12 @@ class TestAPIDataSet:
             text=TEST_TEXT_RESPONSE_DATA,
         )
 
-        response = api_data_set.load()
+        response = api_dataset.load()
         assert isinstance(response, requests.Response)
         assert response.text == TEST_TEXT_RESPONSE_DATA
 
     def test_successful_json_load_with_response(self, requests_mocker, method):
-        api_data_set = APIDataSet(
+        api_dataset = APIDataSet(
             url=TEST_URL,
             method=method,
             json=TEST_JSON_RESPONSE_DATA,
@@ -57,12 +57,12 @@ class TestAPIDataSet:
             text=json.dumps(TEST_JSON_RESPONSE_DATA),
         )
 
-        response = api_data_set.load()
+        response = api_dataset.load()
         assert isinstance(response, requests.Response)
         assert response.json() == TEST_JSON_RESPONSE_DATA
 
     def test_http_error(self, requests_mocker, method):
-        api_data_set = APIDataSet(
+        api_dataset = APIDataSet(
             url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
         )
         requests_mocker.register_uri(
@@ -74,31 +74,31 @@ class TestAPIDataSet:
         )
 
         with pytest.raises(DatasetError, match="Failed to fetch data"):
-            api_data_set.load()
+            api_dataset.load()
 
     def test_socket_error(self, requests_mocker, method):
-        api_data_set = APIDataSet(
+        api_dataset = APIDataSet(
             url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
         )
         requests_mocker.register_uri(method, TEST_URL_WITH_PARAMS, exc=socket.error)
 
         with pytest.raises(DatasetError, match="Failed to connect"):
-            api_data_set.load()
+            api_dataset.load()
 
     def test_read_only_mode(self, method):
         """
         Saving is disabled on the data set.
         """
-        api_data_set = APIDataSet(url=TEST_URL, method=method)
+        api_dataset = APIDataSet(url=TEST_URL, method=method)
         with pytest.raises(DatasetError, match="is a read only data set type"):
-            api_data_set.save({})
+            api_dataset.save({})
 
     def test_exists_http_error(self, requests_mocker, method):
         """
         In case of an unexpected HTTP error,
         ``exists()`` should not silently catch it.
         """
-        api_data_set = APIDataSet(
+        api_dataset = APIDataSet(
             url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
         )
         requests_mocker.register_uri(
@@ -109,14 +109,14 @@ class TestAPIDataSet:
             status_code=requests.codes.FORBIDDEN,
         )
         with pytest.raises(DatasetError, match="Failed to fetch data"):
-            api_data_set.exists()
+            api_dataset.exists()
 
     def test_exists_ok(self, requests_mocker, method):
         """
         If the file actually exists and server responds 200,
         ``exists()`` should return True
         """
-        api_data_set = APIDataSet(
+        api_dataset = APIDataSet(
             url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
         )
         requests_mocker.register_uri(
@@ -126,7 +126,7 @@ class TestAPIDataSet:
             text=TEST_TEXT_RESPONSE_DATA,
         )
 
-        assert api_data_set.exists()
+        assert api_dataset.exists()
 
     def test_credentials_auth_error(self, method):
         """
@@ -157,7 +157,7 @@ class TestAPIDataSet:
             auth_kwarg: auth_seq,
         }
 
-        api_data_set = APIDataSet(**kwargs)
+        api_dataset = APIDataSet(**kwargs)
         requests_mocker.register_uri(
             method,
             TEST_URL_WITH_PARAMS,
@@ -165,6 +165,6 @@ class TestAPIDataSet:
             text=TEST_TEXT_RESPONSE_DATA,
         )
 
-        response = api_data_set.load()
+        response = api_dataset.load()
         assert isinstance(response, requests.Response)
         assert response.text == TEST_TEXT_RESPONSE_DATA

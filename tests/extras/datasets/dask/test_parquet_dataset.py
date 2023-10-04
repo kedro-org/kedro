@@ -55,7 +55,7 @@ def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dd_dataframe: dd.DataFram
 
 
 @pytest.fixture
-def s3_data_set(load_args, save_args):
+def s3_dataset(load_args, save_args):
     return ParquetDataSet(
         filepath=S3_PATH,
         credentials=AWS_CREDENTIALS,
@@ -86,19 +86,19 @@ class TestParquetDataSet:
 
     @pytest.mark.parametrize("bad_credentials", [{"key": None, "secret": None}])
     def test_empty_credentials_load(self, bad_credentials):
-        parquet_data_set = ParquetDataSet(filepath=S3_PATH, credentials=bad_credentials)
+        parquet_dataset = ParquetDataSet(filepath=S3_PATH, credentials=bad_credentials)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            parquet_data_set.load().compute()
+            parquet_dataset.load().compute()
 
     def test_pass_credentials(self, mocker):
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
         client_mock = mocker.patch("botocore.session.Session.create_client")
-        s3_data_set = ParquetDataSet(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
+        s3_dataset = ParquetDataSet(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
-            s3_data_set.load().compute()
+            s3_dataset.load().compute()
 
         assert client_mock.call_count == 1
         args, kwargs = client_mock.call_args_list[0]
@@ -107,78 +107,78 @@ class TestParquetDataSet:
         assert kwargs["aws_secret_access_key"] == AWS_CREDENTIALS["secret"]
 
     @pytest.mark.usefixtures("mocked_s3_bucket")
-    def test_save_data(self, s3_data_set):
+    def test_save_data(self, s3_dataset):
         """Test saving the data to S3."""
         pd_data = pd.DataFrame(
             {"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]}
         )
         dd_data = dd.from_pandas(pd_data, npartitions=2)
-        s3_data_set.save(dd_data)
-        loaded_data = s3_data_set.load()
+        s3_dataset.save(dd_data)
+        loaded_data = s3_dataset.load()
         assert_frame_equal(loaded_data.compute(), dd_data.compute())
 
     @pytest.mark.usefixtures("mocked_s3_object")
-    def test_load_data(self, s3_data_set, dummy_dd_dataframe):
+    def test_load_data(self, s3_dataset, dummy_dd_dataframe):
         """Test loading the data from S3."""
-        loaded_data = s3_data_set.load()
+        loaded_data = s3_dataset.load()
         assert_frame_equal(loaded_data.compute(), dummy_dd_dataframe.compute())
 
     @pytest.mark.usefixtures("mocked_s3_bucket")
-    def test_exists(self, s3_data_set, dummy_dd_dataframe):
+    def test_exists(self, s3_dataset, dummy_dd_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        assert not s3_data_set.exists()
-        s3_data_set.save(dummy_dd_dataframe)
-        assert s3_data_set.exists()
+        assert not s3_dataset.exists()
+        s3_dataset.save(dummy_dd_dataframe)
+        assert s3_dataset.exists()
 
     def test_save_load_locally(self, tmp_path, dummy_dd_dataframe):
         """Test loading the data locally."""
         file_path = str(tmp_path / "some" / "dir" / FILE_NAME)
-        data_set = ParquetDataSet(filepath=file_path)
+        dataset = ParquetDataSet(filepath=file_path)
 
-        assert not data_set.exists()
-        data_set.save(dummy_dd_dataframe)
-        assert data_set.exists()
-        loaded_data = data_set.load()
+        assert not dataset.exists()
+        dataset.save(dummy_dd_dataframe)
+        assert dataset.exists()
+        loaded_data = dataset.load()
         dummy_dd_dataframe.compute().equals(loaded_data.compute())
 
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
     )
-    def test_load_extra_params(self, s3_data_set, load_args):
+    def test_load_extra_params(self, s3_dataset, load_args):
         """Test overriding the default load arguments."""
         for key, value in load_args.items():
-            assert s3_data_set._load_args[key] == value
+            assert s3_dataset._load_args[key] == value
 
     @pytest.mark.parametrize(
         "save_args", [{"k1": "v1", "index": "value"}], indirect=True
     )
-    def test_save_extra_params(self, s3_data_set, save_args):
+    def test_save_extra_params(self, s3_dataset, save_args):
         """Test overriding the default save arguments."""
-        s3_data_set._process_schema()
-        assert s3_data_set._save_args.get("schema") is None
+        s3_dataset._process_schema()
+        assert s3_dataset._save_args.get("schema") is None
 
         for key, value in save_args.items():
-            assert s3_data_set._save_args[key] == value
+            assert s3_dataset._save_args[key] == value
 
-        for key, value in s3_data_set.DEFAULT_SAVE_ARGS.items():
-            assert s3_data_set._save_args[key] == value
+        for key, value in s3_dataset.DEFAULT_SAVE_ARGS.items():
+            assert s3_dataset._save_args[key] == value
 
     @pytest.mark.parametrize(
         "save_args",
         [{"schema": {"col1": "[[int64]]", "col2": "string"}}],
         indirect=True,
     )
-    def test_save_extra_params_schema_dict(self, s3_data_set, save_args):
+    def test_save_extra_params_schema_dict(self, s3_dataset, save_args):
         """Test setting the schema as dictionary of pyarrow column types
         in save arguments."""
 
         for key, value in save_args["schema"].items():
-            assert s3_data_set._save_args["schema"][key] == value
+            assert s3_dataset._save_args["schema"][key] == value
 
-        s3_data_set._process_schema()
+        s3_dataset._process_schema()
 
-        for field in s3_data_set._save_args["schema"].values():
+        for field in s3_dataset._save_args["schema"].values():
             assert isinstance(field, pa.DataType)
 
     @pytest.mark.parametrize(
@@ -195,16 +195,16 @@ class TestParquetDataSet:
         ],
         indirect=True,
     )
-    def test_save_extra_params_schema_dict_mixed_types(self, s3_data_set, save_args):
+    def test_save_extra_params_schema_dict_mixed_types(self, s3_dataset, save_args):
         """Test setting the schema as dictionary of mixed value types
         in save arguments."""
 
         for key, value in save_args["schema"].items():
-            assert s3_data_set._save_args["schema"][key] == value
+            assert s3_dataset._save_args["schema"][key] == value
 
-        s3_data_set._process_schema()
+        s3_dataset._process_schema()
 
-        for field in s3_data_set._save_args["schema"].values():
+        for field in s3_dataset._save_args["schema"].values():
             assert isinstance(field, pa.DataType)
 
     @pytest.mark.parametrize(
@@ -212,12 +212,12 @@ class TestParquetDataSet:
         [{"schema": "c1:[int64],c2:int64"}],
         indirect=True,
     )
-    def test_save_extra_params_schema_str_schema_fields(self, s3_data_set, save_args):
+    def test_save_extra_params_schema_str_schema_fields(self, s3_dataset, save_args):
         """Test setting the schema as string pyarrow schema (list of fields)
         in save arguments."""
 
-        assert s3_data_set._save_args["schema"] == save_args["schema"]
+        assert s3_dataset._save_args["schema"] == save_args["schema"]
 
-        s3_data_set._process_schema()
+        s3_dataset._process_schema()
 
-        assert isinstance(s3_data_set._save_args["schema"], pa.Schema)
+        assert isinstance(s3_dataset._save_args["schema"], pa.Schema)

@@ -44,9 +44,9 @@ class TextDataSet(AbstractVersionedDataset[str, str]):
         >>>
         >>> string_to_write = "This will go in a file."
         >>>
-        >>> data_set = TextDataSet(filepath="test.md")
-        >>> data_set.save(string_to_write)
-        >>> reloaded = data_set.load()
+        >>> dataset = TextDataSet(filepath="test.md")
+        >>> dataset.save(string_to_write)
+        >>> reloaded = dataset.load()
         >>> assert string_to_write == reloaded
 
     """

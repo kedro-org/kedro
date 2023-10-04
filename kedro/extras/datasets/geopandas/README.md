@@ -14,9 +14,9 @@ data = gpd.GeoDataFrame(
     {"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]},
     geometry=[Point(1, 1), Point(2, 4)],
 )
-data_set = GeoJSONDataSet(filepath="test.geojson")
-data_set.save(data)
-reloaded = data_set.load()
+dataset = GeoJSONDataSet(filepath="test.geojson")
+dataset.save(data)
+reloaded = dataset.load()
 assert data.equals(reloaded)
 ```
 

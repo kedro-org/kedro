@@ -80,9 +80,9 @@ class SVMLightDataSet(AbstractVersionedDataset[_DI, _DO]):
         >>> # Features and labels.
         >>> data = (np.array([[0, 1], [2, 3.14159]]), np.array([7, 3]))
         >>>
-        >>> data_set = SVMLightDataSet(filepath="test.svm")
-        >>> data_set.save(data)
-        >>> reloaded_features, reloaded_labels = data_set.load()
+        >>> dataset = SVMLightDataSet(filepath="test.svm")
+        >>> dataset.save(data)
+        >>> reloaded_features, reloaded_labels = dataset.load()
         >>> assert (data[0] == reloaded_features).all()
         >>> assert (data[1] == reloaded_labels).all()
 

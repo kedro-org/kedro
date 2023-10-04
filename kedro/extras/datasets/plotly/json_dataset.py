@@ -49,9 +49,9 @@ class JSONDataSet(
         >>> import plotly.express as px
         >>>
         >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
-        >>> data_set = JSONDataSet(filepath="test.json")
-        >>> data_set.save(fig)
-        >>> reloaded = data_set.load()
+        >>> dataset = JSONDataSet(filepath="test.json")
+        >>> dataset.save(fig)
+        >>> reloaded = dataset.load()
         >>> assert fig == reloaded
     """
 

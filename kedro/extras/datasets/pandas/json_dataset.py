@@ -59,9 +59,9 @@ class JSONDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = JSONDataSet(filepath="test.json")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = JSONDataSet(filepath="test.json")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
 
     """

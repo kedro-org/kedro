@@ -30,11 +30,11 @@ class BioSequenceDataSet(AbstractDataset[List, List]):
         >>> for record in SeqIO.parse(StringIO(data), "fasta"):
         >>>     raw_data.append(record)
         >>>
-        >>> data_set = BioSequenceDataSet(filepath="ls_orchid.fasta",
+        >>> dataset = BioSequenceDataSet(filepath="ls_orchid.fasta",
         >>>                               load_args={"format": "fasta"},
         >>>                               save_args={"format": "fasta"})
-        >>> data_set.save(raw_data)
-        >>> sequence_list = data_set.load()
+        >>> dataset.save(raw_data)
+        >>> sequence_list = dataset.load()
         >>>
         >>> assert raw_data[0].id == sequence_list[0].id
         >>> assert raw_data[0].seq == sequence_list[0].seq

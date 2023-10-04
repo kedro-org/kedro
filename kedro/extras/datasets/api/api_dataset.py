@@ -43,7 +43,7 @@ class APIDataSet(AbstractDataset[None, requests.Response]):
         >>> from kedro.extras.datasets.api import APIDataSet
         >>>
         >>>
-        >>> data_set = APIDataSet(
+        >>> dataset = APIDataSet(
         >>>     url="https://quickstats.nass.usda.gov",
         >>>     params={
         >>>         "key": "SOME_TOKEN",
@@ -54,7 +54,7 @@ class APIDataSet(AbstractDataset[None, requests.Response]):
         >>>         "year": 2000
         >>>     }
         >>> )
-        >>> data = data_set.load()
+        >>> data = dataset.load()
     """
 
     def __init__(  # noqa: too-many-arguments

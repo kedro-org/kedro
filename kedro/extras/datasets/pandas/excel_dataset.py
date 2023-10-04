@@ -67,9 +67,9 @@ class ExcelDataSet(
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = ExcelDataSet(filepath="test.xlsx")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = ExcelDataSet(filepath="test.xlsx")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
 
     To save a multi-sheet Excel file, no special ``save_args`` are required.
@@ -102,9 +102,9 @@ class ExcelDataSet(
         >>>                      'col3': [5, 6]})
         >>> another_dataframe = pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
         >>> multiframe = {"Sheet1": dataframe, "Sheet2": another_dataframe}
-        >>> data_set = ExcelDataSet(filepath="test.xlsx", load_args = {"sheet_name": None})
-        >>> data_set.save(multiframe)
-        >>> reloaded = data_set.load()
+        >>> dataset = ExcelDataSet(filepath="test.xlsx", load_args = {"sheet_name": None})
+        >>> dataset.save(multiframe)
+        >>> reloaded = dataset.load()
         >>> assert multiframe["Sheet1"].equals(reloaded["Sheet1"])
         >>> assert multiframe["Sheet2"].equals(reloaded["Sheet2"])
 

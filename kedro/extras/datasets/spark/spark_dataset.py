@@ -219,9 +219,9 @@ class SparkDataSet(AbstractVersionedDataset[DataFrame, DataFrame]):
         >>> spark_df = SparkSession.builder.getOrCreate()\
         >>>                        .createDataFrame(data, schema)
         >>>
-        >>> data_set = SparkDataSet(filepath="test_data")
-        >>> data_set.save(spark_df)
-        >>> reloaded = data_set.load()
+        >>> dataset = SparkDataSet(filepath="test_data")
+        >>> dataset.save(spark_df)
+        >>> reloaded = dataset.load()
         >>>
         >>> reloaded.take(4)
     """

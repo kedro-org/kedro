@@ -60,17 +60,17 @@ class PickleDataSet(AbstractVersionedDataset[Any, Any]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = PickleDataSet(filepath="test.pkl", backend="pickle")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = PickleDataSet(filepath="test.pkl", backend="pickle")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
         >>>
-        >>> data_set = PickleDataSet(filepath="test.pickle.lz4",
+        >>> dataset = PickleDataSet(filepath="test.pickle.lz4",
         >>>                          backend="compress_pickle",
         >>>                          load_args={"compression":"lz4"},
         >>>                          save_args={"compression":"lz4"})
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
     """
 

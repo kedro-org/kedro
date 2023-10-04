@@ -63,9 +63,9 @@ class CSVDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = CSVDataSet(filepath="test.csv")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = CSVDataSet(filepath="test.csv")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data.equals(reloaded)
 
     """

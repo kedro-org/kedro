@@ -58,15 +58,15 @@ class PlotlyDataSet(JSONDataSet):
         >>>
         >>> df_data = pd.DataFrame([[0, 1], [1, 0]], columns=('x1', 'x2'))
         >>>
-        >>> data_set = PlotlyDataSet(
+        >>> dataset = PlotlyDataSet(
         >>>     filepath='scatter_plot.json',
         >>>     plotly_args={
         >>>         'type': 'scatter',
         >>>         'fig': {'x': 'x1', 'y': 'x2'},
         >>>     }
         >>> )
-        >>> data_set.save(df_data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(df_data)
+        >>> reloaded = dataset.load()
         >>> assert px.scatter(df_data, x='x1', y='x2') == reloaded
 
     """

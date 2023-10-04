@@ -61,10 +61,10 @@ class FeatherDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = FeatherDataSet(filepath="test.feather")
+        >>> dataset = FeatherDataSet(filepath="test.feather")
         >>>
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert data.equals(reloaded)
 

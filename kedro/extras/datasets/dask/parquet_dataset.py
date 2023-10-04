@@ -50,7 +50,7 @@ class ParquetDataSet(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>>                      'col3': [[5, 6], [7, 8]]})
         >>> ddf = dd.from_pandas(data, npartitions=2)
         >>>
-        >>> data_set = ParquetDataSet(
+        >>> dataset = ParquetDataSet(
         >>>     filepath="s3://bucket_name/path/to/folder",
         >>>     credentials={
         >>>         'client_kwargs':{
@@ -60,8 +60,8 @@ class ParquetDataSet(AbstractDataset[dd.DataFrame, dd.DataFrame]):
         >>>     },
         >>>     save_args={"compression": "GZIP"}
         >>> )
-        >>> data_set.save(ddf)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(ddf)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert ddf.compute().equals(reloaded.compute())
 

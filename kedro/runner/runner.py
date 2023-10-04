@@ -94,7 +94,7 @@ class AbstractRunner(ABC):
 
         # Create a default dataset for unregistered datasets
         for ds_name in unregistered_ds:
-            catalog.add(ds_name, self.create_default_data_set(ds_name))
+            catalog.add(ds_name, self.create_default_dataset(ds_name))
 
         if self._is_async:
             self._logger.info(
@@ -164,7 +164,7 @@ class AbstractRunner(ABC):
         pass
 
     @abstractmethod  # pragma: no cover
-    def create_default_data_set(self, ds_name: str) -> AbstractDataset:
+    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
         """Factory method for creating the default dataset for the runner.
 
         Args:

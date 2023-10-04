@@ -55,12 +55,12 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
         >>> import tensorflow as tf
         >>> import numpy as np
         >>>
-        >>> data_set = TensorFlowModelDataset("data/06_models/tensorflow_model.h5")
+        >>> dataset = TensorFlowModelDataset("data/06_models/tensorflow_model.h5")
         >>> model = tf.keras.Model()
         >>> predictions = model.predict([...])
         >>>
-        >>> data_set.save(model)
-        >>> loaded_model = data_set.load()
+        >>> dataset.save(model)
+        >>> loaded_model = dataset.load()
         >>> new_predictions = loaded_model.predict([...])
         >>> np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 

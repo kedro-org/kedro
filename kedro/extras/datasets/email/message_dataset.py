@@ -50,9 +50,9 @@ class EmailMessageDataSet(
         >>> msg["From"] = '"sin studly17"'
         >>> msg["To"] = '"strong bad"'
         >>>
-        >>> data_set = EmailMessageDataSet(filepath="test")
-        >>> data_set.save(msg)
-        >>> reloaded = data_set.load()
+        >>> dataset = EmailMessageDataSet(filepath="test")
+        >>> dataset.save(msg)
+        >>> reloaded = dataset.load()
         >>> assert msg.__dict__ == reloaded.__dict__
 
     """

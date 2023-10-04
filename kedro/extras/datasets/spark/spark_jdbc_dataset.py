@@ -56,14 +56,14 @@ class SparkJDBCDataSet(AbstractDataset[DataFrame, DataFrame]):
         >>> url = 'jdbc:postgresql://localhost/test'
         >>> table = 'table_a'
         >>> connection_properties = {'driver': 'org.postgresql.Driver'}
-        >>> data_set = SparkJDBCDataSet(
+        >>> dataset = SparkJDBCDataSet(
         >>>     url=url, table=table, credentials={'user': 'scott',
         >>>                                        'password': 'tiger'},
         >>>     load_args={'properties': connection_properties},
         >>>     save_args={'properties': connection_properties})
         >>>
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert data.toPandas().equals(reloaded.toPandas())
 

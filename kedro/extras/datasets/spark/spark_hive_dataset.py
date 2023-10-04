@@ -62,10 +62,10 @@ class SparkHiveDataSet(AbstractDataset[DataFrame, DataFrame]):
         >>>
         >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
-        >>> data_set = SparkHiveDataSet(database="test_database", table="test_table",
+        >>> dataset = SparkHiveDataSet(database="test_database", table="test_table",
         >>>                             write_mode="overwrite")
-        >>> data_set.save(spark_df)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(spark_df)
+        >>> reloaded = dataset.load()
         >>>
         >>> reloaded.take(4)
     """

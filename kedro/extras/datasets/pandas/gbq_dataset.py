@@ -57,11 +57,11 @@ class GBQTableDataSet(AbstractDataset[None, pd.DataFrame]):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = GBQTableDataSet('dataset',
+        >>> dataset = GBQTableDataSet('dataset',
         >>>                            'table_name',
         >>>                            project='my-project')
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert data.equals(reloaded)
 
@@ -201,9 +201,9 @@ class GBQQueryDataSet(AbstractDataset[None, pd.DataFrame]):
         >>>
         >>> sql = "SELECT * FROM dataset_1.table_a"
         >>>
-        >>> data_set = GBQQueryDataSet(sql, project='my-project')
+        >>> dataset = GBQQueryDataSet(sql, project='my-project')
         >>>
-        >>> sql_data = data_set.load()
+        >>> sql_data = dataset.load()
         >>>
     """
 

@@ -32,8 +32,8 @@ class ImageDataSet(AbstractVersionedDataset[Image.Image, Image.Image]):
 
         >>> from kedro.extras.datasets.pillow import ImageDataSet
         >>>
-        >>> data_set = ImageDataSet(filepath="test.png")
-        >>> image = data_set.load()
+        >>> dataset = ImageDataSet(filepath="test.png")
+        >>> image = dataset.load()
         >>> image.show()
 
     """

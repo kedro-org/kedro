@@ -145,11 +145,11 @@ class SQLTableDataSet(AbstractDataset[pd.DataFrame, pd.DataFrame]):
         >>> credentials = {
         >>>     "con": "postgresql://scott:tiger@localhost/test"
         >>> }
-        >>> data_set = SQLTableDataSet(table_name=table_name,
+        >>> dataset = SQLTableDataSet(table_name=table_name,
         >>>                            credentials=credentials)
         >>>
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>>
         >>> assert data.equals(reloaded)
 
@@ -326,10 +326,10 @@ class SQLQueryDataSet(AbstractDataset[None, pd.DataFrame]):
         >>> credentials = {
         >>>     "con": "postgresql://scott:tiger@localhost/test"
         >>> }
-        >>> data_set = SQLQueryDataSet(sql=sql,
+        >>> dataset = SQLQueryDataSet(sql=sql,
         >>>                            credentials=credentials)
         >>>
-        >>> sql_data = data_set.load()
+        >>> sql_data = dataset.load()
 
     """
 

@@ -45,9 +45,9 @@ class YAMLDataSet(AbstractVersionedDataset[Dict, Dict]):
         >>>
         >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
         >>>
-        >>> data_set = YAMLDataSet(filepath="test.yaml")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
+        >>> dataset = YAMLDataSet(filepath="test.yaml")
+        >>> dataset.save(data)
+        >>> reloaded = dataset.load()
         >>> assert data == reloaded
 
     """

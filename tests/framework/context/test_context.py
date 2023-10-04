@@ -13,7 +13,7 @@ import pytest
 import toml
 import yaml
 from attrs.exceptions import FrozenInstanceError
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException
@@ -34,7 +34,7 @@ from kedro.framework.project import (
 MOCK_PACKAGE_NAME = "mock_package_name"
 
 
-class BadCatalog:  # pylint: disable=too-few-public-methods
+class BadCatalog:
     """
     Catalog class that doesn't subclass `DataCatalog`, for testing only.
     """
@@ -188,9 +188,7 @@ def extra_params(request):
 
 
 @pytest.fixture
-def dummy_context(
-    tmp_path, prepare_project_dir, env, extra_params
-):  # pylint: disable=unused-argument
+def dummy_context(tmp_path, prepare_project_dir, env, extra_params):
     configure_project(MOCK_PACKAGE_NAME)
     config_loader = ConfigLoader(str(tmp_path / "conf"), env=env)
     context = KedroContext(

@@ -1,4 +1,3 @@
-# pylint: disable=import-outside-toplevel
 import logging
 import sys
 from pathlib import Path

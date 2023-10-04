@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 from collections import namedtuple
 from itertools import cycle
 from os import rename
@@ -42,17 +41,17 @@ def stub_command():
 
 
 @forward_command(stub_cli, name="forwarded_command")
-def forwarded_command(args, **kwargs):  # pylint: disable=unused-argument
+def forwarded_command(args, **kwargs):
     print("fred", args)
 
 
 @forward_command(stub_cli, name="forwarded_help", forward_help=True)
-def forwarded_help(args, **kwargs):  # pylint: disable=unused-argument
+def forwarded_help(args, **kwargs):
     print("fred", args)
 
 
 @forward_command(stub_cli)
-def unnamed(args, **kwargs):  # pylint: disable=unused-argument
+def unnamed(args, **kwargs):
     print("fred", args)
 
 

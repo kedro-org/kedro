@@ -3,15 +3,15 @@ from io import StringIO
 
 import pytest
 import yaml
+from kedro_datasets.pandas import CSVDataSet
 
-from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io import CachedDataset, DataCatalog, DatasetError, MemoryDataset
 
 YML_CONFIG = """
 test_ds:
   type: CachedDataset
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataSet
+    type: kedro_datasets.pandas.CSVDataSet
     filepath: example.csv
 """
 
@@ -20,7 +20,7 @@ test_ds:
   type: CachedDataset
   versioned: true
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataSet
+    type: kedro_datasets.pandas.CSVDataSet
     filepath: example.csv
 """
 
@@ -28,7 +28,7 @@ YML_CONFIG_VERSIONED_BAD = """
 test_ds:
   type: CachedDataset
   dataset:
-    type: kedro.extras.datasets.pandas.CSVDataSet
+    type: kedro_datasets.pandas.CSVDataSet
     filepath: example.csv
     versioned: true
 """
@@ -60,10 +60,10 @@ class TestCachedDataset:
 
         cached_ds.save(42)
         assert cached_ds.load() == 42
-        assert wrapped.load.call_count == 0  # pylint: disable=no-member
-        assert wrapped.save.call_count == 1  # pylint: disable=no-member
-        assert cached_ds._cache.load.call_count == 1  # pylint: disable=no-member
-        assert cached_ds._cache.save.call_count == 1  # pylint: disable=no-member
+        assert wrapped.load.call_count == 0
+        assert wrapped.save.call_count == 1
+        assert cached_ds._cache.load.call_count == 1
+        assert cached_ds._cache.save.call_count == 1
 
     def test_load_empty_cache(self, mocker):
         wrapped = MemoryDataset(-42)
@@ -73,8 +73,8 @@ class TestCachedDataset:
         mocker.spy(cached_ds._cache, "load")
 
         assert cached_ds.load() == -42
-        assert wrapped.load.call_count == 1  # pylint: disable=no-member
-        assert cached_ds._cache.load.call_count == 0  # pylint: disable=no-member
+        assert wrapped.load.call_count == 1
+        assert cached_ds._cache.load.call_count == 0
 
     def test_from_yaml(self, mocker):
         config = yaml.safe_load(StringIO(YML_CONFIG))

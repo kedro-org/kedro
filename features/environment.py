@@ -103,8 +103,6 @@ def _setup_minimal_env(context):
             "pip",
             "install",
             "-U",
-            # pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
-            "pip>=21.2,<23.2; python_version < '3.8'",
             "pip>=21.2; python_version >= '3.8'",
         ],
         env=context.env,
@@ -115,13 +113,11 @@ def _setup_minimal_env(context):
 
 def _install_project_requirements(context):
     install_reqs = (
-        Path(
-            "kedro/templates/project/{{ cookiecutter.repo_name }}/src/requirements.txt"
-        )
+        Path("kedro/templates/project/{{ cookiecutter.repo_name }}/requirements.txt")
         .read_text(encoding="utf-8")
         .splitlines()
     )
     install_reqs = [req for req in install_reqs if "{" not in req and "#" not in req]
-    install_reqs.append(".[pandas.CSVDataSet]")
+    install_reqs.append("kedro-datasets[pandas.CSVDataSet]")
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

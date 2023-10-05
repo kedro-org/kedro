@@ -1,8 +1,8 @@
 import pytest
 import yaml
 from click.testing import CliRunner
+from kedro_datasets.pandas import CSVDataSet
 
-from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
@@ -400,7 +400,7 @@ class TestCatalogCreateCommand:
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
         assert result.exit_code
-        assert "Unable to instantiate Kedro session" in result.output
+        assert "Unable to instantiate Kedro Catalog" in result.output
 
 
 @pytest.mark.usefixtures(

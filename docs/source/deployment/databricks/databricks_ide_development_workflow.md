@@ -5,7 +5,7 @@ This guide demonstrates a workflow for developing Kedro projects on Databricks u
 By working in your local environment, you can take advantage of features within an IDE that are not available on Databricks notebooks:
 
 - Auto-completion and suggestions for code, improving your development speed and accuracy.
-- Linters like Pylint or Flake8 can be integrated to catch potential issues in your code.
+- Linters like [Ruff](https://docs.astral.sh/ruff) can be integrated to catch potential issues in your code.
 - Static type checkers like Mypy can check types in your code, helping to identify potential type-related issues early in the development process.
 
 To set up these features, look for instructions specific to your IDE (for instance, [VS Code](https://code.visualstudio.com/docs/python/linting)).
@@ -184,7 +184,7 @@ Open your newly-created notebook and create **four new cells** inside it. You wi
 1. Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. Add the following code to the first new cell to install the dependencies:
 
 ```ipython
-%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/src/requirements.txt"
+%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/requirements.txt"
 ```
 
 2. To run your project in your notebook, you must load the Kedro IPython extension. Add the following code to the second new cell to load the IPython extension:

@@ -1,6 +1,5 @@
 import re
 
-# pylint: disable=unused-argument
 import numpy as np
 import pandas as pd
 import pytest
@@ -218,7 +217,7 @@ def test_infer_mode_deepcopy(data):
 
 
 def test_infer_mode_assign():
-    class DataFrame:  # pylint: disable=too-few-public-methods
+    class DataFrame:
         pass
 
     data = DataFrame()

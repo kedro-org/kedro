@@ -145,7 +145,7 @@ from kedro.framework.hooks import hook_impl
 
 class MyHooks:
     @hook_impl
-    def after_catalog_created(self, catalog):  # pylint: disable=unused-argument
+    def after_catalog_created(self, catalog):
         logging.info("Reached after_catalog_created hook")
 
 

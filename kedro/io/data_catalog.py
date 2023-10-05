@@ -176,7 +176,7 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet
             >>>
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
@@ -486,7 +486,7 @@ class DataCatalog:
         ::
 
             >>> from kedro.io import DataCatalog
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet
             >>>
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
@@ -499,7 +499,10 @@ class DataCatalog:
         dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from '%s' (%s)...", name, type(dataset).__name__
+            "Loading data from [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
         )
 
         result = dataset.load()
@@ -523,7 +526,7 @@ class DataCatalog:
 
             >>> import pandas as pd
             >>>
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet
             >>>
             >>> cars = CSVDataSet(filepath="cars.csv",
             >>>                   load_args=None,
@@ -537,7 +540,12 @@ class DataCatalog:
         """
         dataset = self._get_dataset(name)
 
-        self._logger.info("Saving data to '%s' (%s)...", name, type(dataset).__name__)
+        self._logger.info(
+            "Saving data to [dark_orange]%s[/dark_orange] (%s)...",
+            name,
+            type(dataset).__name__,
+            extra={"markup": True},
+        )
 
         dataset.save(data)
 
@@ -592,7 +600,7 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet
             >>>
             >>> io = DataCatalog(datasets={
             >>>                   'cars': CSVDataSet(filepath="cars.csv")
@@ -628,7 +636,7 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
+            >>> from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
             >>>
             >>> io = DataCatalog(datasets={
             >>>                   "cars": CSVDataSet(filepath="cars.csv")

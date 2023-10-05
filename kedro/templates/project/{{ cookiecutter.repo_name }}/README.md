@@ -17,12 +17,12 @@ In order to get the best out of the template:
 
 ## How to install dependencies
 
-Declare any dependencies in `src/requirements.txt` for `pip` installation and `src/environment.yml` for `conda` installation.
+Declare any dependencies in `requirements.txt` for `pip` installation.
 
 To install them, run:
 
 ```
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## How to run your Kedro pipeline
@@ -46,7 +46,7 @@ To configure the coverage threshold, look at the `.coveragerc` file.
 
 ## Project dependencies
 
-To see and update the dependency requirements for your project use `src/requirements.txt`. You can install the project requirements with `pip install -r src/requirements.txt`.
+To see and update the dependency requirements for your project use `requirements.txt`. You can install the project requirements with `pip install -r requirements.txt`.
 
 [Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
 
@@ -54,7 +54,7 @@ To see and update the dependency requirements for your project use `src/requirem
 
 > Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `context`, `catalog`, and `startup_error`.
 >
-> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r src/requirements.txt` you will not need to take any extra steps before you use them.
+> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r requirements.txt` you will not need to take any extra steps before you use them.
 
 ### Jupyter
 To use Jupyter notebooks in your Kedro project, you need to install Jupyter:

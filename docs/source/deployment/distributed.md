@@ -14,7 +14,7 @@ For better dependency management, we encourage you to containerise the entire pi
 Firstly make sure your [project requirements are up-to-date](../kedro_project_setup/dependencies.md) by running:
 
 ```bash
-pip-compile --output-file=<project_root>/src/requirements.txt --input-file=<project_root>/src/requirements.txt
+pip-compile --output-file=<project_root>/requirements.txt --input-file=<project_root>/requirements.txt
 ```
 
 We then recommend the [`Kedro-Docker`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-docker) plugin to streamline the process of building the image. [Instructions for using this are in the plugin's README.md](https://github.com/kedro-org/kedro-plugins/blob/main/README.md).

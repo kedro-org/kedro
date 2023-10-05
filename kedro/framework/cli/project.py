@@ -1,16 +1,12 @@
 """A collection of CLI commands for working with Kedro project."""
 
 import os
-import shutil
-import subprocess
 import sys
-import webbrowser
 from pathlib import Path
 
 import click
 
 from kedro.framework.cli.utils import (
-    KedroCliError,
     _check_module_importable,
     _config_file_callback,
     _deprecate_options,
@@ -19,10 +15,8 @@ from kedro.framework.cli.utils import (
     _split_load_versions,
     _split_params,
     call,
-    command_with_verbosity,
     env_option,
     forward_command,
-    python_call,
     split_node_names,
     split_string,
 )
@@ -32,7 +26,7 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.utils import load_obj
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
-{src}/requirements.txt and run 'pip install -r src/requirements.txt'."""
+requirements.txt and run 'pip install -r requirements.txt'."""
 LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
 unformatted imports, and unblackened Python code without modifying the files."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
@@ -75,63 +69,6 @@ def project_group():  # pragma: no cover
 
 
 @forward_command(project_group, forward_help=True)
-@click.pass_obj  # this will pass the metadata as first argument
-def test(metadata: ProjectMetadata, args, **kwargs):  # noqa: ument
-    """Run the test suite. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro test' is deprecated and "
-        "will not be available from Kedro 0.19.0. "
-        "Use the command 'pytest' instead. "
-    )
-    click.secho(deprecation_message, fg="red")
-
-    try:
-        _check_module_importable("pytest")
-    except KedroCliError as exc:
-        source_path = metadata.source_dir
-        raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(source_path))
-        ) from exc
-    python_call("pytest", args)
-
-
-@command_with_verbosity(project_group)
-@click.option("-c", "--check-only", is_flag=True, help=LINT_CHECK_ONLY_HELP)
-@click.argument("files", type=click.Path(exists=True), nargs=-1)
-@click.pass_obj  # this will pass the metadata as first argument
-def lint(
-    metadata: ProjectMetadata, files, check_only, **kwargs
-):  # noqa: unused-argument
-    """Run flake8, isort and black. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro lint' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    source_path = metadata.source_dir
-    package_name = metadata.package_name
-    files = files or (str(source_path / "tests"), str(source_path / package_name))
-
-    if "PYTHONPATH" not in os.environ:
-        # isort needs the source path to be in the 'PYTHONPATH' environment
-        # variable to treat it as a first-party import location
-        os.environ["PYTHONPATH"] = str(source_path)  # pragma: no cover
-
-    for module_name in ("flake8", "isort", "black"):
-        try:
-            _check_module_importable(module_name)
-        except KedroCliError as exc:
-            raise KedroCliError(
-                NO_DEPENDENCY_MESSAGE.format(module=module_name, src=str(source_path))
-            ) from exc
-
-    python_call("black", ("--check",) + files if check_only else files)
-    python_call("flake8", files)
-    python_call("isort", ("--check",) + files if check_only else files)
-
-
-@forward_command(project_group, forward_help=True)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
 def ipython(metadata: ProjectMetadata, env, args, **kwargs):  # noqa: unused-argument
@@ -147,7 +84,17 @@ def ipython(metadata: ProjectMetadata, env, args, **kwargs):  # noqa: unused-arg
 @click.pass_obj  # this will pass the metadata as first argument
 def package(metadata: ProjectMetadata):
     """Package the project as a Python wheel."""
-    source_path = metadata.source_dir
+    # Even if the user decides for the older setup.py on purpose,
+    # pyproject.toml is needed for Kedro metadata
+    if (metadata.project_path / "pyproject.toml").is_file():
+        metadata_dir = metadata.project_path
+        destination_dir = "dist"
+    else:
+        # Assume it's an old Kedro project, packaging metadata was under src
+        # (could be pyproject.toml or setup.py, it's not important)
+        metadata_dir = metadata.source_dir
+        destination_dir = "../dist"
+
     call(
         [
             sys.executable,
@@ -155,9 +102,9 @@ def package(metadata: ProjectMetadata):
             "build",
             "--wheel",
             "--outdir",
-            "../dist",
+            destination_dir,
         ],
-        cwd=str(source_path),
+        cwd=str(metadata_dir),
     )
 
     directory = (
@@ -175,145 +122,6 @@ def package(metadata: ProjectMetadata):
             str(Path(settings.CONF_SOURCE).stem),
         ]
     )
-
-
-@project_group.command("build-docs")
-@click.option(
-    "--open",
-    "-o",
-    "open_docs",
-    is_flag=True,
-    multiple=False,
-    default=False,
-    help=OPEN_ARG_HELP,
-)
-@click.pass_obj  # this will pass the metadata as first argument
-def build_docs(metadata: ProjectMetadata, open_docs):
-    """Build the project documentation. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro build-docs' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    source_path = metadata.source_dir
-    package_name = metadata.package_name
-
-    python_call("pip", ["install", str(source_path / "[docs]")])
-    python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])
-    python_call("ipykernel", ["install", "--user", f"--name={package_name}"])
-    shutil.rmtree("docs/build", ignore_errors=True)
-    call(
-        [
-            "sphinx-apidoc",
-            "--module-first",
-            "-o",
-            "docs/source",
-            str(source_path / package_name),
-        ]
-    )
-    call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
-    if open_docs:
-        docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
-        click.secho(f"Opening {docs_page}")
-        webbrowser.open(docs_page)
-
-
-@forward_command(project_group, name="build-reqs")
-@click.option(
-    "--input-file",
-    "input_file",
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-    multiple=False,
-    help=INPUT_FILE_HELP,
-)
-@click.option(
-    "--output-file",
-    "output_file",
-    multiple=False,
-    help=OUTPUT_FILE_HELP,
-)
-@click.pass_obj  # this will pass the metadata as first argument
-def build_reqs(
-    metadata: ProjectMetadata, input_file, output_file, args, **kwargs
-):  # noqa: unused-argument
-    """Run `pip-compile` on src/requirements.txt or the user defined input file and save
-    the compiled requirements to src/requirements.lock or the user defined output file.
-    (DEPRECATED)
-    """
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro build-reqs' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    source_path = metadata.source_dir
-    input_file = Path(input_file or source_path / "requirements.txt")
-    output_file = Path(output_file or source_path / "requirements.lock")
-
-    if input_file.is_file():
-        python_call(
-            "piptools",
-            [
-                "compile",
-                *args,
-                str(input_file),
-                "--output-file",
-                str(output_file),
-            ],
-        )
-
-    else:
-        raise FileNotFoundError(
-            f"File '{input_file}' not found in the project. "
-            "Please specify another input or create the file and try again."
-        )
-
-    click.secho(
-        f"Requirements built! Please update {input_file.name} "
-        "if you'd like to make a change in your project's dependencies, "
-        f"and re-run build-reqs to generate the new {output_file.name}.",
-        fg="green",
-    )
-
-
-@command_with_verbosity(project_group, "activate-nbstripout")
-@click.pass_obj  # this will pass the metadata as first argument
-def activate_nbstripout(metadata: ProjectMetadata, **kwargs):  # noqa: unused-argument
-    """Install the nbstripout git hook to automatically clean notebooks. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command 'kedro activate-nbstripout' is deprecated and "
-        "will not be available from Kedro 0.19.0."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    source_path = metadata.source_dir
-    click.secho(
-        (
-            "Notebook output cells will be automatically cleared before committing"
-            " to git."
-        ),
-        fg="yellow",
-    )
-
-    try:
-        _check_module_importable("nbstripout")
-    except KedroCliError as exc:
-        raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module="nbstripout", src=str(source_path))
-        ) from exc
-
-    try:
-        res = subprocess.run(  # noqa: subprocess-run-check
-            ["git", "rev-parse", "--git-dir"],
-            capture_output=True,
-        )
-        if res.returncode:
-            raise KedroCliError("Not a git repository. Run 'git init' first.")
-    except FileNotFoundError as exc:
-        raise KedroCliError("Git executable not found. Install Git first.") from exc
-
-    call(["nbstripout", "--install"])
 
 
 @project_group.command()

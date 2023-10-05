@@ -7,6 +7,7 @@ You can take advantage of a notebook's liberal development environment for explo
 ```{toctree}
 :maxdepth: 1
 
+add_kedro_to_a_notebook
 kedro_and_notebooks
 kedro_as_a_data_registry
 ```

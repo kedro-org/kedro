@@ -43,7 +43,9 @@ import pandas as pd
 companies = pd.read_csv('data/companies.csv')
 reviews = pd.read_csv('data/reviews.csv')
 shuttles = pd.read_excel('data/shuttles.xlsx', engine='openpyxl')
+```
 
+```python
 # Data processing
 companies["iata_approved"] = companies["iata_approved"] == "t"
 companies["company_rating"] = companies["company_rating"].str.replace("%", "").astype(float)
@@ -54,9 +56,10 @@ rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
 model_input_table = rated_shuttles.merge(companies, left_on="company_id", right_on="id")
 model_input_table = model_input_table.dropna()
 model_input_table.head()
+```
 
-# Model evaluation
-
+```python
+# Model training
 from sklearn.model_selection import train_test_split
 
 X = model_input_table[[
@@ -74,10 +77,16 @@ y = model_input_table["price"]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=3)
 
 from sklearn.linear_model import LinearRegression
+
 model = LinearRegression()
 model.fit(X_train, y_train)
 model.predict(X_test)
+```
+
+```python
+# Model evaluation
 from sklearn.metrics import r2_score
+
 y_pred = model.predict(X_test)
 r2_score(y_test, y_pred)
 ```
@@ -94,7 +103,7 @@ To start using the Data Catalog, create a `catalog.yml` in the same folder as yo
 
 <!--This code needs the user to create a yaml file with this contents. Is there a piece of code we could offer that creates and writes one for them into the appropriate directory to save the reader the manual task? -->
 
-```yml
+```yaml
 companies:
   type: pandas.CSVDataSet
   filepath: data/companies.csv
@@ -234,7 +243,7 @@ The code now looks as follows:
 ```python
 import yaml 
 
-with open("parameters.yaml", encoding="utf-8") as yaml_file:
+with open("parameters.yml", encoding="utf-8") as yaml_file:
     parameters = yaml.safe_load(yaml_file)
 
 test_size = parameters["model_options"]["test_size"]
@@ -280,7 +289,7 @@ After this setup, you can use Kedro's `OmegaConfigLoader` in code as follows:
 from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 
-conf_loader = OmegaConfigLoader("conf")
+conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
 ```
 
 ```python
@@ -298,9 +307,7 @@ X_train, X_test, y_train, y_test = train_test_split(
  
 ```
 
-```python
 The rest of the model evaluation code can now run as previously. 
-```
 
 ```python
 from sklearn.linear_model import LinearRegression
@@ -350,7 +357,7 @@ from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader("conf")
+conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
 conf_catalog=conf_loader["catalog"]
 
 # Create the DataCatalog instance from the configuration
@@ -377,7 +384,7 @@ from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader("conf")
+conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
 conf_catalog=conf_loader["catalog"]
 conf_params=conf_loader["parameters"]
 
@@ -541,7 +548,7 @@ from kedro.config import OmegaConfigLoader
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
 
-conf_loader = OmegaConfigLoader("conf")
+conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
 conf_catalog=conf_loader["catalog"]
 conf_params=conf_loader["parameters"]
 
@@ -645,8 +652,4 @@ model_input_table = create_model_input_table(preprocessed_shuttles, preprocessed
 X_train, X_test, y_train, y_test = split_data(model_input_table, conf_params["model_options"])
 regressor = train_model(X_train, y_train)
 evaluate_model(regressor, X_test, y_test)    
-```
-
-```python
-
 ```

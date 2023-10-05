@@ -20,7 +20,7 @@ If you want to start a new notebook project but take advantage of the Data Catal
 ```{toctree}
 :maxdepth: 1
 
-add_kedro_to_a_notebook.ipynb
+add_kedro_to_a_notebook
 kedro_and_notebooks
 kedro_as_a_data_registry
 ```

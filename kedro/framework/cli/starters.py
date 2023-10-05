@@ -96,13 +96,13 @@ DIRECTORY_ARG_HELP = (
 # TODO; Insert actual link to the documentation.
 ADDON_ARG_HELP = """
 Select which add-ons you'd like to include. By default, none are included.
-To read more about these add-ons and what they do visit: kedro.org/{insert-documentation}
+Visit: kedro.org/{insert-documentation} to find out more about these add-ons.
 
 Add-Ons
-1) Linting : Provides a basic linting set up with Black and ruff
-2) Testing : Provides basic testing set up with pytest
+1) Linting : Provides a basic linting setup with Black and Ruff
+2) Testing : Provides basic testing setup with pytest
 3) Custom Logging : Provides more logging options
-4) Documentation: Provides basic documentations setup with Sphinx
+4) Documentation: Basic documentation setup with Sphinx
 5) Data Structure: Provides a directory structure for storing data
 
 Example usage:

@@ -41,7 +41,13 @@
 
 ## Documentation changes
 * Added documentation to clarify execution order of hooks.
+
 ## Breaking changes to the API
+* Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasaets` respectively.
+* Renamed the `data_sets()` method in `Pipeline` and all references to it to `datasets()`.
+* Renamed the `create_default_data_set()` method in the `runner` to `create_default_dataset()`.
+* Renamed all other uses of `data_set` and `data_sets` in the codebase to `dataset` and `datasets` respectively.
+
 ## Upcoming deprecations for Kedro 0.19.0
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:

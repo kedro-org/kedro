@@ -1,7 +1,16 @@
 # Kedro for notebook users
 
 
-You can take advantage of a notebook's liberal development environment for exploratory data analysis and experimentation from within a Kedro project. Later, when you need to follow software best practices as the project complexity increases, or as you scale into production, you can transfer code from the notebook into Kedro to benefit from its opinionated project framework.
+If you are familiar with notebooks, you probably find their liberal development environment perfect for exploratory data analysis and experimentation.
+
+As project complexity increases, particularly if you work collaboratively, you may decide to transition to Kedro's way of working to organise your code into a shareable project. There is no single way to switch between notebooks and Kedro. It's possible to pair both ways of working and gradually introduce Kedro techniques into your notebook code.
+
+**Add a notebook to your existing Kedro project**
+The page titled [Use a Jupyter notebook for Kedro project experiments](./kedro_and_notebooks.md) describes how to set up a notebook to access the elements of a Kedro project for experimentation. If you have an existing Kedro project but want to use notebook features to explore your data and experiment with pipelines, this is the page to start.
+
+**Use Kedro's Data Catalog within a notebook**
+If you want to start a new notebook project but take advantage of the Data Catalog, a key Kedro feature, [Kedro as a data registry](./kedro_as_a_data_registry.md) explains how to proceed.
+
 
 
 ```{toctree}

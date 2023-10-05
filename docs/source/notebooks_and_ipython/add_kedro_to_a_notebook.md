@@ -40,18 +40,22 @@ import pandas as pd
 # Is there a way to do this in code from the notebook to save the reader the manual task?
 # Either download the file or use an OS data fabricator to make 3 files?
 
-companies = pd.read_csv('data/companies.csv')
-reviews = pd.read_csv('data/reviews.csv')
-shuttles = pd.read_excel('data/shuttles.xlsx', engine='openpyxl')
+companies = pd.read_csv("data/companies.csv")
+reviews = pd.read_csv("data/reviews.csv")
+shuttles = pd.read_excel("data/shuttles.xlsx", engine="openpyxl")
 ```
 
 ```python
 # Data processing
 companies["iata_approved"] = companies["iata_approved"] == "t"
-companies["company_rating"] = companies["company_rating"].str.replace("%", "").astype(float)
+companies["company_rating"] = (
+    companies["company_rating"].str.replace("%", "").astype(float)
+)
 shuttles["d_check_complete"] = shuttles["d_check_complete"] == "t"
 shuttles["moon_clearance_complete"] = shuttles["moon_clearance_complete"] == "t"
-shuttles["price"] = shuttles["price"].str.replace("$", "").str.replace(",", "").astype(float)
+shuttles["price"] = (
+    shuttles["price"].str.replace("$", "").str.replace(",", "").astype(float)
+)
 rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
 model_input_table = rated_shuttles.merge(companies, left_on="company_id", right_on="id")
 model_input_table = model_input_table.dropna()
@@ -62,16 +66,18 @@ model_input_table.head()
 # Model training
 from sklearn.model_selection import train_test_split
 
-X = model_input_table[[
-    "engines",
-    "passenger_capacity",
-    "crew",
-    "d_check_complete",
-    "moon_clearance_complete",
-    "iata_approved",
-    "company_rating",
-    "review_scores_rating",
-]]
+X = model_input_table[
+    [
+        "engines",
+        "passenger_capacity",
+        "crew",
+        "d_check_complete",
+        "moon_clearance_complete",
+        "iata_approved",
+        "company_rating",
+        "review_scores_rating",
+    ]
+]
 y = model_input_table["price"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=3)
@@ -125,7 +131,8 @@ Then by using Kedro to load the `catalog.yml` file, you can reference the Data C
 from kedro.io import DataCatalog
 
 import yaml
-# load the configuration file 
+
+# load the configuration file
 with open("catalog.yml") as f:
     conf_catalog = yaml.safe_load(f)
 
@@ -171,8 +178,7 @@ By loading `params.yml`, you can reference the values with the notebook code.
 import yaml
 
 with open("params.yml", encoding="utf-8") as yaml_file:
-    params=yaml.safe_load(yaml_file)
-    
+    params = yaml.safe_load(yaml_file)
 ```
 
 ```python
@@ -201,17 +207,22 @@ y = model_input_table["price"]
 
 ```python
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)   
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=test_size, random_state=random_state
+)
 ```
 
 The rest of the model evaluation code can now run as previously. 
 
 ```python
 from sklearn.linear_model import LinearRegression
+
 model = LinearRegression()
 model.fit(X_train, y_train)
 model.predict(X_test)
 from sklearn.metrics import r2_score
+
 y_pred = model.predict(X_test)
 r2_score(y_test, y_pred)
 ```
@@ -257,17 +268,22 @@ y = model_input_table["price"]
 
 ```python
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)   
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=test_size, random_state=random_state
+)
 ```
 
 The rest of the model evaluation code can now run as previously. 
 
 ```python
 from sklearn.linear_model import LinearRegression
+
 model = LinearRegression()
 model.fit(X_train, y_train)
 model.predict(X_test)
 from sklearn.metrics import r2_score
+
 y_pred = model.predict(X_test)
 r2_score(y_test, y_pred)
 ```
@@ -293,7 +309,7 @@ conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
 ```
 
 ```python
-conf_params=conf_loader["parameters"]
+conf_params = conf_loader["parameters"]
 test_size = conf_params["model_options"]["test_size"]
 random_state = conf_params["model_options"]["random_state"]
 X = model_input_table[conf_params["model_options"]["features"]]
@@ -302,19 +318,22 @@ y = model_input_table["price"]
 
 ```python
 from sklearn.model_selection import train_test_split
+
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=test_size, random_state=random_state)
- 
+    X, y, test_size=test_size, random_state=random_state
+)
 ```
 
 The rest of the model evaluation code can now run as previously. 
 
 ```python
 from sklearn.linear_model import LinearRegression
+
 model = LinearRegression()
 model.fit(X_train, y_train)
 model.predict(X_test)
 from sklearn.metrics import r2_score
+
 y_pred = model.predict(X_test)
 r2_score(y_test, y_pred)
 ```
@@ -358,7 +377,7 @@ from kedro.framework.project import settings
 from kedro.io import DataCatalog
 
 conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
-conf_catalog=conf_loader["catalog"]
+conf_catalog = conf_loader["catalog"]
 
 # Create the DataCatalog instance from the configuration
 catalog = DataCatalog.from_config(conf_catalog)
@@ -385,8 +404,8 @@ from kedro.framework.project import settings
 from kedro.io import DataCatalog
 
 conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
-conf_catalog=conf_loader["catalog"]
-conf_params=conf_loader["parameters"]
+conf_catalog = conf_loader["catalog"]
+conf_params = conf_loader["parameters"]
 
 # Create the DataCatalog instance from the configuration
 catalog = DataCatalog.from_config(conf_catalog)
@@ -399,22 +418,27 @@ shuttles = catalog.load("shuttles")
 # Load the configuration data
 test_size = conf_params["model_options"]["test_size"]
 random_state = conf_params["model_options"]["random_state"]
-
 ```
 
 ```python
 def big_function():
-    
+
     ####################
     # Data processing  #
     ####################
     companies["iata_approved"] = companies["iata_approved"] == "t"
-    companies["company_rating"] = companies["company_rating"].str.replace("%", "").astype(float)
+    companies["company_rating"] = (
+        companies["company_rating"].str.replace("%", "").astype(float)
+    )
     shuttles["d_check_complete"] = shuttles["d_check_complete"] == "t"
     shuttles["moon_clearance_complete"] = shuttles["moon_clearance_complete"] == "t"
-    shuttles["price"] = shuttles["price"].str.replace("$", "").str.replace(",", "").astype(float)
+    shuttles["price"] = (
+        shuttles["price"].str.replace("$", "").str.replace(",", "").astype(float)
+    )
     rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
-    model_input_table = rated_shuttles.merge(companies, left_on="company_id", right_on="id")
+    model_input_table = rated_shuttles.merge(
+        companies, left_on="company_id", right_on="id"
+    )
     model_input_table = model_input_table.dropna()
     model_input_table.head()
 
@@ -423,17 +447,20 @@ def big_function():
 
     ####################
     # Model evaluation  #
-    ####################  
+    ####################
     from sklearn.model_selection import train_test_split
+
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state)
- 
+        X, y, test_size=test_size, random_state=random_state
+    )
+
     from sklearn.linear_model import LinearRegression
 
     model = LinearRegression()
     model.fit(X_train, y_train)
     model.predict(X_test)
     from sklearn.metrics import r2_score
+
     y_pred = model.predict(X_test)
     print(r2_score(y_test, y_pred))
 ```
@@ -453,6 +480,7 @@ Let's try this with our code. We'll split it into a set of functions to process 
 ####################
 import pandas as pd
 
+
 def _is_true(x: pd.Series) -> pd.Series:
     return x == "t"
 
@@ -483,6 +511,7 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
     shuttles["price"] = _parse_money(shuttles["price"])
     return shuttles
 
+
 def create_model_input_table(
     shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
 ) -> pd.DataFrame:
@@ -504,6 +533,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
+
 def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
     X = data[parameters["features"]]
     y = data["price"]
@@ -524,20 +554,22 @@ def evaluate_model(
 ):
     y_pred = regressor.predict(X_test)
     print(r2_score(y_test, y_pred))
-    
 ```
 
 ```python
 # Call data processing functions
 preprocessed_companies = preprocess_companies(companies)
 preprocessed_shuttles = preprocess_shuttles(shuttles)
-model_input_table = create_model_input_table(preprocessed_shuttles, preprocessed_companies, reviews)
+model_input_table = create_model_input_table(
+    preprocessed_shuttles, preprocessed_companies, reviews
+)
 
 # Call model evaluation functions
-X_train, X_test, y_train, y_test = split_data(model_input_table, conf_params["model_options"])
+X_train, X_test, y_train, y_test = split_data(
+    model_input_table, conf_params["model_options"]
+)
 regressor = train_model(X_train, y_train)
 evaluate_model(regressor, X_test, y_test)
-
 ```
 
 And that's it. The notebook code has been refactored into a series of functions that use some Kedro setup code to read in configuration values and data. Let's reproduce it all in one big notebook cell for reference so you can see how it looks in comparison to the first cell of the notebook that was the start of this example.
@@ -549,8 +581,8 @@ from kedro.framework.project import settings
 from kedro.io import DataCatalog
 
 conf_loader = OmegaConfigLoader(".", base_env="", default_run_env="")
-conf_catalog=conf_loader["catalog"]
-conf_params=conf_loader["parameters"]
+conf_catalog = conf_loader["catalog"]
+conf_params = conf_loader["parameters"]
 
 # Create the DataCatalog instance from the configuration
 catalog = DataCatalog.from_config(conf_catalog)
@@ -570,6 +602,7 @@ random_state = conf_params["model_options"]["random_state"]
 ####################
 import pandas as pd
 
+
 def _is_true(x: pd.Series) -> pd.Series:
     return x == "t"
 
@@ -600,6 +633,7 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
     shuttles["price"] = _parse_money(shuttles["price"])
     return shuttles
 
+
 def create_model_input_table(
     shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
 ) -> pd.DataFrame:
@@ -620,6 +654,7 @@ from typing import Dict, Tuple
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
+
 
 def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
     X = data[parameters["features"]]
@@ -642,14 +677,18 @@ def evaluate_model(
     y_pred = regressor.predict(X_test)
     print(r2_score(y_test, y_pred))
 
-    
+
 # Call data processing functions
 preprocessed_companies = preprocess_companies(companies)
 preprocessed_shuttles = preprocess_shuttles(shuttles)
-model_input_table = create_model_input_table(preprocessed_shuttles, preprocessed_companies, reviews)
+model_input_table = create_model_input_table(
+    preprocessed_shuttles, preprocessed_companies, reviews
+)
 
 # Call model evaluation functions
-X_train, X_test, y_train, y_test = split_data(model_input_table, conf_params["model_options"])
+X_train, X_test, y_train, y_test = split_data(
+    model_input_table, conf_params["model_options"]
+)
 regressor = train_model(X_train, y_train)
-evaluate_model(regressor, X_test, y_test)    
+evaluate_model(regressor, X_test, y_test)
 ```

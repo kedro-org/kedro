@@ -351,6 +351,9 @@ def find_pipelines() -> dict[str, Pipeline]:  # noqa: PLR0912
         pipeline_name = pipeline_dir.name
         if pipeline_name == "__pycache__":
             continue
+        # Prevent imports of hidden directories/files
+        if pipeline_name.startswith("."):
+            continue
 
         pipeline_module_name = f"{PACKAGE_NAME}.pipelines.{pipeline_name}"
         try:

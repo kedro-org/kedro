@@ -98,3 +98,40 @@ class TestPackageCommand:
                 ),
             ]
         )
+
+    def test_no_pyproject_toml(
+        self, call_mock, fake_project_cli, mocker, fake_repo_path, fake_metadata
+    ):
+        # Assume no pyproject.toml
+        (fake_metadata.project_path / "pyproject.toml").unlink(missing_ok=True)
+
+        result = CliRunner().invoke(fake_project_cli, ["package"], obj=fake_metadata)
+        assert not result.exit_code, result.stdout
+
+        # destination_dir will be different since pyproject.toml doesn't exist
+        call_mock.assert_has_calls(
+            [
+                mocker.call(
+                    [
+                        sys.executable,
+                        "-m",
+                        "build",
+                        "--wheel",
+                        "--outdir",
+                        "../dist",
+                    ],
+                    cwd=str(fake_metadata.source_dir),
+                ),
+                mocker.call(
+                    [
+                        "tar",
+                        "--exclude=local/*.yml",
+                        "-czf",
+                        f"dist/conf-{fake_metadata.package_name}.tar.gz",
+                        f"--directory={fake_metadata.project_path}",
+                        "conf",
+                    ]
+                ),
+            ]
+        )
+

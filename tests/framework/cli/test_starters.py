@@ -80,9 +80,8 @@ def _assert_requirements_ok(
     assert "Change directory to the project generated in" in result.output
 
     root_path = (Path(output_dir) / repo_name).resolve()
-    requirements_file_path = root_path / "src/requirements.txt"
+    requirements_file_path = root_path / "requirements.txt"
     pyproject_file_path = root_path / "pyproject.toml"
-    pyproject_src_file_path = root_path / "src/pyproject.toml"
 
     add_ons_list = parse_add_ons_input(add_ons)
 
@@ -144,7 +143,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
         )
 
     if "4" in add_ons_list:
-        with open(pyproject_src_file_path) as pyproject_file:
+        with open(pyproject_file_path) as pyproject_file:
             requirements = pyproject_file.read()
 
         assert (

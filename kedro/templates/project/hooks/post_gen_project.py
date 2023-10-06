@@ -8,9 +8,8 @@ from kedro.templates.project.hooks.utils import (
 
 def main():
     current_dir = Path.cwd()
-    requirements_file_path = current_dir / "src/requirements.txt"
+    requirements_file_path = current_dir / "requirements.txt"
     pyproject_file_path = current_dir / "pyproject.toml"
-    pyproject_src_file_path = current_dir / "src/pyproject.toml"
 
     # Get the selected add-ons from cookiecutter
     selected_add_ons = "{{ cookiecutter.add_ons }}"
@@ -19,7 +18,7 @@ def main():
     selected_add_ons_list = parse_add_ons_input(selected_add_ons)
 
     # Handle template directories and requirements according to selected add-ons
-    setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path, pyproject_src_file_path)
+    setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path)
 
     # Sort requirements.txt file in alphabetical order
     sort_requirements(requirements_file_path)

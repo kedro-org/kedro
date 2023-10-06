@@ -91,7 +91,7 @@ def parse_add_ons_input(add_ons_str):
     return selected
 
 
-def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path, pyproject_src_file_path):
+def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path):
     """Removes directories and files related to unwanted addons from
     a Kedro project template. Adds the necessary requirements for
     the addons that were selected.
@@ -102,8 +102,6 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         requirements_file_path: the path to the requirements.txt file.
         pyproject_file_path: the path to the pyproject.toml file
         located on the the root of the template.
-        pyproject_src_file_path: the path to the pyproject.toml file
-        located inside the `src` directory.
     """
     if "1" not in selected_add_ons_list:  # If Linting not selected
         pass
@@ -114,7 +112,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
             file.write(lint_pyproject_requirements)
 
     if "2" not in selected_add_ons_list:  # If Testing not selected
-        tests_path = current_dir / "src" / "tests"
+        tests_path = current_dir / "tests"
         if tests_path.exists():
             shutil.rmtree(str(tests_path))
     else:
@@ -133,7 +131,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         if docs_path.exists():
             shutil.rmtree(str(docs_path))
     else:
-        with open(pyproject_src_file_path, 'a') as file:
+        with open(pyproject_file_path, 'a') as file:
             file.write(docs_pyproject_requirements)
 
     if "5" not in selected_add_ons_list:  # If Data Structure not selected

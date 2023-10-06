@@ -1,4 +1,4 @@
-# parameters.yml 
+# parameters.yml
 
 model_options:
   test_size: 0.3
@@ -11,4 +11,4 @@ model_options:
     - moon_clearance_complete
     - iata_approved
     - company_rating
-    - review_scores_rating  
+    - review_scores_rating

@@ -1,4 +1,4 @@
-# params.yml 
+# params.yml
 
 model_options:
   test_size: 0.3

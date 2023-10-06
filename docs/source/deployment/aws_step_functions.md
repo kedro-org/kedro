@@ -55,7 +55,7 @@ The rest of the tutorial will explain each step in the deployment process above 
 
 * Create a `conf/aws` directory in your Kedro project
 * Put a `catalog.yml` file in this directory with the following content
-* Ensure that you have `s3fs>=0.3.0,<0.5` defined in your `src/requirements.txt` so the data can be read from S3.
+* Ensure that you have `s3fs>=0.3.0,<0.5` defined in your `requirements.txt` so the data can be read from S3.
 
 <details>
 <summary><b>Click to expand</b></summary>

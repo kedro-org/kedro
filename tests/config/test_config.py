@@ -257,7 +257,6 @@ class TestConfigLoader:
     def test_key_not_found_dict_get(self, tmp_path):
         """Check the error if no config files satisfy a given pattern"""
         with pytest.raises(KeyError):
-            # pylint: disable=expression-not-assigned
             ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)["non-existent-pattern"]
 
     @use_config_dir
@@ -271,7 +270,6 @@ class TestConfigLoader:
             r"\[\'credentials\*\', \'credentials\*/\**\', \'\**/credentials\*\'\]"
         )
         with pytest.raises(MissingConfigException, match=pattern):
-            # pylint: disable=expression-not-assigned
             ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)["credentials"]
 
     def test_duplicate_paths(self, tmp_path, caplog):

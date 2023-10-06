@@ -38,7 +38,7 @@ kedro-datasets[plotly.PlotlyDataSet, plotly.JSONDataSet]~=1.1
 Navigate to the root directory of the project in your terminal and install the dependencies for the tutorial project:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Configure the Data Catalog
@@ -177,7 +177,7 @@ You can view Matplotlib charts in Kedro-Viz when you use the [Kedro MatplotLibWr
 
 ### Update the dependencies
 
-You must update the `src/requirements.txt` file in the Kedro project by adding the following dataset to enable Matplotlib for the project:
+You must update the `requirements.txt` file in the Kedro project by adding the following dataset to enable Matplotlib for the project:
 
 ```bash
 kedro-datasets[matplotlib.MatplotlibWriter]~=1.1

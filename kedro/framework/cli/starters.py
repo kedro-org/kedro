@@ -598,7 +598,7 @@ def _validate_config_file_inputs(config: dict[str, str]):
         sys.exit(1)
 
     add_on_reg_ex = "^(all|none|(\\d(,\\d)*|(\\d-\\d)))$"
-    input_add_ons = config["add_ons"] if "add_ons" in config.keys() else "none"
+    input_add_ons = config.get("add_ons", "none")
     if not re.match(add_on_reg_ex, input_add_ons):
         message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
         click.secho(message, fg="red", err=True)

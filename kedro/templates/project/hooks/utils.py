@@ -98,10 +98,10 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
 
     Args:
         selected_add_ons_list: a list containing numbers from 1 to 5,
-        representing specific add-ons.
+            representing specific add-ons.
         requirements_file_path: the path to the requirements.txt file.
         pyproject_file_path: the path to the pyproject.toml file
-        located on the the root of the template.
+            located on the the root of the template.
     """
     if "1" not in selected_add_ons_list:  # If Linting not selected
         pass

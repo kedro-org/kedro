@@ -417,9 +417,7 @@ class DataCatalog:
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
-                matches = difflib.get_close_matches(
-                    dataset_name, self._datasets.keys()
-                )
+                matches = difflib.get_close_matches(dataset_name, self._datasets.keys())
                 if matches:
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"

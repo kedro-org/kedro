@@ -1,4 +1,3 @@
-# pylint: disable=expression-not-assigned, pointless-statement
 from __future__ import annotations
 
 import configparser
@@ -518,7 +517,7 @@ class TestOmegaConfigLoader:
 
     @use_config_dir
     def test_load_config_from_tar_file(self, tmp_path):
-        subprocess.run(  # pylint: disable=subprocess-run-check
+        subprocess.run(
             [
                 "tar",
                 "--exclude=local/*.yml",
@@ -588,13 +587,11 @@ class TestOmegaConfigLoader:
         parameters = conf["parameters"]
         catalog = conf["catalog"]
         credentials = conf["credentials"]
-        logging = conf["logging"]
         spark = conf["spark"]
 
         assert key in parameters
         assert key not in catalog
         assert key not in credentials
-        assert key not in logging
         assert key not in spark
 
     def test_ignore_hidden_keys(self, tmp_path):

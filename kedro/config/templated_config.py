@@ -124,7 +124,6 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             "catalog": ["catalog*", "catalog*/**", "**/catalog*"],
             "parameters": ["parameters*", "parameters*/**", "**/parameters*"],
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
-            "logging": ["logging*", "logging*/**", "**/logging*"],
         }
         self.config_patterns.update(config_patterns or {})
 

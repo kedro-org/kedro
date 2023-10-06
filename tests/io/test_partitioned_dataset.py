@@ -9,7 +9,7 @@ import pytest
 import s3fs
 from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from moto import mock_s3
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from kedro.io import DatasetError, PartitionedDataset
 from kedro.io.data_catalog import CREDENTIALS_KEY

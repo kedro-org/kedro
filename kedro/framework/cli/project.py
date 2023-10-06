@@ -26,7 +26,7 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.utils import load_obj
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
-{src}/requirements.txt and run 'pip install -r src/requirements.txt'."""
+requirements.txt and run 'pip install -r requirements.txt'."""
 LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
 unformatted imports, and unblackened Python code without modifying the files."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
@@ -84,7 +84,17 @@ def ipython(metadata: ProjectMetadata, env, args, **kwargs):  # noqa: unused-arg
 @click.pass_obj  # this will pass the metadata as first argument
 def package(metadata: ProjectMetadata):
     """Package the project as a Python wheel."""
-    source_path = metadata.source_dir
+    # Even if the user decides for the older setup.py on purpose,
+    # pyproject.toml is needed for Kedro metadata
+    if (metadata.project_path / "pyproject.toml").is_file():
+        metadata_dir = metadata.project_path
+        destination_dir = "dist"
+    else:
+        # Assume it's an old Kedro project, packaging metadata was under src
+        # (could be pyproject.toml or setup.py, it's not important)
+        metadata_dir = metadata.source_dir
+        destination_dir = "../dist"
+
     call(
         [
             sys.executable,
@@ -92,9 +102,9 @@ def package(metadata: ProjectMetadata):
             "build",
             "--wheel",
             "--outdir",
-            "../dist",
+            destination_dir,
         ],
-        cwd=str(source_path),
+        cwd=str(metadata_dir),
     )
 
     directory = (

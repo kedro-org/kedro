@@ -6,6 +6,7 @@ Conda
 conda
 Cookiecutter
 config
+Dockerfile
 fsspec
 globals
 Globals
@@ -26,7 +27,10 @@ IPython
 APIs
 networkx
 Plotly
+pyenv
 Pylint
+Serverless
+serverless
 SQLAlchemy
 tracebacks
 templated
@@ -37,3 +41,4 @@ Xebia
 pytest
 transcoding
 transcode
+Claypot

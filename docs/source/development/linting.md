@@ -20,7 +20,7 @@ type. [You can read more in the `isort` documentation](https://pycqa.github.io/i
 
 
 ### Install the tools
-Install `black` and `ruff` by adding the following lines to your project's `src/requirements.txt`
+Install `black` and `ruff` by adding the following lines to your project's `requirements.txt`
 file:
 ```text
 black # Used for formatting code
@@ -30,7 +30,7 @@ ruff # Used for linting, formatting and sorting module imports
 To install all the project-specific dependencies, including the linting tools, navigate to the root directory of the
 project and run:
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 Alternatively, you can individually install the linting tools using the following shell commands:
 ```bash
@@ -72,7 +72,7 @@ These hooks are run before committing your code to your repositories to automati
 making code reviews easier and less time-consuming.
 
 ### Install `pre-commit`
-You can install `pre-commit` along with other dependencies by including it in the `src/requirements.txt` file of your
+You can install `pre-commit` along with other dependencies by including it in the `requirements.txt` file of your
 Kedro project by adding the following line:
 ```text
 pre-commit

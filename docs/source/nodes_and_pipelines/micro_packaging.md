@@ -10,7 +10,7 @@ You can package a micro-package by executing: `kedro micropkg package <micropkg_
 
 `kedro micropkg package pipelines.data_processing`
 
-* This will generate a new [source distribution](https://docs.python.org/3/distutils/sourcedist.html) for this micro-package.
+* This will generate a new source distribution for this micro-package.
 * By default, the tar file will be saved into `dist/` directory inside your project.
 * You can customise the target with the `--destination` (`-d`) option.
 

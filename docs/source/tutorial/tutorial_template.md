@@ -38,6 +38,7 @@ ipython>=7.31.1, <8.0; python_version < '3.8'
 ipython~=8.10; python_version >= '3.8'
 isort~=5.0
 nbstripout~=0.4
+ruff~=0.0.290
 
 # notebook tooling
 jupyter~=1.0

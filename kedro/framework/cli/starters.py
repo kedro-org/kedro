@@ -591,7 +591,7 @@ def _validate_config_file_against_prompts(
 
 def _validate_config_file_inputs(config: dict[str, str]):
     project_name_reg_ex = r"^[\w -]{2,}$"
-    input_project_name = config.get("project_name")
+    input_project_name = config.get("project_name", "New Kedro Project")
     if not re.match(project_name_reg_ex, input_project_name):
         message = f"'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
         click.secho(message, fg="red", err=True)

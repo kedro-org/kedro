@@ -590,6 +590,14 @@ def _validate_config_file_against_prompts(
 
 
 def _validate_config_file_inputs(config: dict[str, str]):
+    """Checks that variables provided through the config file are of the expected format.
+
+    Args:
+        config: The config as a dictionary.
+
+    Raises:
+        SystemExit: If the provided variables are not properly formatted.
+    """
     project_name_reg_ex = r"^[\w -]{2,}$"
     input_project_name = config.get("project_name", "New Kedro Project")
     if not re.match(project_name_reg_ex, input_project_name):

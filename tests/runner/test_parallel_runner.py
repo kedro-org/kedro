@@ -35,7 +35,7 @@ from tests.runner.conftest import (
 
 
 def test_deprecation():
-    class_name = "_SharedMemoryDataSet"
+    class_name = "_SharedMemoryDataset"
     with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
         getattr(importlib.import_module("kedro.runner.parallel_runner"), class_name)
 

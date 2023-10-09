@@ -181,7 +181,7 @@ class TestPartitionedDatasetLocal:
         pds = PartitionedDataset(path, dataset)
 
         assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataSet" in str(pds)
+        assert "dataset_type=CSVDataset" in str(pds)
         assert "dataset_config" in str(pds)
 
     def test_load_args(self, mocker):
@@ -245,7 +245,7 @@ class TestPartitionedDatasetLocal:
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
-            pattern = r"Failed while loading data from data set ParquetDataSet(.*)"
+            pattern = r"Failed while loading data from data set ParquetDataset(.*)"
             with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
@@ -549,5 +549,5 @@ class TestPartitionedDatasetS3:
         pds = PartitionedDataset(path, dataset)
 
         assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataSet" in str(pds)
+        assert "dataset_type=CSVDataset" in str(pds)
         assert "dataset_config" in str(pds)

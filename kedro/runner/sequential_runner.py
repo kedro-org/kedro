@@ -29,7 +29,7 @@ class SequentialRunner(AbstractRunner):
         """
         super().__init__(is_async=is_async)
 
-    def create_default_data_set(self, ds_name: str) -> AbstractDataset:
+    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
         """Factory method for creating the default data set for the runner.
 
         Args:
@@ -74,13 +74,13 @@ class SequentialRunner(AbstractRunner):
                 raise
 
             # decrement load counts and release any data sets we've finished with
-            for data_set in node.inputs:
-                load_counts[data_set] -= 1
-                if load_counts[data_set] < 1 and data_set not in pipeline.inputs():
-                    catalog.release(data_set)
-            for data_set in node.outputs:
-                if load_counts[data_set] < 1 and data_set not in pipeline.outputs():
-                    catalog.release(data_set)
+            for dataset in node.inputs:
+                load_counts[dataset] -= 1
+                if load_counts[dataset] < 1 and dataset not in pipeline.inputs():
+                    catalog.release(dataset)
+            for dataset in node.outputs:
+                if load_counts[dataset] < 1 and dataset not in pipeline.outputs():
+                    catalog.release(dataset)
 
             self._logger.info(
                 "Completed %d out of %d tasks", exec_index + 1, len(nodes)

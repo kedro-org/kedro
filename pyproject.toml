@@ -118,6 +118,9 @@ zip-safe = false
 [tool.setuptools.packages.find]
 include = ["kedro*"]
 
+[tool.setuptools.package-data]
+kedro = ["py.typed"]
+
 [tool.setuptools.dynamic]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}

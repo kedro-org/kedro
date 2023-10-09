@@ -26,14 +26,14 @@ class MemoryDataset(AbstractDataset):
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
-        >>> data_set = MemoryDataset(data=data)
+        >>> dataset = MemoryDataset(data=data)
         >>>
-        >>> loaded_data = data_set.load()
+        >>> loaded_data = dataset.load()
         >>> assert loaded_data.equals(data)
         >>>
         >>> new_data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5]})
-        >>> data_set.save(new_data)
-        >>> reloaded_data = data_set.load()
+        >>> dataset.save(new_data)
+        >>> reloaded_data = dataset.load()
         >>> assert reloaded_data.equals(new_data)
 
     """

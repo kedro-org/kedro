@@ -69,7 +69,7 @@ class DryRunner(AbstractRunner):
     neccessary data exists.
     """
 
-    def create_default_data_set(self, ds_name: str) -> AbstractDataset:
+    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
         """Factory method for creating the default data set for the runner.
 
         Args:

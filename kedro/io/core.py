@@ -158,7 +158,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
             ) from exc
 
         try:
-            data_set = class_obj(**config)  # type: ignore
+            dataset = class_obj(**config)  # type: ignore
         except TypeError as err:
             raise DatasetError(
                 f"\n{err}.\nDataset '{name}' must only contain arguments valid for the "
@@ -169,7 +169,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
                 f"\n{err}.\nFailed to instantiate dataset '{name}' "
                 f"of type '{class_obj.__module__}.{class_obj.__qualname__}'."
             ) from err
-        return data_set
+        return dataset
 
     @property
     def _logger(self) -> logging.Logger:

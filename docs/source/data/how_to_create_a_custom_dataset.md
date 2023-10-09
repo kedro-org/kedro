@@ -516,7 +516,7 @@ There is one dataset that is an exception: [SparkDataSet](/kedro_datasets.spark.
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an iPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 
 ```python
-dataset = context.catalog._data_sets["pokemon"]
+dataset = context.catalog._datasets["pokemon"]
 from multiprocessing.reduction import ForkingPickler
 
 # the following call shouldn't throw any errors

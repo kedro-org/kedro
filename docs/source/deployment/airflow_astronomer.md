@@ -36,7 +36,7 @@ To follow this tutorial, ensure you have the following:
 
 ### Tutorial project setup
 
-1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/learn/custom-airflow-ui-docs-tutorial#step-1-create-an-astro-project). Let's call it `kedro-airflow-iris`
+1. [Initialise an Airflow project with Astro](https://docs.astronomer.io/astro/cli/get-started-cli#step-1-create-an-astro-project). Let's call it `kedro-airflow-iris`
 
     ```shell
     mkdir kedro-airflow-iris

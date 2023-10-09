@@ -15,7 +15,7 @@ pip install pip-tools
 To add or remove dependencies to a project, edit the `src/requirements.txt` file, then run the following:
 
 ```bash
-pip-compile --output-file=<project_root>/src/requirements.txt --input-file=<project_root>/src/requirements.txt
+pip-compile <project_root>/src/requirements.txt --output-file <project_root>/src/requirements.lock
 ```
 
 This will [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in

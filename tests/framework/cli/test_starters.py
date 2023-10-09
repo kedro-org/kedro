@@ -18,7 +18,7 @@ from kedro.framework.cli.starters import (
 )
 from kedro.templates.project.hooks.utils import parse_add_ons_input
 
-FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 15
+FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 14
 
 
 @pytest.fixture

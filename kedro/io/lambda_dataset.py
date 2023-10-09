@@ -32,7 +32,7 @@ class LambdaDataset(AbstractDataset):
         >>> def load() -> pd.DataFrame:
         >>>     raise FileNotFoundError("'{}' csv file not found."
         >>>                             .format(file_name))
-        >>> data_set = LambdaDataset(load, None)
+        >>> dataset = LambdaDataset(load, None)
     """
 
     def _describe(self) -> dict[str, Any]:

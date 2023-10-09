@@ -204,7 +204,7 @@ class TestPipelineCreateCommand:
 
         with KedroSession.create(PACKAGE_NAME) as session:
             ctx = session.load_context()
-        assert isinstance(ctx.catalog._data_sets["ds_from_pipeline"], CSVDataSet)
+        assert isinstance(ctx.catalog._datasets["ds_from_pipeline"], CSVDataSet)
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)
         assert ctx.params["params_from_pipeline"] == params_dict["params_from_pipeline"]
 

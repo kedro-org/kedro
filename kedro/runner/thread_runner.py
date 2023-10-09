@@ -51,7 +51,7 @@ class ThreadRunner(AbstractRunner):
 
         self._max_workers = max_workers
 
-    def create_default_data_set(self, ds_name: str) -> MemoryDataset:  # type: ignore
+    def create_default_dataset(self, ds_name: str) -> MemoryDataset:  # type: ignore
         """Factory method for creating the default dataset for the runner.
 
         Args:
@@ -142,16 +142,16 @@ class ThreadRunner(AbstractRunner):
 
                     # Decrement load counts, and release any datasets we
                     # have finished with.
-                    for data_set in node.inputs:
-                        load_counts[data_set] -= 1
+                    for dataset in node.inputs:
+                        load_counts[dataset] -= 1
                         if (
-                            load_counts[data_set] < 1
-                            and data_set not in pipeline.inputs()
+                            load_counts[dataset] < 1
+                            and dataset not in pipeline.inputs()
                         ):
-                            catalog.release(data_set)
-                    for data_set in node.outputs:
+                            catalog.release(dataset)
+                    for dataset in node.outputs:
                         if (
-                            load_counts[data_set] < 1
-                            and data_set not in pipeline.outputs()
+                            load_counts[dataset] < 1
+                            and dataset not in pipeline.outputs()
                         ):
-                            catalog.release(data_set)
+                            catalog.release(dataset)

@@ -139,7 +139,7 @@ class Pipeline:  # noqa: too-many-public-methods
 
         nodes = list(
             chain.from_iterable(
-                [[n] if isinstance(n, Node) else n.nodes for n in nodes]
+                [[n] if isinstance(n, Node) else n._nodes for n in nodes]
             )
         )
         _validate_transcoded_inputs_outputs(nodes)
@@ -171,7 +171,7 @@ class Pipeline:  # noqa: too-many-public-methods
         max_nodes_to_display = 10
 
         nodes_reprs = [repr(node) for node in self.nodes[:max_nodes_to_display]]
-        if len(self.nodes) > max_nodes_to_display:
+        if len(self._nodes) > max_nodes_to_display:
             nodes_reprs.append("...")
         sep = ",\n"
         nodes_reprs_str = f"[\n{sep.join(nodes_reprs)}\n]" if nodes_reprs else "[]"
@@ -181,7 +181,7 @@ class Pipeline:  # noqa: too-many-public-methods
     def __add__(self, other):
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes + other.nodes))
+        return Pipeline(set(self._nodes + other._nodes))
 
     def __radd__(self, other):
         if isinstance(other, int) and other == 0:
@@ -191,17 +191,17 @@ class Pipeline:  # noqa: too-many-public-methods
     def __sub__(self, other):
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes) - set(other.nodes))
+        return Pipeline(set(self._nodes) - set(other._nodes))
 
     def __and__(self, other):
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes) & set(other.nodes))
+        return Pipeline(set(self._nodes) & set(other._nodes))
 
     def __or__(self, other):
         if not isinstance(other, Pipeline):
             return NotImplemented
-        return Pipeline(set(self.nodes + other.nodes))
+        return Pipeline(set(self._nodes + other._nodes))
 
     def all_inputs(self) -> set[str]:
         """All inputs for all nodes in the pipeline.
@@ -210,7 +210,7 @@ class Pipeline:  # noqa: too-many-public-methods
             All node input names as a Set.
 
         """
-        return set.union(set(), *(node.inputs for node in self.nodes))
+        return set.union(set(), *(node.inputs for node in self._nodes))
 
     def all_outputs(self) -> set[str]:
         """All outputs of all nodes in the pipeline.
@@ -219,7 +219,7 @@ class Pipeline:  # noqa: too-many-public-methods
             All node outputs.
 
         """
-        return set.union(set(), *(node.outputs for node in self.nodes))
+        return set.union(set(), *(node.outputs for node in self._nodes))
 
     def _remove_intermediates(self, datasets: set[str]) -> set[str]:
         intermediate = {_strip_transcoding(i) for i in self.all_inputs()} & {
@@ -417,7 +417,7 @@ class Pipeline:  # noqa: too-many-public-methods
         """
         nodes = [
             n
-            for n in self.nodes
+            for n in self._nodes
             if n.namespace and n.namespace.startswith(node_namespace)
         ]
         if not nodes:
@@ -676,7 +676,7 @@ class Pipeline:  # noqa: too-many-public-methods
                 of the tags provided are being copied.
         """
         tags = set(tags)
-        nodes = [node for node in self.nodes if tags & node.tags]
+        nodes = (node for node in self._nodes if tags & node.tags)
         return Pipeline(nodes)
 
     def filter(  # noqa: too-many-arguments
@@ -760,11 +760,11 @@ class Pipeline:  # noqa: too-many-public-methods
         # would give different outcomes depending on the order of filter methods:
         # only_nodes and then from_inputs would give node1, while only_nodes and then
         # from_inputs would give node1 and node3.
-        filtered_pipeline = Pipeline(self.nodes)
+        filtered_pipeline = self
         for subset_pipeline in subset_pipelines:
             filtered_pipeline &= subset_pipeline
 
-        if not filtered_pipeline.nodes:
+        if not filtered_pipeline._nodes:
             raise ValueError(
                 "Pipeline contains no nodes after applying all provided filters"
             )
@@ -779,7 +779,7 @@ class Pipeline:  # noqa: too-many-public-methods
         Returns:
             New ``Pipeline`` object with nodes tagged.
         """
-        nodes = [n.tag(tags) for n in self.nodes]
+        nodes = [n.tag(tags) for n in self._nodes]
         return Pipeline(nodes)
 
     def to_json(self):
@@ -816,7 +816,7 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
         if isinstance(each, Node):
             _check_node(each)
         elif isinstance(each, Pipeline):
-            for node in each.nodes:
+            for node in each._nodes:
                 _check_node(node, pipeline_=each)
 
     if duplicates:

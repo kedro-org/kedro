@@ -70,19 +70,6 @@ class _SharedMemoryDataset:
             raise exc
 
 
-def __getattr__(name):
-    if name == "_SharedMemoryDataset":
-        alias = _SharedMemoryDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
-
-
 class ParallelRunnerManager(SyncManager):
     """``ParallelRunnerManager`` is used to create shared ``MemoryDataset``
     objects as default data sets in a pipeline.

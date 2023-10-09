@@ -41,7 +41,7 @@ def mock_cookiecutter(mocker):
 
 def _clean_up_project(project_dir):
     if project_dir.is_dir():
-        shutil.rmtree(str(dir), ignore_errors=True)
+        shutil.rmtree(str(project_dir), ignore_errors=True)
 
 
 def _write_yaml(filepath: Path, config: dict):

@@ -7,10 +7,10 @@ import boto3
 import pandas as pd
 import pytest
 import s3fs
+from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
 from moto import mock_s3
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
-from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import DatasetError, PartitionedDataset
 from kedro.io.data_catalog import CREDENTIALS_KEY
 from kedro.io.partitioned_dataset import KEY_PROPAGATION_WARNING
@@ -39,14 +39,14 @@ def local_csvs(tmp_path, partitioned_data_pandas):
 
 LOCAL_DATASET_DEFINITION = [
     "pandas.CSVDataSet",
-    "kedro.extras.datasets.pandas.CSVDataSet",
+    "kedro_datasets.pandas.CSVDataSet",
     CSVDataSet,
     {"type": "pandas.CSVDataSet", "save_args": {"index": False}},
     {"type": CSVDataSet},
 ]
 
 
-class FakeDataset:  # pylint: disable=too-few-public-methods
+class FakeDataset:
     pass
 
 
@@ -181,7 +181,7 @@ class TestPartitionedDatasetLocal:
         pds = PartitionedDataset(path, dataset)
 
         assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataSet" in str(pds)
+        assert "dataset_type=CSVDataset" in str(pds)
         assert "dataset_config" in str(pds)
 
     def test_load_args(self, mocker):
@@ -245,7 +245,7 @@ class TestPartitionedDatasetLocal:
         loaded_partitions = pds.load()
 
         for partition, df_loader in loaded_partitions.items():
-            pattern = r"Failed while loading data from data set ParquetDataSet(.*)"
+            pattern = r"Failed while loading data from data set ParquetDataset(.*)"
             with pytest.raises(DatasetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
@@ -404,7 +404,7 @@ class TestPartitionedDatasetLocal:
 BUCKET_NAME = "fake_bucket_name"
 S3_DATASET_DEFINITION = [
     "pandas.CSVDataSet",
-    "kedro.extras.datasets.pandas.CSVDataSet",
+    "kedro_datasets.pandas.CSVDataSet",
     CSVDataSet,
     {"type": "pandas.CSVDataSet", "save_args": {"index": False}},
     {"type": CSVDataSet},
@@ -549,5 +549,5 @@ class TestPartitionedDatasetS3:
         pds = PartitionedDataset(path, dataset)
 
         assert f"path={path}" in str(pds)
-        assert "dataset_type=CSVDataSet" in str(pds)
+        assert "dataset_type=CSVDataset" in str(pds)
         assert "dataset_config" in str(pds)

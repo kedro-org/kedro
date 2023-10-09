@@ -160,7 +160,7 @@ class AWSBatchRunner(ThreadRunner):
         self._job_definition = job_definition
         self._client = boto3.client("batch")
 
-    def create_default_data_set(self, ds_name: str):
+    def create_default_dataset(self, ds_name: str):
         raise NotImplementedError("All datasets must be defined in the catalog")
 
     def _get_required_workers_count(self, pipeline: Pipeline):
@@ -169,7 +169,7 @@ class AWSBatchRunner(ThreadRunner):
 
         return super()._get_required_workers_count(pipeline)
 
-    def _run(  # pylint: disable=too-many-locals,useless-suppression
+    def _run(
         self,
         pipeline: Pipeline,
         catalog: DataCatalog,

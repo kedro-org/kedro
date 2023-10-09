@@ -72,7 +72,7 @@ cd spaceflights
 Install the project's dependencies:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Set up the session store
@@ -135,7 +135,7 @@ export AWS_REGION="your_aws_region"
 
 ## Set up experiment tracking datasets
 
-There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro.extras.datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro.extras.datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data like boolean or text-based data.
+There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro_datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro_datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data like boolean or text-based data.
 
 Set up two datasets to log the columns used in the companies dataset (`companies_columns`) and experiment metrics for the data science pipeline (`metrics`) like the coefficient of determination (`r2 score`), max error (`me`) and mean absolute error (`mae`) by adding the following in the `conf/base/catalog.yml` file:
 
@@ -268,7 +268,7 @@ In this section, we illustrate how to compare Matplotlib plots across experiment
 
 ### Update the dependencies
 
-Update the `src/requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
+Update the `requirements.txt` file in your Kedro project by adding the following dataset to enable Matplotlib for your project:
 
 ```text
 kedro-datasets[matplotlib.MatplotlibWriter]~=1.1
@@ -278,7 +278,7 @@ seaborn~=0.12.1
 And install the requirements with:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Add a plotting node

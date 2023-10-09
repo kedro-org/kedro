@@ -44,10 +44,10 @@ def test_deprecation():
     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
 class TestValidParallelRunner:
-    def test_create_default_data_set(self):
-        # data_set is a proxy to a dataset in another process.
-        data_set = ParallelRunner().create_default_data_set("")
-        assert isinstance(data_set, _SharedMemoryDataset)
+    def test_create_default_dataset(self):
+        # dataset is a proxy to a dataset in another process.
+        dataset = ParallelRunner().create_default_dataset("")
+        assert isinstance(dataset, _SharedMemoryDataset)
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
@@ -172,7 +172,7 @@ class TestInvalidParallelRunner:
         with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_data_set_not_serialisable(self, is_async, fan_out_fan_in):
+    def test_dataset_not_serialisable(self, is_async, fan_out_fan_in):
         """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """

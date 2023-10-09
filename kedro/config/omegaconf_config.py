@@ -451,8 +451,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _is_hidden(self, path: str):
         """Check if path contains any hidden directory or is a hidden file"""
-        path = Path(path).resolve().as_posix()
-        parts = path.split(self._fs.sep)  # filesystem specific separator
+        path = Path(path).resolve()
+        conf_path = Path(self.conf_source).resolve()
+        if path.is_relative_to(conf_path):
+            path_str = path.relative_to(conf_path).as_posix()
+        else:
+            path_str = path.as_posix()
+        parts = path_str.split(self._fs.sep)  # filesystem specific separator
         HIDDEN = "."
         # Check if any component (folder or file) starts with a dot (.)
         return any(part.startswith(HIDDEN) for part in parts)

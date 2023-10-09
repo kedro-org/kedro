@@ -260,7 +260,7 @@ class TestDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a data set
         from nonexistent source"""
-        pattern = r"Failed while loading data from data set CSVDataSet"
+        pattern = r"Failed while loading data from data set CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
@@ -514,7 +514,7 @@ class TestDataCatalogFromConfig:
         sane_config["catalog"]["boats"]["save_and_load_args"] = False
         pattern = (
             r"Dataset 'boats' must only contain arguments valid for "
-            r"the constructor of '.*CSVDataSet'"
+            r"the constructor of '.*CSVDataset'"
         )
         with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**sane_config)

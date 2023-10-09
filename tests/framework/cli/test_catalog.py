@@ -159,10 +159,10 @@ class TestCatalogListCommand:
         expected_dict = {
             f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
-                    "CSVDataSet": ["iris_data"],
+                    "CSVDataset": ["iris_data"],
                     "MemoryDataset": ["intermediate"],
                 },
-                "Datasets not mentioned in pipeline": {"CSVDataSet": ["not_used"]},
+                "Datasets not mentioned in pipeline": {"CSVDataset": ["not_used"]},
             }
         }
         key = f"Datasets in '{PIPELINE_NAME}' pipeline"
@@ -195,7 +195,7 @@ class TestCatalogListCommand:
         expected_dict = {
             f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
-                    "CSVDataSet": ["some_dataset"],
+                    "CSVDataset": ["some_dataset"],
                     "DefaultDataset": ["intermediate"],
                 }
             }

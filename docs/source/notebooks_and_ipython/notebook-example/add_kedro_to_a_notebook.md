@@ -13,28 +13,25 @@ jupyter:
     name: python3
 ---
 
-<!-- #region -->
 # Add Kedro features to a notebook
 
 This page describes how to add Kedro features incrementally to a notebook.
 
-It starts with a version of the spaceflights example which does NOT use Kedro that you can run inside a notebook. It then explains how to convert portions of the code to use Kedro features while remaining runnable from within a notebook. 
+It starts with a notebook example which does NOT use Kedro. It then explains how to convert portions of the code to use Kedro features while remaining runnable within a notebook.
 
->**NOTE**: If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](). Be sure to clone or download the entire folder to ensure that `add_kedro_to_spaceflights_notebook.ipynb` runs correctly because it relies upon data and configuration files stored in the `notebook-example` folder.
+>**NOTE**: If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](https://github.com/kedro-org/kedro/tree/4727aab2f5ab0210f264f5bfb477b66c6327fbbe/docs/source/notebooks_and_ipython/notebook-example). Be sure to download the entire folder, or clone the entire repo, because [`add_kedro_to_spaceflights_notebook.ipynb`](https://github.com/kedro-org/kedro/blob/4727aab2f5ab0210f264f5bfb477b66c6327fbbe/docs/source/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.ipynb) relies upon files stored in the `notebook-example` folder.
 
+## Kedro spaceflights
 
-## Spaceflights in a notebook
-
-If you are unfamiliar with the [Kedro spaceflights tutorial](../tutorial/spaceflights_tutorial.md), it is used to introduce the basics of Kedro in a tutorial that runs exclusively as a Kedro project, that is, as a set of `.py` files rather than in a notebook. The premise is as follows:
+The [Kedro spaceflights tutorial](../../tutorial/spaceflights_tutorial.md) introduces the basics of Kedro in a tutorial that runs as a Kedro project, that is, as a set of `.py` files. The premise is as follows:
 
 _It is 2160, and the space tourism industry is booming. Globally, thousands of space shuttle companies take tourists to the Moon and back. You have been able to source data that lists the amenities offered in each space shuttle, customer reviews, and company information._
 
 _Project: You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight._
 
-<!-- #endregion -->
 
 ### The notebook example
-The full example code is given below. To run this, you will need 
+The full example code is given below. To run this, you will need
 
 ```python
 import pandas as pd
@@ -97,16 +94,16 @@ r2_score(y_test, y_pred)
 ```
 
 ## Use Kedro for data processing
-Even if you’re not ready to work with a full Kedro project, you can still take advantage of its data handling solution in your existing project from within a notebook. This section shows you how.
+Even if you’re not ready to work with a full Kedro project, you can still use its for data handling within an existing notebook project. This section shows you how.
 
-Kedro’s Data Catalog is a registry of all data sources available for use by the project, and offers a separate place to declare details of the datasets your projects use. Kedro provides [built-in datasets for numerous file types and file systems](./kedro_datasets), so you don’t have to write any of the logic for reading or writing data.
+Kedro’s Data Catalog is a registry of all data sources available for use by the project. It offers a separate place to declare details of the datasets your projects use. Kedro provides [built-in datasets for different file types and file systems](/kedro_datasets) so you don’t have to write any of the logic for reading or writing data.
 
-Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml and more. It relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. You can pass arguments in to load and save operations, and use versioning and credentials for data access.
+Kedro offers a range of datasets, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames, and more. They are supported with the APIs of pandas, spark, networkx, matplotlib, yaml, and beyond. It relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read and save data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. You can pass arguments in to load and save operations, and use versioning and credentials for data access.
 
 To start using the Data Catalog, you'll need a `catalog.yml` to define datasets that can be used when writing your functions. There is one included in the same folder as your notebook:
 
 
-<!--This code needs the user to create a yaml file with this contents. Is there a piece of code we could offer that creates and writes one for them into the appropriate directory to save the reader the manual task? -->
+
 
 ```yaml
 companies:
@@ -144,22 +141,21 @@ reviews = catalog.load("reviews")
 shuttles = catalog.load("shuttles")
 ```
 
-The rest of the spaceflights notebook code for data processing and model evaluation from above can now run as previously.
+The rest of the spaceflights notebook code for data processing and model evaluation from above can now run as before.
 
-<!-- #region -->
 ## Use a YAML configuration file
 
-### Use a configuration file just for "magic numbers"
+### Use a configuration file for "magic numbers"
 When writing exploratory code, it’s tempting to hard code values to save time, but it makes code harder to maintain in the longer-term. The example code for model evaluation above calls `sklearn.model_selection.train_test_split()`, passing in a model input table and outputs the test and train datasets. There are hard-code values supplied to `test_size` and `random_state`.
 
 ```python
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=3)
 ```
 
-[Good software engineering practice](https://towardsdatascience.com/five-software-engineering-principles-for-collaborative-data-science-ab26667a311) suggests that we extract *‘magic numbers’* into named constants, sometimes defined at the top of a file, or outside in a utility file, storing it in a format such as yaml.
+[Good software engineering practice](https://towardsdatascience.com/five-software-engineering-principles-for-collaborative-data-science-ab26667a311) suggests that we extract *‘magic numbers’* into named constants. These could be defined at the top of a file or in a utility file, in a format such as yaml.
 
 
-```yml
+```yaml
 # params.yml
 
 model_options:
@@ -168,9 +164,6 @@ model_options:
 ```
 
 The `params.yml` file is included in the example folder so you can reference the values with notebook code as follows:
-
-
-<!-- #endregion -->
 
 ```python
 import yaml
@@ -210,7 +203,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 ```
 
-The rest of the model evaluation code can now run as previously.
+The rest of the model evaluation code can now run as before.
 
 ```python
 from sklearn.linear_model import LinearRegression
@@ -227,7 +220,7 @@ r2_score(y_test, y_pred)
 ### Use a configuration file for all "magic values"
 If we extend the concept of magic numbers to encompass magic values in general, it seems possible that the variable `features` might also be reusable elsewhere. Extracting it from code into the configuration file named `parameters.yml` leads to the following:
 
-```yml
+```yaml
 # parameters.yml
 
 model_options:
@@ -268,7 +261,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 ```
 
-The rest of the model evaluation code can now run as previously.
+The rest of the model evaluation code can now run as before.
 
 ```python
 from sklearn.linear_model import LinearRegression
@@ -311,7 +304,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 ```
 
-The rest of the model evaluation code can now run as previously.
+The rest of the model evaluation code can now run as before.
 
 ```python
 from sklearn.linear_model import LinearRegression
@@ -325,7 +318,6 @@ y_pred = model.predict(X_test)
 r2_score(y_test, y_pred)
 ```
 
-<!-- #region -->
 ### Use Kedro's configuration loader to load the Data Catalog
 Earlier in the example, we saw how to use Kedro's Data Catalog to load a `yaml` file, with `safe_load` and pass it to the `DataCatalog` class.
 
@@ -346,7 +338,6 @@ catalog = DataCatalog.from_config(conf_catalog)
 # Load the datasets
 ...
 ```
-<!-- #endregion -->
 
 It's also possible to use Kedro's `OmegaConfigLoader`configuration loader to initialise the Data Catalog.
 
@@ -372,12 +363,10 @@ shuttles = catalog.load("shuttles")
 ```
 
 ## Where next?
-At this point in the notebook, we've introduced Kedro data management (using the Data Catalog) and configuration loader. You have now "Kedro-ised" the notebook code to make it more reusable in future. However, you can go further if your ultimate goal is to migrate code out of the notebook and use it in a full-blown Kedro project.
+At this point in the notebook, we've introduced Kedro data management (using the Data Catalog) and configuration loader. You have now "Kedro-ised" the notebook code to make it more reusable in future. You can go further if your ultimate goal is to migrate code out of the notebook and use it in a full-blown Kedro project.
 
 ## Refactor your code into functions
-Code in a Kedro project runs in one or more pipelines, where a pipeline is a series of "nodes", which wrap discrete functions. If your ultimate goal is to create a Kedro project and use it to run your notebook code, you'll need to take the code that processes the data, and the code that calls the data science model, and make it into one or more nodes.
-
-One option is to simply put everything into a single function. Let's try this.
+Code in a Kedro project runs in one or more pipelines, where a pipeline is a series of "nodes", which wrap discrete functions. One option is to put everything into a single function. Let's try this.
 
 ```python
 # Use Kedro for data management and configuration
@@ -453,11 +442,11 @@ def big_function():
 big_function()
 ```
 
-In truth, this code is not much more maintainable than if it were spread throughout multiple notebook cells.
+In truth, this code is not much more maintainable than previous versions.
 
-Maybe we could do better with a series of smaller functions, which would map more clearly to the Kedro vision of a pipeline of nodes, each of which behave consistently, repeatably and predictably, so that a given input  to a node always returns the same output. For those in the know, this is the definition of a pure function and, as per software engineering best practice for readable code, nodes/pure functions should be small single responsibility functions that perform a single specific task.
+Maybe we could do better with a series of smaller functions that map to the Kedro vision of a pipeline of nodes. A node should behave consistently, repeatably, and predictably, so that a given input  to a node always returns the same output. For those in the know, this is the definition of a pure function. Nodes/pure functions should be small single responsibility functions that perform a single specific task.
 
-Let's try this with our code. We'll split it into a set of functions to process the data, which are based on the code in `big_function` but where each function has a single responsibility. Then we'll add a set of model evaluation functions which similarly use the code we've written previously but split into three separate functions.
+Let's try this with our code. We'll split it into a set of functions to process the data, which are based on the code in `big_function` but where each function has a single responsibility. Then we'll add a set of data science functions which split the model training and evaluation code into three separate functions.
 
 ```python
 ####################
@@ -557,7 +546,7 @@ regressor = train_model(X_train, y_train)
 evaluate_model(regressor, X_test, y_test)
 ```
 
-And that's it. The notebook code has been refactored into a series of functions that use some Kedro setup code to read in configuration values and data. Let's reproduce it all in one big notebook cell for reference so you can see how it looks in comparison to the notebook code at the top of this page that began this example.
+And that's it. The notebook code has been refactored into a series of functions. Let's reproduce it all in one big notebook cell for reference. Compare it to the notebook code at the top of this page that began this example.
 
 ```python
 # Kedro setup for data management and configuration
@@ -676,8 +665,4 @@ X_train, X_test, y_train, y_test = split_data(
 )
 regressor = train_model(X_train, y_train)
 evaluate_model(regressor, X_test, y_test)
-```
-
-```python
-
 ```

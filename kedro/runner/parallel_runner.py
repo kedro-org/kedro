@@ -7,7 +7,6 @@ import multiprocessing
 import os
 import pickle
 import sys
-import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain

@@ -20,7 +20,6 @@ from .partitioned_dataset import (
     PartitionedDataset,
 )
 
-
 __all__ = [
     "AbstractDataset",
     "AbstractVersionedDataset",

@@ -21,14 +21,6 @@ from .partitioned_dataset import (
 )
 
 
-def __getattr__(name):
-    import kedro.io.core  # noqa: import-outside-toplevel
-
-    if name in (kedro.io.core._DEPRECATED_CLASSES):  # noqa: protected-access
-        return getattr(kedro.io.core, name)
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
-
-
 __all__ = [
     "AbstractDataset",
     "AbstractVersionedDataset",

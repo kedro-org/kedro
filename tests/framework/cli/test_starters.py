@@ -876,6 +876,7 @@ class TestAddOnsFromUserPrompts:
         _assert_requirements_ok(result, add_ons=add_ons)
         template = _assert_template_ok(result, add_ons=add_ons)
         _clean_up_project(template)
+        shutil.rmtree("./new-kedro-project")
 
     def test_invalid_add_ons(self, fake_kedro_cli):
         result = CliRunner().invoke(
@@ -913,6 +914,7 @@ class TestAddOnsFromConfigFile:
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="my-project")
         template = _assert_template_ok(result, **config)
         _clean_up_project(template)
+        shutil.rmtree("./my-project")
 
     def test_invalid_add_ons(self, fake_kedro_cli):
         """Test project created from config."""

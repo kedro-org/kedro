@@ -32,9 +32,6 @@ from kedro.runner.runner import AbstractRunner, run_node
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-_SharedMemoryDataSet: type[_SharedMemoryDataset]
-
 
 class _SharedMemoryDataset:
     """``_SharedMemoryDataset`` is a wrapper class for a shared MemoryDataset in SyncManager.
@@ -74,7 +71,7 @@ class _SharedMemoryDataset:
 
 
 def __getattr__(name):
-    if name == "_SharedMemoryDataSet":
+    if name == "_SharedMemoryDataset":
         alias = _SharedMemoryDataset
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "

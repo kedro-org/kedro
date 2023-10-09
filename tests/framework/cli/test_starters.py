@@ -262,7 +262,7 @@ def test_parse_add_ons_valid(input, expected):
 def test_parse_add_ons_invalid_range(input, capsys):
     with pytest.raises(SystemExit):
         parse_add_ons_input(input)
-    message = f"'{input}' is an invalid range for project add-ons."
+    message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
     assert message in capsys.readouterr().err
 
 
@@ -273,7 +273,7 @@ def test_parse_add_ons_invalid_range(input, capsys):
 def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
     with pytest.raises(SystemExit):
         parse_add_ons_input(input)
-    message = f"'{first_invalid}' is not a valid selection."
+    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."
     assert message in capsys.readouterr().err
 
 

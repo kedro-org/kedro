@@ -874,7 +874,7 @@ class TestAddOnsFromUserPrompts:
 
         _assert_template_ok(result, add_ons=add_ons)
         _assert_requirements_ok(result, add_ons=add_ons)
-        _clean_up_project("./new-kedro-project")
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_invalid_add_ons(self, fake_kedro_cli):
         result = CliRunner().invoke(

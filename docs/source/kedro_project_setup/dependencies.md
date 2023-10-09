@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 ## Workflow dependencies
 
-To install all the dependencies recorded in Kedro's [`setup.py`](https://github.com/kedro-org/kedro/blob/develop/setup.py), run:
+To install all the dependencies recorded in Kedro's [`pyproject.tom`](https://github.com/kedro-org/kedro/blob/develop/pyproject.toml), run:
 
 ```bash
 pip install "kedro[all]"

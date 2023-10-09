@@ -13,11 +13,14 @@ jupyter:
     name: python3
 ---
 
+<!-- #region -->
 # Add Kedro features to a notebook
 
 This page describes how to add Kedro features incrementally to a notebook.
 
-It starts with a version of the spaceflights example which does NOT use Kedro that you can run inside a notebook. It then explains how to convert portions of the code to use Kedro features while remaining runnable from within a notebook. If you want to experiment with the code in a Notebook, you can find it in [the examples folder on GitHub](https://github.com/kedro-org/kedro/tree/ffc4ba156b9bd9c07df56905dce987c6bf6e144d/docs/examples/add_kedro_to_spaceflights_notebook). Be sure to download the entire folder named `add_kedro_to_spaceflights_notebook` because it contains data and configuration files that are needed to run the notebook.
+It starts with a version of the spaceflights example which does NOT use Kedro that you can run inside a notebook. It then explains how to convert portions of the code to use Kedro features while remaining runnable from within a notebook. 
+
+>**NOTE**: If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](). Be sure to clone or download the entire folder to ensure that `add_kedro_to_spaceflights_notebook.ipynb` runs correctly because it relies upon data and configuration files stored in the `notebook-example` folder.
 
 
 ## Spaceflights in a notebook
@@ -28,10 +31,10 @@ _It is 2160, and the space tourism industry is booming. Globally, thousands of s
 
 _Project: You want to construct a model that predicts the price for each trip to the Moon and the corresponding return flight._
 
-
+<!-- #endregion -->
 
 ### The notebook example
-The full example code is given below.
+The full example code is given below. To run this, you will need 
 
 ```python
 import pandas as pd
@@ -676,4 +679,5 @@ evaluate_model(regressor, X_test, y_test)
 ```
 
 ```python
+
 ```

@@ -590,14 +590,14 @@ def _validate_config_file_against_prompts(
 
 
 def _validate_config_file_inputs(config: dict[str, str]):
-    project_name_reg_ex = "^[\\w -]{2,}$"
-    input_project_name = config["project_name"]
+    project_name_reg_ex = r"^[\w -]{2,}$"
+    input_project_name = config.get("project_name")
     if not re.match(project_name_reg_ex, input_project_name):
         message = f"'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
         click.secho(message, fg="red", err=True)
         sys.exit(1)
 
-    add_on_reg_ex = "^(all|none|(\\d(,\\d)*|(\\d-\\d)))$"
+    add_on_reg_ex = r"^(all|none|(\d(,\d)*|(\d-\d)))$"
     input_add_ons = config.get("add_ons", "none")
     if not re.match(add_on_reg_ex, input_add_ons):
         message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."

@@ -107,7 +107,7 @@ def _setup_minimal_env(context):
         ],
         env=context.env,
     )
-    call([context.python, "-m", "pip", "install", "."], env=context.env)
+    call([context.python, "-m", "pip", "install", "-e", "."], env=context.env)
     return context
 
 
@@ -118,6 +118,6 @@ def _install_project_requirements(context):
         .splitlines()
     )
     install_reqs = [req for req in install_reqs if "{" not in req and "#" not in req]
-    install_reqs.append("kedro-datasets[pandas.CSVDataSet]")
+    install_reqs.append("kedro-datasets[pandas.CSVDataset]")
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 ## Workflow dependencies
 
-To install all the dependencies recorded in Kedro's [`setup.py`](https://github.com/kedro-org/kedro/blob/develop/setup.py), run:
+To install all of Kedro's dependencies (recorded in `pyproject.toml`), run the following:
 
 ```bash
 pip install "kedro[all]"
@@ -53,7 +53,7 @@ The [Data Catalog](../data/data_catalog.md) is your way of interacting with diff
 
 #### Install dependencies at a group-level
 
-Data types are broken into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of data types e.g.`pandas.CSVDataSet`, `pandas.ParquetDataSet` and more. You can install dependencies for an entire group of dependencies as follows:
+Data types are broken into groups e.g. `pandas`, `spark` and `pickle`. Each group has a collection of data types e.g.`pandas.CSVDataset`, `pandas.ParquetDataset` and more. You can install dependencies for an entire group of dependencies as follows:
 
 ```bash
 pip install "kedro-datasets[<group>]"
@@ -69,4 +69,4 @@ To limit installation to dependencies specific to a data type:
 pip install "kedro-datasets[<group>.<dataset>]"
 ```
 
-For example, your workflow might require use of the `pandas.ExcelDataSet`, so to install its dependencies, run `pip install "kedro-datasets[pandas.ExcelDataSet]"`.
+For example, your workflow might require use of the `pandas.ExcelDataset`, so to install its dependencies, run `pip install "kedro-datasets[pandas.ExcelDataset]"`.

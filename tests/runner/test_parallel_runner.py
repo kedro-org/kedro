@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import importlib
 import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
@@ -32,12 +31,6 @@ from tests.runner.conftest import (
     sink,
     source,
 )
-
-
-def test_deprecation():
-    class_name = "_SharedMemoryDataSet"
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
-        getattr(importlib.import_module("kedro.runner.parallel_runner"), class_name)
 
 
 @pytest.mark.skipif(

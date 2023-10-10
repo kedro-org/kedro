@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 import copy
-import warnings
 from typing import Any
 
 from kedro.io.core import AbstractDataset, DatasetError
 
 _EMPTY = object()
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-MemoryDataSet: type[MemoryDataset]
 
 
 class MemoryDataset(AbstractDataset):
@@ -140,16 +136,3 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
         )
 
     return copied_data
-
-
-def __getattr__(name):
-    if name == "MemoryDataSet":
-        alias = MemoryDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

@@ -31,10 +31,6 @@ KEY_PROPAGATION_WARNING = (
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-PartitionedDataSet: type[PartitionedDataset]
-IncrementalDataSet: type[IncrementalDataset]
-
 
 class PartitionedDataset(AbstractDataset):
     # noqa: too-many-instance-attributes,protected-access
@@ -379,7 +375,7 @@ class IncrementalDataset(PartitionedDataset):
         >>> dataset.load()
     """
 
-    DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataSet"  # TODO: PartitionedDataset should move to kedro-datasets
+    DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataset"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
     def __init__(  # noqa: too-many-arguments
@@ -554,22 +550,3 @@ class IncrementalDataset(PartitionedDataset):
         partition_ids = [self._path_to_partition(p) for p in self._list_partitions()]
         if partition_ids:
             self._checkpoint.save(partition_ids[-1])  # checkpoint to last partition
-
-
-_DEPRECATED_CLASSES = {
-    "PartitionedDataSet": PartitionedDataset,
-    "IncrementalDataSet": IncrementalDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

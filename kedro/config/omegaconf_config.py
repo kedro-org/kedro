@@ -6,6 +6,7 @@ from __future__ import annotations
 import io
 import logging
 import mimetypes
+import os
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
@@ -451,13 +452,13 @@ class OmegaConfigLoader(AbstractConfigLoader):
 
     def _is_hidden(self, path: str):
         """Check if path contains any hidden directory or is a hidden file"""
-        path = Path(path).resolve()
-        conf_path = Path(self.conf_source).resolve()
-        if path.is_relative_to(conf_path):
-            path_str = path.relative_to(conf_path).as_posix()
+        path = Path(path)
+        conf_path = Path(self.conf_source).resolve().as_posix()
+        if self._protocol == "zip" or self._protocol == "tar":
+            rel_path = path.as_posix()
         else:
-            path_str = path.as_posix()
-        parts = path_str.split(self._fs.sep)  # filesystem specific separator
+            rel_path = os.path.relpath(path.resolve().as_posix(), conf_path)
+        parts = rel_path.split(self._fs.sep)  # filesystem specific separator
         HIDDEN = "."
         # Check if any component (folder or file) starts with a dot (.)
         return any(part.startswith(HIDDEN) for part in parts)

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 import yaml
 from click.testing import CliRunner
-from kedro_datasets.pandas import CSVDataSet
+from kedro_datasets.pandas import CSVDataset
 from pandas import DataFrame
 
 from kedro.framework.cli.pipeline import _sync_dirs
@@ -187,7 +187,7 @@ class TestPipelineCreateCommand:
         conf_dir = fake_repo_path / settings.CONF_SOURCE / "base"
         catalog_dict = {
             "ds_from_pipeline": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/iris.csv",
             }
         }
@@ -204,7 +204,7 @@ class TestPipelineCreateCommand:
 
         with KedroSession.create(PACKAGE_NAME) as session:
             ctx = session.load_context()
-        assert isinstance(ctx.catalog._datasets["ds_from_pipeline"], CSVDataSet)
+        assert isinstance(ctx.catalog._datasets["ds_from_pipeline"], CSVDataset)
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)
         assert ctx.params["params_from_pipeline"] == params_dict["params_from_pipeline"]
 

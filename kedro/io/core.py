@@ -29,13 +29,6 @@ HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "s3n", "s3a", "gcs", "gs", "adl", "abfs", "abfss", "gdrive")
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-DataSetError: type[DatasetError]
-DataSetNotFoundError: type[DatasetNotFoundError]
-DataSetAlreadyExistsError: type[DatasetAlreadyExistsError]
-AbstractDataSet: type[AbstractDataset]
-AbstractVersionedDataSet: type[AbstractVersionedDataset]
-
 
 class DatasetError(Exception):
     """``DatasetError`` raised by ``AbstractDataset`` implementations
@@ -757,25 +750,3 @@ def validate_on_forbidden_chars(**kwargs):
             raise DatasetError(
                 f"Neither white-space nor semicolon are allowed in '{key}'."
             )
-
-
-_DEPRECATED_CLASSES = {
-    "DataSetError": DatasetError,
-    "DataSetNotFoundError": DatasetNotFoundError,
-    "DataSetAlreadyExistsError": DatasetAlreadyExistsError,
-    "AbstractDataSet": AbstractDataset,
-    "AbstractVersionedDataSet": AbstractVersionedDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

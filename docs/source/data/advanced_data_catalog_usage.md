@@ -11,29 +11,29 @@ In the following code, we use several pre-built data loaders documented in the [
 ```python
 from kedro.io import DataCatalog
 from kedro_datasets.pandas import (
-    CSVDataSet,
-    SQLTableDataSet,
-    SQLQueryDataSet,
-    ParquetDataSet,
+    CSVDataset,
+    SQLTableDataset,
+    SQLQueryDataset,
+    ParquetDataset,
 )
 
 io = DataCatalog(
     {
-        "bikes": CSVDataSet(filepath="../data/01_raw/bikes.csv"),
-        "cars": CSVDataSet(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
-        "cars_table": SQLTableDataSet(
+        "bikes": CSVDataset(filepath="../data/01_raw/bikes.csv"),
+        "cars": CSVDataset(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
+        "cars_table": SQLTableDataset(
             table_name="cars", credentials=dict(con="sqlite:///kedro.db")
         ),
-        "scooters_query": SQLQueryDataSet(
+        "scooters_query": SQLQueryDataset(
             sql="select * from cars where gear=4",
             credentials=dict(con="sqlite:///kedro.db"),
         ),
-        "ranked": ParquetDataSet(filepath="ranked.parquet"),
+        "ranked": ParquetDataset(filepath="ranked.parquet"),
     }
 )
 ```
 
-When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` is to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
+When using `SQLTableDataset` or `SQLQueryDataset` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` is to put `con` into `load_args` and `save_args` (`SQLTableDataset` only).
 
 ## How to view the available data sources
 
@@ -130,7 +130,7 @@ my_gcp_credentials:
 Your code will look as follows:
 
 ```python
-CSVDataSet(
+CSVDataset(
     filepath="s3://test_bucket/data/02_intermediate/company/motorbikes.csv",
     load_args=dict(sep=",", skiprows=5, skipfooter=1, na_values=["#NA", "NA"]),
     credentials=dict(key="token", secret="key"),
@@ -145,7 +145,7 @@ If you require programmatic control over load and save versions of a specific da
 
 ```python
 from kedro.io import DataCatalog, Version
-from kedro_datasets.pandas import CSVDataSet
+from kedro_datasets.pandas import CSVDataset
 import pandas as pd
 
 data1 = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
@@ -155,7 +155,7 @@ version = Version(
     save=None,  # generate save version automatically on each save operation
 )
 
-test_dataset = CSVDataSet(
+test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
 io = DataCatalog({"test_dataset": test_dataset})
@@ -179,7 +179,7 @@ version = Version(
     save="my_exact_version",  # save to exact version
 )
 
-test_dataset = CSVDataSet(
+test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
 io = DataCatalog({"test_dataset": test_dataset})
@@ -212,7 +212,7 @@ version = Version(
     save="my_data_20230818.csv",  # save to exact version
 )
 
-test_dataset = CSVDataSet(
+test_dataset = CSVDataset(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version
 )
 io = DataCatalog({"test_dataset": test_dataset})

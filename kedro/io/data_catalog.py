@@ -176,9 +176,9 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro_datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
             >>> io = DataCatalog(datasets={'cars': cars})
@@ -246,14 +246,14 @@ class DataCatalog:
 
             >>> config = {
             >>>     "cars": {
-            >>>         "type": "pandas.CSVDataSet",
+            >>>         "type": "pandas.CSVDataset",
             >>>         "filepath": "cars.csv",
             >>>         "save_args": {
             >>>             "index": False
             >>>         }
             >>>     },
             >>>     "boats": {
-            >>>         "type": "pandas.CSVDataSet",
+            >>>         "type": "pandas.CSVDataset",
             >>>         "filepath": "s3://aws-bucket-name/boats.csv",
             >>>         "credentials": "boats_credentials",
             >>>         "save_args": {
@@ -484,9 +484,9 @@ class DataCatalog:
         ::
 
             >>> from kedro.io import DataCatalog
-            >>> from kedro_datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
             >>> io = DataCatalog(datasets={'cars': cars})
@@ -524,9 +524,9 @@ class DataCatalog:
 
             >>> import pandas as pd
             >>>
-            >>> from kedro_datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
-            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>> cars = CSVDataset(filepath="cars.csv",
             >>>                   load_args=None,
             >>>                   save_args={"index": False})
             >>> io = DataCatalog(datasets={'cars': cars})
@@ -598,13 +598,13 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro_datasets.pandas import CSVDataSet
+            >>> from kedro_datasets.pandas import CSVDataset
             >>>
             >>> io = DataCatalog(datasets={
-            >>>                   'cars': CSVDataSet(filepath="cars.csv")
+            >>>                   'cars': CSVDataset(filepath="cars.csv")
             >>>                  })
             >>>
-            >>> io.add("boats", CSVDataSet(filepath="boats.csv"))
+            >>> io.add("boats", CSVDataset(filepath="boats.csv"))
         """
         if dataset_name in self._datasets:
             if replace:
@@ -634,14 +634,14 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro_datasets.pandas import CSVDataSet, ParquetDataSet
+            >>> from kedro_datasets.pandas import CSVDataset, ParquetDataset
             >>>
             >>> io = DataCatalog(datasets={
-            >>>                   "cars": CSVDataSet(filepath="cars.csv")
+            >>>                   "cars": CSVDataset(filepath="cars.csv")
             >>>                  })
             >>> additional = {
-            >>>     "planes": ParquetDataSet("planes.parq"),
-            >>>     "boats": CSVDataSet(filepath="boats.csv")
+            >>>     "planes": ParquetDataset("planes.parq"),
+            >>>     "boats": CSVDataset(filepath="boats.csv")
             >>> }
             >>>
             >>> io.add_all(additional)

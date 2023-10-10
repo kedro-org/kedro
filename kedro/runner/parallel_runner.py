@@ -7,7 +7,6 @@ import multiprocessing
 import os
 import pickle
 import sys
-import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
@@ -31,9 +30,6 @@ from kedro.runner.runner import AbstractRunner, run_node
 
 # see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
 _MAX_WINDOWS_WORKERS = 61
-
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-_SharedMemoryDataSet: type[_SharedMemoryDataset]
 
 
 class _SharedMemoryDataset:
@@ -71,19 +67,6 @@ class _SharedMemoryDataset:
                     "implicit memory datasets can only be used with serialisable data"
                 ) from serialisation_exc
             raise exc
-
-
-def __getattr__(name):
-    if name == "_SharedMemoryDataSet":
-        alias = _SharedMemoryDataset
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")
 
 
 class ParallelRunnerManager(SyncManager):

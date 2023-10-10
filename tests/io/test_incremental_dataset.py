@@ -8,15 +8,15 @@ from typing import Any
 import boto3
 import pandas as pd
 import pytest
-from kedro_datasets.pickle import PickleDataSet
-from kedro_datasets.text import TextDataSet
+from kedro_datasets.pickle import PickleDataset
+from kedro_datasets.text import TextDataset
 from moto import mock_s3
 from pandas.testing import assert_frame_equal
 
 from kedro.io import AbstractDataset, DatasetError, IncrementalDataset
 from kedro.io.data_catalog import CREDENTIALS_KEY
 
-DATASET = "kedro_datasets.pandas.CSVDataSet"
+DATASET = "kedro_datasets.pandas.CSVDataset"
 
 
 @pytest.fixture
@@ -226,8 +226,8 @@ class TestIncrementalDatasetLocal:
     @pytest.mark.parametrize(
         "checkpoint_config,expected_checkpoint_class",
         [
-            (None, TextDataSet),
-            ({"type": "kedro_datasets.pickle.PickleDataSet"}, PickleDataSet),
+            (None, TextDataset),
+            ({"type": "kedro_datasets.pickle.PickleDataset"}, PickleDataset),
             ({"type": "tests.io.test_incremental_dataset.DummyDataset"}, DummyDataset),
         ],
     )
@@ -372,7 +372,7 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     return f"s3://{BUCKET_NAME}/{prefix}"
 
 
-class TestPartitionedDataSetS3:
+class TestPartitionedDatasetS3:
     os.environ["AWS_ACCESS_KEY_ID"] = "FAKE_ACCESS_KEY"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "FAKE_SECRET_KEY"
 
@@ -477,7 +477,7 @@ class TestPartitionedDataSetS3:
         checkpoint_path = (
             f"{mocked_csvs_in_s3}/{IncrementalDataset.DEFAULT_CHECKPOINT_FILENAME}"
         )
-        checkpoint_value = TextDataSet(checkpoint_path).load()
+        checkpoint_value = TextDataset(checkpoint_path).load()
         assert checkpoint_value == "p04/data.csv"
 
         pds = IncrementalDataset(

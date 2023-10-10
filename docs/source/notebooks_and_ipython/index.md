@@ -8,14 +8,8 @@ As project complexity increases, particularly if you work collaboratively, you m
 **Add a notebook to your existing Kedro project**
 The page titled [Use a Jupyter notebook for Kedro project experiments](./kedro_and_notebooks.md) describes how to set up a notebook to access the elements of a Kedro project for experimentation. If you have an existing Kedro project but want to use notebook features to explore your data and experiment with pipelines, this is the page to start.
 
-**Use Kedro's Data Catalog within a notebook**
-If you want to start a new notebook project but take advantage of the Data Catalog, a key Kedro feature, [Kedro as a data registry](./kedro_as_a_data_registry.md) explains how to proceed.
-
-
-
 ```{toctree}
 :maxdepth: 1
 
 kedro_and_notebooks
-kedro_as_a_data_registry
 ```

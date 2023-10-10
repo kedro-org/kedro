@@ -163,7 +163,7 @@ class Pipeline:  # noqa: too-many-public-methods
             for output in node.outputs:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
-        self._nodes = nodes
+        self._nodes: list[Node] = nodes
         self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
 
     def __repr__(self):  # pragma: no cover
@@ -760,7 +760,7 @@ class Pipeline:  # noqa: too-many-public-methods
         # would give different outcomes depending on the order of filter methods:
         # only_nodes and then from_inputs would give node1, while only_nodes and then
         # from_inputs would give node1 and node3.
-        filtered_pipeline = self
+        filtered_pipeline = Pipeline(self._nodes)
         for subset_pipeline in subset_pipelines:
             filtered_pipeline &= subset_pipeline
 

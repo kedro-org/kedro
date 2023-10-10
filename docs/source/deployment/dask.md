@@ -51,8 +51,8 @@ from kedro.runner import AbstractRunner, run_node
 from pluggy import PluginManager
 
 
-class _DaskDataSet(AbstractDataset):
-    """``_DaskDataSet`` publishes/gets named datasets to/from the Dask
+class _DaskDataset(AbstractDataset):
+    """``_DaskDataset`` publishes/gets named datasets to/from the Dask
     scheduler."""
 
     def __init__(self, name: str):
@@ -102,17 +102,17 @@ class DaskRunner(AbstractRunner):
     def __del__(self):
         Client.current().close()
 
-    def create_default_dataset(self, ds_name: str) -> _DaskDataSet:
+    def create_default_dataset(self, ds_name: str) -> _DaskDataset:
         """Factory method for creating the default dataset for the runner.
 
         Args:
             ds_name: Name of the missing dataset.
 
         Returns:
-            An instance of ``_DaskDataSet`` to be used for all
+            An instance of ``_DaskDataset`` to be used for all
             unregistered datasets.
         """
-        return _DaskDataSet(ds_name)
+        return _DaskDataset(ds_name)
 
     @staticmethod
     def _run_node(

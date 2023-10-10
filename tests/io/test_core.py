@@ -9,8 +9,11 @@ import pytest
 
 from kedro.io.core import (
     AbstractDataset,
-    _parse_filepath,
+    DatasetError,
+    Version,
     get_filepath_str,
+    get_protocol_and_path,
+    validate_on_forbidden_chars,
 )
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
@@ -61,49 +64,49 @@ class TestCoreFunctions:
     @pytest.mark.parametrize(
         "filepath,expected_result",
         [
-            ("s3://bucket/file.txt", {"protocol": "s3", "path": "bucket/file.txt"}),
-            (
-                "s3://user@BUCKET/file.txt",
-                {"protocol": "s3", "path": "BUCKET/file.txt"},
-            ),
-            ("gcs://bucket/file.txt", {"protocol": "gcs", "path": "bucket/file.txt"}),
-            ("gs://bucket/file.txt", {"protocol": "gs", "path": "bucket/file.txt"}),
-            ("adl://bucket/file.txt", {"protocol": "adl", "path": "bucket/file.txt"}),
-            ("abfs://bucket/file.txt", {"protocol": "abfs", "path": "bucket/file.txt"}),
-            (
-                "abfss://bucket/file.txt",
-                {"protocol": "abfss", "path": "bucket/file.txt"},
-            ),
+            ("s3://bucket/file.txt", ("s3", "bucket/file.txt")),
+            ("s3://user@BUCKET/file.txt", ("s3", "BUCKET/file.txt")),
+            ("gcs://bucket/file.txt", ("gcs", "bucket/file.txt")),
+            ("gs://bucket/file.txt", ("gs", "bucket/file.txt")),
+            ("adl://bucket/file.txt", ("adl", "bucket/file.txt")),
+            ("abfs://bucket/file.txt", ("abfs", "bucket/file.txt")),
+            ("abfss://bucket/file.txt", ("abfss", "bucket/file.txt")),
             (
                 "abfss://mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
-                {
-                    "protocol": "abfss",
-                    "path": "mycontainer@mystorageaccount.dfs.core.windows.net/mypath",
-                },
+                ("abfss", "mycontainer@mystorageaccount.dfs.core.windows.net/mypath"),
             ),
-            (
-                "hdfs://namenode:8020/file.txt",
-                {"protocol": "hdfs", "path": "/file.txt"},
-            ),
-            ("file:///tmp/file.txt", {"protocol": "file", "path": "/tmp/file.txt"}),
-            ("/tmp/file.txt", {"protocol": "file", "path": "/tmp/file.txt"}),
-            (
-                "C:\\Projects\\file.txt",
-                {"protocol": "file", "path": "C:\\Projects\\file.txt"},
-            ),
-            (
-                "file:///C:\\Projects\\file.txt",
-                {"protocol": "file", "path": "C:\\Projects\\file.txt"},
-            ),
-            (
-                "https://example.com/file.txt",
-                {"protocol": "https", "path": "https://example.com/file.txt"},
-            ),
-            (
-                "http://example.com/file.txt",
-                {"protocol": "http", "path": "http://example.com/file.txt"},
-            ),
+            ("hdfs://namenode:8020/file.txt", ("hdfs", "/file.txt")),
+            ("file:///tmp/file.txt", ("file", "/tmp/file.txt")),
+            ("/tmp/file.txt", ("file", "/tmp/file.txt")),
+            ("C:\\Projects\\file.txt", ("file", "C:\\Projects\\file.txt")),
+            ("file:///C:\\Projects\\file.txt", ("file", "C:\\Projects\\file.txt")),
+            ("https://example.com/file.txt", ("https", "example.com/file.txt")),
+            ("http://example.com/file.txt", ("http", "example.com/file.txt")),
         ],
     )
-    def test_parse_filepath(self, filepath, expected_result):
-        assert _parse_filepath(filepath) == expected_result
+    def test_get_protocol_and_path(self, filepath, expected_result):
+        assert get_protocol_and_path(filepath) == expected_result
+
+    @pytest.mark.parametrize(
+        "filepath",
+        [
+            "http://example.com/file.txt",
+            "https://example.com/file.txt",
+        ],
+    )
+    def test_get_protocol_and_path_http_with_verion(self, filepath):
+        version = version = Version(load=None, save=None)
+        expected_error_message = "Versioning is not supported for HTTP protocols. Please remove the `versioned` flag from the dataset configuration."
+        with pytest.raises(DatasetError, match=expected_error_message):
+            get_protocol_and_path(filepath, version)
+
+    @pytest.mark.parametrize(
+        "input", [{"key1": "invalid value"}, {"key2": "invalid;value"}]
+    )
+    def test_validate_forbidden_chars(self, input):
+        key = list(input.keys())[0]
+        expected_error_message = (
+            f"Neither white-space nor semicolon are allowed in '{key}'."
+        )
+        with pytest.raises(DatasetError, match=expected_error_message):
+            validate_on_forbidden_chars(**input)

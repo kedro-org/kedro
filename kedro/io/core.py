@@ -214,7 +214,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         except DatasetError:
             raise
         except (FileNotFoundError, NotADirectoryError):
-            raise
+            raise  # TODO coverage
         except Exception as exc:
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
@@ -448,7 +448,7 @@ def _load_obj(class_path: str) -> object | None:
     return class_obj
 
 
-def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
+def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK # TODO coverage
     filepath = Path(filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
@@ -544,7 +544,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                     f"Did not find any versions for {self}. This could be "
                     f"due to insufficient permission."
                 )
-            else:
+            else:  # TODO coverage
                 message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
         return PurePath(most_recent).parent.name
@@ -552,7 +552,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
     @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
-    def _fetch_latest_save_version(self) -> str:  # noqa: no-self-use
+    def _fetch_latest_save_version(self) -> str:  # noqa: no-self-use # TODO coverage
         """Generate and cache the current save version"""
         return generate_timestamp()
 
@@ -588,7 +588,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         save_version = self.resolve_save_version()
         versioned_path = self._get_versioned_path(save_version)  # type: ignore
 
-        if self._exists_function(str(versioned_path)):
+        if self._exists_function(str(versioned_path)):  # TODO coverage
             raise DatasetError(
                 f"Save path '{versioned_path}' for {str(self)} must not exist if "
                 f"versioning is enabled."
@@ -607,7 +607,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         save_version = self.resolve_save_version()  # Make sure last save version is set
         try:
             super().save(data)
-        except (FileNotFoundError, NotADirectoryError) as err:
+        except (FileNotFoundError, NotADirectoryError) as err:  # TODO coverage
             # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
             _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"
             raise DatasetError(
@@ -623,7 +623,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             ) from err
 
         load_version = self.resolve_load_version()
-        if load_version != save_version:
+        if load_version != save_version:  # TODO coverage
             warnings.warn(
                 _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
             )
@@ -642,15 +642,15 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._logger.debug("Checking whether target of %s exists", str(self))
         try:
             return self._exists()
-        except VersionNotFoundError:
+        except VersionNotFoundError:  # TODO coverage
             return False
-        except Exception as exc:  # SKIP_IF_NO_SPARK
+        except Exception as exc:  # SKIP_IF_NO_SPARK    # TODO coverage
             message = (
                 f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
             )
             raise DatasetError(message) from exc
 
-    def _release(self) -> None:
+    def _release(self) -> None:  # TODO coverage
         super()._release()
         self._version_cache.clear()
 

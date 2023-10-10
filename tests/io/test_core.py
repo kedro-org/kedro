@@ -5,10 +5,12 @@ from fractions import Fraction
 from pathlib import PurePosixPath
 from typing import Any
 
+import pandas as pd
 import pytest
 
 from kedro.io.core import (
     AbstractDataset,
+    AbstractVersionedDataset,
     DatasetError,
     Version,
     get_filepath_str,
@@ -46,6 +48,22 @@ class MyDataset(AbstractDataset):
 
     def _save(self, data):
         pass  # pragma: no cover
+
+
+class MyVersionedDataset(AbstractVersionedDataset):
+    def __init__(self, filepath, version):
+        super().__init__(PurePosixPath(filepath), version)
+
+    def _load(self):
+        load_path = self._get_load_path()
+        return pd.read_csv(load_path)
+
+    def _save(self, data: pd.DataFrame):
+        save_path = self._get_save_path()
+        data.to_csv(str(save_path))
+
+    def _describe(self):
+        return dict(version=self._version)
 
 
 class TestCoreFunctions:
@@ -110,3 +128,11 @@ class TestCoreFunctions:
         )
         with pytest.raises(DatasetError, match=expected_error_message):
             validate_on_forbidden_chars(**input)
+
+
+class TestAbstractDataSet:
+    pass
+
+
+class TestAbstractVersionedDataset:
+    pass

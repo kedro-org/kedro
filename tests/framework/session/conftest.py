@@ -66,13 +66,13 @@ def local_config(tmp_path):
     boats_filepath = str(tmp_path / "boats.csv")
     return {
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": cars_filepath,
             "save_args": {"index": False},
             "versioned": True,
         },
         "boats": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": boats_filepath,
             "versioned": True,
         },

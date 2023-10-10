@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Dropped Python 3.7 support.
+* Introduced add-ons to the `kedro new` CLI flow.
 
 ## Bug fixes and other changes
 

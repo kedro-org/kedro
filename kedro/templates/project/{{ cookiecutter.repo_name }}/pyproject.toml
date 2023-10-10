@@ -37,13 +37,3 @@ namespaces = false
 package_name = "{{ cookiecutter.python_package }}"
 project_name = "{{ cookiecutter.project_name }}"
 kedro_init_version = "{{ cookiecutter.kedro_version }}"
-
-[tool.pytest.ini_options]
-addopts = """
---cov-report term-missing \
---cov src/{{ cookiecutter.python_package }} -ra"""
-
-[tool.coverage.report]
-fail_under = 0
-show_missing = true
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]

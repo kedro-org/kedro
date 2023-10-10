@@ -5,6 +5,11 @@ In a Kedro project, the Data Catalog is a registry of all data sources available
 
 This page introduces the basic sections of `catalog.yml`, which is the file Kedro uses to register data sources for a project.
 
+```{warning}
+Starting from Kedro version `0.19.0`, datasets will no longer be included in the core Kedro package. Instead, you will need to import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package.
+Furthermore, beginning with version `2.0.0` of kedro-datasets, all dataset names have been modified to exclude the capital letter "S" in the dataset part of the name. For example, `CSVDataSet` is now `CSVDataset`.
+```
+
 ## The basics of `catalog.yml`
 A separate page of [Data Catalog YAML examples](./data_catalog_yaml_examples.md)  gives further examples of how to work with `catalog.yml`, but here we revisit the [basic `catalog.yml` introduced by the spaceflights tutorial](../tutorial/set_up_data.md).
 

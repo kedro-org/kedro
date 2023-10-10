@@ -2,6 +2,11 @@
 
 You can define a Data Catalog in two ways. Most use cases can be through a YAML configuration file as [illustrated previously](./data_catalog.md), but it is possible to access the Data Catalog programmatically through [`kedro.io.DataCatalog`](/kedro.io.DataCatalog) using an API that allows you to configure data sources in code and use the IO module within notebooks.
 
+```{warning}
+Starting from Kedro version `0.19.0`, datasets will no longer be included in the core Kedro package. Instead, you will need to import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package.
+Furthermore, beginning with version `2.0.0` of kedro-datasets, all dataset names have been modified to exclude the capital letter "S" in the dataset part of the name. For example, `CSVDataSet` is now `CSVDataset`.
+```
+
 ## How to configure the Data Catalog
 
 To use the `DataCatalog` API, construct a `DataCatalog` object programmatically in a file like `catalog.py`.

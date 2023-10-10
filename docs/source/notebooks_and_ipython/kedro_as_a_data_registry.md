@@ -23,11 +23,11 @@ The starter contains:
  ```yaml
 # conf/base/catalog.yml
 example_dataset_1:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: folder/filepath.csv
 
 example_dataset_2:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: s3a://your_bucket/data/01_raw/example_dataset_2*
   credentials: dev_s3
   file_format: csv

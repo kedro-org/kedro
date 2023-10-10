@@ -135,17 +135,17 @@ export AWS_REGION="your_aws_region"
 
 ## Set up experiment tracking datasets
 
-There are two types of tracking datasets: [`tracking.MetricsDataSet`](/kedro_datasets.tracking.MetricsDataSet) and [`tracking.JSONDataSet`](/kedro_datasets.tracking.JSONDataSet). The `tracking.MetricsDataSet` should be used for tracking numerical metrics, and the `tracking.JSONDataSet` can be used for tracking any other JSON-compatible data like boolean or text-based data.
+There are two types of tracking datasets: [`tracking.MetricsDataset`](/kedro_datasets.tracking.MetricsDataset) and [`tracking.JSONDataset`](/kedro_datasets.tracking.JSONDataset). The `tracking.MetricsDataset` should be used for tracking numerical metrics, and the `tracking.JSONDataset` can be used for tracking any other JSON-compatible data like boolean or text-based data.
 
 Set up two datasets to log the columns used in the companies dataset (`companies_columns`) and experiment metrics for the data science pipeline (`metrics`) like the coefficient of determination (`r2 score`), max error (`me`) and mean absolute error (`mae`) by adding the following in the `conf/base/catalog.yml` file:
 
 ```yaml
 metrics:
-  type: tracking.MetricsDataSet
+  type: tracking.MetricsDataset
   filepath: data/09_tracking/metrics.json
 
 companies_columns:
-  type: tracking.JSONDataSet
+  type: tracking.JSONDataset
   filepath: data/09_tracking/companies_columns.json
 ```
 

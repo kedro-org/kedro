@@ -40,6 +40,20 @@ def test_deprecation():
         getattr(importlib.import_module("kedro.runner.parallel_runner"), class_name)
 
 
+class SingleProcessDataset(AbstractDataset):
+    def __init__(self):
+        self._SINGLE_PROCESS = True
+
+    def _load(self):
+        pass
+
+    def _save(self):
+        pass
+
+    def _describe(self):
+        pass
+
+
 @pytest.mark.skipif(
     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
@@ -141,12 +155,18 @@ class TestMaxWorkers:
 )
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
-    def test_task_validation(self, is_async, fan_out_fan_in, catalog):
+    def test_task_node_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialise the lambda function."""
         catalog.add_feed_dict({"A": 42})
         pipeline = modular_pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
+
+    def test_task_dataset_validation(self, is_async, fan_out_fan_in, catalog):
+        """ParallelRunner cannot serialise datasets marked with `_SINGLE_PROCESS`."""
+        catalog.add("A", SingleProcessDataset())
+        with pytest.raises(AttributeError):
+            ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
 
     def test_task_exception(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(feed_dict={"A": 42})

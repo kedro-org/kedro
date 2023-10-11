@@ -20,6 +20,9 @@
 * Added documentation to clarify execution order of hooks.
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 0.19.0
+* All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+* All dataset classes ending with `DataSet` are deprecated and will be removed in Kedro `0.19.0` and `kedro-datasets` `2.0.0`. Instead, use the updated class names ending with `Dataset`.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 

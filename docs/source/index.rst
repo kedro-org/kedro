@@ -110,7 +110,7 @@ Welcome to Kedro's documentation!
 
    kedro_project_setup/index.md
 
-   .. toctree::
+.. toctree::
    :maxdepth: 2
 
    extend_kedro/index.md

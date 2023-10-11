@@ -139,7 +139,8 @@ omit = [
     "kedro/framework/hooks/specs.py",
     "tests/*",
     "kedro/io/core.py",  # TODO: temp fix for removing datasets, need to resolve this before 0.19
-    "kedro/runner/parallel_runner.py"
+    "kedro/runner/parallel_runner.py",
+    "*/site-packages/*"
 ]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 

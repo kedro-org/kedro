@@ -72,15 +72,10 @@ def mock_package_name_with_settings_file(tmpdir):
 
 @pytest.fixture
 def mock_package_name_without_settings_file(tmpdir):
-    """This mock settings file tests everything that can be customised in settings.py.
-    Where there are suggestions in the project template settings.py (e.g. as for
-    CONFIG_LOADER_CLASS), those suggestions should be tested."""
-    settings_file_path = tmpdir.mkdir("test_package_without_settings").join(
-        "settings.py"
-    )
-    project_path, package_name, _ = str(settings_file_path).rpartition(
-        "test_package_without_settings"
-    )
+    """This mocks a project that doesn't have a settings.py file.
+    When configured, the project should have sensible default settings."""
+    package_name = "test_package_without_settings"
+    project_path, _, _ = str(tmpdir.mkdir(package_name)).rpartition(package_name)
 
     sys.path.insert(0, project_path)
     yield package_name
@@ -122,7 +117,7 @@ def test_validate_settings_without_settings_file(
         is None
     )
     configure_project(mock_package_name_without_settings_file)
-    # When a kedro project doesn't have a settings file, the settings should be the default.
+    # When a kedro project doesn't have a settings file, the settings should match be the default.
     test_settings_without_configure_project_shows_default_values()
 
 

@@ -239,16 +239,8 @@ def configure_project(package_name: str):
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py and pipeline_registry.py.
     """
-    if package_name is None:
-        raise ValueError(
-            "Package name not found. Make sure you have configured the project using "
-            "'bootstrap_project'. This should happen automatically if you are using "
-            "Kedro command line interface."
-        )
-
     settings_module = f"{package_name}.settings"
-    if importlib.util.find_spec(f"{package_name}.settings") is not None:  # type: ignore
-        settings.configure(settings_module)
+    settings.configure(settings_module)
 
     pipelines_module = f"{package_name}.pipeline_registry"
     pipelines.configure(pipelines_module)
@@ -267,7 +259,7 @@ def configure_logging(logging_config: dict[str, Any]) -> None:
 
 
 def validate_settings():
-    """Eagerly validate that the settings module is importable. This is desirable to
+    """Eagerly validate that the settings module is importable if it exists. This is desirable to
     surface any syntax or import errors early. In particular, without eagerly importing
     the settings module, dynaconf would silence any import error (e.g. missing
     dependency, missing/mislabelled pipeline), and users would instead get a cryptic

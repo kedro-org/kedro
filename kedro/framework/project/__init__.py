@@ -239,8 +239,16 @@ def configure_project(package_name: str):
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py and pipeline_registry.py.
     """
+    if package_name is None:
+        raise ValueError(
+            "Package name not found. Make sure you have configured the project using "
+            "'bootstrap_project'. This should happen automatically if you are using "
+            "Kedro command line interface."
+        )
+
     settings_module = f"{package_name}.settings"
-    settings.configure(settings_module)
+    if importlib.util.find_spec(f"{package_name}.settings") is not None:  # type: ignore
+        settings.configure(settings_module)
 
     pipelines_module = f"{package_name}.pipeline_registry"
     pipelines.configure(pipelines_module)
@@ -272,8 +280,12 @@ def validate_settings():
             "'bootstrap_project'. This should happen automatically if you are using "
             "Kedro command line interface."
         )
-
-    importlib.import_module(f"{PACKAGE_NAME}.settings")
+    # Check if file exists, if it does, validate it.
+    if importlib.util.find_spec(f"{PACKAGE_NAME}.settings") is not None:  # type: ignore
+        importlib.import_module(f"{PACKAGE_NAME}.settings")
+    else:
+        logger = logging.getLogger(__name__)
+        logger.warning("No settings.py found, defaults will be used.")
 
 
 def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:

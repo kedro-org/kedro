@@ -1,3 +1,4 @@
+import importlib
 import sys
 import textwrap
 
@@ -69,6 +70,23 @@ def mock_package_name_with_settings_file(tmpdir):
         settings.set(key, value)
 
 
+@pytest.fixture
+def mock_package_name_without_settings_file(tmpdir):
+    """This mock settings file tests everything that can be customised in settings.py.
+    Where there are suggestions in the project template settings.py (e.g. as for
+    CONFIG_LOADER_CLASS), those suggestions should be tested."""
+    settings_file_path = tmpdir.mkdir("test_package_without_settings").join(
+        "settings.py"
+    )
+    project_path, package_name, _ = str(settings_file_path).rpartition(
+        "test_package_without_settings"
+    )
+
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
+
+
 def test_settings_without_configure_project_shows_default_values():
     assert len(settings.HOOKS) == 0
     assert settings.DISABLE_HOOKS_FOR_PLUGINS.to_list() == []
@@ -94,6 +112,18 @@ def test_settings_after_configuring_project_shows_updated_values(
     assert settings.CONFIG_LOADER_CLASS == TemplatedConfigLoader
     assert settings.CONFIG_LOADER_ARGS == {"globals_pattern": "*globals.yml"}
     assert settings.DATA_CATALOG_CLASS == MyDataCatalog
+
+
+def test_validate_settings_without_settings_file(
+    mock_package_name_without_settings_file,
+):
+    assert (
+        importlib.util.find_spec(f"{mock_package_name_without_settings_file}.settings")
+        is None
+    )
+    configure_project(mock_package_name_without_settings_file)
+    # When a kedro project doesn't have a settings file, the settings should be the default.
+    test_settings_without_configure_project_shows_default_values()
 
 
 def test_validate_settings_with_empty_package_name():

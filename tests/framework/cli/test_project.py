@@ -1,4 +1,3 @@
-# pylint: disable=unused-argument
 import sys
 
 import pytest
@@ -62,7 +61,7 @@ class TestIpythonCommand:
         assert result.exit_code
         error = (
             "Module 'IPython' not found. Make sure to install required project "
-            "dependencies by running the 'pip install -r src/requirements.txt' command first."
+            "dependencies by running the 'pip install -r requirements.txt' command first."
         )
         assert error in result.output
 
@@ -83,9 +82,9 @@ class TestPackageCommand:
                         "build",
                         "--wheel",
                         "--outdir",
-                        "../dist",
+                        "dist",
                     ],
-                    cwd=str(fake_repo_path / "src"),
+                    cwd=str(fake_repo_path),
                 ),
                 mocker.call(
                     [
@@ -96,6 +95,42 @@ class TestPackageCommand:
                         f"--directory={fake_metadata.project_path}",
                         "conf",
                     ],
+                ),
+            ]
+        )
+
+    def test_no_pyproject_toml(
+        self, call_mock, fake_project_cli, mocker, fake_repo_path, fake_metadata
+    ):
+        # Assume no pyproject.toml
+        (fake_metadata.project_path / "pyproject.toml").unlink(missing_ok=True)
+
+        result = CliRunner().invoke(fake_project_cli, ["package"], obj=fake_metadata)
+        assert not result.exit_code, result.stdout
+
+        # destination_dir will be different since pyproject.toml doesn't exist
+        call_mock.assert_has_calls(
+            [
+                mocker.call(
+                    [
+                        sys.executable,
+                        "-m",
+                        "build",
+                        "--wheel",
+                        "--outdir",
+                        "../dist",
+                    ],
+                    cwd=str(fake_metadata.source_dir),
+                ),
+                mocker.call(
+                    [
+                        "tar",
+                        "--exclude=local/*.yml",
+                        "-czf",
+                        f"dist/conf-{fake_metadata.package_name}.tar.gz",
+                        f"--directory={fake_metadata.project_path}",
+                        "conf",
+                    ]
                 ),
             ]
         )

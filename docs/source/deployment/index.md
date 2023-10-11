@@ -27,6 +27,7 @@ This following pages provide information for deployment to, or integration with,
 
 * [Airflow](airflow_astronomer.md)
 * [Amazon SageMaker](amazon_sagemaker.md)
+* [Amazon EMR Serverless](amazon_emr_serverless.md)
 * [AWS Step functions](aws_step_functions.md)
 * [Azure](azure.md)
 * [Dask](dask.md)
@@ -52,6 +53,7 @@ single_machine
 distributed
 airflow_astronomer
 amazon_sagemaker
+amazon_emr_serverless
 aws_step_functions
 azure
 dask

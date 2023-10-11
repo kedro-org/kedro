@@ -1,13 +1,19 @@
 # Upcoming Release 0.19.0
 
 ## Major features and improvements
+* Dropped Python 3.7 support.
+* Introduced add-ons to the `kedro new` CLI flow.
 
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
+* Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
+* Renamed the `data_sets()` method in `Pipeline` and all references to it to `datasets()`.
+* Renamed the `create_default_data_set()` method in the `Runner` to `create_default_dataset()`.
+* Renamed all other uses of `data_set` and `data_sets` in the codebase to `dataset` and `datasets` respectively.
 
 ### DataSets
-* Remove `kedro.extras.datasets` and tests.
+* Removed `kedro.extras.datasets` and tests.
 * Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
 
 ### CLI
@@ -20,6 +26,8 @@
 * Removed deprecated `kedro.extras.ColorHandler`.
 * The Kedro IPython extension is no longer available as `%load_ext kedro.extras.extensions.ipython`; use `%load_ext kedro.ipython` instead.
 * Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
+* The default project template now has one `pyproject.toml` at the root of the project (containing both the packaging metadata and the Kedro build config).
+* The `requirements.txt` in the default project template moved to the root of the project as well (hence dependencies are now installed with `pip install -r requirements.txt` instead of `pip install -r src/requirements.txt`).
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 ### DataSets
@@ -31,14 +39,20 @@
 
 ## Major features and improvements
 * Allowed using of custom cookiecutter templates for creating pipelines with `--template` flag for `kedro pipeline create` or via `template/pipeline` folder.
+* Allowed overriding of configuration keys with runtime parameters using the `runtime_params` resolver with `OmegaConfigLoader`.
 
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
 
 ## Documentation changes
 * Added documentation to clarify execution order of hooks.
+
 ## Breaking changes to the API
+
 ## Upcoming deprecations for Kedro 0.19.0
+* All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
+* All dataset classes ending with `DataSet` are deprecated and will be removed in Kedro `0.19.0` and `kedro-datasets` `2.0.0`. Instead, use the updated class names ending with `Dataset`.
+
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 

@@ -120,7 +120,7 @@ The following definition in `conf/base/catalog.yml` registers the dataset that s
 
 ```yaml
 regressor:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/06_models/regressor.pickle
   versioned: true
 ```
@@ -184,19 +184,19 @@ You should see output similar to the following:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-                    INFO     Loading data from 'companies' (CSVDataSet)...                   data_catalog.py:343
+                    INFO     Loading data from 'companies' (CSVDataset)...                   data_catalog.py:343
                     INFO     Running node: preprocess_companies_node:                                node.py:327
                              preprocess_companies([companies]) -> [preprocessed_companies]
                     INFO     Saving data to 'preprocessed_companies' (MemoryDataset)...      data_catalog.py:382
                     INFO     Completed 1 out of 6 tasks                                  sequential_runner.py:85
-                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                  data_catalog.py:343
+                    INFO     Loading data from 'shuttles' (ExcelDataset)...                  data_catalog.py:343
 [08/09/22 16:56:15] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) node.py:327
                              -> [preprocessed_shuttles]
                     INFO     Saving data to 'preprocessed_shuttles' (MemoryDataset)...       data_catalog.py:382
                     INFO     Completed 2 out of 6 tasks                                  sequential_runner.py:85
                     INFO     Loading data from 'preprocessed_shuttles' (MemoryDataset)...    data_catalog.py:343
                     INFO     Loading data from 'preprocessed_companies' (MemoryDataset)...   data_catalog.py:343
-                    INFO     Loading data from 'reviews' (CSVDataSet)...                     data_catalog.py:343
+                    INFO     Loading data from 'reviews' (CSVDataset)...                     data_catalog.py:343
                     INFO     Running node: create_model_input_table_node:                            node.py:327
                              create_model_input_table([preprocessed_shuttles,preprocessed_companies,
                              reviews]) -> [model_input_table]
@@ -216,9 +216,9 @@ You should see output similar to the following:
                     INFO     Loading data from 'y_train' (MemoryDataset)...                  data_catalog.py:343
                     INFO     Running node: train_model_node: train_model([X_train,y_train]) ->       node.py:327
                              [regressor]
-[08/09/22 16:56:20] INFO     Saving data to 'regressor' (PickleDataSet)...                   data_catalog.py:382
+[08/09/22 16:56:20] INFO     Saving data to 'regressor' (PickleDataset)...                   data_catalog.py:382
                     INFO     Completed 5 out of 6 tasks                                  sequential_runner.py:85
-                    INFO     Loading data from 'regressor' (PickleDataSet)...                data_catalog.py:343
+                    INFO     Loading data from 'regressor' (PickleDataset)...                data_catalog.py:343
                     INFO     Loading data from 'X_test' (MemoryDataset)...                   data_catalog.py:343
                     INFO     Loading data from 'y_test' (MemoryDataset)...                   data_catalog.py:343
                     INFO     Running node: evaluate_model_node:                                      node.py:327
@@ -264,12 +264,12 @@ First, add namespaces to the modelling component of the data science pipeline to
 
 ```yaml
 active_modelling_pipeline.regressor:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/06_models/regressor_active.pickle
   versioned: true
 
 candidate_modelling_pipeline.regressor:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/06_models/regressor_candidate.pickle
   versioned: true
 
@@ -365,25 +365,25 @@ def create_pipeline(**kwargs) -> Pipeline:
 <summary><b>Click to expand</b></summary>
 
 ```bash
-[11/02/22 10:41:08] INFO     Loading data from 'companies' (CSVDataSet)...                                             data_catalog.py:343
+[11/02/22 10:41:08] INFO     Loading data from 'companies' (CSVDataset)...                                             data_catalog.py:343
                     INFO     Running node: preprocess_companies_node: preprocess_companies([companies]) ->                     node.py:327
                              [preprocessed_companies]
-                    INFO     Saving data to 'preprocessed_companies' (ParquetDataSet)...                               data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_companies' (ParquetDataset)...                               data_catalog.py:382
                     INFO     Completed 1 out of 9 tasks                                                            sequential_runner.py:85
-                    INFO     Loading data from 'shuttles' (ExcelDataSet)...                                            data_catalog.py:343
+                    INFO     Loading data from 'shuttles' (ExcelDataset)...                                            data_catalog.py:343
 [11/02/22 10:41:13] INFO     Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) ->                        node.py:327
                              [preprocessed_shuttles]
-                    INFO     Saving data to 'preprocessed_shuttles' (ParquetDataSet)...                                data_catalog.py:382
+                    INFO     Saving data to 'preprocessed_shuttles' (ParquetDataset)...                                data_catalog.py:382
                     INFO     Completed 2 out of 9 tasks                                                            sequential_runner.py:85
-                    INFO     Loading data from 'preprocessed_shuttles' (ParquetDataSet)...                             data_catalog.py:343
-                    INFO     Loading data from 'preprocessed_companies' (ParquetDataSet)...                            data_catalog.py:343
-                    INFO     Loading data from 'reviews' (CSVDataSet)...                                               data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_shuttles' (ParquetDataset)...                             data_catalog.py:343
+                    INFO     Loading data from 'preprocessed_companies' (ParquetDataset)...                            data_catalog.py:343
+                    INFO     Loading data from 'reviews' (CSVDataset)...                                               data_catalog.py:343
                     INFO     Running node: create_model_input_table_node:                                                      node.py:327
                              create_model_input_table([preprocessed_shuttles,preprocessed_companies,reviews]) ->
                              [model_input_table]
-^[[B[11/02/22 10:41:14] INFO     Saving data to 'model_input_table' (ParquetDataSet)...                                    data_catalog.py:382
+^[[B[11/02/22 10:41:14] INFO     Saving data to 'model_input_table' (ParquetDataset)...                                    data_catalog.py:382
 [11/02/22 10:41:15] INFO     Completed 3 out of 9 tasks                                                            sequential_runner.py:85
-                    INFO     Loading data from 'model_input_table' (ParquetDataSet)...                                 data_catalog.py:343
+                    INFO     Loading data from 'model_input_table' (ParquetDataset)...                                 data_catalog.py:343
                     INFO     Loading data from 'params:active_modelling_pipeline.model_options' (MemoryDataset)...     data_catalog.py:343
                     INFO     Running node: split_data_node:                                                                    node.py:327
                              split_data([model_input_table,params:active_modelling_pipeline.model_options]) ->
@@ -394,7 +394,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     INFO     Saving data to 'active_modelling_pipeline.y_train' (MemoryDataset)...                     data_catalog.py:382
                     INFO     Saving data to 'active_modelling_pipeline.y_test' (MemoryDataset)...                      data_catalog.py:382
                     INFO     Completed 4 out of 9 tasks                                                            sequential_runner.py:85
-                    INFO     Loading data from 'model_input_table' (ParquetDataSet)...                                 data_catalog.py:343
+                    INFO     Loading data from 'model_input_table' (ParquetDataset)...                                 data_catalog.py:343
                     INFO     Loading data from 'params:candidate_modelling_pipeline.model_options' (MemoryDataset)...  data_catalog.py:343
                     INFO     Running node: split_data_node:                                                                    node.py:327
                              split_data([model_input_table,params:candidate_modelling_pipeline.model_options]) ->
@@ -410,16 +410,16 @@ def create_pipeline(**kwargs) -> Pipeline:
                     INFO     Running node: train_model_node:                                                                   node.py:327
                              train_model([active_modelling_pipeline.X_train,active_modelling_pipeline.y_train]) ->
                              [active_modelling_pipeline.regressor]
-                    INFO     Saving data to 'active_modelling_pipeline.regressor' (PickleDataSet)...                   data_catalog.py:382
+                    INFO     Saving data to 'active_modelling_pipeline.regressor' (PickleDataset)...                   data_catalog.py:382
                     INFO     Completed 6 out of 9 tasks                                                            sequential_runner.py:85
                     INFO     Loading data from 'candidate_modelling_pipeline.X_train' (MemoryDataset)...               data_catalog.py:343
                     INFO     Loading data from 'candidate_modelling_pipeline.y_train' (MemoryDataset)...               data_catalog.py:343
                     INFO     Running node: train_model_node:                                                                   node.py:327
                              train_model([candidate_modelling_pipeline.X_train,candidate_modelling_pipeline.y_train]) ->
                              [candidate_modelling_pipeline.regressor]
-                    INFO     Saving data to 'candidate_modelling_pipeline.regressor' (PickleDataSet)...                data_catalog.py:382
+                    INFO     Saving data to 'candidate_modelling_pipeline.regressor' (PickleDataset)...                data_catalog.py:382
                     INFO     Completed 7 out of 9 tasks                                                            sequential_runner.py:85
-                    INFO     Loading data from 'active_modelling_pipeline.regressor' (PickleDataSet)...                data_catalog.py:343
+                    INFO     Loading data from 'active_modelling_pipeline.regressor' (PickleDataset)...                data_catalog.py:343
                     INFO     Loading data from 'active_modelling_pipeline.X_test' (MemoryDataset)...                   data_catalog.py:343
                     INFO     Loading data from 'active_modelling_pipeline.y_test' (MemoryDataset)...                   data_catalog.py:343
                     INFO     Running node: evaluate_model_node:                                                                node.py:327
@@ -427,7 +427,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                              ling_pipeline.y_test]) -> None
                     INFO     Model has a coefficient R^2 of 0.462 on test data.                                                nodes.py:60
                     INFO     Completed 8 out of 9 tasks                                                            sequential_runner.py:85
-                    INFO     Loading data from 'candidate_modelling_pipeline.regressor' (PickleDataSet)...             data_catalog.py:343
+                    INFO     Loading data from 'candidate_modelling_pipeline.regressor' (PickleDataset)...             data_catalog.py:343
                     INFO     Loading data from 'candidate_modelling_pipeline.X_test' (MemoryDataset)...                data_catalog.py:343
                     INFO     Loading data from 'candidate_modelling_pipeline.y_test' (MemoryDataset)...                data_catalog.py:343
                     INFO     Running node: evaluate_model_node:                                                                node.py:327
@@ -518,6 +518,6 @@ kedro run --runner=ThreadRunner
 kedro run --runner=module.path.to.my.runner
 ```
 
-`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and [Dask](/kedro_datasets.dask.ParquetDataSet).
+`ParallelRunner` performs task parallelisation via multiprocessing, while `ThreadRunner` is intended for use with remote execution engines such as [Spark](../integrations/pyspark_integration.md) and [Dask](/kedro_datasets.dask.ParquetDataset).
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../nodes_and_pipelines/run_a_pipeline.md).

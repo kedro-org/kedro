@@ -1,6 +1,6 @@
 # Set up the spaceflights project
 
-This section shows how to create a new project (with `kedro new` using the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights)) and install project dependencies (with `pip install -r src/requirements.txt`).
+This section shows how to create a new project (with `kedro new` using the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights)) and install project dependencies (with `pip install -r requirements.txt`).
 
 ## Create a new project
 
@@ -28,20 +28,19 @@ cd spaceflights
 
 Kedro projects have a `requirements.txt` file to specify their dependencies and enable sharable projects by ensuring consistency across Python packages and versions.
 
-The spaceflights project dependencies are stored in `src/requirements.txt`(you may find that the versions differ slightly depending on the version of Kedro):
+The spaceflights project dependencies are stored in `requirements.txt`(you may find that the versions differ slightly depending on the version of Kedro):
 
 ```text
 # code quality packages
-black==22.0
-flake8>=3.7.9, <5.0
-ipython>=7.31.1, <8.0
-isort~=5.0
-nbstripout~=0.4
+black~=22.0
+ipython>=7.31.1, <8.0; python_version < '3.8'
+ipython~=8.10; python_version >= '3.8'
+ruff~=0.0.290
 
 # notebook tooling
 jupyter~=1.0
+jupyterlab_server>=2.11.1
 jupyterlab~=3.0
-jupyterlab_server>=2.11.1, <2.16.0
 
 # Pytest + useful extensions
 pytest-cov~=3.0
@@ -49,12 +48,12 @@ pytest-mock>=1.7.1, <2.0
 pytest~=7.2
 
 # Kedro dependencies and datasets to work with different data formats (including CSV, Excel, and Parquet)
-kedro~=0.18.10
-kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.1
+kedro~=0.18.13
+kedro-datasets[pandas.CSVDataset, pandas.ExcelDataset, pandas.ParquetDataset]~=1.1
 kedro-telemetry~=0.2.0
 kedro-viz~=6.0 # Visualise pipelines
 
-# For modelling in the data science pipeline
+# For modeling in the data science pipeline
 scikit-learn~=1.0
 ```
 
@@ -63,7 +62,7 @@ scikit-learn~=1.0
 To install all the project-specific dependencies, run the following from the project root directory:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Optional: logging and configuration

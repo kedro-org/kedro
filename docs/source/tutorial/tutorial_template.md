@@ -32,16 +32,15 @@ The spaceflights project dependencies are stored in `src/requirements.txt`(you m
 
 ```text
 # code quality packages
-black==22.0
-flake8>=3.7.9, <5.0
-ipython>=7.31.1, <8.0
-isort~=5.0
-nbstripout~=0.4
+black~=22.0
+ipython>=7.31.1, <8.0; python_version < '3.8'
+ipython~=8.10; python_version >= '3.8'
+ruff~=0.0.290
 
 # notebook tooling
 jupyter~=1.0
-jupyterlab~=3.0
 jupyterlab_server>=2.11.1, <2.16.0
+jupyterlab~=3.0
 
 # Pytest + useful extensions
 pytest-cov~=3.0
@@ -49,12 +48,12 @@ pytest-mock>=1.7.1, <2.0
 pytest~=7.2
 
 # Kedro dependencies and datasets to work with different data formats (including CSV, Excel, and Parquet)
-kedro~=0.18.10
-kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.1
+kedro~=0.18.13
+kedro-datasets[pandas.CSVDataSet, pandas.ExcelDataSet, pandas.ParquetDataSet]~=1.0
 kedro-telemetry~=0.2.0
 kedro-viz~=6.0 # Visualise pipelines
 
-# For modelling in the data science pipeline
+# For modeling in the data science pipeline
 scikit-learn~=1.0
 ```
 

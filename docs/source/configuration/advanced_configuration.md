@@ -60,8 +60,8 @@ bucket_name: "my_s3_bucket"
 key_prefix: "my/key/prefix/"
 
 datasets:
-    csv: "pandas.CSVDataSet"
-    spark: "spark.SparkDataSet"
+    csv: "pandas.CSVDataset"
+    spark: "spark.SparkDataset"
 
 folders:
     raw: "01_raw"
@@ -99,7 +99,7 @@ Alternatively, you can declare which values to fill in the template through a di
     "bucket_name": "another_bucket_name",
     "non_string_key": 10,
     "key_prefix": "my/key/prefix",
-    "datasets": {"csv": "pandas.CSVDataSet", "spark": "spark.SparkDataSet"},
+    "datasets": {"csv": "pandas.CSVDataset", "spark": "spark.SparkDataset"},
     "folders": {
         "raw": "01_raw",
         "int": "02_intermediate",
@@ -117,7 +117,7 @@ CONFIG_LOADER_ARGS = {
         "bucket_name": "another_bucket_name",
         "non_string_key": 10,
         "key_prefix": "my/key/prefix",
-        "datasets": {"csv": "pandas.CSVDataSet", "spark": "spark.SparkDataSet"},
+        "datasets": {"csv": "pandas.CSVDataset", "spark": "spark.SparkDataset"},
         "folders": {
             "raw": "01_raw",
             "int": "02_intermediate",
@@ -148,7 +148,7 @@ CONFIG_LOADER_ARGS = {
 By changing this setting, the default behaviour for loading parameters will be replaced, while the other configuration patterns will remain in their default state.
 
 ### How to ensure non default configuration files get loaded
-You can add configuration patterns to match files other than `parameters`, `credentials`, `logging`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
+You can add configuration patterns to match files other than `parameters`, `credentials`, and `catalog` by setting the `CONFIG_LOADER_ARGS` variable in [`src/<package_name>/settings.py`](../kedro_project_setup/settings.md).
 For example, if you want to load Spark configuration files you need to update `CONFIG_LOADER_ARGS` as follows:
 
 ```python
@@ -160,7 +160,7 @@ CONFIG_LOADER_ARGS = {
 ```
 
 ### How to bypass the configuration loading rules
-You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters, credentials, and logging) as well as additional configuration.
+You can bypass the configuration patterns and set configuration directly on the instance of a config loader class. You can bypass the default configuration (catalog, parameters and credentials) as well as additional configuration.
 
 ```{code-block} python
 :lineno-start: 10
@@ -185,7 +185,7 @@ From version 0.17.0, `TemplatedConfigLoader` also supports the [Jinja2](https://
     type: MemoryDataset
 
 {{ speed }}-cars:
-    type: pandas.CSVDataSet
+    type: pandas.CSVDataset
     filepath: s3://${bucket_name}/{{ speed }}-cars.csv
     save_args:
         index: true
@@ -205,13 +205,13 @@ The output Python dictionary will look as follows:
 {
     "fast-trains": {"type": "MemoryDataset"},
     "fast-cars": {
-        "type": "pandas.CSVDataSet",
+        "type": "pandas.CSVDataset",
         "filepath": "s3://my_s3_bucket/fast-cars.csv",
         "save_args": {"index": True},
     },
     "slow-trains": {"type": "MemoryDataset"},
     "slow-cars": {
-        "type": "pandas.CSVDataSet",
+        "type": "pandas.CSVDataset",
         "filepath": "s3://my_s3_bucket/slow-cars.csv",
         "save_args": {"index": True},
     },
@@ -260,7 +260,7 @@ companies:
 and a file containing the template values called `catalog_globals.yml`:
 ```yaml
 _pandas:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
 ```
 
 Since both of the file names (`catalog.yml` and `catalog_globals.yml`) match the config pattern for catalogs, the `OmegaConfigLoader` will load the files and resolve the placeholders correctly.
@@ -279,7 +279,7 @@ Suppose you have global variables located in the file `conf/base/globals.yml`:
 ```yaml
 my_global_value: 45
 dataset_type:
-  csv: pandas.CSVDataSet
+  csv: pandas.CSVDataset
 ```
 You can access these global variables in your catalog or parameters config files with a `globals` resolver like this:
 `conf/base/parameters.yml`:
@@ -318,7 +318,7 @@ kedro run --params random=3
 You can also specify a default value to be used in case the runtime parameter is not specified with the `kedro run` command. Consider this catalog entry:
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: "${runtime_params:folder, 'data/01_raw'}/companies.csv"
 ```
 If the `folder` parameter is not passed through the CLI `--params` option with `kedro run`, the default value `'data/01_raw/'` is used for the `filepath`.
@@ -366,7 +366,7 @@ types to the catalog entry.
 
 ```yaml
 my_polars_dataset:
-  type: polars.CSVDataSet
+  type: polars.CSVDataset
   filepath: data/01_raw/my_dataset.csv
   load_args:
     dtypes:

@@ -11,7 +11,7 @@ There are a few ways to create a new project once you have [set up Kedro](instal
 
 Once you've created a project:
 
-* You need to **navigate to its project folder** and **install its dependencies**: `pip install -r src/requirements.txt`
+* You need to **navigate to its project folder** and **install its dependencies**: `pip install -r requirements.txt`
 * **To run the project**: `kedro run`
 * **To visualise the project**: `kedro viz`
 
@@ -79,7 +79,7 @@ kedro new --starter=pandas-iris
 However you create a Kedro project, once `kedro new` has completed, the next step is to navigate to the project folder (`cd <project-name>`) and install dependencies with `pip` as follows:
 
 ```bash
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 Now run the project:

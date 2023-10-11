@@ -1,6 +1,5 @@
 import re
 
-# pylint: disable=unused-argument
 import numpy as np
 import pandas as pd
 import pytest
@@ -167,11 +166,11 @@ class TestMemoryDataset:
 
     def test_exists(self, new_data):
         """Test `exists` method invocation"""
-        data_set = MemoryDataset()
-        assert not data_set.exists()
+        dataset = MemoryDataset()
+        assert not dataset.exists()
 
-        data_set.save(new_data)
-        assert data_set.exists()
+        dataset.save(new_data)
+        assert dataset.exists()
 
 
 @pytest.mark.parametrize("data", [["a", "b"], [{"a": "b"}, {"c": "d"}]])
@@ -218,7 +217,7 @@ def test_infer_mode_deepcopy(data):
 
 
 def test_infer_mode_assign():
-    class DataFrame:  # pylint: disable=too-few-public-methods
+    class DataFrame:
         pass
 
     data = DataFrame()

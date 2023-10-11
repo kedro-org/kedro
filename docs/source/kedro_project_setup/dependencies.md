@@ -5,9 +5,11 @@ Both `pip install kedro` and `conda install -c conda-forge kedro` install the co
 When you create a project, you then introduce additional dependencies for the tasks it performs.
 
 ## Project-specific dependencies
+
 You can specify a project's exact dependencies in the `requirements.txt` file to make it easier for you and others to run your project in the future,
 and to avoid version conflicts downstream. This can be achieved with the help of [`pip-tools`](https://pypi.org/project/pip-tools/).
 To install `pip-tools` in your virtual environment, run the following command:
+
 ```bash
 pip install pip-tools
 ```
@@ -30,21 +32,12 @@ The `requirements.txt` file contains "source" requirements, while `src/requireme
 
 To further update the project requirements, modify the `requirements.txt` file (not `src/requirements.lock`) and re-run the `pip-compile` command above.
 
-
 ## Install project-specific dependencies
 
 To install the project-specific dependencies, navigate to the root directory of the project and run:
 
 ```bash
 pip install -r requirements.txt
-```
-
-## Workflow dependencies
-
-To install all of Kedro's dependencies (recorded in `pyproject.toml`), run the following:
-
-```bash
-pip install "kedro[all]"
 ```
 
 ### Install dependencies related to the Data Catalog

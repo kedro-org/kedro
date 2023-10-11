@@ -39,7 +39,6 @@ docs = [
     "sphinx~=3.4.3",
     "sphinx_rtd_theme==0.5.1",
     "nbsphinx==0.8.1",
-    "nbstripout~=0.4",
     "sphinx-autodoc-typehints==1.11.1",
     "sphinx_copybutton==0.3.1",
     "ipykernel>=5.3, <7.0",
@@ -50,14 +49,14 @@ docs = [
 
 def _validate_range(start, end):
     if int(start) > int(end):
-        message = f"'{start}-{end}' is an invalid range for project add-ons."
+        message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
         click.secho(message, fg="red", err=True)
         sys.exit(1)
 
 def _validate_selection(add_ons):
     for add_on in add_ons:
         if int(add_on) < 1 or int(add_on) > 5:
-            message = f"'{add_on}' is not a valid selection."
+            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
@@ -92,19 +91,17 @@ def parse_add_ons_input(add_ons_str):
     return selected
 
 
-def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path, pyproject_src_file_path):
+def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path):
     """Removes directories and files related to unwanted addons from
     a Kedro project template. Adds the necessary requirements for
     the addons that were selected.
 
     Args:
         selected_add_ons_list: a list containing numbers from 1 to 5,
-        representing specific add-ons.
+            representing specific add-ons.
         requirements_file_path: the path to the requirements.txt file.
         pyproject_file_path: the path to the pyproject.toml file
-        located on the the root of the template.
-        pyproject_src_file_path: the path to the pyproject.toml file
-        located inside the `src` directory.
+            located on the the root of the template.
     """
     if "1" not in selected_add_ons_list:  # If Linting not selected
         pass
@@ -115,7 +112,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
             file.write(lint_pyproject_requirements)
 
     if "2" not in selected_add_ons_list:  # If Testing not selected
-        tests_path = current_dir / "src" / "tests"
+        tests_path = current_dir / "tests"
         if tests_path.exists():
             shutil.rmtree(str(tests_path))
     else:
@@ -134,7 +131,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         if docs_path.exists():
             shutil.rmtree(str(docs_path))
     else:
-        with open(pyproject_src_file_path, 'a') as file:
+        with open(pyproject_file_path, 'a') as file:
             file.write(docs_pyproject_requirements)
 
     if "5" not in selected_add_ons_list:  # If Data Structure not selected

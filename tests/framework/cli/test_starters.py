@@ -18,7 +18,7 @@ from kedro.framework.cli.starters import (
 )
 from kedro.templates.project.hooks.utils import parse_add_ons_input
 
-FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 16
+FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 14
 
 
 @pytest.fixture
@@ -37,6 +37,11 @@ def mock_determine_repo_dir(mocker):
 @pytest.fixture
 def mock_cookiecutter(mocker):
     return mocker.patch("cookiecutter.main.cookiecutter")
+
+
+def _clean_up_project(project_dir):
+    if project_dir.is_dir():
+        shutil.rmtree(str(project_dir), ignore_errors=True)
 
 
 def _write_yaml(filepath: Path, config: dict):
@@ -86,9 +91,8 @@ def _assert_requirements_ok(
     assert "Change directory to the project generated in" in result.output
 
     root_path = (Path(output_dir) / repo_name).resolve()
-    requirements_file_path = root_path / "src/requirements.txt"
+    requirements_file_path = root_path / "requirements.txt"
     pyproject_file_path = root_path / "pyproject.toml"
-    pyproject_src_file_path = root_path / "src/pyproject.toml"
 
     add_ons_list = parse_add_ons_input(add_ons)
 
@@ -150,7 +154,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
         )
 
     if "4" in add_ons_list:
-        with open(pyproject_src_file_path) as pyproject_file:
+        with open(pyproject_file_path) as pyproject_file:
             requirements = pyproject_file.read()
 
         assert (
@@ -161,7 +165,6 @@ docs = [
     "sphinx~=3.4.3",
     "sphinx_rtd_theme==0.5.1",
     "nbsphinx==0.8.1",
-    "nbstripout~=0.4",
     "sphinx-autodoc-typehints==1.11.1",
     "sphinx_copybutton==0.3.1",
     "ipykernel>=5.3, <7.0",
@@ -198,9 +201,7 @@ def _assert_template_ok(
     assert (full_path / ".gitignore").is_file()
     assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
     assert "KEDRO" in (full_path / ".gitignore").read_text(encoding="utf-8")
-    assert kedro_version in (full_path / "src" / "requirements.txt").read_text(
-        encoding="utf-8"
-    )
+    assert kedro_version in (full_path / "requirements.txt").read_text(encoding="utf-8")
     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
 
@@ -272,7 +273,7 @@ def test_parse_add_ons_valid(input, expected):
 def test_parse_add_ons_invalid_range(input, capsys):
     with pytest.raises(SystemExit):
         parse_add_ons_input(input)
-    message = f"'{input}' is an invalid range for project add-ons."
+    message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
     assert message in capsys.readouterr().err
 
 
@@ -283,7 +284,7 @@ def test_parse_add_ons_invalid_range(input, capsys):
 def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
     with pytest.raises(SystemExit):
         parse_add_ons_input(input)
-    message = f"'{first_invalid}' is not a valid selection."
+    message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."
     assert message in capsys.readouterr().err
 
 
@@ -297,6 +298,7 @@ class TestNewFromUserPromptsValid:
             fake_kedro_cli, ["new"], input=_make_cli_prompt_input()
         )
         _assert_template_ok(result)
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_custom_project_name(self, fake_kedro_cli):
         result = CliRunner().invoke(
@@ -310,6 +312,7 @@ class TestNewFromUserPromptsValid:
             repo_name="my-project",
             python_package="my_project",
         )
+        _clean_up_project(Path("./my-project"))
 
     def test_custom_project_name_with_hyphen_and_underscore_and_number(
         self, fake_kedro_cli
@@ -325,18 +328,21 @@ class TestNewFromUserPromptsValid:
             repo_name="my-project--1",
             python_package="my_project__1",
         )
+        _clean_up_project(Path("./my-project--1"))
 
     def test_no_prompts(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
         (Path("template") / "prompts.yml").unlink()
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         _assert_template_ok(result)
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_empty_prompts(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
         _write_yaml(Path("template") / "prompts.yml", {})
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         _assert_template_ok(result)
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_custom_prompt_valid_input(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
@@ -362,6 +368,7 @@ class TestNewFromUserPromptsValid:
             repo_name="my-project",
             python_package="my_project",
         )
+        _clean_up_project(Path("./my-project"))
 
     def test_custom_prompt_for_essential_variable(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
@@ -387,6 +394,7 @@ class TestNewFromUserPromptsValid:
             repo_name="my_custom_repo",
             python_package="my_project",
         )
+        _clean_up_project(Path("./my_custom_repo"))
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -480,6 +488,7 @@ class TestNewFromConfigFileValid:
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
+        _clean_up_project(Path("./my-project"))
 
     def test_custom_required_keys(self, fake_kedro_cli):
         """Test project created from config."""
@@ -494,6 +503,7 @@ class TestNewFromConfigFileValid:
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
+        _clean_up_project(Path("./projectx"))
 
     def test_custom_kedro_version(self, fake_kedro_cli):
         """Test project created from config."""
@@ -509,6 +519,7 @@ class TestNewFromConfigFileValid:
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
+        _clean_up_project(Path("./my-project"))
 
     def test_custom_output_dir(self, fake_kedro_cli):
         """Test project created from config."""
@@ -525,6 +536,7 @@ class TestNewFromConfigFileValid:
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
+        _clean_up_project(Path("./my-project"))
 
     def test_extra_keys_allowed(self, fake_kedro_cli):
         """Test project created from config."""
@@ -539,6 +551,7 @@ class TestNewFromConfigFileValid:
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
+        _clean_up_project(Path("./my-project"))
 
     def test_no_prompts(self, fake_kedro_cli):
         config = {
@@ -553,6 +566,7 @@ class TestNewFromConfigFileValid:
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
+        _clean_up_project(Path("./my-project"))
 
     def test_empty_prompts(self, fake_kedro_cli):
         config = {
@@ -567,6 +581,7 @@ class TestNewFromConfigFileValid:
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
         _assert_template_ok(result, **config)
+        _clean_up_project(Path("./my-project"))
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -663,6 +678,7 @@ class TestNewWithStarterValid:
             input=_make_cli_prompt_input(),
         )
         _assert_template_ok(result)
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_relative_path(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
@@ -672,6 +688,7 @@ class TestNewWithStarterValid:
             input=_make_cli_prompt_input(),
         )
         _assert_template_ok(result)
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_relative_path_directory(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
@@ -681,6 +698,7 @@ class TestNewWithStarterValid:
             input=_make_cli_prompt_input(),
         )
         _assert_template_ok(result)
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_alias(self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter):
         CliRunner().invoke(
@@ -859,8 +877,10 @@ class TestAddOnsFromUserPrompts:
             ["new"],
             input=_make_cli_prompt_input(add_ons=add_ons),
         )
+
         _assert_template_ok(result, add_ons=add_ons)
         _assert_requirements_ok(result, add_ons=add_ons)
+        _clean_up_project(Path("./new-kedro-project"))
 
     def test_invalid_add_ons(self, fake_kedro_cli):
         result = CliRunner().invoke(
@@ -895,8 +915,10 @@ class TestAddOnsFromConfigFile:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "-v", "--config", "config.yml"]
         )
+
         _assert_template_ok(result, **config)
         _assert_requirements_ok(result, add_ons=add_ons, repo_name="my-project")
+        _clean_up_project(Path("./my-project"))
 
     def test_invalid_add_ons(self, fake_kedro_cli):
         """Test project created from config."""

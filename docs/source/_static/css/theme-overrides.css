@@ -94,9 +94,12 @@ img[alt^="mermaid-"] {
 .wy-header-nav a {
   padding: 10px 20px;
   border-radius: 10px;
-  background: #ffc801;
   color: black;
   font-size: 18px;
+}
+
+.wy-header-nav a.active {
+  background: #ffc801;
 }
 
 .wy-grid-header div[role="search"] {

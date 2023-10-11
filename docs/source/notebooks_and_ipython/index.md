@@ -13,5 +13,6 @@ The page titled [Use a Jupyter notebook for Kedro project experiments](./kedro_a
 ```{toctree}
 :maxdepth: 1
 
+notebook-example/add_kedro_to_a_notebook
 kedro_and_notebooks
 ```

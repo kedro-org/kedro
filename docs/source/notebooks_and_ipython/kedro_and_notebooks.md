@@ -1,18 +1,8 @@
-# Kedro and Jupyter Notebooks
+# Use a Jupyter notebook for Kedro project experiments
 
-This page explains how best to combine Kedro and Jupyter Notebook development and illustrates with an example Notebook that has access to the `catalog`, `context`, `pipelines` and `session` variables for a Kedro project.
+This page explains how to use a Jupyter notebook to explore elements of a Kedro project. It shows how to use `kedro jupyter notebook` to set up a notebook that has access to the `catalog`, `context`, `pipelines` and `session` variables of the Kedro project so you can query them.
 
-## A custom Kedro kernel
-
-Kedro offers a command (`kedro jupyter notebook`) to create a Jupyter kernel named `kedro_<package_name>` that is almost identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) but with a slightly customised [kernel specification](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs).
-
-The custom kernel automatically loads `kedro.ipython`, which is an [IPython extension](https://ipython.readthedocs.io/en/stable/config/extensions/) that launches a [Kedro session](../kedro_project_setup/session.md) and makes the following Kedro variables available:
-
-* `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
-* `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
-* `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
-* `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
-
+This page also explains how to use line magic to display a Kedro-Viz visualisation of your pipeline directly in your notebook.
 
 ## Iris dataset example
 
@@ -24,27 +14,63 @@ kedro new --starter=pandas-iris
 
 We will assume you call the project `iris`, but you can call it whatever you choose.
 
-Navigate to the project directory and issue the following command in the terminal to launch Jupyter:
+Navigate to the project directory (`cd iris`) and issue the following command in the terminal to launch Jupyter:
 
 ```bash
 kedro jupyter notebook
 ```
 
-Your browser window will open, and you can then create a new Jupyter Notebook using the dropdown and selecting the `Kedro (<project_name>)` kernel.
+You'll be asked if you want to opt into usage analytics on the first run of your new project. Once you've answered the question with `y` or `n`, your browser window will open with a Jupyter page that lists the folders in your project:
 
-![Create a new Jupyter Notebook with Kedro (iris) kernel](../meta/images/jupyter_new_notebook.png)
+![The initial view in your browser](../meta/images/new_jupyter_browser_window.png)
 
-We recommend that you store your Notebooks in the `notebooks` folder of your Kedro project.
+You can now create a new Jupyter notebook using the **New** dropdown and selecting the **Kedro (iris)** kernel:
 
-We will now give some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, you might like to consult the relevant [API documentation](/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir) (e.g. `dir(catalog)`).
+![Create a new Jupyter notebook with Kedro (iris) kernel](../meta/images/jupyter_new_notebook.png)
+
+This opens a new browser tab to display the empty notebook:
+
+![Your new Jupyter notebook with Kedro (iris) kernel](../meta/images/new_jupyter_notebook_view.png)
+
+We recommend that you save your notebook in the `notebooks` folder of your Kedro project.
+
+### What does `kedro jupyter notebook` do?
+
+The `kedro jupyter notebook` command launches a notebook with a kernel that is [slightly customised](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs) but almost identical to the [default IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html).
+
+This custom kernel automatically makes the following Kedro variables available:
+
+* `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components
+* `pipelines` (type `Dict[str, Pipeline]`): Pipelines defined in your [pipeline registry](../nodes_and_pipelines/run_a_pipeline.md#run-a-pipeline-by-name)
+* `session` (type `KedroSession`): [Kedro session](../kedro_project_setup/session.md) that orchestrates a pipeline run
 
 ``` {note}
-If the Kedro variables are not available within your Jupyter Notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook`.
+If the Kedro variables are not available within your Jupyter notebook, you could have a malformed configuration file or missing dependencies. The full error message is shown on the terminal used to launch `kedro jupyter notebook`.
 ```
+
+## How to explore a Kedro project in a notebook
+Here are some examples of how to work with the Kedro variables. To explore the full range of attributes and methods available, see the relevant [API documentation](/kedro) or use the [Python `dir` function](https://docs.python.org/3/library/functions.html#dir), for example `dir(catalog)`.
+
+### `%run_viz` line magic
+
+``` {note}
+If you have not yet installed [Kedro-Viz](https://github.com/kedro-org/kedro-viz) for the project, run `pip install kedro-viz` in your terminal from within the project directory.
+```
+
+You can display an interactive visualisation of your pipeline directly in your notebook using the `run-viz` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) from within a cell:
+
+```python
+%run_viz
+```
+
+![View your project's Kedro Viz inside a notebook](../meta/images/run_viz_in_notebook.png)
 
 ### `catalog`
 
-`catalog` can be used to explore your [Data Catalog](../data/data_catalog.md), including parameters. Useful methods include `catalog.list`, `catalog.load` and `catalog.save`. For example, add the following to a cell in your Notebook:
+`catalog` can be used to explore your project's [Data Catalog](../data/data_catalog.md) using methods such as `catalog.list`, `catalog.load` and `catalog.save`.
+
+For example, add the following to a cell in your notebook to run `catalog.list`:
 
 ```ipython
 catalog.list()
@@ -60,7 +86,7 @@ When you run the cell:
  'params:example_learning_rate'
 ]
 ```
-Next try the following:
+Next try the following for `catalog.load`:
 
 ```ipython
 catalog.load("example_iris_data")
@@ -85,12 +111,12 @@ INFO     Loading data from 'example_iris_data' (CSVDataSet)...
 149           5.9          3.0           5.1          1.8  virginica
 ```
 
-Finally, try the following:
+Now try the following:
 
 ```ipython
 catalog.load("parameters")
 ```
-You should see the following:
+You should see this:
 
 ```ipython
 INFO     Loading data from 'parameters' (MemoryDataset)...
@@ -111,7 +137,7 @@ If you enable [versioning](../data/data_catalog.md#dataset-versioning) you can l
 ```ipython
 context.project_path
 ```
-You should see output similar to the following, according to your username and path:
+You should see output like this, according to your username and path:
 
 ```ipython
 PosixPath('/Users/username/kedro_projects/iris')
@@ -156,29 +182,28 @@ Should give the output:
 session.run()
 ```
 
-```{note}
-You can only execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do multiple runs, you'll have to run `%reload_kedro` to obtain a new `session` (see below).
-```
-
 You can also specify the following optional arguments for `session.run`:
 
 | Argument name   | Accepted types   | Description                                                                                                                                          |
 | --------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tags`          | `Iterable[str]`  | Construct the pipeline using only nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags  |
+| `tags`          | `Iterable[str]`  | Construct the pipeline using nodes which have this tag attached. A node is included in the resulting pipeline if it contains any of those tags  |
 | `runner`        | `AbstractRunner` | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner). Can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)          |
-| `node_names`    | `Iterable[str]`  | Run only nodes with specified names                                                                                                                  |
+| `node_names`    | `Iterable[str]`  | Run nodes with specified names                                                                                                                  |
 | `from_nodes`    | `Iterable[str]`  | A list of node names which should be used as a starting point                                                                                        |
 | `to_nodes`      | `Iterable[str]`  | A list of node names which should be used as an end point                                                                                            |
 | `from_inputs`   | `Iterable[str]`  | A list of dataset names which should be used as a starting point                                                                                     |
 | `to_outputs`    | `Iterable[str]`  | A list of dataset names which should be used as an end point                                                                                         |
-| `load_versions` | `Dict[str, str]` | A mapping of a dataset name to a specific dataset version (timestamp) for loading. Applies to versioned datasets only                                |
+| `load_versions` | `Dict[str, str]` | A mapping of a dataset name to a specific dataset version (timestamp) for loading. Applies to versioned datasets
+                                |
 | `pipeline_name` | `str`            | Name of the modular pipeline to run. Must be one of those returned by the `register_pipelines` function in `src/<package_name>/pipeline_registry.py` |
 
-## `%reload_kedro` line magic
+You can execute one *successful* run per session, as there's a one-to-one mapping between a session and a run. If you wish to do more than one run, you'll have to run `%reload_kedro` line magic to get a new `session`.
 
-You can use `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) within your Jupyter Notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+#### `%reload_kedro` line magic
 
-You don't need to restart the kernel to reload the Kedro IPython extension and refresh the `catalog`, `context`, `pipelines` and `session` variables.
+You can use `%reload_kedro` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) within your Jupyter notebook to reload the Kedro variables (for example, if you need to update `catalog` following changes to your Data Catalog).
+
+You don't need to restart the kernel for the `catalog`, `context`, `pipelines` and `session` variables.
 
 `%reload_kedro` accepts optional keyword arguments `env` and `params`. For example, to use configuration environment `prod`:
 
@@ -188,16 +213,9 @@ You don't need to restart the kernel to reload the Kedro IPython extension and r
 
 For more details, run `%reload_kedro?`.
 
-## `%run_viz` line magic
+## How to use tags to convert functions from Jupyter notebooks into Kedro nodes
 
-If you have [Kedro-Viz](https://github.com/kedro-org/kedro-viz) installed for the project you can display an interactive visualisation of your pipeline directly in your Notebook using the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%run_viz`.
-
-
-## Convert functions from Jupyter Notebooks into Kedro nodes
-
-If you are writing experimental code in your Notebook and later want to convert functions you've written to Kedro nodes, you can do this using tags.
-
-Say you have the following code in your Notebook:
+You can use the notebook to write experimental code for your Kedro project. If you later want to convert functions you've written to Kedro nodes, you can do this using `node` tags to export them to a Python file. Say you have the following code in your notebook:
 
 ```ipython
 def some_action():
@@ -210,16 +228,13 @@ def some_action():
 2. Add the `node` tag to the cell containing your function
 ![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
 
-```{note}
-The Notebook can contain multiple functions tagged as `node`, each of them will be exported into the resulting Python file
-```
 
-3. Save your Jupyter Notebook to `notebooks/my_notebook.ipynb`
+3. Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
 4. From your terminal, run `kedro jupyter convert notebooks/my_notebook.ipynb` from the Kedro project directory. The output is a Python file `src/<package_name>/nodes/my_notebook.py` containing the `some_action` function definition
 5. The `some_action` function can now be used in your Kedro pipelines
 
-## Useful to know...
-Each Kedro project has its own Jupyter kernel so you can switch between multiple Kedro projects from a single Jupyter instance simply by selecting the appropriate kernel.
+## Useful to know (for advanced users)
+Each Kedro project has its own Jupyter kernel so you can switch between Kedro projects from a single Jupyter instance by selecting the appropriate kernel.
 
 If a Jupyter kernel with the name `kedro_<package_name>` already exists then it is replaced. This ensures that the kernel always points to the correct Python executable. For example, if you change conda environment in a Kedro project then you should re-run `kedro jupyter notebook` to replace the kernel specification with one that points to the new environment.
 
@@ -227,7 +242,7 @@ You can use the `jupyter kernelspec` set of commands to manage your Jupyter kern
 
 ### Managed services
 
-If you work within a managed Jupyter service such as a Databricks Notebook you may be unable to execute `kedro jupyter notebook`. You can explicitly load the Kedro IPython extension with the `%load_ext` line magic:
+If you work within a managed Jupyter service such as a Databricks notebook you may be unable to execute `kedro jupyter notebook`. You can explicitly load the Kedro IPython extension with the `%load_ext` line magic:
 
 ```ipython
 In [1]: %load_ext kedro.ipython
@@ -238,7 +253,7 @@ If you launch your Jupyter instance from outside your Kedro project, you will ne
 ```ipython
 In [2]: %reload_kedro <project_root>
 ```
-The Kedro IPython extension remembers the project path so that subsequent calls to `%reload_kedro` do not need to specify it:
+The Kedro IPython extension remembers the project path so that future calls to `%reload_kedro` do not need to specify it:
 
 ```ipython
 In [1]: %load_ext kedro.ipython
@@ -254,7 +269,7 @@ You can also connect an IPython shell to a Kedro project kernel as follows:
 kedro ipython
 ```
 
-The command launches an IPython shell with the extension already loaded and is equivalent to the command `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../tutorial/set_up_data.md#test-that-kedro-can-load-the-data).
+The command launches an IPython shell with the extension already loaded and is the same command as  `ipython --ext kedro.ipython`. You first saw this in action in the [spaceflights tutorial](../tutorial/set_up_data.md#test-that-kedro-can-load-the-data).
 
 
 Similarly, the following creates a custom Jupyter kernel that automatically loads the extension and launches JupyterLab with this kernel selected:
@@ -277,10 +292,10 @@ This will automatically load the Kedro IPython in a console that supports graphi
 
 We recommend the following:
 
-* [Power is nothing without control: Don’t break up with Jupyter Notebooks. Just use Kedro too!](https://towardsdatascience.com/power-is-nothing-without-control-aa43523745b6)
+* [Power is nothing without control: Don’t break up with Jupyter notebooks. Just use Kedro too!](https://towardsdatascience.com/power-is-nothing-without-control-aa43523745b6)
 
 * [Two Tricks to Optimize your Kedro Jupyter Flow](https://youtu.be/ZHIqXJEp0-w)
 
 * [Handling Custom Jupyter Data Sources](https://youtu.be/dRnCovp1GRQ)
 
-* [Why transition from vanilla Jupyter Notebooks to Kedro?](https://www.youtube.com/watch?v=JLTYNPoK7nw&ab_channel=PyConUS)
+* [Why transition from vanilla Jupyter notebooks to Kedro?](https://www.youtube.com/watch?v=JLTYNPoK7nw&ab_channel=PyConUS)

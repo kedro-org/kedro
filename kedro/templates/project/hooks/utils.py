@@ -98,7 +98,7 @@ def parse_add_ons_input(add_ons_str):
     return selected
 
 
-def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path):
+def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path, python_package_name):
     """Removes directories and files related to unwanted addons from
     a Kedro project template. Adds the necessary requirements for
     the addons that were selected.
@@ -147,7 +147,9 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
             shutil.rmtree(str(data_path))
 
     if "6" not in selected_add_ons_list:  # If PySpark not selected
-        pass
+        pyspark_hooks_path = current_dir / f"src/{python_package_name}/hooks.py"
+        if pyspark_hooks_path.exists():
+            pyspark_hooks_path.unlink()
     else:
         spark_yml_path = current_dir / "conf/base/spark.yml"
         with open(spark_yml_path, 'w') as file:

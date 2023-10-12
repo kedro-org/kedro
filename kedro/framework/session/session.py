@@ -15,6 +15,7 @@ from typing import Any, Iterable
 
 import click
 
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLoader
 from kedro.framework.context import KedroContext
@@ -269,7 +270,7 @@ class KedroSession:
                 f" the documentation for OmegaConfigLoader, see here:"
                 f" https://docs.kedro.org/en/stable/configuration/"
                 f"advanced_configuration.html#omegaconfigloader",
-                FutureWarning,
+                KedroDeprecationWarning,
             )
         context_class = settings.CONTEXT_CLASS
         context = context_class(

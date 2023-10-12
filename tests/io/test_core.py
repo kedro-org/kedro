@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 
+from kedro import KedroDeprecationWarning
 from kedro.io.core import (
     _DEPRECATED_CLASSES,
     AbstractDataset,
@@ -36,7 +37,9 @@ FALSE_BUILTINS: list[Any] = [
 @pytest.mark.parametrize("module_name", ["kedro.io", "kedro.io.core"])
 @pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
 def test_deprecation(module_name, class_name):
-    with pytest.warns(DeprecationWarning, match=f"{repr(class_name)} has been renamed"):
+    with pytest.warns(
+        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
+    ):
         getattr(importlib.import_module(module_name), class_name)
 
 

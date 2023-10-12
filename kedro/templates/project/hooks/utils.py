@@ -54,6 +54,10 @@ spark.sql.execution.arrow.pyspark.enabled: true
 spark.scheduler.mode: FAIR
 """
 
+spark_requirement = """
+kedro-datasets[spark.SparkDataSet]~=1.0
+"""
+
 def _validate_range(start, end):
     if int(start) > int(end):
         message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
@@ -159,12 +163,16 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         # Add hook to settings.py
         settings_path = current_dir / f"src/{python_package_name}/settings.py"
         with open(settings_path, "a") as settings_file:
-            lines_to_add = [
+            hook_settings = [
                 "",
                 f"from {python_package_name}.hooks import SparkHooks",
                 "HOOKS = (SparkHooks(),)",
             ]
-            settings_file.writelines("\n".join(lines_to_add))
+            settings_file.writelines("\n".join(hook_settings))
+
+        # Add spark to requirements.txt
+        with open(requirements_file_path, 'a') as file:
+            file.write(spark_requirement)
 
 
 def sort_requirements(requirements_file_path):

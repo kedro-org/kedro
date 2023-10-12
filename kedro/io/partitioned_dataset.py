@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from cachetools import Cache, cachedmethod
 
+from kedro import KedroDeprecationWarning
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
@@ -568,7 +569,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

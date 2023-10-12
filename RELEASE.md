@@ -15,6 +15,7 @@
 
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
+* Updated `OmegaConfigLoader` to handle paths containing dots outside of `conf_source`.
 
 ## Documentation changes
 * Added documentation to clarify execution order of hooks.
@@ -27,6 +28,7 @@
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [Jason Hite](https://github.com/jasonmhite)
+* [IngerMathilde](https://github.com/IngerMathilde)
 
 
 # Release 0.18.13

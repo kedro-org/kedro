@@ -47,6 +47,13 @@ docs = [
 ]
 """
 
+spark_config = """
+spark.driver.maxResultSize: 3g
+spark.hadoop.fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+spark.sql.execution.arrow.pyspark.enabled: true
+spark.scheduler.mode: FAIR
+"""
+
 def _validate_range(start, end):
     if int(start) > int(end):
         message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
@@ -55,8 +62,8 @@ def _validate_range(start, end):
 
 def _validate_selection(add_ons):
     for add_on in add_ons:
-        if int(add_on) < 1 or int(add_on) > 5:
-            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."
+        if int(add_on) < 1 or int(add_on) > 6:
+            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
@@ -71,7 +78,7 @@ def parse_add_ons_input(add_ons_str):
         list: List of selected add-ons as strings.
     """
     if add_ons_str == "all":
-        return ["1", "2", "3", "4", "5"]
+        return ["1", "2", "3", "4", "5", "6"]
     if add_ons_str == "none":
         return []
 
@@ -138,6 +145,13 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         data_path = current_dir / "data"
         if data_path.exists():
             shutil.rmtree(str(data_path))
+
+    if "6" not in selected_add_ons_list:  # If PySpark not selected
+        pass
+    else:
+        spark_yml_path = current_dir / "conf/base/spark.yml"
+        with open(spark_yml_path, 'w') as file:
+            file.write(spark_config)
 
 
 def sort_requirements(requirements_file_path):

@@ -345,6 +345,7 @@ def _get_add_ons_text(add_ons):
         "3": "Custom Logging",
         "4": "Documentation",
         "5": "Data structure",
+        "6": "PySpark",
     }
     add_ons_list = parse_add_ons_input(add_ons)
     add_ons_text = [add_ons_dict[add_on] for add_on in add_ons_list]

@@ -151,9 +151,20 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         if pyspark_hooks_path.exists():
             pyspark_hooks_path.unlink()
     else:
+        # Add spark config
         spark_yml_path = current_dir / "conf/base/spark.yml"
         with open(spark_yml_path, 'w') as file:
             file.write(spark_config)
+
+        # Add hook to settings.py
+        settings_path = current_dir / f"src/{python_package_name}/settings.py"
+        with open(settings_path, "a") as settings_file:
+            lines_to_add = [
+                "",
+                f"from {python_package_name}.hooks import SparkHooks",
+                "HOOKS = (SparkHooks(),)",
+            ]
+            settings_file.writelines("\n".join(lines_to_add))
 
 
 def sort_requirements(requirements_file_path):

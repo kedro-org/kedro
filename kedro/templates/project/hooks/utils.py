@@ -145,12 +145,24 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
 
     if "6" not in selected_add_ons_list:  # If PySpark not selected
         pass
-    else:
+    else:  # Use spaceflights-pyspark to create pyspark template
         # Remove all .csv and .xlsx files from data/01_raw/
         raw_data_path = current_dir / "data/01_raw/"
         if raw_data_path.exists() and raw_data_path.is_dir():
             for file_path in raw_data_path.glob("*.*"):
                 if file_path.suffix in [".csv", ".xlsx"]:
+                    file_path.unlink()
+
+        # Remove parameter files from conf/base/
+        param_files = [
+            "parameters_data_processing.yml",
+            "parameters_data_science.yml",
+        ]
+        conf_base_path = current_dir / "conf/base/"
+        if conf_base_path.exists() and conf_base_path.is_dir():
+            for param_file in param_files:
+                file_path = conf_base_path / param_file
+                if file_path.exists():
                     file_path.unlink()
 
         # Remove specific pipeline subdirectories

@@ -197,6 +197,11 @@ class PartitionedDataset(AbstractDataset):
 
         super().__init__()
 
+        warnings.warn(
+            "'PartitionedDataset' has been moved to `kedro-datasets` and will be removed in Kedro 0.19.0.",
+            KedroDeprecationWarning,
+        )
+
         self._path = path
         self._filename_suffix = filename_suffix
         self._overwrite = overwrite
@@ -455,6 +460,11 @@ class IncrementalDataset(PartitionedDataset):
             credentials=credentials,
             load_args=load_args,
             fs_args=fs_args,
+        )
+
+        warnings.warn(
+            "'IncrementalDataset' has been moved to `kedro-datasets` and will be removed in Kedro 0.19.0.",
+            KedroDeprecationWarning,
         )
 
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)

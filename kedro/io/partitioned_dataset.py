@@ -31,10 +31,6 @@ KEY_PROPAGATION_WARNING = (
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
-# https://github.com/pylint-dev/pylint/issues/4300#issuecomment-1043601901
-PartitionedDataSet: type[PartitionedDataset]
-IncrementalDataSet: type[IncrementalDataset]
-
 
 class PartitionedDataset(AbstractDataset):
     # noqa: too-many-instance-attributes,protected-access
@@ -83,17 +79,17 @@ class PartitionedDataset(AbstractDataset):
             }
         >>>
         >>> # Save it as small paritions with DAY_OF_MONTH as the partition key
-        >>> data_set = PartitionedDataset(
+        >>> dataset = PartitionedDataset(
                 path="df_with_partition",
                 dataset="pandas.CSVDataset",
                 filename_suffix=".csv"
             )
         >>> # This will create a folder `df_with_partition` and save multiple files
         >>> # with the dict key + filename_suffix as filename, i.e. 1.csv, 2.csv etc.
-        >>> data_set.save(dict_df)
+        >>> dataset.save(dict_df)
         >>>
         >>> # This will create lazy load functions instead of loading data into memory immediately.
-        >>> loaded = data_set.load()
+        >>> loaded = dataset.load()
         >>>
         >>> # Load all the partitions
         >>> for partition_id, partition_load_func in loaded.items():
@@ -114,12 +110,12 @@ class PartitionedDataset(AbstractDataset):
         >>> # and the dataset initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = PartitionedDataset(
+        >>> dataset = PartitionedDataset(
                 path="s3://bucket-name/path/to/folder",
                 dataset="pandas.CSVDataset",
                 credentials=credentials
             )
-        >>> loaded = data_set.load()
+        >>> loaded = dataset.load()
         >>> # assert isinstance(loaded, dict)
         >>>
         >>> combine_all = pd.DataFrame()
@@ -132,7 +128,7 @@ class PartitionedDataset(AbstractDataset):
         >>>
         >>> new_data = pd.DataFrame({"new": [1, 2]})
         >>> # creates "s3://bucket-name/path/to/folder/new/partition.csv"
-        >>> data_set.save({"new/partition.csv": new_data})
+        >>> dataset.save({"new/partition.csv": new_data})
 
     """
 
@@ -363,23 +359,23 @@ class IncrementalDataset(PartitionedDataset):
         >>> # c) the checkpoint initializer
         >>> credentials = {"key1": "secret1", "key2": "secret2"}
         >>>
-        >>> data_set = IncrementalDataset(
+        >>> dataset = IncrementalDataset(
         >>>     path="s3://bucket-name/path/to/folder",
         >>>     dataset="pandas.CSVDataset",
         >>>     credentials=credentials
         >>> )
-        >>> loaded = data_set.load()  # loads all available partitions
+        >>> loaded = dataset.load()  # loads all available partitions
         >>> # assert isinstance(loaded, dict)
         >>>
-        >>> data_set.confirm()  # update checkpoint value to the last processed partition ID
-        >>> reloaded = data_set.load()  # still loads all available partitions
+        >>> dataset.confirm()  # update checkpoint value to the last processed partition ID
+        >>> reloaded = dataset.load()  # still loads all available partitions
         >>>
-        >>> data_set.release()  # clears load cache
+        >>> dataset.release()  # clears load cache
         >>> # returns an empty dictionary as no new partitions were added
-        >>> data_set.load()
+        >>> dataset.load()
     """
 
-    DEFAULT_CHECKPOINT_TYPE = "kedro.extras.datasets.text.TextDataSet"
+    DEFAULT_CHECKPOINT_TYPE = "kedro_datasets.text.TextDataset"
     DEFAULT_CHECKPOINT_FILENAME = "CHECKPOINT"
 
     def __init__(  # noqa: too-many-arguments
@@ -554,22 +550,3 @@ class IncrementalDataset(PartitionedDataset):
         partition_ids = [self._path_to_partition(p) for p in self._list_partitions()]
         if partition_ids:
             self._checkpoint.save(partition_ids[-1])  # checkpoint to last partition
-
-
-_DEPRECATED_CLASSES = {
-    "PartitionedDataSet": PartitionedDataset,
-    "IncrementalDataSet": IncrementalDataset,
-}
-
-
-def __getattr__(name):
-    if name in _DEPRECATED_CLASSES:
-        alias = _DEPRECATED_CLASSES[name]
-        warnings.warn(
-            f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
-            f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return alias
-    raise AttributeError(f"module {repr(__name__)} has no attribute {repr(name)}")

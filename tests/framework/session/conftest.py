@@ -66,13 +66,13 @@ def local_config(tmp_path):
     boats_filepath = str(tmp_path / "boats.csv")
     return {
         "cars": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": cars_filepath,
             "save_args": {"index": False},
             "versioned": True,
         },
         "boats": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": boats_filepath,
             "versioned": True,
         },
@@ -122,7 +122,7 @@ def mock_pipeline() -> Pipeline:
     )
 
 
-class LogRecorder(logging.Handler):  # pylint: disable=abstract-method
+class LogRecorder(logging.Handler):
     """Record logs received from a process-safe log listener"""
 
     def __init__(self):
@@ -370,9 +370,7 @@ def mock_settings(mocker, project_hooks):
 
 
 @pytest.fixture
-def mock_session(
-    mock_settings, mock_package_name, tmp_path
-):  # pylint: disable=unused-argument
+def mock_session(mock_settings, mock_package_name, tmp_path):
     configure_project(mock_package_name)
     session = KedroSession.create(
         mock_package_name, tmp_path, extra_params={"params:key": "value"}

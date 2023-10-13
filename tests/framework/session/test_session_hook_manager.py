@@ -36,11 +36,13 @@ def mock_settings_with_disabled_hooks(mocker, project_hooks, naughty_plugin):
 class TestSessionHookManager:
     """Test the process of registering hooks with the hook manager in a session."""
 
+    @pytest.mark.nologreset
     def test_assert_register_hooks(self, project_hooks, mock_session):
         hook_manager = mock_session._hook_manager
         assert hook_manager.is_registered(project_hooks)
 
     @pytest.mark.usefixtures("mock_session")
+    @pytest.mark.nologreset
     def test_calling_register_hooks_twice(self, project_hooks, mock_session):
         """Calling hook registration multiple times should not raise"""
         hook_manager = mock_session._hook_manager
@@ -51,6 +53,7 @@ class TestSessionHookManager:
         assert hook_manager.is_registered(project_hooks)
 
     @pytest.mark.parametrize("num_plugins", [0, 1])
+    @pytest.mark.nologreset
     def test_hooks_registered_when_session_created(
         self, mocker, request, caplog, project_hooks, num_plugins
     ):
@@ -81,6 +84,7 @@ class TestSessionHookManager:
             assert expected_msg in log_messages
 
     @pytest.mark.usefixtures("mock_settings_with_disabled_hooks")
+    @pytest.mark.nologreset
     def test_disabling_auto_discovered_hooks(
         self,
         mocker,

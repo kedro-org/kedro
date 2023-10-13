@@ -12,7 +12,7 @@ You're [testing whether Kedro can load the raw test data](./set_up_data.md#test-
 
 ```python
 DatasetError: Failed while loading data from data set
-CSVDataSet(filepath=...).
+CSVDataset(filepath=...).
 [Errno 2] No such file or directory: '.../companies.csv'
 ```
 
@@ -41,12 +41,12 @@ Are you seeing a message saying that an exception occurred?
 ```bash
 DatasetError: An exception occurred when parsing config for Dataset
 'data_processing.preprocessed_companies':
-Object 'ParquetDataSet' cannot be loaded from 'kedro_datasets.pandas'. Please see the
-documentation on how to install relevant dependencies for kedro_datasets.pandas.ParquetDataSet:
+Object 'ParquetDataset' cannot be loaded from 'kedro_datasets.pandas'. Please see the
+documentation on how to install relevant dependencies for kedro_datasets.pandas.ParquetDataset:
 https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html
 ```
 
-The Kedro Data Catalog is missing [dependencies needed to parse the data](../kedro_project_setup/dependencies.md#install-dependencies-related-to-the-data-catalog). Check that you have [all the project dependencies to `requirements.txt`](./tutorial_template.md#install-project-dependencies) and then call `pip install -r src/requirements.txt` to install them.
+The Kedro Data Catalog is missing [dependencies needed to parse the data](../kedro_project_setup/dependencies.md#install-dependencies-related-to-the-data-catalog). Check that you have [all the project dependencies to `requirements.txt`](./tutorial_template.md#install-project-dependencies) and then call `pip install -r requirements.txt` to install them.
 
 ### Pipeline run
 
@@ -56,7 +56,7 @@ To successfully run the pipeline, all required input datasets must already exist
 ```bash
 kedro run --pipeline=data_science
 
-2019-10-04 12:36:12,158 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataSet)...
+2019-10-04 12:36:12,158 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataset)...
 2019-10-04 12:36:12,158 - kedro.runner.sequential_runner - WARNING - There are 3 nodes that have not run.
 You can resume the pipeline run with the following command:
 kedro run
@@ -71,6 +71,6 @@ The above exception was the direct cause of the following exception:
 Traceback (most recent call last):
   ...
     raise DatasetError(message) from exc
-kedro.io.core.DatasetError: Failed while loading data from data set CSVDataSet(filepath=data/03_primary/model_input_table.csv, save_args={'index': False}).
+kedro.io.core.DatasetError: Failed while loading data from data set CSVDataset(filepath=data/03_primary/model_input_table.csv, save_args={'index': False}).
 [Errno 2] File b'data/03_primary/model_input_table.csv' does not exist: b'data/03_primary/model_input_table.csv'
 ```

@@ -15,6 +15,7 @@
 
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
+* Made `settings.py` optional.
 
 ## Documentation changes
 * Added documentation to clarify execution order of hooks.

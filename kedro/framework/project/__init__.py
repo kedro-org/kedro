@@ -277,7 +277,7 @@ def validate_settings():
         importlib.import_module(f"{PACKAGE_NAME}.settings")
     else:
         logger = logging.getLogger(__name__)
-        logger.warning("No settings.py found, defaults will be used.")
+        logger.warning("No 'settings.py' found, defaults will be used.")
 
 
 def _create_pipeline(pipeline_module: types.ModuleType) -> Pipeline | None:

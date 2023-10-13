@@ -117,6 +117,7 @@ def test_validate_settings_without_settings_file(
         is None
     )
     configure_project(mock_package_name_without_settings_file)
+    validate_settings()
     # When a kedro project doesn't have a settings file, the settings should match be the default.
     test_settings_without_configure_project_shows_default_values()
 

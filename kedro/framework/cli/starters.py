@@ -161,10 +161,14 @@ def _starter_spec_to_dict(
     """Convert a dictionary of starters spec to a nicely formatted dictionary"""
     format_dict: dict[str, dict[str, str]] = {}
     for alias, spec in starter_specs.items():
-        format_dict[alias] = {}  # Each dictionary represent 1 starter
-        format_dict[alias]["template_path"] = spec.template_path
+        if alias in _DEPRECATED_STARTERS:
+            key = alias + " (deprecated)"
+        else:
+            key = alias
+        format_dict[key] = {}  # Each dictionary represent 1 starter
+        format_dict[key]["template_path"] = spec.template_path
         if spec.directory:
-            format_dict[alias]["directory"] = spec.directory
+            format_dict[key]["directory"] = spec.directory
     return format_dict
 
 

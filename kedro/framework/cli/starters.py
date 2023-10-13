@@ -10,6 +10,7 @@ import re
 import shutil
 import stat
 import tempfile
+import warnings
 from collections import OrderedDict
 from itertools import groupby
 from pathlib import Path
@@ -20,6 +21,7 @@ import yaml
 from attrs import define, field
 
 import kedro
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
@@ -33,6 +35,13 @@ from kedro.framework.cli.utils import (
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+
+_DEPRECATED_STARTERS = [
+    "pandas-iris",
+    "pyspark-iris",
+    "pyspark",
+    "standalone-datacatalog",
+]
 
 
 @define(order=True)
@@ -178,6 +187,19 @@ def create_cli():  # pragma: no cover
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 def new(config_path, starter_alias, checkout, directory, **kwargs):
     """Create a new kedro project."""
+
+    if starter_alias in _DEPRECATED_STARTERS:
+        warnings.warn(
+            f"The starter '{starter_alias}' has been deprecated and will be archived from Kedro 0.19.0.",
+            KedroDeprecationWarning,
+        )
+    click.secho(
+        "From Kedro 0.19.0, the command `kedro new` will come with the option of interactively selecting add-ons "
+        "for your project such as linting, testing, custom logging, and more. The selected add-ons will add the "
+        "basic setup for the utilities selected to your projects.",
+        fg="green",
+    )
+
     if checkout and not starter_alias:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
@@ -256,6 +278,9 @@ def list_starters():
     # ensure kedro starters are listed first
     sorted_starters_dict = dict(
         sorted(sorted_starters_dict.items(), key=lambda x: x == "kedro")
+    )
+    warnings.warn(
+        f"The starters {_DEPRECATED_STARTERS} are deprecated and will be archived in Kedro 0.19.0."
     )
 
     for origin, starters_spec in sorted_starters_dict.items():

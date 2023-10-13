@@ -47,13 +47,6 @@ docs = [
 ]
 """
 
-spark_config = """
-spark.driver.maxResultSize: 3g
-spark.hadoop.fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-spark.sql.execution.arrow.pyspark.enabled: true
-spark.scheduler.mode: FAIR
-"""
-
 spark_requirement = """
 kedro-datasets[spark.SparkDataSet]~=1.0
 """

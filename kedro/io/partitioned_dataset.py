@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from cachetools import Cache, cachedmethod
 
+from kedro import KedroDeprecationWarning
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
@@ -195,6 +196,11 @@ class PartitionedDataset(AbstractDataset):
         from fsspec.utils import infer_storage_options  # for performance reasons
 
         super().__init__()
+
+        warnings.warn(
+            "'PartitionedDataset' has been moved to `kedro-datasets` and will be removed in Kedro 0.19.0.",
+            KedroDeprecationWarning,
+        )
 
         self._path = path
         self._filename_suffix = filename_suffix
@@ -456,6 +462,11 @@ class IncrementalDataset(PartitionedDataset):
             fs_args=fs_args,
         )
 
+        warnings.warn(
+            "'IncrementalDataset' has been moved to `kedro-datasets` and will be removed in Kedro 0.19.0.",
+            KedroDeprecationWarning,
+        )
+
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)
         self._force_checkpoint = self._checkpoint_config.pop("force_checkpoint", None)
         self.metadata = metadata
@@ -568,7 +579,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

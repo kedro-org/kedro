@@ -7,6 +7,7 @@ from typing import NamedTuple, Union
 
 import anyconfig
 
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as kedro_version
 from kedro.framework.project import configure_project
 
@@ -97,7 +98,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     if "project_version" in metadata_dict:
         warnings.warn(
             "project_version in pyproject.toml is deprecated, use kedro_init_version instead",
-            DeprecationWarning,
+            KedroDeprecationWarning,
         )
         metadata_dict["kedro_init_version"] = metadata_dict["project_version"]
     elif "kedro_init_version" in metadata_dict:

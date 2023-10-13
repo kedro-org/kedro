@@ -15,6 +15,7 @@
 
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
+* Updated `OmegaConfigLoader` to handle paths containing dots outside of `conf_source`.
 * Made `settings.py` optional.
 
 ## Documentation changes
@@ -23,11 +24,13 @@
 ## Upcoming deprecations for Kedro 0.19.0
 * All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 * All dataset classes ending with `DataSet` are deprecated and will be removed in Kedro `0.19.0` and `kedro-datasets` `2.0.0`. Instead, use the updated class names ending with `Dataset`.
+* `PartitionedDataset` and `IncrementalDataset` have been moved to `kedro-datasets` and will be removed in Kedro `0.19.0`. Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [Jason Hite](https://github.com/jasonmhite)
+* [IngerMathilde](https://github.com/IngerMathilde)
 
 
 # Release 0.18.13

@@ -1,7 +1,7 @@
 ---
 jupyter:
   jupytext:
-    formats: ipynb,md
+    formats: md,ipynb
     text_representation:
       extension: .md
       format_name: markdown
@@ -13,13 +13,16 @@ jupyter:
     name: python3
 ---
 
+<!-- This is markdown extracted from the Jupyter notebook of the same name. If you want to change the content to publish as new HTML on docs.kedro.org, first `pip install jupytext`. Then open the markdown (this page) make your changes and save. Next, type `jupytext --set-formats md,ipynb add_kedro_to_a_notebook.md` on the command line to regenerate the notebook. -->
+
+
 # Add Kedro features to a notebook
 
 This page describes how to add Kedro features incrementally to a notebook.
 
 It starts with a notebook example which does NOT use Kedro. It then explains how to convert portions of the code to use Kedro features while remaining runnable within a notebook. For that part of the example, you need to have [set up Kedro](../../get_started/install.md).
 
->**NOTE**: If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](https://github.com/kedro-org/kedro/tree/4727aab2f5ab0210f264f5bfb477b66c6327fbbe/docs/source/notebooks_and_ipython/notebook-example). Be sure to download the entire folder, or clone the entire repo, because [`add_kedro_to_spaceflights_notebook.ipynb`](https://github.com/kedro-org/kedro/blob/4727aab2f5ab0210f264f5bfb477b66c6327fbbe/docs/source/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.ipynb) relies upon files stored in the `notebook-example` folder.
+>**NOTE**: If you want to experiment with the code in a notebook, you can find it in the [`notebook-example` folder on GitHub](https://github.com/kedro-org/kedro/tree/main/docs/source/notebooks_and_ipython/notebook-example). Be sure to download the entire folder, or clone the entire repo, because the `add_kedro_to_spaceflights_notebook.ipynb` notebook relies upon files stored in the `notebook-example` folder.
 
 ## Kedro spaceflights
 

@@ -238,7 +238,10 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
-    _create_project(template_path, cookiecutter_args)
+
+    project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
+
+    _create_project(project_template, cookiecutter_args)
 
 
 @create_cli.group()
@@ -355,6 +358,17 @@ def _get_add_ons_text(add_ons):
     )
 
 
+def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
+    extra_context = cookiecutter_args["extra_context"]
+    add_ons = extra_context.get("add_ons")
+
+    if add_ons == "6":
+        cookiecutter_args["directory"] = "spaceflights-pyspark"
+        pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
+        return pyspark_path
+    return template_path
+
+
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
@@ -387,8 +401,8 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     add_ons = extra_context.get("add_ons")
 
-    # Only non-starter projects have configurable add-ons
-    if template_path == str(TEMPLATE_PATH):
+    # Only core template and spaceflights-pyspark have configurable add-ons
+    if template_path == str(TEMPLATE_PATH) or add_ons == 6:
         if add_ons == "none":
             click.secho("\nYou have selected no add-ons")
         else:

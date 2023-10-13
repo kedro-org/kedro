@@ -151,28 +151,19 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
             shutil.rmtree(str(data_path))
 
     if "6" not in selected_add_ons_list:  # If PySpark not selected
-        pyspark_hooks_path = current_dir / f"src/{python_package_name}/hooks.py"
-        if pyspark_hooks_path.exists():
-            pyspark_hooks_path.unlink()
+        pass
     else:
-        # Add spark config
-        spark_yml_path = current_dir / "conf/base/spark.yml"
-        with open(spark_yml_path, 'w') as file:
-            file.write(spark_config)
+        # Remove all .csv and .xlsx files from data/01_raw/
+        raw_data_path = current_dir / "data/01_raw/"
+        if raw_data_path.exists() and raw_data_path.is_dir():
+            for file_path in raw_data_path.glob("*.*"):
+                if file_path.suffix in [".csv", ".xlsx"]:
+                    file_path.unlink()
 
-        # Add hook to settings.py
-        settings_path = current_dir / f"src/{python_package_name}/settings.py"
-        with open(settings_path, "a") as settings_file:
-            hook_settings = [
-                "",
-                f"from {python_package_name}.hooks import SparkHooks",
-                "HOOKS = (SparkHooks(),)",
-            ]
-            settings_file.writelines("\n".join(hook_settings))
-
-        # Add spark to requirements.txt
-        with open(requirements_file_path, 'a') as file:
-            file.write(spark_requirement)
+        # Remove specific pipeline subdirectories
+        pipelines_path = current_dir / f"src/{python_package_name}/pipelines/"
+        for pipeline_subdir in ["data_science", "data_processing"]:
+            shutil.rmtree(pipelines_path / pipeline_subdir, ignore_errors=True)
 
 
 def sort_requirements(requirements_file_path):

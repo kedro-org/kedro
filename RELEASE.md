@@ -16,6 +16,7 @@
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
 * Updated `OmegaConfigLoader` to handle paths containing dots outside of `conf_source`.
+* Improved performance of pipeline operations by not topologically sorting nodes in non-user-facing code.
 
 ## Documentation changes
 * Added documentation to clarify execution order of hooks.

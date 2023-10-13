@@ -20,6 +20,7 @@ from urllib.parse import urlsplit
 from cachetools import Cache, cachedmethod
 from cachetools.keys import hashkey
 
+from kedro import KedroDeprecationWarning
 from kedro.utils import load_obj
 
 VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
@@ -354,7 +355,7 @@ _CONSISTENCY_WARNING = (
 )
 
 # `kedro_datasets` is probed before `kedro.extras.datasets`,
-# hence the DeprecationWarning will not be shown
+# hence the KedroDeprecationWarning will not be shown
 # if the dataset is available in the former
 _DEFAULT_PACKAGES = ["kedro.io.", "kedro_datasets.", "kedro.extras.datasets.", ""]
 
@@ -777,7 +778,7 @@ def __getattr__(name):
         warnings.warn(
             f"{repr(name)} has been renamed to {repr(alias.__name__)}, "
             f"and the alias will be removed in Kedro 0.19.0",
-            DeprecationWarning,
+            KedroDeprecationWarning,
             stacklevel=2,
         )
         return alias

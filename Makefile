@@ -25,7 +25,7 @@ test-no-datasets:
 	pytest --no-cov --ignore tests/extras/datasets/ --numprocesses 4 --dist loadfile
 
 e2e-tests:
-	behave
+	behave --tags=-skip
 
 pip-compile:
 	pip-compile -q -o -

@@ -137,8 +137,8 @@ omit = [
     "kedro/extras/extensions/ipython.py",
     "kedro/framework/cli/hooks/specs.py",
     "kedro/framework/hooks/specs.py",
-    "tests/*"
-    "*/site-packages/*"
+    "tests/*",
+    "*/site-packages/*",
 ]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 

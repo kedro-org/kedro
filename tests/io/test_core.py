@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from decimal import Decimal
 from fractions import Fraction
-from pathlib import PurePosixPath, Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
+import fsspec
 import pandas as pd
 import pytest
 
@@ -53,34 +54,55 @@ class MyDataset(AbstractDataset):
     def _load(self):
         return pd.read_csv(self._filepath)
 
-    def _save(self, data : pd.DataFrame):
-        data.to_csv(str(self._filepath))
+    def _save(self, data: str) -> None:
+
+        with open(self._filepath, mode="w") as file:
+            file.write(data)
 
 
-class MyVersionedDataset(AbstractVersionedDataset):
-    def __init__(self, filepath, version):
-        super().__init__(PurePosixPath(filepath), version)
+class MyVersionedDataset(AbstractVersionedDataset[str, str]):
+    def __init__(  # noqa: PLR0913
+        self,
+        filepath: str,
+        version: Version = None,
+    ) -> None:
+        _fs_args: dict[Any, Any] = {}
+        _fs_args.setdefault("auto_mkdir", True)
+        protocol, path = get_protocol_and_path(filepath, version)
 
-    def _load(self):
-        load_path = self._get_load_path()
-        return pd.read_csv(load_path)
+        self._protocol = protocol
+        self._fs = fsspec.filesystem(self._protocol, **_fs_args)
 
-    def _save(self, data: pd.DataFrame):
-        save_path = self._get_save_path()
-        data.to_csv(str(save_path))
+        super().__init__(
+            filepath=PurePosixPath(path),
+            version=version,
+            exists_function=self._fs.exists,
+            glob_function=self._fs.glob,
+        )
 
-    def _describe(self):
+    def _describe(self) -> dict[str, Any]:
         return dict(filepath=self._filepath, version=self._version)
 
-    def _exists(self) -> bool:
-        return Path(self._filepath.as_posix()).exists()
+    def _load(self) -> str:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-    # def _exists(self) -> bool:
-        # try:
-        #     path = self._get_load_path()
-        #     load_path = get_filepath_str(path, self._protocol)
-        # except DatasetError:
-        #     return False
+        with self._fs.open(load_path, mode="r") as fs_file:
+            return fs_file.read()
+
+    def _save(self, data: str) -> None:
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+        with self._fs.open(save_path, mode="w") as fs_file:
+            fs_file.write(data)
+
+    def _exists(self) -> bool:
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DatasetError:
+            return False
+
+        return self._fs.exists(load_path)
+
 
 @pytest.fixture(params=[None])
 def load_version(request):
@@ -90,6 +112,7 @@ def load_version(request):
 @pytest.fixture(params=[None])
 def save_version(request):
     return request.param or generate_timestamp()
+
 
 @pytest.fixture(params=[None])
 def load_args(request):
@@ -105,21 +128,27 @@ def save_args(request):
 def fs_args(request):
     return request.param
 
+
 @pytest.fixture
 def filepath_versioned(tmp_path):
     return (tmp_path / "test.csv").as_posix()
+
 
 @pytest.fixture
 def my_dataset(filepath_versioned, save_args, fs_args):
     return MyDataset(filepath=filepath_versioned, save_args=save_args, fs_args=fs_args)
 
+
 @pytest.fixture
 def my_versioned_dataset(filepath_versioned, load_version, save_version):
-    return MyVersionedDataset(filepath=filepath_versioned, version=Version(load_version, save_version))
+    return MyVersionedDataset(
+        filepath=filepath_versioned, version=Version(load_version, save_version)
+    )
+
 
 @pytest.fixture
 def dummy_data():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    return "col1 : [1, 2], col2 : [4, 5], col3 : [5, 6]}"
 
 
 class TestCoreFunctions:

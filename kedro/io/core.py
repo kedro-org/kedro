@@ -214,7 +214,7 @@ class AbstractDataset(abc.ABC, Generic[_DI, _DO]):
         except DatasetError:
             raise
         except (FileNotFoundError, NotADirectoryError):
-            raise # TODO coverage
+            raise  # TODO coverage
         except Exception as exc:
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DatasetError(message) from exc
@@ -544,7 +544,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
                     f"Did not find any versions for {self}. This could be "
                     f"due to insufficient permission."
                 )
-            else:   # TODO coverage
+            else:  # TODO coverage
                 message = f"Did not find any versions for {self}"
             raise VersionNotFoundError(message)
         return PurePath(most_recent).parent.name
@@ -588,7 +588,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         save_version = self.resolve_save_version()
         versioned_path = self._get_versioned_path(save_version)  # type: ignore
 
-        if self._exists_function(str(versioned_path)): # TODO coverage
+        if self._exists_function(str(versioned_path)):  # TODO coverage
             raise DatasetError(
                 f"Save path '{versioned_path}' for {str(self)} must not exist if "
                 f"versioning is enabled."
@@ -623,7 +623,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             ) from err
 
         load_version = self.resolve_load_version()
-        if load_version != save_version:    # TODO coverage
+        if load_version != save_version:  # TODO coverage
             warnings.warn(
                 _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
             )
@@ -642,7 +642,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._logger.debug("Checking whether target of %s exists", str(self))
         try:
             return self._exists()
-        except VersionNotFoundError:    # TODO coverage
+        except VersionNotFoundError:  # TODO coverage
             return False
         except Exception as exc:  # SKIP_IF_NO_SPARK    # TODO coverage
             message = (
@@ -650,7 +650,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             )
             raise DatasetError(message) from exc
 
-    def _release(self) -> None: # TODO coverage
+    def _release(self) -> None:  # TODO coverage
         super()._release()
         self._version_cache.clear()
 

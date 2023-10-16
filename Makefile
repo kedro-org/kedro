@@ -50,6 +50,7 @@ package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
+	python -m pip install -U "pip>=21.2,<23.2"
 	pip install .[test]
 
 install-pre-commit: install-test-requirements

@@ -27,14 +27,6 @@
 * New TSC members added to the page and the organisation of each member is also now listed.
 * Plus some minor bug fixes and changes across the documentation.
 
-## Community contributions
-Many thanks to the following Kedroids for contributing PRs to this release:
-
-* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
-* [Richard](https://github.com/CF-FHB-X)
-* [flpvvvv](https://github.com/flpvvvv)
-* [qheuristics](https://github.com/qheuristics)
-
 ## Breaking changes to the API
 ## Upcoming deprecations for Kedro 0.19.0
 * All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
@@ -46,6 +38,10 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [Jason Hite](https://github.com/jasonmhite)
 * [IngerMathilde](https://github.com/IngerMathilde)
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
+* [Richard](https://github.com/CF-FHB-X)
+* [flpvvvv](https://github.com/flpvvvv)
+* [qheuristics](https://github.com/qheuristics)
 
 
 # Release 0.18.13

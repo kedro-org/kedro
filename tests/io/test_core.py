@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import Path, PurePosixPath
@@ -240,6 +241,14 @@ class TestAbstractVersionedDataset:
         my_versioned_dataset.save(dummy_data)
         reloaded = my_versioned_dataset.load()
         assert dummy_data == reloaded
+
+    def test_resolve_save_version(self, dummy_data):
+        ds = MyVersionedDataset("test.csv", Version(None, None))
+        ds.save(dummy_data)
+        assert ds._filepath
+
+        # teardown
+        shutil.rmtree(ds._filepath)
 
     def test_no_versions(self, my_versioned_dataset):
         """Check the error if no versions are available for load."""

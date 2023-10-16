@@ -72,7 +72,6 @@ project-dir         # Parent directory of the template
 ├── notebooks       # Project-related Jupyter notebooks (can be used for experimental code before moving the code to src)
 ├── pyproject.toml  # Identifies the project root and contains configuration information
 ├── README.md       # Project README
-├── .flake8         # Configuration options for `flake8` (linting)
 └── src             # Project source code
 ```
 
@@ -104,4 +103,4 @@ The `data` folder contains multiple subfolders to store project data. We recomme
 
 ### `src`
 
-This subfolder contains the project's source code in one subfolder and another folder that you can use to add unit tests for your project. Projects are preconfigured to run tests using `pytest` when you call `kedro test` from the project's root directory.
+This subfolder contains the project's source code.

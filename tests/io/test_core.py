@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import importlib
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import PurePosixPath
@@ -8,9 +7,7 @@ from typing import Any
 
 import pytest
 
-from kedro import KedroDeprecationWarning
 from kedro.io.core import (
-    _DEPRECATED_CLASSES,
     AbstractDataset,
     _parse_filepath,
     get_filepath_str,
@@ -34,16 +31,7 @@ FALSE_BUILTINS: list[Any] = [
 ]
 
 
-@pytest.mark.parametrize("module_name", ["kedro.io", "kedro.io.core"])
-@pytest.mark.parametrize("class_name", _DEPRECATED_CLASSES)
-def test_deprecation(module_name, class_name):
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module(module_name), class_name)
-
-
-class MyDataSet(AbstractDataset):
+class MyDataset(AbstractDataset):
     def __init__(self, var=None):
         self.var = var
 
@@ -60,10 +48,10 @@ class MyDataSet(AbstractDataset):
 class TestCoreFunctions:
     @pytest.mark.parametrize("var", [1, True] + FALSE_BUILTINS)
     def test_str_representation(self, var):
-        assert str(MyDataSet(var)) == f"MyDataSet(var={var})"
+        assert str(MyDataset(var)) == f"MyDataset(var={var})"
 
     def test_str_representation_none(self):
-        assert str(MyDataSet()) == "MyDataSet()"
+        assert str(MyDataset()) == "MyDataset()"
 
     def test_get_filepath_str(self):
         path = get_filepath_str(PurePosixPath("example.com/test.csv"), "http")

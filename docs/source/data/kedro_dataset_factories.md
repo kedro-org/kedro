@@ -14,12 +14,12 @@ Consider the following catalog entries:
 
 ```yaml
 factory_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/factory_data.csv
 
 
 process_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/process_data.csv
 ```
 
@@ -27,7 +27,7 @@ The datasets in this catalog can be generalised to the following dataset factory
 
 ```yaml
 "{name}_data":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/{name}_data.csv
 ```
 
@@ -38,19 +38,19 @@ quotes to avoid YAML parsing errors.
 ## How to generalise datasets of the same type
 
 You can also combine all the datasets with the same type and configuration details. For example, consider the following
-catalog with three datasets named `boats`, `cars` and `planes` of the type `pandas.CSVDataSet`:
+catalog with three datasets named `boats`, `cars` and `planes` of the type `pandas.CSVDataset`:
 
 ```yaml
 boats:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/shuttles.csv
 
 cars:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/reviews.csv
 
 planes:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
 ```
 
@@ -58,7 +58,7 @@ These datasets can be combined into the following dataset factory:
 
 ```yaml
 "{dataset_name}#csv":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/{dataset_name}.csv
 ```
 
@@ -152,7 +152,7 @@ and `candidate_modelling_pipeline.regressor` as below:
 
 ```yaml
 {namespace}.regressor:
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/06_models/regressor_{namespace}.pkl
   versioned: true
 ```
@@ -163,21 +163,21 @@ entries share `type`, `file_format` and `save_args`:
 
 ```yaml
 processing.factory_data:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/processing/factory_data.pq
   file_format: parquet
   save_args:
     mode: overwrite
 
 processing.process_data:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/processing/process_data.pq
   file_format: parquet
   save_args:
     mode: overwrite
 
 modelling.metrics:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/modelling/factory_data.pq
   file_format: parquet
   save_args:
@@ -188,7 +188,7 @@ This could be generalised to the following pattern:
 
 ```yaml
 "{layer}.{dataset_name}":
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/{layer}/{dataset_name}.pq
   file_format: parquet
   save_args:
@@ -201,12 +201,12 @@ You can have multiple dataset factories in your catalog. For example:
 
 ```yaml
 "{namespace}.{dataset_name}@spark":
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/{namespace}/{dataset_name}.pq
   file_format: parquet
 
 "{dataset_name}@csv":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/{dataset_name}.csv
 ```
 
@@ -224,12 +224,12 @@ You can use dataset factories to define a catch-all pattern which will overwrite
 
 ```yaml
 "{default_dataset}":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/{default_dataset}.csv
 
 ```
 Kedro will now treat all the datasets mentioned in your project's pipelines that do not appear as specific patterns or explicit entries in your catalog
-as `pandas.CSVDataSet`.
+as `pandas.CSVDataset`.
 
 ## CLI commands for dataset factories
 
@@ -250,27 +250,27 @@ Consider a catalog file with the following patterns:
 
 ```yaml
 "{layer}.{dataset_name}":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/{layer}/{dataset_name}.csv
 
 preprocessed_{dataset_name}:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{dataset_name}.pq
 
 processed_{dataset_name}:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/03_primary/processed_{dataset_name}.pq
 
 "{dataset_name}_csv":
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/03_primary/{dataset_name}.csv
 
 "{namespace}.{dataset_name}_pq":
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/03_primary/{dataset_name}_{namespace}.pq
 
 "{default_dataset}":
-  type: pickle.PickleDataSet
+  type: pickle.PickleDataset
   filepath: data/01_raw/{default_dataset}.pickle
 ```
 </details>
@@ -299,25 +299,25 @@ To illustrate this, consider the following catalog file:
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: data/01_raw/shuttles.xlsx
   load_args:
     engine: openpyxl # Use modern Excel engine, it is the default since Kedro 0.18.0
 
 preprocessed_{name}:
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/02_intermediate/preprocessed_{name}.pq
 
 "{default}":
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
   filepath: data/03_primary/{default}.pq
 ```
 </details>
@@ -362,24 +362,24 @@ The resolved catalog output by the command will be as follows:
 ```yaml
 companies:
   filepath: data/01_raw/companies.csv
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
 model_input_table:
   filepath: data/03_primary/model_input_table.pq
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
 preprocessed_companies:
   filepath: data/02_intermediate/preprocessed_companies.pq
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
 preprocessed_shuttles:
   filepath: data/02_intermediate/preprocessed_shuttles.pq
-  type: pandas.ParquetDataSet
+  type: pandas.ParquetDataset
 reviews:
   filepath: data/01_raw/reviews.csv
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
 shuttles:
   filepath: data/01_raw/shuttles.xlsx
   load_args:
     engine: openpyxl
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
 ```
 </details>
 

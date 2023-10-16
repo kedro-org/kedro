@@ -1,8 +1,8 @@
 install:
-	pip install .
+	pip install -e .
 
 clean:
-	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info kedro/datasets
+	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true
@@ -12,18 +12,6 @@ lint:
 test:
 	pytest --numprocesses 4 --dist loadfile
 
-test-no-spark:
-	pytest --no-cov --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
-
-test-sequential:
-	pytest tests --cov-config pyproject.toml
-
-test-no-spark-sequential:
-	pytest tests --no-cov --ignore tests/extras/datasets/spark
-
-test-no-datasets:
-	pytest --no-cov --ignore tests/extras/datasets/ --numprocesses 4 --dist loadfile
-
 e2e-tests:
 	behave --tags=-skip
 
@@ -32,8 +20,6 @@ pip-compile:
 
 secret-scan:
 	trufflehog --max_depth 1 --exclude_paths trufflehog-ignore.txt .
-
-SPHINXPROJ = Kedro
 
 build-docs:
 	pip install -e ".[docs]"

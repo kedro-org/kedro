@@ -152,5 +152,5 @@ The nodes are stored in `src/get_started/nodes.py`:
 
 If you [visualise your project with Kedro-Viz](#visualise-a-kedro-project) you should see the following:
 
-![](../meta/images/pipeline_visualisation.png)
+![](../meta/images/pipeline_visualisation_iris_starter.png)
 </details>

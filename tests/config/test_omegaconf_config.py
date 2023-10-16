@@ -845,15 +845,19 @@ class TestOmegaConfigLoader:
         assert conf._is_hidden(hidden_path)
 
     @pytest.mark.parametrize(
-        "hidden_path",
+        "hidden_path, conf_source",
         [
-            "/User/conf/base/catalog.yml",
-            "/User/conf/local/catalog/data_science.yml",
-            "/User/notebooks/../conf/base/catalog",
+            ("/User/project/conf/base/catalog.yml", "/User/project/conf"),
+            ("/User/project/conf/local/catalog/data_science.yml", "/User/project/conf"),
+            ("/User/project/notebooks/../conf/base/catalog", "/User/project/conf"),
+            (
+                "/User/.hidden/project/conf/base/catalog.yml",
+                "/User/.hidden/project/conf",
+            ),
         ],
     )
-    def test_not_hidden_config(self, tmp_path, hidden_path):
-        conf = OmegaConfigLoader(str(tmp_path))
+    def test_not_hidden_config(self, conf_source, hidden_path):
+        conf = OmegaConfigLoader(str(conf_source))
         assert not conf._is_hidden(hidden_path)
 
     def test_ignore_ipynb_checkpoints(self, tmp_path, mocker):

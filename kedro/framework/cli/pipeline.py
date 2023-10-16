@@ -13,7 +13,6 @@ import kedro
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
-    _filter_deprecation_warnings,
     command_with_verbosity,
     env_option,
 )
@@ -211,9 +210,8 @@ def _echo_deletion_warning(message: str, **paths: list[Path]):
 
 
 def _create_pipeline(name: str, template_path: Path, output_dir: Path) -> Path:
-    with _filter_deprecation_warnings():
-        # noqa: import-outside-toplevel
-        from cookiecutter.main import cookiecutter
+    # noqa: import-outside-toplevel
+    from cookiecutter.main import cookiecutter
 
     cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
 

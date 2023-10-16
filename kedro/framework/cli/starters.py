@@ -26,7 +26,6 @@ from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     KedroCliError,
     _clean_pycache,
-    _filter_deprecation_warnings,
     _get_entry_points,
     _safe_load_entry_point,
     command_with_verbosity,
@@ -367,9 +366,8 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     Raises:
         KedroCliError: If it fails to generate a project.
     """
-    with _filter_deprecation_warnings():
-        # noqa: import-outside-toplevel
-        from cookiecutter.main import cookiecutter  # for performance reasons
+    # noqa: import-outside-toplevel
+    from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
         result_path = cookiecutter(template=template_path, **cookiecutter_args)

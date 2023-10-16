@@ -256,8 +256,10 @@ class TestAbstractVersionedDataset:
         with pytest.raises(DatasetError, match=pattern):
             my_versioned_dataset.load()
 
-    def test_no_versions_exists(self, my_versioned_dataset):
+    def test_no_versions_exists(self):
         """Check the error if no versions are available for load."""
+        version = Version(load="2019-01-01T23.59.59.999Z", save=None)
+        my_versioned_dataset = MyVersionedDataset("test.csv", version=version)
         assert my_versioned_dataset.exists() is False
 
     def test_exists(self, my_versioned_dataset, dummy_data):

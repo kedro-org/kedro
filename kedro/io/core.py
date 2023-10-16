@@ -642,7 +642,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
         self._logger.debug("Checking whether target of %s exists", str(self))
         try:
             return self._exists()
-        except VersionNotFoundError:  # TODO coverage
+        except VersionNotFoundError:
             return False
         except Exception as exc:  # SKIP_IF_NO_SPARK    # TODO coverage
             message = (

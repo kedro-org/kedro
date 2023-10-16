@@ -15,7 +15,6 @@ from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,
     Version,
-    VersionNotFoundError,
     generate_timestamp,
     get_filepath_str,
     get_protocol_and_path,
@@ -200,8 +199,8 @@ class TestCoreFunctions:
             "https://example.com/file.txt",
         ],
     )
-    def test_get_protocol_and_path_http_with_verion(self, filepath):
-        version = version = Version(load=None, save=None)
+    def test_get_protocol_and_path_http_with_version(self, filepath):
+        version = Version(load=None, save=None)
         expected_error_message = "Versioning is not supported for HTTP protocols. Please remove the `versioned` flag from the dataset configuration."
         with pytest.raises(DatasetError, match=expected_error_message):
             get_protocol_and_path(filepath, version)
@@ -256,6 +255,10 @@ class TestAbstractVersionedDataset:
         pattern = r"Did not find any versions for MyVersionedDataset\(.+\)"
         with pytest.raises(DatasetError, match=pattern):
             my_versioned_dataset.load()
+
+    def test_no_versions_exists(self, my_versioned_dataset):
+        """Check the error if no versions are available for load."""
+        assert my_versioned_dataset.exists() is False
 
     def test_exists(self, my_versioned_dataset, dummy_data):
         """Test `exists` method invocation for versioned data set."""

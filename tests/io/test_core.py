@@ -15,6 +15,7 @@ from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,
     Version,
+    VersionNotFoundError,
     generate_timestamp,
     get_filepath_str,
     get_protocol_and_path,
@@ -311,3 +312,10 @@ class TestAbstractVersionedDataset:
         Path(my_dataset._filepath.as_posix()).unlink()
         my_versioned_dataset.save(dummy_data)
         assert my_versioned_dataset.exists()
+
+    def test_cache_release(self, my_versioned_dataset):
+        my_versioned_dataset._version_cache["index"] = "value"
+        assert my_versioned_dataset._version_cache.currsize > 0
+
+        my_versioned_dataset._release()
+        assert my_versioned_dataset._version_cache.currsize == 0

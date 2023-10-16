@@ -650,7 +650,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             )
             raise DatasetError(message) from exc
 
-    def _release(self) -> None:  # TODO coverage
+    def _release(self) -> None:
         super()._release()
         self._version_cache.clear()
 

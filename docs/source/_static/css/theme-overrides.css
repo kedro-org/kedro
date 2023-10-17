@@ -86,19 +86,21 @@ img[alt^="mermaid-"] {
   font-weight: 400;
 }
 
-.wy-header-nav {
+.wy-main-nav {
   display: flex;
   gap: 20px;
 }
 
-.wy-header-nav a {
+.wy-main-nav a {
+  display: flex;
+  align-items: center;
   padding: 10px 20px;
   border-radius: 10px;
   color: black;
   font-size: 18px;
 }
 
-.wy-header-nav a.active {
+.wy-main-nav a.active {
   background: #ffc801;
 }
 
@@ -122,6 +124,23 @@ img[alt^="mermaid-"] {
   box-shadow: none;
 }
 
+.wy-body-for-nav .wy-menu-vertical {
+  height: calc(100% - 75px);
+}
+
+.wy-body-for-nav .wy-side-nav-search .wy-main-nav {
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.wy-body-for-nav .wy-side-nav-search .wy-main-nav a {
+  width: 100%;
+  height: auto;
+  padding: 10px 20px;
+  line-height: 1;
+  font-size: 16px;
+  justify-content: center;
+}
 @media screen and (min-width: 768px) {
   .wy-body-for-nav .wy-nav-side {
     top: 75px;

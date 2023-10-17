@@ -42,6 +42,7 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [Richard](https://github.com/CF-FHB-X)
 * [flpvvvv](https://github.com/flpvvvv)
 * [qheuristics](https://github.com/qheuristics)
+* [Miguel Ortiz](https://github.com/miguel-ortiz-marin)
 
 
 # Release 0.18.13

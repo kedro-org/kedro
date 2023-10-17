@@ -8,7 +8,6 @@ from typing import Any
 import pandas as pd
 import pytest
 from kedro_datasets.pandas import CSVDataset, ParquetDataset
-from kedro_datasets.partitions import IncrementalDataset
 from pandas.testing import assert_frame_equal
 
 from kedro.io import (
@@ -595,7 +594,9 @@ class TestDataCatalogFromConfig:
     def test_confirm(self, tmp_path, caplog, mocker):
         """Confirm the dataset"""
         with caplog.at_level(logging.INFO):
-            mock_confirm = mocker.patch("kedro_datasets.partitions.incremental_dataset.IncrementalDataset.confirm")
+            mock_confirm = mocker.patch(
+                "kedro_datasets.partitions.incremental_dataset.IncrementalDataset.confirm"
+            )
             catalog = {
                 "ds_to_confirm": {
                     "type": "kedro_datasets.partitions.incremental_dataset.IncrementalDataset",

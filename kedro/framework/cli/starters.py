@@ -92,7 +92,13 @@ DIRECTORY_ARG_HELP = (
     "An optional directory inside the repository where the starter resides."
 )
 
-
+ADD_ONS_DICT = {
+    "1": "Linting",
+    "2": "Testing",
+    "3": "Custom Logging",
+    "4": "Documentation",
+    "5": "Data structure",
+}
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
     """Remove readonly files on Windows
@@ -338,15 +344,9 @@ def _make_cookiecutter_args(
 
 
 def _get_add_ons_text(add_ons):
-    add_ons_dict = {
-        "1": "Linting",
-        "2": "Testing",
-        "3": "Custom Logging",
-        "4": "Documentation",
-        "5": "Data structure",
-    }
+
     add_ons_list = parse_add_ons_input(add_ons)
-    add_ons_text = [add_ons_dict[add_on] for add_on in add_ons_list]
+    add_ons_text = [ADD_ONS_DICT[add_on] for add_on in add_ons_list]
     return (
         " ".join(str(add_on) + "," for add_on in add_ons_text[:-1])
         + f" and {add_ons_text[-1]}"

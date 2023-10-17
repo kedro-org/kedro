@@ -1,40 +1,6 @@
-{% extends "!layout.html" %} {%- block extrabody %}
-
-<div class="wy-grid-header">
-  <div class="wy-header-logo">
-    {%- set _logo_url = logo_url|default(pathto('_static/' + (logo or ""), 1))
-    %} {%- set _root_doc = root_doc|default(master_doc) %}
-    <a href="{{ pathto(_root_doc) }}">
-      {% if not theme_logo_only %}{{ project }}{% endif %} {%- if logo or
-      logo_url %}
-      <img src="{{ _logo_url }}" class="logo" alt="{{ _('Logo') }}" />
-      {%- endif %}
-    </a>
-
-    {%- if theme_display_version %} {%- set nav_version = version %} {%- if
-    READTHEDOCS and current_version %} {%- set nav_version = current_version %}
-    {%- endif %} {%- if nav_version %}
-    <div class="wy-header-version">{{ nav_version }}</div>
-    {%- endif %} {%- endif %}
-  </div>
-
-  <div class="wy-main-nav">
-    <a href="#" class="active">Kedro</a>
-    <a href="#">Kedro-Viz</a>
-    <a href="#">Kedro-Datasets</a>
-  </div>
-
-  {%- include "searchbox.html" %}
-</div>
-
-{% endblock %} {%- block extrahead %}
+{% extends "!layout.html" %} {%- block extrahead %}
 <script type="text/javascript">
-      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=document.createElement("script");r.type="text/javascript",r.async=!0,r.src="https://cdn.heapanalytics.com/js/heap-"+e+".js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetIdentity","removeEventProperty","setEventProperties","track","unsetEventProperty"],o=0;o<p.length;o++)heap[p[o]]=n(p[o])};
-      heap.load({{ "2164194004" | env_override }});{# 2164194004 coresponds to the Development environment #}
-    // Wait for DOM to load and clone main nav into sidebar
-    document.addEventListener("DOMContentLoaded", function() {
-      var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
-      sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
-  });
+  window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=document.createElement("script");r.type="text/javascript",r.async=!0,r.src="https://cdn.heapanalytics.com/js/heap-"+e+".js";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetIdentity","removeEventProperty","setEventProperties","track","unsetEventProperty"],o=0;o<p.length;o++)heap[p[o]]=n(p[o])};
+  heap.load({{ "2164194004" | env_override }});{# 2164194004 coresponds to the Development environment #}
 </script>
 {% endblock %}

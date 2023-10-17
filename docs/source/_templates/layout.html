@@ -33,9 +33,8 @@
       heap.load({{ "2164194004" | env_override }});{# 2164194004 coresponds to the Development environment #}
     // Wait for DOM to load and clone main nav into sidebar
     document.addEventListener("DOMContentLoaded", function() {
-      var mainNavCopy = document.querySelector('.wy-main-nav').cloneNode(true);
       var sidebarSearch = document.querySelector('.wy-side-nav-search div[role="search"]');
-      sidebarSearch.parentNode.insertBefore(mainNavCopy, sidebarSearch);
+      sidebarSearch.parentNode.insertBefore(document.querySelector('.wy-main-nav').cloneNode(true), sidebarSearch);
   });
 </script>
 {% endblock %}

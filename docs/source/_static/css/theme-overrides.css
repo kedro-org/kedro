@@ -134,7 +134,6 @@ img[alt^="mermaid-"] {
 }
 
 .wy-body-for-nav .wy-side-nav-search .wy-main-nav a {
-  width: 100%;
   height: auto;
   padding: 10px 20px;
   line-height: 1;
@@ -152,5 +151,11 @@ img[alt^="mermaid-"] {
 
   .wy-body-for-nav .wy-nav-content-wrap {
     margin-top: 75px;
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .wy-body-for-nav .wy-side-nav-search .wy-main-nav a {
+    width: 100%;
   }
 }

@@ -44,6 +44,7 @@
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
 * Updated `OmegaConfigLoader` to handle paths containing dots outside of `conf_source`.
+* Made `settings.py` optional.
 
 ## Documentation changes
 * Added documentation to clarify execution order of hooks.

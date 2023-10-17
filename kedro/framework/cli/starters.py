@@ -30,7 +30,6 @@ from kedro.framework.cli.utils import (
     _safe_load_entry_point,
     command_with_verbosity,
 )
-from kedro.templates.project.hooks.utils import parse_add_ons_input
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
@@ -165,6 +164,50 @@ def _starter_spec_to_dict(
         if spec.directory:
             format_dict[alias]["directory"] = spec.directory
     return format_dict
+
+
+def _parse_add_ons_input(add_ons_str):
+    """Parse the add-ons input string.
+
+    Args:
+        add_ons_str: Input string from prompts.yml.
+
+    Returns:
+        list: List of selected add-ons as strings.
+    """
+
+    def _validate_range(start, end):
+        if int(start) > int(end):
+            message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
+            click.secho(message, fg="red", err=True)
+            sys.exit(1)
+
+    def _validate_selection(add_ons):
+        for add_on in add_ons:
+            if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
+                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."  # nosec
+                click.secho(message, fg="red", err=True)
+                sys.exit(1)
+
+    if add_ons_str == "all":
+        return list(ADD_ONS_DICT)
+    if add_ons_str == "none":
+        return []
+
+    # Split by comma
+    add_ons_choices = add_ons_str.split(",")
+    selected = []
+
+    for choice in add_ons_choices:
+        if "-" in choice:
+            start, end = choice.split("-")
+            _validate_range(start, end)
+            selected.extend(str(i) for i in range(int(start), int(end) + 1))
+        else:
+            selected.append(choice.strip())
+
+    _validate_selection(selected)
+    return selected
 
 
 # noqa: missing-function-docstring
@@ -344,8 +387,7 @@ def _make_cookiecutter_args(
 
 
 def _get_add_ons_text(add_ons):
-
-    add_ons_list = parse_add_ons_input(add_ons)
+    add_ons_list = _parse_add_ons_input(add_ons)
     add_ons_text = [ADD_ONS_DICT[add_on] for add_on in add_ons_list]
     return (
         " ".join(str(add_on) + "," for add_on in add_ons_text[:-1])

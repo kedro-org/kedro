@@ -1,10 +1,11 @@
 from pathlib import Path
 
 from kedro.templates.project.hooks.utils import (
-    parse_add_ons_input,
+
     setup_template_add_ons,
     sort_requirements,
 )
+from kedro.framework.cli.starters import _parse_add_ons_input
 
 def main():
     current_dir = Path.cwd()
@@ -15,7 +16,7 @@ def main():
     selected_add_ons = "{{ cookiecutter.add_ons }}"
 
     # Parse the add-ons to get a list
-    selected_add_ons_list = parse_add_ons_input(selected_add_ons)
+    selected_add_ons_list = _parse_add_ons_input(selected_add_ons)
 
     # Handle template directories and requirements according to selected add-ons
     setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path)

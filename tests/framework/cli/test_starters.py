@@ -15,8 +15,8 @@ from kedro.framework.cli.starters import (
     _OFFICIAL_STARTER_SPECS,
     TEMPLATE_PATH,
     KedroStarterSpec,
+    _parse_add_ons_input,
 )
-from kedro.templates.project.hooks.utils import parse_add_ons_input
 
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 14
 
@@ -64,7 +64,7 @@ def _get_expected_files(add_ons: str):
         "4": 2,
         "5": 8,
     }  # files added to template by each add-on
-    add_ons_list = parse_add_ons_input(add_ons)
+    add_ons_list = _parse_add_ons_input(add_ons)
 
     expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
 
@@ -88,7 +88,7 @@ def _assert_requirements_ok(
     requirements_file_path = root_path / "requirements.txt"
     pyproject_file_path = root_path / "pyproject.toml"
 
-    add_ons_list = parse_add_ons_input(add_ons)
+    add_ons_list = _parse_add_ons_input(add_ons)
 
     if "1" in add_ons_list:
         with open(requirements_file_path) as requirements_file:
@@ -256,7 +256,7 @@ def test_starter_list_with_invalid_starter_plugin(
     ],
 )
 def test_parse_add_ons_valid(input, expected):
-    result = parse_add_ons_input(input)
+    result = _parse_add_ons_input(input)
     assert result == expected
 
 
@@ -266,7 +266,7 @@ def test_parse_add_ons_valid(input, expected):
 )
 def test_parse_add_ons_invalid_range(input, capsys):
     with pytest.raises(SystemExit):
-        parse_add_ons_input(input)
+        _parse_add_ons_input(input)
     message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
     assert message in capsys.readouterr().err
 
@@ -277,7 +277,7 @@ def test_parse_add_ons_invalid_range(input, capsys):
 )
 def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
     with pytest.raises(SystemExit):
-        parse_add_ons_input(input)
+        _parse_add_ons_input(input)
     message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."
     assert message in capsys.readouterr().err
 

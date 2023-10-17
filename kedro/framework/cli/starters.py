@@ -300,7 +300,8 @@ def _get_addons_from_cli_input(
     selected_addons: str, config: dict[str, str]
 ) -> dict[str, str]:
     """Inserts add-on selection from the CLI input in the project
-    configuration, if it exists.
+    configuration, if it exists. Replaces add-on strings with the
+    corresponding prompt number.
 
     Args:
         selected_addons: a string containing the value for the --addons flag,
@@ -310,8 +311,15 @@ def _get_addons_from_cli_input(
         Configuration for starting a new project, with the selected add-ons
         from the `--addons` flag.
     """
+    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5"}
+
     if selected_addons is not None:
-        config["add_ons"] = selected_addons
+        addons = selected_addons.split(",")
+        for i in range(len(addons)):
+            addon = addons[i]
+            if addon in string_to_number:
+                addons[i] = string_to_number[addon]
+        config["add_ons"] = ",".join(addons)
 
     return config
 

@@ -945,7 +945,18 @@ class TestAddOnsFromConfigFile:
 class TestAddOnsFromCLI:
     @pytest.mark.parametrize(
         "add_ons",
-        ["lint", "test", "log", "docs", "data", "none", "test,log,docs", "test,data,lint", "log,docs,data,test,lint", "all"],
+        [
+            "lint",
+            "test",
+            "log",
+            "docs",
+            "data",
+            "none",
+            "test,log,docs",
+            "test,data,lint",
+            "log,docs,data,test,lint",
+            "all",
+        ],
     )
     def test_valid_add_ons(self, fake_kedro_cli, add_ons):
         result = CliRunner().invoke(

@@ -4,7 +4,7 @@
 
 Distributed systems play an increasingly important role in ETL data pipelines. They increase the processing throughput, enabling us to work with much larger volumes of input data. A situation may arise where your Kedro node needs to read the data from a directory full of uniform files of the same type like JSON or CSV. Tools like `PySpark` and the corresponding [SparkDataset](/kedro_datasets.spark.SparkDataset) cater for such use cases but may not always be possible.
 
-This is why Kedro provides a built-in [PartitionedDataset](/kedro.io.PartitionedDataset), with the following features:
+This is why Kedro provides a built-in [PartitionedDataset](/kedro_datasets.partitions.PartitionedDataset), with the following features:
 
 * `PartitionedDataset` can recursively load/save all or specific files from a given location.
 * It is platform agnostic, and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and many more.
@@ -240,7 +240,7 @@ When using lazy saving, the dataset will be written _after_ the `after_node_run`
 
 ## Incremental datasets
 
-[IncrementalDataset](/kedro.io.IncrementalDataset) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, i.e. each subsequent pipeline run should only process the partitions which were not processed by the previous runs.
+[IncrementalDataset](/kedro_datasets.partitions.IncrementalDataset) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, i.e. each subsequent pipeline run should only process the partitions which were not processed by the previous runs.
 
 This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
 
@@ -309,7 +309,7 @@ pipeline(
 
 Important notes about the confirmation operation:
 
-* Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro.io.IncrementalDataset) method is called on the dataset object.
+* Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro_datasets.partitions.IncrementalDataset) method is called on the dataset object.
 * A pipeline cannot contain more than one node confirming the same dataset.
 
 

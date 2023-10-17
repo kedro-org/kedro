@@ -24,6 +24,7 @@
 ## Upcoming deprecations for Kedro 0.19.0
 * All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 * All dataset classes ending with `DataSet` are deprecated and will be removed in Kedro `0.19.0` and `kedro-datasets` `2.0.0`. Instead, use the updated class names ending with `Dataset`.
+* The starters `pandas-iris`, `pyspark-iris`, `pyspark`, and `standalone-datacatalog` are deprecated and will be archived in Kedro 0.19.0.
 * `PartitionedDataset` and `IncrementalDataset` have been moved to `kedro-datasets` and will be removed in Kedro `0.19.0`. Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 
 ## Community contributions

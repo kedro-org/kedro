@@ -2,6 +2,7 @@
 as `{{ cookiecutter.repo_name }}` and `python -m {{ cookiecutter.python_package }}`
 """
 import importlib
+import sys
 from pathlib import Path
 
 from kedro.framework.cli.utils import KedroCliError, load_entry_points
@@ -40,6 +41,12 @@ def main(*args, **kwargs):
     package_name = Path(__file__).parent.name
     configure_project(package_name)
     run = _find_run_command(package_name)
+
+    if kwargs is None:
+        kwargs = {}
+    interactive = not hasattr(sys, 'ps1')
+    kwargs = {**kwargs, **dict(standalone_mode=not interactive)}
+
     run(*args, **kwargs)
 
 

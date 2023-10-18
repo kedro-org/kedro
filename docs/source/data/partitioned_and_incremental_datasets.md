@@ -240,7 +240,7 @@ When using lazy saving, the dataset will be written _after_ the `after_node_run`
 
 ## Incremental datasets
 
-[IncrementalDataset](/kedro_datasets.partitions.IncrementalDataset) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, i.e. each subsequent pipeline run should only process the partitions which were not processed by the previous runs.
+[IncrementalDataset](/kedro_datasets.partitions.IncrementalDataset) is a subclass of `PartitionedDataset`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataset` addresses the use case when partitions have to be processed incrementally, that is, each subsequent pipeline run should process just the partitions which were not processed by the previous runs.
 
 This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataset` instantiated with path `s3://my-bucket-name/path/to/folder`, the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless [the checkpoint configuration is explicitly overwritten](#checkpoint-configuration).
 

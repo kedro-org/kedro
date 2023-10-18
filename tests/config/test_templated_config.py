@@ -41,7 +41,7 @@ def template_config():
         "s3_bucket": "s3a://boat-and-car-bucket",
         "raw_data_folder": "01_raw",
         "boat_file_name": "boats.csv",
-        "boat_data_type": "SparkDataSet",
+        "boat_data_type": "SparkDataset",
         "string_type": "VARCHAR",
         "float_type": "FLOAT",
         "write_only_user": "ron",
@@ -55,10 +55,10 @@ def catalog_with_jinja2_syntax(tmp_path):
     catalog = """
 {% for speed in ['fast', 'slow'] %}
 {{ speed }}-trains:
-    type: MemoryDataSet
+    type: MemoryDataset
 
 {{ speed }}-cars:
-    type: pandas.CSVDataSet
+    type: pandas.CSVDataset
     filepath: ${s3_bucket}/{{ speed }}-cars.csv
     save_args:
         index: true
@@ -86,7 +86,7 @@ def proj_catalog_globals(tmp_path, template_config):
 def normal_config_advanced():
     return {
         "planes": {
-            "type": "SparkJDBCDataSet",
+            "type": "SparkJDBCDataset",
             "postgres_credentials": {"user": "Fakeuser", "password": "F@keP@55word"},
             "batch_size": 10000,
             "need_permission": True,
@@ -117,7 +117,7 @@ def param_config_advanced():
 @pytest.fixture
 def template_config_advanced():
     return {
-        "plane_data_type": "SparkJDBCDataSet",
+        "plane_data_type": "SparkJDBCDataset",
         "credentials": {"user": "Fakeuser", "password": "F@keP@55word"},
         "batch_size": 10000,
         "permission_param": True,
@@ -215,7 +215,7 @@ class TestTemplatedConfigLoader:
         )
         config_loader.default_run_env = ""
         catalog = config_loader["catalog"]
-        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert catalog["boats"]["type"] == "SparkDataset"
 
     @pytest.mark.usefixtures("proj_catalog_param")
     def test_catalog_parameterized_w_dict(self, tmp_path, template_config):
@@ -225,7 +225,7 @@ class TestTemplatedConfigLoader:
         )
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*.yml")
-        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert catalog["boats"]["type"] == "SparkDataset"
         assert (
             catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
         )
@@ -243,7 +243,7 @@ class TestTemplatedConfigLoader:
             str(tmp_path), globals_pattern="*globals.yml"
         ).get("catalog*.yml")
 
-        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert catalog["boats"]["type"] == "SparkDataset"
         assert (
             catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
         )
@@ -279,7 +279,7 @@ class TestTemplatedConfigLoader:
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*.yml")
 
-        assert catalog["planes"]["type"] == "SparkJDBCDataSet"
+        assert catalog["planes"]["type"] == "SparkJDBCDataset"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
         assert catalog["planes"]["postgres_credentials"]["password"] == "F@keP@55word"
         assert catalog["planes"]["batch_size"] == 10000
@@ -295,7 +295,7 @@ class TestTemplatedConfigLoader:
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*.yml")
 
-        assert catalog["planes"]["type"] == "SparkJDBCDataSet"
+        assert catalog["planes"]["type"] == "SparkJDBCDataset"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
         assert catalog["planes"]["postgres_credentials"]["password"] == "F@keP@55word"
         assert catalog["planes"]["batch_size"] == 10000
@@ -312,7 +312,7 @@ class TestTemplatedConfigLoader:
             str(tmp_path), globals_pattern="*globals.yml", globals_dict=get_environ
         ).get("catalog*.yml")
 
-        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert catalog["boats"]["type"] == "SparkDataset"
         assert (
             catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
         )
@@ -332,7 +332,7 @@ class TestTemplatedConfigLoader:
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*.yml")
 
-        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert catalog["boats"]["type"] == "SparkDataset"
         assert (
             catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
         )
@@ -362,15 +362,15 @@ class TestTemplatedConfigLoader:
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*.yml")
         expected_catalog = {
-            "fast-trains": {"type": "MemoryDataSet"},
+            "fast-trains": {"type": "MemoryDataset"},
             "fast-cars": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "s3a://boat-and-car-bucket/fast-cars.csv",
                 "save_args": {"index": True},
             },
-            "slow-trains": {"type": "MemoryDataSet"},
+            "slow-trains": {"type": "MemoryDataset"},
             "slow-cars": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "s3a://boat-and-car-bucket/slow-cars.csv",
                 "save_args": {"index": True},
             },
@@ -389,15 +389,15 @@ class TestTemplatedConfigLoader:
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*.yml")
         expected_catalog = {
-            "fast-trains": {"type": "MemoryDataSet"},
+            "fast-trains": {"type": "MemoryDataset"},
             "fast-cars": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "s3a://boat-and-car-bucket/fast-cars.csv",
                 "save_args": {"index": True},
             },
-            "slow-trains": {"type": "MemoryDataSet"},
+            "slow-trains": {"type": "MemoryDataset"},
             "slow-cars": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "s3a://boat-and-car-bucket/slow-cars.csv",
                 "save_args": {"index": True},
             },
@@ -492,7 +492,7 @@ class TestFormatObject:
         catalog = config_loader["catalog"]
         config_loader["spark"] = {"spark_config": "emr.blabla"}
 
-        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert catalog["boats"]["type"] == "SparkDataset"
         assert config_loader["spark"] == {"spark_config": "emr.blabla"}
 
     @pytest.mark.usefixtures("proj_catalog_param")

@@ -17,13 +17,11 @@ import click
 
 from kedro import KedroDeprecationWarning
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLoader
+from kedro.config import ConfigLoader, TemplatedConfigLoader
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import _create_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_entry_points
 from kedro.framework.project import (
-    configure_logging,
     pipelines,
     settings,
     validate_settings,
@@ -189,35 +187,10 @@ class KedroSession:
                 "Unable to get username. Full exception: %s", exc
             )
 
-        session._store.update(session_data)
-
-        # We need ConfigLoader and env to setup logging correctly
-        session._setup_logging()
         session_data.update(**_describe_git(session._project_path))
         session._store.update(session_data)
 
         return session
-
-    def _get_logging_config(self) -> dict[str, Any]:
-        logging_config = self._get_config_loader()["logging"]
-        # turn relative paths in logging config into absolute path
-        # before initialising loggers
-        logging_config = _convert_paths_to_absolute_posix(
-            project_path=self._project_path, conf_dictionary=logging_config
-        )
-        return logging_config
-
-    def _setup_logging(self) -> None:
-        """Register logging specified in logging directory."""
-        try:
-            logging_config = self._get_logging_config()
-        except MissingConfigException:
-            self._logger.debug(
-                "No project logging configuration loaded; "
-                "Kedro's default logging configuration will be used."
-            )
-        else:
-            configure_logging(logging_config)
 
     def _init_store(self) -> BaseSessionStore:
         store_class = settings.SESSION_STORE_CLASS

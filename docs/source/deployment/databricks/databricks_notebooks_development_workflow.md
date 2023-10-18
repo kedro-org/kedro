@@ -19,7 +19,7 @@ This tutorial introduces a Kedro project development workflow using only the Dat
 
 - An active [Databricks deployment](https://docs.databricks.com/getting-started/index.html).
 - A [Databricks cluster](https://docs.databricks.com/clusters/configure.html) configured with a recent version (>= 11.3 is recommended) of the Databricks runtime.
-- Python >= 3.7 installed.
+- Python >= 3.8 installed.
 - Git installed.
 - A [GitHub](https://github.com/) account.
 - A Python environment management system installed, [venv](https://docs.python.org/3/library/venv.html), [virtualenv](https://virtualenv.pypa.io/en/latest/) or [Conda](https://docs.conda.io/en/latest/) are popular choices.
@@ -213,7 +213,7 @@ Create **four new cells** inside your notebook. You will fill these cells with c
 1. Before you import and run your Python code, you'll need to install your project's dependencies on the cluster attached to your notebook. Your project has a `requirements.txt` file for this purpose. Add the following code to the first new cell to install the dependencies:
 
 ```ipython
-%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/src/requirements.txt"
+%pip install -r "/Workspace/Repos/<databricks_username>/iris-databricks/requirements.txt"
 ```
 
 2. To run your project in your notebook, you must load the Kedro IPython extension. Add the following code to the second new cell to load the IPython extension:

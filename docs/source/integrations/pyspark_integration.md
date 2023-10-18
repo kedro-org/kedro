@@ -66,16 +66,16 @@ HOOKS = (SparkHooks(),)
 
 We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/dataframe.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
-* [spark.DeltaTableDataSet](/kedro_datasets.spark.DeltaTableDataSet)
-* [spark.SparkDataSet](/kedro_datasets.spark.SparkDataSet)
-* [spark.SparkJDBCDataSet](/kedro_datasets.spark.SparkJDBCDataSet)
-* [spark.SparkHiveDataSet](/kedro_datasets.spark.SparkHiveDataSet)
+* [spark.DeltaTableDataset](/kedro_datasets.spark.DeltaTableDataset)
+* [spark.SparkDataset](/kedro_datasets.spark.SparkDataset)
+* [spark.SparkJDBCDataset](/kedro_datasets.spark.SparkJDBCDataset)
+* [spark.SparkHiveDataset](/kedro_datasets.spark.SparkHiveDataset)
 
-The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
+The example below illustrates how to use `spark.SparkDataset` to read a CSV file located in S3 into a `DataFrame` in `conf/base/catalog.yml`:
 
 ```yaml
 weather:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: s3a://your_bucket/data/01_raw/weather*
   file_format: csv
   load_args:
@@ -91,9 +91,9 @@ Or using the Python API:
 ```python
 import pyspark.sql
 from kedro.io import DataCatalog
-from kedro_datasets.spark import SparkDataSet
+from kedro_datasets.spark import SparkDataset
 
-spark_ds = SparkDataSet(
+spark_ds = SparkDataset(
     filepath="s3a://your_bucket/data/01_raw/weather*",
     file_format="csv",
     load_args={"header": True, "inferSchema": True},
@@ -112,14 +112,14 @@ To setup PySpark with Delta Lake, have a look at [the recommendations in Delta L
 
 We recommend the following workflow, which makes use of the [transcoding feature in Kedro](../data/data_catalog_yaml_examples.md#read-the-same-file-using-two-different-datasets):
 
-* To create a Delta table, use a `SparkDataSet` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table and/or overwrite it.
-* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataSet` and perform the write operations within the node function.
+* To create a Delta table, use a `SparkDataset` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table and/or overwrite it.
+* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataset` and perform the write operations within the node function.
 
 As a result, we end up with a catalog that looks like this:
 
 ```yaml
 temperature:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: data/01_raw/data.csv
   file_format: "csv"
   load_args:
@@ -130,7 +130,7 @@ temperature:
     header: True
 
 weather@spark:
-  type: spark.SparkDataSet
+  type: spark.SparkDataset
   filepath: s3a://my_bucket/03_primary/weather
   file_format: "delta"
   save_args:
@@ -138,11 +138,11 @@ weather@spark:
     versionAsOf: 0
 
 weather@delta:
-  type: spark.DeltaTableDataSet
+  type: spark.DeltaTableDataset
   filepath: s3a://my_bucket/03_primary/weather
 ```
 
-The `DeltaTableDataSet` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
+The `DeltaTableDataset` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
 
 
 ```{note}

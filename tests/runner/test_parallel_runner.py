@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import importlib
 import sys
 from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any
 
 import pytest
 
-from kedro import KedroDeprecationWarning
 from kedro.framework.hooks import _create_hook_manager
 from kedro.io import (
     AbstractDataset,
@@ -35,22 +33,14 @@ from tests.runner.conftest import (
 )
 
 
-def test_deprecation():
-    class_name = "_SharedMemoryDataSet"
-    with pytest.warns(
-        KedroDeprecationWarning, match=f"{repr(class_name)} has been renamed"
-    ):
-        getattr(importlib.import_module("kedro.runner.parallel_runner"), class_name)
-
-
 @pytest.mark.skipif(
     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
 class TestValidParallelRunner:
-    def test_create_default_data_set(self):
-        # data_set is a proxy to a dataset in another process.
-        data_set = ParallelRunner().create_default_data_set("")
-        assert isinstance(data_set, _SharedMemoryDataset)
+    def test_create_default_dataset(self):
+        # dataset is a proxy to a dataset in another process.
+        dataset = ParallelRunner().create_default_dataset("")
+        assert isinstance(dataset, _SharedMemoryDataset)
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
@@ -175,7 +165,7 @@ class TestInvalidParallelRunner:
         with pytest.raises(DatasetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_data_set_not_serialisable(self, is_async, fan_out_fan_in):
+    def test_dataset_not_serialisable(self, is_async, fan_out_fan_in):
         """Data set A cannot be serialisable because _load and _save are not
         defined in global scope.
         """

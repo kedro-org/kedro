@@ -1,10 +1,40 @@
-[tool.kedro]
-project_name = "{{ cookiecutter.project_name }}"
-project_version = "{{ cookiecutter.kedro_version }}"
-package_name = "{{ cookiecutter.python_package }}"
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
-[tool.isort]
-profile = "black"
+[project]
+name = "{{ cookiecutter.python_package }}"
+readme = "README.md"
+dynamic = ["dependencies", "version"]
+
+[project.scripts]
+{{ cookiecutter.repo_name }} = "{{ cookiecutter.python_package }}.__main__:main"
+
+[project.optional-dependencies]
+docs = [
+    "docutils<0.18.0",
+    "sphinx~=3.4.3",
+    "sphinx_rtd_theme==0.5.1",
+    "nbsphinx==0.8.1",
+    "sphinx-autodoc-typehints==1.11.1",
+    "sphinx_copybutton==0.3.1",
+    "ipykernel>=5.3, <7.0",
+    "Jinja2<3.1.0",
+    "myst-parser~=0.17.2",
+]
+
+[tool.setuptools.dynamic]
+dependencies = {file = "requirements.txt"}
+version = {attr = "{{ cookiecutter.python_package }}.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.kedro]
+package_name = "{{ cookiecutter.python_package }}"
+project_name = "{{ cookiecutter.project_name }}"
+kedro_init_version = "{{ cookiecutter.kedro_version }}"
 
 [tool.pytest.ini_options]
 addopts = """

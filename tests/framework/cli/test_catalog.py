@@ -1,8 +1,8 @@
 import pytest
 import yaml
 from click.testing import CliRunner
+from kedro_datasets.pandas import CSVDataset
 
-from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.pipeline import node
 from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
@@ -32,10 +32,10 @@ def mock_pipelines(mocker):
 def fake_catalog_config():
     config = {
         "parquet_{factory_pattern}": {
-            "type": "pandas.ParquetDataSet",
+            "type": "pandas.ParquetDataset",
             "filepath": "test.pq",
         },
-        "csv_{factory_pattern}": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
+        "csv_{factory_pattern}": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
     }
     return config
 
@@ -44,7 +44,7 @@ def fake_catalog_config():
 def fake_catalog_with_overlapping_factories():
     config = {
         "an_example_dataset": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": "dummy_filepath",
         },
         "an_example_{placeholder}": {
@@ -71,13 +71,13 @@ def fake_catalog_with_overlapping_factories():
 def fake_catalog_config_with_resolvable_dataset():
     config = {
         "parquet_{factory_pattern}": {
-            "type": "pandas.ParquetDataSet",
+            "type": "pandas.ParquetDataset",
             "filepath": "test.pq",
         },
-        "csv_{factory_pattern}": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
-        "explicit_ds": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
+        "csv_{factory_pattern}": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
+        "explicit_ds": {"type": "pandas.CSVDataset", "filepath": "test.csv"},
         "{factory_pattern}_ds": {
-            "type": "pandas.ParquetDataSet",
+            "type": "pandas.ParquetDataset",
             "filepath": "test.pq",
         },
     }
@@ -133,19 +133,19 @@ class TestCatalogListCommand:
     ):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
-        catalog_data_sets = {
-            "iris_data": CSVDataSet("test.csv"),
+        catalog_datasets = {
+            "iris_data": CSVDataset("test.csv"),
             "intermediate": MemoryDataset(),
             "parameters": MemoryDataset(),
             "params:data_ratio": MemoryDataset(),
-            "not_used": CSVDataSet("test2.csv"),
+            "not_used": CSVDataset("test2.csv"),
         }
 
-        mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
-            "data_sets",
-            return_value=catalog_data_sets.keys() - {"not_used"},
+            "datasets",
+            return_value=catalog_datasets.keys() - {"not_used"},
         )
 
         result = CliRunner().invoke(
@@ -159,10 +159,10 @@ class TestCatalogListCommand:
         expected_dict = {
             f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
-                    "CSVDataSet": ["iris_data"],
+                    "CSVDataset": ["iris_data"],
                     "MemoryDataset": ["intermediate"],
                 },
-                "Datasets not mentioned in pipeline": {"CSVDataSet": ["not_used"]},
+                "Datasets not mentioned in pipeline": {"CSVDataset": ["not_used"]},
             }
         }
         key = f"Datasets in '{PIPELINE_NAME}' pipeline"
@@ -172,17 +172,17 @@ class TestCatalogListCommand:
     def test_default_dataset(
         self, fake_project_cli, fake_metadata, fake_load_context, mocker, mock_pipelines
     ):
-        """Test that datasets that are found in `Pipeline.data_sets()`,
+        """Test that datasets that are found in `Pipeline.datasets()`,
         but not in the catalog, are outputted under the key "DefaultDataset".
         """
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
-        catalog_data_sets = {"some_dataset": CSVDataSet("test.csv")}
-        mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+        catalog_datasets = {"some_dataset": CSVDataset("test.csv")}
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
-            "data_sets",
-            return_value=catalog_data_sets.keys() | {"intermediate"},
+            "datasets",
+            return_value=catalog_datasets.keys() | {"intermediate"},
         )
 
         result = CliRunner().invoke(
@@ -195,7 +195,7 @@ class TestCatalogListCommand:
         expected_dict = {
             f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
-                    "CSVDataSet": ["some_dataset"],
+                    "CSVDataset": ["some_dataset"],
                     "DefaultDataset": ["intermediate"],
                 }
             }
@@ -221,8 +221,8 @@ class TestCatalogListCommand:
         mocked_context.catalog = DataCatalog.from_config(fake_catalog_config)
         mocker.patch.object(
             mock_pipelines[PIPELINE_NAME],
-            "data_sets",
-            return_value=mocked_context.catalog._data_sets.keys()
+            "datasets",
+            return_value=mocked_context.catalog._datasets.keys()
             | {"csv_example", "parquet_example"},
         )
 
@@ -236,8 +236,8 @@ class TestCatalogListCommand:
         expected_dict = {
             f"Datasets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets generated from factories": {
-                    "pandas.CSVDataSet": ["csv_example"],
-                    "pandas.ParquetDataSet": ["parquet_example"],
+                    "pandas.CSVDataset": ["csv_example"],
+                    "pandas.ParquetDataset": ["parquet_example"],
                 }
             }
         }
@@ -340,11 +340,11 @@ class TestCatalogCreateCommand:
     ):
         mocked_context = fake_load_context.return_value
 
-        catalog_data_sets = {
-            "input_data": CSVDataSet("test.csv"),
-            "output_data": CSVDataSet("test2.csv"),
+        catalog_datasets = {
+            "input_data": CSVDataset("test.csv"),
+            "output_data": CSVDataset("test2.csv"),
         }
-        mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+        mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
         mocked_context.project_path = fake_repo_path
         mock_pipelines[self.PIPELINE_NAME] = modular_pipeline(
             [node(identity, "input_data", "output_data")]
@@ -370,7 +370,7 @@ class TestCatalogCreateCommand:
         data_catalog_file = catalog_path / f"catalog_{self.PIPELINE_NAME}.yml"
 
         catalog_config = {
-            "example_test_x": {"type": "pandas.CSVDataSet", "filepath": "test.csv"}
+            "example_test_x": {"type": "pandas.CSVDataset", "filepath": "test.csv"}
         }
         with data_catalog_file.open(mode="w") as catalog_file:
             yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)
@@ -400,7 +400,7 @@ class TestCatalogCreateCommand:
         result = CliRunner().invoke(fake_project_cli, cmd, obj=fake_metadata)
 
         assert result.exit_code
-        assert "Unable to instantiate Kedro session" in result.output
+        assert "Unable to instantiate Kedro Catalog" in result.output
 
 
 @pytest.mark.usefixtures(
@@ -444,12 +444,12 @@ def test_rank_catalog_factories_with_no_factories(
 ):
     mocked_context = fake_load_context.return_value
 
-    catalog_data_sets = {
-        "iris_data": CSVDataSet("test.csv"),
+    catalog_datasets = {
+        "iris_data": CSVDataset("test.csv"),
         "intermediate": MemoryDataset(),
-        "not_used": CSVDataSet("test2.csv"),
+        "not_used": CSVDataset("test2.csv"),
     }
-    mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+    mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
 
     result = CliRunner().invoke(
         fake_project_cli, ["catalog", "rank"], obj=fake_metadata
@@ -476,12 +476,12 @@ def test_catalog_resolve(
     mocked_context = fake_load_context.return_value
     mocked_context.catalog = DataCatalog.from_config(fake_catalog_config)
 
-    placeholder_ds = mocked_context.catalog._data_sets.keys()
+    placeholder_ds = mocked_context.catalog._datasets.keys()
     explicit_ds = {"csv_example", "parquet_example"}
 
     mocker.patch.object(
         mock_pipelines[PIPELINE_NAME],
-        "data_sets",
+        "datasets",
         return_value=explicit_ds,
     )
 
@@ -525,8 +525,8 @@ def test_no_overwrite(
 
     mocker.patch.object(
         mock_pipelines[PIPELINE_NAME],
-        "data_sets",
-        return_value=mocked_context.catalog._data_sets.keys()
+        "datasets",
+        return_value=mocked_context.catalog._datasets.keys()
         | {"csv_example", "parquet_example"},
     )
 
@@ -555,25 +555,25 @@ def test_no_param_datasets_in_resolve(
 
     catalog_config = {
         "iris_data": {
-            "type": "pandas.CSVDataSet",
+            "type": "pandas.CSVDataset",
             "filepath": "test.csv",
         },
-        "intermediate": {"type": "MemoryDataSet"},
+        "intermediate": {"type": "MemoryDataset"},
     }
 
     catalog_datasets = {
-        "iris_data": CSVDataSet("test.csv"),
+        "iris_data": CSVDataset("test.csv"),
         "intermediate": MemoryDataset(),
         "parameters": MemoryDataset(),
         "params:data_ratio": MemoryDataset(),
     }
 
     mocked_context.config_loader = {"catalog": catalog_config}
-    mocked_context.catalog = DataCatalog(data_sets=catalog_datasets)
+    mocked_context.catalog = DataCatalog(datasets=catalog_datasets)
 
     mocker.patch.object(
         mock_pipelines[PIPELINE_NAME],
-        "data_sets",
+        "datasets",
         return_value=catalog_datasets.keys(),
     )
 

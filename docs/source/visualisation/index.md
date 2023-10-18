@@ -14,5 +14,5 @@ pip install kedro-viz
 kedro-viz_visualisation
 share_kedro_viz
 preview_datasets
-visualise_charts_with_plotly
+visualise_charts_with_kedro_viz
 ```

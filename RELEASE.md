@@ -48,12 +48,19 @@
 
 ## Documentation changes
 * Added documentation to clarify execution order of hooks.
+* Added a notebook example for spaceflights to illustrate how to incrementally add Kedro features.
+* Moved documentation for the `standalone-datacatalog` starter into its [README file](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog).
+* Added new documentation about deploying a Kedro project with Amazon EMR.
+* Added new documentation about how to publish a Kedro-Viz project to make it shareable.
+* New TSC members added to the page and the organisation of each member is also now listed.
+* Plus some minor bug fixes and changes across the documentation.
 
 ## Breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.19.0
 * All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 * All dataset classes ending with `DataSet` are deprecated and will be removed in Kedro `0.19.0` and `kedro-datasets` `2.0.0`. Instead, use the updated class names ending with `Dataset`.
+* The starters `pandas-iris`, `pyspark-iris`, `pyspark`, and `standalone-datacatalog` are deprecated and will be archived in Kedro 0.19.0.
 * `PartitionedDataset` and `IncrementalDataset` have been moved to `kedro-datasets` and will be removed in Kedro `0.19.0`. Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 
 ## Community contributions
@@ -61,6 +68,11 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 
 * [Jason Hite](https://github.com/jasonmhite)
 * [IngerMathilde](https://github.com/IngerMathilde)
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
+* [Richard](https://github.com/CF-FHB-X)
+* [flpvvvv](https://github.com/flpvvvv)
+* [qheuristics](https://github.com/qheuristics)
+* [Miguel Ortiz](https://github.com/miguel-ortiz-marin)
 
 
 # Release 0.18.13

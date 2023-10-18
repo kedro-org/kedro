@@ -53,6 +53,7 @@ extensions = [
     "sphinxcontrib.mermaid",
     "myst_parser",
     "notfound.extension",
+    "sphinxcontrib.jquery",
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class

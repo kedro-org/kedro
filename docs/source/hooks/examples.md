@@ -76,7 +76,7 @@ The output should look similar to the following:
 
 ```
 ...
-[01/25/23 21:38:23] INFO     Loading data from 'example_iris_data' (CSVDataSet)...                                                                                                                                                                                    data_catalog.py:343
+[01/25/23 21:38:23] INFO     Loading data from 'example_iris_data' (CSVDataset)...                                                                                                                                                                                    data_catalog.py:343
                     INFO     Loading example_iris_data consumed 0.99MiB memory                                                                                                                                                                                                hooks.py:67
                     INFO     Loading data from 'parameters' (MemoryDataset)...                                                                                                                                                                                        data_catalog.py:343
                     INFO     Loading parameters consumed 0.48MiB memory                                                                                                                                                                                                       hooks.py:67

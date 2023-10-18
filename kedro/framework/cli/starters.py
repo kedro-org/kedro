@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 import tempfile
 import warnings
 from collections import OrderedDict
@@ -31,6 +32,7 @@ from kedro.framework.cli.utils import (
     _safe_load_entry_point,
     command_with_verbosity,
 )
+from kedro.templates.project.hooks.utils import parse_add_ons_input
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
@@ -251,9 +253,12 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
         config = {}
         if config_path:
             config = _fetch_config_from_file(config_path)
+            _validate_config_file_inputs(config)
+
     elif config_path:
         config = _fetch_config_from_file(config_path)
-        _validate_config_file(config, prompts_required)
+        _validate_config_file_against_prompts(config, prompts_required)
+        _validate_config_file_inputs(config)
     else:
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
@@ -361,6 +366,22 @@ def _make_cookiecutter_args(
     return cookiecutter_args
 
 
+def _get_add_ons_text(add_ons):
+    add_ons_dict = {
+        "1": "Linting",
+        "2": "Testing",
+        "3": "Custom Logging",
+        "4": "Documentation",
+        "5": "Data structure",
+    }
+    add_ons_list = parse_add_ons_input(add_ons)
+    add_ons_text = [add_ons_dict[add_on] for add_on in add_ons_list]
+    return (
+        " ".join(str(add_on) + "," for add_on in add_ons_text[:-1])
+        + f" and {add_ons_text[-1]}"
+    )
+
+
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
@@ -390,6 +411,17 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     python_package = extra_context.get(
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )
+    add_ons = extra_context.get("add_ons")
+
+    # Only non-starter projects have configurable add-ons
+    if template_path == str(TEMPLATE_PATH):
+        if add_ons == "none":
+            click.secho("\nYou have selected no add-ons")
+        else:
+            click.secho(
+                f"\nYou have selected the following add-ons: {_get_add_ons_text(add_ons)}"
+            )
+
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "
         f"\n- The project title in {result_path}/README.md "
@@ -398,7 +430,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running 'pip install -r src/requirements.txt' to install "
+        "a virtual environment before running 'pip install -r requirements.txt' to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )
@@ -531,10 +563,10 @@ class _Prompt:
     def validate(self, user_input: str) -> None:
         """Validate a given prompt value against the regex validator"""
         if self.regexp and not re.match(self.regexp, user_input):
-            message = f"'{user_input}' is an invalid value for {self.title}."
+            message = f"'{user_input}' is an invalid value for {(self.title).lower()}."
             click.secho(message, fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)
-            raise ValueError(message, self.error_message)
+            sys.exit(1)
 
 
 def _get_available_tags(template_path: str) -> list:
@@ -557,7 +589,9 @@ def _get_available_tags(template_path: str) -> list:
     return sorted(unique_tags)
 
 
-def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
+def _validate_config_file_against_prompts(
+    config: dict[str, str], prompts: dict[str, Any]
+):
     """Checks that the configuration file contains all needed variables.
 
     Args:
@@ -580,3 +614,27 @@ def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
             f"'{config['output_dir']}' is not a valid output directory. "
             "It must be a relative or absolute path to an existing directory."
         )
+
+
+def _validate_config_file_inputs(config: dict[str, str]):
+    """Checks that variables provided through the config file are of the expected format.
+
+    Args:
+        config: The config as a dictionary.
+
+    Raises:
+        SystemExit: If the provided variables are not properly formatted.
+    """
+    project_name_reg_ex = r"^[\w -]{2,}$"
+    input_project_name = config.get("project_name", "New Kedro Project")
+    if not re.match(project_name_reg_ex, input_project_name):
+        message = f"'{input_project_name}' is an invalid value for project name. It must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
+        click.secho(message, fg="red", err=True)
+        sys.exit(1)
+
+    add_on_reg_ex = r"^(all|none|(\d(,\d)*|(\d-\d)))$"
+    input_add_ons = config.get("add_ons", "none")
+    if not re.match(add_on_reg_ex, input_add_ons):
+        message = f"'{input_add_ons}' is an invalid value for project add-ons. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'."
+        click.secho(message, fg="red", err=True)
+        sys.exit(1)

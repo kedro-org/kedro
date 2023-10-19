@@ -66,14 +66,16 @@ def load_ipython_extension(ipython):
     help=PARAMS_ARG_HELP,
 )
 @argument("--conf-source", type=str, default=None, help=CONF_SOURCE_HELP)
-def magic_reload_kedro(line: str, local_ns: dict[str, Any] = None):
+def magic_reload_kedro(
+    line: str, local_ns: dict[str, Any] = None, conf_source: str = None
+):
     """
     The `%reload_kedro` IPython line magic.
     See https://kedro.readthedocs.io/en/stable/notebooks_and_ipython/kedro_and_notebooks.html#reload-kedro-line-magic # noqa: line-too-long
     for more.
     """
     args = parse_argstring(magic_reload_kedro, line)
-    reload_kedro(args.path, args.env, args.params, local_ns)
+    reload_kedro(args.path, args.env, args.params, local_ns, args.conf_source)
 
 
 def reload_kedro(

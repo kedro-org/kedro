@@ -62,6 +62,18 @@ def _make_cli_prompt_input_without_addons(
     return "\n".join([project_name, repo_name, python_package])
 
 
+def _convert_addon_names_to_numbers(selected_addons: str):
+    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5"}
+
+    addons = selected_addons.split(",")
+    for i in range(len(addons)):
+        addon = addons[i]
+        if addon in string_to_number:
+            addons[i] = string_to_number[addon]
+
+    return ",".join(addons)
+
+
 def _get_expected_files(add_ons: str):
     add_ons_template_files = {
         "1": 0,
@@ -964,6 +976,7 @@ class TestAddOnsFromCLI:
             ["new", "--addons", add_ons],
             input=_make_cli_prompt_input_without_addons(),
         )
+        add_ons = _convert_addon_names_to_numbers(selected_addons=add_ons)
         _assert_template_ok(result, add_ons=add_ons)
         _assert_requirements_ok(result, add_ons=add_ons)
 

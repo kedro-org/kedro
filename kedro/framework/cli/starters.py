@@ -101,10 +101,9 @@ DIRECTORY_ARG_HELP = (
     "An optional directory inside the repository where the starter resides."
 )
 
-# TODO; Insert actual link to the documentation.
+# TODO; Insert actual link to the documentation (Visit: kedro.org/{insert-documentation} to find out more about these add-ons.).
 ADDON_ARG_HELP = """
-Select which add-ons you'd like to include. By default, none are included.
-Visit: kedro.org/{insert-documentation} to find out more about these add-ons.\n
+Select which add-ons you'd like to include. By default, none are included.\n
 
 Add-Ons\n
 1) Linting: Provides a basic linting setup with Black and Ruff\n

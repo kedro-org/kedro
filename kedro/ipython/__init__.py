@@ -14,7 +14,7 @@ from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
 from kedro.framework.cli import load_entry_points
-from kedro.framework.cli.project import PARAMS_ARG_HELP, CONF_SOURCE_HELP 
+from kedro.framework.cli.project import PARAMS_ARG_HELP, CONF_SOURCE_HELP
 from kedro.framework.cli.utils import ENV_HELP, _split_params
 from kedro.framework.project import (
     LOGGING,  # noqa
@@ -83,6 +83,7 @@ def reload_kedro(
     env: str = None,
     extra_params: dict[str, Any] = None,
     local_namespace: dict[str, Any] | None = None,
+    conf_source: str = None,
 ) -> None:  # pragma: no cover
     """Function that underlies the %reload_kedro Line magic. This should not be imported
     or run directly but instead invoked through %reload_kedro."""
@@ -94,7 +95,11 @@ def reload_kedro(
     configure_project(metadata.package_name)
 
     session = KedroSession.create(
-        metadata.package_name, project_path, env=env, extra_params=extra_params
+        metadata.package_name,
+        project_path,
+        env=env,
+        extra_params=extra_params,
+        conf_source=conf_source,
     )
     context = session.load_context()
     catalog = context.catalog

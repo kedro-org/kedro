@@ -11,6 +11,7 @@ import shutil
 import stat
 import sys
 import tempfile
+import warnings
 from collections import OrderedDict
 from itertools import groupby
 from pathlib import Path
@@ -21,12 +22,12 @@ import yaml
 from attrs import define, field
 
 import kedro
+from kedro import KedroDeprecationWarning
 from kedro import __version__ as version
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
     KedroCliError,
     _clean_pycache,
-    _filter_deprecation_warnings,
     _get_entry_points,
     _safe_load_entry_point,
     command_with_verbosity,
@@ -36,6 +37,13 @@ from kedro.templates.project.hooks.utils import parse_add_ons_input
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 _STARTERS_REPO = "git+https://github.com/kedro-org/kedro-starters.git"
+
+_DEPRECATED_STARTERS = [
+    "pandas-iris",
+    "pyspark-iris",
+    "pyspark",
+    "standalone-datacatalog",
+]
 
 
 @define(order=True)
@@ -155,10 +163,14 @@ def _starter_spec_to_dict(
     """Convert a dictionary of starters spec to a nicely formatted dictionary"""
     format_dict: dict[str, dict[str, str]] = {}
     for alias, spec in starter_specs.items():
-        format_dict[alias] = {}  # Each dictionary represent 1 starter
-        format_dict[alias]["template_path"] = spec.template_path
+        if alias in _DEPRECATED_STARTERS:
+            key = alias + " (deprecated)"
+        else:
+            key = alias
+        format_dict[key] = {}  # Each dictionary represent 1 starter
+        format_dict[key]["template_path"] = spec.template_path
         if spec.directory:
-            format_dict[alias]["directory"] = spec.directory
+            format_dict[key]["directory"] = spec.directory
     return format_dict
 
 
@@ -181,6 +193,19 @@ def create_cli():  # pragma: no cover
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 def new(config_path, starter_alias, checkout, directory, **kwargs):
     """Create a new kedro project."""
+
+    if starter_alias in _DEPRECATED_STARTERS:
+        warnings.warn(
+            f"The starter '{starter_alias}' has been deprecated and will be archived from Kedro 0.19.0.",
+            KedroDeprecationWarning,
+        )
+    click.secho(
+        "From Kedro 0.19.0, the command `kedro new` will come with the option of interactively selecting add-ons "
+        "for your project such as linting, testing, custom logging, and more. The selected add-ons will add the "
+        "basic setup for the utilities selected to your projects.",
+        fg="green",
+    )
+
     if checkout and not starter_alias:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
@@ -265,6 +290,9 @@ def list_starters():
     # ensure kedro starters are listed first
     sorted_starters_dict = dict(
         sorted(sorted_starters_dict.items(), key=lambda x: x == "kedro")
+    )
+    warnings.warn(
+        f"The starters {_DEPRECATED_STARTERS} are deprecated and will be archived in Kedro 0.19.0."
     )
 
     for origin, starters_spec in sorted_starters_dict.items():
@@ -382,9 +410,8 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     Raises:
         KedroCliError: If it fails to generate a project.
     """
-    with _filter_deprecation_warnings():
-        # noqa: import-outside-toplevel
-        from cookiecutter.main import cookiecutter  # for performance reasons
+    # noqa: import-outside-toplevel
+    from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
         result_path = cookiecutter(template=template_path, **cookiecutter_args)

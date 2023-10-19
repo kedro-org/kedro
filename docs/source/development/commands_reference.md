@@ -109,7 +109,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.18.13
+v0.18.14
 
 Kedro is a Python framework for
 creating reproducible, maintainable
@@ -476,7 +476,7 @@ To start an IPython shell:
 kedro ipython
 ```
 
-The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#a-custom-kedro-kernel) makes the following variables available in your IPython or Jupyter session:
+The [Kedro IPython extension](../notebooks_and_ipython/kedro_and_notebooks.md#what-does-kedro-jupyter-notebook-do) makes the following variables available in your IPython or Jupyter session:
 
 * `catalog` (type `DataCatalog`): [Data Catalog](../data/data_catalog.md) instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `context` (type `KedroContext`): Kedro project context that provides access to Kedro's library components

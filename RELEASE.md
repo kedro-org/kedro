@@ -30,12 +30,14 @@
 * The `requirements.txt` in the default project template moved to the root of the project as well (hence dependencies are now installed with `pip install -r requirements.txt` instead of `pip install -r src/requirements.txt`).
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
-# Upcoming Release 0.18.14
+
+# Release 0.18.14
 
 ## Major features and improvements
 * Allowed using of custom cookiecutter templates for creating pipelines with `--template` flag for `kedro pipeline create` or via `template/pipeline` folder.
@@ -43,21 +45,38 @@
 
 ## Bug fixes and other changes
 * Updated dataset factories to resolve nested catalog config properly.
+* Updated `OmegaConfigLoader` to handle paths containing dots outside of `conf_source`.
+* Made `settings.py` optional.
 
 ## Documentation changes
 * Added documentation to clarify execution order of hooks.
-
-## Breaking changes to the API
+* Added a notebook example for spaceflights to illustrate how to incrementally add Kedro features.
+* Moved documentation for the `standalone-datacatalog` starter into its [README file](https://github.com/kedro-org/kedro-starters/tree/main/standalone-datacatalog).
+* Added new documentation about deploying a Kedro project with Amazon EMR.
+* Added new documentation about how to publish a Kedro-Viz project to make it shareable.
+* New TSC members added to the page and the organisation of each member is also now listed.
+* Plus some minor bug fixes and changes across the documentation.
 
 ## Upcoming deprecations for Kedro 0.19.0
 * All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 * All dataset classes ending with `DataSet` are deprecated and will be removed in Kedro `0.19.0` and `kedro-datasets` `2.0.0`. Instead, use the updated class names ending with `Dataset`.
+* The starters `pandas-iris`, `pyspark-iris`, `pyspark`, and `standalone-datacatalog` are deprecated and will be archived in Kedro 0.19.0.
+* `PartitionedDataset` and `IncrementalDataset` have been moved to `kedro-datasets` and will be removed in Kedro `0.19.0`. Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
-
 * [Jason Hite](https://github.com/jasonmhite)
-
+* [IngerMathilde](https://github.com/IngerMathilde)
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
+* [Richard](https://github.com/CF-FHB-X)
+* [flpvvvv](https://github.com/flpvvvv)
+* [qheuristics](https://github.com/qheuristics)
+* [Miguel Ortiz](https://github.com/miguel-ortiz-marin)
+* [rxm7706](https://github.com/rxm7706)
+* [Iñigo Hidalgo](https://github.com/inigohidalgo)
+* [harmonys-qb](https://github.com/harmonys-qb)
+* [Yi Kuang](https://github.com/lvxhnat)
+* [Jens Lordén](https://github.com/Celsuss)
 
 # Release 0.18.13
 

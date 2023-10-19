@@ -100,7 +100,8 @@ img[alt^="mermaid-"] {
   font-size: 18px;
 }
 
-.wy-main-nav a.active {
+.wy-main-nav a.active,
+.wy-main-nav a:hover {
   background: #ffc801;
 }
 

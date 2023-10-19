@@ -661,18 +661,6 @@ class TestPipelineDescribe:
             assert res == example
 
 
-@pytest.fixture
-def nodes_with_tags():
-    return [
-        node(identity, "E", None, name="node1"),
-        node(identity, "D", "E", name="node2", tags=["tag1", "tag2"]),
-        node(identity, "C", "D", name="node3"),
-        node(identity, "A", "B", name="node4", tags=["tag2"]),
-        node(identity, "B", "C", name="node5"),
-        node(constant_output, None, "A", name="node6", tags=["tag1"]),
-    ]
-
-
 class TestPipelineTags:
     def test_tag_existing_pipeline(self, branchless_pipeline):
         pipeline = modular_pipeline(branchless_pipeline["nodes"])
@@ -752,6 +740,18 @@ class TestPipelineFilter:
             )
 
 
+@pytest.fixture
+def nodes_with_tags():
+    return [
+        node(identity, "E", None, name="node1"),
+        node(identity, "D", "E", name="node2", tags=["tag1", "tag2"]),
+        node(identity, "C", "D", name="node3"),
+        node(identity, "A", "B", name="node4", tags=["tag2"]),
+        node(identity, "B", "C", name="node5"),
+        node(constant_output, None, "A", name="node6", tags=["tag1"]),
+    ]
+
+
 class TestPipelineFilterHelpers:
     """Node selection functions called by Pipeline.filter."""
 
@@ -769,11 +769,9 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_tags(self, tags, expected_nodes, nodes_with_tags):
         pipeline = modular_pipeline(nodes_with_tags)
 
-        def get_nodes_with_tags(*tags):
-            p = pipeline.only_nodes_with_tags(*tags)
-            return sorted(n.name for n in p.nodes)
+        p = pipeline.only_nodes_with_tags(*tags)
 
-        assert get_nodes_with_tags(*tags) == expected_nodes
+        assert sorted(n.name for n in p.nodes) == expected_nodes
 
     def test_from_nodes(self, complex_pipeline):
         """New pipeline contain all nodes that depend on node2 and node3."""
@@ -804,7 +802,7 @@ class TestPipelineFilterHelpers:
     @pytest.mark.parametrize(
         "target_node_names", [["node2", "node3", "node4", "node8"], ["node1"]]
     )
-    def test_only_nodes(self, target_node_names, pipeline_list_with_lists):
+    def test_only_nodes(self, pipeline_list_with_lists, target_node_names):
         full = modular_pipeline(pipeline_list_with_lists["nodes"])
         partial = full.only_nodes(*target_node_names)
         target_list = list(target_node_names)
@@ -923,10 +921,14 @@ class TestPipelineFilterHelpers:
             assert actual_node.namespace == expected_namespace
 
     @pytest.mark.parametrize("namespace", ["katie", None])
-    def test_only_nodes_with_namespace_unknown(self, namespace):
+    def test_only_nodes_with_unknown_namespace_raises_value_error(self, namespace):
+        """
+        Test that the `only_nodes_with_namespace` method raises a ValueError with the expected error message
+        when a non-existent namespace is provided.
+        """
         pipeline = modular_pipeline([node(identity, "A", "B", namespace=namespace)])
-        pattern = r"Pipeline does not contain nodes"
-        with pytest.raises(ValueError, match=pattern):
+        expected_error_message = "Pipeline does not contain nodes with namespace 'non_existent'"
+        with pytest.raises(ValueError, match=expected_error_message):
             pipeline.only_nodes_with_namespace("non_existent")
 
 
@@ -934,19 +936,25 @@ class TestPipelineRunnerHelpers:
     """Node selection functions used in AbstractRunner."""
 
     def test_only_nodes_with_inputs(self, complex_pipeline):
-        """node1 and node2 require H as an input."""
-        new_pipeline = complex_pipeline.only_nodes_with_inputs("H")
-        nodes = {node.name for node in new_pipeline.nodes}
+        """Test that only_nodes_with_inputs filters nodes requiring 'H' input."""
 
-        assert len(new_pipeline.nodes) == 2
-        assert nodes == {"node1", "node2"}
+        # Filter the complex pipeline to retain nodes that require 'H' as an input.
+        filtered_pipeline = complex_pipeline.only_nodes_with_inputs("H")
+
+        # Get the names of nodes in the filtered pipeline.
+        expected_node_names = {node.name for node in filtered_pipeline.nodes}
+
+        # Perform assertions
+        assert len(filtered_pipeline.nodes) == 2
+        assert expected_node_names == {"node1", "node2"}
 
     def test_only_nodes_with_inputs_unknown(self, complex_pipeline):
+        """ The complex pipeline does not contain nodes W and Z so the only_nodes_with_inputs should raise an error."""
         with pytest.raises(ValueError, match="['W', 'Z']"):
             complex_pipeline.only_nodes_with_inputs("Z", "W", "E", "C")
 
-    def test_only_nodes_with_outputs(self, complex_pipeline):
-        """node4 require F and H as outputs."""
+    def test_only_nodes_with_outputs_on_specific_node_output(self, complex_pipeline):
+        """In the complex pipeline, the node with outputs F and H was tagged node4"""
         new_pipeline = complex_pipeline.only_nodes_with_outputs("F", "H")
         nodes = {node.name for node in new_pipeline.nodes}
 
@@ -954,6 +962,7 @@ class TestPipelineRunnerHelpers:
         assert nodes == {"node4"}
 
     def test_only_nodes_with_outputs_unknown(self, complex_pipeline):
+        """ The complex pipeline does not contain nodes W and Z so the only_nodes_with_inputs should raise an error."""
         with pytest.raises(ValueError, match="['W', 'Z']"):
             complex_pipeline.only_nodes_with_outputs("Z", "W", "E", "C")
 

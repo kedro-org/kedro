@@ -767,54 +767,65 @@ class TestPipelineFilterHelpers:
         ],
     )
     def test_only_nodes_with_tags(self, tags, expected_nodes, nodes_with_tags):
+        """ Test that the 'only_nodes_with_tags' method correctly filters nodes based on provided tags. """
+        # Create a pipeline from nodes with tags.
         pipeline = modular_pipeline(nodes_with_tags)
 
-        p = pipeline.only_nodes_with_tags(*tags)
+        # Filter the pipeline based on the specified tags.
+        filtered_pipeline = pipeline.only_nodes_with_tags(*tags)
 
-        assert sorted(n.name for n in p.nodes) == expected_nodes
+        assert sorted(node.name for node in filtered_pipeline.nodes) == expected_nodes
 
     def test_from_nodes(self, complex_pipeline):
-        """New pipeline contain all nodes that depend on node2 and node3."""
+        """Test if the new pipeline includes nodes required by 'node2' and 'node3'."""
         new_pipeline = complex_pipeline.from_nodes("node3", "node2")
         nodes = {node.name for node in new_pipeline.nodes}
 
         assert len(new_pipeline.nodes) == 3
         assert nodes == {"node1", "node2", "node3"}
 
-    def test_from_nodes_unknown(self, complex_pipeline):
+    def test_from_nodes_unknown_raises_value_error(self, complex_pipeline):
+        """ Test that passing an unknown node to from_nodes results in a ValueError. """
         pattern = r"Pipeline does not contain nodes named \['missing_node'\]"
         with pytest.raises(ValueError, match=pattern):
             complex_pipeline.from_nodes("missing_node")
 
     def test_to_nodes(self, complex_pipeline):
-        """New pipeline contain all nodes required by node4 and node6."""
+        """Test if the new pipeline includes nodes that require 'node4' and 'node6'."""
         new_pipeline = complex_pipeline.to_nodes("node4", "node6")
         nodes = {node.name for node in new_pipeline.nodes}
 
         assert len(new_pipeline.nodes) == 5
         assert nodes == {"node4", "node6", "node7", "node8", "node9"}
 
-    def test_to_nodes_unknown(self, complex_pipeline):
+    def test_to_nodes_unknown_raises_value_error(self, complex_pipeline):
+        """ Test that passing an unknown node to to_nodes results in a ValueError. """
         pattern = r"Pipeline does not contain nodes named \['missing_node'\]"
         with pytest.raises(ValueError, match=pattern):
             complex_pipeline.to_nodes("missing_node")
 
-    @pytest.mark.parametrize(
-        "target_node_names", [["node2", "node3", "node4", "node8"], ["node1"]]
-    )
-    def test_only_nodes(self, pipeline_list_with_lists, target_node_names):
-        full = modular_pipeline(pipeline_list_with_lists["nodes"])
-        partial = full.only_nodes(*target_node_names)
-        target_list = list(target_node_names)
-        names = map(lambda node_: node_.name, partial.nodes)
-        assert sorted(names) == sorted(target_list)
+    @pytest.mark.parametrize("target_node_names", [["node2", "node3", "node4", "node8"], ["node1"]])
+    def test_only_nodes_filtering(self, pipeline_list_with_lists, target_node_names):
+        # Create a pipeline from the input nodes.
+        full_pipeline = modular_pipeline(pipeline_list_with_lists["nodes"])
+
+        # Apply the 'only_nodes' method to filter the pipeline.
+        filtered_pipeline = full_pipeline.only_nodes(*target_node_names)
+
+        # Assert that the filtered node names match the sorted target node names.
+        assert sorted(node.name for node in filtered_pipeline.nodes) == sorted(target_node_names)
 
     @pytest.mark.parametrize(
         "target_node_names", [["node2", "node3", "node4", "NaN"], ["invalid"]]
     )
     def test_only_nodes_unknown(self, pipeline_list_with_lists, target_node_names):
+        """
+        Test the only_nodes fails for nodes which are not present in the pipeline.
+        """
         pattern = r"Pipeline does not contain nodes"
+
         full = modular_pipeline(pipeline_list_with_lists["nodes"])
+
         with pytest.raises(ValueError, match=pattern):
             full.only_nodes(*target_node_names)
 
@@ -825,9 +836,11 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_namespacing(
         self, pipeline_with_namespaces, non_namespaced_node_name
     ):
-        # Tests that error message will supply correct namespaces.
-        # Example of expected error:
-        # Pipeline does not contain nodes named ['node1']. Did you mean: ['katie.node1']?
+        """
+        Tests that error message will supply correct namespaces.
+        Example of expected error:
+        Pipeline does not contain nodes named ['node1']. Did you mean: ['katie.node1']?
+        """
         pattern = (
             rf"Pipeline does not contain nodes named \['{non_namespaced_node_name}'\]\. "
             rf"Did you mean: \['.*\.{non_namespaced_node_name}'\]\?"
@@ -842,10 +855,12 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_namespacing_multiple_args(
         self, pipeline_with_namespaces, non_namespaced_node_names
     ):
-        # Tests that error message will contain suggestions for all provided arguments.
-        # Example of expected error message:
-        # "Pipeline does not contain nodes named ['node1', 'node2'].
-        # Did you mean: ['katie.node1', 'lisa.node2']?"
+        """
+        Ensures error message includes suggestions for all provided arguments.
+        Expected error message example:
+        "Pipeline does not contain nodes named ['node1', 'node2']. Did you mean: ['katie.node1', 'lisa.node2']?"
+        """
+
         pattern = (
             rf"(('.*\.{non_namespaced_node_names[0]}')+.*"
             rf"('.*\.{non_namespaced_node_names[1]}')+)"
@@ -863,11 +878,13 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_namespacing_and_invalid_args(
         self, pipeline_with_namespaces, non_namespaced_node_names
     ):
-        # Tests error message will still contain namespace suggestions for correct arguments.
-        # regex is not specific to node names due to unspecified order
-        # Example of expected error message:
-        # "Pipeline does not contain nodes named ['node1', 'invalid_node'].
-        # Did you mean: ['katie.node1']?"
+        """
+        Verifies that namespace suggestions are provided in the error message for both correct and incorrect arguments.
+        The regex pattern isn't specific to node names due to unordered arguments.
+        Expected error message example:
+        "Pipeline does not contain nodes named ['node1', 'invalid_node']. Did you mean: ['katie.node1']?"
+        """
+
         pattern = (
             r"Pipeline does not contain nodes named \[.*\]\. Did you mean: \[.*\]\?"
         )
@@ -882,20 +899,20 @@ class TestPipelineFilterHelpers:
         assert len(new_pipeline.nodes) == 3
         assert nodes == {"node1", "node2", "node3"}
 
-    def test_from_inputs_unknown(self, complex_pipeline):
-        """W and Z do not exist as inputs."""
+    def test_from_inputs_unknown_raises_value_error(self, complex_pipeline):
+        """Test for ValueError if W and Z do not exist as inputs."""
         with pytest.raises(ValueError, match=r"\['W', 'Z'\]"):
             complex_pipeline.from_inputs("Z", "W", "E", "C")
 
     def test_to_outputs(self, complex_pipeline):
         """New pipeline contain all nodes to produce F and H outputs."""
         new_pipeline = complex_pipeline.to_outputs("F", "H")
-        nodes = {node.name for node in new_pipeline.nodes}
 
         assert len(new_pipeline.nodes) == 4
-        assert nodes == {"node4", "node7", "node8", "node9"}
+        assert {node.name for node in new_pipeline.nodes} == {"node4", "node7", "node8", "node9"}
 
-    def test_to_outputs_unknown(self, complex_pipeline):
+    def test_to_outputs_unknown_raises_value_error(self, complex_pipeline):
+        """"Test for ValueError if W and Z do not exist as outputs."""
         with pytest.raises(ValueError, match=r"\['W', 'Z'\]"):
             complex_pipeline.to_outputs("Z", "W", "E", "C")
 
@@ -912,6 +929,7 @@ class TestPipelineFilterHelpers:
     def test_only_nodes_with_namespace(
         self, target_namespace, expected_namespaces, pipeline_with_namespaces
     ):
+        """ Test that only nodes with the matching namespace are returned from the pipeline. """
         resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespace(
             target_namespace
         )

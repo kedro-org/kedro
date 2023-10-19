@@ -105,6 +105,49 @@ class MyVersionedDataset(AbstractVersionedDataset[str, str]):
         return self._fs.exists(load_path)
 
 
+class MyLocalVersionedDataset(AbstractVersionedDataset[str, str]):
+    def __init__(  # noqa: PLR0913
+        self,
+        filepath: str,
+        version: Version = None,
+    ) -> None:
+        _fs_args: dict[Any, Any] = {}
+        _fs_args.setdefault("auto_mkdir", True)
+        protocol, path = get_protocol_and_path(filepath, version)
+
+        self._protocol = protocol
+        self._fs = fsspec.filesystem(self._protocol, **_fs_args)
+
+        super().__init__(
+            filepath=PurePosixPath(path),
+            version=version,
+            glob_function=self._fs.glob,
+        )
+
+    def _describe(self) -> dict[str, Any]:
+        return dict(filepath=self._filepath, version=self._version)
+
+    def _load(self) -> str:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+
+        with self._fs.open(load_path, mode="r") as fs_file:
+            return fs_file.read()
+
+    def _save(self, data: str) -> None:
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+        with self._fs.open(save_path, mode="w") as fs_file:
+            fs_file.write(data)
+
+    def _exists(self) -> bool:
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DatasetError:
+            return False
+
+        return self._fs.exists(load_path)
+
+
 @pytest.fixture(params=[None])
 def load_version(request):
     return request.param
@@ -258,8 +301,8 @@ class TestAbstractVersionedDataset:
 
     def test_no_versions_exists(self):
         """Check the error if no versions are available for load."""
-        version = Version(load="2019-01-01T23.59.59.999Z", save=None)
-        my_versioned_dataset = MyVersionedDataset("test.csv", version=version)
+        version = Version(load=None, save=None)
+        my_versioned_dataset = MyLocalVersionedDataset("test.csv", version=version)
         assert my_versioned_dataset.exists() is False
 
     def test_exists(self, my_versioned_dataset, dummy_data):

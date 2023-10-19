@@ -389,8 +389,8 @@ def _get_add_ons_text(add_ons):
 def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
-
-    if add_ons == "6":
+    add_ons_list = parse_add_ons_input(add_ons)
+    if "6" in add_ons_list:
         cookiecutter_args["directory"] = "spaceflights-pyspark"
         pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
         return pyspark_path
@@ -429,7 +429,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     add_ons = extra_context.get("add_ons")
 
     # Only core template and spaceflights-pyspark have configurable add-ons
-    if template_path == str(TEMPLATE_PATH) or add_ons == 6:
+    if template_path == str(TEMPLATE_PATH) or add_ons == "6":
         if add_ons == "none":
             click.secho("\nYou have selected no add-ons")
         else:

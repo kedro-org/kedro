@@ -14,7 +14,7 @@ from IPython.core.magic import needs_local_scope, register_line_magic
 from IPython.core.magic_arguments import argument, magic_arguments, parse_argstring
 
 from kedro.framework.cli import load_entry_points
-from kedro.framework.cli.project import PARAMS_ARG_HELP
+from kedro.framework.cli.project import PARAMS_ARG_HELP, CONF_SOURCE_HELP 
 from kedro.framework.cli.utils import ENV_HELP, _split_params
 from kedro.framework.project import (
     LOGGING,  # noqa
@@ -65,6 +65,7 @@ def load_ipython_extension(ipython):
     default=None,
     help=PARAMS_ARG_HELP,
 )
+@argument("--conf-source", type=str, default=None, help=CONF_SOURCE_HELP)
 def magic_reload_kedro(line: str, local_ns: dict[str, Any] = None):
     """
     The `%reload_kedro` IPython line magic.

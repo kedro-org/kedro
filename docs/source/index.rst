@@ -92,11 +92,6 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Kedro projects
 
-   kedro_project_setup/index.md
-
-.. toctree::
-   :maxdepth: 2
-
    configuration/index.md
 
 .. toctree::
@@ -113,13 +108,17 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Advanced usage
 
+   kedro_project_setup/index.md
+
+.. toctree::
+   :maxdepth: 2
+
    extend_kedro/index.md
 
 .. toctree::
    :maxdepth: 2
 
    hooks/index.md
-
 
 .. toctree::
    :maxdepth: 2

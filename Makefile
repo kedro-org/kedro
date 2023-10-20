@@ -13,7 +13,7 @@ test:
 	pytest --numprocesses 4 --dist loadfile
 
 e2e-tests:
-	behave
+	behave --tags=-skip
 
 pip-compile:
 	pip-compile -q -o -
@@ -36,6 +36,9 @@ package: clean install
 	python -m pip install build && python -m build
 
 install-test-requirements:
+# pip==23.2 breaks pip-tools<7.0, and pip-tools>=7.0 does not support Python 3.7
+# pip==23.3 breaks dependency resolution
+	python -m pip install -U "pip>=21.2,<23.2"
 	pip install .[test]
 
 install-pre-commit: install-test-requirements

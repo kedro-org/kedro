@@ -372,6 +372,8 @@ def _make_cookiecutter_args(
         Arguments to pass to cookiecutter.
     """
     config.setdefault("kedro_version", version)
+
+    # Map the selected add on lists to readable name
     add_ons = config.get("add_ons")
     if add_ons:
         config["add_ons"] = [

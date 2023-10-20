@@ -15,6 +15,7 @@ from kedro.io.core import (
     AbstractVersionedDataset,
     DatasetError,
     Version,
+    VersionNotFoundError,
     generate_timestamp,
     get_filepath_str,
     get_protocol_and_path,
@@ -122,7 +123,7 @@ class MyLocalVersionedDataset(AbstractVersionedDataset[str, str]):
             filepath=PurePosixPath(path),
             version=version,
             glob_function=self._fs.glob,
-        )
+        )  # Not passing exists_function so it'll use _local_exists() instead.
 
     def _describe(self) -> dict[str, Any]:
         return dict(filepath=self._filepath, version=self._version)
@@ -140,11 +141,17 @@ class MyLocalVersionedDataset(AbstractVersionedDataset[str, str]):
             fs_file.write(data)
 
     def _exists(self) -> bool:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        # no try catch - will return a VersionNotFoundError to be caught be AbstractVersionedDataset.exists()
+        return self._fs.exists(load_path)
+
+
+class MyOtherVersionedDataset(MyLocalVersionedDataset):
+    def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DatasetError:
-            return False
-
+        except VersionNotFoundError:
+            raise NameError("Raising a NameError instead")
         return self._fs.exists(load_path)
 
 
@@ -299,17 +306,31 @@ class TestAbstractVersionedDataset:
         with pytest.raises(DatasetError, match=pattern):
             my_versioned_dataset.load()
 
-    def test_no_versions_exists(self):
-        """Check the error if no versions are available for load."""
+    def test_local_exists(self, dummy_data):
+        """Check the error if no versions are available for load (_local_exists())."""
         version = Version(load=None, save=None)
         my_versioned_dataset = MyLocalVersionedDataset("test.csv", version=version)
         assert my_versioned_dataset.exists() is False
+        my_versioned_dataset.save(dummy_data)  # _local_exists is used by save
+        assert my_versioned_dataset.exists() is True
+        shutil.rmtree(my_versioned_dataset._filepath)
+
+    def test_exists_general_exception(self):
+        """Check if all exceptions are shown as DataSetError for exists() check"""
+        version = Version(load=None, save=None)
+        my_other_versioned_dataset = MyOtherVersionedDataset(
+            "test.csv", version=version
+        )
+        # Override the _exists() function to return a different exception
+        with pytest.raises(DatasetError):
+            my_other_versioned_dataset.exists()
 
     def test_exists(self, my_versioned_dataset, dummy_data):
         """Test `exists` method invocation for versioned data set."""
         assert not my_versioned_dataset.exists()
         my_versioned_dataset.save(dummy_data)
         assert my_versioned_dataset.exists()
+        shutil.rmtree(my_versioned_dataset._filepath)
 
     def test_prevent_overwrite(self, my_versioned_dataset, dummy_data):
         """Check the error when attempting to override the data set if the

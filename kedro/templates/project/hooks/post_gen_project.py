@@ -15,11 +15,8 @@ def main():
     # Get the selected add-ons from cookiecutter
     selected_add_ons = "{{ cookiecutter.add_ons }}"
 
-    # Parse the add-ons to get a list
-    selected_add_ons_list = _parse_add_ons_input(selected_add_ons)
-
     # Handle template directories and requirements according to selected add-ons
-    setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path)
+    setup_template_add_ons(selected_add_ons, requirements_file_path, pyproject_file_path)
 
     # Sort requirements.txt file in alphabetical order
     sort_requirements(requirements_file_path)

@@ -48,13 +48,6 @@ docs = [
 """
 
 
-
-
-
-
-
-
-
 def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path):
     """Removes directories and files related to unwanted addons from
     a Kedro project template. Adds the necessary requirements for
@@ -67,7 +60,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         pyproject_file_path: the path to the pyproject.toml file
             located on the the root of the template.
     """
-    if "1" not in selected_add_ons_list:  # If Linting not selected
+    if "Linting" not in selected_add_ons_list:
         pass
     else:
         with open(requirements_file_path, 'a') as file:
@@ -75,7 +68,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         with open(pyproject_file_path, 'a') as file:
             file.write(lint_pyproject_requirements)
 
-    if "2" not in selected_add_ons_list:  # If Testing not selected
+    if "Testing" not in selected_add_ons_list:
         tests_path = current_dir / "tests"
         if tests_path.exists():
             shutil.rmtree(str(tests_path))
@@ -85,12 +78,12 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         with open(pyproject_file_path, 'a') as file:
             file.write(test_pyproject_requirements)
 
-    if "3" not in selected_add_ons_list:  # If Logging not selected
+    if "Logging" not in selected_add_ons_list:
         logging_yml_path = current_dir / "conf/logging.yml"
         if logging_yml_path.exists():
             logging_yml_path.unlink()
 
-    if "4" not in selected_add_ons_list:  # If Documentation not selected
+    if "Documentation" not in selected_add_ons_list:
         docs_path = current_dir / "docs"
         if docs_path.exists():
             shutil.rmtree(str(docs_path))
@@ -98,7 +91,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         with open(pyproject_file_path, 'a') as file:
             file.write(docs_pyproject_requirements)
 
-    if "5" not in selected_add_ons_list:  # If Data Structure not selected
+    if "Data Structure" not in selected_add_ons_list:
         data_path = current_dir / "data"
         if data_path.exists():
             shutil.rmtree(str(data_path))

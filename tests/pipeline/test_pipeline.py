@@ -49,7 +49,17 @@ def triconcat(input1: str, input2: str, input3: str):
 
 @pytest.fixture
 def branchless_pipeline():
-    return {
+    """
+    Fixture for a branchless pipeline configuration.
+
+    This fixture defines a branchless pipeline with nodes and their connections.
+    The pipeline starts with a constant output node A and is followed by a series
+    of identity nodes in a linear chain from A to E.
+
+    Returns:
+        dict: A dictionary containing the branchless pipeline configuration.
+    """
+    pipeline = {
         "nodes": [
             node(identity, "E", None),
             node(identity, "D", "E"),
@@ -59,21 +69,29 @@ def branchless_pipeline():
             node(constant_output, None, "A"),
         ],
         "expected": [
-            {node(constant_output, None, "A")},
-            {node(identity, "A", "B")},
-            {node(identity, "B", "C")},
-            {node(identity, "C", "D")},
-            {node(identity, "D", "E")},
-            {node(identity, "E", None)},
+            node(constant_output, None, "A"),
+            node(identity, "A", "B"),
+            node(identity, "B", "C"),
+            node(identity, "C", "D"),
+            node(identity, "D", "E"),
+            node(identity, "E", None),
         ],
         "free_inputs": [],
         "outputs": [],
     }
-
+    return pipeline
 
 @pytest.fixture
-def pipeline_list_with_lists():
-    return {
+def pipeline_with_lists():
+    """
+    Fixture for a pipeline configuration with nodes and their connections.
+
+    There is added complexity as some nodes map to/from a list of nodes.
+
+    Returns:
+        dict: A dictionary containing the pipeline configuration.
+    """
+    pipeline = {
         "nodes": [
             node(triconcat, ["H", "I", "M"], "N", name="node1"),
             node(identity, "H", "I", name="node2"),
@@ -103,11 +121,21 @@ def pipeline_list_with_lists():
         "free_inputs": [],
         "outputs": ["L", "G", "N"],
     }
+    return pipeline
+
 
 
 @pytest.fixture
 def pipeline_with_dicts():
-    return {
+    """
+    Fixture for a pipeline configuration with nodes and their connections.
+
+    There is added complexity as some nodes map to/from a dictionary of nodes.
+
+    Returns:
+        dict: A dictionary containing the pipeline configuration.
+    """
+    pipeline = {
         "nodes": [
             node(triconcat, ["H", "I", "M"], "N", name="node1"),
             node(identity, "H", "I", name="node2"),
@@ -137,11 +165,21 @@ def pipeline_with_dicts():
         "free_inputs": [],
         "outputs": ["L", "G", "N"],
     }
+    return pipeline
 
 
 @pytest.fixture
 def free_input_needed_pipeline():
-    return {
+    """
+    Fixture for a pipeline configuration with nodes requiring a free input.
+
+    The first node ('node1') requires a free input 'A'. The other nodes are
+    connected in succession.
+
+    Returns:
+        dict: A dictionary containing the pipeline configuration.
+    """
+    pipeline = {
         "nodes": [
             node(identity, "A", "B", name="node1"),  # 'A' needs to be free
             node(identity, "B", "C", name="node2"),
@@ -155,12 +193,18 @@ def free_input_needed_pipeline():
         "free_inputs": ["A"],
         "outputs": ["D"],
     }
+    return pipeline
 
 
 @pytest.fixture
 def disjoint_pipeline():
-    # Two separate pipelines: A->B->C and D->E->F
-    return {
+    """
+    Fixture for a pipeline configuration made up of two disjoint pipelines.
+
+    Returns:
+        dict: A dictionary containing the pipeline configuration.
+    """
+    pipeline = {
         "nodes": [
             node(identity, "A", "B", name="node1"),
             node(identity, "B", "C", name="node2"),
@@ -180,11 +224,19 @@ def disjoint_pipeline():
         "free_inputs": ["A", "D"],
         "outputs": ["C", "F"],
     }
+    return pipeline
 
 
 @pytest.fixture
 def pipeline_input_duplicated():
-    return {
+    """
+    This fixture defines a pipeline configuration with nodes where the first node ('node1')
+    has a duplicated input 'A'. The other nodes are connected in succession.
+
+    Returns:
+        dict: A dictionary containing the pipeline configuration.
+    """
+    pipeline = {
         "nodes": [
             node(biconcat, ["A", "A"], "B", name="node1"),  # input duplicate
             node(identity, "B", "C", name="node2"),
@@ -198,11 +250,21 @@ def pipeline_input_duplicated():
         "free_inputs": ["A"],
         "outputs": ["D"],
     }
+    return pipeline
 
 
 @pytest.fixture
-def str_node_inputs_list():
-    return {
+def str_nodes_input_list():
+    """
+    Fixture for a pipeline configuration with nodes that specify input and output lists.
+
+    This fixture defines a pipeline configuration with nodes that specify input and output lists.
+    The nodes are connected sequentially, and specific inputs and outputs are defined for each node.
+
+    Returns:
+        dict: A dictionary containing the pipeline configuration.
+    """
+    pipeline = {
         "nodes": [
             node(biconcat, ["input1", "input2"], ["input3"], name="node1"),
             node(identity, "input3", "input4", name="node2"),
@@ -214,13 +276,13 @@ def str_node_inputs_list():
         "free_inputs": ["input1", "input2"],
         "outputs": ["input4"],
     }
+    return pipeline
 
 
 @pytest.fixture
-def complex_pipeline(pipeline_list_with_lists):
+def complex_modular_pipeline(pipeline_list_with_lists):
     nodes = pipeline_list_with_lists["nodes"]
-    pipeline = modular_pipeline(nodes)
-    return pipeline
+    return modular_pipeline(nodes)
 
 
 @pytest.fixture(
@@ -234,7 +296,7 @@ def complex_pipeline(pipeline_list_with_lists):
         "str_node_inputs_list",
     ]
 )
-def input_data(request):
+def all_pipeline_input_data(request):
     return request.getfixturevalue(request.param)
 
 
@@ -245,10 +307,10 @@ class TestValidPipeline:
 
         assert set(pipeline.nodes) == set(nodes)
 
-    def test_grouped_nodes(self, input_data):
+    def test_grouped_nodes(self, all_pipeline_input_data):
         """Check if grouped_nodes func groups the nodes correctly"""
-        nodes_input = input_data["nodes"]
-        expected = input_data["expected"]
+        nodes_input = all_pipeline_input_data["nodes"]
+        expected = all_pipeline_input_data["expected"]
         pipeline = modular_pipeline(nodes_input)
 
         grouped = pipeline.grouped_nodes
@@ -258,17 +320,17 @@ class TestValidPipeline:
         # non-deterministic, so we are only checking they have the same set of nodes.
         assert all(set(g) == e for g, e in zip(grouped, expected))
 
-    def test_free_input(self, input_data):
-        nodes = input_data["nodes"]
-        inputs = input_data["free_inputs"]
+    def test_free_input(self, all_pipeline_input_data):
+        nodes = all_pipeline_input_data["nodes"]
+        inputs = all_pipeline_input_data["free_inputs"]
 
         pipeline = modular_pipeline(nodes)
 
         assert pipeline.inputs() == set(inputs)
 
-    def test_outputs(self, input_data):
-        nodes = input_data["nodes"]
-        outputs = input_data["outputs"]
+    def test_outputs(self, all_pipeline_input_data):
+        nodes = all_pipeline_input_data["nodes"]
+        outputs = all_pipeline_input_data["outputs"]
 
         pipeline = modular_pipeline(nodes)
 
@@ -985,8 +1047,8 @@ class TestPipelineRunnerHelpers:
             complex_pipeline.only_nodes_with_outputs("Z", "W", "E", "C")
 
 
-def test_pipeline_to_json(input_data):
-    nodes = input_data["nodes"]
+def test_pipeline_to_json(all_pipeline_input_data):
+    nodes = all_pipeline_input_data["nodes"]
     json_rep = modular_pipeline(nodes).to_json()
     for pipeline_node in nodes:
         assert pipeline_node.name in json_rep

@@ -105,7 +105,7 @@ ADD_ONS_DICT = {
     "2": "Testing",
     "3": "Custom Logging",
     "4": "Documentation",
-    "5": "Data structure",
+    "5": "Data Structure",
 }
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover

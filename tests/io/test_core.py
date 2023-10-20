@@ -267,10 +267,6 @@ class TestCoreFunctions:
             validate_on_forbidden_chars(**input)
 
 
-class TestAbstractDataSet:
-    pass
-
-
 class TestAbstractVersionedDataset:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance

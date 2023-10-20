@@ -322,7 +322,20 @@ def _get_addons_from_cli_input(
     return config
 
 
-def _select_prompts_to_display(prompts_required, selected_addons):
+def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> dict:
+    """Selects which prompts an user will receive when creating a new
+    Kedro project, based on what information was already made available
+    through CLI input.
+
+    Args:
+        prompts_required: a dictionary of all the prompts that will be shown to
+            the user on project creation.
+        selected_addons: a string containing the value for the --addons flag,
+            or None in case the flag wasn't used.
+
+    Returns:
+        the prompts_required dictionary, with all the redundant information removed.
+    """
     valid_addons = ["lint", "test", "log", "docs", "data", "all", "none"]
 
     if selected_addons is not None:

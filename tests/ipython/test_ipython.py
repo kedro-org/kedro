@@ -1,4 +1,3 @@
-# pylint: disable=import-outside-toplevel
 from pathlib import Path
 
 import pytest
@@ -18,7 +17,7 @@ PROJECT_VERSION = "0.1"
 @pytest.fixture(autouse=True)
 def cleanup_pipeline():
     yield
-    from kedro.framework.project import pipelines  # pylint: disable=reimported
+    from kedro.framework.project import pipelines
 
     pipelines.configure()
 
@@ -165,9 +164,6 @@ class TestLoadIPythonExtension:
     def test_load_ipython_extension(self, ipython):
         ipython.magic("load_ext kedro.ipython")
 
-    def test_load_ipython_extension_old_location(self, ipython):
-        ipython.magic("load_ext kedro.ipython")
-
     def test_load_extension_missing_dependency(self, mocker):
         mocker.patch("kedro.ipython.reload_kedro", side_effect=ImportError)
         mocker.patch(
@@ -249,7 +245,6 @@ class TestProjectPathResolution:
         assert result == expected
 
     def test_only_local_namespace_specified(self):
-        # pylint: disable=too-few-public-methods
         class MockKedroContext:
             # A dummy stand-in for KedroContext sufficient for this test
             _project_path = Path("/test").resolve()
@@ -283,7 +278,6 @@ class TestProjectPathResolution:
         assert expected_message in log_messages
 
     def test_project_path_update(self, caplog):
-        # pylint: disable=too-few-public-methods
         class MockKedroContext:
             # A dummy stand-in for KedroContext sufficient for this test
             _project_path = Path("/test").resolve()

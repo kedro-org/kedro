@@ -202,7 +202,7 @@ To use generator functions in Kedro nodes, you need to update the `catalog.yml` 
 You need to add a new dataset in your `catalog.yml` as follows:
 ```diff
 + X_test:
-+  type: pandas.CSVDataSet
++  type: pandas.CSVDataset
 +  filepath: data/05_model_input/X_test.csv
 +  load_args:
 +    chunksize: 10
@@ -287,7 +287,7 @@ def report_accuracy(y_pred: pd.Series, y_test: pd.Series):
 </details>
 
 
-The `ChunkWiseCSVDataset` is a variant of the `pandas.CSVDataSet` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
+The `ChunkWiseCSVDataset` is a variant of the `pandas.CSVDataset` where the main change is to the `_save` method that appends data instead of overwriting it. You need to create a file `src/<package_name>/chunkwise.py` and put this class inside it. Below is an example of the `ChunkWiseCSVDataset` implementation:
 
 ```python
 import pandas as pd
@@ -295,10 +295,10 @@ import pandas as pd
 from kedro.io.core import (
     get_filepath_str,
 )
-from kedro.extras.datasets.pandas import CSVDataSet
+from kedro_datasets.pandas import CSVDataset
 
 
-class ChunkWiseCSVDataset(CSVDataSet):
+class ChunkWiseCSVDataset(CSVDataset):
     """``ChunkWiseCSVDataset`` loads/saves data from/to a CSV file using an underlying
     filesystem. It uses pandas to handle the CSV file.
     """

@@ -15,13 +15,6 @@ pip install sphinx
 ```
 
 ### Set up the Sphinx project files
-
-```{warning}
-Currently, Kedro projects are created with a `docs/source` subdirectory, which gets pre-populated with two Sphinx configuration files (`conf.py`, and `index.rst`), needed by the `kedro build-docs` command. This command is deprecated; it will be removed in Kedro version 0.19, along with those dummy files.
-
-Before proceeding with these instructions, back up the contents of `docs/source/index.rst` and remove both `docs/source/conf.py` and `docs/source/index.rst`.
-```
-
 First, run the following command:
 
 ```bash

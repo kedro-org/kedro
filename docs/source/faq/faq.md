@@ -9,7 +9,6 @@ This is a growing set of technical FAQs. The [product FAQs on the Kedro website]
 ## Working with Jupyter
 
 * [How can I convert functions from Jupyter Notebooks into Kedro nodes](../notebooks_and_ipython/kedro_and_notebooks.md#how-to-use-tags-to-convert-functions-from-jupyter-notebooks-into-kedro-nodes)?
-
 * [How do I connect a Kedro project kernel to other Jupyter clients like JupyterLab](../notebooks_and_ipython/kedro_and_notebooks.md#ipython-jupyterlab-and-other-jupyter-clients)?
 
 ## Kedro project development

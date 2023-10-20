@@ -166,7 +166,7 @@ def _starter_spec_to_dict(
     return format_dict
 
 
-def _parse_add_ons_input(add_ons_str):
+def _parse_add_ons_input(add_ons_str: str):
     """Parse the add-ons input string.
 
     Args:
@@ -182,7 +182,7 @@ def _parse_add_ons_input(add_ons_str):
             click.secho(message, fg="red", err=True)
             sys.exit(1)
 
-    def _validate_selection(add_ons):
+    def _validate_selection(add_ons: list[str]):
         for add_on in add_ons:
             if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
                 message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."  # nosec
@@ -372,27 +372,25 @@ def _make_cookiecutter_args(
         Arguments to pass to cookiecutter.
     """
     config.setdefault("kedro_version", version)
+    add_ons = config.get("add_ons")
+    if add_ons:
+        config["add_ons"] = [
+            ADD_ONS_DICT[add_on] for add_on in _parse_add_ons_input(add_ons)
+        ]
+        config["add_ons"] = str(config["add_ons"])
 
     cookiecutter_args = {
         "output_dir": config.get("output_dir", str(Path.cwd().resolve())),
         "no_input": True,
         "extra_context": config,
     }
+
     if checkout:
         cookiecutter_args["checkout"] = checkout
     if directory:
         cookiecutter_args["directory"] = directory
 
     return cookiecutter_args
-
-
-def _get_add_ons_text(add_ons):
-    add_ons_list = _parse_add_ons_input(add_ons)
-    add_ons_text = [ADD_ONS_DICT[add_on] for add_on in add_ons_list]
-    return (
-        " ".join(str(add_on) + "," for add_on in add_ons_text[:-1])
-        + f" and {add_ons_text[-1]}"
-    )
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
@@ -431,9 +429,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         if add_ons == "none":
             click.secho("\nYou have selected no add-ons")
         else:
-            click.secho(
-                f"\nYou have selected the following add-ons: {_get_add_ons_text(add_ons)}"
-            )
+            click.secho(f"\nYou have selected the following add-ons: {add_ons}")
 
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "

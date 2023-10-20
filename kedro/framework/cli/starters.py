@@ -230,9 +230,8 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     cookiecutter_dir = _get_cookiecutter_dir(template_path, checkout, directory, tmpdir)
     prompts_required = _get_prompts_required(cookiecutter_dir)
 
-    # Remove the prompt asking for add-ons if the user already passed them through CLI.
-    if selected_addons is not None:
-        del prompts_required["add_ons"]
+    # Select which prompts will be displayed to the user based on which flags were selected.
+    prompts_required = _select_prompts_to_display(prompts_required, selected_addons)
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
     if not config_path:
@@ -321,6 +320,24 @@ def _get_addons_from_cli_input(
         config["add_ons"] = ",".join(addons)
 
     return config
+
+
+def _select_prompts_to_display(prompts_required, selected_addons):
+    valid_addons = ["lint", "test", "log", "docs", "data", "all", "none"]
+
+    if selected_addons is not None:
+        addons = selected_addons.split(",")
+        for addon in addons:
+            if addon not in valid_addons:
+                click.secho(
+                    "Please select from the available add-ons: lint, test, log, docs, data, all, none",
+                    fg="red",
+                    err=True,
+                )
+                sys.exit(1)
+        del prompts_required["add_ons"]
+
+    return prompts_required
 
 
 def _fetch_config_from_file(config_path: str) -> dict[str, str]:

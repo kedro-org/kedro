@@ -74,6 +74,10 @@ def parse_add_ons_input(add_ons_str):
     Returns:
         list: List of selected add-ons as strings.
     """
+    # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
+    if not add_ons_str:
+        return []
+
     if add_ons_str == "all":
         return ["1", "2", "3", "4", "5", "6"]
     if add_ons_str == "none":
@@ -169,6 +173,11 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         pipelines_path = current_dir / f"src/{python_package_name}/pipelines/"
         for pipeline_subdir in ["data_science", "data_processing"]:
             shutil.rmtree(pipelines_path / pipeline_subdir, ignore_errors=True)
+
+        # Remove all test file from tests/pipelines/
+        test_pipeline_path = current_dir / "tests/pipelines/test_data_science.py"
+        if test_pipeline_path.exists():
+            test_pipeline_path.unlink()
 
 
 def sort_requirements(requirements_file_path):

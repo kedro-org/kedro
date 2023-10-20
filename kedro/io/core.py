@@ -448,7 +448,7 @@ def _load_obj(class_path: str) -> object | None:
     return class_obj
 
 
-def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK # TODO coverage
+def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     filepath = Path(filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
@@ -644,7 +644,7 @@ class AbstractVersionedDataset(AbstractDataset[_DI, _DO], abc.ABC):
             return self._exists()
         except VersionNotFoundError:
             return False
-        except Exception as exc:  # SKIP_IF_NO_SPARK    # TODO coverage
+        except Exception as exc:  # SKIP_IF_NO_SPARK
             message = (
                 f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
             )

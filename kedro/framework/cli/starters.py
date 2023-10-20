@@ -209,7 +209,7 @@ def _parse_add_ons_input(add_ons_str: str):
 
     # Split by comma
     add_ons_choices = add_ons_str.split(",")
-    selected = []
+    selected: list[str] = []
 
     for choice in add_ons_choices:
         if "-" in choice:
@@ -379,7 +379,7 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
 
 
 def _make_cookiecutter_args(
-    config: dict[str, str],
+    config: dict[str, str | list[str]],
     checkout: str,
     directory: str,
 ) -> dict[str, Any]:
@@ -403,7 +403,7 @@ def _make_cookiecutter_args(
     config.setdefault("kedro_version", version)
 
     # Map the selected add on lists to readable name
-    add_ons = config.get("add_ons")
+    add_ons:str = config.get("add_ons")
     if add_ons:
         config["add_ons"] = [
             ADD_ONS_DICT[add_on] for add_on in _parse_add_ons_input(add_ons)

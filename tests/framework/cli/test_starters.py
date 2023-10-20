@@ -989,3 +989,7 @@ class TestAddOnsFromCLI:
         )
 
         assert result.exit_code != 0
+        assert (
+            "Please select from the available add-ons: lint, test, log, docs, data, all, none"
+            in result.output
+        )

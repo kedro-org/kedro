@@ -8,7 +8,12 @@ on:
 
 jobs:
   kedro-test:
+    strategy:
+      matrix:
+        branch: [ main, develop ]
     uses: ./.github/workflows/all-checks.yml
+    with:
+      branch: ${{ matrix.branch }}
 
   notify-kedro:
     permissions:

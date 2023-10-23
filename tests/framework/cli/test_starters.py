@@ -697,13 +697,13 @@ class TestNewWithStarterValid:
     def test_alias(self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter):
         CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--starter", "spaceflights"],
+            ["new", "--starter", "spaceflights-pandas"],
             input=_make_cli_prompt_input(),
         )
         kwargs = {
             "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": version,
-            "directory": "spaceflights",
+            "directory": "spaceflights-pandas",
         }
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
@@ -713,13 +713,13 @@ class TestNewWithStarterValid:
     ):
         CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--starter", "spaceflights", "--checkout", "my_checkout"],
+            ["new", "--starter", "spaceflights-pandas", "--checkout", "my_checkout"],
             input=_make_cli_prompt_input(),
         )
         kwargs = {
             "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": "my_checkout",
-            "directory": "spaceflights",
+            "directory": "spaceflights-pandas",
         }
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
@@ -798,7 +798,7 @@ class TestNewWithStarterInvalid:
     @pytest.mark.parametrize(
         "starter, repo",
         [
-            ("spaceflights", "https://github.com/kedro-org/kedro-starters.git"),
+            ("spaceflights-pandas", "https://github.com/kedro-org/kedro-starters.git"),
             (
                 "git+https://github.com/fake/fake.git",
                 "https://github.com/fake/fake.git",

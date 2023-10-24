@@ -112,7 +112,7 @@ def config_with_dataset_factories_nested():
     return {
         "catalog": {
             "{brand}_cars": {
-                "type": "PartitionedDataset",
+                "type": "kedro_datasets.partitions.PartitionedDataset",
                 "path": "data/01_raw",
                 "dataset": "pandas.CSVDataset",
                 "metadata": {
@@ -594,10 +594,12 @@ class TestDataCatalogFromConfig:
     def test_confirm(self, tmp_path, caplog, mocker):
         """Confirm the dataset"""
         with caplog.at_level(logging.INFO):
-            mock_confirm = mocker.patch("kedro.io.IncrementalDataset.confirm")
+            mock_confirm = mocker.patch(
+                "kedro_datasets.partitions.incremental_dataset.IncrementalDataset.confirm"
+            )
             catalog = {
                 "ds_to_confirm": {
-                    "type": "IncrementalDataset",
+                    "type": "kedro_datasets.partitions.incremental_dataset.IncrementalDataset",
                     "dataset": "pandas.CSVDataset",
                     "path": str(tmp_path),
                 }

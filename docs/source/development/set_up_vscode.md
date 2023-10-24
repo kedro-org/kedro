@@ -109,7 +109,8 @@ PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
 
 You can find [more information about setting up environmental variables in the VSCode documentation](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
 
-Go to **Debug > Add Configurations**.
+Click on the **Run and Debug** icon on the left activity bar (press `Cmd + Shift + D` for macOS). If there is no existing configuration, click on **create a launch.json file** else click on the dropdown arrow in the top-left (shown below) and click **Add Configuration** .
+![](../meta/images/vscode_add_configuration.png)
 
 ```{note}
 If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`, you can manually create `launch.json` file in `.vscode` directory and paste the configuration from below.

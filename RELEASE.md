@@ -5,7 +5,6 @@
 * Introduced add-ons to the `kedro new` CLI flow.
 
 ## Bug fixes and other changes
-* Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
@@ -16,6 +15,7 @@
 ### DataSets
 * Removed `kedro.extras.datasets` and tests.
 * Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+* Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ### CLI
 * Removed deprecated `kedro docs` command.

@@ -21,6 +21,7 @@
 
 ### CLI
 * Removed deprecated `kedro docs` command.
+* Added the `--addons` flag to the `kedro new` command.
 
 ### ConfigLoader
 * `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.

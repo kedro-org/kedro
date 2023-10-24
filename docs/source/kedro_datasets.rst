@@ -44,6 +44,8 @@ kedro_datasets
    kedro_datasets.plotly.PlotlyDataset
    kedro_datasets.polars.CSVDataset
    kedro_datasets.polars.GenericDataset
+   kedro_datasets.polars.EagerPolarsDataset
+   kedro_datasets.polars.LazyPolarsDataset
    kedro_datasets.redis.PickleDataset
    kedro_datasets.snowflake.SnowparkTableDataset
    kedro_datasets.spark.DeltaTableDataset

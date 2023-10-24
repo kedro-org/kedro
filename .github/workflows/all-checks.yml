@@ -2,6 +2,10 @@ name: Run all checks on Kedro
 
 on:
   workflow_call:
+    inputs:
+      branch:
+        type: string
+        default: ''
   push:
     branches:
       - main
@@ -27,6 +31,7 @@ jobs:
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
 
   lint:
     strategy:
@@ -37,6 +42,7 @@ jobs:
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
 
   e2e-tests:
     strategy:
@@ -47,6 +53,7 @@ jobs:
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
 
   pip-compile:
     strategy:
@@ -57,3 +64,4 @@ jobs:
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}

@@ -314,7 +314,7 @@ def _get_addons_from_cli_input(
     if selected_addons is not None:
         addons = selected_addons.split(",")
         for i in range(len(addons)):
-            addon = addons[i]
+            addon = addons[i].strip()
             if addon in string_to_number:
                 addons[i] = string_to_number[addon]
         config["add_ons"] = ",".join(addons)
@@ -339,7 +339,7 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
     valid_addons = ["lint", "test", "log", "docs", "data", "all", "none"]
 
     if selected_addons is not None:
-        addons = selected_addons.split(",")
+        addons = re.sub(r"\s", "", selected_addons).split(",")
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
@@ -348,6 +348,13 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
                     err=True,
                 )
                 sys.exit(1)
+        if ("none" in addons or "all" in addons) and len(addons) > 1:
+            click.secho(
+                "Add-on options 'all' and 'none' cannot be used with other options",
+                fg="red",
+                err=True,
+            )
+            sys.exit(1)
         del prompts_required["add_ons"]
 
     return prompts_required

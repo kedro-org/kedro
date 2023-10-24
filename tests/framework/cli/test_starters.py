@@ -67,7 +67,7 @@ def _convert_addon_names_to_numbers(selected_addons: str):
 
     addons = selected_addons.split(",")
     for i in range(len(addons)):
-        addon = addons[i]
+        addon = addons[i].strip()
         if addon in string_to_number:
             addons[i] = string_to_number[addon]
 
@@ -967,6 +967,8 @@ class TestAddOnsFromCLI:
             "test,log,docs",
             "test,data,lint",
             "log,docs,data,test,lint",
+            "log, docs, data, test, lint",
+            "log,       docs,     data,   test,     lint",
             "all",
         ],
     )
@@ -991,5 +993,22 @@ class TestAddOnsFromCLI:
         assert result.exit_code != 0
         assert (
             "Please select from the available add-ons: lint, test, log, docs, data, all, none"
+            in result.output
+        )
+
+    @pytest.mark.parametrize(
+        "add_ons",
+        ["lint,all", "test,none", "all,none"],
+    )
+    def test_invalid_add_on_combination(self, fake_kedro_cli, add_ons):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", add_ons],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "Add-on options 'all' and 'none' cannot be used with other options"
             in result.output
         )

@@ -12,7 +12,7 @@
 * Renamed the `data_sets()` method in `Pipeline` and all references to it to `datasets()`.
 * Renamed the `create_default_data_set()` method in the `Runner` to `create_default_dataset()`.
 * Renamed all other uses of `data_set` and `data_sets` in the codebase to `dataset` and `datasets` respectively.
-* Deprecated `project_version` from `ProjectMetadata`.
+* Remove deprecated `project_version` from `ProjectMetadata`.
 
 ### DataSets
 * Removed `kedro.extras.datasets` and tests.

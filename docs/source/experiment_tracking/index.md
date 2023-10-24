@@ -57,7 +57,7 @@ The example code uses a version of Kedro-Viz `>6.2.0`.
 Create a new project using the spaceflights starter. From the terminal run:
 
 ```bash
-kedro new --starter=spaceflights
+kedro new --starter=spaceflights-pandas
 ```
 
 Feel free to name your project as you like, but this guide assumes the project is named `Spaceflights`.

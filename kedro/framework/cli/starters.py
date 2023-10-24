@@ -403,10 +403,10 @@ def _make_cookiecutter_args(
     config.setdefault("kedro_version", version)
 
     # Map the selected add on lists to readable name
-    add_ons:str = config.get("add_ons")
+    add_ons = config.get("add_ons")
     if add_ons:
         config["add_ons"] = [
-            ADD_ONS_DICT[add_on] for add_on in _parse_add_ons_input(add_ons)
+            ADD_ONS_DICT[add_on] for add_on in _parse_add_ons_input(add_ons)  # type: ignore
         ]
         config["add_ons"] = str(config["add_ons"])
 
@@ -457,7 +457,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
 
     # Only non-starter projects have configurable add-ons
     if template_path == str(TEMPLATE_PATH):
-        if add_ons == "none":
+        if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")
         else:
             click.secho(f"\nYou have selected the following add-ons: {add_ons}")

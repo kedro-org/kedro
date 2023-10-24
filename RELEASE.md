@@ -5,6 +5,7 @@
 * Introduced add-ons to the `kedro new` CLI flow.
 
 ## Bug fixes and other changes
+* Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.

@@ -1,13 +1,11 @@
 """This module provides metadata for a Kedro project."""
 import os
 import sys
-import warnings
 from pathlib import Path
 from typing import NamedTuple, Union
 
 import anyconfig
 
-from kedro import KedroDeprecationWarning
 from kedro import __version__ as kedro_version
 from kedro.framework.project import configure_project
 
@@ -21,9 +19,9 @@ class ProjectMetadata(NamedTuple):
     package_name: str
     project_name: str
     project_path: Path
-    project_version: str
     source_dir: Path
     kedro_init_version: str
+    add_ons: list
 
 
 def _version_mismatch_error(kedro_init_version) -> str:
@@ -89,26 +87,11 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             f"configuration parameters."
         ) from exc
 
-    mandatory_keys = ["package_name", "project_name"]
+    mandatory_keys = ["package_name", "project_name", "kedro_init_version"]
     missing_keys = [key for key in mandatory_keys if key not in metadata_dict]
     if missing_keys:
         raise RuntimeError(f"Missing required keys {missing_keys} from '{_PYPROJECT}'.")
 
-    # Temporary solution to keep project_version backwards compatible to be removed in 0.19.0
-    if "project_version" in metadata_dict:
-        warnings.warn(
-            "project_version in pyproject.toml is deprecated, use kedro_init_version instead",
-            KedroDeprecationWarning,
-        )
-        metadata_dict["kedro_init_version"] = metadata_dict["project_version"]
-    elif "kedro_init_version" in metadata_dict:
-        metadata_dict["project_version"] = metadata_dict["kedro_init_version"]
-    else:
-        raise RuntimeError(
-            f"Missing required key kedro_init_version from '{_PYPROJECT}'."
-        )
-
-    mandatory_keys.append("kedro_init_version")
     # check the match for major and minor version (skip patch version)
     if (
         metadata_dict["kedro_init_version"].split(".")[:2]

@@ -15,10 +15,6 @@ from .core import (
 from .data_catalog import DataCatalog
 from .lambda_dataset import LambdaDataset
 from .memory_dataset import MemoryDataset
-from .partitioned_dataset import (
-    IncrementalDataset,
-    PartitionedDataset,
-)
 
 __all__ = [
     "AbstractDataset",
@@ -28,9 +24,7 @@ __all__ = [
     "DatasetAlreadyExistsError",
     "DatasetError",
     "DatasetNotFoundError",
-    "IncrementalDataset",
     "LambdaDataset",
     "MemoryDataset",
-    "PartitionedDataset",
     "Version",
 ]

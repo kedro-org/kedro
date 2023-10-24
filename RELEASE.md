@@ -12,10 +12,12 @@
 * Renamed the `data_sets()` method in `Pipeline` and all references to it to `datasets()`.
 * Renamed the `create_default_data_set()` method in the `Runner` to `create_default_dataset()`.
 * Renamed all other uses of `data_set` and `data_sets` in the codebase to `dataset` and `datasets` respectively.
+* Remove deprecated `project_version` from `ProjectMetadata`.
 
 ### DataSets
 * Removed `kedro.extras.datasets` and tests.
 * Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+* Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ### CLI
 * Removed deprecated `kedro docs` command.

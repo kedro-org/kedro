@@ -112,7 +112,7 @@ def config_with_dataset_factories_nested():
     return {
         "catalog": {
             "{brand}_cars": {
-                "type": "PartitionedDataset",
+                "type": "kedro_datasets.partitions.PartitionedDataset",
                 "path": "data/01_raw",
                 "dataset": "pandas.CSVDataset",
                 "metadata": {

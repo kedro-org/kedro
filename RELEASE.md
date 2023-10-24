@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Dropped Python 3.7 support.
 * Introduced add-ons to the `kedro new` CLI flow.
+* The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 
 ## Bug fixes and other changes
 
@@ -29,14 +30,17 @@
 * Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
 * The default project template now has one `pyproject.toml` at the root of the project (containing both the packaging metadata and the Kedro build config).
 * The `requirements.txt` in the default project template moved to the root of the project as well (hence dependencies are now installed with `pip install -r requirements.txt` instead of `pip install -r src/requirements.txt`).
+* The `spaceflights` starter has been renamed to `spaceflights-pandas`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
+
 ### DataSets
 * If you use `APIDataSet`, move all `requests` specific arguments (e.g. `params`, `headers`), except for `url` and `method`, to under `load_args`.
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
-# Upcoming Release 0.18.14
+
+# Release 0.18.14
 
 ## Major features and improvements
 * Allowed using of custom cookiecutter templates for creating pipelines with `--template` flag for `kedro pipeline create` or via `template/pipeline` folder.
@@ -56,8 +60,6 @@
 * New TSC members added to the page and the organisation of each member is also now listed.
 * Plus some minor bug fixes and changes across the documentation.
 
-## Breaking changes to the API
-
 ## Upcoming deprecations for Kedro 0.19.0
 * All dataset classes will be removed from the core Kedro repository (`kedro.extras.datasets`). Install and import them from the [`kedro-datasets`](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets) package instead.
 * All dataset classes ending with `DataSet` are deprecated and will be removed in Kedro `0.19.0` and `kedro-datasets` `2.0.0`. Instead, use the updated class names ending with `Dataset`.
@@ -66,7 +68,6 @@
 
 ## Community contributions
 Many thanks to the following Kedroids for contributing PRs to this release:
-
 * [Jason Hite](https://github.com/jasonmhite)
 * [IngerMathilde](https://github.com/IngerMathilde)
 * [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
@@ -74,7 +75,11 @@ Many thanks to the following Kedroids for contributing PRs to this release:
 * [flpvvvv](https://github.com/flpvvvv)
 * [qheuristics](https://github.com/qheuristics)
 * [Miguel Ortiz](https://github.com/miguel-ortiz-marin)
-
+* [rxm7706](https://github.com/rxm7706)
+* [Iñigo Hidalgo](https://github.com/inigohidalgo)
+* [harmonys-qb](https://github.com/harmonys-qb)
+* [Yi Kuang](https://github.com/lvxhnat)
+* [Jens Lordén](https://github.com/Celsuss)
 
 # Release 0.18.13
 

@@ -92,9 +92,9 @@ class TestGetProjectMetadata:
             config_file=self.project_path / "pyproject.toml",
             package_name="fake_package_name",
             project_name="fake_project_name",
-            project_version=kedro_version,
             kedro_init_version=kedro_version,
             project_path=self.project_path,
+            add_ons=[],
         )
         assert actual == expected
 
@@ -106,7 +106,7 @@ class TestGetProjectMetadata:
                 "kedro": {
                     "package_name": "fake_package_name",
                     "project_name": "fake_project_name",
-                    "project_version": kedro_version,
+                    "kedro_init_version": kedro_version,
                 }
             }
         }
@@ -119,9 +119,9 @@ class TestGetProjectMetadata:
             config_file=self.project_path / "pyproject.toml",
             package_name="fake_package_name",
             project_name="fake_project_name",
-            project_version=kedro_version,
             kedro_init_version=kedro_version,
             project_path=self.project_path,
+            add_ons=[],
         )
         assert actual == expected
 
@@ -230,7 +230,7 @@ class TestGetProjectMetadata:
                     "source_dir": "source_dir",
                     "package_name": "fake_package_name",
                     "project_name": "fake_project_name",
-                    "project_version": invalid_version,
+                    "kedro_init_version": invalid_version,
                 }
             }
         }
@@ -315,9 +315,9 @@ class TestBootstrapProject:
             "package_name": "fake_package_name",
             "project_name": "fake_project_name",
             "project_path": tmp_path,
-            "project_version": kedro_version,
             "kedro_init_version": kedro_version,
             "source_dir": src_dir,
+            "add_ons": [],
         }
         assert result == ProjectMetadata(**expected_metadata)
         assert str(src_dir) in sys.path[0]

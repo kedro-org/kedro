@@ -69,12 +69,12 @@ def branchless_pipeline():
             node(constant_output, None, "A"),
         ],
         "expected": [
-            node(constant_output, None, "A"),
-            node(identity, "A", "B"),
-            node(identity, "B", "C"),
-            node(identity, "C", "D"),
-            node(identity, "D", "E"),
-            node(identity, "E", None),
+            {node(constant_output, None, "A")},
+            {node(identity, "A", "B")},
+            {node(identity, "B", "C")},
+            {node(identity, "C", "D")},
+            {node(identity, "D", "E")},
+            {node(identity, "E", None)},
         ],
         "free_inputs": [],
         "outputs": [],
@@ -82,7 +82,7 @@ def branchless_pipeline():
     return pipeline
 
 @pytest.fixture
-def pipeline_with_lists():
+def pipeline_list_with_lists():
     """
     Fixture for a pipeline configuration with nodes and their connections.
 
@@ -254,7 +254,7 @@ def pipeline_input_duplicated():
 
 
 @pytest.fixture
-def str_nodes_input_list():
+def str_node_inputs_list():
     """
     Fixture for a pipeline configuration with nodes that specify input and output lists.
 
@@ -280,7 +280,7 @@ def str_nodes_input_list():
 
 
 @pytest.fixture
-def complex_modular_pipeline(pipeline_list_with_lists):
+def complex_pipeline(pipeline_list_with_lists):
     nodes = pipeline_list_with_lists["nodes"]
     return modular_pipeline(nodes)
 

@@ -15,10 +15,8 @@ kedro.io
    kedro.io.AbstractVersionedDataset
    kedro.io.CachedDataset
    kedro.io.DataCatalog
-   kedro.io.IncrementalDataset
    kedro.io.LambdaDataset
    kedro.io.MemoryDataset
-   kedro.io.PartitionedDataset
    kedro.io.Version
 
 .. rubric:: Exceptions

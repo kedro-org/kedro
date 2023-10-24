@@ -56,6 +56,24 @@ def _make_cli_prompt_input(
     return "\n".join([add_ons, project_name, repo_name, python_package])
 
 
+def _make_cli_prompt_input_without_addons(
+    project_name="", repo_name="", python_package=""
+):
+    return "\n".join([project_name, repo_name, python_package])
+
+
+def _convert_addon_names_to_numbers(selected_addons: str):
+    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5"}
+
+    addons = selected_addons.split(",")
+    for i in range(len(addons)):
+        addon = addons[i].strip()
+        if addon in string_to_number:
+            addons[i] = string_to_number[addon]
+
+    return ",".join(addons)
+
+
 def _get_expected_files(add_ons: str):
     add_ons_template_files = {
         "1": 0,
@@ -931,5 +949,66 @@ class TestAddOnsFromConfigFile:
         assert "is an invalid value for project add-ons." in result.output
         assert (
             "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
+            in result.output
+        )
+
+
+@pytest.mark.usefixtures("chdir_to_tmp")
+class TestAddOnsFromCLI:
+    @pytest.mark.parametrize(
+        "add_ons",
+        [
+            "lint",
+            "test",
+            "log",
+            "docs",
+            "data",
+            "none",
+            "test,log,docs",
+            "test,data,lint",
+            "log,docs,data,test,lint",
+            "log, docs, data, test, lint",
+            "log,       docs,     data,   test,     lint",
+            "all",
+        ],
+    )
+    def test_valid_add_ons(self, fake_kedro_cli, add_ons):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", add_ons],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+        add_ons = _convert_addon_names_to_numbers(selected_addons=add_ons)
+        _assert_template_ok(result, add_ons=add_ons)
+        _assert_requirements_ok(result, add_ons=add_ons, repo_name="new-kedro-project")
+        _clean_up_project(Path("./new-kedro-project"))
+
+    def test_invalid_add_ons(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", "bad_input"],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "Please select from the available add-ons: lint, test, log, docs, data, all, none"
+            in result.output
+        )
+
+    @pytest.mark.parametrize(
+        "add_ons",
+        ["lint,all", "test,none", "all,none"],
+    )
+    def test_invalid_add_on_combination(self, fake_kedro_cli, add_ons):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", add_ons],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "Add-on options 'all' and 'none' cannot be used with other options"
             in result.output
         )

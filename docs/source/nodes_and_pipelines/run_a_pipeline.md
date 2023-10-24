@@ -43,7 +43,7 @@ kedro run --runner=ThreadRunner
 ```
 
 ```{note}
-`SparkDataSet` doesn't work correctly with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataSet`, you must use `ThreadRunner`.
+`SparkDataset` doesn't work correctly with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataset`, you must use `ThreadRunner`.
 ```
 
 For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../integrations/pyspark_integration.md).
@@ -69,7 +69,7 @@ class DryRunner(AbstractRunner):
     neccessary data exists.
     """
 
-    def create_default_data_set(self, ds_name: str) -> AbstractDataset:
+    def create_default_dataset(self, ds_name: str) -> AbstractDataset:
         """Factory method for creating the default data set for the runner.
 
         Args:
@@ -144,7 +144,7 @@ If a node has multiple inputs or outputs (e.g., `node(func, ["a", "b", "c"], ["d
 $ kedro run --async
 ...
 2020-03-24 09:20:01,482 - kedro.runner.sequential_runner - INFO - Asynchronous mode is enabled for loading and saving data
-2020-03-24 09:20:01,483 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataSet)...
+2020-03-24 09:20:01,483 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataset)...
 ...
 ```
 

@@ -20,7 +20,7 @@ class MyDataCatalog(DataCatalog):
     pass
 
 
-class ProjectHooks:  # pylint: disable=too-few-public-methods
+class ProjectHooks:
     pass
 
 

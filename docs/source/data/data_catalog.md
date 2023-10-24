@@ -17,15 +17,15 @@ The example below registers two `csv` datasets, and an `xlsx` dataset. The minim
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/reviews.csv
 
 shuttles:
-  type: pandas.ExcelDataSet
+  type: pandas.ExcelDataset
   filepath: data/01_raw/shuttles.xlsx
   load_args:
     engine: openpyxl # Use modern Excel engine (the default since Kedro 0.18.0)
@@ -68,7 +68,7 @@ For example, to load or save a CSV on a local file system, using specified load/
 
 ```yaml
 cars:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/company/cars.csv
   load_args:
     sep: ','
@@ -121,7 +121,7 @@ and the Data Catalog is specified in `catalog.yml` as follows:
 
 ```yaml
 motorbikes:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
   credentials: dev_s3
   load_args:
@@ -137,7 +137,7 @@ Kedro enables dataset and ML model versioning through the `versioned` definition
 
 ```yaml
 cars:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/01_raw/company/cars.csv
   versioned: True
 ```
@@ -153,7 +153,7 @@ where `--load-version` is dataset name and version timestamp separated by `:`.
 
 A dataset offers versioning support if it extends the [`AbstractVersionedDataset`](/kedro.io.AbstractVersionedDataset) class to accept a version keyword argument as part of the constructor and adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively.
 
-To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
+To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataset(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 
 ```{note}
 Note that HTTP(S) is a supported file system in the dataset implementations, but if you it, you can't also use versioning.
@@ -171,12 +171,12 @@ To illustrate this, consider the following catalog entry for a dataset named `ca
 ```yaml
 cars:
   filepath: s3://my_bucket/cars.csv
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
  ```
 You can overwrite this catalog entry in `conf/local/catalog.yml` to point to a locally stored file instead:
 ```yaml
 cars:
   filepath: data/01_raw/cars.csv
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
 ```
 In your pipeline code, when the `cars` dataset is used, it will use the overwritten catalog entry from `conf/local/catalog.yml` and rely on Kedro to detect which definition of `cars` dataset to use in your pipeline.

@@ -30,7 +30,6 @@ from kedro.framework.cli.utils import (
     _safe_load_entry_point,
     command_with_verbosity,
 )
-from kedro.templates.project.hooks.utils import parse_add_ons_input
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
@@ -116,6 +115,13 @@ kedro new --addons=all\n
 kedro new --addons=none
 """
 
+ADD_ONS_DICT = {
+    "1": "Linting",
+    "2": "Testing",
+    "3": "Custom Logging",
+    "4": "Documentation",
+    "5": "Data Structure",
+}
 
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
@@ -183,6 +189,50 @@ def _starter_spec_to_dict(
         if spec.directory:
             format_dict[alias]["directory"] = spec.directory
     return format_dict
+
+
+def _parse_add_ons_input(add_ons_str: str):
+    """Parse the add-ons input string.
+
+    Args:
+        add_ons_str: Input string from prompts.yml.
+
+    Returns:
+        list: List of selected add-ons as strings.
+    """
+
+    def _validate_range(start, end):
+        if int(start) > int(end):
+            message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
+            click.secho(message, fg="red", err=True)
+            sys.exit(1)
+
+    def _validate_selection(add_ons: list[str]):
+        for add_on in add_ons:
+            if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
+                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."  # nosec
+                click.secho(message, fg="red", err=True)
+                sys.exit(1)
+
+    if add_ons_str == "all":
+        return list(ADD_ONS_DICT)
+    if add_ons_str == "none":
+        return []
+
+    # Split by comma
+    add_ons_choices = add_ons_str.split(",")
+    selected: list[str] = []
+
+    for choice in add_ons_choices:
+        if "-" in choice:
+            start, end = choice.split("-")
+            _validate_range(start, end)
+            selected.extend(str(i) for i in range(int(start), int(end) + 1))
+        else:
+            selected.append(choice.strip())
+
+    _validate_selection(selected)
+    return selected
 
 
 # noqa: missing-function-docstring
@@ -398,7 +448,7 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
 
 
 def _make_cookiecutter_args(
-    config: dict[str, str],
+    config: dict[str, str | list[str]],
     checkout: str,
     directory: str,
 ) -> dict[str, Any]:
@@ -421,33 +471,26 @@ def _make_cookiecutter_args(
     """
     config.setdefault("kedro_version", version)
 
+    # Map the selected add on lists to readable name
+    add_ons = config.get("add_ons")
+    if add_ons:
+        config["add_ons"] = [
+            ADD_ONS_DICT[add_on] for add_on in _parse_add_ons_input(add_ons)  # type: ignore
+        ]
+        config["add_ons"] = str(config["add_ons"])
+
     cookiecutter_args = {
         "output_dir": config.get("output_dir", str(Path.cwd().resolve())),
         "no_input": True,
         "extra_context": config,
     }
+
     if checkout:
         cookiecutter_args["checkout"] = checkout
     if directory:
         cookiecutter_args["directory"] = directory
 
     return cookiecutter_args
-
-
-def _get_add_ons_text(add_ons):
-    add_ons_dict = {
-        "1": "Linting",
-        "2": "Testing",
-        "3": "Custom Logging",
-        "4": "Documentation",
-        "5": "Data structure",
-    }
-    add_ons_list = parse_add_ons_input(add_ons)
-    add_ons_text = [add_ons_dict[add_on] for add_on in add_ons_list]
-    return (
-        " ".join(str(add_on) + "," for add_on in add_ons_text[:-1])
-        + f" and {add_ons_text[-1]}"
-    )
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
@@ -483,12 +526,10 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
 
     # Only non-starter projects have configurable add-ons
     if template_path == str(TEMPLATE_PATH):
-        if add_ons == "none":
+        if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")
         else:
-            click.secho(
-                f"\nYou have selected the following add-ons: {_get_add_ons_text(add_ons)}"
-            )
+            click.secho(f"\nYou have selected the following add-ons: {add_ons}")
 
     click.secho(
         f"\nThe project name '{project_name}' has been applied to: "

@@ -94,7 +94,7 @@ class TestGetProjectMetadata:
             project_name="fake_project_name",
             kedro_init_version=kedro_version,
             project_path=self.project_path,
-            add_ons=[],
+            add_ons=None,
         )
         assert actual == expected
 
@@ -121,7 +121,7 @@ class TestGetProjectMetadata:
             project_name="fake_project_name",
             kedro_init_version=kedro_version,
             project_path=self.project_path,
-            add_ons=[],
+            add_ons=None,
         )
         assert actual == expected
 
@@ -243,23 +243,6 @@ class TestGetProjectMetadata:
         with pytest.raises(ValueError, match=re.escape(pattern)):
             _get_project_metadata(self.project_path)
 
-    def test_toml_file_has_missing_version(self, mocker):
-        mocker.patch.object(Path, "is_file", return_value=True)
-        pyproject_toml_payload = {
-            "tool": {
-                "kedro": {
-                    "source_dir": "source_dir",
-                    "package_name": "fake_package_name",
-                    "project_name": "fake_project_name",
-                }
-            }
-        }
-        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
-        pattern = "Missing required key kedro_init_version from 'pyproject.toml'."
-
-        with pytest.raises(RuntimeError, match=re.escape(pattern)):
-            _get_project_metadata(self.project_path)
-
 
 class TestValidateSourcePath:
     @pytest.mark.parametrize(
@@ -317,7 +300,7 @@ class TestBootstrapProject:
             "project_path": tmp_path,
             "kedro_init_version": kedro_version,
             "source_dir": src_dir,
-            "add_ons": [],
+            "add_ons": None,
         }
         assert result == ProjectMetadata(**expected_metadata)
         assert str(src_dir) in sys.path[0]

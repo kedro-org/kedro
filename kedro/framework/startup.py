@@ -99,8 +99,11 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     ):
         raise ValueError(_version_mismatch_error(metadata_dict["kedro_init_version"]))
 
+    # Default settings
     source_dir = Path(metadata_dict.get("source_dir", "src")).expanduser()
     source_dir = (project_path / source_dir).resolve()
+    metadata_dict["add_ons"] = metadata_dict.get("add_ons")
+
     metadata_dict["source_dir"] = source_dir
     metadata_dict["config_file"] = pyproject_toml
     metadata_dict["project_path"] = project_path

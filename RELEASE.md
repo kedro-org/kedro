@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Dropped Python 3.7 support.
 * Introduced add-ons to the `kedro new` CLI flow.
+* The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 
 ## Bug fixes and other changes
 
@@ -28,6 +29,7 @@
 * Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
 * The default project template now has one `pyproject.toml` at the root of the project (containing both the packaging metadata and the Kedro build config).
 * The `requirements.txt` in the default project template moved to the root of the project as well (hence dependencies are now installed with `pip install -r requirements.txt` instead of `pip install -r src/requirements.txt`).
+* The `spaceflights` starter has been renamed to `spaceflights-pandas`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 

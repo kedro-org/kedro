@@ -121,6 +121,7 @@ ADD_ONS_DICT = {
     "3": "Custom Logging",
     "4": "Documentation",
     "5": "Data Structure",
+    "7": "Kedro Viz",
 }
 
 # noqa: unused-argument
@@ -210,7 +211,7 @@ def _parse_add_ons_input(add_ons_str: str):
     def _validate_selection(add_ons: list[str]):
         for add_on in add_ons:
             if int(add_on) < 1 or int(add_on) > len(ADD_ONS_DICT):
-                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5."  # nosec
+                message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6, 7."  # nosec
                 click.secho(message, fg="red", err=True)
                 sys.exit(1)
 
@@ -318,7 +319,9 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     config = _get_addons_from_cli_input(selected_addons, config)
 
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
-    _create_project(template_path, cookiecutter_args)
+    project_template = fetch_template_based_on_add_ons(template_path, cookiecutter_args)
+
+    _create_project(project_template, cookiecutter_args)
 
 
 @create_cli.group()
@@ -493,6 +496,19 @@ def _make_cookiecutter_args(
     return cookiecutter_args
 
 
+def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
+    extra_context = cookiecutter_args["extra_context"]
+    add_ons = extra_context.get("add_ons")
+    if add_ons and "Pyspark" in add_ons:
+        # cookiecutter_args["directory"] = "spaceflights-pyspark"
+        # pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
+        pyspark_path = (
+            "/Users/sajid_alam/Documents/GitHub/kedro-starters/spaceflights-pyspark"
+        )
+        return pyspark_path
+    return template_path
+
+
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     """Creates a new kedro project using cookiecutter.
 
@@ -524,8 +540,8 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     add_ons = extra_context.get("add_ons")
 
-    # Only non-starter projects have configurable add-ons
-    if template_path == str(TEMPLATE_PATH):
+    # Only core template and spaceflights-pyspark, spaceflights-pandas-viz have configurable add-ons
+    if template_path == str(TEMPLATE_PATH) or add_ons == "7":
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")
         else:

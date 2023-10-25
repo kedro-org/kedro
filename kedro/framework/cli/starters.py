@@ -108,9 +108,10 @@ Add-Ons\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
+6) Pyspark: Provides a basic PySpark set up\n
 
 Example usage:\n
-kedro new --addons=lint,test,log,docs,data (or any subset of these options)\n
+kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
 kedro new --addons=all\n
 kedro new --addons=none
 """

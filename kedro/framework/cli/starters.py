@@ -222,7 +222,7 @@ def _parse_add_ons_input(add_ons_str: str):
         return []
     # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
     if not add_ons_str:
-        return []
+        return []  # pragma: no cover
 
     # Split by comma
     add_ons_choices = add_ons_str.split(",")

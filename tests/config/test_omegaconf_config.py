@@ -121,6 +121,31 @@ def proj_credentials_env_variable(tmp_path):
     )
 
 
+@pytest.fixture
+def mlflow_config(tmp_path):
+    base_mlflow = tmp_path / _BASE_ENV / "mlflow.yml"
+    base_config = {
+        "tracking": {
+            "disable_tracking": {"pipelines": "[on_exit_notification]"},
+            "experiment": {
+                "name": "name-of-local-experiment",
+            },
+            "params": {"long_params_strategy": "tag"},
+        }
+    }
+    local_mlflow = tmp_path / _DEFAULT_RUN_ENV / "mlflow.yml"
+    local_config = {
+        "tracking": {
+            "experiment": {
+                "name": "name-of-prod-experiment",
+            },
+        }
+    }
+
+    _write_yaml(base_mlflow, base_config)
+    _write_yaml(local_mlflow, local_config)
+
+
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
 use_proj_catalog = pytest.mark.usefixtures("proj_catalog")
 use_credentials_env_variable_yml = pytest.mark.usefixtures(
@@ -417,30 +442,8 @@ class TestOmegaConfigLoader:
             "**/params*",
         ]
 
-    def test_destructive_merging_strategy(self, tmp_path):
+    def test_default_destructive_merging_strategy(self, tmp_path, mlflow_config):
         mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
-        base_mlflow = tmp_path / _BASE_ENV / "mlflow.yml"
-        base_config = {
-            "tracking": {
-                "disable_tracking": {"pipelines": "[on_exit_notification]"},
-                "experiment": {
-                    "name": "name-of-local-experiment",
-                },
-                "params": {"long_params_strategy": "tag"},
-            }
-        }
-        local_mlflow = tmp_path / _DEFAULT_RUN_ENV / "mlflow.yml"
-        local_config = {
-            "tracking": {
-                "experiment": {
-                    "name": "name-of-prod-experiment",
-                },
-            }
-        }
-
-        _write_yaml(base_mlflow, base_config)
-        _write_yaml(local_mlflow, local_config)
-
         conf = OmegaConfigLoader(str(tmp_path), config_patterns=mlflow_patterns)[
             "mlflow"
         ]
@@ -450,6 +453,40 @@ class TestOmegaConfigLoader:
                 "experiment": {
                     "name": "name-of-prod-experiment",
                 },
+            }
+        }
+
+    def test_destructive_merging_strategy(self, tmp_path, mlflow_config):
+        mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
+        conf = OmegaConfigLoader(
+            str(tmp_path),
+            config_patterns=mlflow_patterns,
+            merge_strategy={"mlflow": "destructive"},
+        )["mlflow"]
+
+        assert conf == {
+            "tracking": {
+                "experiment": {
+                    "name": "name-of-prod-experiment",
+                },
+            }
+        }
+
+    def test_soft_merging_strategy(self, tmp_path, mlflow_config):
+        mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
+        conf = OmegaConfigLoader(
+            str(tmp_path),
+            config_patterns=mlflow_patterns,
+            merge_strategy={"mlflow": "soft"},
+        )["mlflow"]
+
+        assert conf == {
+            "tracking": {
+                "disable_tracking": {"pipelines": "[on_exit_notification]"},
+                "experiment": {
+                    "name": "name-of-prod-experiment",
+                },
+                "params": {"long_params_strategy": "tag"},
             }
         }
 

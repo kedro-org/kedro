@@ -504,9 +504,8 @@ def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, 
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
     if add_ons and "Pyspark" in add_ons:
-        #cookiecutter_args["directory"] = "spaceflights-pyspark"
-        #pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
-        pyspark_path = "/Users/sajid_alam/Documents/GitHub/kedro-starters/spaceflights-pyspark"
+        cookiecutter_args["directory"] = "spaceflights-pyspark"
+        pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
         return pyspark_path
     return template_path
 

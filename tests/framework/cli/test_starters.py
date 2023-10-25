@@ -63,7 +63,14 @@ def _make_cli_prompt_input_without_addons(
 
 
 def _convert_addon_names_to_numbers(selected_addons: str):
-    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5", "pyspark": "6"}
+    string_to_number = {
+        "lint": "1",
+        "test": "2",
+        "log": "3",
+        "docs": "4",
+        "data": "5",
+        "pyspark": "6",
+    }
 
     addons = selected_addons.split(",")
     for i in range(len(addons)):

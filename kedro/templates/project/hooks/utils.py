@@ -47,57 +47,6 @@ docs = [
 ]
 """
 
-spark_requirement = """
-kedro-datasets[spark.SparkDataSet]~=1.0
-"""
-
-def _validate_range(start, end):
-    if int(start) > int(end):
-        message = f"'{start}-{end}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
-        click.secho(message, fg="red", err=True)
-        sys.exit(1)
-
-def _validate_selection(add_ons):
-    for add_on in add_ons:
-        if int(add_on) < 1 or int(add_on) > 6:
-            message = f"'{add_on}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
-            click.secho(message, fg="red", err=True)
-            sys.exit(1)
-
-
-def parse_add_ons_input(add_ons_str):
-    """Parse the add-ons input string.
-
-    Args:
-        add_ons_str: Input string from prompts.yml.
-
-    Returns:
-        list: List of selected add-ons as strings.
-    """
-    # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
-    if not add_ons_str:
-        return []
-
-    if add_ons_str == "all":
-        return ["1", "2", "3", "4", "5", "6"]
-    if add_ons_str == "none":
-        return []
-
-    # Split by comma
-    add_ons_choices = add_ons_str.split(",")
-    selected = []
-
-    for choice in add_ons_choices:
-        if "-" in choice:
-            start, end = choice.split("-")
-            _validate_range(start, end)
-            selected.extend(str(i) for i in range(int(start), int(end) + 1))
-        else:
-            selected.append(choice.strip())
-
-    _validate_selection(selected)
-    return selected
-
 
 def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path, python_package_name):
     """Removes directories and files related to unwanted addons from
@@ -111,7 +60,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         pyproject_file_path: the path to the pyproject.toml file
             located on the the root of the template.
     """
-    if "1" not in selected_add_ons_list:  # If Linting not selected
+    if "Linting" not in selected_add_ons_list:
         pass
     else:
         with open(requirements_file_path, 'a') as file:
@@ -119,7 +68,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         with open(pyproject_file_path, 'a') as file:
             file.write(lint_pyproject_requirements)
 
-    if "2" not in selected_add_ons_list:  # If Testing not selected
+    if "Testing" not in selected_add_ons_list:
         tests_path = current_dir / "tests"
         if tests_path.exists():
             shutil.rmtree(str(tests_path))
@@ -129,12 +78,12 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         with open(pyproject_file_path, 'a') as file:
             file.write(test_pyproject_requirements)
 
-    if "3" not in selected_add_ons_list:  # If Logging not selected
+    if "Logging" not in selected_add_ons_list:
         logging_yml_path = current_dir / "conf/logging.yml"
         if logging_yml_path.exists():
             logging_yml_path.unlink()
 
-    if "4" not in selected_add_ons_list:  # If Documentation not selected
+    if "Documentation" not in selected_add_ons_list:
         docs_path = current_dir / "docs"
         if docs_path.exists():
             shutil.rmtree(str(docs_path))
@@ -142,7 +91,7 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         with open(pyproject_file_path, 'a') as file:
             file.write(docs_pyproject_requirements)
 
-    if "5" not in selected_add_ons_list:  # If Data Structure not selected
+    if "Data Structure" not in selected_add_ons_list:
         data_path = current_dir / "data"
         if data_path.exists():
             shutil.rmtree(str(data_path))

@@ -15,8 +15,8 @@ from kedro.framework.cli.starters import (
     _OFFICIAL_STARTER_SPECS,
     TEMPLATE_PATH,
     KedroStarterSpec,
+    _parse_add_ons_input,
 )
-from kedro.templates.project.hooks.utils import parse_add_ons_input
 
 FILES_IN_TEMPLATE_WITH_NO_ADD_ONS = 14
 
@@ -56,6 +56,24 @@ def _make_cli_prompt_input(
     return "\n".join([add_ons, project_name, repo_name, python_package])
 
 
+def _make_cli_prompt_input_without_addons(
+    project_name="", repo_name="", python_package=""
+):
+    return "\n".join([project_name, repo_name, python_package])
+
+
+def _convert_addon_names_to_numbers(selected_addons: str):
+    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5"}
+
+    addons = selected_addons.split(",")
+    for i in range(len(addons)):
+        addon = addons[i].strip()
+        if addon in string_to_number:
+            addons[i] = string_to_number[addon]
+
+    return ",".join(addons)
+
+
 def _get_expected_files(add_ons: str):
     add_ons_template_files = {
         "1": 0,
@@ -65,7 +83,7 @@ def _get_expected_files(add_ons: str):
         "5": 8,
         "6": 2,
     }  # files added to template by each add-on
-    add_ons_list = parse_add_ons_input(add_ons)
+    add_ons_list = _parse_add_ons_input(add_ons)
 
     expected_files = FILES_IN_TEMPLATE_WITH_NO_ADD_ONS
 
@@ -89,7 +107,7 @@ def _assert_requirements_ok(
     requirements_file_path = root_path / "requirements.txt"
     pyproject_file_path = root_path / "pyproject.toml"
 
-    add_ons_list = parse_add_ons_input(add_ons)
+    add_ons_list = _parse_add_ons_input(add_ons)
 
     if "1" in add_ons_list:
         with open(requirements_file_path) as requirements_file:
@@ -257,7 +275,7 @@ def test_starter_list_with_invalid_starter_plugin(
     ],
 )
 def test_parse_add_ons_valid(input, expected):
-    result = parse_add_ons_input(input)
+    result = _parse_add_ons_input(input)
     assert result == expected
 
 
@@ -267,7 +285,7 @@ def test_parse_add_ons_valid(input, expected):
 )
 def test_parse_add_ons_invalid_range(input, capsys):
     with pytest.raises(SystemExit):
-        parse_add_ons_input(input)
+        _parse_add_ons_input(input)
     message = f"'{input}' is an invalid range for project add-ons.\nPlease ensure range values go from smaller to larger."
     assert message in capsys.readouterr().err
 
@@ -278,7 +296,7 @@ def test_parse_add_ons_invalid_range(input, capsys):
 )
 def test_parse_add_ons_invalid_selection(input, first_invalid, capsys):
     with pytest.raises(SystemExit):
-        parse_add_ons_input(input)
+        _parse_add_ons_input(input)
     message = f"'{first_invalid}' is not a valid selection.\nPlease select from the available add-ons: 1, 2, 3, 4, 5, 6."
     assert message in capsys.readouterr().err
 
@@ -698,13 +716,13 @@ class TestNewWithStarterValid:
     def test_alias(self, fake_kedro_cli, mock_determine_repo_dir, mock_cookiecutter):
         CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--starter", "spaceflights"],
+            ["new", "--starter", "spaceflights-pandas"],
             input=_make_cli_prompt_input(),
         )
         kwargs = {
             "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": version,
-            "directory": "spaceflights",
+            "directory": "spaceflights-pandas",
         }
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
@@ -714,13 +732,13 @@ class TestNewWithStarterValid:
     ):
         CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--starter", "spaceflights", "--checkout", "my_checkout"],
+            ["new", "--starter", "spaceflights-pandas", "--checkout", "my_checkout"],
             input=_make_cli_prompt_input(),
         )
         kwargs = {
             "template": "git+https://github.com/kedro-org/kedro-starters.git",
             "checkout": "my_checkout",
-            "directory": "spaceflights",
+            "directory": "spaceflights-pandas",
         }
         assert kwargs.items() <= mock_determine_repo_dir.call_args[1].items()
         assert kwargs.items() <= mock_cookiecutter.call_args[1].items()
@@ -799,7 +817,7 @@ class TestNewWithStarterInvalid:
     @pytest.mark.parametrize(
         "starter, repo",
         [
-            ("spaceflights", "https://github.com/kedro-org/kedro-starters.git"),
+            ("spaceflights-pandas", "https://github.com/kedro-org/kedro-starters.git"),
             (
                 "git+https://github.com/fake/fake.git",
                 "https://github.com/fake/fake.git",
@@ -932,5 +950,66 @@ class TestAddOnsFromConfigFile:
         assert "is an invalid value for project add-ons." in result.output
         assert (
             "Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.\n"
+            in result.output
+        )
+
+
+@pytest.mark.usefixtures("chdir_to_tmp")
+class TestAddOnsFromCLI:
+    @pytest.mark.parametrize(
+        "add_ons",
+        [
+            "lint",
+            "test",
+            "log",
+            "docs",
+            "data",
+            "none",
+            "test,log,docs",
+            "test,data,lint",
+            "log,docs,data,test,lint",
+            "log, docs, data, test, lint",
+            "log,       docs,     data,   test,     lint",
+            "all",
+        ],
+    )
+    def test_valid_add_ons(self, fake_kedro_cli, add_ons):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", add_ons],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+        add_ons = _convert_addon_names_to_numbers(selected_addons=add_ons)
+        _assert_template_ok(result, add_ons=add_ons)
+        _assert_requirements_ok(result, add_ons=add_ons, repo_name="new-kedro-project")
+        _clean_up_project(Path("./new-kedro-project"))
+
+    def test_invalid_add_ons(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", "bad_input"],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "Please select from the available add-ons: lint, test, log, docs, data, all, none"
+            in result.output
+        )
+
+    @pytest.mark.parametrize(
+        "add_ons",
+        ["lint,all", "test,none", "all,none"],
+    )
+    def test_invalid_add_on_combination(self, fake_kedro_cli, add_ons):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--addons", add_ons],
+            input=_make_cli_prompt_input_without_addons(),
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "Add-on options 'all' and 'none' cannot be used with other options"
             in result.output
         )

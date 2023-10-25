@@ -3,21 +3,26 @@
 ## Major features and improvements
 * Dropped Python 3.7 support.
 * Introduced add-ons to the `kedro new` CLI flow.
+* The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 
 ## Bug fixes and other changes
+* Added a new field `add-ons` to `pyproject.toml` when a project is created.
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
 * Renamed the `data_sets()` method in `Pipeline` and all references to it to `datasets()`.
 * Renamed the `create_default_data_set()` method in the `Runner` to `create_default_dataset()`.
 * Renamed all other uses of `data_set` and `data_sets` in the codebase to `dataset` and `datasets` respectively.
+* Remove deprecated `project_version` from `ProjectMetadata`.
 
 ### DataSets
 * Removed `kedro.extras.datasets` and tests.
 * Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+* Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ### CLI
 * Removed deprecated `kedro docs` command.
+* Added the `--addons` flag to the `kedro new` command.
 
 ### ConfigLoader
 * `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.
@@ -28,6 +33,7 @@
 * Anonymous nodes are given default names of the form `<function_name>([in1;in2;...]) -> [out1;out2;...]`, with the names of inputs and outputs separated by semicolons.
 * The default project template now has one `pyproject.toml` at the root of the project (containing both the packaging metadata and the Kedro build config).
 * The `requirements.txt` in the default project template moved to the root of the project as well (hence dependencies are now installed with `pip install -r requirements.txt` instead of `pip install -r src/requirements.txt`).
+* The `spaceflights` starter has been renamed to `spaceflights-pandas`.
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 

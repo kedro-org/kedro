@@ -6,19 +6,23 @@
 * The new spaceflights starters, `spaceflights-pandas`, `spaceflights-pandas-viz`, `spaceflights-pyspark`, and `spaceflights-pyspark-viz` can be used with the `kedro new` command with the `--starter` flag.
 
 ## Bug fixes and other changes
+* Added a new field `add-ons` to `pyproject.toml` when a project is created.
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
 * Renamed the `data_sets()` method in `Pipeline` and all references to it to `datasets()`.
 * Renamed the `create_default_data_set()` method in the `Runner` to `create_default_dataset()`.
 * Renamed all other uses of `data_set` and `data_sets` in the codebase to `dataset` and `datasets` respectively.
+* Remove deprecated `project_version` from `ProjectMetadata`.
 
 ### DataSets
 * Removed `kedro.extras.datasets` and tests.
 * Reduced constructor arguments for `APIDataSet` by replacing most arguments with a single constructor argument `load_args`. This makes it more consistent with other Kedro DataSets and the underlying `requests` API, and automatically enables the full configuration domain: stream, certificates, proxies, and more.
+* Removed `PartitionedDataset` and `IncrementalDataset` from `kedro.io`
 
 ### CLI
 * Removed deprecated `kedro docs` command.
+* Added the `--addons` flag to the `kedro new` command.
 
 ### ConfigLoader
 * `logging` is removed from `ConfigLoader` in favour of the environment variable `KEDRO_LOGGING_CONFIG`.

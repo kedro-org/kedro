@@ -383,7 +383,7 @@ class TestInvalidPipeline:
         fred = node(identity, "input", "output")
         pipeline = modular_pipeline([fred])
         with pytest.raises(TypeError):
-            pipeline + fred  # pylint: disable=pointless-statement
+            pipeline + fred
 
     def test_bad_combine_int(self):
         """int cannot be combined to pipeline, tests __radd__"""
@@ -405,7 +405,7 @@ class TestInvalidPipeline:
             "appear more than once:\n\nFree nodes:\n  - a"
         )
         with pytest.raises(ValueError, match=re.escape(pattern)):
-            pipeline1 + new_pipeline  # pylint: disable=pointless-statement
+            pipeline1 + new_pipeline
 
     def test_conflicting_outputs(self):
         """Node outputs must be unique."""
@@ -416,7 +416,7 @@ class TestInvalidPipeline:
             [node(biconcat, ["input", "input2"], ["output", "output2"], name="b")]
         )
         with pytest.raises(OutputNotUniqueError, match=r"\['output'\]"):
-            pipeline1 + new_pipeline  # pylint: disable=pointless-statement
+            pipeline1 + new_pipeline
 
     def test_duplicate_node_confirms(self):
         """Test that non-unique dataset confirms break pipeline concatenation"""
@@ -427,7 +427,7 @@ class TestInvalidPipeline:
             [node(identity, "input2", "output2", confirms=["other", "output2"])]
         )
         with pytest.raises(ConfirmNotUniqueError, match=r"\['other'\]"):
-            pipeline1 + pipeline2  # pylint: disable=pointless-statement
+            pipeline1 + pipeline2
 
 
 class TestPipelineOperators:
@@ -533,7 +533,7 @@ class TestPipelineOperators:
         p = modular_pipeline([])
         pattern = r"unsupported operand type\(s\) for -: 'Pipeline' and 'str'"
         with pytest.raises(TypeError, match=pattern):
-            p - "hello"  # pylint: disable=pointless-statement
+            p - "hello"
 
     def test_combine_same_node(self):
         """Multiple (identical) pipelines are possible"""
@@ -567,7 +567,7 @@ class TestPipelineOperators:
         p = modular_pipeline([])
         pattern = r"unsupported operand type\(s\) for &: 'Pipeline' and 'str'"
         with pytest.raises(TypeError, match=pattern):
-            p & "hello"  # pylint: disable=pointless-statement
+            p & "hello"
 
     def test_union(self):
         pipeline1 = modular_pipeline(
@@ -588,7 +588,7 @@ class TestPipelineOperators:
         p = modular_pipeline([])
         pattern = r"unsupported operand type\(s\) for |: 'Pipeline' and 'str'"
         with pytest.raises(TypeError, match=pattern):
-            p | "hello"  # pylint: disable=pointless-statement
+            p | "hello"
 
     def test_node_unique_confirms(self):
         """Test that unique dataset confirms don't break pipeline concatenation"""
@@ -649,7 +649,7 @@ class TestPipelineDescribe:
             "#### Pipeline execution order ####",
             "Inputs: input1, input2",
             "",
-            "node1: biconcat([input1,input2]) -> [input3]",
+            "node1: biconcat([input1;input2]) -> [input3]",
             "node2: identity([input3]) -> [input4]",
             "",
             "Outputs: input4",

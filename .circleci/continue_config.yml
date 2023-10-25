@@ -52,7 +52,7 @@ commands:
           name: Install venv for some pre-commit hooks
           command: conda install -y virtualenv
       - run:
-          # pytables does not work properly with python 3.9 to handle our HDFDataSet
+          # pytables does not work properly with python 3.9 to handle our HDFDataset
           # if pip-installed, so we install this dependency via conda
           name: Install pytables
           command: conda install -c conda-forge pytables -y
@@ -143,7 +143,7 @@ commands:
     steps:
       - restore_cache:
           name: Restore package cache
-          key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
+          key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}
         # We don't restore the conda environment cache for python 3.10 as it conflicts with the
         # 'Install GDAL, Fiona and pytables' step breaking the conda environment (missing zlib.dll).
       - unless:
@@ -152,7 +152,7 @@ commands:
           steps:
             - restore_cache:
                 name: Restore conda environment cache
-                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one
@@ -283,14 +283,14 @@ jobs:
           steps:
             - run:
                 name: Run unit tests without spark in parallel
-                command: conda activate kedro_builder; make test-no-spark
+                command: conda activate kedro_builder; make test
       - when:
           condition:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests without spark sequentially
-                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
+                command: conda activate kedro_builder; pytest tests --no-cov
 
   lint:
     parameters:
@@ -327,14 +327,14 @@ jobs:
       - win_setup:
           python_version: <<parameters.python_version>>
       - when:
-          # Save Python package cache only for Python 3.7. The conda environment itself
+          # Save Python package cache only for Python 3.8. The conda environment itself
           # is specific to a Python version and is cached separately for each.
           condition:
-            equal: ["3.7", <<parameters.python_version>>]
+            equal: [<<parameters.python_version>>]
           steps:
           - save_cache:
               name: Save Python package cache
-              key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
+              key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}
               paths:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs
@@ -347,7 +347,7 @@ jobs:
           steps:
             - save_cache:
                 name: Save conda environment cache
-                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}
                 paths:
                   - c:\tools\miniconda3\envs\kedro_builder
       - run:
@@ -458,7 +458,7 @@ jobs:
   publish_kedro:
     executor:
       name: docker
-      python_version: "3.7"
+      python_version: "3.8"
     steps:
       - setup
       - add_ssh_keys
@@ -528,7 +528,7 @@ workflows:
       - lint:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - all_circleci_checks_succeeded:
           requires:
             - lint
@@ -544,31 +544,31 @@ workflows:
       - e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - win_e2e_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - win_unit_tests:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - lint:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - pip_compile:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - win_pip_compile:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - all_circleci_checks_succeeded:
           requires:
             - e2e_tests
@@ -620,14 +620,14 @@ workflows:
             - kedro-ecr-publish
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
           filters:
             branches:
               only: main
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
           requires:
             - build_docker_image-<<matrix.python_version>>
           filters:
@@ -672,7 +672,7 @@ workflows:
       - build_kedro:
           matrix:
             parameters:
-              python_version: ["3.7", "3.8", "3.9", "3.10"]
+              python_version: ["3.8", "3.9", "3.10"]
       - publish_kedro:
           requires:
             - build_kedro

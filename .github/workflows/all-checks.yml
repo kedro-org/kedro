@@ -2,6 +2,10 @@ name: Run all checks on Kedro
 
 on:
   workflow_call:
+    inputs:
+      branch:
+        type: string
+        default: ''
   push:
     branches:
       - main
@@ -22,11 +26,12 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
 
   lint:
     strategy:
@@ -37,23 +42,26 @@ jobs:
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
 
   e2e-tests:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/e2e-tests.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
 
   pip-compile:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/pip-compile.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}

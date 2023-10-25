@@ -374,7 +374,14 @@ def _get_addons_from_cli_input(
         Configuration for starting a new project, with the selected add-ons
         from the `--addons` flag.
     """
-    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5", "pyspark": "6"}
+    string_to_number = {
+        "lint": "1",
+        "test": "2",
+        "log": "3",
+        "docs": "4",
+        "data": "5",
+        "pyspark": "6",
+    }
 
     if selected_addons is not None:
         addons = selected_addons.split(",")

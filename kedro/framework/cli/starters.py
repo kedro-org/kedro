@@ -121,7 +121,7 @@ ADD_ONS_DICT = {
     "3": "Custom Logging",
     "4": "Documentation",
     "5": "Data Structure",
-    "6": "Pyspark:,
+    "6": "Pyspark",
 }
 
 # noqa: unused-argument
@@ -218,6 +218,9 @@ def _parse_add_ons_input(add_ons_str: str):
     if add_ons_str == "all":
         return list(ADD_ONS_DICT)
     if add_ons_str == "none":
+        return []
+    # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
+    if not add_ons_str:
         return []
 
     # Split by comma
@@ -397,14 +400,14 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = ["lint", "test", "log", "docs", "data", "all", "none"]
+    valid_addons = ["lint", "test", "log", "docs", "data", "pyspark", "all", "none"]
 
     if selected_addons is not None:
         addons = re.sub(r"\s", "", selected_addons).split(",")
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
-                    "Please select from the available add-ons: lint, test, log, docs, data, all, none",
+                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none",
                     fg="red",
                     err=True,
                 )
@@ -495,6 +498,17 @@ def _make_cookiecutter_args(
         cookiecutter_args["directory"] = directory
 
     return cookiecutter_args
+
+
+def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
+    extra_context = cookiecutter_args["extra_context"]
+    add_ons = extra_context.get("add_ons")
+    if add_ons and "Pyspark" in add_ons:
+        #cookiecutter_args["directory"] = "spaceflights-pyspark"
+        #pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
+        pyspark_path = "/Users/sajid_alam/Documents/GitHub/kedro-starters/spaceflights-pyspark"
+        return pyspark_path
+    return template_path
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):

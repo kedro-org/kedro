@@ -63,7 +63,7 @@ def _make_cli_prompt_input_without_addons(
 
 
 def _convert_addon_names_to_numbers(selected_addons: str):
-    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5"}
+    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5", "pyspark": "6"}
 
     addons = selected_addons.split(",")
     for i in range(len(addons)):
@@ -964,6 +964,7 @@ class TestAddOnsFromCLI:
             "log",
             "docs",
             "data",
+            "pyspark",
             "none",
             "test,log,docs",
             "test,data,lint",
@@ -993,7 +994,7 @@ class TestAddOnsFromCLI:
 
         assert result.exit_code != 0
         assert (
-            "Please select from the available add-ons: lint, test, log, docs, data, all, none"
+            "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none"
             in result.output
         )
 

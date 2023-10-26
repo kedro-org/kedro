@@ -434,4 +434,5 @@ CONFIG_LOADER_ARGS = {
 }
 ```
 
-If no merging strategy is defined, the default destructive merging strategy will be applied.
+If no merging strategy is defined, the default destructive merging strategy will be applied. Note that this merge strategy setting only applies to configuration files in different environments.
+When files are part of the same environment, they are always merged in a soft way and an error will be thrown when files in the same environment contain the same top-level keys.

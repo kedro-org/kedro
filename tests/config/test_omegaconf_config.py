@@ -490,6 +490,15 @@ class TestOmegaConfigLoader:
             }
         }
 
+    def test_unsupported_merge_strategy(self, tmp_path, mlflow_config):
+        mlflow_patterns = {"mlflow": ["mlflow*", "mlflow*/**", "**/mlflow*"]}
+        with pytest.raises(ValueError):
+            OmegaConfigLoader(
+                str(tmp_path),
+                config_patterns=mlflow_patterns,
+                merge_strategy={"mlflow": "hard"},
+            )["mlflow"]
+
     @use_config_dir
     def test_adding_extra_keys_to_confloader(self, tmp_path):
         """Make sure extra keys can be added directly to the config loader instance."""

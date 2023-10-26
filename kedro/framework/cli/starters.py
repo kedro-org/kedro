@@ -108,9 +108,10 @@ Add-Ons\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
+6) Pyspark: Provides a basic PySpark set up\n
 
 Example usage:\n
-kedro new --addons=lint,test,log,docs,data (or any subset of these options)\n
+kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
 kedro new --addons=all\n
 kedro new --addons=none
 """
@@ -121,6 +122,7 @@ ADD_ONS_DICT = {
     "3": "Custom Logging",
     "4": "Documentation",
     "5": "Data Structure",
+    "6": "Pyspark",
     "7": "Kedro Viz",
 }
 
@@ -219,6 +221,9 @@ def _parse_add_ons_input(add_ons_str: str):
         return list(ADD_ONS_DICT)
     if add_ons_str == "none":
         return []
+    # Guard clause if add_ons_str is None, which can happen if prompts.yml is removed
+    if not add_ons_str:
+        return []  # pragma: no cover
 
     # Split by comma
     add_ons_choices = add_ons_str.split(",")
@@ -369,7 +374,14 @@ def _get_addons_from_cli_input(
         Configuration for starting a new project, with the selected add-ons
         from the `--addons` flag.
     """
-    string_to_number = {"lint": "1", "test": "2", "log": "3", "docs": "4", "data": "5"}
+    string_to_number = {
+        "lint": "1",
+        "test": "2",
+        "log": "3",
+        "docs": "4",
+        "data": "5",
+        "pyspark": "6",
+    }
 
     if selected_addons is not None:
         addons = selected_addons.split(",")
@@ -396,14 +408,14 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = ["lint", "test", "log", "docs", "data", "all", "none"]
+    valid_addons = ["lint", "test", "log", "docs", "data", "pyspark", "all", "none"]
 
     if selected_addons is not None:
         addons = re.sub(r"\s", "", selected_addons).split(",")
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
-                    "Please select from the available add-ons: lint, test, log, docs, data, all, none",
+                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none",
                     fg="red",
                     err=True,
                 )
@@ -500,11 +512,8 @@ def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, 
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
     if add_ons and "Pyspark" in add_ons:
-        # cookiecutter_args["directory"] = "spaceflights-pyspark"
-        # pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
-        pyspark_path = (
-            "/Users/sajid_alam/Documents/GitHub/kedro-starters/spaceflights-pyspark"
-        )
+        cookiecutter_args["directory"] = "spaceflights-pyspark"
+        pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
         return pyspark_path
     return template_path
 
@@ -540,8 +549,13 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     )
     add_ons = extra_context.get("add_ons")
 
-    # Only core template and spaceflights-pyspark, spaceflights-pandas-viz have configurable add-ons
-    if template_path == str(TEMPLATE_PATH) or add_ons == "7":
+
+    # Only core template and spaceflights-pyspark have configurable add-ons
+    if (
+        template_path == str(TEMPLATE_PATH)
+        or add_ons is not None
+        and "Pyspark" in add_ons
+    ):
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")
         else:

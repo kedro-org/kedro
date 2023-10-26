@@ -5,7 +5,7 @@ from kedro.templates.project.hooks.utils import (
     setup_template_add_ons,
     sort_requirements,
 )
-from kedro.framework.cli.starters import _parse_add_ons_input
+
 
 def main():
     current_dir = Path.cwd()
@@ -18,6 +18,7 @@ def main():
 
     # Handle template directories and requirements according to selected add-ons
     setup_template_add_ons(selected_add_ons, requirements_file_path, pyproject_file_path, python_package_name)
+
     # Sort requirements.txt file in alphabetical order
     sort_requirements(requirements_file_path)
 

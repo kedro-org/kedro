@@ -10,8 +10,9 @@ add_ons:
     3) Custom Logging : Provides more logging options
     4) Documentation: Provides basic documentations setup with Sphinx
     5) Data Structure: Provides a directory structure for storing data
+    6) PySpark : Provides a basic PySpark set up
 
-    Which add-ons would you like to include in your project? [1-5/1,3/all/none]:
+    Which add-ons would you like to include in your project? [1-6/1,3/all/none]:
   regex_validator: "^(all|none|(\\d(,\\d)*|(\\d-\\d)))$"
   error_message: |
     Invalid input. Please select valid options for add-ons using comma-separated values, ranges, or 'all/none'.

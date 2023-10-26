@@ -550,7 +550,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     add_ons = extra_context.get("add_ons")
 
     # Only core template and spaceflights-pyspark have configurable add-ons
-    if template_path == str(TEMPLATE_PATH) or "Pyspark" in add_ons:
+    if template_path == str(TEMPLATE_PATH) or add_ons is not None and "Pyspark" in add_ons:
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")
         else:

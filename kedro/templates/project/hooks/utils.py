@@ -34,6 +34,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 """
 
 docs_pyproject_requirements = """
+[project.optional-dependencies]
 docs = [
     "docutils<0.18.0",
     "sphinx~=3.4.3",

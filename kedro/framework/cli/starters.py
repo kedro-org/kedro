@@ -125,6 +125,8 @@ ADD_ONS_DICT = {
     "6": "Pyspark",
 }
 
+NAME_ARG_HELP = "The name of the Kedro project."
+
 # noqa: unused-argument
 def _remove_readonly(func: Callable, path: Path, excinfo: tuple):  # pragma: no cover
     """Remove readonly files on Windows
@@ -258,7 +260,10 @@ def create_cli():  # pragma: no cover
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
 @click.option("--directory", help=DIRECTORY_ARG_HELP)
 @click.option("--addons", "-a", "selected_addons", help=ADDON_ARG_HELP)
-def new(config_path, starter_alias, selected_addons, checkout, directory, **kwargs):
+@click.option("--name", "-n", "name", help=NAME_ARG_HELP)
+def new(  # noqa: too-many-arguments
+    config_path, starter_alias, selected_addons, name, checkout, directory, **kwargs
+):
     """Create a new kedro project."""
     if checkout and not starter_alias:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
@@ -293,7 +298,9 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
     prompts_required = _get_prompts_required(cookiecutter_dir)
 
     # Select which prompts will be displayed to the user based on which flags were selected.
-    prompts_required = _select_prompts_to_display(prompts_required, selected_addons)
+    prompts_required = _select_prompts_to_display(
+        prompts_required, selected_addons, name
+    )
 
     # We only need to make cookiecutter_context if interactive prompts are needed.
     if not config_path:
@@ -321,6 +328,7 @@ def new(config_path, starter_alias, selected_addons, checkout, directory, **kwar
         config = _fetch_config_from_user_prompts(prompts_required, cookiecutter_context)
 
     config = _get_addons_from_cli_input(selected_addons, config)
+    config = _get_name_from_cli_input(name, config)
 
     cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
 
@@ -394,7 +402,27 @@ def _get_addons_from_cli_input(
     return config
 
 
-def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> dict:
+def _get_name_from_cli_input(name: str, config: dict[str, str]) -> dict[str, str]:
+    """Inserts project_name from the CLI input in the project
+    configuration, if it exists.
+
+    Args:
+        name: a string containing the value for the --name flag,
+            or None in case the flag wasn't used.
+
+    Returns:
+        Configuration for starting a new project, with the selected name
+        from the `--name` flag.
+    """
+
+    if name is not None:
+        config["project_name"] = name
+    return config
+
+
+def _select_prompts_to_display(
+    prompts_required: dict, selected_addons: str, name: str
+) -> dict:
     """Selects which prompts an user will receive when creating a new
     Kedro project, based on what information was already made available
     through CLI input.
@@ -428,6 +456,16 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
             )
             sys.exit(1)
         del prompts_required["add_ons"]
+
+    if name is not None:
+        if bool(re.match(r"^[a-zA-Z0-9-_ ]*$", name)) is False:
+            click.secho(
+                "Kedro project names must contain only alphanumeric characters, spaces, hyphens and underscores",
+                fg="red",
+                err=True,
+            )
+            sys.exit(1)
+        del prompts_required["project_name"]
 
     return prompts_required
 

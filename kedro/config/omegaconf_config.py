@@ -464,7 +464,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
     @staticmethod
     def _soft_merge(config, env_config):
         # Soft merge the two env dirs. The chosen env will override base if keys clash.
-        return OmegaConf.merge(config, env_config)
+        return OmegaConf.to_container(OmegaConf.merge(config, env_config))
 
     def _is_hidden(self, path: str):
         """Check if path contains any hidden directory or is a hidden file"""

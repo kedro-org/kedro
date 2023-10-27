@@ -108,7 +108,8 @@ Add-Ons\n
 3) Custom Logging: Provides more logging options\n
 4) Documentation: Basic documentation setup with Sphinx\n
 5) Data Structure: Provides a directory structure for storing data\n
-6) Pyspark: Provides a basic PySpark set up\n
+6) Pyspark: Provides set up configuration for working with PySpark\n
+7) Kedro Viz: Provides Kedro's native visualisation tool \n
 
 Example usage:\n
 kedro new --addons=lint,test,log,docs,data,pyspark (or any subset of these options)\n
@@ -511,11 +512,17 @@ def _make_cookiecutter_args(
 def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, Any]):
     extra_context = cookiecutter_args["extra_context"]
     add_ons = extra_context.get("add_ons")
-    if add_ons and "Pyspark" in add_ons:
+    starter_path = "git+https://github.com/kedro-org/kedro-starters.git"
+
+    if add_ons and "Pyspark" in add_ons and "Kedro Viz" in add_ons:
+        cookiecutter_args["directory"] = "spaceflights-pyspark-viz"
+    elif add_ons and "Pyspark" in add_ons:
         cookiecutter_args["directory"] = "spaceflights-pyspark"
-        pyspark_path = "git+https://github.com/kedro-org/kedro-starters.git"
-        return pyspark_path
-    return template_path
+    elif add_ons and "Kedro Viz" in add_ons:
+        cookiecutter_args["directory"] = "spaceflights-viz"
+    else:
+        starter_path = template_path
+    return starter_path
 
 
 def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
@@ -548,7 +555,6 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
         "python_package", project_name.lower().replace(" ", "_").replace("-", "_")
     )
     add_ons = extra_context.get("add_ons")
-
 
     # Only core template and spaceflights-pyspark have configurable add-ons
     if (

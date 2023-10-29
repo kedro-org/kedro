@@ -37,7 +37,9 @@ The command opens a browser tab to serve the visualisation at `http://127.0.0.1:
 
 You should see the following:
 
-![](../meta/images/pipeline_visualisation.png)
+```{eval-rst}
+.. thumbnail:: ../meta/images/pipeline_visualisation.png
+```
 
 If a visualisation panel opens up and a pipeline is not visible, refresh the view, and check that your tutorial project code is complete if you've not generated it from the starter template. If you still don't see the visualisation, the Kedro community can help:
 
@@ -54,11 +56,15 @@ You can use the `--autoreload` flag to autoreload Kedro-Viz when a `Python` or `
 kedro viz --autoreload
 ```
 
-![](../meta/images/kedro_viz_autoreload.gif)
+```{eval-rst}
+.. thumbnail:: ../meta/images/kedro_viz_autoreload.gif
+```
 
 The `autoreload` flag reflects changes to the project as they happen. For example, commenting out `create_model_input_table_node` in `pipeline.py` will trigger a re-render of the pipeline:
 
-![autoreload](../meta/images/autoreload.gif)
+```{eval-rst}
+.. thumbnail:: ../meta/images/autoreload.gif
+```
 
 ## Visualise layers
 
@@ -147,7 +153,9 @@ regressor:
 
 The visualisation now includes the layers:
 
-![](../meta/images/pipeline_visualisation_with_layers.png)
+```{eval-rst}
+.. thumbnail:: ../meta/images/pipeline_visualisation_with_layers.png
+```
 
 ## Share a pipeline visualisation
 

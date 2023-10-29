@@ -54,6 +54,7 @@ extensions = [
     "myst_parser",
     "notfound.extension",
     "sphinxcontrib.jquery",
+    "sphinxcontrib.images"
 ]
 
 # enable autosummary plugin  (table of contents for modules/classes/class
@@ -308,6 +309,14 @@ texinfo_documents = [
         "Data-Science",
     )
 ]
+
+# -- Options for Image output ------------------------------------------------
+
+# https://sphinxcontrib-images.readthedocs.io/en/latest/
+images_config = {
+    'override_image_directive': True,
+    'default_image_width': '70%',
+}
 
 # -- Options for todo extension ----------------------------------------------
 

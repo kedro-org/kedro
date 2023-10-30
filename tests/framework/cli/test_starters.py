@@ -233,14 +233,15 @@ def _assert_template_ok(
 
 def _assert_name_ok(
     result,
-    add_ons="none",
     project_name="New Kedro Project",
     repo_name="new-kedro-project",
-    python_package="new_kedro_project",
-    kedro_version=version,
     output_dir=".",
 ):
     assert result.exit_code == 0, result.output
+    assert "Change directory to the project generated in" in result.output
+    assert (
+        "The project name '" + project_name + "' has been applied to: " in result.output
+    )
 
 
 def test_starter_list(fake_kedro_cli):
@@ -1059,8 +1060,11 @@ class TestNameFromCLI:
             ["new", "--name", name],
             input=_make_cli_prompt_input_without_name(),
         )
+
+        repo_name = name.lower().replace(" ", "_").replace("-", "_")
         assert result.exit_code == 0
-        _clean_up_project(Path("./new-kedro-project"))
+        _assert_name_ok(result, project_name=name, repo_name=repo_name)
+        _clean_up_project(Path("./" + repo_name))
 
     @pytest.mark.parametrize(
         "name",

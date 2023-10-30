@@ -247,7 +247,7 @@ class TestProjectPathResolution:
     def test_only_local_namespace_specified(self):
         class MockKedroContext:
             # A dummy stand-in for KedroContext sufficient for this test
-            _project_path = Path("/test").resolve()
+            project_path = Path("/test").resolve()
 
         result = _resolve_project_path(local_namespace={"context": MockKedroContext()})
         expected = Path("/test").resolve()
@@ -280,7 +280,7 @@ class TestProjectPathResolution:
     def test_project_path_update(self, caplog):
         class MockKedroContext:
             # A dummy stand-in for KedroContext sufficient for this test
-            _project_path = Path("/test").resolve()
+            project_path = Path("/test").resolve()
 
         local_namespace = {"context": MockKedroContext()}
         updated_path = Path("/updated_path").resolve()

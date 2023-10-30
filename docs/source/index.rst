@@ -106,6 +106,12 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+
+   starters/index.md
+
+
+.. toctree::
+   :maxdepth: 2
    :caption: Advanced usage
 
    kedro_project_setup/index.md

@@ -88,9 +88,9 @@ kedro new --starter=databricks-iris
 
 Name your new project `iris-databricks` for consistency with the rest of this guide. This command creates a new Kedro project using the `databricks-iris` starter template.
 
- ```{note} 
+ ```{note}
  If you are not using the `databricks-iris` starter to create a Kedro project, then you should [disable file-based logging](https://docs.kedro.org/en/stable/logging/logging.html#disable-file-based-logging). This prevents Kedro from attempting to write to the read-only file system. 
- ``` 
+ ```
 
 ### Create a Repo on Databricks
 

@@ -410,7 +410,17 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = ["lint", "test", "log", "docs", "data", "pyspark", "viz", "all", "none"]
+    valid_addons = [
+        "lint",
+        "test",
+        "log",
+        "docs",
+        "data",
+        "pyspark",
+        "viz",
+        "all",
+        "none",
+    ]
 
     if selected_addons is not None:
         addons = re.sub(r"\s", "", selected_addons).split(",")
@@ -558,7 +568,9 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     add_ons = extra_context.get("add_ons")
 
     # Only core template and spaceflights-pyspark have configurable add-ons
-    if template_path == str(TEMPLATE_PATH) or (add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)):
+    if template_path == str(TEMPLATE_PATH) or (
+        add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)
+    ):
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")
         else:

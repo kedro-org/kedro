@@ -25,9 +25,19 @@ jobs:
   unit-tests:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ windows-latest, ubuntu-latest ]
         python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/unit-tests.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      branch: ${{ inputs.branch }}
+  e2e-tests:
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+    uses: ./.github/workflows/e2e-tests.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
@@ -44,21 +54,11 @@ jobs:
       python-version: ${{ matrix.python-version }}
       branch: ${{ inputs.branch }}
 
-  e2e-tests:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
-    uses: ./.github/workflows/e2e-tests.yml
-    with:
-      os: ${{ matrix.os }}
-      python-version: ${{ matrix.python-version }}
-      branch: ${{ inputs.branch }}
 
   pip-compile:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ windows-latest, ubuntu-latest ]
         python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     uses: ./.github/workflows/pip-compile.yml
     with:

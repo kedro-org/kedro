@@ -34,6 +34,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 """
 
 docs_pyproject_requirements = """
+[project.optional-dependencies]
 docs = [
     "docutils<0.18.0",
     "sphinx~=3.4.3",
@@ -48,7 +49,7 @@ docs = [
 """
 
 
-def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path):
+def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproject_file_path, python_package_name):
     """Removes directories and files related to unwanted addons from
     a Kedro project template. Adds the necessary requirements for
     the addons that were selected.
@@ -95,6 +96,38 @@ def setup_template_add_ons(selected_add_ons_list, requirements_file_path, pyproj
         data_path = current_dir / "data"
         if data_path.exists():
             shutil.rmtree(str(data_path))
+
+    if "Pyspark" not in selected_add_ons_list:  # If PySpark not selected
+        pass
+    else:  # Use spaceflights-pyspark to create pyspark template
+        # Remove all .csv and .xlsx files from data/01_raw/
+        raw_data_path = current_dir / "data/01_raw/"
+        if raw_data_path.exists() and raw_data_path.is_dir():
+            for file_path in raw_data_path.glob("*.*"):
+                if file_path.suffix in [".csv", ".xlsx"]:
+                    file_path.unlink()
+
+        # Remove parameter files from conf/base/
+        param_files = [
+            "parameters_data_processing.yml",
+            "parameters_data_science.yml",
+        ]
+        conf_base_path = current_dir / "conf/base/"
+        if conf_base_path.exists() and conf_base_path.is_dir():
+            for param_file in param_files:
+                file_path = conf_base_path / param_file
+                if file_path.exists():
+                    file_path.unlink()
+
+        # Remove specific pipeline subdirectories
+        pipelines_path = current_dir / f"src/{python_package_name}/pipelines/"
+        for pipeline_subdir in ["data_science", "data_processing"]:
+            shutil.rmtree(pipelines_path / pipeline_subdir, ignore_errors=True)
+
+        # Remove all test file from tests/pipelines/
+        test_pipeline_path = current_dir / "tests/pipelines/test_data_science.py"
+        if test_pipeline_path.exists():
+            test_pipeline_path.unlink()
 
 
 def sort_requirements(requirements_file_path):

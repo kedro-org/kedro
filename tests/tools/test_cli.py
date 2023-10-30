@@ -101,6 +101,8 @@ class TestCLITools:
                 "-v",
                 "--config",
                 "-c",
+                "--addons",
+                "-a",
                 "--starter",
                 "-s",
                 "--checkout",

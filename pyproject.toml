@@ -99,7 +99,7 @@ docs = [
     "sphinxcontrib-mermaid~=0.7.1",
     "myst-parser~=1.0.0",
     "Jinja2<3.1.0",
-    "kedro-datasets[all]~=1.7.0",
+    "kedro-datasets[all]~=1.8.0",
 ]
 all = [ "kedro[test,docs]" ]
 
@@ -138,9 +138,8 @@ omit = [
     "kedro/framework/cli/hooks/specs.py",
     "kedro/framework/hooks/specs.py",
     "tests/*",
-    "kedro/io/core.py",  # TODO: temp fix for removing datasets, need to resolve this before 0.19
     "kedro/runner/parallel_runner.py",
-    "*/site-packages/*"
+    "*/site-packages/*",
 ]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 

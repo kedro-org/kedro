@@ -36,12 +36,15 @@ kedro_datasets
    kedro_datasets.pandas.SQLQueryDataset
    kedro_datasets.pandas.SQLTableDataset
    kedro_datasets.pandas.XMLDataset
+   kedro_datasets.partitions.IncrementalDataset
+   kedro_datasets.partitions.PartitionedDataset
    kedro_datasets.pickle.PickleDataset
    kedro_datasets.pillow.ImageDataset
    kedro_datasets.plotly.JSONDataset
    kedro_datasets.plotly.PlotlyDataset
    kedro_datasets.polars.CSVDataset
    kedro_datasets.polars.GenericDataset
+   kedro_datasets.polars.EagerPolarsDataset
    kedro_datasets.redis.PickleDataset
    kedro_datasets.snowflake.SnowparkTableDataset
    kedro_datasets.spark.DeltaTableDataset

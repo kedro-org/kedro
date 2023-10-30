@@ -62,6 +62,12 @@ def _make_cli_prompt_input_without_addons(
     return "\n".join([project_name, repo_name, python_package])
 
 
+def _make_cli_prompt_input_without_name(
+    add_ons="none", repo_name="", python_package=""
+):
+    return "\n".join([add_ons, repo_name, python_package])
+
+
 def _convert_addon_names_to_numbers(selected_addons: str):
     string_to_number = {
         "lint": "1",
@@ -223,6 +229,18 @@ def _assert_template_ok(
     assert "KEDRO" in (full_path / ".gitignore").read_text(encoding="utf-8")
     assert kedro_version in (full_path / "requirements.txt").read_text(encoding="utf-8")
     assert (full_path / "src" / python_package / "__init__.py").is_file()
+
+
+def _assert_name_ok(
+    result,
+    add_ons="none",
+    project_name="New Kedro Project",
+    repo_name="new-kedro-project",
+    python_package="new_kedro_project",
+    kedro_version=version,
+    output_dir=".",
+):
+    assert result.exit_code == 0, result.output
 
 
 def test_starter_list(fake_kedro_cli):
@@ -1019,5 +1037,44 @@ class TestAddOnsFromCLI:
         assert result.exit_code != 0
         assert (
             "Add-on options 'all' and 'none' cannot be used with other options"
+            in result.output
+        )
+
+
+@pytest.mark.usefixtures("chdir_to_tmp")
+class TestNameFromCLI:
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "readable_name",
+            "Readable Name",
+            "Readable-name",
+            "readable_name_12233",
+            "123ReadableName",
+        ],
+    )
+    def test_valid_names(self, fake_kedro_cli, name):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--name", name],
+            input=_make_cli_prompt_input_without_name(),
+        )
+        assert result.exit_code == 0
+        _clean_up_project(Path("./new-kedro-project"))
+
+    @pytest.mark.parametrize(
+        "name",
+        ["bad_name$%!", "Bad.Name", ""],
+    )
+    def test_invalid_names(self, fake_kedro_cli, name):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--name", name],
+            input=_make_cli_prompt_input_without_name(),
+        )
+
+        assert result.exit_code != 0
+        assert (
+            "Kedro project names must contain only alphanumeric symbols, spaces, underscores and hyphens and be at least 2 characters long"
             in result.output
         )

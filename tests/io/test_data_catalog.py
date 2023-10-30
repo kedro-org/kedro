@@ -7,9 +7,9 @@ from typing import Any
 
 import pandas as pd
 import pytest
-from pandas.util.testing import assert_frame_equal
+from kedro_datasets.pandas import CSVDataset, ParquetDataset
+from pandas.testing import assert_frame_equal
 
-from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import (
     AbstractDataset,
     DataCatalog,
@@ -42,9 +42,9 @@ def dummy_dataframe():
 def sane_config(filepath):
     return {
         "catalog": {
-            "boats": {"type": "pandas.CSVDataSet", "filepath": filepath},
+            "boats": {"type": "pandas.CSVDataset", "filepath": filepath},
             "cars": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "s3://test_bucket/test_file.csv",
                 "credentials": "s3_credentials",
                 "layer": "raw",
@@ -78,11 +78,11 @@ def sane_config_with_tracking_ds(tmp_path):
     return {
         "catalog": {
             "boats": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": boat_path,
                 "versioned": True,
             },
-            "planes": {"type": "tracking.MetricsDataSet", "filepath": plane_path},
+            "planes": {"type": "tracking.MetricsDataset", "filepath": plane_path},
         },
     }
 
@@ -92,15 +92,15 @@ def config_with_dataset_factories():
     return {
         "catalog": {
             "{brand}_cars": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{brand}_cars.csv",
             },
             "audi_cars": {
-                "type": "pandas.ParquetDataSet",
+                "type": "pandas.ParquetDataset",
                 "filepath": "data/01_raw/audi_cars.pq",
             },
             "{type}_boats": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{type}_boats.csv",
             },
         },
@@ -112,9 +112,9 @@ def config_with_dataset_factories_nested():
     return {
         "catalog": {
             "{brand}_cars": {
-                "type": "PartitionedDataset",
+                "type": "kedro_datasets.partitions.PartitionedDataset",
                 "path": "data/01_raw",
-                "dataset": "pandas.CSVDataSet",
+                "dataset": "pandas.CSVDataset",
                 "metadata": {
                     "my-plugin": {
                         "brand": "{brand}",
@@ -133,7 +133,7 @@ def config_with_dataset_factories_nested():
 @pytest.fixture
 def config_with_dataset_factories_with_default(config_with_dataset_factories):
     config_with_dataset_factories["catalog"]["{default_dataset}"] = {
-        "type": "pandas.CSVDataSet",
+        "type": "pandas.CSVDataset",
         "filepath": "data/01_raw/{default_dataset}.csv",
     }
     return config_with_dataset_factories
@@ -142,7 +142,7 @@ def config_with_dataset_factories_with_default(config_with_dataset_factories):
 @pytest.fixture
 def config_with_dataset_factories_bad_pattern(config_with_dataset_factories):
     config_with_dataset_factories["catalog"]["{type}@planes"] = {
-        "type": "pandas.ParquetDataSet",
+        "type": "pandas.ParquetDataset",
         "filepath": "data/01_raw/{brand}_plane.pq",
     }
     return config_with_dataset_factories
@@ -153,19 +153,19 @@ def config_with_dataset_factories_only_patterns():
     return {
         "catalog": {
             "{default}": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{default}.csv",
             },
             "{namespace}_{dataset}": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{namespace}_{dataset}.pq",
             },
             "{country}_companies": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{country}_companies.csv",
             },
             "{dataset}s": {
-                "type": "pandas.CSVDataSet",
+                "type": "pandas.CSVDataset",
                 "filepath": "data/01_raw/{dataset}s.csv",
             },
         },
@@ -173,14 +173,14 @@ def config_with_dataset_factories_only_patterns():
 
 
 @pytest.fixture
-def data_set(filepath):
-    return CSVDataSet(filepath=filepath, save_args={"index": False})
+def dataset(filepath):
+    return CSVDataset(filepath=filepath, save_args={"index": False})
 
 
 @pytest.fixture
 def multi_catalog():
-    csv = CSVDataSet(filepath="abc.csv")
-    parq = ParquetDataSet(filepath="xyz.parq")
+    csv = CSVDataset(filepath="abc.csv")
+    parq = ParquetDataset(filepath="xyz.parq")
     layers = {"raw": {"abc.csv"}, "model": {"xyz.parq"}}
     return DataCatalog({"abc": csv, "xyz": parq}, layers=layers)
 
@@ -201,7 +201,7 @@ def conflicting_feed_dict():
 class BadDataset(AbstractDataset):  # pragma: no cover
     def __init__(self, filepath):
         self.filepath = filepath
-        raise Exception("Naughty!")  # pylint: disable=broad-exception-raised
+        raise Exception("Naughty!")
 
     def _load(self):
         return None
@@ -221,8 +221,8 @@ def bad_config(filepath):
 
 
 @pytest.fixture
-def data_catalog(data_set):
-    return DataCatalog(data_sets={"test": data_set})
+def data_catalog(dataset):
+    return DataCatalog(datasets={"test": dataset})
 
 
 @pytest.fixture
@@ -238,20 +238,20 @@ class TestDataCatalog:
 
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
-    def test_add_save_and_load(self, data_set, dummy_dataframe):
+    def test_add_save_and_load(self, dataset, dummy_dataframe):
         """Test adding and then saving and reloading the data set"""
-        catalog = DataCatalog(data_sets={})
-        catalog.add("test", data_set)
+        catalog = DataCatalog(datasets={})
+        catalog.add("test", dataset)
         catalog.save("test", dummy_dataframe)
         reloaded_df = catalog.load("test")
 
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
-    def test_add_all_save_and_load(self, data_set, dummy_dataframe):
+    def test_add_all_save_and_load(self, dataset, dummy_dataframe):
         """Test adding all to the data catalog and then saving and reloading
         the data set"""
-        catalog = DataCatalog(data_sets={})
-        catalog.add_all({"test": data_set})
+        catalog = DataCatalog(datasets={})
+        catalog.add_all({"test": dataset})
         catalog.save("test", dummy_dataframe)
         reloaded_df = catalog.load("test")
 
@@ -260,26 +260,26 @@ class TestDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a data set
         from nonexistent source"""
-        pattern = r"Failed while loading data from data set CSVDataSet"
+        pattern = r"Failed while loading data from data set CSVDataset"
         with pytest.raises(DatasetError, match=pattern):
             data_catalog.load("test")
 
-    def test_add_data_set_twice(self, data_catalog, data_set):
+    def test_add_dataset_twice(self, data_catalog, dataset):
         """Check the error when attempting to add the data set twice"""
         pattern = r"Dataset 'test' has already been registered"
         with pytest.raises(DatasetAlreadyExistsError, match=pattern):
-            data_catalog.add("test", data_set)
+            data_catalog.add("test", dataset)
 
     def test_load_from_unregistered(self):
         """Check the error when attempting to load unregistered data set"""
-        catalog = DataCatalog(data_sets={})
+        catalog = DataCatalog(datasets={})
         pattern = r"Dataset 'test' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.load("test")
 
     def test_save_to_unregistered(self, dummy_dataframe):
         """Check the error when attempting to save to unregistered data set"""
-        catalog = DataCatalog(data_sets={})
+        catalog = DataCatalog(datasets={})
         pattern = r"Dataset 'test' not found in the catalog"
         with pytest.raises(DatasetNotFoundError, match=pattern):
             catalog.save("test", dummy_dataframe)
@@ -300,7 +300,7 @@ class TestDataCatalog:
 
     def test_exists_not_implemented(self, caplog):
         """Test calling `exists` on the data set, which didn't implement it"""
-        catalog = DataCatalog(data_sets={"test": LambdaDataset(None, None)})
+        catalog = DataCatalog(datasets={"test": LambdaDataset(None, None)})
         result = catalog.exists("test")
 
         log_record = caplog.records[0]
@@ -364,14 +364,14 @@ class TestDataCatalog:
 
     def test_datasets_on_init(self, data_catalog_from_config):
         """Check datasets are loaded correctly on construction"""
-        assert isinstance(data_catalog_from_config.datasets.boats, CSVDataSet)
-        assert isinstance(data_catalog_from_config.datasets.cars, CSVDataSet)
+        assert isinstance(data_catalog_from_config.datasets.boats, CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets.cars, CSVDataset)
 
     def test_datasets_on_add(self, data_catalog_from_config):
         """Check datasets are updated correctly after adding"""
-        data_catalog_from_config.add("new_dataset", CSVDataSet("some_path"))
-        assert isinstance(data_catalog_from_config.datasets.new_dataset, CSVDataSet)
-        assert isinstance(data_catalog_from_config.datasets.boats, CSVDataSet)
+        data_catalog_from_config.add("new_dataset", CSVDataset("some_path"))
+        assert isinstance(data_catalog_from_config.datasets.new_dataset, CSVDataset)
+        assert isinstance(data_catalog_from_config.datasets.boats, CSVDataset)
 
     def test_adding_datasets_not_allowed(self, data_catalog_from_config):
         """Check error if user tries to update the datasets attribute"""
@@ -401,11 +401,15 @@ class TestDataCatalog:
         """Confirm the dataset"""
         with caplog.at_level(logging.INFO):
             mock_ds = mocker.Mock()
-            data_catalog = DataCatalog(data_sets={"mocked": mock_ds})
+            data_catalog = DataCatalog(datasets={"mocked": mock_ds})
             data_catalog.confirm("mocked")
             mock_ds.confirm.assert_called_once_with()
             assert caplog.record_tuples == [
-                ("kedro.io.data_catalog", logging.INFO, "Confirming dataset 'mocked'")
+                (
+                    "kedro.io.data_catalog",
+                    logging.INFO,
+                    "Confirming dataset 'mocked'",
+                )
             ]
 
     @pytest.mark.parametrize(
@@ -450,25 +454,25 @@ class TestDataCatalogFromConfig:
         """Check the error if the type points to nonexistent module"""
         sane_config["catalog"]["boats"][
             "type"
-        ] = "kedro.invalid_module_name.io.CSVDataSet"
+        ] = "kedro.invalid_module_name.io.CSVDataset"
 
-        error_msg = "Class 'kedro.invalid_module_name.io.CSVDataSet' not found"
+        error_msg = "Class 'kedro.invalid_module_name.io.CSVDataset' not found"
         with pytest.raises(DatasetError, match=re.escape(error_msg)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_relative_import(self, sane_config):
         """Check the error if the type points to a relative import"""
-        sane_config["catalog"]["boats"]["type"] = ".CSVDataSetInvalid"
+        sane_config["catalog"]["boats"]["type"] = ".CSVDatasetInvalid"
 
         pattern = "'type' class path does not support relative paths"
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_import_kedro_datasets(self, sane_config, mocker):
-        """Test kedro.extras.datasets default path to the dataset class"""
+        """Test kedro_datasets default path to the dataset class"""
         # Spy _load_obj because kedro_datasets is not installed and we can't import it.
 
-        import kedro.io.core  # pylint: disable=import-outside-toplevel
+        import kedro.io.core
 
         spy = mocker.spy(kedro.io.core, "_load_obj")
         parse_dataset_definition(sane_config["catalog"]["boats"])
@@ -476,25 +480,25 @@ class TestDataCatalogFromConfig:
             # In Python 3.7 call_args.args is not available thus we access the call
             # arguments with less meaningful index.
             # The 1st index returns a tuple, the 2nd index return the name of module.
-            assert call_args[0][0] == f"{prefix}pandas.CSVDataSet"
+            assert call_args[0][0] == f"{prefix}pandas.CSVDataset"
 
     def test_config_import_extras(self, sane_config):
-        """Test kedro.extras.datasets default path to the dataset class"""
-        sane_config["catalog"]["boats"]["type"] = "pandas.CSVDataSet"
+        """Test kedro_datasets default path to the dataset class"""
+        sane_config["catalog"]["boats"]["type"] = "pandas.CSVDataset"
         assert DataCatalog.from_config(**sane_config)
 
     def test_config_missing_class(self, sane_config):
         """Check the error if the type points to nonexistent class"""
-        sane_config["catalog"]["boats"]["type"] = "kedro.io.CSVDataSetInvalid"
+        sane_config["catalog"]["boats"]["type"] = "kedro.io.CSVDatasetInvalid"
 
         pattern = (
             "An exception occurred when parsing config for dataset 'boats':\n"
-            "Class 'kedro.io.CSVDataSetInvalid' not found"
+            "Class 'kedro.io.CSVDatasetInvalid' not found"
         )
         with pytest.raises(DatasetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
-    def test_config_invalid_data_set(self, sane_config):
+    def test_config_invalid_dataset(self, sane_config):
         """Check the error if the type points to invalid class"""
         sane_config["catalog"]["boats"]["type"] = "DataCatalog"
         pattern = (
@@ -510,7 +514,7 @@ class TestDataCatalogFromConfig:
         sane_config["catalog"]["boats"]["save_and_load_args"] = False
         pattern = (
             r"Dataset 'boats' must only contain arguments valid for "
-            r"the constructor of '.*CSVDataSet'"
+            r"the constructor of '.*CSVDataset'"
         )
         with pytest.raises(DatasetError, match=pattern):
             DataCatalog.from_config(**sane_config)
@@ -527,7 +531,7 @@ class TestDataCatalogFromConfig:
 
     def test_link_credentials(self, sane_config, mocker):
         """Test credentials being linked to the relevant data set"""
-        mock_client = mocker.patch("kedro.extras.datasets.pandas.csv_dataset.fsspec")
+        mock_client = mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec")
         config = deepcopy(sane_config)
         del config["catalog"]["boats"]
 
@@ -537,7 +541,7 @@ class TestDataCatalogFromConfig:
         mock_client.filesystem.assert_called_with("s3", **expected_client_kwargs)
 
     def test_nested_credentials(self, sane_config_with_nested_creds, mocker):
-        mock_client = mocker.patch("kedro.extras.datasets.pandas.csv_dataset.fsspec")
+        mock_client = mocker.patch("kedro_datasets.pandas.csv_dataset.fsspec")
         config = deepcopy(sane_config_with_nested_creds)
         del config["catalog"]["boats"]
         DataCatalog.from_config(**config)
@@ -565,12 +569,11 @@ class TestDataCatalogFromConfig:
         """Test that dependency is missing."""
         pattern = "dependency issue"
 
-        # pylint: disable=unused-argument,inconsistent-return-statements
         def dummy_load(obj_path, *args, **kwargs):
-            if obj_path == "kedro.extras.datasets.pandas.CSVDataSet":
+            if obj_path == "kedro_datasets.pandas.CSVDataset":
                 raise AttributeError(pattern)
-            if obj_path == "kedro.extras.datasets.pandas.__all__":
-                return ["CSVDataSet"]
+            if obj_path == "kedro_datasets.pandas.__all__":
+                return ["CSVDataset"]
 
         mocker.patch("kedro.io.core.load_obj", side_effect=dummy_load)
         with pytest.raises(DatasetError, match=pattern):
@@ -591,11 +594,13 @@ class TestDataCatalogFromConfig:
     def test_confirm(self, tmp_path, caplog, mocker):
         """Confirm the dataset"""
         with caplog.at_level(logging.INFO):
-            mock_confirm = mocker.patch("kedro.io.IncrementalDataset.confirm")
+            mock_confirm = mocker.patch(
+                "kedro_datasets.partitions.incremental_dataset.IncrementalDataset.confirm"
+            )
             catalog = {
                 "ds_to_confirm": {
-                    "type": "IncrementalDataset",
-                    "dataset": "pandas.CSVDataSet",
+                    "type": "kedro_datasets.partitions.incremental_dataset.IncrementalDataset",
+                    "dataset": "pandas.CSVDataset",
                     "path": str(tmp_path),
                 }
             }
@@ -657,7 +662,7 @@ class TestDataCatalogVersioned:
 
         # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
         actual_timestamp = datetime.strptime(
-            catalog.datasets.boats.resolve_load_version(),  # pylint: disable=no-member
+            catalog.datasets.boats.resolve_load_version(),
             VERSION_FORMAT,
         )
         expected_timestamp = current_ts.replace(
@@ -702,11 +707,11 @@ class TestDataCatalogVersioned:
 
         # Verify that saved version on tracking dataset is the same as on the CSV dataset
         csv_timestamp = datetime.strptime(
-            catalog.datasets.boats.resolve_save_version(),  # pylint: disable=no-member
+            catalog.datasets.boats.resolve_save_version(),
             VERSION_FORMAT,
         )
         tracking_timestamp = datetime.strptime(
-            catalog.datasets.planes.resolve_save_version(),  # pylint: disable=no-member
+            catalog.datasets.planes.resolve_save_version(),
             VERSION_FORMAT,
         )
 
@@ -745,10 +750,10 @@ class TestDataCatalogVersioned:
 
     def test_replacing_nonword_characters(self):
         """Test replacing non-word characters in dataset names"""
-        csv = CSVDataSet(filepath="abc.csv")
+        csv = CSVDataset(filepath="abc.csv")
         datasets = {"ds1@spark": csv, "ds2_spark": csv, "ds3.csv": csv, "jalapeño": csv}
 
-        catalog = DataCatalog(data_sets=datasets)
+        catalog = DataCatalog(datasets=datasets)
         assert "ds1@spark" not in catalog.datasets.__dict__
         assert "ds2__spark" not in catalog.datasets.__dict__
         assert "ds3.csv" not in catalog.datasets.__dict__
@@ -764,7 +769,7 @@ class TestDataCatalogVersioned:
         monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummmy")
         monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummmy")
         version = Version(load=None, save=None)
-        versioned_dataset = CSVDataSet("s3://bucket/file.csv", version=version)
+        versioned_dataset = CSVDataset("s3://bucket/file.csv", version=version)
         pattern = re.escape(
             f"Did not find any versions for {versioned_dataset}. "
             f"This could be due to insufficient permission."
@@ -777,13 +782,13 @@ class TestDataCatalogDatasetFactories:
     def test_match_added_to_datasets_on_get(self, config_with_dataset_factories):
         """Check that the datasets that match patterns are only added when fetched"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        assert "{brand}_cars" not in catalog._data_sets
-        assert "tesla_cars" not in catalog._data_sets
+        assert "{brand}_cars" not in catalog._datasets
+        assert "tesla_cars" not in catalog._datasets
         assert "{brand}_cars" in catalog._dataset_patterns
 
         tesla_cars = catalog._get_dataset("tesla_cars")
-        assert isinstance(tesla_cars, CSVDataSet)
-        assert "tesla_cars" in catalog._data_sets
+        assert isinstance(tesla_cars, CSVDataset)
+        assert "tesla_cars" in catalog._datasets
 
     @pytest.mark.parametrize(
         "dataset_name, expected",
@@ -806,8 +811,8 @@ class TestDataCatalogDatasetFactories:
     def test_patterns_not_in_catalog_datasets(self, config_with_dataset_factories):
         """Check that the pattern is not in the catalog datasets"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
-        assert "audi_cars" in catalog._data_sets
-        assert "{brand}_cars" not in catalog._data_sets
+        assert "audi_cars" in catalog._datasets
+        assert "{brand}_cars" not in catalog._datasets
         assert "audi_cars" not in catalog._dataset_patterns
         assert "{brand}_cars" in catalog._dataset_patterns
 
@@ -815,7 +820,7 @@ class TestDataCatalogDatasetFactories:
         """Check that the existing catalog entry is not overwritten by config in pattern"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories)
         audi_cars = catalog._get_dataset("audi_cars")
-        assert isinstance(audi_cars, ParquetDataSet)
+        assert isinstance(audi_cars, ParquetDataset)
 
     @pytest.mark.parametrize(
         "dataset_name,pattern",
@@ -847,7 +852,7 @@ class TestDataCatalogDatasetFactories:
     def test_default_dataset(self, config_with_dataset_factories_with_default, caplog):
         """Check that default dataset is used when no other pattern matches"""
         catalog = DataCatalog.from_config(**config_with_dataset_factories_with_default)
-        assert "jet@planes" not in catalog._data_sets
+        assert "jet@planes" not in catalog._datasets
         jet_dataset = catalog._get_dataset("jet@planes")
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
@@ -856,7 +861,7 @@ class TestDataCatalogDatasetFactories:
             "in the catalog will be used to override the default "
             "MemoryDataset creation for the dataset 'jet@planes'" in log_record.message
         )
-        assert isinstance(jet_dataset, CSVDataSet)
+        assert isinstance(jet_dataset, CSVDataset)
 
     def test_unmatched_key_error_when_parsing_config(
         self, config_with_dataset_factories_bad_pattern
@@ -915,7 +920,7 @@ class TestDataCatalogDatasetFactories:
 
         # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
         actual_timestamp = datetime.strptime(
-            catalog.datasets.tesla_cars.resolve_load_version(),  # pylint: disable=no-member
+            catalog.datasets.tesla_cars.resolve_load_version(),
             VERSION_FORMAT,
         )
         expected_timestamp = current_ts.replace(

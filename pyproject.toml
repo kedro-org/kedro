@@ -10,7 +10,7 @@ authors = [
     {name = "Kedro"}
 ]
 description = "Kedro helps you build production-ready data and analytics pipelines"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
     "anyconfig>=0.10.0",
     "attrs>=21.3",
@@ -21,15 +21,15 @@ dependencies = [
     "dynaconf>=3.1.2,<4.0",
     "fsspec>=2021.4",
     "gitpython>=3.0",
-    "importlib_metadata>=3.6,<5.0; python_version < '3.8'",  # The "selectable" entry points were introduced in `importlib_metadata` 3.6 and Python 3.10. Bandit on Python 3.7 relies on a library with `importlib_metadata` < 5.0
     "importlib-metadata>=3.6,<7.0; python_version >= '3.8'",
     "importlib_resources>=1.3,<7.0",  # The `files()` API was introduced in `importlib_resources` 1.3 and Python 3.9.
     "jmespath>=0.9.5",
+    "kedro-datasets",
     "more_itertools>=8.14.0",
     "omegaconf>=2.1.1",
     "parse>=1.19.0",
     "pip-tools>=6.5",
-    "pluggy>=1.0,<1.3",  # TODO: Uncap when dropping Python 3.7 support, see https://github.com/kedro-org/kedro/issues/2979
+    "pluggy>=1.0",
     "PyYAML>=4.2,<7.0",
     "rich>=12.0,<14.0",
     "rope>=0.21,<2.0",  # subject to LGPLv3 license
@@ -47,13 +47,61 @@ keywords = [
 license = {text = "Apache Software License (Apache 2.0)"}
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-dynamic = ["readme", "version", "optional-dependencies"]
+dynamic = ["readme", "version"]
+
+[project.optional-dependencies]
+test = [
+    "bandit>=1.6.2, <2.0",
+    "behave==1.2.6",
+    "blacken-docs==1.9.2",
+    "black~=22.0",
+    "coverage[toml]",
+    "fsspec<2023.9", # Temporary, newer version causing "test_no_versions_with_cloud_protocol" to fail
+    "import-linter[toml]==1.8.0",
+    "ipython>=7.31.1, <8.0; python_version < '3.8'",
+    "ipython~=8.10; python_version >= '3.8'",
+    "Jinja2<3.1.0",
+    "jupyterlab_server>=2.11.1",
+    "jupyterlab~=3.0",
+    "jupyter~=1.0",
+    "moto==1.3.7; python_version < '3.10'",
+    "moto==4.1.12; python_version >= '3.10'",
+    "pandas~=2.0",
+    "pre-commit>=2.9.2, <3.0",  # The hook `mypy` requires pre-commit version 2.9.2.
+    "pyarrow>=1.0; python_version < '3.11'",
+    "pyarrow>=7.0; python_version >= '3.11'",  # Adding to avoid numpy build errors
+    "pyproj~=3.0",
+    "pytest-cov~=3.0",
+    "pytest-mock>=1.7.1, <2.0",
+    "pytest-xdist[psutil]~=2.2.1",
+    "pytest~=7.2",
+    "s3fs>=0.3.0, <0.5",  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.
+    "semver",
+    "trufflehog~=2.1",
+]
+docs = [
+    # docutils>=0.17 changed the HTML
+    # see https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
+    "docutils==0.16",
+    "sphinx~=5.3.0",
+    "sphinx_rtd_theme==1.2.0",
+    # Regression on sphinx-autodoc-typehints 1.21
+    # that creates some problematic docstrings
+    "sphinx-autodoc-typehints==1.20.2",
+    "sphinx_copybutton==0.3.1",
+    "sphinx-notfound-page",
+    "ipykernel>=5.3, <7.0",
+    "sphinxcontrib-mermaid~=0.7.1",
+    "myst-parser~=1.0.0",
+    "Jinja2<3.1.0",
+    "kedro-datasets[all]~=1.8.0",
+]
+all = [ "kedro[test,docs]" ]
 
 [project.urls]
 Homepage = "https://kedro.org"
@@ -70,46 +118,15 @@ zip-safe = false
 [tool.setuptools.packages.find]
 include = ["kedro*"]
 
+[tool.setuptools.package-data]
+kedro = ["py.typed"]
+
 [tool.setuptools.dynamic]
 readme = {file = "README.md", content-type = "text/markdown"}
 version = {attr = "kedro.__version__"}
 
 [tool.black]
 exclude = "/templates/|^features/steps/test_starter"
-
-[tool.isort]
-profile = "black"
-
-
-[tool.pylint]
-[tool.pylint.master]
-ignore = "CVS"
-ignore-patterns = "kedro/templates/*"
-load-plugins = [
-    "pylint.extensions.docparams",
-    "pylint.extensions.no_self_use"
-]
-extension-pkg-whitelist = "cv2"
-unsafe-load-any-extension = false
-[tool.pylint.messages_control]
-disable = [
-    "ungrouped-imports",
-    "duplicate-code",
-    "wrong-import-order",  # taken care of by isort
-]
-enable = ["useless-suppression"]
-[tool.pylint.refactoring]
-max-nested-blocks = 5
-[tool.pylint.format]
-indent-after-paren=4
-indent-string="    "
-[tool.pylint.miscellaneous]
-notes = [
-    "FIXME",
-    "XXX"
-]
-[tool.pylint.design]
-min-public-methods = 1
 
 [tool.coverage.report]
 fail_under = 100
@@ -120,9 +137,9 @@ omit = [
     "kedro/extras/extensions/ipython.py",
     "kedro/framework/cli/hooks/specs.py",
     "kedro/framework/hooks/specs.py",
-    "kedro/extras/datasets/tensorflow/*",
-    "kedro/extras/datasets/holoviews/*",
-    "tests/*"
+    "tests/*",
+    "kedro/runner/parallel_runner.py",
+    "*/site-packages/*",
 ]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 
@@ -156,7 +173,6 @@ layers = [
     "framework.context",
     "framework.project",
     "runner",
-    "extras.datasets",
     "io",
     "pipeline",
     "config"
@@ -184,7 +200,6 @@ forbidden_modules = [
     "kedro.runner",
     "kedro.io",
     "kedro.pipeline",
-    "kedro.extras.datasets"
 ]
 
 [[tool.importlinter.contracts]]
@@ -194,7 +209,6 @@ source_modules = [
     "kedro.runner",
     "kedro.io",
     "kedro.pipeline",
-    "kedro.extras.datasets"
 ]
 forbidden_modules = [
     "kedro.config"

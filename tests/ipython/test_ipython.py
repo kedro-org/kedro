@@ -231,6 +231,7 @@ class TestLoadIPythonExtension:
             "--env=base",
             "-e base",
             ". --env=base --params=key:val",
+            "--conf-source=new_conf",
         ],
     )
     def test_line_magic_with_valid_arguments(self, mocker, args, ipython):

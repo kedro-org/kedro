@@ -382,6 +382,7 @@ def _get_addons_from_cli_input(
         "docs": "4",
         "data": "5",
         "pyspark": "6",
+        "viz": "7",
     }
 
     if selected_addons is not None:
@@ -409,14 +410,14 @@ def _select_prompts_to_display(prompts_required: dict, selected_addons: str) -> 
     Returns:
         the prompts_required dictionary, with all the redundant information removed.
     """
-    valid_addons = ["lint", "test", "log", "docs", "data", "pyspark", "all", "none"]
+    valid_addons = ["lint", "test", "log", "docs", "data", "pyspark", "viz", "all", "none"]
 
     if selected_addons is not None:
         addons = re.sub(r"\s", "", selected_addons).split(",")
         for addon in addons:
             if addon not in valid_addons:
                 click.secho(
-                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark, all, none",
+                    "Please select from the available add-ons: lint, test, log, docs, data, pyspark,viz, all, none",
                     fg="red",
                     err=True,
                 )
@@ -519,7 +520,7 @@ def fetch_template_based_on_add_ons(template_path, cookiecutter_args: dict[str, 
     elif add_ons and "Pyspark" in add_ons:
         cookiecutter_args["directory"] = "spaceflights-pyspark"
     elif add_ons and "Kedro Viz" in add_ons:
-        cookiecutter_args["directory"] = "spaceflights-viz"
+        cookiecutter_args["directory"] = "spaceflights-pandas-viz"
     else:
         starter_path = template_path
     return starter_path
@@ -557,11 +558,7 @@ def _create_project(template_path: str, cookiecutter_args: dict[str, Any]):
     add_ons = extra_context.get("add_ons")
 
     # Only core template and spaceflights-pyspark have configurable add-ons
-    if (
-        template_path == str(TEMPLATE_PATH)
-        or add_ons is not None
-        and "Pyspark" in add_ons
-    ):
+    if template_path == str(TEMPLATE_PATH) or (add_ons and ("Pyspark" in add_ons or "Kedro Viz" in add_ons)):
         if add_ons == "[]":  # TODO: This should be a list
             click.secho("\nYou have selected no add-ons")
         else:

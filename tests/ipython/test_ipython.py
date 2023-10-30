@@ -11,7 +11,7 @@ from kedro.pipeline.modular_pipeline import pipeline as modular_pipeline
 
 PACKAGE_NAME = "fake_package_name"
 PROJECT_NAME = "fake_project_name"
-PROJECT_VERSION = "0.1"
+PROJECT_INIT_VERSION = "0.1"
 
 
 @pytest.fixture(autouse=True)
@@ -36,9 +36,9 @@ def fake_metadata(tmp_path):
         config_file=tmp_path / "pyproject.toml",
         package_name=PACKAGE_NAME,
         project_name=PROJECT_NAME,
-        project_version=PROJECT_VERSION,
-        kedro_init_version=PROJECT_VERSION,
+        kedro_init_version=PROJECT_INIT_VERSION,
         project_path=tmp_path,
+        add_ons=None,
     )
     return metadata
 
@@ -247,7 +247,7 @@ class TestProjectPathResolution:
     def test_only_local_namespace_specified(self):
         class MockKedroContext:
             # A dummy stand-in for KedroContext sufficient for this test
-            _project_path = Path("/test").resolve()
+            project_path = Path("/test").resolve()
 
         result = _resolve_project_path(local_namespace={"context": MockKedroContext()})
         expected = Path("/test").resolve()
@@ -280,7 +280,7 @@ class TestProjectPathResolution:
     def test_project_path_update(self, caplog):
         class MockKedroContext:
             # A dummy stand-in for KedroContext sufficient for this test
-            _project_path = Path("/test").resolve()
+            project_path = Path("/test").resolve()
 
         local_namespace = {"context": MockKedroContext()}
         updated_path = Path("/updated_path").resolve()

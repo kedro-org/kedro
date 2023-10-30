@@ -143,7 +143,7 @@ commands:
     steps:
       - restore_cache:
           name: Restore package cache
-          key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
+          key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}
         # We don't restore the conda environment cache for python 3.10 as it conflicts with the
         # 'Install GDAL, Fiona and pytables' step breaking the conda environment (missing zlib.dll).
       - unless:
@@ -152,7 +152,7 @@ commands:
           steps:
             - restore_cache:
                 name: Restore conda environment cache
-                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}
         # pytables and Fiona have a series of binary dependencies under Windows that
         # are best handled by conda-installing instead of pip-installing them.
         # Dependency resolution works best when installing these altogether in one
@@ -283,14 +283,14 @@ jobs:
           steps:
             - run:
                 name: Run unit tests without spark in parallel
-                command: conda activate kedro_builder; make test-no-spark
+                command: conda activate kedro_builder; make test
       - when:
           condition:
             equal: [ "3.10", <<parameters.python_version>> ]
           steps:
             - run:
                 name: Run unit tests without spark sequentially
-                command: conda activate kedro_builder; pytest tests --no-cov --ignore tests/extras/datasets/spark
+                command: conda activate kedro_builder; pytest tests --no-cov
 
   lint:
     parameters:
@@ -334,7 +334,7 @@ jobs:
           steps:
           - save_cache:
               name: Save Python package cache
-              key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
+              key: kedro-deps-v1-win-{{ checksum "pyproject.toml" }}
               paths:
                 # Cache pip cache and conda packages directories
                 - c:\tools\miniconda3\pkgs
@@ -347,7 +347,7 @@ jobs:
           steps:
             - save_cache:
                 name: Save conda environment cache
-                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}-{{ checksum "setup.py" }}
+                key: kedro-deps-v1-win-<<parameters.python_version>>-{{ checksum "pyproject.toml" }}
                 paths:
                   - c:\tools\miniconda3\envs\kedro_builder
       - run:

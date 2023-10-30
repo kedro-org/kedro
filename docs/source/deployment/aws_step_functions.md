@@ -23,7 +23,7 @@ To use AWS Step Functions, ensure you have the following:
 
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 - [Configured AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) on your local machine
-- Generated Kedro project called **Spaceflights Step Functions** using [Kedro Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights/).
+- Generated Kedro project called **Spaceflights Step Functions** using [Kedro Spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas/).
   - The final project directory's name should be `spaceflights-step-functions`.
   - You should complete the [spaceflights tutorial](../tutorial/spaceflights_tutorial.md) to understand the project's structure.
 

@@ -1,6 +1,6 @@
 # Set up the spaceflights project
 
-This section shows how to create a new project (with `kedro new` using the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights)) and install project dependencies (with `pip install -r requirements.txt`).
+This section shows how to create a new project (with `kedro new` using the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas)) and install project dependencies (with `pip install -r requirements.txt`).
 
 ## Create a new project
 
@@ -10,10 +10,10 @@ This section shows how to create a new project (with `kedro new` using the [Kedr
 We recommend that you use the same version of Kedro that was most recently used to test this tutorial (0.18.6). To check the version installed, type `kedro -V` in your terminal window.
 ```
 
-In your terminal, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights). The project will be populated with a complete set of working example code:
+In your terminal, navigate to the folder you want to store the project. Type the following to generate the project from the [Kedro spaceflights starter](https://github.com/kedro-org/kedro-starters/tree/main/spaceflights-pandas). The project will be populated with a complete set of working example code:
 
 ```bash
-kedro new --starter=spaceflights
+kedro new --starter=spaceflights-pandas
 ```
 
 When prompted for a project name, you should accept the default choice (`Spaceflights`) as the rest of this tutorial assumes that project name.

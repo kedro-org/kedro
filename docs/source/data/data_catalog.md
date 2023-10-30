@@ -156,7 +156,7 @@ A dataset offers versioning support if it extends the [`AbstractVersionedDataset
 To verify whether a dataset can undergo versioning, you should examine the dataset class code to inspect its inheritance [(you can find contributed datasets within the `kedro-datasets` repository)](https://github.com/kedro-org/kedro-plugins/tree/main/kedro-datasets/kedro_datasets). Check if the dataset class inherits from the `AbstractVersionedDataset`. For instance, if you encounter a class like `CSVDataSet(AbstractVersionedDataset[pd.DataFrame, pd.DataFrame])`, this indicates that the dataset is set up to support versioning.
 
 ```{note}
-Note that HTTP(S) is a supported file system in the dataset implementations, but if you it, you can't also use versioning.
+Note that HTTP(S) is a supported file system in the dataset implementations, but if you use it, you can't also use versioning.
 ```
 
 ## Use the Data Catalog within Kedro configuration

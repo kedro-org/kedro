@@ -8,6 +8,10 @@
 
 ## Migration guide from Kedro 0.18.* to 0.19.*
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Adam Kells](https://github.com/adamkells)
+
 # Release 0.18.14
 
 ## Major features and improvements

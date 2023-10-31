@@ -4,7 +4,7 @@
 * Added the `--conf-source` option to `%reload_kedro`, allowing users to specify a source for project configuration.
 
 ## Bug fixes and other changes
-
+* Reduced `spaceflights` data to minimize waiting times during tutorial execution.
 ## Breaking changes to the API
 
 ## Migration guide from Kedro 0.18.* to 0.19.*

@@ -11,7 +11,7 @@ from warnings import warn
 from attrs import field, frozen
 from pluggy import PluginManager
 
-from kedro.config import MissingConfigException, OmegaConfigLoader
+from kedro.config import AbstractConfigLoader, MissingConfigException
 from kedro.framework.project import settings
 from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import _transcode_split
@@ -166,7 +166,7 @@ class KedroContext:
 
     _package_name: str
     project_path: Path = field(converter=_expand_full_path)
-    config_loader: OmegaConfigLoader
+    config_loader: AbstractConfigLoader
     _hook_manager: PluginManager
     env: str | None = None
     _extra_params: dict[str, Any] | None = field(default=None, converter=deepcopy)

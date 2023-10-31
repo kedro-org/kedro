@@ -7,6 +7,7 @@
 
 ## Bug fixes and other changes
 * Added a new field `add-ons` to `pyproject.toml` when a project is created.
+* Reduced `spaceflights` data to minimize waiting times during tutorial execution.
 
 ## Breaking changes to the API
 * Renamed the `data_sets` argument and the `_data_sets` attribute in `Catalog` and their references to `datasets` and `_datasets` respectively.
@@ -43,6 +44,10 @@
 ### Logging
 `logging.yml` is now independent of Kedro's run environment and only used if `KEDRO_LOGGING_CONFIG` is set to point to it.
 
+## Community contributions
+Many thanks to the following Kedroids for contributing PRs to this release:
+* [Adam Kells](https://github.com/adamkells)
+* [Laíza Milena Scheid Parizotto](https://github.com/laizaparizotto)
 
 # Release 0.18.14
 
